@@ -118,7 +118,7 @@ export default function AxisConfigFactory() {
     };
 
     isPercentage() {
-      return this._values.mode === 'percentage';
+      return this._values.scale.mode === 'percentage';
     };
 
     isUserDefined() {

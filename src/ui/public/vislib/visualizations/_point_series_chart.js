@@ -16,14 +16,14 @@ export default function PointSeriesChartProvider(Private) {
     }
 
     getStackedCount() {
-      return _.reduce(this.handler.data.data.series, function (sum, val) {
+      return _.reduce(this.handler.data.get('series'), function (sum, val) {
         if (val.stacked || 1) return sum + 1;
       }, 0);
     };
 
     getStackedNum(data) {
       let i = 0;
-      for (const seri of this.handler.data.data.series) {
+      for (const seri of this.handler.data.get('series')) {
         if (seri === data) return i;
         if (seri.stacked || 1) i++;
       }
@@ -48,6 +48,17 @@ export default function PointSeriesChartProvider(Private) {
       const mouseout = events.addMouseoutEvent();
       const click = events.addClickEvent();
       return element.call(hover).call(mouseout).call(click);
+    };
+
+    checkIfEnoughData() {
+      const message = 'Point series charts require more than one data point. Try adding ' +
+        'an X-Axis Aggregation';
+
+      const notEnoughData = this.chartData.values.length < 2;
+
+      if (notEnoughData) {
+        throw new errors.NotEnoughData(message);
+      }
     };
 
     createEndZones(svg) {

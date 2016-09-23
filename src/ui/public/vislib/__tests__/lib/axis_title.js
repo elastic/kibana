@@ -6,12 +6,14 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibAxisConfigProvider from 'ui/vislib/lib/axis_config';
+import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;
   let AxisConfig;
+  let VisConfig;
   let Data;
   let PersistedState;
   let axisTitle;
@@ -82,6 +84,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     AxisTitle = Private(VislibLibAxisTitleProvider);
     AxisConfig = Private(VislibLibAxisConfigProvider);
+    VisConfig = Private(VislibLibVisConfigProvider);
     Data = Private(VislibLibDataProvider);
     PersistedState = Private(PersistedStatePersistedStateProvider);
 
@@ -104,28 +107,20 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
 
     dataObj = new Data(data, {}, new PersistedState());
-    const xAxisConfig = new AxisConfig({
+    const visConfig = new VisConfig({
+      type: 'histogram',
+      el: el.node()
+    }, data, new PersistedState());
+    const xAxisConfig = new AxisConfig(visConfig, {
       position: 'bottom',
       title: {
         text: dataObj.get('xAxisLabel')
-      },
-      vis: {
-        el: el.node(),
-        _attr: {
-          type: 'histogram'
-        }
       }
     });
-    const yAxisConfig = new AxisConfig({
+    const yAxisConfig = new AxisConfig(visConfig, {
       position: 'left',
       title: {
         text: dataObj.get('yAxisLabel')
-      },
-      vis: {
-        el: el.node(),
-        _attr: {
-          type: 'histogram'
-        }
       }
     });
     xTitle = new AxisTitle(xAxisConfig);
@@ -138,7 +133,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   describe('render Method', function () {
     beforeEach(function () {
-      xTitle.render();//here
+      xTitle.render();
       yTitle.render();
     });
 

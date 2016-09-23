@@ -125,7 +125,7 @@ describe('Vislib _chart Test Suite', function () {
     myChart.destroy();
 
     expect(function () {
-      myChart.draw();
+      myChart.render();
     }).to.throwError();
   });
 
