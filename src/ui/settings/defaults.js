@@ -135,6 +135,13 @@ export default function defaultSettingsProvider() {
       value: '2s',
       description: 'Time to wait before dimming visualizations during query'
     },
+    'visualization:dimmingOpacity': {
+      type: 'number',
+      value: 0.5,
+      description: 'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
+      'The lower this number, the more the highlighted element will stand out.' +
+      'This must be a number between 0 and 1.'
+    },
     'csv:separator': {
       value: ',',
       description: 'Separate exported values with this string',
