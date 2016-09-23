@@ -235,7 +235,7 @@ export default function DispatchClass(Private, config) {
       $('[data-label]', element.parentNode)
         .css('opacity', 1)//Opacity 1 is needed to avoid the css application
         .not((els, el) => `${$(el).data('label')}` === label)
-        .css('opacity', dimming);
+        .css('opacity', justifyOpacity(dimming));
     }
 
     /**
@@ -308,6 +308,12 @@ export default function DispatchClass(Private, config) {
 
   function validBrushClick(event) {
     return event.button === 0;
+  }
+
+
+  function justifyOpacity(opacity) {
+    const decimalNumber = parseFloat(opacity, 10);
+    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : 0.5;
   }
 
 
