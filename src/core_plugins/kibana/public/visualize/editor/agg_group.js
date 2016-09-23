@@ -48,9 +48,9 @@ uiModules
 
         //the aggs have been reordered in [group] and we need
         //to apply that ordering to [vis.aggs]
-        const baseIndex = $scope.vis.aggs.indexOf($scope.group[0]);
+        const indexOffset = $scope.vis.aggs.indexOf($scope.group[0]);
         _.forEach($scope.group, (agg, index) => {
-          _.move($scope.vis.aggs, agg, baseIndex + index);
+          _.move($scope.vis.aggs, agg, indexOffset + index);
         });
       });
     }
