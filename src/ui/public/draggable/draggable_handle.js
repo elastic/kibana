@@ -1,7 +1,7 @@
 import uiModules from 'ui/modules';
 
 uiModules
-.get('app/visualize')
+.get('kibana')
 .directive('draggableHandle', function () {
   return {
     restrict: 'A',
