@@ -407,7 +407,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       expect(_.isArray(results)).to.be(true);
     });
 
-    it('should return an array of values in the correct order', function () {
+    it('should return an array of values ordered by their index by default', function () {
       expect(results[0]).to.be('1');
       expect(results[1]).to.be('2');
       expect(results[2]).to.be('3');
@@ -420,10 +420,10 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       expect(numberedResults[4]).to.be(5);
     });
 
-    it('should return an array of values in the correct order when orderBuckets is set', function () {
-      const sortBuckets = true;
-      results = orderXValues(multiSeriesData, sortBuckets);
-      numberedResults = orderXValues(multiSeriesNumberedData, sortBuckets);
+    it('should return an array of values ordered by their sum when orderBucketsBySum is true', function () {
+      const orderBucketsBySum = true;
+      results = orderXValues(multiSeriesData, orderBucketsBySum);
+      numberedResults = orderXValues(multiSeriesNumberedData, orderBucketsBySum);
 
       expect(results[0]).to.be('3');
       expect(results[1]).to.be('1');
