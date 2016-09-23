@@ -37,7 +37,8 @@ dataTypesArray.forEach(function (dataType, i) {
       hasTimeField: true,
       addLegend: true,
       addTooltip: true,
-      mode: mode
+      mode: mode,
+      zeroFill: true
     };
 
     beforeEach(ngMock.module('kibana'));
@@ -193,8 +194,8 @@ dataTypesArray.forEach(function (dataType, i) {
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
-          const min = vis.handler.data.getYMin();
-          const max = vis.handler.data.getYMax();
+          const min = vis.handler.valueAxes[0].axisScale.getYMin();
+          const max = vis.handler.valueAxes[0].axisScale.getYMax();
           const domain = yAxis.getScale().domain();
           expect(domain[0]).to.equal(min);
           expect(domain[1]).to.equal(max);

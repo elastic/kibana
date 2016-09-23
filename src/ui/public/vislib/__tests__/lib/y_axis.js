@@ -80,8 +80,6 @@ function createData(seriesData) {
     return new YAxis(_.merge({}, {
       type: 'value',
       scale: {
-        min: dataObj.getYMin(),
-        max: dataObj.getYMax(),
         defaultYMin: true,
         setYExtents: false,
       },
