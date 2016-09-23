@@ -15,16 +15,17 @@ export default function AxisFactory(Private) {
   const AxisConfig = Private(AxisConfigProvider);
 
   class Axis extends ErrorHandler {
-    constructor(visCofig, axisConfigArgs) {
+    constructor(visConfig, axisConfigArgs) {
       super();
-      this.data = visCofig.data;
+      this.visConfig = visConfig;
+      this.data = visConfig.data;
 
-      this.config = new AxisConfig(visCofig, axisConfigArgs);
+      this.config = new AxisConfig(visConfig, axisConfigArgs);
       if (this.config.get('type') === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
-      this.axisScale = new AxisScale(this.config, this.data, visCofig);
+      this.axisScale = new AxisScale(this.config, this.data, visConfig);
       this.axisTitle = new AxisTitle(this.config);
       this.axisLabels = new AxisLabels(this.config, this.axisScale);
     }
@@ -69,7 +70,7 @@ export default function AxisFactory(Private) {
     }
 
     getLength(el, n) {
-      const margin = this.config._chartConfig.get('style.margin');
+      const margin = this.visConfig.get('style.margin');
       if (this.config.isHorizontal()) {
         return $(el).parent().width() / n - margin.left - margin.right - 50;
       }
@@ -100,7 +101,7 @@ export default function AxisFactory(Private) {
       const config = this.config;
       const xAxisPadding = 15;
       const style = config.get('style');
-      const margin = config._chartConfig.get('style.margin');
+      const margin = this.visConfig.get('style.margin');
       const position = config.get('position');
 
       return function (selection) {
