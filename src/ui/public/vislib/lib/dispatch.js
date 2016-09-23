@@ -232,9 +232,9 @@ export default function DispatchClass(Private, config) {
       if (!label) return;
 
       const dimming = config.get('visualization:dimmingOpacity');
-      $('[data-label]', element.parentNode)
+      $(element).parent().find('[data-label]')
         .css('opacity', 1)//Opacity 1 is needed to avoid the css application
-        .not((els, el) => `${$(el).data('label')}` === label)
+        .not((els, el) => $(el).data('label') === label)
         .css('opacity', justifyOpacity(dimming));
     }
 
@@ -313,9 +313,9 @@ export default function DispatchClass(Private, config) {
 
   function justifyOpacity(opacity) {
     const decimalNumber = parseFloat(opacity, 10);
-    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : 0.5;
+    const fallbackOpacity = 0.5;
+    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
   }
-
 
   return Dispatch;
 };
