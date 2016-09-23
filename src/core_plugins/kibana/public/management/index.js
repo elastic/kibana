@@ -14,6 +14,7 @@ import appTemplate from 'plugins/kibana/management/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
 import chrome from 'ui/chrome/chrome';
 import management from 'ui/management';
+import 'ui/kbn_top_nav';
 
 uiRoutes
 .when('/management', {
@@ -53,7 +54,7 @@ uiModules
 
       if ($scope.section) {
         $scope.section.items.forEach(item => {
-          item.class = `#${$location.path()}`.indexOf(item.url) > -1 ? 'active' : undefined;
+          item.active = `#${$location.path()}`.indexOf(item.url) > -1;
         });
       }
 

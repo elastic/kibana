@@ -202,6 +202,10 @@ export default function PieChartFactory(Private) {
           const path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 
+          self.events.emit('rendered', {
+            chart: data
+          });
+
           return svg;
         });
       };

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { fromRoot } from '../../utils';
 import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../../cli/serve/read_yaml_config';
-import { versionSatisfies, cleanVersion } from './version';
+import { versionSatisfies, cleanVersion } from '../../utils/version';
 import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {

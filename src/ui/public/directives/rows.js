@@ -52,6 +52,10 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           } else {
             $cell.html(contents.markup);
           }
+
+          if (contents.attr) {
+            $cell.attr(contents.attr);
+          }
         } else {
           if (contents === '') {
             $cell.html('&nbsp;');

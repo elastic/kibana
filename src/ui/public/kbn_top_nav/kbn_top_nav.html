@@ -1,4 +1,4 @@
-<navbar ng-show="chrome.getVisible()" class="kibana-nav-options">
+<navbar ng-show="kbnTopNav.isVisible()" class="kibana-nav-options" data-test-subj="top-nav">
   <div ng-transclude></div>
   <div class="button-group kibana-nav-actions" role="toolbar">
     <button
@@ -13,6 +13,7 @@
       tooltip-placement="bottom"
       tooltip-popup-delay="400"
       tooltip-append-to-body="1"
+      data-test-subj="menu-item-{{menuItem.key}}"
     >
     </button>
   </div>
@@ -20,7 +21,7 @@
 </navbar>
 <div class="config" ng-show="kbnTopNav.rendered">
   <div id="template_wrapper" class="container-fluid"></div>
-  <div class="config-close remove" ng-click="kbnTopNav.close()" data-test-subj="config-close-button">
+  <div class="config-close remove" ng-click="kbnTopNav.close()">
     <i class="fa fa-chevron-circle-up"></i>
   </div>
 </div>

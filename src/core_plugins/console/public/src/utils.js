@@ -8,13 +8,6 @@ utils.textFromRequest = function (request) {
   return request.method + " " + request.url + "\n" + data;
 };
 
-utils.getUrlParam = function (name) {
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(location.search);
-  return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-};
-
 utils.jsonToString = function (data, indent) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 };

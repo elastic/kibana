@@ -7,6 +7,7 @@ node_modules
 trash
 /optimize/bundles
 /optimize/testdev
+/optimize/testUiServer
 target
 /build
 .jruby
@@ -21,7 +22,7 @@ target
 /esvm
 .htpasswd
 .eslintcache
-plugins
+/plugins/
 data
 disabledPlugins
 webpackstats.json
