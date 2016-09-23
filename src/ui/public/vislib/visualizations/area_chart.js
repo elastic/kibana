@@ -192,17 +192,6 @@ export default function AreaChartFactory(Private) {
       return circles;
     };
 
-    checkIfEnoughData() {
-      const message = 'Area charts require more than one data point. Try adding ' +
-        'an X-Axis Aggregation';
-
-      const notEnoughData = this.chartData.values.length < 2;
-
-      if (notEnoughData) {
-        throw new errors.NotEnoughData(message);
-      }
-    };
-
     validateWiggleSelection() {
       const isWiggle = this._attr.mode === 'wiggle';
       const ordered = this.handler.data.get('ordered');

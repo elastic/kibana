@@ -6,6 +6,7 @@ import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
+import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 let YAxis;
 let Data;
@@ -14,6 +15,7 @@ let el;
 let buildYAxis;
 let yAxis;
 let yAxisDiv;
+let VisConfig;
 
 const timeSeries = [
   1408734060000,
@@ -72,29 +74,18 @@ function createData(seriesData) {
   yAxisDiv = el.append('div')
   .attr('class', 'y-axis-div');
 
-  const dataObj = new Data(data, {
-    defaultYMin: true
-  }, persistedState);
-
   buildYAxis = function (params) {
-    return new YAxis(_.merge({}, {
+    let visConfig = new VisConfig({
+      el: node,
+      type: 'histogram'
+    }, data, persistedState);
+    return new YAxis(visConfig, _.merge({}, {
+      id: 'ValueAxis-1',
       type: 'value',
       scale: {
-        min: dataObj.getYMin(),
-        max: dataObj.getYMax(),
         defaultYMin: true,
         setYExtents: false,
-      },
-      vis: {
-        el: node,
-        _attr: {
-          margin: { top: 0, right: 0, bottom: 0, left: 0 },
-          type: 'histogram',
-          mode: 'grouped',
-          yAxis: {}
-        }
-      },
-      data: dataObj
+      }
     }, params));
   };
 
@@ -108,13 +99,16 @@ describe('Vislib yAxis Class Test Suite', function () {
     Data = Private(VislibLibDataProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
     YAxis = Private(VislibLibYAxisProvider);
+    VisConfig = Private(VislibVisConfig);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));
 
   afterEach(function () {
-    el.remove();
-    yAxisDiv.remove();
+    if (el) {
+      el.remove();
+      yAxisDiv.remove();
+    }
   });
 
   describe('render Method', function () {
@@ -244,7 +238,7 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should return a decimal value', function () {
-        yAxis.config.set('vis._attr.mode', 'percentage');
+        yAxis.config.set('scale.mode', 'percentage');
         yAxis.config.set('scale.setYExtents', true);
         yAxis.getAxis(height);
         domain = [];
@@ -340,10 +334,8 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     it('should use percentage format for percentages', function () {
       yAxis = buildYAxis({
-        vis: {
-          _attr: {
-            mode: 'percentage'
-          }
+        scale: {
+          mode: 'percentage'
         }
       });
       const tickFormat = yAxis.getAxis().tickFormat();

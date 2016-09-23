@@ -105,8 +105,9 @@ export default function ColumnChartFactory(Private) {
 
       let barWidth;
       if (this.getCategoryAxis().config.isTimeDomain()) {
-        const start = this.handler.data.data.ordered.min;
-        const end = moment(this.handler.data.data.ordered.min).add(this.handler.data.data.ordered.interval).valueOf();
+        const ordered = this.handler.data.get('ordered');
+        const start = ordered.min;
+        const end = moment(ordered.min).add(ordered.interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
