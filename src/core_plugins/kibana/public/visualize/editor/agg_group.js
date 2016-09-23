@@ -43,7 +43,16 @@ uiModules
       });
 
       $scope.$on('agg-drag-start', e => $scope.dragging = true);
-      $scope.$on('agg-drag-end', e => $scope.dragging = false);
+      $scope.$on('agg-drag-end', e => {
+        $scope.dragging = false;
+
+        //the aggs have been reordered in [group] and we need
+        //to apply that ordering to [vis.aggs]
+        const indexOffset = $scope.vis.aggs.indexOf($scope.group[0]);
+        _.forEach($scope.group, (agg, index) => {
+          _.move($scope.vis.aggs, agg, indexOffset + index);
+        });
+      });
     }
   };
 
