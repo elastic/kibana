@@ -7,7 +7,7 @@
 </div>
 <div class="form-group">
   <label>Patterns:</label><span> (line delimited)</span>
-  <textarea ng-model="patterns" class="form-control"></textarea>
+  <list-textarea list="processor.patterns"></list-textarea>
 </div>
 <div class="form-group">
   <label>Ignore Missing Field:</label>
@@ -30,7 +30,10 @@
         class="fa">
       </i>
     </button>
-    <label ng-click="processor.advancedExpanded = !processor.advancedExpanded">Advanced Settings</label>
+    <label
+      ng-click="processor.advancedExpanded = !processor.advancedExpanded">
+      Advanced Settings
+    </label>
   </div>
   <div ng-show="processor.advancedExpanded">
     <div class="form-group">

@@ -1,5 +1,6 @@
 import uiModules from 'ui/modules';
 import template from './view.html';
+import 'ui/pipelines/list_textarea';
 
 const app = uiModules.get('kibana');
 
@@ -12,21 +13,6 @@ app.directive('processorUiAppend', function () {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
-      function splitValues(delimitedList) {
-        return delimitedList.split('\n');
-      }
-
-      function joinValues(valueArray) {
-        return valueArray.join('\n');
-      }
-
-      function updateValues() {
-        processor.values = splitValues($scope.values);
-      }
-
-      $scope.values = joinValues(processor.values);
-
-      $scope.$watch('values', updateValues);
       $scope.$watch('processor.targetField', () => { pipeline.setDirty(); });
       $scope.$watchCollection('processor.values', () => { pipeline.setDirty(); });
     }
