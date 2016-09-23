@@ -15,8 +15,7 @@ export default class Date extends Processor {
         targetField: '@timestamp',
         formats: [],
         timezone: 'Etc/UTC',
-        locale: 'ENGLISH',
-        customFormat: ''
+        locale: 'ENGLISH'
       },
       model
     );
@@ -40,8 +39,7 @@ export default class Date extends Processor {
         targetField: this.targetField || '',
         formats: this.formats || [],
         timezone: this.timezone || '',
-        locale: this.locale || '',
-        customFormat: this.customFormat || ''
+        locale: this.locale || ''
       }
     );
   }

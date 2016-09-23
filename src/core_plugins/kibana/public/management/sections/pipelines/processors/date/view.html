@@ -11,33 +11,16 @@
 </div>
 <div class="form-group">
   <label>Formats:</label>
-  <div ng-repeat="format in formats">
-    <input
-      type="checkbox"
-      id="format_{{processor.processorId}}_{{$index}}"
-      ng-model="format.selected"
-      ng-click="updateFormats()" />
-    <label for="format_{{processor.processorId}}_{{$index}}">
-      {{format.title}}
-      <a
-        aria-label="Custom Date Format Help"
-        tooltip="Custom Date Format Help"
-        tooltip-append-to-body="true"
-        href="http://www.joda.org/joda-time/key_format.html"
-        target="_blank"
-        ng-show="format.title === 'Custom'">
-        <i aria-hidden="true" class="fa fa-question-circle"></i>
-      </a>
-    </label>
-  </div>
-  <div
-    class="custom-date-format"
-    ng-show="customFormatSelected">
-    <input
-      type="text"
-      class="form-control"
-      ng-model="processor.customFormat">
-  </div>
+  <span> (line delimited)</span>
+  <a
+    aria-label="Custom Date Format Help"
+    tooltip="Custom Date Format Help"
+    tooltip-append-to-body="true"
+    href="http://www.joda.org/joda-time/key_format.html"
+    target="_blank">
+    <i aria-hidden="true" class="fa fa-question-circle"></i>
+  </a>
+  <list-textarea list="processor.formats"></list-textarea>
 </div>
 <div class="form-group">
   <label>
