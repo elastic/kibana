@@ -5,10 +5,10 @@ import errors from 'ui/errors';
 
 export default function AxisScaleFactory(Private) {
   class AxisScale {
-    constructor(config, data, chartConfig) {
+    constructor(config, data, visConfig) {
       this.config = config;
       this.data = data;
-      this.chartConfig = chartConfig;
+      this.visConfig = visConfig;
 
       if (this.config.get('type') === 'category') {
         this.values = data.xValues();
@@ -93,9 +93,9 @@ export default function AxisScaleFactory(Private) {
       const data = this.data.chartData();
       const chartPoints = _.reduce(data, (chartPoints, chart) => {
         const stackedData = {};
-        const points = this.chartConfig.get('chart.series').reduce((points, seri, i) => {
+        const points = this.visConfig.get('chart.series').reduce((points, seri, i) => {
           const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === config.get('id');
-          const isFirstAxis = config.get('id') === this.chartConfig.get('valueAxes[0].id');
+          const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
           const shouldStackData = seri.mode === 'stacked';
 
           if (matchingValueAxis || (!seri.valueAxis && isFirstAxis)) {
@@ -190,7 +190,7 @@ export default function AxisScaleFactory(Private) {
 
       if (!config.isUserDefined() && !config.isYExtents() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
-      if (config._chartConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      if (this.visConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 
