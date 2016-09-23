@@ -12,12 +12,9 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      //const yAxis = opts && opts.valueAxes[0];
 
       selection.each(function () {
         const div = d3.select(this);
-
-        //div.call(setWidth, yAxis);
 
         div.selectAll('.y-axis-div')
         .append('div')
@@ -29,23 +26,5 @@ define(function () {
           .attr('class', 'y-axis-div axis-div');
       });
     };
-
-    function setWidth(el, yAxis) {
-      if (!yAxis) return;
-
-      const padding = 5;
-      const height = parseInt(el.node().clientHeight, 10);
-
-      // render svg and get the width of the bounding box
-      const svg = d3.select('body')
-      .append('svg')
-      .attr('style', 'position:absolute; top:-10000; left:-10000');
-
-      svg.append('g')
-      .call(() => {
-        yAxis.getAxis(height);
-      }).node().getBBox().width + padding;
-      svg.remove();
-    }
   };
 });

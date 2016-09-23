@@ -15,17 +15,16 @@ export default function AxisFactory(Private) {
   const AxisConfig = Private(AxisConfigProvider);
 
   class Axis extends ErrorHandler {
-    constructor(config, args) {
+    constructor(visCofig, axisConfigArgs) {
       super();
-      this.data = config.data;
-      this.chart = config.chart;
+      this.data = visCofig.data;
 
-      this.config = new AxisConfig(config, args);
+      this.config = new AxisConfig(visCofig, axisConfigArgs);
       if (this.config.get('type') === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
-      this.axisScale = new AxisScale(this.config, this.data, config);
+      this.axisScale = new AxisScale(this.config, this.data, visCofig);
       this.axisTitle = new AxisTitle(this.config);
       this.axisLabels = new AxisLabels(this.config, this.axisScale);
     }
