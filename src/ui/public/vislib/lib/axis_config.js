@@ -14,7 +14,8 @@ export default function AxisConfigFactory() {
       setYExtents: null,
       defaultYExtents: null,
       min: null,
-      max: null
+      max: null,
+      mode: 'normal' // [percentage]
     },
     style: {
       color: '#ddd',
@@ -87,8 +88,8 @@ export default function AxisConfigFactory() {
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       // unless explicitly overriden by user
       if (this.isHorizontal() && this.isOrdinal()) {
-        this._values.labels.filter = axisConfig.labels.filter || false;
-        this._values.labels.rotate = axisConfig.labels.rotate || 70;
+        this._values.labels.filter = _.get(axisConfig, 'labels.filter', false);
+        this._values.labels.rotate = _.get(axisConfig, 'labels.rotate', 70);
       }
     };
 
@@ -118,15 +119,15 @@ export default function AxisConfigFactory() {
     };
 
     isPercentage() {
-      return (this._chartConfig.mode === 'percentage');
+      return this._values.mode === 'percentage';
     };
 
     isUserDefined() {
-      return (this._values.scale.setYExtents);
+      return this._values.scale.setYExtents;
     };
 
     isYExtents() {
-      return (this._values.scale.defaultYExtents);
+      return this._values.scale.defaultYExtents;
     };
 
     isLogScale() {
