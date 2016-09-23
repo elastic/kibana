@@ -27,6 +27,7 @@ export default function ColumnHandler(Private) {
               defaultYExtents: config.defaultYExtents,
               min : isUserDefinedYAxis ? config.yAxis.min : undefined,
               max : isUserDefinedYAxis ? config.yAxis.max : undefined,
+              mode : config.mode
             },
             labels: {
               axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
