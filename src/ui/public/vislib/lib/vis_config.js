@@ -12,13 +12,15 @@ export default function VisConfigFactory(Private) {
     style: {
       margin : { top: 10, right: 3, bottom: 5, left: 3 }
     },
-    alerts: {}
+    alerts: {},
+    categoryAxes: [],
+    valueAxes: []
   };
 
 
   class VisConfig {
     constructor(config, data, uiState) {
-      if (config.zeroFill) {
+      if (config.zeroFill || ['area', 'column'].indexOf(config.type) !== -1) {
         this.data = new Data(injectZeros(data), config, uiState);
       } else {
         this.data = new Data(data, config, uiState);
