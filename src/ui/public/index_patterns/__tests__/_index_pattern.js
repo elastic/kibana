@@ -43,6 +43,9 @@ describe('index pattern', function () {
     sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
       return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
     });
+    sinon.stub(mapper, 'clearCache', function () {
+      return Promise.resolve();
+    });
 
     // stub mappingSetup
     mappingSetup = Private(UtilsMappingSetupProvider);
@@ -151,15 +154,34 @@ describe('index pattern', function () {
     const indexPatternId = 'test-pattern';
     let indexPattern;
     let fieldLength;
-    let truncatedFields;
+    let customFields;
 
     beforeEach(function () {
       fieldLength = mockLogstashFields.length;
-      truncatedFields = mockLogstashFields.slice(3);
+      customFields = [{
+        analyzed: true,
+        count: 30,
+        filterable: true,
+        indexed: true,
+        name: 'foo',
+        scripted: false,
+        sortable: true,
+        type: 'number',
+        aggregatable: true,
+        searchable: false
+      },
+      {
+        name: 'script number',
+        type: 'number',
+        scripted: true,
+        script: '1234',
+        lang: 'expression'
+      }];
+
       return create(indexPatternId, {
         _source: {
           customFormats: '{}',
-          fields: JSON.stringify(truncatedFields)
+          fields: JSON.stringify(customFields)
         }
       }).then(function (pattern) {
         indexPattern = pattern;
@@ -168,8 +190,8 @@ describe('index pattern', function () {
 
     it('should fetch fields from the doc source', function () {
       // ensure that we don't have all the fields
-      expect(truncatedFields.length).to.not.equal(mockLogstashFields.length);
-      expect(indexPattern.fields).to.have.length(truncatedFields.length);
+      expect(customFields.length).to.not.equal(mockLogstashFields.length);
+      expect(indexPattern.fields).to.have.length(customFields.length);
 
       // ensure that all fields will be included in the returned docSource
       setDocsourcePayload(docSourceResponse(indexPatternId));
@@ -201,9 +223,8 @@ describe('index pattern', function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        const scripted = _.where(mockLogstashFields, { scripted: true });
-        const expected = _.filter(indexPattern.fields, { scripted: true });
-        expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
+        const expected = _.filter(indexPattern.fields, {scripted: true});
+        expect(_.pluck(expected, 'name')).to.eql(['script number']);
       });
     });
   });
