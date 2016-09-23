@@ -2,8 +2,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import SimpleEmitter from 'ui/utils/simple_emitter';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
-export default function DispatchClass(Private) {
+
+export default function DispatchClass(Private, config) {
+
   /**
    * Handles event responses
    *
@@ -214,33 +215,33 @@ export default function DispatchClass(Private) {
      * Mouseover Behavior
      *
      * @method addMousePointer
-     * @returns {D3.Selection}
+     * @returns {d3.Selection}
      */
     addMousePointer() {
       return d3.select(this).style('cursor', 'pointer');
     };
 
     /**
-     * Mouseover Behavior
-     *
-     * @param element {D3.Selection}
+     * Highlight the element that is under the cursor
+     * by reducing the opacity of all the elements on the graph.
+     * @param element {d3.Selection}
      * @method highlight
      */
     highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      //Opacity 1 is needed to avoid the css application
-      $('[data-label]', element.parentNode).css('opacity', 1).not(
-        function (els, el) {
-          return `${$(el).data('label')}` === label;
-        }
-      ).css('opacity', 0.5);
-    };
+
+      const dimming = config.get('visualization:dimmingOpacity');
+      $('[data-label]', element.parentNode)
+        .css('opacity', 1)//Opacity 1 is needed to avoid the css application
+        .not((els, el) => `${$(el).data('label')}` === label)
+        .css('opacity', dimming);
+    }
 
     /**
      * Mouseout Behavior
      *
-     * @param element {D3.Selection}
+     * @param element {d3.Selection}
      * @method unHighlight
      */
     unHighlight(element) {
