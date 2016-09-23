@@ -32,7 +32,6 @@ export default function downloadNodeBuilds(grunt) {
         const [sha, platform] = line.split('  ');
         shaSums[platform] = sha;
       });
-      grunt.log.ok(`sha sums download complete`);
     });
   };
 
@@ -50,9 +49,7 @@ export default function downloadNodeBuilds(grunt) {
     }
 
     return checkHashFromFileAsync(filePath, expected).then(([passed, actual]) => {
-      if (passed) {
-        grunt.log.ok(`${platform.name} shasum verified`);
-      } else {
+      if (!passed) {
         grunt.log.error(`${platform.name} shasum check failed`);
       }
       return passed;
@@ -67,8 +64,6 @@ export default function downloadNodeBuilds(grunt) {
     if (grunt.file.isFile(filePath)) {
       grunt.file.delete(filePath);
     }
-
-    grunt.log.ok(`downloading ${platform.name}`);
 
     return wreckGetAsync(platform.nodeUrl)
     .then(([resp, payload]) => {
@@ -92,8 +87,8 @@ export default function downloadNodeBuilds(grunt) {
       if (isDownloadValid) return;
     }
 
-    grunt.log.ok('starting download ...');
     while (!isDownloadValid && (downloadCounter < downloadLimit)) {
+      grunt.log.ok(`Downloading ${platform.name} and corresponding sha`);
       await getNodeBuild(platform);
       isDownloadValid = await checkShaSum(platform);
       ++downloadCounter;
@@ -103,7 +98,7 @@ export default function downloadNodeBuilds(grunt) {
       throw new Error(`${platform.name} download failed`);
     }
 
-    grunt.log.ok(`download of ${platform.name} completed successfully`);
+    grunt.log.ok(`${platform.name} downloaded and verified`);
   };
 
   grunt.registerTask('_build:downloadNodeBuilds', function () {
