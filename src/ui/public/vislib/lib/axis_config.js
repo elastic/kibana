@@ -57,19 +57,18 @@ export default function AxisConfigFactory() {
     constructor(chartConfig, axisConfig) {
       const typeDefaults = axisConfig.type === 'category' ? categoryDefaults : {};
       this._values = _.defaultsDeep({}, axisConfig, typeDefaults, defaults);
-      this._chartConfig = chartConfig;
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
-      this._values.rootEl = this._chartConfig.get('el');
+      this._values.rootEl = chartConfig.get('el');
 
-      this.data = this._chartConfig.data;
+      this.data = chartConfig.data;
       if (this._values.type === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
 
       if (this._values.type === 'value') {
-        const isWiggleOrSilluete = this._chartConfig.mode === 'wiggle' || this._chartConfig.mode === 'silluete';
+        const isWiggleOrSilluete = chartConfig.mode === 'wiggle' || chartConfig.mode === 'silluete';
         // if show was not explicitly set and wiggle or silluete option was checked
         if (!axisConfig.show && isWiggleOrSilluete) {
           this._values.show = false;

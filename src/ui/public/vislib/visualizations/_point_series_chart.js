@@ -60,9 +60,8 @@ export default function PointSeriesChartProvider(Private) {
       if (missingMinMax || ordered.endzones === false) return;
 
       const attr = this.handler._attr;
-      const height = attr.height;
-      const width = attr.width;
-      const margin = attr.margin;
+      const {width, height} = svg.node().getBBox();
+      const margin = attr.get('style.margin');
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just
