@@ -9,7 +9,7 @@ export default function ChartTitleFactory(Private) {
   class ChartTitle extends ErrorHandler {
     constructor(config) {
       super();
-      this.el = config.el;
+      this.el = config.get('el');
       this.tooltip = new Tooltip('chart-title', this.el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
       });
