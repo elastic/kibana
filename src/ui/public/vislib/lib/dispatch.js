@@ -164,7 +164,7 @@ export default function DispatchClass(Private, config) {
       const xAxis = this.handler.categoryAxes[0];
       const xScale = xAxis.getScale();
       // Don't allow brushing for time based charts from non-time-based indices
-      const hasTimeField = this.handler.config.get('hasTimeField');
+      const hasTimeField = this.handler._attr.get('hasTimeField');
 
       return Boolean(hasTimeField && xAxis.ordered && xScale && _.isFunction(xScale.invert));
     };
@@ -259,8 +259,8 @@ export default function DispatchClass(Private, config) {
     createBrush(xScale, svg) {
       const self = this;
       const attr = self.handler._attr;
-      const height = attr.height;
-      const margin = attr.margin;
+      const height = svg.node().getBBox().height;
+      const margin = attr.get('style.margin');
 
       // Brush scale
       const brush = d3.svg.brush()
