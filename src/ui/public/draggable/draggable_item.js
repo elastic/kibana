@@ -2,7 +2,7 @@ import $ from 'jquery';
 import uiModules from 'ui/modules';
 
 uiModules
-.get('app/visualize')
+.get('kibana')
 .directive('draggableItem', function () {
   return {
     restrict: 'A',

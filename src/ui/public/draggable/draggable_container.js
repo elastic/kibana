@@ -4,7 +4,7 @@ import dragula from 'dragula';
 import uiModules from 'ui/modules';
 
 uiModules
-.get('app/visualize')
+.get('kibana')
 .directive('draggableContainer', function () {
 
   return {
