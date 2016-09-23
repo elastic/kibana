@@ -1,6 +1,7 @@
 import uiModules from 'ui/modules';
 import template from './view.html';
 import './grok_pattern_definitions';
+import 'ui/pipelines/list_textarea';
 
 const app = uiModules.get('kibana');
 
@@ -13,22 +14,7 @@ app.directive('processorUiGrok', function () {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
-      function splitPatterns(delimitedList) {
-        return delimitedList.split('\n');
-      }
-
-      function joinPatterns(valueArray) {
-        return valueArray.join('\n');
-      }
-
-      function updatePatterns() {
-        processor.patterns = splitPatterns($scope.patterns);
-      }
-
-      $scope.patterns = joinPatterns(processor.patterns);
-
       $scope.$watch('processor.sourceField', () => { pipeline.setDirty(); });
-      $scope.$watch('patterns', updatePatterns);
       $scope.$watchCollection('processor.patterns', () => { pipeline.setDirty(); });
       $scope.$watch('processor.traceMatch', () => { pipeline.setDirty(); });
       $scope.$watchCollection('processor.patternDefinitions', () => { pipeline.setDirty(); }, true);

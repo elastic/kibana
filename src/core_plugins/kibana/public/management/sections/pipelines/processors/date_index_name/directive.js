@@ -1,5 +1,6 @@
 import uiModules from 'ui/modules';
 import template from './view.html';
+import 'ui/pipelines/list_textarea';
 
 const app = uiModules.get('kibana');
 
@@ -12,20 +13,6 @@ app.directive('processorUiDateIndexName', function () {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
-      function splitDateFormats(delimitedList) {
-        return delimitedList.split('\n');
-      }
-
-      function joinDateFormats(valueArray) {
-        return valueArray.join('\n');
-      }
-
-      function updatePatterns() {
-        processor.dateFormats = splitDateFormats($scope.dateFormats);
-      }
-
-      $scope.dateFormats = joinDateFormats(processor.dateFormats);
-
       $scope.roundingTypes = [
         { value: 'y', label: 'Year' },
         { value: 'M', label: 'Month' },
@@ -35,8 +22,6 @@ app.directive('processorUiDateIndexName', function () {
         { value: 'm', label: 'Minute' },
         { value: 's', label: 'Second' }
       ];
-
-      $scope.$watch('dateFormats', updatePatterns);
 
       $scope.$watch('processor.sourceField', () => { pipeline.setDirty(); });
       $scope.$watch('processor.indexNamePrefix', () => { pipeline.setDirty(); });
