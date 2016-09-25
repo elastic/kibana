@@ -26,8 +26,8 @@ expression that supports aliased expressions that can be reused.`,
   }
 
   get description() {
-    const inputKeys = keysDeep(this.inputObject);
-    const outputKeys = keysDeep(this.outputObject);
+    const inputKeys = keysDeep(this.inputObject.doc);
+    const outputKeys = keysDeep(this.outputObject.doc);
     const addedKeys = difference(outputKeys, inputKeys);
     const added = addedKeys.sort().map(field => `[${field}]`).join(', ');
     const source = this.sourceField || '?';
