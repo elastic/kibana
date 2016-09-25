@@ -3,6 +3,9 @@ import '../styles/_processor_ui_container_header.less';
 import processorUiContainerHeaderTemplate from '../views/processor_ui_container_header.html';
 import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
 import Processor from 'ui/pipelines/processor/view_model';
+import 'ui/draggable/draggable_container';
+import 'ui/draggable/draggable_handle';
+import 'ui/draggable/draggable_item';
 
 const app = uiModules.get('kibana');
 

@@ -67,32 +67,6 @@ export default class ProcessorCollection {
     this.updateParents();
   }
 
-  moveUp(processor) {
-    const processors = this.processors;
-    const index = processors.indexOf(processor);
-
-    if (index === 0) return;
-
-    const temp = processors[index - 1];
-    processors[index - 1] = processors[index];
-    processors[index] = temp;
-
-    this.updateParents();
-  }
-
-  moveDown(processor) {
-    const processors = this.processors;
-    const index = processors.indexOf(processor);
-
-    if (index === processors.length - 1) return;
-
-    const temp = processors[index + 1];
-    processors[index + 1] = processors[index];
-    processors[index] = temp;
-
-    this.updateParents();
-  }
-
   updateParents() {
     this.processors.forEach((processor, index) => {
       const newParent = index > 0 ? this.processors[index - 1] : null;
