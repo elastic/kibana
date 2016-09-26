@@ -6,35 +6,35 @@ import fromRoot from '../../../../utils/from_root';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
-
     let kbnServer;
 
-    before(function () {
-      this.timeout(60000); // sometimes waiting for server takes longer than 10
+    before(async function () {
+      // Sometimes waiting for server takes longer than 10s.
+      // NOTE: This can't be a fat-arrow function because `this` needs to refer to the execution
+      // context, not to the parent context.
+      this.timeout(60000);
 
       kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
             fromRoot('src/core_plugins')
           ]
-        }
+        },
       });
-      return kbnServer.ready()
-      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
-    });
 
+      await kbnServer.ready();
+      await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+    });
 
     after(function () {
       return kbnServer.close();
     });
 
-
-    function testRoute(options) {
+    function testRoute(options, statusCode = 200) {
       if (typeof options.payload === 'object') {
         options.payload = JSON.stringify(options.payload);
       }
 
-      const statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
@@ -49,7 +49,6 @@ describe('plugins/elasticsearch', function () {
       });
     }
 
-
     testRoute({
       method: 'GET',
       url: '/elasticsearch/_nodes'
@@ -62,21 +61,18 @@ describe('plugins/elasticsearch', function () {
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'PUT',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'DELETE',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'GET',
@@ -86,9 +82,8 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/_bulk',
-      payload: '{}',
-      statusCode: 400
-    });
+      payload: '{}'
+    }, 400);
 
     testRoute({
       method: 'POST',

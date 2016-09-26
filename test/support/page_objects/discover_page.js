@@ -202,31 +202,25 @@ export default class DiscoverPage {
 
   clickShortenUrl() {
     return this.findTimeout
-    .findByCssSelector('button.shorten-button')
+    .findByCssSelector('[data-test-subj="sharedSnapshotShortUrlButton"]')
     .click();
   }
 
   clickCopyToClipboard() {
     return this.findTimeout
-    .findDisplayedByCssSelector('button.clipboard-button')
+    .findByCssSelector('[data-test-subj="sharedSnapshotCopyButton"]')
     .click();
   }
 
   getShareCaption() {
     return this.findTimeout
-    .findByCssSelector('.vis-share label')
+    .findByCssSelector('[data-test-subj="shareUiTitle"]')
     .getVisibleText();
   }
 
   getSharedUrl() {
     return this.findTimeout
-    .findByCssSelector('.url')
-    .getProperty('value');
-  }
-
-  getShortenedUrl() {
-    return this.findTimeout
-    .findByCssSelector('.url')
+    .findByCssSelector('[data-test-subj="sharedSnapshotUrl"]')
     .getProperty('value');
   }
 

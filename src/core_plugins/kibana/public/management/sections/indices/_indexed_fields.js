@@ -25,8 +25,9 @@ uiModules.get('apps/management')
         { title: 'name' },
         { title: 'type' },
         { title: 'format' },
+        { title: 'searchable', info: 'These fields can be used in the filter bar' },
+        { title: 'aggregatable' , info: 'These fields can be used in visualization aggregations' },
         { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
-        { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
         { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
         { title: 'controls', sortable: false }
       ];
@@ -51,7 +52,10 @@ uiModules.get('apps/management')
             {
               markup: nameHtml,
               scope: childScope,
-              value: field.displayName
+              value: field.displayName,
+              attr: {
+                'data-test-subj': 'indexedFieldName'
+              }
             },
             {
               markup: typeHtml,
@@ -60,12 +64,16 @@ uiModules.get('apps/management')
             },
             _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
             {
-              markup: field.analyzed ? yesTemplate : noTemplate,
-              value: field.analyzed
+              markup: field.searchable ? yesTemplate : noTemplate,
+              value: field.searchable
             },
             {
-              markup: field.indexed ? yesTemplate : noTemplate,
-              value: field.indexed
+              markup: field.aggregatable ? yesTemplate : noTemplate,
+              value: field.aggregatable
+            },
+            {
+              markup: field.analyzed ? yesTemplate : noTemplate,
+              value: field.analyzed
             },
             {
               markup: excluded ? yesTemplate : noTemplate,

@@ -79,7 +79,6 @@
     // Undo the collapse side padding for navbars with containers to ensure
     // alignment of right-aligned contents.
     .navbar-fixed-top &,
-    .navbar-static-top &,
     .navbar-fixed-bottom & {
       padding-left: 0;
       padding-right: 0;
@@ -123,16 +122,6 @@
 //
 // Display the navbar across the entirety of the page or fixed it to the top or
 // bottom of the page.
-
-// Static top (unfixed, but 100% wide) navbar
-.navbar-static-top {
-  z-index: @zindex-navbar;
-  border-width: 0 0 1px;
-
-  @media (min-width: @grid-float-breakpoint) {
-    border-radius: 0;
-  }
-}
 
 // Fix the top/bottom navbars when screen real estate supports it
 .navbar-fixed-top,

@@ -7,7 +7,7 @@ import SearchRequestProvider from '../fetch/request/search';
 import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
 
-export default function SearchSourceFactory(Promise, Private) {
+export default function SearchSourceFactory(Promise, Private, config) {
   let SourceAbstract = Private(AbstractDataSourceProvider);
   let SearchRequest = Private(SearchRequestProvider);
   let SegmentedRequest = Private(SegmentedRequestProvider);
@@ -174,8 +174,19 @@ export default function SearchSourceFactory(Promise, Private) {
 
     switch (key) {
       case 'filter':
+        let verifiedFilters = val;
+        if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
+          if (!_.isArray(val)) val = [val];
+          verifiedFilters = val.filter(function (el) {
+            if ('meta' in el && 'index' in state) {
+              const field = state.index.fields.byName[el.meta.key];
+              if (!field) return false;
+            }
+            return true;
+          });
+        }
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
-        state.filters = _([ state.filters || [], val ])
+        state.filters = _([ state.filters || [], verifiedFilters ])
         .flatten()
         // Yo Dawg! I heard you needed to filter out your filters
         .reject(function (filter) {

@@ -65,7 +65,7 @@ export default function VisFactory(Private) {
       }
 
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
-      this._runOnHandler('render');
+      this._runWithoutResizeChecker('render');
     };
 
     /**
@@ -85,6 +85,14 @@ export default function VisFactory(Private) {
         this.render(this.data, this.uiState);
       }
     };
+
+    _runWithoutResizeChecker(method) {
+      this.resizeChecker.stopSchedule();
+      this._runOnHandler(method);
+      this.resizeChecker.saveSize();
+      this.resizeChecker.saveDirty(false);
+      this.resizeChecker.continueSchedule();
+    }
 
     _runOnHandler(method) {
       try {

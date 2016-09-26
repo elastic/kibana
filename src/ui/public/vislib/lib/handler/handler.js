@@ -103,7 +103,7 @@ export default function HandlerBaseClass(Private) {
      */
     render() {
       const self = this;
-      const charts = this.charts = [];
+      const { binder, charts = [] } = this;
       const selection = d3.select(this.el);
 
       selection.selectAll('*').remove();
@@ -116,12 +116,21 @@ export default function HandlerBaseClass(Private) {
       });
 
       // render the chart(s)
-      selection.selectAll('.chart')
-      .each(function (chartData) {
+      let loadedCount = 0;
+      const chartSelection = selection.selectAll('.chart');
+      chartSelection.each(function (chartData) {
         const chart = new self.ChartClass(self, this, chartData);
 
         self.vis.activeEvents().forEach(function (event) {
           self.enable(event, chart);
+        });
+
+        binder.on(chart.events, 'rendered', () => {
+          loadedCount++;
+          if (loadedCount === chartSelection.length) {
+            // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
+            charts[0].events.emit('renderComplete');
+          }
         });
 
         charts.push(chart);

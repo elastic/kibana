@@ -84,23 +84,34 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
-    indexFields(indexPattern);
+    const promise = indexFields(indexPattern);
 
     // any time index pattern in ES is updated, update index pattern object
     docSources
     .get(indexPattern)
     .onUpdate()
     .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+
+    return promise;
+  }
+
+  function containsFieldCapabilities(fields) {
+    return _.any(fields, (field) => {
+      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+    });
   }
 
   function indexFields(indexPattern) {
+    let promise = Promise.resolve();
+
     if (!indexPattern.id) {
-      return;
+      return promise;
     }
-    if (!indexPattern.fields) {
-      return indexPattern.refreshFields();
+
+    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+      promise = indexPattern.refreshFields();
     }
-    initFields(indexPattern);
+    return promise.then(() => {initFields(indexPattern);});
   }
 
   function setId(indexPattern, id) {

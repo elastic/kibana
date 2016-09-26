@@ -4,7 +4,7 @@ import dragula from 'dragula';
 import uiModules from 'ui/modules';
 
 uiModules
-.get('app/visualize')
+.get('kibana')
 .directive('draggableContainer', function () {
 
   return {
@@ -69,18 +69,33 @@ uiModules
         const list = $scope.draggableContainerCtrl.getList();
         const itemScope = $(el).scope();
         const item = itemScope.draggableItemCtrl.getItem();
-        const toIndex = getSiblingItemIndex(list, sibling);
+        const fromIndex = list.indexOf(item);
+        const siblingIndex = getItemIndexFromElement(list, sibling);
+
+        const toIndex = getTargetIndex(list, fromIndex, siblingIndex);
         _.move(list, item, toIndex);
       }
 
-      function getSiblingItemIndex(list, sibling) {
-        if (!sibling) { // means the item was dropped at the end of the list
+      function getTargetIndex(list, fromIndex, siblingIndex) {
+        if (siblingIndex === -1) {
+          // means the item was dropped at the end of the list
           return list.length - 1;
+        } else if (fromIndex < siblingIndex) {
+          // An item moving from a lower index to a higher index will offset the
+          // index of the earlier items by one.
+          return siblingIndex - 1;
         }
-        const siblingScope = $(sibling).scope();
-        const siblingItem = siblingScope.draggableItemCtrl.getItem();
-        const siblingIndex = list.indexOf(siblingItem);
         return siblingIndex;
+      }
+
+      function getItemIndexFromElement(list, element) {
+        if (!element) return -1;
+
+        const scope = $(element).scope();
+        const item = scope.draggableItemCtrl.getItem();
+        const index = list.indexOf(item);
+
+        return index;
       }
     }
   };

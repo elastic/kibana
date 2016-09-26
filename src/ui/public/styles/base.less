@@ -217,16 +217,6 @@ a {
   .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
 }
 
-// right section of the main nav base
-.navbar-static-top .navbar-right {
-  font-size: @font-size-small;
-
-  .loading-spinner {
-    color: @navbar-inverse-brand-hover-color;
-    vertical-align: middle;
-  }
-}
-
 .navbar-timepicker {
   > li > a {
     padding-left: 7px !important;
@@ -315,6 +305,12 @@ table {
 
 //== breadCrumbsTemplate
 bread-crumbs {
+  display: block;
+
+  &.bread-crumbs--navbar {
+    background-color: @navbar-default-bg;
+  }
+
   ul {
     margin: 0;
     padding: 8px 10px;
@@ -660,4 +656,4 @@ fieldset {
   }
 }
 
-@import (reference) "~dragula/dist/dragula.css";
+@import "~dragula/dist/dragula.css";
