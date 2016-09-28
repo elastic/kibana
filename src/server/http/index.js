@@ -4,15 +4,18 @@ import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
+import HapiTemplates from 'vision';
+import HapiStaticFiles from 'inert';
+import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 
 module.exports = async function (kbnServer, server, config) {
 
-
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = require('./short_url_lookup')(server);
+  await kbnServer.mixin(require('./register_hapi_plugins'));
   await kbnServer.mixin(require('./setup_connection'));
 
   // provide a simple way to expose static directories
