@@ -7,6 +7,7 @@ export default function ColorFormatProvider(Private) {
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
+    regex: '#000000',
     text: '#000000',
     background: '#ffffff'
   };
@@ -19,7 +20,7 @@ export default function ColorFormatProvider(Private) {
   _Color.id = 'color';
   _Color.title = 'Color';
   _Color.fieldType = [
-    'number'
+    'number', 'string'
   ];
 
   _Color.editor = {
@@ -41,12 +42,22 @@ export default function ColorFormatProvider(Private) {
   };
 
   _Color.prototype._convert = {
-    html(val) {
-      const color = _.findLast(this.param('colors'), ({ range }) => {
-        if (!range) return;
-        const [start, end] = range.split(':');
-        return val >= Number(start) && val <= Number(end);
-      });
+    html(val, field) {
+
+      var color;
+      if (field.type === 'string') {
+        color = _.findLast(this.param('colors'), (colorParam) => {
+          return new RegExp(colorParam.regex).test(val);
+        });
+      }
+
+      else {
+        color = _.findLast(this.param('colors'), ({ range }) => {
+          if (!range) return;
+          const [start, end] = range.split(':');
+          return val >= Number(start) && val <= Number(end);
+        });
+      }
 
       if (!color) return _.asPrettyString(val);
 

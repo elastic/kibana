@@ -36,4 +36,18 @@ describe('Color Format', function () {
     });
     expect(colorer.convert(99, 'html')).to.eql('99');
   });
+
+  it('should add colors if the regex matches', function () {
+    let colorer = new ColorFormat({
+      colors: [{
+        regex: 'A.*',
+        text: 'blue',
+        background: 'yellow'
+      }]
+    });
+    expect(colorer.convert('B', 'html')).to.eql('B');
+    expect(colorer.convert('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">B</span>');
+    expect(colorer.convert('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
+    expect(colorer.convert('a', 'html')).to.eql('a');
+  });
 });
