@@ -25,6 +25,6 @@
   </div>
   <span style="display:inline-block" ng-show="unPinnedQueries.length == 0">
     <i class="icon-search pointer" ng-click="refresh()"></i>
-    <i class="icon-plus pointer" ng-click="querySrv.set({})"></i>
+    <i class="icon-plus pointer" ng-if="isEditable()" ng-click="querySrv.set({})"></i>
   </span>
 </div>
