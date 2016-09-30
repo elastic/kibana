@@ -15,7 +15,6 @@ require('./src/directives/sense_history');
 require('./src/directives/sense_settings');
 require('./src/directives/sense_help');
 require('./src/directives/sense_welcome');
-require('./src/directives/sense_navbar');
 
 devTools.register(() => ({
   order: 1,

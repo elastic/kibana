@@ -54,6 +54,18 @@ module.directive('kbnTopNav', function (Private) {
     restrict: 'E',
     transclude: true,
     template,
+
+    // TODO: The kbnTopNav currently requires that it share a scope with
+    // it's parent directive. This allows it to export the kbnTopNav controller
+    // and allows the config templates to use values from the parent scope.
+    //
+    // Moving this to an isolate scope will require modifying the config
+    // directive to support child directives, instead of templates, so that
+    // parent controllers can be imported/required rather than simply referenced
+    // directly in the template.
+    //
+    // scope: {}
+
     controller($scope, $attrs, $element) {
       const extensions = getNavbarExtensions($attrs.name);
       let controls = _.get($scope, $attrs.config, []);
@@ -65,6 +77,7 @@ module.directive('kbnTopNav', function (Private) {
 
       $scope.kbnTopNav = new KbnTopNavController(controls);
       $scope.kbnTopNav._link($scope, $element);
+
       return $scope.kbnTopNav;
     }
   };
