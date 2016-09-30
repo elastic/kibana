@@ -52,8 +52,9 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
           'name',
           'type',
           'format',
+          'searchable',
+          'aggregatable',
           'analyzed',
-          'indexed',
           'controls'
         ];
 
