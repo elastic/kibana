@@ -2,6 +2,9 @@ let $ = require('jquery');
 let es = require('./es');
 const storage = require('./storage');
 
+import getInput from './input'
+import getOutput from './output'
+
 function getFontSize() {
   return storage.get('font_size', 14);
 }
@@ -28,7 +31,7 @@ function setBasicAuth(mode) {
   return true;
 }
 
-function getAutocomplete() {
+export function getAutocomplete() {
   return storage.get('autocomplete_settings', { fields: true, indices: true });
 }
 
@@ -37,10 +40,10 @@ function setAutocomplete(settings) {
   return true;
 }
 
-function applyCurrentSettings(editor) {
+export function applyCurrentSettings(editor) {
   if (typeof editor === 'undefined') {
-    applyCurrentSettings(require('./input')());
-    applyCurrentSettings(require('./output')());
+    applyCurrentSettings(getInput());
+    applyCurrentSettings(getOutput());
   }
   if (editor) {
     editor.getSession().setUseWrapMode(getWrapMode());
@@ -48,7 +51,7 @@ function applyCurrentSettings(editor) {
   }
 }
 
-function getCurrentSettings() {
+export function getCurrentSettings() {
   return {
     autocomplete: getAutocomplete(),
     wrapMode: getWrapMode(),
@@ -56,18 +59,10 @@ function getCurrentSettings() {
   };
 }
 
-function updateSettings({ fontSize, wrapMode, autocomplete}) {
+export function updateSettings({ fontSize, wrapMode, autocomplete}) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);
-  require('./input')().focus();
+  getInput().focus();
   return getCurrentSettings();
 }
-
-module.exports = {
-  getAutocomplete,
-  applyCurrentSettings,
-
-  getCurrentSettings,
-  updateSettings,
-};

@@ -103,7 +103,7 @@ export default function HandlerBaseClass(Private) {
      */
     render() {
       const self = this;
-      const charts = this.charts = [];
+      const { binder, charts = [] } = this;
       const selection = d3.select(this.el);
 
       selection.selectAll('*').remove();
@@ -125,7 +125,7 @@ export default function HandlerBaseClass(Private) {
           self.enable(event, chart);
         });
 
-        chart.events.on('rendered', () => {
+        binder.on(chart.events, 'rendered', () => {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
             // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
