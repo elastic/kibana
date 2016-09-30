@@ -15,6 +15,17 @@ export default class ElasticsearchError {
     }
   }
 
+  static hasRootCause(error, cause) {
+    try {
+      const esError = new ElasticsearchError(error);
+      return esError.hasRootCause(cause);
+    } catch (err) {
+      // we assume that any failure represents a validation error
+      // in the ElasticsearchError constructor
+      return false;
+    }
+  }
+
   getRootCauses() {
     const rootCauses = _.get(this.error, 'resp.error.root_cause');
     return _.pluck(rootCauses, 'reason');
