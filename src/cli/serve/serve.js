@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { statSync } from 'fs';
+import { statSync, readdirSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
 import { fromRoot } from '../../utils';
@@ -81,6 +81,11 @@ module.exports = function (program) {
     configPathCollector,
     [ getConfig() ]
   )
+  .option(
+    '--multi-config-dir <path>',
+    'Path to a directory of config files, where each file will be used for a different ' +
+    'instance of the Kibana Server'
+  )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
@@ -127,45 +132,96 @@ module.exports = function (program) {
       }
     }
 
-    const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
-    const settings = getCurrentSettings();
+    if (opts.dev && opts.multiConfigDir) {
+      logFatal('--multi-config-dir can not be used in dev mode');
+      process.exit(1);
+    }
+
+    const getSettings = () => readServerSettings(opts, this.getUnknownOptions());
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
       const ClusterManager = require('../cluster/cluster_manager');
-      new ClusterManager(opts, settings);
+      new ClusterManager(opts, getSettings());
       return;
     }
 
-    let kbnServer = {};
-    const KbnServer = require('../../server/kbn_server');
-    try {
-      kbnServer = new KbnServer(settings);
-      await kbnServer.ready();
-    }
-    catch (err) {
-      const { server } = kbnServer;
+    let reloadServerSettingsFns;
+    if (!opts.multiConfigDir) {
+      reloadServerSettingsFns = await startServers([getSettings]);
+    } else {
+      reloadServerSettingsFns = await startServers(
+        readdirSync(opts.multiConfigDir)
+        .map(name => {
+          if (name.startsWith('.')) return null;
 
-      if (err.code === 'EADDRINUSE') {
-        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
-      } else {
-        logFatal(err, server);
-      }
+          const multiConfigPath = resolve(opts.multiConfigDir, name);
+          const getMultiSettings = () => {
+            const settings = getSettings();
+            const multiOpts = {
+              ...opts,
+              config: multiConfigPath
+            };
+            const multiSettings = readServerSettings(multiOpts, {});
+            return _.defaultsDeep(multiSettings, settings);
+          };
 
-      kbnServer.close();
-      process.exit(1); // eslint-disable-line no-process-exit
+          return getMultiSettings;
+        })
+        .filter(Boolean)
+      );
     }
 
     process.on('SIGHUP', function reloadConfig() {
-      const settings = getCurrentSettings();
-      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-      kbnServer.applyLoggingConfiguration(settings);
-      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+      reloadServerSettingsFns.forEach(reloadServerSettings => {
+        reloadServerSettings();
+      });
     });
-
-    return kbnServer;
   });
 };
+
+async function startServers(getSettingsFns) {
+  const reloadServerSettingsFns = [];
+  const getSettingsFnsByServer = new Map();
+
+  await Promise.all(getSettingsFns.map(async getSettings => {
+    const settings = getSettings();
+    const kbnServer = await startKibanaServer(settings);
+    getSettingsFnsByServer.set(kbnServer, getSettings);
+
+    reloadServerSettingsFns.push((kbnServer) => {
+      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+      kbnServer.applyLoggingConfiguration(getSettings());
+      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+    });
+  }));
+
+  return reloadServerSettingsFns;
+}
+
+async function startKibanaServer(settings) {
+  let kbnServer = {};
+
+  const KbnServer = require('../../server/kbn_server');
+  try {
+    kbnServer = new KbnServer(settings);
+    await kbnServer.ready();
+  }
+  catch (err) {
+    const { server } = kbnServer;
+
+    if (err.code === 'EADDRINUSE') {
+      logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
+    } else {
+      logFatal(err, server);
+    }
+
+    kbnServer.close();
+    process.exit(1); // eslint-disable-line no-process-exit
+  }
+
+  return kbnServer;
+}
 
 function logFatal(message, server) {
   if (server) {
