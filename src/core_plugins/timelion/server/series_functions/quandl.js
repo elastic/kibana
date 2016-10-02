@@ -23,8 +23,9 @@ module.exports = new Datasource ('quandl', {
     }
   ],
   help: `
-    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana\'s Advanced Settings.
-    The API has a really low rate limit without a key`,
+    [experimental]
+    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana's
+    Advanced Settings. The API has a really low rate limit without a key.`,
   fn: function quandlFn(args, tlConfig) {
     var intervalMap = {
       '1d': 'daily',
