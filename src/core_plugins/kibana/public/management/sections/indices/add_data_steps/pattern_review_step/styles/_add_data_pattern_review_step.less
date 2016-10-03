@@ -1,0 +1,71 @@
+@import (reference) "../../../styles/_add_data_wizard";
+
+pattern-review-step {
+  margin-bottom: 14px;
+
+  .pattern-review {
+    margin-bottom: 15px;
+
+    label {
+      margin-bottom: 0;
+    }
+
+  .time-field-input {
+    padding-left: 14px;
+    margin-bottom: 0;
+  }
+
+  .pattern-input {
+    width: 300px;
+    margin-right: 7px;
+  }
+
+    > .help-block {
+      margin-top: 0;
+    }
+  }
+
+  paginated-table.pattern-review-field-table {
+    table {
+      border-bottom: 3px solid @settings-filebeat-wizard-panel-bg;
+
+      tr {
+        .form-group;
+      }
+
+      th {
+        border-bottom: 0;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: @settings-filebeat-wizard-panel-bg;
+        font-weight: normal;
+      }
+
+      td {
+        border-top: 3px solid @settings-filebeat-wizard-panel-bg;
+        vertical-align: middle;
+        padding-right: 14px;
+      }
+
+      select {
+        .form-control;
+        .wizard-container.form-control;
+
+        min-width: 105px;
+      }
+    }
+
+    paginate-controls {
+      position: relative;
+
+      ul > li > a {
+        background-color: @settings-filebeat-wizard-panel-bg;
+      }
+
+      form.pagination-size {
+        position: absolute;
+        right: 0;
+      }
+    }
+  }
+}

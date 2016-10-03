@@ -14,10 +14,13 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     id: 'kibana',
     config: function (Joi) {
+      const ONE_GIGABYTE = 1024 * 1024 * 1024;
+
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('discover'),
-        index: Joi.string().default('.kibana')
+        index: Joi.string().default('.kibana'),
+        addDataMaxBytes: Joi.number().default(ONE_GIGABYTE)
       }).default();
     },
 
@@ -42,7 +45,8 @@ module.exports = function (kibana) {
           let config = server.config();
           return {
             kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            tilemap: config.get('tilemap')
+            tilemap: config.get('tilemap'),
+            addDataMaxBytes: config.get('kibana.addDataMaxBytes')
           };
         },
       },

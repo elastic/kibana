@@ -1,0 +1,50 @@
+<h2><em>Review the index pattern.</em>
+  Here we'll define how and where to store your parsed events. We've made some intelligent guesses for you, but most
+  fields can be changed if we got it wrong!
+</h2>
+
+<form name="reviewStep.form">
+  <div class="pattern-review form-inline">
+    <div ng-show="reviewStep.errors.length" class="alert alert-danger">
+      <div ng-repeat="error in reviewStep.errors">{{ error }}</div>
+    </div>
+    <div class="alert alert-danger"
+         ng-show="reviewStep.form.pattern.$dirty && reviewStep.form.pattern.$error.lowercase">
+      Index names must be all lowercase
+    </div>
+    <div class="alert alert-danger"
+         ng-show="reviewStep.form.pattern.$dirty && reviewStep.form.pattern.$error.indexNameInput">
+      An index name must not be empty and cannot contain whitespace or any of the following characters: ", *, \, <, |, ,, >, /, ?
+    </div>
+
+    <label>{{ reviewStep.patternInput.label }}</label>
+    <span id="pattern-help" class="help-block">{{ reviewStep.patternInput.helpText }}</span>
+    <input name="pattern" ng-model="reviewStep.indexPattern.id"
+           class="pattern-input form-control"
+           novalidate
+           required
+           validate-index-name
+           validate-lowercase
+           placeholder="{{reviewStep.patternInput.placeholder}}"
+           aria-describedby="pattern-help"/>
+    <label>
+      <input ng-model="reviewStep.isTimeBased" type="checkbox"/>
+      time based
+    </label>
+    <label ng-if="reviewStep.isTimeBased" class="time-field-input">
+      Time Field
+      <select ng-model="reviewStep.indexPattern.timeFieldName" name="time_field_name" class="form-control">
+        <option ng-repeat="field in reviewStep.dateFields" value="{{field}}">
+          {{field}}
+        </option>
+      </select>
+    </label>
+  </div>
+
+  <paginated-table
+    class="pattern-review-field-table"
+    columns="reviewStep.columns"
+    rows="reviewStep.rows"
+    per-page="10">
+  </paginated-table>
+</form>
