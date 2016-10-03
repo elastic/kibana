@@ -27,8 +27,7 @@ modules.get('apps/management')
         location: 'Add Data'
       });
 
-      const usePipeline = !_.isEmpty(_.get(this.results, 'pipeline.processors'));
-      ingest.uploadCSV(this.results.file, this.results.indexPattern.id, this.results.parseOptions.delimiter, usePipeline)
+      ingest.uploadCSV(this.results.file, this.results.indexPattern.id, this.results.parseOptions.delimiter)
       .then(
         (res) => {
           this.created = 0;

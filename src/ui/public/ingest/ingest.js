@@ -9,7 +9,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
   const ingestAPIPrefix = chrome.addBasePath('/api/kibana/ingest');
   const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
 
-  this.save = function (indexPattern, pipeline) {
+  this.save = function (indexPattern) {
     if (_.isEmpty(indexPattern)) {
       throw new Error('index pattern is required');
     }
@@ -17,9 +17,6 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     const payload = {
       index_pattern: keysToSnakeCaseShallow(indexPattern)
     };
-    if (!_.isEmpty(pipeline)) {
-      payload.pipeline = _.map(pipeline, processor => keysToSnakeCaseShallow(processor));
-    }
 
     return $http.post(`${ingestAPIPrefix}`, payload)
     .then(() => {
@@ -44,39 +41,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     });
   };
 
-  this.simulate = function (pipeline) {
-    function pack(pipeline) {
-      const result = keysToSnakeCaseShallow(pipeline);
-      result.processors = _.map(result.processors, processor => keysToSnakeCaseShallow(processor));
-
-      return result;
-    }
-
-    function unpack(response) {
-      const data = response.data.map(result => keysToCamelCaseShallow(result));
-      return data;
-    }
-
-    return $http.post(`${ingestAPIPrefix}/simulate`, pack(pipeline))
-    .then(unpack)
-    .catch(err => {
-      return $q.reject(new Error('Error simulating pipeline'));
-    });
-  };
-
-  this.getProcessors = function () {
-    function unpack(response) {
-      return response.data;
-    }
-
-    return $http.get(`${ingestAPIPrefix}/processors`)
-    .then(unpack)
-    .catch(err => {
-      return $q.reject(new Error('Error fetching enabled processors'));
-    });
-  };
-
-  this.uploadCSV = function (file, indexPattern, delimiter, pipeline) {
+  this.uploadCSV = function (file, indexPattern, delimiter) {
     if (_.isUndefined(file)) {
       throw new Error('file is required');
     }
@@ -90,9 +55,6 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     const params = {};
     if (!_.isUndefined(delimiter)) {
       params.csv_delimiter = delimiter;
-    }
-    if (!_.isUndefined(pipeline)) {
-      params.pipeline = pipeline;
     }
 
     return $http.post(chrome.addBasePath(`/api/kibana/${indexPattern}/_data`), formData, {
