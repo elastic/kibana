@@ -43,11 +43,6 @@ define(function (require) {
           // Fields must have a name and type
           request.post('/kibana/ingest')
             .send(_.set(createTestData(), 'index_pattern.fields', [{count: 0}]))
-            .expect(400),
-
-          // should validate pipeline processors
-          request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'pipeline[0]', {bad: 'processor'}))
             .expect(400)
         ]);
       });
@@ -163,30 +158,6 @@ define(function (require) {
               expect(mappings.agent).to.have.property('fields');
             });
           });
-      });
-
-      bdd.it('should create a pipeline if one is included in the request', function () {
-        return request.post('/kibana/ingest')
-          .send(createTestData())
-          .expect(204)
-          .then(function () {
-            return scenarioManager.client.transport.request({
-              path: '_ingest/pipeline/kibana-logstash-*',
-              method: 'GET'
-            })
-            .then(function (body) {
-              expect(body).to.have.property('kibana-logstash-*');
-            });
-          });
-      });
-
-      bdd.it('pipeline should be optional', function optionalPipeline() {
-        const payload = createTestData();
-        delete payload.pipeline;
-
-        return request.post('/kibana/ingest')
-          .send(payload)
-          .expect(204);
       });
 
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
