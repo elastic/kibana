@@ -290,11 +290,11 @@ export default function defaultSettingsProvider() {
     },
     'timelion:graphite.url': {
       value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
-      description: 'The URL of your graphite host'
+      description: '<em>[experimental]</em> The URL of your graphite host'
     },
     'timelion:quandl.key': {
       value: 'someKeyHere',
-      description: 'Your API key from www.quandl.com'
+      description: '<em>[experimental]</em> Your API key from www.quandl.com'
     },
     'state:storeInSessionStorage': {
       value: false,
