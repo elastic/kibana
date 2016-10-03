@@ -23,12 +23,6 @@ module.exports = function createTestData() {
           'type': 'geo_point'
         }
       ]
-    },
-    pipeline: [{
-      processor_id: 'processor1',
-      type_id: 'set',
-      target_field: 'foo',
-      value: 'bar'
-    }]
+    }
   };
 };
