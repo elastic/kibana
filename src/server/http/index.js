@@ -13,6 +13,7 @@ module.exports = function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = require('./short_url_lookup')(server);
+  kbnServer.mixin(require('./register_hapi_plugins'));
 
   // Create a new connection
   let connectionOptions = {

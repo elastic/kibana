@@ -28,12 +28,11 @@ describe('plugins/elasticsearch', function () {
     });
 
 
-    function testRoute(options) {
+    function testRoute(options, statusCode = 200) {
       if (typeof options.payload === 'object') {
         options.payload = JSON.stringify(options.payload);
       }
 
-      const statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
@@ -61,21 +60,18 @@ describe('plugins/elasticsearch', function () {
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'PUT',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'DELETE',
-      url: '/elasticsearch/.kibana',
-      statusCode: 405
-    });
+      url: '/elasticsearch/.kibana'
+    }, 405);
 
     testRoute({
       method: 'GET',
@@ -85,9 +81,8 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/_bulk',
-      payload: '{}',
-      statusCode: 400
-    });
+      payload: '{}'
+    }, 400);
 
     testRoute({
       method: 'POST',
