@@ -30,9 +30,9 @@ export default function PointSeriesGetSeries(Private) {
         let seriesLabel = y.col.title;
 
         if (aspects.series) {
-          let prefix = point.series ? point.series + ': ' : '';
+          const prefix = point.series ? point.series + ': ' : '';
           seriesId = prefix + seriesId;
-          seriesLabel = prefix + y.col.title;
+          seriesLabel = prefix + seriesLabel;
         }
 
         addToSiri(series, point, seriesId, seriesLabel);
