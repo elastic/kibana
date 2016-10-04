@@ -54,13 +54,13 @@ dataTypesArray.forEach(function (dataType, i) {
       vis = null;
     });
 
-    describe('stackData method', function () {
+    describe('mapData method', function () {
       let stackedData;
       let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.mapData(chart.chartData, chart);
 
           isStacked = stackedData.every(function (arr) {
             return arr.every(function (d) {

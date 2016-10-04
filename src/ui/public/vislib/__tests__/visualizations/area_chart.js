@@ -51,9 +51,11 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should throw a Not Enough Data Error', function () {
         vis.handler.charts.forEach(function (chart) {
-          expect(function () {
-            chart.checkIfEnoughData();
-          }).to.throwError();
+          chart.series.forEach(function (series) {
+            expect(function () {
+              series.checkIfEnoughData();
+            }).to.throwError();
+          });
         });
       });
     });
@@ -67,20 +69,22 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should not throw a Not Enough Data Error', function () {
         vis.handler.charts.forEach(function (chart) {
-          expect(function () {
-            chart.checkIfEnoughData();
-          }).to.not.throwError();
+          chart.series.forEach(function (series) {
+            expect(function () {
+              series.checkIfEnoughData();
+            }).to.not.throwError();
+          });
         });
       });
     });
 
-    describe('stackData method', function () {
+    describe('mapData method', function () {
       let stackedData;
       let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.mapData(chart.chartData, chart);
 
           isStacked = stackedData.every(function (arr) {
             return arr.every(function (d) {
@@ -225,11 +229,11 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
-          const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+          const min = vis.handler.valueAxes[0].axisScale.getYMin();
+          const max = vis.handler.valueAxes[0].axisScale.getYMax();
           const domain = yAxis.getScale().domain();
-
-          expect(domain[0]).to.equal(yVals[0]);
-          expect(domain[1]).to.equal(yVals[1]);
+          expect(domain[0]).to.equal(min);
+          expect(domain[1]).to.equal(max);
         });
       });
     });

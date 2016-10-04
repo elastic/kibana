@@ -12,6 +12,8 @@ import $ from 'jquery';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibVisConfig from 'ui/vislib/lib/vis_config';
+
 const dateHistogramArray = [
   series,
   columns,
@@ -32,6 +34,7 @@ dateHistogramArray.forEach(function (data, i) {
     let persistedState;
     let numberOfCharts;
     let testLayout;
+    let VisConfig;
 
     beforeEach(ngMock.module('kibana'));
 
@@ -40,6 +43,7 @@ dateHistogramArray.forEach(function (data, i) {
         Layout = Private(VislibLibLayoutLayoutProvider);
         vis = Private(FixturesVislibVisFixtureProvider)();
         persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        VisConfig = Private(VislibVisConfig);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
@@ -68,7 +72,11 @@ dateHistogramArray.forEach(function (data, i) {
 
     describe('layout Method', function () {
       beforeEach(function () {
-        testLayout = new Layout(vis.el, vis.data, 'histogram');
+        let visConfig = new VisConfig({
+          el: vis.el,
+          type: 'histogram'
+        }, data, persistedState);
+        testLayout = new Layout(visConfig);
       });
 
       it('should append a div with the correct class name', function () {

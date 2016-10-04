@@ -140,16 +140,16 @@ describe('No global chart settings', function () {
 
     it('should throw an error when all charts contain zeros', function () {
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(allZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(allZeros);
       }).to.throwError();
     });
 
     it('should not throw an error when only some or no charts contain zeros', function () {
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(someZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(someZeros);
       }).to.not.throwError();
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(noZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(noZeros);
       }).to.not.throwError();
     });
   });

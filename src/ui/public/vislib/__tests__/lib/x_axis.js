@@ -7,6 +7,7 @@ import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 import VislibLibAxisProvider from 'ui/vislib/lib/axis';
+import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 describe('Vislib xAxis Class Test Suite', function () {
   let Axis;
@@ -16,6 +17,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   let el;
   let fixture;
   let dataObj;
+  let VisConfig;
   const data = {
     hits: 621,
     label: '',
@@ -83,6 +85,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     Data = Private(VislibLibDataProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
     Axis = Private(VislibLibAxisProvider);
+    VisConfig = Private(VislibVisConfig);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')
@@ -91,20 +94,13 @@ describe('Vislib xAxis Class Test Suite', function () {
     fixture = el.append('div')
       .attr('class', 'x-axis-div');
 
-    dataObj = new Data(data, {}, persistedState);
-    xAxis = new Axis({
+    let visConfig = new VisConfig({
+      el: $('.x-axis-div')[0],
+      type: 'histogram'
+    }, data, persistedState);
+    xAxis = new Axis(visConfig, {
       type: 'category',
-      vis: {
-        el: $('.x-axis-div')[0],
-        _attr: {
-          margin: { top: 0, right: 0, bottom: 0, left: 0 },
-          type: 'histogram'
-        }
-      },
-      data: dataObj,
-      labels: {
-        xAxisFormatter: dataObj.get('xAxisFormatter')
-      }
+      id: 'CategoryAxis-1'
     });
   }));
 

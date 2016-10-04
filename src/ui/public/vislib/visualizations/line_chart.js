@@ -109,7 +109,7 @@ export default function LineChartFactory(Private) {
 
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
-          const margin = self._attr.margin;
+          const margin = self.handler._attr.get('style.margin');
           const width = self._attr.width - margin.left - margin.right;
           const height = self._attr.height - margin.top - margin.bottom;
           const circleRadius = (d._input.z - radii.min) / radiusStep;

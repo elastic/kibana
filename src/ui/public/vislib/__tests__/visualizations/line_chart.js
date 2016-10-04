@@ -175,10 +175,11 @@ describe('Vislib Line Chart', function () {
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
-            const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+            const min = vis.handler.valueAxes[0].axisScale.getYMin();
+            const max = vis.handler.valueAxes[0].axisScale.getYMax();
             const domain = yAxis.getScale().domain();
-            expect(domain[0]).to.equal(yVals[0]);
-            expect(domain[1]).to.equal(yVals[1]);
+            expect(domain[0]).to.equal(min);
+            expect(domain[1]).to.equal(max);
           });
         });
       });

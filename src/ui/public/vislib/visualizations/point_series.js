@@ -141,11 +141,13 @@ export default function PointSeriesFactory(Private) {
           self.addClipPath(svg, width, height);
 
           self.stackedData = {};
+          self.series = [];
           const chartTypes = self.handler.chartTypes;
           _.each(self._attr.series, (seri, i) => {
             const chart = new chartTypes[seri.type || self.handler._attr.get('chart.type')](self.handler, svg, data.series[i], seri);
             chart.events = self.events;
             svg.call(chart.draw());
+            self.series.push(chart);
           });
 
           self.addEvents(svg);
