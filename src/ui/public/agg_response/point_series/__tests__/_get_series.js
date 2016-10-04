@@ -27,7 +27,7 @@ describe('getSeries', function () {
       [1, 2, 3]
     ].map(wrapRows);
 
-    let yCol = { aggConfig: {}, title: 'y' };
+    const yCol = { aggConfig: {}, title: 'y' };
     let chart = {
       aspects: {
         x: { i: 0 },
