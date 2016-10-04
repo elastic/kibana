@@ -38,12 +38,18 @@ describe('plugins/elasticsearch', function () {
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
-            try {
-              expect(res.statusCode).to.be(statusCode);
+            if (res.statusCode === statusCode) {
               done();
-            } catch (e) {
-              done(e);
+              return;
             }
+
+            done(new Error(`
+              Invalid response code from elasticseach:
+                ${res.statusCode} should be ${statusCode}
+
+              Response:
+                ${res.payload}
+            `));
           });
         });
       });
