@@ -23,9 +23,17 @@ export default function PointSeriesGetSeries(Private) {
         let point = partGetPoint(row, y, aspects.z);
         if (!point) return;
 
-        let prefix = point.series ? point.series + ': ' : '';
-        let seriesId = prefix + y.agg.id;
-        let seriesLabel = prefix + y.col.title;
+        // use the point's y-axis as it's series by default,
+        // but augment that with series aspect if it's actually
+        // available
+        let seriesId = y.agg.id;
+        let seriesLabel = y.col.title;
+
+        if (aspects.series) {
+          let prefix = point.series ? point.series + ': ' : '';
+          seriesId = prefix + seriesId;
+          seriesLabel = prefix + y.col.title;
+        }
 
         addToSiri(series, point, seriesId, seriesLabel);
       });

@@ -65,32 +65,8 @@ export default function DataFactory(Private) {
       }
     }
 
-    _updateData() {
-      if (this.data.rows) {
-        _.map(this.data.rows, this._updateDataSeriesLabel, this);
-      } else if (this.data.columns) {
-        _.map(this.data.columns, this._updateDataSeriesLabel, this);
-      } else {
-        this._updateDataSeriesLabel(this.data);
-      }
-    };
-
-    _updateDataSeriesLabel(eachData) {
-      if (eachData.series) {
-        eachData.series[0].label = this.get('yAxisLabel');
-      }
-    };
-
     _getLabels(data) {
-      if (this.type === 'series') {
-        const noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
-        if (noLabel) {
-          this._updateData();
-          return [(this.get('yAxisLabel'))];
-        }
-        return getLabels(data);
-      }
-      return this.pieNames();
+      return this.type === 'series' ? getLabels(data) : this.pieNames();
     };
 
     /**
