@@ -162,10 +162,10 @@ export default function AxisScaleFactory(Private) {
       return [1, max];
     };
 
-    getD3Scale() {
+    getD3Scale(scaleType) {
       // todo: why do we need this renaming ?
-      if (this.scaleType === 'square root') this.scaleType = 'sqrt'; // Rename 'square root' to 'sqrt'
-      this.scaleType = this.scaleType || 'linear';
+      if (scaleType === 'square root') scaleType = 'sqrt'; // Rename 'square root' to 'sqrt'
+      this.scaleType = scaleType || 'linear';
 
       if (this.config.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
       if (this.config.isOrdinal()) return d3.scale.ordinal();
