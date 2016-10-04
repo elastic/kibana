@@ -14,20 +14,26 @@ class Try {
     var start = Date.now();
     var retryDelay = 502;
     var lastTry = 0;
-    var tempMessage;
+    var finalMessage;
+    var prevMessage;
 
     function attempt() {
       lastTry = Date.now();
 
       if (lastTry - start > timeout) {
-        throw new Error('tryForTime timeout: ' + tempMessage);
+        throw new Error('tryForTime timeout: ' + finalMessage);
       }
 
       return bluebird
       .try(block)
       .catch(function tryForTimeCatch(err) {
-        Log.debug('tryForTime failure: ' + err.message);
-        tempMessage = err.stack || err.message;
+        if (err.message === prevMessage) {
+          Log.debug('--- tryForTime failed again with the same message  ...');
+        } else {
+          prevMessage = err.message;
+          Log.debug('--- tryForTime failure: ' + prevMessage);
+        }
+        finalMessage = err.stack || err.message;
         return bluebird.delay(retryDelay).then(attempt);
       });
     }
