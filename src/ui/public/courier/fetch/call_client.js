@@ -94,12 +94,7 @@ export default function CourierFetchCallClient(Private, Promise, es, esShardTime
         throw ABORTED;
       }
 
-      return (esPromise = es[strategy.clientMethod]({
-        timeout: esShardTimeout,
-        ignore_unavailable: true,
-        preference: sessionId,
-        body: body
-      }));
+      return (esPromise = es[strategy.clientMethod]({ body }));
     })
     .then(function (clientResp) {
       return strategy.getResponses(clientResp);
