@@ -4,7 +4,7 @@ import IsRequestProvider from './is_request';
 import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
 import ReqStatusProvider from './req_status';
 
-export default function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
+export default function CourierFetchCallClient(Private, Promise, es) {
 
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
