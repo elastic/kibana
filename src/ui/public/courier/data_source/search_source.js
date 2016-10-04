@@ -1,4 +1,4 @@
-import _, { defaults } from 'lodash';
+import _ from 'lodash';
 
 import NormalizeSortRequestProvider from './_normalize_sort_request';
 import rootSearchSource from './_root_search_source';
