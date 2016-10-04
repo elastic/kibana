@@ -27,10 +27,11 @@ describe('getSeries', function () {
       [1, 2, 3]
     ].map(wrapRows);
 
+    let yCol = { aggConfig: {}, title: 'y' };
     let chart = {
       aspects: {
         x: { i: 0 },
-        y: { i: 1 },
+        y: { i: 1, col: yCol },
         z: { i: 2 }
       }
     };
@@ -44,7 +45,7 @@ describe('getSeries', function () {
     let siri = series[0];
     expect(siri)
       .to.be.an('object')
-      .and.have.property('label', '')
+      .and.have.property('label', yCol.title)
       .and.have.property('values');
 
     expect(siri.values)
