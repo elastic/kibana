@@ -7,25 +7,16 @@ import SearchRequestProvider from '../fetch/request/search';
 import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
 
-export default function SearchSourceFactory(Promise, Private, config, esShardTimeout) {
+export default function SearchSourceFactory(Promise, Private, config) {
   let SourceAbstract = Private(AbstractDataSourceProvider);
   let SearchRequest = Private(SearchRequestProvider);
   let SegmentedRequest = Private(SegmentedRequestProvider);
   let searchStrategy = Private(SearchStrategyProvider);
   let normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
-  function includeDefaults(initialState) {
-    return defaults(
-      initialState || {},
-      {
-        timeout: esShardTimeout
-      }
-    );
-  }
-
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
-    SearchSource.Super.call(this, includeDefaults(initialState), searchStrategy);
+    SearchSource.Super.call(this, initialState, searchStrategy);
   }
 
   /*****
@@ -47,8 +38,7 @@ export default function SearchSourceFactory(Promise, Private, config, esShardTim
     'aggs',
     'from',
     'size',
-    'source',
-    'timeout'
+    'source'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
