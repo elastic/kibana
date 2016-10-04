@@ -20,14 +20,14 @@ class Try {
       lastTry = Date.now();
 
       if (lastTry - start > timeout) {
-        throw new Error('timeout ' + tempMessage);
+        throw new Error('tryForTime timeout: ' + tempMessage);
       }
 
       return bluebird
       .try(block)
       .catch(function tryForTimeCatch(err) {
         Log.debug('tryForTime failure: ' + err.message);
-        tempMessage = err.message;
+        tempMessage = err.stack || err.message;
         return bluebird.delay(retryDelay).then(attempt);
       });
     }
