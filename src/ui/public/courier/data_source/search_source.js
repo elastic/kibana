@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { defaults } from 'lodash';
 
 import NormalizeSortRequestProvider from './_normalize_sort_request';
 import rootSearchSource from './_root_search_source';
@@ -7,16 +7,25 @@ import SearchRequestProvider from '../fetch/request/search';
 import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
 
-export default function SearchSourceFactory(Promise, Private, config) {
+export default function SearchSourceFactory(Promise, Private, config, esShardTimeout) {
   let SourceAbstract = Private(AbstractDataSourceProvider);
   let SearchRequest = Private(SearchRequestProvider);
   let SegmentedRequest = Private(SegmentedRequestProvider);
   let searchStrategy = Private(SearchStrategyProvider);
   let normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
+  function includeDefaults(initialState) {
+    return defaults(
+      initialState || {},
+      {
+        timeout: esShardTimeout
+      }
+    );
+  }
+
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
-    SearchSource.Super.call(this, initialState, searchStrategy);
+    SearchSource.Super.call(this, includeDefaults(initialState), searchStrategy);
   }
 
   /*****
@@ -38,7 +47,8 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'aggs',
     'from',
     'size',
-    'source'
+    'source',
+    'timeout'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
