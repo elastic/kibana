@@ -37,8 +37,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('checkIfEnoughData method throws an error when not enough data', function () {

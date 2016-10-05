@@ -105,8 +105,8 @@ describe('No global chart settings', function () {
   }));
 
   afterEach(function () {
-    chart1 = null;
-    chart2 = null;
+    chart1.destroy();
+    chart2.destroy();
   });
 
   it('should render chart titles for all charts', function () {
@@ -187,8 +187,7 @@ aggArray.forEach(function (dataAgg, i) {
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('addPathEvents method', function () {
