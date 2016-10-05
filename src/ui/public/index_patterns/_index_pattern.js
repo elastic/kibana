@@ -31,10 +31,12 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
   const docSources = new WeakMap();
   const getRoutes = () => ({
     edit: '/management/kibana/indices/{{id}}',
-    addField: '/management/kibana/indices/{{id}}/create-field',
+    addMetaField: '/management/kibana/indices/{{id}}/create-field/metaField',
+    addScriptedField: '/management/kibana/indices/{{id}}/create-field/scriptedField',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
     scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
     sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+    metaFields: '/management/kibana/indices/{{id}}?_a=(tab:metaFields)'
   });
 
   const mapping = mappingSetup.expandShorthand({
@@ -150,7 +152,9 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
-      const all = fields.concat(scripted);
+      const fieldsWithScripted = fields.concat(scripted);
+      const meta = indexPattern.getMetaFields();
+      const all = fieldsWithScripted.concat(meta);
       initFields(indexPattern, all);
     });
   }
@@ -235,6 +239,32 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       this.save();
     }
 
+    addMetaField(name, type = 'string') {
+      const metaFields = this.getMetaFields();
+      const names = _.pluck(metaFields, 'name');
+
+      if (_.contains(names, name)) {
+        throw new errors.DuplicateField(name);
+      }
+
+      this.fields.push({
+        name: name,
+        type: type,
+        meta: true
+      });
+
+      this.save();
+    }
+
+    removeMetaField(name) {
+      const fieldIndex = _.findIndex(this.fields, {
+        name: name,
+        met: true
+      });
+      this.fields.splice(fieldIndex, 1);
+      this.save();
+    }
+
     popularizeField(fieldName, unit = 1) {
       const field = _.get(this, ['fields', 'byName', fieldName]);
       if (!field) {
@@ -254,6 +284,14 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
 
     getScriptedFields() {
       return _.where(this.fields, { scripted: true });
+    }
+
+    getNonMetaFields() {
+      return _.where(this.fields, { meta: false });
+    }
+
+    getMetaFields() {
+      return _.where(this.fields, { meta: true });
     }
 
     getInterval() {

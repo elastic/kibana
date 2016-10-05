@@ -4,6 +4,7 @@ import './indexed_fields_table';
 import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
+import './meta_fields_table';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';

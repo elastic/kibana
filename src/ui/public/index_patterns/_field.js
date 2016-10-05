@@ -41,8 +41,9 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
 
     const indexed = !!spec.indexed;
     const scripted = !!spec.scripted;
-    const searchable = !!spec.searchable || scripted;
-    const aggregatable = !!spec.aggregatable || scripted;
+    const meta = !!spec.meta;
+    const searchable = !!spec.searchable || scripted || meta;
+    const aggregatable = !!spec.aggregatable || scripted || meta;
     const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
     const filterable = spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
     const visualizable = aggregatable;
@@ -78,6 +79,9 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
 
     // conflict info
     obj.writ('conflictDescriptions');
+
+    //  meta objs
+    obj.fact('meta', meta);
 
     return obj.create();
   }

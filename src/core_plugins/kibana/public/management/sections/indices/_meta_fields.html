@@ -1,0 +1,20 @@
+<h3>Meta fields</h3>
+<p>These meta fields exist outside of _source to merge into index pattern when displaying it</p>
+
+<header>
+  <a
+    ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addMetaField') }}"
+    class="btn btn-info"
+    aria-label="Add Meta Field">
+    <i aria-hidden="true" class="fa fa-plus"></i>
+    Add Meta Field
+  </a>
+</header>
+
+<paginated-table
+  columns="columns"
+  rows="rows"
+  per-page="perPage">
+</paginated-table>
+
+<p class="text-center" ng-if="rows.length === 0">No matching meta fields found.</p>
