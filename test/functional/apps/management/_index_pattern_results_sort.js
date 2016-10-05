@@ -37,7 +37,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
       bdd.before(function () {
         return PageObjects.settings.navigateTo()
         .then(function () {
-          return PageObjects.settings.clickExistingData();
+          return PageObjects.settings.clickKibanaIndicies();
         });
       });
 
