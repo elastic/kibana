@@ -41,9 +41,8 @@ dataArray.forEach(function (data, i) {
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      $(secondVis.el).remove();
-      vis = null;
+      vis.destroy();
+      secondVis.destroy();
     });
 
     describe('render Method', function () {

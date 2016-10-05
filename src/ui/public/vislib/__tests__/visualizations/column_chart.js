@@ -49,8 +49,7 @@ dataTypesArray.forEach(function (dataType, i) {
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('stackData method', function () {

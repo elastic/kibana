@@ -47,8 +47,7 @@ describe('Vislib Line Chart', function () {
       }));
 
       afterEach(function () {
-        $(vis.el).remove();
-        vis = null;
+        vis.destroy();
       });
 
       describe('addCircleEvents method', function () {
