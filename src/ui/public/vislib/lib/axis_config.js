@@ -54,9 +54,9 @@ export default function AxisConfigFactory() {
   };
 
   class AxisConfig {
-    constructor(chartConfig, axisConfig) {
-      const typeDefaults = axisConfig.type === 'category' ? categoryDefaults : {};
-      this._values = _.defaultsDeep({}, axisConfig, typeDefaults, defaults);
+    constructor(chartConfig, axisConfigArgs) {
+      const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : {};
+      this._values = _.defaultsDeep({}, axisConfigArgs, typeDefaults, defaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');
@@ -68,9 +68,9 @@ export default function AxisConfigFactory() {
       }
 
       if (this._values.type === 'value') {
-        const isWiggleOrSilluete = chartConfig.mode === 'wiggle' || chartConfig.mode === 'silluete';
+        const isWiggleOrSilluete = chartConfig.get('mode') === 'wiggle' || chartConfig.get('mode') === 'silluete';
         // if show was not explicitly set and wiggle or silluete option was checked
-        if (!axisConfig.show && isWiggleOrSilluete) {
+        if (!axisConfigArgs.show && isWiggleOrSilluete) {
           this._values.show = false;
         }
 
@@ -87,8 +87,8 @@ export default function AxisConfigFactory() {
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       // unless explicitly overriden by user
       if (this.isHorizontal() && this.isOrdinal()) {
-        this._values.labels.filter = _.get(axisConfig, 'labels.filter', false);
-        this._values.labels.rotate = _.get(axisConfig, 'labels.rotate', 70);
+        this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
+        this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 70);
       }
     };
 

@@ -3,8 +3,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 export default function AxisLabelsFactory(Private) {
   class AxisLabels {
-    constructor(config, scale) {
-      this.config = config;
+    constructor(axisConfig, scale) {
+      this.axisConfig = axisConfig;
       this.axisScale = scale;
     }
 
@@ -13,7 +13,7 @@ export default function AxisLabelsFactory(Private) {
     };
 
     rotateAxisLabels() {
-      const config = this.config;
+      const config = this.axisConfig;
       return function (selection) {
         const text = selection.selectAll('.tick text');
 
@@ -69,7 +69,7 @@ export default function AxisLabelsFactory(Private) {
 
     truncateLabels() {
       const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
       return function (selection) {
         if (!config.get('labels.truncate')) return;
 
@@ -83,7 +83,7 @@ export default function AxisLabelsFactory(Private) {
 
     filterAxisLabels() {
       const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
       let startPos = 0;
       let padding = 1.1;
 
@@ -111,7 +111,7 @@ export default function AxisLabelsFactory(Private) {
 
     draw() {
       const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
 
       return function (selection) {
         selection.each(function () {

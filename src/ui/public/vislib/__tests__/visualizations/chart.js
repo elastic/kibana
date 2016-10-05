@@ -95,7 +95,6 @@ describe('Vislib _chart Test Suite', function () {
 
     config = {
       type: 'histogram',
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
       stack: d3.layout.stack(),
