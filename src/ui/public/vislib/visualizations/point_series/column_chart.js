@@ -36,7 +36,7 @@ export default function ColumnChartFactory(Private) {
      * @param layers {Array} Chart data array
      * @returns {D3.UpdateSelection} SVG with rect added
      */
-    addBars(svg, layers) {
+    addBars(svg, data) {
       const self = this;
       const color = this.handler.data.getColorFunc();
       const tooltip = this.baseChart.tooltip;
@@ -47,19 +47,21 @@ export default function ColumnChartFactory(Private) {
         return 'series ' + i;
       });
 
+      const layers = data.values;
+
       const bars = layer.selectAll('rect')
-        .data(layers);
+      .data(layers);
 
       bars
-        .exit()
-        .remove();
+      .exit()
+      .remove();
 
       bars
       .enter()
       .append('rect')
       .call(this.baseChart._addIdentifier)
       .attr('fill', function (d) {
-        return color(d.label);
+        return color(d.label || data.label);
       });
 
       self.updateBars(bars);
@@ -215,18 +217,14 @@ export default function ColumnChartFactory(Private) {
 
       return function (selection) {
         selection.each(function () {
-          const data = self.handler.pointSeries.mapData(self.chartData, self);
           const svg = self.chartEl.append('g');
-          svg.data([{
-            label: self.chartData.label,
-            values: data
-          }]);
+          svg.data([self.chartData]);
 
-          const bars = self.addBars(svg, data);
+          const bars = self.addBars(svg, self.chartData);
           self.addCircleEvents(bars);
 
           self.events.emit('rendered', {
-            chart: data
+            chart: self.chartData
           });
 
           return svg;
