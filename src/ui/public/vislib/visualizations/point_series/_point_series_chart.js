@@ -11,7 +11,7 @@ export default function PointSeriesChartProvider(Private) {
       this.chartData = seriesData;
       this.seriesConfig = seriesConfig;
 
-      this.validateDataCompliesWithScalingMethod(this.chartData);
+      //this.validateDataCompliesWithScalingMethod(this.chartData);
     }
 
     validateDataCompliesWithScalingMethod(data) {

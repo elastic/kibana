@@ -35,6 +35,39 @@ export default function PointSeriesFactory(Private) {
       this.handler.pointSeries = this;
     }
 
+    shouldBeStacked(seriesConfig) {
+      const isHistogram = (seriesConfig.type === 'histogram');
+      const isArea = (seriesConfig.type === 'area');
+      const isOverlapping = (seriesConfig.mode === 'overlap');
+      const grouped = (seriesConfig.mode === 'grouped');
+
+      const stackedHisto = isHistogram && !grouped;
+      const stackedArea = isArea && !isOverlapping;
+
+      return stackedHisto || stackedArea;
+    };
+
+    getStackedSeries(axis, series, first = false) {
+      const matchingSeries = [];
+      this.chartConfig.series.forEach((seriArgs, i) => {
+        const matchingAxis = seriArgs.valueAxis === axis.axisConfig.get('id') || (!seriArgs.valueAxis && first);
+        if (matchingAxis && this.shouldBeStacked(seriArgs)) {
+          matchingSeries.push(series[i]);
+        }
+      });
+      return matchingSeries;
+    };
+
+    stackData(data) {
+      const stackedData = {};
+      this.handler.valueAxes.forEach((axis, i) => {
+        const id = axis.axisConfig.get('id');
+        stackedData[id] = this.getStackedSeries(axis, data.series, i === 0);
+        axis.stack(_.map(stackedData[id], 'values'));
+      });
+      return stackedData;
+    };
+
     mapData(data, chart) {
       const seriesConfig = chart.seriesConfig;
       // todo: should stack or not should be defined per series
@@ -211,7 +244,7 @@ export default function PointSeriesFactory(Private) {
 
           self.addClipPath(svg, width, height);
 
-          self.stackedData = {};
+          self.stackData(data);
           self.series = [];
           _.each(self.chartConfig.series, (seriArgs, i) => {
             const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')];

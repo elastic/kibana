@@ -21,50 +21,14 @@ export default function DataFactory(Private) {
    * @param attr {Object|*} Visualization options
    */
   class Data {
-    constructor(data, visConfigArgs, uiState) {
+    constructor(data, uiState) {
       this.uiState = uiState;
-
-      const self = this;
-      let offset;
-
-      if (visConfigArgs.mode === 'stacked') {
-        offset = 'zero';
-      } else if (visConfigArgs.mode === 'percentage') {
-        offset = 'expand';
-      } else if (visConfigArgs.mode === 'grouped') {
-        offset = 'group';
-      } else {
-        offset = visConfigArgs.mode;
-      }
-
       this.data = data;
       this.type = this.getDataType();
 
       this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
-
-      this._attr = _.defaults({}, {
-        type: visConfigArgs.type,
-        mode: visConfigArgs.mode,
-        stack: d3.layout.stack()
-        .x(function (d) {
-          return d.x;
-        })
-        .y(function (d) {
-          if (offset === 'expand') {
-            return Math.abs(d.y);
-          }
-          return d.y;
-        })
-        .offset(offset || 'zero')
-      });
-
-      if (visConfigArgs.mode === 'stacked' && visConfigArgs.type === 'histogram') {
-        this._attr.stack.out(function (d, y0, y) {
-          return self._stackNegAndPosVals(d, y0, y);
-        });
-      }
     }
 
     _updateData() {
@@ -93,124 +57,6 @@ export default function DataFactory(Private) {
         return getLabels(data);
       }
       return this.pieNames();
-    };
-
-    /**
-     * Returns true for positive numbers
-     */
-    _isPositive(num) {
-      return num >= 0;
-    };
-
-    /**
-     * Returns true for negative numbers
-     */
-    _isNegative(num) {
-      return num < 0;
-    };
-
-    /**
-     * Adds two input values
-     */
-    _addVals(a, b) {
-      return a + b;
-    };
-
-    /**
-     * Returns the results of the addition of numbers in a filtered array.
-     */
-    _sumYs(arr, callback) {
-      const filteredArray = arr.filter(callback);
-
-      return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
-    };
-
-    /**
-     * Calculates the d.y0 value for stacked data in D3.
-     */
-    _calcYZero(y, arr) {
-      if (y >= 0) return this._sumYs(arr, this._isPositive);
-      return this._sumYs(arr, this._isNegative);
-    };
-
-    /**
-     *
-     */
-    _getCounts(i, j) {
-      const data = this.chartData();
-      const dataLengths = {};
-
-      dataLengths.charts = data.length;
-      dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
-      dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
-
-      return dataLengths;
-    };
-
-    /**
-     *
-     */
-    _createCache() {
-      const cache = {
-        index: {
-          chart: 0,
-          stack: 0,
-          value: 0
-        },
-        yValsArr: []
-      };
-
-      cache.count = this._getCounts(cache.index.chart, cache.index.stack);
-
-      return cache;
-    };
-
-    /**
-     * Stacking function passed to the D3 Stack Layout `.out` API.
-     * See: https://github.com/mbostock/d3/wiki/Stack-Layout
-     * It is responsible for calculating the correct d.y0 value for
-     * mixed datasets containing both positive and negative values.
-     */
-    _stackNegAndPosVals(d, y0, y) {
-      const data = this.chartData();
-
-      // Storing counters and data characteristics needed to stack values properly
-      if (!this._cache) {
-        this._cache = this._createCache();
-      }
-
-      d.y0 = this._calcYZero(y, this._cache.yValsArr);
-      ++this._cache.index.stack;
-
-
-      // last stack, or last value, reset the stack count and y value array
-      const lastStack = (this._cache.index.stack >= this._cache.count.stacks);
-      if (lastStack) {
-        this._cache.index.stack = 0;
-        ++this._cache.index.value;
-        this._cache.yValsArr = [];
-        // still building the stack collection, push v value to array
-      } else if (y !== 0) {
-        this._cache.yValsArr.push(y);
-      }
-
-      // last value, prepare for the next chart, if one exists
-      const lastValue = (this._cache.index.value >= this._cache.count.values);
-      if (lastValue) {
-        this._cache.index.value = 0;
-        ++this._cache.index.chart;
-
-        // no more charts, reset the queue and finish
-        if (this._cache.index.chart >= this._cache.count.charts) {
-          this._cache = this._createCache();
-          return;
-        }
-
-        // get stack and value count for next chart
-        const chartSeries = data[this._cache.index.chart].series;
-        this._cache.count.stacks = chartSeries.length;
-        this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
-      }
     };
 
     getDataType() {
@@ -341,25 +187,6 @@ export default function DataFactory(Private) {
         .pluck('values')
         .flattenDeep()
         .value();
-    };
-
-    /**
-     * Determines whether histogram charts should be stacked
-     * TODO: need to make this more generic
-     *
-     * @method shouldBeStacked
-     * @returns {boolean}
-     */
-    shouldBeStacked() {
-      const isHistogram = (this._attr.type === 'histogram');
-      const isArea = (this._attr.type === 'area');
-      const isOverlapping = (this._attr.mode === 'overlap');
-      const grouped = (this._attr.mode === 'grouped');
-
-      const stackedHisto = isHistogram && !grouped;
-      const stackedArea = isArea && !isOverlapping;
-
-      return stackedHisto || stackedArea;
     };
 
     /**
