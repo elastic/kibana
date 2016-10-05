@@ -35,12 +35,22 @@ describe('Histogram Agg', function () {
     describe('interval', function () {
       // reads aggConfig.params.interval, writes to dsl.interval
 
-      it('accepts a number', function () {
+      it('accepts a whole number', function () {
         let output = paramWriter.write({ interval: 100 });
         expect(output.params).to.have.property('interval', 100);
       });
 
-      it('accepts a string', function () {
+      it('accepts a decimal number', function () {
+        let output = paramWriter.write({ interval: 0.1 });
+        expect(output.params).to.have.property('interval', 0.1);
+      });
+
+      it('accepts a decimal number string', function () {
+        let output = paramWriter.write({ interval: '0.1' });
+        expect(output.params).to.have.property('interval', 0.1);
+      });
+
+      it('accepts a whole number string', function () {
         let output = paramWriter.write({ interval: '10' });
         expect(output.params).to.have.property('interval', 10);
       });
