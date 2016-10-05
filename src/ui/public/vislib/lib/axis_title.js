@@ -1,21 +1,19 @@
 import d3 from 'd3';
 import $ from 'jquery';
-import _ from 'lodash';
 export default function AxisTitleFactory(Private) {
 
   class AxisTitle {
-    constructor(config) {
-      this.config = config;
-      this.elSelector = this.config.get('title.elSelector').replace('{pos}', this.config.get('position'));
+    constructor(axisConfig) {
+      this.axisConfig = axisConfig;
+      this.elSelector = this.axisConfig.get('title.elSelector').replace('{pos}', this.axisConfig.get('position'));
     }
 
     render() {
-      d3.select(this.config.get('rootEl')).selectAll(this.elSelector).call(this.draw());
+      d3.select(this.axisConfig.get('rootEl')).selectAll(this.elSelector).call(this.draw());
     };
 
     draw() {
-      const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
 
       return function (selection) {
         selection.each(function () {

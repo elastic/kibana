@@ -2,8 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
-import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
 export default function AreaChartFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
@@ -33,14 +32,14 @@ export default function AreaChartFactory(Private) {
     constructor(handler, chartEl, chartData, chartConfig) {
       super(handler, chartEl, chartData);
 
-      this.isOverlapping = (handler._attr.mode === 'overlap');
+      this.isOverlapping = (handler.visConfig.get('mode') === 'overlap');
 
       if (this.isOverlapping) {
 
         // todo ... default opacity handler should check what the opacity is and then move back to it on mouseout
         // Default opacity should return to 0.6 on mouseout
         const defaultOpacity = 0.6;
-        handler._attr.defaultOpacity = defaultOpacity;
+        handler.visConfig.set('defaultOpacity', defaultOpacity);
         handler.highlight = function (element) {
           const label = this.getAttribute('data-label');
           if (!label) return;

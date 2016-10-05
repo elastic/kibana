@@ -5,7 +5,7 @@ import Binder from 'ui/binder';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
-import VislibAxis from 'ui/vislib/lib/axis';
+import VislibAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
 
 export default function HandlerBaseClass(Private) {
@@ -13,7 +13,7 @@ export default function HandlerBaseClass(Private) {
   const Layout = Private(VislibLibLayoutLayoutProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
-  const Axis = Private(VislibAxis);
+  const Axis = Private(VislibAxisProvider);
 
   /**
    * Handles building all the components of the visualization
@@ -25,22 +25,21 @@ export default function HandlerBaseClass(Private) {
    * create the visualization
    */
   class Handler {
-    constructor(vis, config) {
-      this.el = config.get('el');
-      this.chartTypes = chartTypes;
-      this.ChartClass = chartTypes[config.get('type')];
+    constructor(vis, visConfig) {
+      this.el = visConfig.get('el');
+      this.ChartClass = chartTypes[visConfig.get('type')];
       this.charts = [];
 
       this.vis = vis;
-      this._attr = config;
-      this.data = config.data;
+      this.visConfig = visConfig;
+      this.data = visConfig.data;
 
-      this.categoryAxes = _.map(config.get('categoryAxes'), axis => new Axis(config, axis));
-      this.valueAxes = _.map(config.get('valueAxes'), axis => new Axis(config, axis));
-      this.chartTitle = new ChartTitle(config);
-      this.alerts = new Alerts(this, config.get('alerts'));
+      this.categoryAxes = visConfig.get('categoryAxes').map(axis => new Axis(visConfig, axis));
+      this.valueAxes = visConfig.get('valueAxes').map(axis => new Axis(visConfig, axis));
+      this.chartTitle = new ChartTitle(visConfig);
+      this.alerts = new Alerts(this, visConfig.get('alerts'));
 
-      this.layout = new Layout(config);
+      this.layout = new Layout(visConfig);
       this.binder = new Binder();
       this.renderArray = _.filter([
         this.layout,

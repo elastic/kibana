@@ -2,14 +2,15 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
+import VislibVisualizationsSeriTypesProvider from 'ui/vislib/visualizations/point_series/seri_types';
 
 export default function PointSeriesFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
-
+  const seriTypes = Private(VislibVisualizationsSeriTypesProvider);
   /**
    * Line Chart Visualization
    *
@@ -27,7 +28,7 @@ export default function PointSeriesFactory(Private) {
       this.handler = handler;
       this.chartData = chartData;
       this.chartEl = chartEl;
-      this._attr = handler._attr.get('chart');
+      this._attr = handler.visConfig.get('chart');
       this.handler.pointSeries = this;
     }
 
@@ -101,7 +102,7 @@ export default function PointSeriesFactory(Private) {
       // todo: do we need to handle width and height here ?
       let self = this;
       let $elem = $(this.chartEl);
-      let margin = this.handler._attr.get('style.margin');
+      let margin = this.handler.visConfig.get('style.margin');
       let elWidth = this._attr.width = $elem.width();
       let elHeight = this._attr.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
@@ -142,9 +143,8 @@ export default function PointSeriesFactory(Private) {
 
           self.stackedData = {};
           self.series = [];
-          const chartTypes = self.handler.chartTypes;
           _.each(self._attr.series, (seri, i) => {
-            const chart = new chartTypes[seri.type || self.handler._attr.get('chart.type')](self.handler, svg, data.series[i], seri);
+            const chart = new seriTypes[seri.type || self.handler.visConfig.get('chart.type')](self.handler, svg, data.series[i], seri);
             chart.events = self.events;
             svg.call(chart.draw());
             self.series.push(chart);
