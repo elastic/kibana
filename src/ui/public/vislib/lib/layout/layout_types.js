@@ -13,9 +13,6 @@ export default function LayoutTypeFactory(Private) {
    * @return {Function} Returns an Object of HTML layouts for each visualization class
    */
   return {
-    histogram: Private(VislibLibLayoutTypesColumnLayoutProvider),
-    line: Private(VislibLibLayoutTypesColumnLayoutProvider),
-    area: Private(VislibLibLayoutTypesColumnLayoutProvider),
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
     tile_map: Private(VislibLibLayoutTypesMapLayoutProvider),
     point_series: Private(VislibLibLayoutTypesColumnLayoutProvider)

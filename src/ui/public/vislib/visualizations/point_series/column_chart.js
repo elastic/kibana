@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
 export default function ColumnChartFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
@@ -97,17 +97,16 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     addStackedBars(bars) {
-      const data = this.chartData;
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
       const height = yScale.range()[0];
       const yMin = yScale.domain()[0];
 
       let barWidth;
-      if (this.getCategoryAxis().config.isTimeDomain()) {
-        const ordered = this.handler.data.get('ordered');
-        const start = ordered.min;
-        const end = moment(ordered.min).add(ordered.interval).valueOf();
+      if (this.getCategoryAxis().axisConfig.isTimeDomain()) {
+        const { min, interval } = this.handler.data.get('ordered');
+        const start = min;
+        const end = moment(min).add(interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
@@ -158,49 +157,49 @@ export default function ColumnChartFactory(Private) {
     addGroupedBars(bars) {
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
-      const data = this.chartData;
-      const n = this.getStackedCount();
-      const j = this.getStackedNum(this.chartData);
+      const n = this.getGroupedCount();
+      const j = this.getGroupedNum(this.chartData);
       const height = yScale.range()[0];
       const groupSpacingPercentage = 0.15;
-      const isTimeScale = (data.ordered && data.ordered.date);
+      const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const minWidth = 1;
       let barWidth;
 
+      if (isTimeScale) {
+        const {min, interval} = this.handler.data.get('ordered');
+        const groupWidth = xScale(min + interval) - xScale(min);
+        const groupSpacing = groupWidth * groupSpacingPercentage;
+
+        barWidth = (groupWidth - groupSpacing) / n;
+      }
       // update
       bars
-        .attr('x', function (d, i) {
-          if (isTimeScale) {
-            const groupWidth = xScale(data.ordered.min + data.ordered.interval) -
-              xScale(data.ordered.min);
-            const groupSpacing = groupWidth * groupSpacingPercentage;
+      .attr('x', function (d) {
+        if (isTimeScale) {
+          return xScale(d.x) + barWidth * j;
+        }
+        return xScale(d.x) + xScale.rangeBand() / n * j;
+      })
+      .attr('width', function () {
+        if (barWidth < minWidth) {
+          throw new errors.ContainerTooSmall();
+        }
 
-            barWidth = (groupWidth - groupSpacing) / n;
+        if (isTimeScale) {
+          return barWidth;
+        }
+        return xScale.rangeBand() / n;
+      })
+      .attr('y', function (d) {
+        if (d.y < 0) {
+          return yScale(0);
+        }
 
-            return xScale(d.x) + barWidth * j;
-          }
-          return xScale(d.x) + xScale.rangeBand() / n * j;
-        })
-        .attr('width', function () {
-          if (barWidth < minWidth) {
-            throw new errors.ContainerTooSmall();
-          }
-
-          if (isTimeScale) {
-            return barWidth;
-          }
-          return xScale.rangeBand() / n;
-        })
-        .attr('y', function (d) {
-          if (d.y < 0) {
-            return yScale(0);
-          }
-
-          return yScale(d.y);
-        })
-        .attr('height', function (d) {
-          return Math.abs(yScale(0) - yScale(d.y));
-        });
+        return yScale(d.y);
+      })
+      .attr('height', function (d) {
+        return Math.abs(yScale(0) - yScale(d.y));
+      });
 
       return bars;
     };

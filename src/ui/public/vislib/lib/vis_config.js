@@ -14,24 +14,25 @@ export default function VisConfigFactory(Private) {
     },
     alerts: {},
     categoryAxes: [],
-    valueAxes: []
+    valueAxes: [],
+    mode: 'normal'
   };
 
 
   class VisConfig {
-    constructor(config, data, uiState) {
-      if (config.zeroFill || ['area', 'column'].indexOf(config.type) !== -1) {
-        this.data = new Data(injectZeros(data), config, uiState);
+    constructor(configArgs, data, uiState) {
+      if (configArgs.zeroFill || ['area', 'column'].includes(configArgs.type)) {
+        this.data = new Data(injectZeros(data), configArgs, uiState);
       } else {
-        this.data = new Data(data, config, uiState);
+        this.data = new Data(data, configArgs, uiState);
       }
 
-      const typeDefaults = visTypes[config.type](config, this.data);
+      const typeDefaults = visTypes[configArgs.type](configArgs, this.data);
       this._values = _.defaultsDeep({}, typeDefaults, defaults);
     };
 
-    get(property, defaults = null) {
-      if (_.has(this._values, property)) {
+    get(property, defaults) {
+      if (_.has(this._values, property) || typeof defaults !== 'undefined') {
         return _.get(this._values, property, defaults);
       } else {
         throw new Error(`Accessing invalid config property: ${property}`);

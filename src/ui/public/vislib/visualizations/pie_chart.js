@@ -32,7 +32,7 @@ export default function PieChartFactory(Private) {
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
 
-      this._attr = _.defaults(handler._attr.chart || {}, defaults);
+      this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
 
 

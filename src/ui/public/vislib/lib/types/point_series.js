@@ -59,7 +59,7 @@ export default function ColumnHandler(Private) {
       }
 
       if (!config.chart) {
-        const series = (data.data.rows || data.data.columns || [data.data])[0].series;
+        const series = data.get('series');
         config.chart = {
           type: 'point_series',
           series: _.map(series, (seri) => {

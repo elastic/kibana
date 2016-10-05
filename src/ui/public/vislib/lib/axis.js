@@ -18,28 +18,27 @@ export default function AxisFactory(Private) {
     constructor(visConfig, axisConfigArgs) {
       super();
       this.visConfig = visConfig;
-      this.data = visConfig.data;
 
-      this.config = new AxisConfig(visConfig, axisConfigArgs);
-      if (this.config.get('type') === 'category') {
-        this.values = this.data.xValues();
-        this.ordered = this.data.get('ordered');
+      this.axisConfig = new AxisConfig(this.visConfig, axisConfigArgs);
+      if (this.axisConfig.get('type') === 'category') {
+        this.values = this.visConfig.data.xValues();
+        this.ordered = this.visConfig.data.get('ordered');
       }
-      this.axisScale = new AxisScale(this.config, this.data, visConfig);
-      this.axisTitle = new AxisTitle(this.config);
-      this.axisLabels = new AxisLabels(this.config, this.axisScale);
+      this.axisScale = new AxisScale(this.axisConfig, visConfig);
+      this.axisTitle = new AxisTitle(this.axisConfig);
+      this.axisLabels = new AxisLabels(this.axisConfig, this.axisScale);
     }
 
     render() {
-      const elSelector = this.config.get('elSelector');
-      const rootEl = this.config.get('rootEl');
+      const elSelector = this.axisConfig.get('elSelector');
+      const rootEl = this.axisConfig.get('rootEl');
       d3.select(rootEl).selectAll(elSelector).call(this.draw());
     }
 
     getAxis(length) {
       const scale = this.axisScale.getScale(length);
-      const position = this.config.get('position');
-      const axisFormatter = this.config.get('labels.axisFormatter');
+      const position = this.axisConfig.get('position');
+      const axisFormatter = this.axisConfig.get('labels.axisFormatter');
 
       return d3.svg.axis()
       .scale(scale)
@@ -71,16 +70,16 @@ export default function AxisFactory(Private) {
 
     getLength(el, n) {
       const margin = this.visConfig.get('style.margin');
-      if (this.config.isHorizontal()) {
+      if (this.axisConfig.isHorizontal()) {
         return $(el).parent().width() / n - margin.left - margin.right - 50;
       }
       return $(el).parent().height() / n - margin.top - margin.bottom;
     }
 
     updateXaxisHeight() {
-      const self = this;
-      const position = this.config.get('position');
-      const selection = d3.select(this.config.get('rootEl')).selectAll('.vis-wrapper');
+      const el = this.axisConfig.get('rootEl');
+      const position = this.axisConfig.get('position');
+      const selection = d3.select(el).selectAll('.vis-wrapper');
 
       selection.each(function () {
         const visEl = d3.select(this);
@@ -98,7 +97,7 @@ export default function AxisFactory(Private) {
 
     adjustSize() {
       const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
       const xAxisPadding = 15;
       const style = config.get('style');
       const margin = this.visConfig.get('style.margin');
@@ -141,7 +140,7 @@ export default function AxisFactory(Private) {
 
     draw() {
       const self = this;
-      const config = this.config;
+      const config = this.axisConfig;
       const style = config.get('style');
 
       return function (selection) {
@@ -156,7 +155,6 @@ export default function AxisFactory(Private) {
           const height = $(el).height();
           const length = self.getLength(el, n);
 
-          self.data = div.data()[0];
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
 
@@ -181,10 +179,6 @@ export default function AxisFactory(Private) {
               .style('stroke', style.tickColor)
               .style('stroke-width', style.tickWidth)
               .style('stroke-opacity', style.opacity);
-              // TODO: update to be depenent on position ...
-              //.attr('x1', -parseInt(style.lineWidth) / 2)
-              //.attr('x2', -parseInt(style.lineWidth) / 2 - parseInt(style.tickLength));
-
             }
             if (self.axisLabels) self.axisLabels.render(svg);
             svg.call(self.adjustSize());
