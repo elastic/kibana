@@ -21,20 +21,20 @@ export default function DataFactory(Private) {
    * @param attr {Object|*} Visualization options
    */
   class Data {
-    constructor(data, attr, uiState) {
+    constructor(data, visConfigArgs, uiState) {
       this.uiState = uiState;
 
       const self = this;
       let offset;
 
-      if (attr.mode === 'stacked') {
+      if (visConfigArgs.mode === 'stacked') {
         offset = 'zero';
-      } else if (attr.mode === 'percentage') {
+      } else if (visConfigArgs.mode === 'percentage') {
         offset = 'expand';
-      } else if (attr.mode === 'grouped') {
+      } else if (visConfigArgs.mode === 'grouped') {
         offset = 'group';
       } else {
-        offset = attr.mode;
+        offset = visConfigArgs.mode;
       }
 
       this.data = data;
@@ -44,7 +44,9 @@ export default function DataFactory(Private) {
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
 
-      this._attr = _.defaults(attr || {}, {
+      this._attr = _.defaults({}, {
+        type: visConfigArgs.type,
+        mode: visConfigArgs.mode,
         stack: d3.layout.stack()
         .x(function (d) {
           return d.x;
@@ -58,7 +60,7 @@ export default function DataFactory(Private) {
         .offset(offset || 'zero')
       });
 
-      if (attr.mode === 'stacked' && attr.type === 'histogram') {
+      if (visConfigArgs.mode === 'stacked' && visConfigArgs.type === 'histogram') {
         this._attr.stack.out(function (d, y0, y) {
           return self._stackNegAndPosVals(d, y0, y);
         });

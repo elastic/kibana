@@ -26,9 +26,9 @@ export default function LineChartFactory(Private) {
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
   class LineChart extends PointSeriesChart {
-    constructor(handler, chartEl, chartData, chartConfig) {
-      super(handler, chartEl, chartData, chartConfig);
-      this._attr = _.defaults(chartConfig || {}, defaults);
+    constructor(handler, chartEl, chartData, seriesConfigArgs) {
+      super(handler, chartEl, chartData, seriesConfigArgs);
+      this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     }
 
     /**
@@ -41,13 +41,13 @@ export default function LineChartFactory(Private) {
      */
     addCircles(svg, data) {
       const self = this;
-      const showCircles = this._attr.showCircles;
+      const showCircles = this.seriesConfig.showCircles;
       const color = this.handler.data.getColorFunc();
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
-      const tooltip = this.tooltip;
-      const isTooltip = this._attr.addTooltip;
+      const tooltip = this.baseChart.tooltip;
+      const isTooltip = this.seriesConfig.addTooltip;
 
       const radii = _(data)
         .map(function (point) {
@@ -62,7 +62,7 @@ export default function LineChartFactory(Private) {
           max: -Infinity
         });
 
-      const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
+      const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this.seriesConfig.radiusRatio, 2);
 
       const layer = svg.append('g')
       .attr('class', 'points line');
@@ -107,24 +107,23 @@ export default function LineChartFactory(Private) {
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
           const margin = self.handler.visConfig.get('style.margin');
-          const width = self._attr.width - margin.left - margin.right;
-          const height = self._attr.height - margin.top - margin.bottom;
+          const width = self.baseChart.chartConfig.width - margin.left - margin.right;
+          const height = self.baseChart.chartConfig.height - margin.top - margin.bottom;
           const circleRadius = (d._input.z - radii.min) / radiusStep;
 
           return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
         };
       }
 
-
       circles
       .enter()
       .append('circle')
       .attr('r', getCircleRadiusFn())
-      .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
+      .attr('fill-opacity', (this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7))
       .attr('cx', cx)
       .attr('cy', cy)
       .attr('class', 'circle-decoration')
-      .call(this._addIdentifier)
+      .call(this.baseChart._addIdentifier)
       .attr('fill', colorCircle);
 
       circles
@@ -135,7 +134,7 @@ export default function LineChartFactory(Private) {
       .attr('cy', cy)
       .attr('fill', 'transparent')
       .attr('class', 'circle')
-      .call(this._addIdentifier)
+      .call(this.baseChart._addIdentifier)
       .attr('stroke', cColor)
       .attr('stroke-width', 0);
 
@@ -160,7 +159,7 @@ export default function LineChartFactory(Private) {
       const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
-      const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
+      const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
 
       const line = svg.append('g')
         .attr('class', 'pathgroup lines');
@@ -212,7 +211,7 @@ export default function LineChartFactory(Private) {
           const svg = self.chartEl.append('g');
           svg.data([self.chartData]);
 
-          if (self._attr.drawLinesBetweenPoints) {
+          if (self.seriesConfig.drawLinesBetweenPoints) {
             self.addLine(svg, data);
           }
           const circles = self.addCircles(svg, data);

@@ -23,9 +23,9 @@ export default function ColumnChartFactory(Private) {
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
   class ColumnChart extends PointSeriesChart {
-    constructor(handler, chartEl, chartData, chartConfig) {
-      super(handler, chartEl, chartData, chartConfig);
-      this._attr = _.defaults(chartConfig || {}, defaults);
+    constructor(handler, chartEl, chartData, seriesConfigArgs) {
+      super(handler, chartEl, chartData, seriesConfigArgs);
+      this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     }
 
     /**
@@ -39,8 +39,8 @@ export default function ColumnChartFactory(Private) {
     addBars(svg, layers) {
       const self = this;
       const color = this.handler.data.getColorFunc();
-      const tooltip = this.tooltip;
-      const isTooltip = this._attr.addTooltip;
+      const tooltip = this.baseChart.tooltip;
+      const isTooltip = this.seriesConfig.addTooltip;
 
       const layer = svg.append('g')
       .attr('class', function (d, i) {
@@ -57,7 +57,7 @@ export default function ColumnChartFactory(Private) {
       bars
       .enter()
       .append('rect')
-      .call(this._addIdentifier)
+      .call(this.baseChart._addIdentifier)
       .attr('fill', function (d) {
         return color(d.label);
       });
@@ -81,7 +81,7 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     updateBars(bars) {
-      const offset = this._attr.mode;
+      const offset = this.seriesConfig.mode;
 
       if (offset === 'grouped') {
         return this.addGroupedBars(bars);
