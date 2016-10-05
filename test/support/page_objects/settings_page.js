@@ -31,7 +31,7 @@ export default class SettingsPage {
   }
 
   clickExistingData() {
-    return this.clickLinkText('Existing Data');
+    return this.clickLinkText('Index Patterns');
   }
 
   getAdvancedSettings(propertyName) {
