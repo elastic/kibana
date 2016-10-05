@@ -34,8 +34,8 @@ export default function HandlerBaseClass(Private) {
       this.visConfig = visConfig;
       this.data = visConfig.data;
 
-      this.categoryAxes = visConfig.get('categoryAxes').map(axis => new Axis(visConfig, axis));
-      this.valueAxes = visConfig.get('valueAxes').map(axis => new Axis(visConfig, axis));
+      this.categoryAxes = visConfig.get('categoryAxes').map(axisArgs => new Axis(visConfig, axisArgs));
+      this.valueAxes = visConfig.get('valueAxes').map(axisArgs => new Axis(visConfig, axisArgs));
       this.chartTitle = new ChartTitle(visConfig);
       this.alerts = new Alerts(this, visConfig.get('alerts'));
 

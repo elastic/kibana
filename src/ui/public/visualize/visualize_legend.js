@@ -1,8 +1,5 @@
 import _ from 'lodash';
 import html from 'ui/visualize/visualize_legend.html';
-import $ from 'jquery';
-import d3 from 'd3';
-import findByParam from 'ui/utils/find_by_param';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
@@ -51,7 +48,7 @@ uiModules.get('kibana')
       };
 
       $scope.toggleLegend = function () {
-        let bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
+        let bwcAddLegend = $scope.renderbot.vislibVis.visConfig.get('addLegend');
         let bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
         $scope.uiState.set('vis.legendOpen', $scope.open);
@@ -96,11 +93,11 @@ uiModules.get('kibana')
       function refresh() {
         let vislibVis = $scope.renderbot.vislibVis;
 
-        if ($scope.uiState.get('vis.legendOpen') == null && vislibVis._attr.addLegend != null) {
-          $scope.open = vislibVis._attr.addLegend;
+        if ($scope.uiState.get('vis.legendOpen') == null && vislibVis.visConfigArgs.addLegend != null) {
+          $scope.open = vislibVis.visConfigArgs.addLegend;
         }
 
-        $scope.labels = getLabels($scope.data, vislibVis._attr.type);
+        $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
         $scope.getColor = colorPalette(_.pluck($scope.labels, 'label'), $scope.uiState.get('vis.colors'));
       }
 

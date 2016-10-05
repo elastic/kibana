@@ -2,15 +2,18 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
+import TooltipProvider from 'ui/vislib/components/tooltip';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 import VislibVisualizationsSeriTypesProvider from 'ui/vislib/visualizations/point_series/seri_types';
 
 export default function PointSeriesFactory(Private) {
 
-  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const Chart = Private(VislibVisualizationsChartProvider);
+  const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
   const seriTypes = Private(VislibVisualizationsSeriTypesProvider);
+  const touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
   /**
    * Line Chart Visualization
    *
@@ -21,23 +24,24 @@ export default function PointSeriesFactory(Private) {
    * @param el {HTMLElement} HTML element to which the chart will be appended
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
-  class PointSeries extends PointSeriesChart {
+  class PointSeries extends Chart {
     constructor(handler, chartEl, chartData) {
       super(handler, chartEl, chartData);
 
       this.handler = handler;
       this.chartData = chartData;
       this.chartEl = chartEl;
-      this._attr = handler.visConfig.get('chart');
+      this.chartConfig = handler.visConfig.get('chart');
       this.handler.pointSeries = this;
     }
 
     mapData(data, chart) {
-      const config = chart._attr;
-      const shouldStack = config.mode === 'stacked';
+      const seriesConfig = chart.seriesConfig;
+      // todo: should stack or not should be defined per series
+      const shouldStack = seriesConfig.mode === 'stacked';
 
       return _.map(data.values, val => {
-        const valueAxis = config.valueAxis || chart.handler.valueAxes[0].id;
+        const valueAxis = seriesConfig.valueAxis || chart.handler.valueAxes[0].id;
         let y0 = 0;
         if (shouldStack) {
           if (!this.stackedData[valueAxis]) this.stackedData[valueAxis] = {};
@@ -81,35 +85,102 @@ export default function PointSeriesFactory(Private) {
       }
     };
 
-    validateDataCompliesWithScalingMethod(data) {
-      function valuesSmallerThanOne(d) {
-        return d.values && d.values.some(e => e.y < 1);
+    createEndZones(svg) {
+      const self = this;
+      const xAxis = this.handler.categoryAxes[0];
+      const xScale = xAxis.getScale();
+      const ordered = xAxis.ordered;
+      const missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
+
+      if (missingMinMax || ordered.endzones === false) return;
+
+      const visConfig = this.handler.visConfig;
+      const {width, height} = svg.node().getBBox();
+      const margin = visConfig.get('style.margin');
+
+      // we don't want to draw endzones over our min and max values, they
+      // are still a part of the dataset. We want to start the endzones just
+      // outside of them so we will use these values rather than ordered.min/max
+      const oneUnit = (ordered.units || _.identity)(1);
+
+      // points on this axis represent the amount of time they cover,
+      // so draw the endzones at the actual time bounds
+      const leftEndzone = {
+        x: 0,
+        w: Math.max(xScale(ordered.min), 0)
+      };
+
+      const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
+      const rightStart = rightLastVal + oneUnit;
+      const rightEndzone = {
+        x: xScale(rightStart),
+        w: Math.max(width - xScale(rightStart), 0)
+      };
+
+      this.endzones = svg.selectAll('.layer')
+        .data([leftEndzone, rightEndzone])
+        .enter()
+        .insert('g', '.brush')
+        .attr('class', 'endzone')
+        .append('rect')
+        .attr('class', 'zone')
+        .attr('x', function (d) {
+          return d.x;
+        })
+        .attr('y', 0)
+        .attr('height', height - margin.top - margin.bottom)
+        .attr('width', function (d) {
+          return d.w;
+        });
+
+      function callPlay(event) {
+        const boundData = event.target.__data__;
+        const mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
+        const wholeBucket = boundData && boundData.x != null;
+
+        // the min and max that the endzones start in
+        const min = leftEndzone.w;
+        const max = rightEndzone.x;
+
+        // bounds of the cursor to consider
+        let xLeft = mouseChartXCoord;
+        let xRight = mouseChartXCoord;
+        if (wholeBucket) {
+          xLeft = xScale(boundData.x);
+          xRight = xScale(xAxis.addInterval(boundData.x));
+        }
+
+        return {
+          wholeBucket: wholeBucket,
+          touchdown: min > xLeft || max < xRight
+        };
       }
 
-      const invalidLogScale = data.series && data.series.some(valuesSmallerThanOne);
-      if (this._attr.scale === 'log' && invalidLogScale) {
-        throw new errors.InvalidLogScaleValues();
+      function textFormatter() {
+        return touchdownTmpl(callPlay(d3.event));
       }
+
+      const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
+      this.tooltips.push(endzoneTT);
+      endzoneTT.order = 0;
+      endzoneTT.showCondition = function inEndzone() {
+        return callPlay(d3.event).touchdown;
+      };
+      endzoneTT.render()(svg);
     };
 
-    /**
-     * Renders d3 visualization
-     *
-     * @method draw
-     * @returns {Function} Creates the line chart
-     */
     draw() {
       // todo: do we need to handle width and height here ?
       let self = this;
       let $elem = $(this.chartEl);
       let margin = this.handler.visConfig.get('style.margin');
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
+      let elWidth = this.chartConfig.width = $elem.width();
+      let elHeight = this.chartConfig.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
       let minWidth = 20;
       let minHeight = 20;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+      let addTimeMarker = this.chartConfig.addTimeMarker;
+      let times = this.chartConfig.times || [];
       let timeMarker;
       let div;
       let svg;
@@ -125,7 +196,6 @@ export default function PointSeriesFactory(Private) {
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
-          self.validateDataCompliesWithScalingMethod(data);
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
@@ -143,11 +213,12 @@ export default function PointSeriesFactory(Private) {
 
           self.stackedData = {};
           self.series = [];
-          _.each(self._attr.series, (seri, i) => {
-            const chart = new seriTypes[seri.type || self.handler.visConfig.get('chart.type')](self.handler, svg, data.series[i], seri);
-            chart.events = self.events;
-            svg.call(chart.draw());
-            self.series.push(chart);
+          _.each(self.chartConfig.series, (seriArgs, i) => {
+            const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')];
+            const series = new SeriClass(self.handler, svg, data.series[i], seriArgs);
+            series.events = self.events;
+            svg.call(series.draw());
+            self.series.push(series);
           });
 
           self.addEvents(svg);
