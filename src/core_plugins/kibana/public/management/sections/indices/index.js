@@ -19,7 +19,7 @@ uiRoutes
 });
 
 uiRoutes
-.defaults(/management\/data\/index/, {
+.defaults(/management\/kibana\/index/, {
   resolve: indexPatternsResolutions
 });
 
@@ -49,12 +49,6 @@ uiModules.get('apps/management')
       $scope.$emit('application.load');
     }
   };
-});
-
-management.getSection('data').register('indices', {
-  display: 'Existing Data',
-  order: 0,
-  url: '#/management/data/index/'
 });
 
 management.getSection('kibana').register('indices', {
