@@ -31,9 +31,9 @@ UiModules
 
       // travel forward in time based on the interval between from and to
       $scope.foward = function () {
-        var time = getFromTo();
-        var diff = time.to.diff(time.from);
-        var origTo = time.to.toISOString();
+        const time = getFromTo();
+        const diff = time.to.diff(time.from);
+        const origTo = time.to.toISOString();
 
         time.to.add(diff, 'milliseconds');
         timefilter.time.from = origTo;
@@ -42,9 +42,9 @@ UiModules
 
       // travel backwards in time based on the interval between from and to
       $scope.back = function () {
-        var time = getFromTo();
-        var diff = time.to.diff(time.from);
-        var origFrom = time.from.toISOString();
+        const time = getFromTo();
+        const diff = time.to.diff(time.from);
+        const origFrom = time.from.toISOString();
 
         time.from.subtract(diff, 'milliseconds');
         timefilter.time.to = origFrom;
@@ -53,11 +53,11 @@ UiModules
 
       // zoom out, doubling the difference between start and end, keeping the same time range center
       $scope.zoomOut = function () {
-        var time = getFromTo();
-        var from = time.from.unix() * 1000;
-        var to = time.to.unix() * 1000;
+        const time = getFromTo();
+        const from = time.from.unix() * 1000;
+        const to = time.to.unix() * 1000;
 
-        var diff = Math.floor((to - from) / 2);
+        const diff = Math.floor((to - from) / 2);
 
         timefilter.time.from = moment(from - diff).toISOString();
         timefilter.time.to = moment(to + diff).toISOString();
@@ -65,11 +65,11 @@ UiModules
 
       // zoom in, halving the difference between start and end, keeping the same time range center
       $scope.zoomIn = function () {
-        var time = getFromTo();
-        var from = time.from.unix() * 1000;
-        var to = time.to.unix() * 1000;
+        const time = getFromTo();
+        const from = time.from.unix() * 1000;
+        const to = time.to.unix() * 1000;
 
-        var diff = Math.floor((to - from) / 4);
+        const diff = Math.floor((to - from) / 4);
 
         timefilter.time.from = moment(from + diff).toISOString();
         timefilter.time.to = moment(to - diff).toISOString();
