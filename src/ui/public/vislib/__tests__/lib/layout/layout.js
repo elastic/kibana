@@ -46,8 +46,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('createLayout Method', function () {
