@@ -17,7 +17,7 @@ bdd.describe('user input reactions', function () {
       return PageObjects.settings.navigateTo();
     })
     .then(function () {
-      return PageObjects.settings.clickExistingData();
+      return PageObjects.settings.clickKibanaIndicies();
     });
   });
 
