@@ -46,7 +46,7 @@ describe('Color Format', function () {
       }]
     });
     expect(colorer.convert('B', 'html')).to.eql('B');
-    expect(colorer.convert('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">B</span>');
+    expect(colorer.convert('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
     expect(colorer.convert('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
     expect(colorer.convert('a', 'html')).to.eql('a');
   });
