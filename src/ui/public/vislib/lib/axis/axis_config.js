@@ -15,7 +15,7 @@ export default function AxisConfigFactory() {
       defaultYExtents: null,
       min: null,
       max: null,
-      mode: 'normal' // [percentage]
+      mode: 'normal' // [percentage, normal, wiggle, silluete]
     },
     style: {
       color: '#ddd',
@@ -90,6 +90,22 @@ export default function AxisConfigFactory() {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 70);
       }
+
+      let offset;
+      switch (this.get('scale.mode')) {
+        case 'normal':
+          offset = 'zero';
+          break;
+        case 'percentage':
+          offset = 'expand';
+          break;
+        case 'grouped':
+          offset = 'group';
+          break;
+        default:
+          offset = this.get('scale.mode');
+      }
+      this.set('scale.offset', _.get(axisConfigArgs, 'scale.offset', offset));
     };
 
     get(property, defaults = null) {

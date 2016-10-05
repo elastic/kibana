@@ -33,7 +33,7 @@ export default function DispatchClass(Private, config) {
       const datum = d._input || d;
       const data = d3.event.target.nearestViewportElement ?
         d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const label = d.label ? d.label : (d.name || d.series);
+      const label = d.label ? d.label : (d.series || 'Count');
       const isSeries = !!(data && data.series);
       const isSlices = !!(data && data.slices);
       const series = isSeries ? data.series : undefined;

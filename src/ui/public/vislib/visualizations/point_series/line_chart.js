@@ -49,9 +49,9 @@ export default function LineChartFactory(Private) {
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.seriesConfig.addTooltip;
 
-      const radii = _(data)
+      const radii = _(data.values)
         .map(function (point) {
-          return point._input.z;
+          return point.z;
         })
         .reduce(function (result, val) {
           if (result.min > val) result.min = val;
@@ -70,7 +70,7 @@ export default function LineChartFactory(Private) {
       const circles = layer
       .selectAll('circle')
       .data(function appendData() {
-        return data.filter(function (d) {
+        return data.values.filter(function (d) {
           return !_.isNull(d.y);
         });
       });
@@ -109,7 +109,7 @@ export default function LineChartFactory(Private) {
           const margin = self.handler.visConfig.get('style.margin');
           const width = self.baseChart.chartConfig.width - margin.left - margin.right;
           const height = self.baseChart.chartConfig.height - margin.top - margin.bottom;
-          const circleRadius = (d._input.z - radii.min) / radiusStep;
+          const circleRadius = (d.z - radii.min) / radiusStep;
 
           return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
         };
@@ -165,7 +165,7 @@ export default function LineChartFactory(Private) {
         .attr('class', 'pathgroup lines');
 
       line.append('path')
-        .call(this._addIdentifier)
+        .call(this.baseChart._addIdentifier)
         .attr('d', () => {
           const d3Line = d3.svg.line()
             .defined(function (d) {
@@ -181,11 +181,11 @@ export default function LineChartFactory(Private) {
             .y(function y(d) {
               return yScale(d.y);
             });
-          return d3Line(data);
+          return d3Line(data.values);
         })
         .attr('fill', 'none')
         .attr('stroke', function lineStroke(d) {
-          return color(d.label);
+          return color(d.label || data.label);
         })
         .attr('stroke-width', 2);
 
@@ -204,21 +204,17 @@ export default function LineChartFactory(Private) {
       return function (selection) {
         selection.each(function () {
 
-          // this should only stack if series mode is stacked ...
-          // but it should still do the transform ? why do we need that transform in the first place ?
-          // should we just update the values with y0 (0 for non stacked) ??
-          const data = self.handler.pointSeries.mapData(self.chartData, self);
           const svg = self.chartEl.append('g');
           svg.data([self.chartData]);
 
           if (self.seriesConfig.drawLinesBetweenPoints) {
-            self.addLine(svg, data);
+            self.addLine(svg, self.chartData);
           }
-          const circles = self.addCircles(svg, data);
+          const circles = self.addCircles(svg, self.chartData);
           self.addCircleEvents(circles);
 
           self.events.emit('rendered', {
-            chart: data
+            chart: self.chartData
           });
 
           return svg;

@@ -71,7 +71,7 @@ export default function AreaChartFactory(Private) {
      * @param layers {Array} Chart data array
      * @returns {D3.UpdateSelection} SVG with path added
      */
-    addPath(svg, data, label) {
+    addPath(svg, data) {
       const ordered = this.handler.data.get('ordered');
       const isTimeSeries = (ordered && ordered.date);
       const isOverlapping = this.isOverlapping;
@@ -90,7 +90,7 @@ export default function AreaChartFactory(Private) {
       const path = layer.append('path')
       .call(this.baseChart._addIdentifier)
       .style('fill', () => {
-        return color(label);
+        return color(data.label);
       })
       .classed('overlap_area', function () {
         return isOverlapping;
@@ -115,7 +115,7 @@ export default function AreaChartFactory(Private) {
           return !_.isNull(d.y);
         })
         .interpolate(interpolate);
-        return area(data);
+        return area(data.values);
       });
 
       return path;
@@ -146,7 +146,7 @@ export default function AreaChartFactory(Private) {
       // append the circles
       const circles = layer.selectAll('circles')
       .data(function appendData() {
-        return data.filter(function isZeroOrNull(d) {
+        return data.values.filter(function isZeroOrNull(d) {
           return d.y !== 0 && !_.isNull(d.y);
         });
       });
@@ -207,16 +207,15 @@ export default function AreaChartFactory(Private) {
 
       return function (selection) {
         selection.each(function () {
-          const data = self.handler.pointSeries.mapData(self.chartData, self);
           const svg = self.chartEl.append('g');
           svg.data([self.chartData]);
 
-          self.addPath(svg, data, self.chartData.label);
-          const circles = self.addCircles(svg, data);
+          self.addPath(svg, self.chartData);
+          const circles = self.addCircles(svg, self.chartData);
           self.addCircleEvents(circles);
 
           self.events.emit('rendered', {
-            chart: data
+            chart: self.chartData
           });
 
           return svg;

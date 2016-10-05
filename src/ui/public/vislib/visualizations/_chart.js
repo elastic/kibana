@@ -35,7 +35,6 @@ export default function ChartBaseClass(Private) {
         this.tooltips.push(this.tooltip);
       }
 
-      this._attr = _.defaults(this.handler.visConfig || {}, {});
       this._addIdentifier = _.bind(this._addIdentifier, this);
     }
 

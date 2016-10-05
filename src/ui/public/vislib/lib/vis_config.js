@@ -20,10 +20,10 @@ export default function VisConfigFactory(Private) {
 
   class VisConfig {
     constructor(visConfigArgs, data, uiState) {
-      if (visConfigArgs.zeroFill || ['area', 'column'].includes(visConfigArgs.type)) {
-        this.data = new Data(injectZeros(data), visConfigArgs, uiState);
+      if (visConfigArgs.zeroFill || ['area', 'histogram'].includes(visConfigArgs.type)) {
+        this.data = new Data(injectZeros(data), uiState);
       } else {
-        this.data = new Data(data, visConfigArgs, uiState);
+        this.data = new Data(data, uiState);
       }
 
       const typeDefaults = visTypes[visConfigArgs.type](visConfigArgs, this.data);
