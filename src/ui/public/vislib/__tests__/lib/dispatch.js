@@ -13,8 +13,7 @@ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_s
 describe('Vislib Dispatch Class Test Suite', function () {
 
   function destroyVis(vis) {
-    $(vis.el).remove();
-    vis = null;
+    vis.destroy();
   }
 
   function getEls(el, n, type) {
