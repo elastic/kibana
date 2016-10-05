@@ -16,8 +16,14 @@ export default function PointSeriesChartProvider(Private) {
     }
 
     getStackedCount() {
-      return _.reduce(this.handler.data.get('series'), function (sum, val) {
-        if (val.stacked || 1) return sum + 1;
+      return this.handler.data.get('series').reduce(function (sum, val) {
+        return val.stacked ? sum + 1 : sum;
+      }, 0);
+    };
+
+    getGroupedCount() {
+      return this.handler.data.get('series').reduce(function (sum, val) {
+        return val.stacked ? sum : sum + 1;
       }, 0);
     };
 
@@ -25,7 +31,16 @@ export default function PointSeriesChartProvider(Private) {
       let i = 0;
       for (const seri of this.handler.data.get('series')) {
         if (seri === data) return i;
-        if (seri.stacked || 1) i++;
+        if (seri.stacked) i++;
+      }
+      return 0;
+    };
+
+    getGroupedNum(data) {
+      let i = 0;
+      for (const seri of this.handler.data.get('series')) {
+        if (seri === data) return i;
+        if (!seri.stacked) i++;
       }
       return 0;
     };
@@ -70,9 +85,9 @@ export default function PointSeriesChartProvider(Private) {
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      const attr = this.handler._attr;
+      const visConfig = this.handler.visConfig;
       const {width, height} = svg.node().getBBox();
-      const margin = attr.get('style.margin');
+      const margin = visConfig.get('style.margin');
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just

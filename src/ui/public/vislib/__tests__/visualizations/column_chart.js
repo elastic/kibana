@@ -92,7 +92,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('updateBars method', function () {
       beforeEach(function () {
-        vis.handler._attr.mode = 'grouped';
+        vis.handler.visConfig.set('mode', 'grouped');
         vis.render(vis.data, persistedState);
       });
 
@@ -187,7 +187,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
-        vis._attr.defaultYExtents = true;
+        vis.visConfig.set('defaultYExtents', true);
         vis.render(data, persistedState);
       });
 

@@ -5,23 +5,22 @@ import errors from 'ui/errors';
 
 export default function AxisScaleFactory(Private) {
   class AxisScale {
-    constructor(config, data, visConfig) {
-      this.config = config;
-      this.data = data;
+    constructor(axisConfig, visConfig) {
+      this.axisConfig = axisConfig;
       this.visConfig = visConfig;
 
-      if (this.config.get('type') === 'category') {
-        this.values = data.xValues();
-        this.ordered = data.get('ordered');
+      if (this.axisConfig.get('type') === 'category') {
+        this.values = this.visConfig.data.xValues();
+        this.ordered = this.visConfig.data.get('ordered');
       }
     };
 
     getScaleType() {
-      return this.config.getScaleType();
+      return this.axisConfig.getScaleType();
     };
 
     validateUserExtents(domain) {
-      const config = this.config;
+      const config = this.axisConfig;
       return domain.map((val) => {
         val = parseInt(val, 10);
 
@@ -48,7 +47,7 @@ export default function AxisScaleFactory(Private) {
       const opts = [ordered[extent]];
 
       let point = d3[extent](data);
-      if (this.config.get('scale.expandLastBucket') && extent === 'max') {
+      if (this.axisConfig.get('scale.expandLastBucket') && extent === 'max') {
         point = this.addInterval(point);
       }
       opts.push(point);
@@ -88,9 +87,9 @@ export default function AxisScaleFactory(Private) {
       return y.valueOf();
     };
 
-    getMinMaxExtent(extent) {
-      const config = this.config;
-      const data = this.data.chartData();
+    getAllPoints() {
+      const config = this.axisConfig;
+      const data = this.visConfig.data.chartData();
       const chartPoints = _.reduce(data, (chartPoints, chart) => {
         const stackedData = {};
         const points = this.visConfig.get('chart.series').reduce((points, seri, i) => {
@@ -115,37 +114,37 @@ export default function AxisScaleFactory(Private) {
         return chartPoints.concat(points);
       }, []);
 
-      return d3[extent](chartPoints);
+      return chartPoints;
     };
 
     getYMin() {
-      return this.getMinMaxExtent('min');
+      return d3.min(this.getAllPoints());
     };
 
     getYMax() {
-      return this.getMinMaxExtent('max');
+      return d3.max(this.getAllPoints());
     };
 
     getExtents() {
-      if (this.config.get('type') === 'category') {
-        if (this.config.isTimeDomain()) return this.getTimeDomain(this.values);
-        if (this.config.isOrdinal()) return this.values;
+      if (this.axisConfig.get('type') === 'category') {
+        if (this.axisConfig.isTimeDomain()) return this.getTimeDomain(this.values);
+        if (this.axisConfig.isOrdinal()) return this.values;
       }
 
-      const min = this.config.get('scale.min') || this.getYMin();
-      const max = this.config.get('scale.max') || this.getYMax();
+      const min = this.axisConfig.get('scale.min') || this.getYMin();
+      const max = this.axisConfig.get('scale.max') || this.getYMax();
       const domain = [min, max];
-      if (this.config.isUserDefined()) return this.validateUserExtents(domain);
-      if (this.config.isYExtents()) return domain;
-      if (this.config.isLogScale()) return this.logDomain(min, max);
+      if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
+      if (this.axisConfig.isYExtents()) return domain;
+      if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
       return [Math.min(0, min), Math.max(0, max)];
     };
 
     getRange(length) {
-      if (this.config.isHorizontal()) {
-        return !this.config.get('scale.inverted') ? [0, length] : [length, 0];
+      if (this.axisConfig.isHorizontal()) {
+        return !this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
       } else {
-        return this.config.get('scale.inverted') ? [0, length] : [length, 0];
+        return this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
       }
     };
 
@@ -165,19 +164,24 @@ export default function AxisScaleFactory(Private) {
     getD3Scale(scaleType) {
       // todo: why do we need this renaming ?
       if (scaleType === 'square root') scaleType = 'sqrt'; // Rename 'square root' to 'sqrt'
-      this.scaleType = scaleType || 'linear';
+      scaleType = scaleType || 'linear';
 
-      if (this.config.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
-      if (this.config.isOrdinal()) return d3.scale.ordinal();
-      if (typeof d3.scale[this.scaleType] !== 'function') {
-        return this.throwCustomError(`Axis.getScaleType: ${this.scaleType} is not a function`);
+      if (this.axisConfig.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
+      if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();
+      if (typeof d3.scale[scaleType] !== 'function') {
+        return this.throwCustomError(`Axis.getScaleType: ${scaleType} is not a function`);
       }
 
-      return d3.scale[this.scaleType]();
+      return d3.scale[scaleType]();
     };
 
+    canApplyNice() {
+      const config = this.axisConfig;
+      return (!config.isUserDefined() && !config.isYExtents() && !config.isOrdinal() && !config.isTimeDomain());
+    }
+
     getScale(length) {
-      const config = this.config;
+      const config = this.axisConfig;
       const scale = this.getD3Scale(config.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
@@ -188,7 +192,7 @@ export default function AxisScaleFactory(Private) {
         this.scale.range(range);
       }
 
-      if (!config.isUserDefined() && !config.isYExtents() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice();
+      if (this.canApplyNice()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
       if (this.visConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 

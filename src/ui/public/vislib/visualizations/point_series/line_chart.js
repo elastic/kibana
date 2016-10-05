@@ -1,9 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import $ from 'jquery';
-import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
-import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
 export default function LineChartFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
@@ -109,7 +106,7 @@ export default function LineChartFactory(Private) {
 
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
-          const margin = self.handler._attr.get('style.margin');
+          const margin = self.handler.visConfig.get('style.margin');
           const width = self._attr.width - margin.left - margin.right;
           const height = self._attr.height - margin.top - margin.bottom;
           const circleRadius = (d._input.z - radii.min) / radiusStep;

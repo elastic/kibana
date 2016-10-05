@@ -222,7 +222,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
-        vis._attr.defaultYExtents = true;
+        vis.visConfig.set('defaultYExtents', true);
         vis.render(variablesAreCool, persistedState);
       });
 
