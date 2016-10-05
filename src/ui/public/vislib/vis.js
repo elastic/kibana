@@ -25,12 +25,12 @@ export default function VisFactory(Private) {
    * @param config {Object} Parameters that define the chart type and chart options
    */
   class Vis extends Events {
-    constructor($el, config) {
+    constructor($el, visConfigArgs) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this._attr = config;
-      this._attr.el = this.el;
+      this.visConfigArgs = visConfigArgs;
+      this.visConfigArgs.el = this.el;
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -61,8 +61,8 @@ export default function VisFactory(Private) {
         uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
       }
 
-      this.config = new VisConfig(this._attr, this.data, this.uiState);
-      this.handler = new Handler(this, this.config);
+      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState);
+      this.handler = new Handler(this, this.visConfig);
       this._runWithoutResizeChecker('render');
     };
 
@@ -133,7 +133,7 @@ export default function VisFactory(Private) {
      * @param val {*} Value to which the attribute name is set
      */
     set(name, val) {
-      this._attr[name] = val;
+      this.visConfig.set(name, val);
       this.render(this.data, this.uiState);
     };
 
@@ -145,7 +145,7 @@ export default function VisFactory(Private) {
      * @returns {*} The value of the attribute name
      */
     get(name) {
-      return this._attr[name];
+      return this.visConfig.get(name);
     };
 
     /**
