@@ -14,20 +14,19 @@ export default function VisConfigFactory(Private) {
     },
     alerts: {},
     categoryAxes: [],
-    valueAxes: [],
-    mode: 'normal'
+    valueAxes: []
   };
 
 
   class VisConfig {
-    constructor(configArgs, data, uiState) {
-      if (configArgs.zeroFill || ['area', 'column'].includes(configArgs.type)) {
-        this.data = new Data(injectZeros(data), configArgs, uiState);
+    constructor(visConfigArgs, data, uiState) {
+      if (visConfigArgs.zeroFill || ['area', 'column'].includes(visConfigArgs.type)) {
+        this.data = new Data(injectZeros(data), visConfigArgs, uiState);
       } else {
-        this.data = new Data(data, configArgs, uiState);
+        this.data = new Data(data, visConfigArgs, uiState);
       }
 
-      const typeDefaults = visTypes[configArgs.type](configArgs, this.data);
+      const typeDefaults = visTypes[visConfigArgs.type](visConfigArgs, this.data);
       this._values = _.defaultsDeep({}, typeDefaults, defaults);
     };
 

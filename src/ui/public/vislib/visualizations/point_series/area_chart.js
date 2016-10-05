@@ -29,17 +29,17 @@ export default function AreaChartFactory(Private) {
    * chart
    */
   class AreaChart extends PointSeriesChart {
-    constructor(handler, chartEl, chartData, chartConfig) {
+    constructor(handler, chartEl, chartData, seriesConfigArgs) {
       super(handler, chartEl, chartData);
 
-      this.isOverlapping = (handler.visConfig.get('mode') === 'overlap');
-
+      this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
+      this.isOverlapping = (this.seriesConfig.mode === 'overlap');
       if (this.isOverlapping) {
 
         // todo ... default opacity handler should check what the opacity is and then move back to it on mouseout
         // Default opacity should return to 0.6 on mouseout
         const defaultOpacity = 0.6;
-        handler.visConfig.set('defaultOpacity', defaultOpacity);
+        this.seriesConfig.defaultOpacity = defaultOpacity;
         handler.highlight = function (element) {
           const label = this.getAttribute('data-label');
           if (!label) return;
@@ -61,8 +61,6 @@ export default function AreaChartFactory(Private) {
       }
 
       this.checkIfEnoughData();
-
-      this._attr = _.defaults(chartConfig || {}, defaults);
     }
 
     /**
@@ -80,7 +78,7 @@ export default function AreaChartFactory(Private) {
       const color = this.handler.data.getColorFunc();
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
-      const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
+      const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
 
       // Data layers
       const layer = svg.append('g')
@@ -90,7 +88,7 @@ export default function AreaChartFactory(Private) {
 
       // Append path
       const path = layer.append('path')
-      .call(this._addIdentifier)
+      .call(this.baseChart._addIdentifier)
       .style('fill', () => {
         return color(label);
       })
@@ -138,8 +136,8 @@ export default function AreaChartFactory(Private) {
       const ordered = this.handler.data.get('ordered');
       const circleRadius = 12;
       const circleStrokeWidth = 0;
-      const tooltip = this.tooltip;
-      const isTooltip = this._attr.addTooltip;
+      const tooltip = this.baseChart.tooltip;
+      const isTooltip = this.seriesConfig.addTooltip;
       const isOverlapping = this.isOverlapping;
 
       const layer = svg.append('g')
@@ -160,7 +158,7 @@ export default function AreaChartFactory(Private) {
       circles
       .enter()
       .append('circle')
-      .call(this._addIdentifier)
+      .call(this.baseChart._addIdentifier)
       .attr('stroke', function strokeColor(d) {
         return color(d.label);
       })
@@ -192,7 +190,7 @@ export default function AreaChartFactory(Private) {
     };
 
     validateWiggleSelection() {
-      const isWiggle = this._attr.mode === 'wiggle';
+      const isWiggle = this.seriesConfig.mode === 'wiggle';
       const ordered = this.handler.data.get('ordered');
 
       if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();

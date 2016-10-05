@@ -11,7 +11,8 @@ export default function ColumnHandler(Private) {
     return function (cfg, data) {
       const isUserDefinedYAxis = cfg.setYExtents;
       const config = _.defaults({}, cfg, {
-        chartTitle: {}
+        chartTitle: {},
+        mode: 'normal'
       }, opts);
 
       config.type = 'point_series';

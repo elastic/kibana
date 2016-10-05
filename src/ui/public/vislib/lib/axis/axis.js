@@ -2,10 +2,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
-import AxisTitleProvider from 'ui/vislib/lib/axis_title';
-import AxisLabelsProvider from 'ui/vislib/lib/axis_labels';
-import AxisScaleProvider from 'ui/vislib/lib/axis_scale';
-import AxisConfigProvider from 'ui/vislib/lib/axis_config';
+import AxisTitleProvider from 'ui/vislib/lib/axis/axis_title';
+import AxisLabelsProvider from 'ui/vislib/lib/axis/axis_labels';
+import AxisScaleProvider from 'ui/vislib/lib/axis/axis_scale';
+import AxisConfigProvider from 'ui/vislib/lib/axis/axis_config';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
