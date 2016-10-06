@@ -53,16 +53,16 @@ dataTypesArray.forEach(function (dataType, i) {
       vis.destroy();
     });
 
-    describe('mapData method', function () {
+    describe('stackData method', function () {
       let stackedData;
       let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.mapData(chart.chartData, chart);
+          stackedData = chart.stackData(chart.chartData);
 
-          isStacked = stackedData.every(function (arr) {
-            return arr.every(function (d) {
+          isStacked = stackedData['ValueAxis-1'].every(function (arr) {
+            return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });
           });
@@ -186,7 +186,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
-        vis.visConfig.set('defaultYExtents', true);
+        vis.visConfigArgs.defaultYExtents = true;
         vis.render(data, persistedState);
       });
 
