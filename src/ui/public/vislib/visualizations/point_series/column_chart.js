@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
+import VislibVisualizationsPointSeriProvider from 'ui/vislib/visualizations/point_series/_point_seri';
 export default function ColumnChartFactory(Private) {
 
-  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const PointSeri = Private(VislibVisualizationsPointSeriProvider);
 
   const defaults = {
     mode: 'normal',
@@ -22,20 +22,12 @@ export default function ColumnChartFactory(Private) {
    * @param el {HTMLElement} HTML element to which the chart will be appended
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
-  class ColumnChart extends PointSeriesChart {
+  class ColumnChart extends PointSeri {
     constructor(handler, chartEl, chartData, seriesConfigArgs) {
       super(handler, chartEl, chartData, seriesConfigArgs);
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     }
 
-    /**
-     * Adds SVG rect to Vertical Bar Chart
-     *
-     * @method addBars
-     * @param svg {HTMLElement} SVG to which rect are appended
-     * @param layers {Array} Chart data array
-     * @returns {D3.UpdateSelection} SVG with rect added
-     */
     addBars(svg, data) {
       const self = this;
       const color = this.handler.data.getColorFunc();
@@ -47,10 +39,8 @@ export default function ColumnChartFactory(Private) {
         return 'series ' + i;
       });
 
-      const layers = data.values;
-
       const bars = layer.selectAll('rect')
-      .data(layers);
+      .data(data.values);
 
       bars
       .exit()
