@@ -9,8 +9,6 @@ import VisConifgProvider from 'ui/vislib/lib/vis_config';
 import VisHandlerProvider from 'ui/vislib/lib/handler';
 
 export default function VisFactory(Private) {
-
-
   const ResizeChecker = Private(VislibLibResizeCheckerProvider);
   const Events = Private(EventsProvider);
   const VisConfig = Private(VisConifgProvider);
@@ -38,6 +36,9 @@ export default function VisFactory(Private) {
       this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
+    hasLegend() {
+      return this.visConfigArgs.addLegend;
+    }
     /**
      * Renders the visualization
      *
