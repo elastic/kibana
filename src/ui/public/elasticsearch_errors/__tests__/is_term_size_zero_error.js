@@ -30,4 +30,8 @@ describe('isTermSizeZeroError', () => {
     };
     expect(isTermSizeZeroError(error)).to.be(false);
   });
+
+  it ('returns false for non-elasticsearch error input', () => {
+    expect(isTermSizeZeroError({ foo: 'bar' })).to.be(false);
+  });
 });

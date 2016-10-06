@@ -18,7 +18,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       return PageObjects.settings.navigateTo();
     })
     .then(function () {
-      return PageObjects.settings.clickExistingData();
+      return PageObjects.settings.clickKibanaIndicies();
     });
   });
 

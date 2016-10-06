@@ -30,10 +30,6 @@ export default class SettingsPage {
     return this.clickLinkText('Index Patterns');
   }
 
-  clickExistingData() {
-    return this.clickLinkText('Existing Data');
-  }
-
   getAdvancedSettings(propertyName) {
     PageObjects.common.debug('in setAdvancedSettings');
     return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
@@ -309,7 +305,7 @@ export default class SettingsPage {
     return PageObjects.common.try(() => {
       return this.navigateTo()
         .then(() => {
-          return this.clickExistingData();
+          return this.clickKibanaIndicies();
         })
         .then(() => {
           return this.selectTimeFieldOption('@timestamp');
