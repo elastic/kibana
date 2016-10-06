@@ -3,7 +3,6 @@ import { useResizeCheckerProvider } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
-import es from '../es';
 import init from '../app';
 import { SenseTopNavController } from './sense_top_nav_controller';
 
@@ -20,7 +19,7 @@ module.run(function (Private, $rootScope) {
 module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle) {
   docTitle.change('Console');
 
-  $scope.topNavController = Private(SenseTopNavController)
+  $scope.topNavController = Private(SenseTopNavController);
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app
