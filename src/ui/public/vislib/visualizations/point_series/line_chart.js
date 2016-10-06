@@ -1,9 +1,9 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
+import VislibVisualizationsPointSeriProvider from 'ui/vislib/visualizations/point_series/_point_seri';
 export default function LineChartFactory(Private) {
 
-  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const PointSeri = Private(VislibVisualizationsPointSeriProvider);
 
   const defaults = {
     mode: 'normal',
@@ -25,20 +25,12 @@ export default function LineChartFactory(Private) {
    * @param el {HTMLElement} HTML element to which the chart will be appended
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
-  class LineChart extends PointSeriesChart {
+  class LineChart extends PointSeri {
     constructor(handler, chartEl, chartData, seriesConfigArgs) {
       super(handler, chartEl, chartData, seriesConfigArgs);
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     }
 
-    /**
-     * Adds circles to SVG
-     *
-     * @method addCircles
-     * @param svg {HTMLElement} SVG to which rect are appended
-     * @param data {Array} Array of object data points
-     * @returns {D3.UpdateSelection} SVG with circles added
-     */
     addCircles(svg, data) {
       const self = this;
       const showCircles = this.seriesConfig.showCircles;
