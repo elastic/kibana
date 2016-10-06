@@ -134,7 +134,7 @@ export default function VisFactory(Private) {
      * @param val {*} Value to which the attribute name is set
      */
     set(name, val) {
-      this.visConfig.set(name, val);
+      this.visConfigArgs[name] = val;
       this.render(this.data, this.uiState);
     };
 

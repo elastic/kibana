@@ -222,8 +222,8 @@ describe('Vislib yAxis Class Test Suite', function () {
     describe('validate user defined values', function () {
       beforeEach(function () {
         createData(defaultGraphData);
-        yAxis.config.set('scale.stacked', true);
-        yAxis.config.set('scale.setYExtents', false);
+        yAxis.axisConfig.set('scale.stacked', true);
+        yAxis.axisConfig.set('scale.setYExtents', false);
         yAxis.getAxis(height);
         yScale = yAxis.getScale();
       });
@@ -238,8 +238,8 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should return a decimal value', function () {
-        yAxis.config.set('scale.mode', 'percentage');
-        yAxis.config.set('scale.setYExtents', true);
+        yAxis.axisConfig.set('scale.mode', 'percentage');
+        yAxis.axisConfig.set('scale.setYExtents', true);
         yAxis.getAxis(height);
         domain = [];
         domain[0] = 20;

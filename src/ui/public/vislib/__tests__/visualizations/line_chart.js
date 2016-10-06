@@ -167,7 +167,7 @@ describe('Vislib Line Chart', function () {
 
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
-          vis.visConfig.set('defaultYExtents', true);
+          vis.visConfigArgs.defaultYExtents = true;
           vis.render(data, persistedState);
         });
 

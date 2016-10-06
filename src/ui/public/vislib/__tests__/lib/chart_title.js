@@ -91,7 +91,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, {}, persistedState);
+    dataObj = new Data(data, persistedState);
     const visConfig = new VisConfig({
       type: 'histogram',
       title: {
