@@ -2,10 +2,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/point_series/_point_series_chart';
+import VislibVisualizationsPointSeriProvider from 'ui/vislib/visualizations/point_series/_point_seri';
 export default function AreaChartFactory(Private) {
 
-  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const PointSeri = Private(VislibVisualizationsPointSeriProvider);
 
   const defaults = {
     mode: 'normal',
@@ -28,7 +28,7 @@ export default function AreaChartFactory(Private) {
    * @param chartData {Object} Elasticsearch query results for this specific
    * chart
    */
-  class AreaChart extends PointSeriesChart {
+  class AreaChart extends PointSeri {
     constructor(handler, chartEl, chartData, seriesConfigArgs) {
       super(handler, chartEl, chartData);
 
@@ -63,14 +63,6 @@ export default function AreaChartFactory(Private) {
       this.checkIfEnoughData();
     }
 
-    /**
-     * Adds SVG path to area chart
-     *
-     * @method addPath
-     * @param svg {HTMLElement} SVG to which rect are appended
-     * @param layers {Array} Chart data array
-     * @returns {D3.UpdateSelection} SVG with path added
-     */
     addPath(svg, data) {
       const ordered = this.handler.data.get('ordered');
       const isTimeSeries = (ordered && ordered.date);

@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import errors from 'ui/errors';
 
-export default function PointSeriesChartProvider(Private) {
+export default function PointSeriProvider(Private) {
 
-  class PointSeriesChart {
+  class PointSeri {
     constructor(handler, seriesEl, seriesData, seriesConfig) {
       this.handler = handler;
       this.baseChart = handler.pointSeries;
@@ -87,5 +87,5 @@ export default function PointSeriesChartProvider(Private) {
     };
   }
 
-  return PointSeriesChart;
+  return PointSeri;
 };
