@@ -1,17 +1,21 @@
 import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import colorTemplate from 'ui/stringify/editors/color.html';
+import StringifyTypesNumeralProvider from 'ui/stringify/types/_numeral';
+import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
+
 export default function ColorFormatProvider(Private) {
 
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const Numeral = Private(StringifyTypesNumeralProvider);
+  const BoundToConfigObj = Private(BoundToConfigObjProvider);
+
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
     text: '#000000',
     background: '#ffffff'
   };
 
-  _.class(_Color).inherits(FieldFormat);
+  _.class(_Color).inherits(Numeral);
   function _Color(params) {
     _Color.Super.call(this, params);
   }
@@ -35,10 +39,10 @@ export default function ColorFormatProvider(Private) {
     }
   };
 
-
-  _Color.paramDefaults = {
-    colors: [_.cloneDeep(DEFAULT_COLOR)]
-  };
+  _Color.paramDefaults = new BoundToConfigObj({
+    colors: [_.cloneDeep(DEFAULT_COLOR)],
+    pattern: '=format:color:defaultPattern'
+  });
 
   _Color.prototype._convert = {
     html(val) {
@@ -48,11 +52,14 @@ export default function ColorFormatProvider(Private) {
         return val >= Number(start) && val <= Number(end);
       });
 
-      if (!color) return _.asPrettyString(val);
+      const formattedValue = Numeral.prototype._convert.call(this, val);
+      if (!color) {
+        return formattedValue;
+      }
 
       const styleColor = color.text ? `color: ${color.text};` : '';
       const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
-      return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
+      return `<span style="${styleColor}${styleBackgroundColor}">${formattedValue}</span>`;
     }
   };
 
