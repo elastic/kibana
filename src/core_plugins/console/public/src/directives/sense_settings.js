@@ -7,7 +7,7 @@ require('ui/modules')
     restrict: 'E',
     template: require('./settings.html'),
     controllerAs: 'settings',
-    controller: function ($scope) {
+    controller: function ($scope, $element) {
       const settings = require('../settings');
 
       this.vals = settings.getCurrentSettings();
@@ -16,6 +16,16 @@ require('ui/modules')
         $scope.kbnTopNav.close();
       };
 
+      const self = this;
+
+      function onEnter(event) {
+        if (event.which === 13) {
+          self.apply();
+        }
+      }
+
+      const boundElement = $element.bind('keydown', onEnter);
+      $scope.$on('$destroy', () => boundElement.unbind('keydown', onEnter));
     },
   };
 });
