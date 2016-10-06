@@ -295,7 +295,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
 
           if (flatState.body._source) {
             // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatState.body._source.exclude);
+            const filter = fieldWildcardFilter(flatState.body._source.excludes);
             flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
           }
         }
