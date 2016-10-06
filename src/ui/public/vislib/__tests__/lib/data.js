@@ -117,7 +117,7 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return an object', function () {
-      const rowIn = new Data(rowsData, {}, persistedState);
+      const rowIn = new Data(rowsData, persistedState);
       expect(_.isObject(rowIn)).to.be(true);
     });
 
@@ -132,7 +132,7 @@ describe('Vislib Data Class Test Suite', function () {
         ],
         'yAxisLabel': 'customLabel'
       };
-      const modifiedData = new Data(seriesDataWithoutLabelInSeries, {}, persistedState);
+      const modifiedData = new Data(seriesDataWithoutLabelInSeries, persistedState);
       expect(modifiedData.data.series[0].label).to.be('customLabel');
     });
 
@@ -162,7 +162,7 @@ describe('Vislib Data Class Test Suite', function () {
         ],
       };
 
-      const modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
+      const modifiedData = new Data(seriesDataWithoutLabelInRow, persistedState);
       expect(modifiedData.data.rows[0].series[0].label).to.be('customLabel');
       expect(modifiedData.data.rows[1].series[0].label).to.be('customLabel');
     });
@@ -194,7 +194,7 @@ describe('Vislib Data Class Test Suite', function () {
         'yAxisLabel': 'customLabel'
       };
 
-      const modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
+      const modifiedData = new Data(seriesDataWithoutLabelInRow, persistedState);
       expect(modifiedData.data.columns[0].series[0].label).to.be('customLabel');
       expect(modifiedData.data.columns[1].series[0].label).to.be('customLabel');
     });
@@ -214,7 +214,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(pieData, {}, persistedState);
+      data = new Data(pieData, persistedState);
     });
 
     it('should remove zero values', function () {
@@ -232,9 +232,9 @@ describe('Vislib Data Class Test Suite', function () {
     let colOut;
 
     beforeEach(function () {
-      serIn = new Data(seriesData, {}, persistedState);
-      rowIn = new Data(rowsData, {}, persistedState);
-      colIn = new Data(colsData, {}, persistedState);
+      serIn = new Data(seriesData, persistedState);
+      rowIn = new Data(rowsData, persistedState);
+      colIn = new Data(colsData, persistedState);
       serOut = serIn.flatten();
       rowOut = rowIn.flatten();
       colOut = colIn.flatten();
@@ -250,7 +250,7 @@ describe('Vislib Data Class Test Suite', function () {
 
     function testLength(inputData) {
       return function () {
-        const data = new Data(inputData, {}, persistedState);
+        const data = new Data(inputData, persistedState);
         const len = _.reduce(data.chartData(), function (sum, chart) {
           return sum + chart.series.reduce(function (sum, series) {
             return sum + series.values.length;
@@ -302,7 +302,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(geohashGridData, {}, persistedState);
+      data = new Data(geohashGridData, persistedState);
     });
 
     describe('getVisData', function () {
@@ -323,7 +323,7 @@ describe('Vislib Data Class Test Suite', function () {
 
   describe('null value check', function () {
     it('should return false', function () {
-      const data = new Data(rowsData, {}, persistedState);
+      const data = new Data(rowsData, persistedState);
       expect(data.hasNullValues()).to.be(false);
     });
 
@@ -339,7 +339,7 @@ describe('Vislib Data Class Test Suite', function () {
         ]
       });
 
-      const data = new Data(nullRowData, {}, persistedState);
+      const data = new Data(nullRowData, persistedState);
       expect(data.hasNullValues()).to.be(true);
     });
   });

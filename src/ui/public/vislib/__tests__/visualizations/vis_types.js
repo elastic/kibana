@@ -11,7 +11,7 @@ describe('Vislib Vis Types Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     visTypes = Private(VislibVisualizationsVisTypesProvider);
-    visFunc = visTypes.histogram;
+    visFunc = visTypes.point_series;
   }));
 
   it('should be an object', function () {

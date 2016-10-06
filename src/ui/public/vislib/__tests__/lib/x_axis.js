@@ -172,7 +172,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     beforeEach(function () {
       width = $('.x-axis-div').width();
       xAxis.ordered = null;
-      xAxis.config.ordered = null;
+      xAxis.axisConfig.ordered = null;
       xAxis.getAxis(width);
       ordinalScale = xAxis.getScale();
       ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
