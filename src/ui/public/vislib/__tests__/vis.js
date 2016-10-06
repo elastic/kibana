@@ -122,7 +122,7 @@ dataArray.forEach(function (data, i) {
       it('should get attribue values', function () {
         expect(vis.get('addLegend')).to.be(true);
         expect(vis.get('addTooltip')).to.be(true);
-        expect(vis.get('type')).to.be('histogram');
+        expect(vis.get('type')).to.be('point_series');
       });
     });
 

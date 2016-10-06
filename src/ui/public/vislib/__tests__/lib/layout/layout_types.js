@@ -11,7 +11,7 @@ describe('Vislib Layout Types Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-    layoutFunc = layoutType.histogram;
+    layoutFunc = layoutType.point_series;
   }));
 
   it('should be an object', function () {

@@ -26,7 +26,7 @@ export default function ChartBaseClass(Private) {
 
       const events = this.events = new Dispatch(handler);
 
-      if (this.handler.visConfig.get('addTooltip', false)) {
+      if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {
         const $el = this.handler.el;
         const formatter = this.handler.data.get('tooltipFormatter');
 
