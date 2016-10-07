@@ -58,8 +58,8 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     obj.fact('doc_values', !!spec.doc_values);
 
     // stats
-    obj.fact('searchable', !!spec.searchable);
-    obj.fact('aggregatable', !!spec.aggregatable);
+    obj.fact('searchable', !!spec.searchable || scripted);
+    obj.fact('aggregatable', !!spec.aggregatable || scripted);
 
     // usage flags, read-only and won't be saved
     obj.comp('format', format);
