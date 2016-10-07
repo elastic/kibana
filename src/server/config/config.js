@@ -5,11 +5,17 @@ import unset from './unset';
 import createDefaultSchema from './schema';
 import pkg from '../../utils/package_json';
 import clone from './deep_clone_with_buffers';
+import { createReplaceLegacyKey } from './deprecation/replace_legacy_key';
+import { DeprecationLogger } from './deprecation/deprecation_logger';
+import { legacySettings } from './deprecation/legacy_settings';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
+const deprecationLogger = Symbol('Deprecation Logger');
+
+const replaceLegacyKey = createReplaceLegacyKey(legacySettings);
 
 module.exports = class Config {
   static withDefaultSchema(settings = {}) {
@@ -17,6 +23,7 @@ module.exports = class Config {
   }
 
   constructor(initialSchema, initialSettings) {
+    this[deprecationLogger] = new DeprecationLogger();
     this[schemaExts] = Object.create(null);
     this[vals] = Object.create(null);
     this[pendingSets] = _.merge(Object.create(null), initialSettings || {});
@@ -117,6 +124,7 @@ module.exports = class Config {
   }
 
   get(key) {
+    key = replaceLegacyKey(key, this.logDeprecation.bind(this));
     if (!key) {
       return clone(this[vals]);
     }
@@ -127,10 +135,12 @@ module.exports = class Config {
         throw new Error('Unknown config key: ' + key);
       }
     }
+
     return clone(value);
   }
 
   has(key) {
+    key = replaceLegacyKey(key, this.logDeprecation.bind(this));
     function has(key, schema, path) {
       path = path || [];
       // Catch the partial paths
@@ -180,5 +190,13 @@ module.exports = class Config {
     }
 
     return this[schema];
+  }
+
+  logDeprecation(message) {
+    this[deprecationLogger].log(message);
+  }
+
+  setDeprecationLogger(fn) {
+    this[deprecationLogger].set(fn);
   }
 };

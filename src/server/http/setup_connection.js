@@ -1,6 +1,9 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 import httpolyglot from 'httpolyglot';
+import { map } from 'lodash';
+import secureOptions from './secure_options';
+
 
 import tlsCiphers from './tls_ciphers';
 
@@ -25,8 +28,7 @@ export default function (kbnServer, server, config) {
     }
   };
 
-  // enable tlsOpts if ssl key and cert are defined
-  const useSsl = config.get('server.ssl.key') && config.get('server.ssl.cert');
+  const useSsl = config.get('server.ssl.enabled');
 
   // not using https? well that's easy!
   if (!useSsl) {
@@ -39,11 +41,16 @@ export default function (kbnServer, server, config) {
     tls: true,
     listener: httpolyglot.createServer({
       key: readFileSync(config.get('server.ssl.key')),
-      cert: readFileSync(config.get('server.ssl.cert')),
+      cert: readFileSync(config.get('server.ssl.certificate')),
+      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      passphrase: config.get('server.ssl.keyPassphrase'),
 
       ciphers: tlsCiphers,
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
-      honorCipherOrder: true
+      honorCipherOrder: true,
+      requestCert: config.get('server.ssl.clientAuthentication') !== 'none',
+      rejectUnauthorized: config.get('server.ssl.clientAuthentication') === 'required',
+      secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
     })
   });
 

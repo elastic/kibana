@@ -24,13 +24,17 @@ export default class BasePathProxy {
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    const { cert } = config.get('server.ssl');
-    if (cert) {
+    const { certificate, certificateAuthorities, clientAuthentication } = config.get('server.ssl');
+    if (certificate) {
+      if (certificateAuthorities || clientAuthentication !== 'none') {
+        throw new Error('BasePathProxy doesn\'t support the settings: server.ssl.certificateAuthorities, server.ssl.clientAuthentication');
+      }
+
       const httpsAgentConfig = {};
-      if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
+      if (certificate === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
         httpsAgentConfig.rejectUnauthorized = false;
       } else {
-        httpsAgentConfig.ca = readFileSync(cert);
+        httpsAgentConfig.ca = readFileSync(certificate);
       }
       this.proxyAgent = new HttpsAgent(httpsAgentConfig);
     }

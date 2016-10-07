@@ -43,14 +43,15 @@ to work with X-Pack, see {xpack-ref}kibana.html.
 Kibana supports SSL encryption for both client requests and the requests the Kibana server
 sends to Elasticsearch.
 
-To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file` and
-`ssl_cert_file` properties in `kibana.yml`:
+To encrypt communications between the browser and the Kibana server, you configure the `server.ssl.enabled`,
+`server.ssl.certificate` and `server.ssl.key` properties in `kibana.yml`:
 
 [source,text]
 ----
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
+server.ssl.enabled: true
 server.ssl.key: /path/to/your/server.key
-server.ssl.cert: /path/to/your/server.crt
+server.ssl.certificate: /path/to/your/server.crt
 ----
 
 If you are using X-Pack Security or a proxy that provides an HTTPS endpoint for Elasticsearch,
