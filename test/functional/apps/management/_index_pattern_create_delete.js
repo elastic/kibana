@@ -18,7 +18,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       return PageObjects.settings.navigateTo();
     })
     .then(function () {
-      return PageObjects.settings.clickExistingData();
+      return PageObjects.settings.clickKibanaIndicies();
     });
   });
 
@@ -52,8 +52,9 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
           'name',
           'type',
           'format',
+          'searchable',
+          'aggregatable',
           'analyzed',
-          'indexed',
           'controls'
         ];
 

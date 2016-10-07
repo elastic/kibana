@@ -202,7 +202,7 @@ _.class(errors.NoDefinedIndexPatterns).inherits(KbnError);
 
 
 /**
- * Tried to load a route besides management/data/* but you don't have a default index pattern!
+ * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
  */
 errors.NoDefaultIndexPattern = function NoDefaultIndexPattern(type) {
   KbnError.call(this,
