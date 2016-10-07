@@ -6,6 +6,8 @@ import '../styles/_pipeline_setup.less';
 import template from '../views/pipeline_setup.html';
 import processorRegistry from 'ui/registry/pipelines_processors';
 import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import './pipeline_inputs';
+import modes from '../lib/constants/pipeline_modes';
 
 const app = uiModules.get('kibana');
 
@@ -17,6 +19,8 @@ app.directive('pipelineSetup', function () {
       const pipelines = Private(PipelinesProvider);
       const notify = new Notifier({ location: `Pipeline Setup` });
       $scope.collectionTypes = ProcessorCollection.types;
+      $scope.modes = modes;
+      $scope.mode = $scope.modes.INPUTS;
 
       $scope.pipeline = $route.current.locals.pipeline;
 

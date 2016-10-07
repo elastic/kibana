@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import { SampleCollection } from 'ui/pipelines/lib/sample_collection';
 
 export default class Pipeline {
   constructor(processorRegistry, model) {
@@ -34,6 +35,7 @@ export default class Pipeline {
     this.processorRegistry = processorRegistry;
     this.processorCollections = [];
     this.activeProcessorCollection = this.processorCollection;
+    this.sampleCollection = new SampleCollection();
     this.input = {};
     this.output = undefined;
     this.dirty = false;

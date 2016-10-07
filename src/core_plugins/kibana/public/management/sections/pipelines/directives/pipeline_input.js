@@ -2,6 +2,8 @@ import uiModules from 'ui/modules';
 import { map, isObject } from 'lodash';
 import '../styles/_pipeline_input.less';
 import template from '../views/pipeline_input.html';
+import modes from '../lib/constants/pipeline_modes';
+import _ from 'lodash';
 
 const app = uiModules.get('kibana');
 
@@ -11,29 +13,33 @@ app.directive('pipelineInput', function () {
     template: template,
     scope: {
       pipeline: '=',
-      samples: '='
+      mode: '='
     },
     controller: function ($scope) {
-      $scope.$watch('pipeline.rawSamples', (newValue) => {
-        const splitRawSamples = ('' + newValue).split('\n');
+      const pipeline = $scope.pipeline;
+      const sampleCollection = $scope.sampleCollection = pipeline.sampleCollection;
 
-        $scope.samples = map(splitRawSamples, (sample) => {
-          try {
-            const json = JSON.parse(sample);
-            if (isObject(json)) {
-              return json;
-            } else {
-              return defaultObject(sample);
-            }
-          }
-          catch (error) {
-            return defaultObject(sample);
-          }
-        });
+      $scope.editSamples = () => {
+        $scope.mode = modes.INPUTS;
+      };
 
-        function defaultObject(sample) {
-          return { message: sample };
-        }
+      $scope.previousSample = () => {
+        let newIndex = sampleCollection.index - 1;
+        if (newIndex === -1) newIndex = sampleCollection.samples.length - 1;
+
+        sampleCollection.index = newIndex;
+      };
+
+      $scope.nextSample = () => {
+        let newIndex = sampleCollection.index + 1;
+        if (newIndex === sampleCollection.samples.length) newIndex = 0;
+
+        sampleCollection.index = newIndex;
+      };
+
+      $scope.$watch('sampleCollection.getCurrentSample()', (newVal) => {
+        $scope.currentSample = newVal;
+        pipeline.input = _.get($scope.currentSample, 'doc');
       });
     }
   };

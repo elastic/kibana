@@ -1,0 +1,4 @@
+<div class="sample">
+  <span ng-if="!isEmpty(sample.description)">{{ sample.description }}</span>
+  <span ng-if="isEmpty(sample.description)">{{ sample.doc | json }}</span>
+</div>

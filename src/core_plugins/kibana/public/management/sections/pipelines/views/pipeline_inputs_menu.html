@@ -1,0 +1,31 @@
+<h2><em>Pipeline Samples</em>
+  - Define one or more sample documents to build your pipeline against.
+</h2>
+
+<paginated-table
+  class="pattern-review-field-table"
+  columns="columns"
+  rows="rows"
+  per-page="10">
+</paginated-table>
+
+<div class="buttons">
+  <button
+    ng-click="addFromLogs()"
+    type="button"
+    class="btn btn-primary">
+    Add Samples from Logs
+  </button>
+  <button
+    ng-click="addFromJson()"
+    type="button"
+    class="btn btn-primary">
+    Add Single Sample
+  </button>
+  <button
+    ng-click="returnToPipeline()"
+    type="button"
+    class="btn btn-primary">
+    Define Pipeline
+  </button>
+</div>

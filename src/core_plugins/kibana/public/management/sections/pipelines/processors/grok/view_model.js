@@ -1,4 +1,4 @@
-import { assign, difference } from 'lodash';
+import { assign, difference, get } from 'lodash';
 import keysDeep from 'ui/pipelines/lib/keys_deep';
 import Processor from 'ui/pipelines/processor/view_model';
 
@@ -26,8 +26,8 @@ expression that supports aliased expressions that can be reused.`,
   }
 
   get description() {
-    const inputKeys = keysDeep(this.inputObject.doc);
-    const outputKeys = keysDeep(this.outputObject.doc);
+    const inputKeys = keysDeep(get(this, 'inputObject.doc'));
+    const outputKeys = keysDeep(get(this, 'outputObject.doc'));
     const addedKeys = difference(outputKeys, inputKeys);
     const added = addedKeys.sort().map(field => `[${field}]`).join(', ');
     const source = this.sourceField || '?';

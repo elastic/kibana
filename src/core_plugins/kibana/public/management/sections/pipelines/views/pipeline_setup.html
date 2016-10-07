@@ -1,4 +1,9 @@
-<div class="main-panels">
+<pipeline-inputs
+  pipeline="pipeline"
+  mode="mode"
+  ng-show="mode!==modes.PIPELINE">
+</pipeline-inputs>
+<div class="main-panels" ng-show="mode===modes.PIPELINE">
   <div
     ng-hide="expandContext < 1"
     class="left-panel">
@@ -26,28 +31,6 @@
           <pipeline-on-failure pipeline="pipeline"></pipeline-on-failure>
         </div>
       </div>
-<!--       <ul
-        class="pipeline-container"
-        draggable-container="pipeline.activeProcessorCollection.processors"
-        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
-        <li
-          draggable-item="processor"
-          ng-repeat="processor in pipeline.activeProcessorCollection.processors track by processor.processorId">
-          <processor-ui-container
-            pipeline="pipeline"
-            processor-collection="pipeline.activeProcessorCollection"
-            processor="processor">
-          </processor-ui-container>
-        </li>
-      </ul>
-      <ul
-        class="pipeline-container"
-        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
-        <li ng-hide="pipeline.processorCollections.length > 0">
-          <pipeline-on-failure pipeline="pipeline"></pipeline-on-failure>
-        </li>
-      </ul> -->
-
       <div class="add-processor">
         <div
           class="form-group"
@@ -92,7 +75,7 @@
   <div
     ng-hide="expandContext > 1"
     class="right-panel">
-    <pipeline-input pipeline="pipeline" samples="samples"></pipeline-input>
+    <pipeline-input pipeline="pipeline" mode="mode"></pipeline-input>
     <pipeline-output pipeline="pipeline" samples="samples"></pipeline-output>
   </div>
 </div>

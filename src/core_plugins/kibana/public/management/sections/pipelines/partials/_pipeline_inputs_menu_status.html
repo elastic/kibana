@@ -1,0 +1,21 @@
+<div
+  ng-if="sample.state === states.VALID"
+  class="status-valid"
+  aria-label="This Sample would be indexed successfully using the current Pipeline."
+  tooltip="This Sample would be indexed successfully using the current Pipeline."
+  tooltip-append-to-body="true">
+</div>
+<div
+  ng-if="sample.state === states.INVALID"
+  class="status-invalid"
+  aria-label="This Sample would not be indexed successfully using the current Pipeline."
+  tooltip="This Sample would not be indexed successfully using the current Pipeline."
+  tooltip-append-to-body="true">
+</div>
+<div
+  ng-if="sample.state === states.UNKNOWN"
+  class="status-unknown"
+  aria-label="This Sample has not been tested using the current Pipeline. Please wait."
+  tooltip="This Sample has not been tested using the current Pipeline. Please wait."
+  tooltip-append-to-body="true">
+</div>
