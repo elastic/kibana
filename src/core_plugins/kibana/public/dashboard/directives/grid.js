@@ -37,6 +37,20 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       function init() {
         $el.addClass('gridster');
 
+        // See issue https://github.com/elastic/kibana/issues/2138 and the
+        // subsequent fix for why we need to sort here. Short story is that
+        // gridster can fail to render widgets in the correct order, depending
+        // on the specific order of the panels.
+        // See https://github.com/ducksboard/gridster.js/issues/147
+        // for some additional back story.
+        $state.panels.sort((a, b) => {
+          if (a.row === b.row) {
+            return a.col - b.col;
+          } else {
+            return a.row - b.row;
+          }
+        });
+
         gridster = $el.gridster({
           max_cols: COLS,
           min_cols: COLS,
