@@ -25,7 +25,7 @@ describe('plugins/elasticsearch', function () {
       const config = {
         url: 'http://localhost:9200',
         ssl: {
-          verify: false
+          verificationMode: 'none'
         }
       };
 

@@ -1,4 +1,5 @@
-import { trim, trimRight, bindKey, get } from 'lodash';
+import { bindKey, compact, get, has, set, trim, trimRight } from 'lodash';
+import { unset } from '../../utils';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
@@ -19,6 +20,14 @@ module.exports = function ({ Plugin }) {
     config(Joi) {
       const { array, boolean, number, object, string, ref } = Joi;
 
+      const sslSchema = object({
+        verificationMode: string().valid('none', 'certificate', 'full').default('full'),
+        certificateAuthorities: array().single().items(string()),
+        certificate: string(),
+        key: string(),
+        keyPassphrase: string()
+      }).default();
+
       return object({
         enabled: boolean().default(true),
         url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
@@ -32,12 +41,7 @@ module.exports = function ({ Plugin }) {
         pingTimeout: number().default(ref('requestTimeout')),
         startupTimeout: number().default(5000),
         logQueries: boolean().default(false),
-        ssl: object({
-          verify: boolean().default(true),
-          ca: array().single().items(string()),
-          cert: string(),
-          key: string()
-        }).default(),
+        ssl: sslSchema,
         apiVersion: Joi.string().default('master'),
         healthCheck: object({
           delay: number().default(2500)
@@ -54,15 +58,41 @@ module.exports = function ({ Plugin }) {
           pingTimeout: number().default(ref('requestTimeout')),
           startupTimeout: number().default(5000),
           logQueries: boolean().default(false),
-          ssl: object({
-            verify: boolean().default(true),
-            ca: array().single().items(string()),
-            cert: string(),
-            key: string()
-          }).default(),
+          ssl: sslSchema,
           apiVersion: Joi.string().default('master'),
         }).default()
       }).default();
+    },
+
+    deprecations({ rename }) {
+      const sslVerify = (basePath) => {
+        const getKey = (path) => {
+          return compact([basePath, path]).join('.');
+        };
+
+        return (settings, log) => {
+          const sslSettings = get(settings, getKey('ssl'));
+
+          if (!has(sslSettings, 'verify')) {
+            return;
+          }
+
+          const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
+          set(sslSettings, 'verificationMode', verificationMode);
+          unset(sslSettings, 'verify');
+
+          log(`Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with "${getKey('ssl.verificationMode')}"`);
+        };
+      };
+
+      return [
+        rename('ssl.ca', 'ssl.certificateAuthorities'),
+        rename('ssl.cert', 'ssl.certificate'),
+        sslVerify(),
+        rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
+        rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
+        sslVerify('tribe')
+      ];
     },
 
     uiExports: {
