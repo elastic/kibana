@@ -59,7 +59,7 @@ capitalized:
 food AND love
 -------------
 
-Or parantheses:
+Or parentheses:
 
 [source,shell]
 ----------------------------------------
