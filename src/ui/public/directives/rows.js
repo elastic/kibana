@@ -35,7 +35,11 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
             $cell = createAggConfigResultCell(contents);
           }
-          contents = contents.toString('html');
+
+          let formatter = contents.aggConfig.fieldFormatter('html');
+          contents = formatter(contents.value,
+            contents.aggConfig.params && contents.aggConfig.params.field && contents.aggConfig.params.field.type);
+
         }
 
         if (_.isObject(contents)) {
