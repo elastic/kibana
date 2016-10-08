@@ -45,7 +45,7 @@ export default function ColorFormatProvider(Private) {
     html(val, field) {
 
       var color;
-      if (field.type === 'string') {
+      if (field.type === 'string' || field === 'string') {
         color = _.findLast(this.param('colors'), (colorParam) => {
           return new RegExp(colorParam.regex).test(val);
         });
@@ -66,6 +66,7 @@ export default function ColorFormatProvider(Private) {
       return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
     }
   };
+
 
   return _Color;
 };
