@@ -7,7 +7,7 @@ export default function ColorFormatProvider(Private) {
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-    regex: '#000000',
+    regex: '<insert regex>',
     text: '#000000',
     background: '#ffffff'
   };
