@@ -77,6 +77,28 @@ module.exports = function (grunt) {
       ]
     },
 
+    testUIDevServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testUiServer',
+        ...kbnServerFlags,
+      ]
+    },
+
     testCoverageServer: {
       options: {
         wait: false,
