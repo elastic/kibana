@@ -18,37 +18,31 @@ bdd.describe('shared links', function describeIndexTests() {
   // Pass either one.
   var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
-  bdd.before(function () {
+  bdd.before(async function () {
     baseUrl = PageObjects.common.getHostPort();
 
     var fromTime = '2015-09-19 06:31:44.000';
     var toTime = '2015-09-23 18:31:44.000';
-
     // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
-    .then(function loadkibanaIndexPattern() {
-      PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
-    })
+    await esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+    PageObjects.common.debug('load kibana index with default index pattern');
+    await elasticDump.elasticLoad('visualize','.kibana');
     // and load a set of makelogs data
-    .then(function loadIfEmptyMakelogs() {
-      return scenarioManager.loadIfEmpty('logstashFunctional');
-    })
-    .then(function () {
-      PageObjects.common.debug('discover');
-      return PageObjects.common.navigateToApp('discover');
-    })
-    .then(function () {
-      PageObjects.common.debug('setAbsoluteRange');
-      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    })
-    .then(function () {
-      //After hiding the time picker, we need to wait for
-      //the refresh button to hide before clicking the share button
-      return PageObjects.common.sleep(1000);
+    await scenarioManager.loadIfEmpty('logstashFunctional');
+    PageObjects.common.debug('discover');
+    await PageObjects.common.navigateToApp('discover');
+    PageObjects.common.debug('setAbsoluteRange');
+    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+
+    //After hiding the time picker, we need to wait for
+    //the refresh button to hide before clicking the share button
+    await PageObjects.common.try(async () => {
+      // Use a small timeout, since most commonly the time picker will not be showing and we
+      // don't want to wait 10 seconds (the default) to confirm that.
+      let shown = await PageObjects.header.isTimepickerOpen(500);
+      expect(shown).to.be.false;
     });
   });
-
 
   bdd.describe('shared link', function () {
     bdd.it('should show "Share a link" caption', function () {
