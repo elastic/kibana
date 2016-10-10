@@ -1,12 +1,12 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/input_whole_number';
+import 'ui/directives/input_number';
 
-describe('Whole number input directive', function () {
+describe('Number input directive', function () {
   let $compile;
   let $rootScope;
-  let html = '<input type="text" ng-model="value" input-whole-number />';
+  let html = '<input type="text" ng-model="value" input-number />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -22,16 +22,16 @@ describe('Whole number input directive', function () {
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = '1.0';
+    $rootScope.value = '1';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = '-5.0';
+    $rootScope.value = '-5';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
   });
 
-  it('should disallow numbers with decimals', function () {
+  it('should allow numbers with decimals', function () {
     let element = $compile(html)($rootScope);
 
     $rootScope.value = '123.0';
@@ -40,10 +40,10 @@ describe('Whole number input directive', function () {
 
     $rootScope.value = '1.2';
     $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
+    expect(element.hasClass('ng-valid')).to.be.ok();
 
     $rootScope.value = '-5.5';
     $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
+    expect(element.hasClass('ng-valid')).to.be.ok();
   });
 });

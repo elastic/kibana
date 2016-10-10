@@ -29,7 +29,7 @@ export default function HistogramAggDefinition(Private) {
         name: 'interval',
         editor: intervalTemplate,
         write: function (aggConfig, output) {
-          output.params.interval = parseInt(aggConfig.params.interval, 10);
+          output.params.interval = parseFloat(aggConfig.params.interval);
         }
       },
 
