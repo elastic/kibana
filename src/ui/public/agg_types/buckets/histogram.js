@@ -3,13 +3,59 @@ import moment from 'moment';
 import 'ui/validate_date_interval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
+import autoScaleTemplate from 'ui/agg_types/controls/auto_scale.html';
 export default function HistogramAggDefinition(Private) {
   let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   let createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
+  let queryFilter = Private(FilterBarQueryFilterProvider);
+  const NUM_BUCKETS = 50;
 
+  function numberOfDigits(num) {
+    return (Math.trunc(num).toString()).length;
+  }
+
+  function getInterval(agg) {
+    var interval = parseInt(agg.params.interval, 10);
+    if (agg.params.auto_scale) {
+      var found = false;
+      var min = 0;
+      var max = 0;
+      var key = agg.params.field.displayName;
+      _.flatten([queryFilter.getAppFilters(), queryFilter.getGlobalFilters()]).forEach(function (it) {
+        if (it.meta.key === key) {
+          var filterMin = -1;
+          var filterMax = -1;
+          if ('gte' in it.range[key]) filterMin = it.range[key].gte;
+          if ('gt' in it.range[key]) filterMin = it.range[key].gt;
+          if ('lte' in it.range[key]) filterMax = it.range[key].lte;
+          if ('lt' in it.range[key]) filterMax = it.range[key].lt;
+          if (filterMin !== -1 && filterMax !== -1) {
+            if (!found || filterMin < min) min = filterMin;
+            if (!found || filterMax > max) max = filterMax;
+            found = true;
+          }
+        }
+      });
+      if (found) {
+        var range = max - min;
+        interval = range / NUM_BUCKETS;
+        var digits = numberOfDigits(interval);
+        var roundPrecision = 0;
+        if (digits === 2) {
+          roundPrecision = -1;
+        } else if (digits > 2) {
+          roundPrecision = (digits - 2) * -1;
+        }
+        interval = _.round(interval, roundPrecision);
+        if (interval < 1) interval = 1;
+      }
+    }
+    return interval;
+  }
 
   return new BucketAggType({
     name: 'histogram',
@@ -29,7 +75,16 @@ export default function HistogramAggDefinition(Private) {
         name: 'interval',
         editor: intervalTemplate,
         write: function (aggConfig, output) {
-          output.params.interval = parseInt(aggConfig.params.interval, 10);
+          output.params.interval = getInterval(aggConfig);
+        }
+      },
+
+      {
+        name: 'auto_scale',
+        default: null,
+        editor: autoScaleTemplate,
+        write: function (aggConfig, output) {
+          return null;
         }
       },
 
