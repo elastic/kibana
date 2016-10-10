@@ -147,29 +147,23 @@ bdd.describe('discover app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show correct data for chart interval Daily', function () {
+    bdd.it('should show correct data for chart interval Daily', async function () {
       var chartInterval = 'Daily';
       var expectedBarChartData = [
         '133.196', '129.192', '129.724'
       ];
-      return PageObjects.discover.setChartInterval(chartInterval)
-      .then(function () {
-        return PageObjects.common.sleep(4000);
-      })
-      .then(function () {
-        return verifyChartData(expectedBarChartData);
+      await PageObjects.discover.setChartInterval(chartInterval);
+      await PageObjects.common.try(async () => {
+        await verifyChartData(expectedBarChartData);
       });
     });
 
-    bdd.it('should show correct data for chart interval Weekly', function () {
+    bdd.it('should show correct data for chart interval Weekly', async function () {
       var chartInterval = 'Weekly';
       var expectedBarChartData = [ '66.598', '129.458'];
-      return PageObjects.discover.setChartInterval(chartInterval)
-      .then(function () {
-        return PageObjects.common.sleep(2000);
-      })
-      .then(function () {
-        return verifyChartData(expectedBarChartData);
+      await PageObjects.discover.setChartInterval(chartInterval);
+      await PageObjects.common.try(async () => {
+        await verifyChartData(expectedBarChartData);
       });
     });
 

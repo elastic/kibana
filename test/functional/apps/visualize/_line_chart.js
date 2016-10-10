@@ -62,7 +62,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // sleep a bit before trying to get the chart data
       return PageObjects.common.sleep(3000)
       .then(function () {
-        return PageObjects.visualize.getLineChartData('fill="#57c17b"')
+        return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
         .then(function showData(data) {
           PageObjects.common.debug('data=' + data);
           PageObjects.common.saveScreenshot('Visualize-line-chart');
@@ -92,7 +92,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function () {
         return PageObjects.common.try(function () {
-          return PageObjects.visualize.getLineChartData('fill="#57c17b"')
+          return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
           .then(function showData(data) {
             PageObjects.common.debug('data=' + data);
             PageObjects.common.saveScreenshot('Visualize-line-chart');

@@ -39,7 +39,6 @@ function readServerSettings(opts, extraCliOptions) {
     set('env', 'development');
     set('optimize.lazy', true);
     if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.host', 'localhost');
       set('server.ssl.cert', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
