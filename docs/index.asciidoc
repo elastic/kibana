@@ -16,6 +16,8 @@ include::setup.asciidoc[]
 
 include::getting-started.asciidoc[]
 
+include::breaking-changes.asciidoc[]
+
 include::plugins.asciidoc[]
 
 include::access.asciidoc[]
