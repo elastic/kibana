@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
+import ngMock from 'ngMock';
 import AggTypeMetricPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
