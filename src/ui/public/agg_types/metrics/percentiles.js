@@ -11,12 +11,12 @@ define(function (require) {
     // required by the percentiles editor
     require('ui/number_list');
 
-  let valueProps = {
-    makeLabel: function () {
-      const label = this.params.customLabel || this.fieldDisplayName();
-      return ordinalSuffix(this.key) + ' percentile of ' + label;
-    }
-  };
+    let valueProps = {
+      makeLabel: function () {
+        const label = this.params.customLabel || this.fieldDisplayName();
+        return ordinalSuffix(this.key) + ' percentile of ' + label;
+      }
+    };
 
     return new MetricAggType({
       name: 'percentiles',
