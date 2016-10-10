@@ -1,5 +1,5 @@
 [[breaking-changes]]
-== Breaking changes
+== Breaking Changes
 
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
