@@ -79,4 +79,16 @@ describe('createMappingsFromPatternFields', function () {
     expect(mappings).to.have.property('bytes');
     expect(mappings.bytes).to.have.property('type', 'double');
   });
+
+  it('should filter out any metafields', function () {
+    testFields.push({name: '_source'});
+    testFields.push({name: '_somefuturemetafieldwedontknowabout'});
+    let mappings = createMappingsFromPatternFields(testFields);
+
+    const metafields = _.filter(_.keys(mappings), (name) => {
+      return name === '_source' || name === '_somefuturemetafieldwedontknowabout';
+    });
+
+    expect(metafields).to.be.empty();
+  });
 });
