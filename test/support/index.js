@@ -19,6 +19,7 @@ const config = exports.config = kbnInternVars.intern.config;
 exports.defaultTimeout = config.defaultTimeout;
 exports.defaultTryTimeout = config.defaultTryTimeout;
 exports.defaultFindTimeout = config.defaultFindTimeout;
+exports.screenshotsConfig = config.screenshots;
 
 // Helper instances
 exports.scenarioManager =

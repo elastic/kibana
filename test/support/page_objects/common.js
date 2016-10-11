@@ -23,7 +23,8 @@ import {
   defaultFindTimeout,
   remote,
   shieldPage,
-  esClient
+  esClient,
+  screenshotsConfig
 } from '../index';
 
 import PageObjects from './index';
@@ -37,7 +38,6 @@ const mkdirpAsync = promisify(mkdirp);
 const writeFileAsync = promisify(fs.writeFile);
 
 export default class Common {
-
   init(remote) {
     function injectTimestampQuery(func, url) {
       var formatted = modifyQueryString(url, function (parsed) {
@@ -251,7 +251,7 @@ export default class Common {
   async saveScreenshot(fileName, isFailure = false) {
     try {
       const directoryName = isFailure ? 'failure' : 'session';
-      const directoryPath = path.resolve(`test/screenshots/${directoryName}`);
+      const directoryPath = path.resolve(screenshotsConfig.directory, directoryName);
       const filePath = path.resolve(directoryPath, `${fileName}.png`);
       this.debug(`Taking screenshot "${filePath}"`);
 
