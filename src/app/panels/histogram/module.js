@@ -352,6 +352,15 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
         if($scope.panel.mode === 'count') {
           facet = facet.field($scope.panel.time_field).global(true);
+          
+          var dotPosition = $scope.panel.time_field.indexOf('.');
+
+          if (dotPosition > 0)
+          {
+            var nestedRoot = $scope.panel.time_field.substr(0, dotPosition);
+  
+            facet.nested(nestedRoot);
+          }
         } else {
           if(_.isNull($scope.panel.value_field)) {
             $scope.panel.error = "In " + $scope.panel.mode + " mode a field must be specified";
