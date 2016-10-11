@@ -27,8 +27,6 @@ UiModules
         timefilter.refreshInterval.pause = !timefilter.refreshInterval.pause;
       };
 
-      // functions for the time navigation buttons
-
       // travel forward in time based on the interval between from and to
       $scope.foward = function () {
         const time = getFromTo();
@@ -47,8 +45,8 @@ UiModules
         const origFrom = time.from.toISOString();
 
         time.from.subtract(diff, 'milliseconds');
-        timefilter.time.to = origFrom;
         timefilter.time.from = time.from.toISOString();
+        timefilter.time.to = origFrom;
       };
 
       // zoom out, doubling the difference between start and end, keeping the same time range center
