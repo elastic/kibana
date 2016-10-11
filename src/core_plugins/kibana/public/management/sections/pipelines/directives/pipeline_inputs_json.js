@@ -27,12 +27,7 @@ app.directive('pipelineInputsJson', function () {
       };
 
       $scope.saveEdit = () => {
-        $scope.sample.doc = $scope.editSample.doc;
-        $scope.sample.description = $scope.editSample.description;
-        $scope.sample.state = $scope.states.UNKNOWN;
-
-        //sampleCollection.add will not add the same sample instance more than once.
-        $scope.pipeline.sampleCollection.add($scope.sample);
+        $scope.pipeline.sampleCollection.replace($scope.sample, $scope.editSample);
 
         $scope.sample = undefined;
         $scope.mode = modes.INPUTS;

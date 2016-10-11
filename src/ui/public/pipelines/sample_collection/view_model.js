@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { map, forEach, last } from 'lodash';
+import { map, forEach, last, indexOf } from 'lodash';
 
 export class Sample {
   constructor(doc = {}) {
@@ -59,16 +59,20 @@ export class SampleCollection {
   }
 
   add(sample) {
-    if (_.contains(this.samples, sample)) return;
-
     this.samples.push(sample);
     if (this.index = -1) {
       this.index = 0;
     }
   }
 
+  replace(sample, newSample) {
+    const index = indexOf(this.samples, sample);
+    //_.pullAt(this.samples, index);
+    this.samples.splice(index, 1, newSample);
+  }
+
   remove(sample) {
-    const index = _.indexOf(this.samples, sample);
+    const index = indexOf(this.samples, sample);
 
     //TODO: Find out why remove wasn't working here!
     _.pullAt(this.samples, index);
@@ -96,7 +100,11 @@ export class SampleCollection {
     forEach(simulateResults, (simulateResult, index) => {
       const sample = this.samples[index];
       const lastProcessorResult = last(simulateResult);
-      sample.state = lastProcessorResult.output ? Sample.states.VALID : Sample.states.INVALID;
+      if (lastProcessorResult && !lastProcessorResult.output) {
+        sample.state = Sample.states.INVALID;
+      } else {
+        sample.state = Sample.states.VALID;
+      }
     });
   }
 
