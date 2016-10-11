@@ -294,6 +294,10 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       return _.where(this.fields, { meta: true });
     }
 
+    getNonMetaScriptedFields() {
+      return _.where(this.fields, { meta: false, scripted:false });
+    }
+
     getInterval() {
       return this.intervalName && _.find(intervals, { name: this.intervalName });
     }
