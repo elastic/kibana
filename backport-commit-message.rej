@@ -1,0 +1,22 @@
+Backport PR #8448
+---------
+
+**Commit 1:**
+Add highlight opacity as global setting
+
+The opacity of the items that are dimmed on a chart can now be configured. This is useful for users who want to increase or decrease the contrast between the element under focus and the other elements.
+
+* Original sha: b02bbad6c857a4d16bf69f91d288162eca91d466
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-09-23T05:12:59Z
+
+**Commit 2:**
+coerce opacity to valid value
+
+* Original sha: 8d10852a73aecf063e2bd484ed8a8dfa49803d99
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-09-23T17:09:31Z
+
+**Commit 3:**
+improve code style
+
+* Original sha: 807cc1b49142ad47fdae9fdc9cbadb11effc73c1
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-09-23T17:41:47Z
