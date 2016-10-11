@@ -1,6 +1,6 @@
 const Tab = require('../Tab');
 const expect = require('expect.js');
-const TabFakeStore = require('./_TabFakeStore');
+const StubBrowserStorage = require('testUtils/stub_browser_storage');
 
 describe('Chrome Tab', function () {
   describe('construction', function () {
@@ -87,7 +87,7 @@ describe('Chrome Tab', function () {
     });
 
     it('discovers the lastUrl', function () {
-      const lastUrlStore = new TabFakeStore();
+      const lastUrlStore = new StubBrowserStorage();
       const tab = new Tab({ id: 'foo', lastUrlStore });
       expect(tab.lastUrl).to.not.equal('bar');
 
@@ -102,7 +102,7 @@ describe('Chrome Tab', function () {
 
   describe('#setLastUrl()', function () {
     it('updates the lastUrl and storage value if passed a lastUrlStore', function () {
-      const lastUrlStore = new TabFakeStore();
+      const lastUrlStore = new StubBrowserStorage();
       const tab = new Tab({ id: 'foo', lastUrlStore });
 
       expect(tab.lastUrl).to.not.equal('foo');
