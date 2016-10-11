@@ -168,17 +168,27 @@ function (angular, app, _, $, kbn) {
 
       // Terms mode
       if($scope.panel.tmode === 'terms') {
-        request = request
-          .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.field)
-          .size($scope.panel.size)
-          .order($scope.panel.order)
-          .exclude($scope.panel.exclude)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
-            )))).size(0);
+        var field = $scope.field,
+            dotPosition = field.indexOf('.'),
+            facet = $scope.ejs.TermsFacet('terms')
+                .field($scope.field)
+                .size($scope.panel.size)
+                .order($scope.panel.order)
+                .exclude($scope.panel.exclude)
+                .facetFilter($scope.ejs.QueryFilter(
+                    $scope.ejs.FilteredQuery(
+                        boolQuery,
+                        filterSrv.getBoolFilter(filterSrv.ids())
+                    )));
+
+        if (dotPosition > 0)
+        {
+          var nestedRoot = field.substr(0, dotPosition);
+
+          facet.nested(nestedRoot);
+        }
+        
+        request = request.facet(facet).size(0);
       }
       if($scope.panel.tmode === 'terms_stats') {
         request = request
