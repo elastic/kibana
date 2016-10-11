@@ -3,6 +3,7 @@ import Pipeline from 'ui/pipelines/pipeline/view_model';
 import angular from 'angular';
 import PipelinesProvider from 'ui/pipelines';
 import '../styles/_pipeline_setup.less';
+import '../../indices/styles/_add_data_wizard.less'; //TODO: Need to find a better home for this stuff.
 import template from '../views/pipeline_setup.html';
 import processorRegistry from 'ui/registry/pipelines_processors';
 import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
