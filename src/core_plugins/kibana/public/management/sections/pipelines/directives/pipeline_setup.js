@@ -33,11 +33,20 @@ app.directive('pipelineSetup', function () {
           pipeline.updateOutput();
           return;
         }
+        if (pipeline.sampleCollection.samples.length === 0) {
+          pipeline.updateOutput();
+          return;
+        }
 
         return pipelines.pipeline.simulate(pipeline.model, pipeline.input)
         .then((results) => { pipeline.applySimulateResults(results); })
         .catch(notify.error);
       }, 200);
+
+      $scope.$watchCollection('pipeline.sampleCollection.samples', () => {
+        const pipeline = $scope.pipeline;
+        pipeline.dirty = true;
+      });
 
       $scope.$watchCollection('pipeline.activeProcessorCollection.processors', (newVal, oldVal) => {
         const pipeline = $scope.pipeline;
