@@ -1,0 +1,17 @@
+Backport PR #8313
+---------
+
+**Commit 1:**
+Upgrades Hapi to 14.2.0
+
+As of Node 6, crypto.pbkdf emits a deprecation warning when the digest isn't explicily set. Under certain conditions we are seeing this warning from Hapi's dependency Iron. Iron resolved this issue as of 4.0.4, which was introduced into Hapi as of 14.0.0.
+
+Node deprecation: https://github.com/nodejs/node/pull/4047/commits/8e8959d3ee0bfe48b5f4d239e7f031a1a27708f0
+Iron's resolution: https://github.com/hueniverse/iron/pull/43/commits/9e0a1ef5927c707fc79c5f2fa8c69a4b956897a4
+
+As of Hapi v9, they have removed three build-in plugins from the core which we rely on inert (files and directories), vision (view templates), and h2o2 (proxy). https://github.com/hapijs/hapi/issues/2682
+
+Signed-off-by: Tyler Smalley <tyler.smalley@elastic.co>
+
+* Original sha: 4feeff1bb948c18131c2aed9a81b94b208b6c823
+* Authored by Tyler Smalley <tyler.smalley@elastic.co> on 2016-09-13T19:20:22Z
