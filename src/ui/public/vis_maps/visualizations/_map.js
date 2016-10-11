@@ -1,28 +1,22 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
-import marked from 'marked';
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
-
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from './marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
-export default function MapFactory(Private, tilemap, $sanitize) {
+
+export default function MapFactory(Private, tilemapSettings) {
 
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
 
-  const tilemapOptions = tilemap.options;
-  const attribution = $sanitize(marked(tilemapOptions.attribution));
+
 
   const mapTiles = {
-    url: tilemap.url,
-    options: _.assign({}, tilemapOptions, { attribution })
+    url: tilemapSettings.getUrl(),
+    options: tilemapSettings.getOptions()
   };
 
   const markerTypes = {
@@ -52,13 +46,13 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapTiles.options.maxZoom), mapTiles.options.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
       const mapOptions = {
-        minZoom: tilemapOptions.minZoom,
-        maxZoom: tilemapOptions.maxZoom,
+        minZoom: mapTiles.options.minZoom,
+        maxZoom: mapTiles.options.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
