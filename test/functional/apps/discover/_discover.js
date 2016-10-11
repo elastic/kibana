@@ -237,39 +237,15 @@ bdd.describe('discover app', function describeIndexTests() {
       expect(isVisible).to.be(true);
     });
 
-    bdd.it('should open and close the time picker', () => {
-      let i = 0;
+    bdd.it('should have a link that opens and closes the time picker', async function() {
+      var noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
+      expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
 
-      return closeTimepicker() // close
-        .then(() => isTimepickerOpen(false)
-          .then(el => el.click()) // open
-          .then(() => isTimepickerOpen(true))
-          .then(el => el.click()) // close
-          .then(() => isTimepickerOpen(false))
-          .catch(PageObjects.common.createErrorHandler(this))
-        );
+      await noResultsTimepickerLink.click();
+      expect(await PageObjects.header.isTimepickerOpen()).to.be(true);
 
-      function closeTimepicker() {
-        return PageObjects.header.isTimepickerOpen().then(shown => {
-          if (!shown) {
-            return;
-          }
-          return PageObjects.discover
-            .getNoResultsTimepicker()
-            .click(); // close
-        });
-      }
-
-      function isTimepickerOpen(expected) {
-        return PageObjects.header.isTimepickerOpen().then(shown => {
-          PageObjects.common.debug(`expect (#${++i}) timepicker to be ${peek(expected)} (is ${peek(shown)}).`);
-          expect(shown).to.be(expected);
-          return PageObjects.discover.getNoResultsTimepicker();
-          function peek(state) {
-            return state ? 'open' : 'closed';
-          }
-        });
-      }
+      await noResultsTimepickerLink.click();
+      expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
     });
   });
 });
