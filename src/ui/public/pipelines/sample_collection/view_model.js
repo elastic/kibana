@@ -52,14 +52,18 @@ export class SampleCollection {
 
   add(sample) {
     this.samples.push(sample);
-    if (this.index = -1) {
+    if (this.index === -1) {
       this.index = 0;
     }
   }
 
   replace(sample, newSample) {
     const index = indexOf(this.samples, sample);
-    this.samples.splice(index, 1, newSample);
+    if (index === -1) {
+      this.add(newSample);
+    } else {
+      this.samples.splice(index, 1, newSample);
+    }
   }
 
   remove(sample) {
