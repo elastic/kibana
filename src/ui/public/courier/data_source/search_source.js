@@ -1,3 +1,55 @@
+/**
+ * @name SearchSource
+ *
+ * @description A promise-based stream of search results that can inherit from other search sources.
+ *
+ * Because filters/queries in Kibana have different levels of persistence and come from different
+ * places, it is important to keep track of where filters come from for when they are saved back to
+ * the savedObject store in the Kibana index. To do this, we create trees of searchSource objects
+ * that can have associated query parameters (index, query, filter, etc) which can also inherit from
+ * other searchSource objects.
+ *
+ * At query time, all of the searchSource objects that have subscribers are "flattened", at which
+ * point the query params from the searchSource are collected while traversing up the inheritance
+ * chain. At each link in the chain a decision about how to merge the query params is made until a
+ * single set of query parameters is created for each active searchSource (a searchSource with
+ * subscribers).
+ *
+ * That set of query parameters is then sent to elasticsearch. This is how the filter hierarchy
+ * works in Kibana.
+ *
+ * Visualize, starting from a new search:
+ *
+ *  - the `savedVis.searchSource` is set as the `appSearchSource`.
+ *  - The `savedVis.searchSource` would normally inherit from the `appSearchSource`, but now it is
+ *    upgraded to inherit from the `rootSearchSource`.
+ *  - Any interaction with the visualization will still apply filters to the `appSearchSource`, so
+ *    they will be stored directly on the `savedVis.searchSource`.
+ *  - Any interaction with the time filter will be written to the `rootSearchSource`, so those
+ *    filters will not be saved by the `savedVis`.
+ *  - When the `savedVis` is saved to elasticsearch, it takes with it all the filters that are
+ *    defined on it directly, but none of the ones that it inherits from other places.
+ *
+ * Visualize, starting from an existing search:
+ *
+ *  - The `savedVis` loads the `savedSearch` on which it is built.
+ *  - The `savedVis.searchSource` is set to inherit from the `saveSearch.searchSource` and set as
+ *    the `appSearchSource`.
+ *  - The `savedSearch.searchSource`, is set to inherit from the `rootSearchSource`.
+ *  - Then the `savedVis` is written to elasticsearch it will be flattened and only include the
+ *    filters created in the visualize application and will reconnect the filters from the
+ *    `savedSearch` at runtime to prevent losing the relationship
+ *
+ * Dashboard search sources:
+ *
+ *  - Each panel in a dashboard has a search source.
+ *  - The `savedDashboard` also has a searchsource, and it is set as the `appSearchSource`.
+ *  - Each panel's search source inherits from the `appSearchSource`, meaning that they inherit from
+ *    the dashboard search source.
+ *  - When a filter is added to the search box, or via a visualization, it is written to the
+ *    `appSearchSource`.
+ */
+
 import _ from 'lodash';
 
 import NormalizeSortRequestProvider from './_normalize_sort_request';
