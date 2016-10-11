@@ -65,6 +65,12 @@ export class SampleCollection {
   remove(sample) {
     const index = indexOf(this.samples, sample);
     _.pullAt(this.samples, index);
+
+    if (this.samples.length === 0) {
+      this.index = -1;
+    } else if (this.index === index) {
+      this.index = 0;
+    }
   }
 
   addFromLogs(logLines, propertyName) {
