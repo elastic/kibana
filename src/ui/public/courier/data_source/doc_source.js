@@ -1,5 +1,7 @@
 define(function (require) {
   let _ = require('lodash');
+  require('ui/es');
+  require('ui/storage');
 
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     let sendToEs = Private(require('ui/courier/data_source/_doc_send_to_es'));
