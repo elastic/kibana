@@ -16,11 +16,19 @@ visualize {
     height: 1px;
     display: flex;
     flex-direction: row;
-
-    flex: 1 1 auto;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
+    flex: 1 1 0;
+
+    // IE11 Hack
+    //
+    // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
+    // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
+    // have to use an IE-specific hack instead.
+    _:-ms-fullscreen, :root  & {
+      flex: 1 0;
+    }
 
     &.spy-only {
       display: none;
@@ -181,4 +189,3 @@ visualize-spy {
     white-space: pre-wrap;
   }
 }
-
