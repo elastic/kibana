@@ -86,7 +86,7 @@ uiModules
           if (param.name === 'field') {
             fields = $aggParamEditorsScope.indexedFields = getIndexedFields(param);
           } else if (param.type === 'field') {
-            fields = $aggParamEditorsScope[param.name] = getIndexedFields(param);
+            fields = $aggParamEditorsScope[`${param.name}Options`] = getIndexedFields(param);
           }
 
           if (fields) {

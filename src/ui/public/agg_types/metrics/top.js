@@ -19,10 +19,7 @@ export default function AggTypeMetricTopProvider(Private) {
           if (vis.type.name === 'table') {
             return true;
           }
-          if (vis.type.name === 'pie') {
-            return value === 'number';
-          }
-          return value === 'number' || value === 'date';
+          return value === 'number';
         },
         write(agg, output) {
           output.params = {

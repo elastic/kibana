@@ -8,9 +8,9 @@
     name="sortField"
     required
     ng-model="agg.params.sortField"
-    ng-show="sortField.length"
-    auto-select-if-only-one="sortField"
-    ng-options="field as field.displayName group by field.type for field in sortField">
+    ng-show="sortFieldOptions.length"
+    auto-select-if-only-one="sortFieldOptions"
+    ng-options="field as field.displayName group by field.type for field in sortFieldOptions">
   </select>
 </div>
 
