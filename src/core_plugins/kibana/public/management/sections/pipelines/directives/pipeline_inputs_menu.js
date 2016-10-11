@@ -6,7 +6,7 @@ import sampleTemplate from '../partials/_pipeline_inputs_menu_sample.html';
 import { assign, isEmpty, map, get } from 'lodash';
 import modes from '../lib/constants/pipeline_modes';
 import '../styles/pipeline_inputs_menu.less';
-import { Sample } from 'ui/pipelines/lib/sample_collection';
+import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 

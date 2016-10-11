@@ -3,7 +3,7 @@ import template from '../views/pipeline_inputs_logs.html';
 import '../styles/pipeline_inputs_logs.less';
 import modes from '../lib/constants/pipeline_modes';
 import _ from 'lodash';
-import { Sample } from 'ui/pipelines/lib/sample_collection';
+import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 

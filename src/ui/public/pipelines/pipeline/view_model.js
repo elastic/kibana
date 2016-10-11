@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
-import { SampleCollection } from 'ui/pipelines/lib/sample_collection';
+import { SampleCollection } from 'ui/pipelines/sample_collection/view_model';
 
 export default class Pipeline {
   constructor(processorRegistry, model) {
@@ -9,8 +9,7 @@ export default class Pipeline {
     const defaultModel = {
       pipelineId: '',
       description: '',
-      failureAction: 'index_fail',
-      rawSamples: ''
+      failureAction: 'index_fail'
     };
 
     _.defaults(
@@ -31,11 +30,11 @@ export default class Pipeline {
       _.get(model, 'failureProcessors'),
       ProcessorCollection.types.GLOBAL_FAILURE
     );
+    this.sampleCollection = new SampleCollection();
 
     this.processorRegistry = processorRegistry;
     this.processorCollections = [];
     this.activeProcessorCollection = this.processorCollection;
-    this.sampleCollection = new SampleCollection();
     this.input = {};
     this.output = undefined;
     this.dirty = false;
@@ -57,7 +56,7 @@ export default class Pipeline {
       failureAction: this.failureAction,
       failureProcessors: this.failureProcessorCollection.model,
       processors: this.processorCollection.model,
-      rawSamples: this.rawSamples
+      samples: this.sampleCollection.model
     };
 
     return result;
@@ -96,10 +95,13 @@ export default class Pipeline {
   // Updates the state of the pipeline and processors with the results
   // from an ingest simulate call.
   applySimulateResults(simulateResults) {
+    this.sampleCollection.applySimulateResults(simulateResults);
+
+    const currentSampleResults = simulateResults[this.sampleCollection.index];
     const allProcessors = this.allProcessors;
     const allResults = {};
 
-    _.forEach(simulateResults, result => {
+    _.forEach(currentSampleResults, result => {
       allResults[result.processorId] = result;
     });
 
@@ -107,6 +109,8 @@ export default class Pipeline {
       processor.setSimulateResult(allResults[processor.processorId]);
     });
 
+    //TODO: Do I want to get rid of the `input` property, and instead completely
+    //rely on the sampleCollection.getCurrentSample?
     this.processorCollection.applySimulateResults({ doc: this.input, meta: {} });
 
     const failureProcessorId = _.get(this.failureProcessorCollection, 'processors[0].failureProcessorId');
@@ -114,7 +118,7 @@ export default class Pipeline {
     const failureSourceInput = failureProcessor ? failureProcessor.inputObject : undefined;
     this.failureProcessorCollection.applySimulateResults(failureSourceInput);
 
-    this.updateOutput(allProcessors, simulateResults);
+    this.updateOutput(allProcessors, currentSampleResults);
   }
 
   get allProcessors() {

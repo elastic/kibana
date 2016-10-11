@@ -20,12 +20,20 @@ export default function PipelinesProvider($http, $q, Private) {
     });
   }
 
+  function packSamples(samples) {
+    return map(samples, (sample) => {
+      const result = keysToSnakeCaseShallow(sample);
+      return result;
+    });
+  }
+
   function packPipeline(pipeline) {
     const result = keysToSnakeCaseShallow(pipeline);
     result.processors = packProcessors(result.processors);
     if (result.failure_processors) {
       result.failure_processors = packProcessors(result.failure_processors);
     }
+    result.samples = packSamples(result.samples);
 
     return result;
   }
@@ -78,22 +86,18 @@ export default function PipelinesProvider($http, $q, Private) {
 
       return $http.delete(`${apiPrefix}/pipeline/${pipelineId}`);
     },
-    simulate: function (pipeline, input) {
-      function pack(pipeline, input) {
-        const result = {
-          pipeline: packPipeline(pipeline),
-          input: input
-        };
-
-        return result;
-      }
-
+    simulate: function (pipeline) {
       function unpack(response) {
-        const data = response.data.map(result => keysToCamelCaseShallow(result));
+        const data = map(response.data, (sampleResponse) => {
+          return map(sampleResponse, (processorResponse) => {
+            return keysToCamelCaseShallow(processorResponse);
+          });
+        });
+
         return data;
       }
 
-      const payload = pack(pipeline, input);
+      const payload = packPipeline(pipeline);
       return $http.post(`${apiPrefix}/simulate`, payload)
       .then(unpack)
       .catch(err => {

@@ -1,32 +1,25 @@
 import { map, partial } from 'lodash';
 import handleESError from '../../../../lib/handle_es_error';
-import simulateSchema from '../../../../lib/pipelines/simulate/schema';
+import pipelineSchema from '../../../../lib/pipelines/pipeline/schema';
 import simulateConverterProvider from '../../../../lib/pipelines/simulate/converter';
-import { keysToSnakeCaseShallow } from '../../../../../common/lib/case_conversion';
 
 export default (server) => {
   const simulateConverter = simulateConverterProvider(server);
-
-  function handleResponse(resp) {
-    return simulateConverter.esResponseToKibana(resp);
-  };
-
-  function handleError(error) {
-    return simulateConverter.esErrorToKibana(error);
-  }
+  const handleResponse = simulateConverter.esResponseToKibana;
+  const handleError = simulateConverter.esErrorToKibana;
 
   server.route({
     path: '/api/kibana/pipelines/simulate',
     method: 'POST',
     config: {
       validate: {
-        payload: simulateSchema
+        payload: pipelineSchema
       }
     },
     handler: function (request, reply) {
       const boundCallWithRequest = partial(server.plugins.elasticsearch.callWithRequest, request);
-      const simulateApiDocument = request.payload;
-      const body = simulateConverter.kibanaToEs(simulateApiDocument);
+      const pipelineApiDocument = request.payload;
+      const body = simulateConverter.kibanaToEs(pipelineApiDocument);
 
       console.log(JSON.stringify(body));
 
@@ -37,7 +30,6 @@ export default (server) => {
         body: body
       })
       .then(handleResponse, handleError)
-      .then((processors) => map(processors, keysToSnakeCaseShallow))
       .then(reply)
       .catch((error) => {
         reply(handleESError(error));

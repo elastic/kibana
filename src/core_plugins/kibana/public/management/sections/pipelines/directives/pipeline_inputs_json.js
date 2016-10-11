@@ -5,7 +5,7 @@ import _ from 'lodash';
 import modes from '../lib/constants/pipeline_modes';
 import 'ace';
 import angular from 'angular';
-import { Sample } from 'ui/pipelines/lib/sample_collection';
+import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 

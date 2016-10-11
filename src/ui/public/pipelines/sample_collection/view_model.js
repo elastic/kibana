@@ -1,10 +1,20 @@
 import _ from 'lodash';
+import { map, forEach, last } from 'lodash';
 
 export class Sample {
   constructor(doc = {}) {
     this.doc = doc;
     this.state = Sample.states.UNKNOWN;
     this.description = '';
+  }
+
+  get model() {
+    const result = {
+      doc: this.doc,
+      description: this.description
+    };
+
+    return result;
   }
 }
 
@@ -76,5 +86,25 @@ export class SampleCollection {
       _.set(result, propertyName, sample);
       return result;
     }
+  }
+
+  applySimulateResults(simulateResults) {
+    forEach(this.samples, (sample) => {
+      sample.state = Sample.states.UNKNOWN;
+    });
+
+    forEach(simulateResults, (simulateResult, index) => {
+      const sample = this.samples[index];
+      const lastProcessorResult = last(simulateResult);
+      sample.state = lastProcessorResult.output ? Sample.states.VALID : Sample.states.INVALID;
+    });
+  }
+
+  get model() {
+    const result = map(this.samples, (sample) => {
+      return sample.model;
+    });
+
+    return result;
   }
 }
