@@ -1,3 +1,12 @@
+/**
+ * @name AggConfig
+ *
+ * @extends IndexedArray
+ *
+ * @description A "data structure"-like class with methods for indexing and
+ * accessing instances of AggConfig.
+ */
+
 import _ from 'lodash';
 import IndexedArray from 'ui/indexed_array';
 import VisAggConfigProvider from 'ui/vis/agg_config';
