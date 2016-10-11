@@ -145,7 +145,8 @@ uiModules
         const fieldTypes = param.filterFieldTypes;
 
         if (fieldTypes) {
-          fields = $filter('fieldType')(fields, _.isFunction(fieldTypes) ? fieldTypes.bind(this, $scope.agg.vis) : fieldTypes);
+          const filter = _.isFunction(fieldTypes) ? fieldTypes.bind(this, $scope.agg.vis) : fieldTypes;
+          fields = $filter('fieldType')(fields, filter);
           fields = $filter('orderBy')(fields, ['type', 'name']);
         }
 
