@@ -30,7 +30,7 @@ export default (server) => {
         type: 'pipeline-meta',
         id: pipelineApiDocument.pipeline_id,
         body: {
-          'raw-samples': pipelineApiDocument.raw_samples,
+          samples: pipelineApiDocument.samples
         }
       }))
       .then(reply)

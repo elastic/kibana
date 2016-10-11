@@ -1,0 +1,20 @@
+"pipeline-meta": {
+  "properties": {
+    "samples": {
+      "properties": {
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "doc": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

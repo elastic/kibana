@@ -50,12 +50,20 @@ export default function PipelinesProvider($http, $q, Private) {
     });
   }
 
+  function unpackSamples(samples) {
+    return map(samples, (sample) => {
+      const result = keysToCamelCaseShallow(sample);
+      return result;
+    });
+  }
+
   function unpackPipeline(pipeline) {
     const result = keysToCamelCaseShallow(pipeline);
     result.processors = unpackProcessors(result.processors);
     if (result.failureProcessors) {
       result.failureProcessors = unpackProcessors(result.failureProcessors);
     }
+    result.samples = unpackSamples(result.samples);
 
     return result;
   }

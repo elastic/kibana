@@ -9,7 +9,11 @@ export default (server) => {
   function handlePipelineResponse(response, metaResponse) {
     const kibanaPipeline = pipelineConverter.esToKibana(response);
 
-    kibanaPipeline.raw_samples = get(metaResponse, '_source.raw-samples', '');
+    console.log('**************************************************');
+    console.log(JSON.stringify(metaResponse));
+    console.log('**************************************************');
+
+    kibanaPipeline.samples = get(metaResponse, '_source.samples', []);
 
     return kibanaPipeline;
   }

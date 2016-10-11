@@ -26,7 +26,7 @@ app.directive('pipelineInputsLogs', function () {
 
       $scope.saveEdit = () => {
         _.forEach($scope.samples, (sample) => {
-          sampleCollection.add(sample);
+          sampleCollection.add({ doc: sample });
         });
 
         $scope.mode = modes.INPUTS;

@@ -59,8 +59,6 @@ app.directive('pipelineMenu', function () {
         {title: '', sortable: false}
       ];
 
-      //buildRows();
-
       $scope.$watchCollection('pipelines', () => { buildRows(); });
     }
   };

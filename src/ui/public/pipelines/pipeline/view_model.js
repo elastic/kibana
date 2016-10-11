@@ -30,7 +30,7 @@ export default class Pipeline {
       _.get(model, 'failureProcessors'),
       ProcessorCollection.types.GLOBAL_FAILURE
     );
-    this.sampleCollection = new SampleCollection();
+    this.sampleCollection = new SampleCollection(_.get(model, 'samples'));
 
     this.processorRegistry = processorRegistry;
     this.processorCollections = [];

@@ -2,31 +2,31 @@ import { assign, isEmpty } from 'lodash';
 
 export default function (server) {
   return {
-    kibanaToEs: function (processorApiDocument) {
+    kibanaToEs: function (sampleApiDocument) {
       const result = {};
 
       assign(result, {
-        doc: processorApiDocument.doc
+        doc: sampleApiDocument.doc
       });
 
-      if (!isEmpty(processorApiDocument.description)) {
+      if (!isEmpty(sampleApiDocument.description)) {
         assign(result, {
-          description: processorApiDocument.description
+          description: sampleApiDocument.description
         });
       }
 
       return result;
     },
-    esToKibana: function (processorEsDocument) {
+    esToKibana: function (sampleEsDocument) {
       const result = {};
 
       assign(result, {
-        doc: processorEsDocument.doc
+        doc: sampleEsDocument.doc
       });
 
-      if (!isEmpty(processorEsDocument.description)) {
+      if (!isEmpty(sampleEsDocument.description)) {
         assign(result, {
-          description: processorEsDocument.description
+          description: sampleEsDocument.description
         });
       }
 

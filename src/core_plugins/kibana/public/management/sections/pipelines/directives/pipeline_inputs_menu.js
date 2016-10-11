@@ -48,8 +48,7 @@ app.directive('pipelineInputsMenu', function () {
       };
 
       const duplicateSample = (sample) => {
-        const newSample = new Sample(sample.doc);
-        newSample.description = sample.description;
+        const newSample = new Sample(sample.model);
 
         sampleCollection.add(newSample);
       };

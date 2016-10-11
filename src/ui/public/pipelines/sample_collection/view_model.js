@@ -1,16 +1,24 @@
 import _ from 'lodash';
-import { map, forEach, last, indexOf } from 'lodash';
+import { cloneDeep, map, forEach, last, indexOf } from 'lodash';
 
 export class Sample {
-  constructor(doc = {}) {
-    this.doc = doc;
-    this.state = Sample.states.UNKNOWN;
-    this.description = '';
+  constructor(model) {
+    const defaultModel = {
+      doc: {},
+      state: Sample.states.UNKNOWN,
+      description: ''
+    };
+
+    _.defaults(
+      this,
+      _.pick(model, _.keys(defaultModel)),
+      defaultModel
+    );
   }
 
   get model() {
     const result = {
-      doc: this.doc,
+      doc: cloneDeep(this.doc),
       description: this.description
     };
 
@@ -25,28 +33,12 @@ Sample.states = {
 };
 
 export class SampleCollection {
-  constructor() {
-    this.samples = [];
+  constructor(model) {
     this.index = -1;
 
-    _.times(0, (index) => {
-      this.add(new Sample({
-        firstname: 'James',
-        lastname: 'Unger',
-        age: index + 1,
-        address: '4214 S. Regal Manor Ct'
-      }));
-
-      const sample = this.samples[this.samples.length - 1];
-
-      const rnd = _.random(1, 3);
-      if (rnd === 1) sample.state = Sample.states.VALID;
-      if (rnd === 2) sample.state = Sample.states.INVALID;
-      if (rnd === 3) sample.state = Sample.states.UNKNOWN;
-
-      if (_.random(1,5) === 1) {
-        sample.description = `Description for document ${index + 1}`;
-      }
+    this.samples = [];
+    forEach(model, (sampleModel) => {
+      this.add(new Sample(sampleModel));
     });
   }
 
@@ -67,16 +59,12 @@ export class SampleCollection {
 
   replace(sample, newSample) {
     const index = indexOf(this.samples, sample);
-    //_.pullAt(this.samples, index);
     this.samples.splice(index, 1, newSample);
   }
 
   remove(sample) {
     const index = indexOf(this.samples, sample);
-
-    //TODO: Find out why remove wasn't working here!
     _.pullAt(this.samples, index);
-    //_.remove(this.samples, sample);
   }
 
   addFromLogs(logLines, propertyName) {
