@@ -39,7 +39,7 @@ app.directive('pipelineInputsJson', function ($timeout) {
         $scope.pipeline.sampleCollection.replace($scope.sample, $scope.editSample);
 
         $scope.sample = undefined;
-        $scope.mode = modes.INPUTS;
+        $scope.mode = modes.PIPELINE;
       };
 
       $scope.aceLoaded = function (editor) {

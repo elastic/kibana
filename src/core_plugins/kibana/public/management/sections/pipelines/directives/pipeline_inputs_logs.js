@@ -40,7 +40,7 @@ app.directive('pipelineInputsLogs', function ($timeout) {
           sampleCollection.add(sample);
         });
 
-        $scope.mode = modes.INPUTS;
+        $scope.mode = modes.PIPELINE;
       };
 
       function defaultObject(line) {
