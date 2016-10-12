@@ -22,5 +22,8 @@ export default {
     painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html#painless-api`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
+  },
+  pipelines: {
+    grok: `${baseUrl}guide/en/logstash/${urlVersion}/plugins-filters-grok.html`,
   }
 };
