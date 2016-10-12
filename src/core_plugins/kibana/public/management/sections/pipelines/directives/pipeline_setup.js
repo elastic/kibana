@@ -21,7 +21,12 @@ app.directive('pipelineSetup', function () {
       const notify = new Notifier({ location: `Pipeline Setup` });
       $scope.collectionTypes = ProcessorCollection.types;
       $scope.modes = modes;
-      $scope.mode = $scope.modes.INPUTS;
+
+      if ($scope.pipeline.sampleCollection.samples.length > 0) {
+        $scope.mode = $scope.modes.PIPELINE;
+      } else {
+        $scope.mode = $scope.modes.INPUTS;
+      }
 
       $scope.pipeline = $route.current.locals.pipeline;
 

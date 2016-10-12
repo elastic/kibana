@@ -9,7 +9,7 @@ import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 
-app.directive('pipelineInputsJson', function () {
+app.directive('pipelineInputsJson', function ($timeout) {
   return {
     restrict: 'E',
     template: template,
@@ -17,6 +17,15 @@ app.directive('pipelineInputsJson', function () {
       pipeline: '=',
       sample: '=',
       mode: '='
+    },
+    link: function ($scope, $el, attr) {
+      $scope.$watch('mode', () => {
+        if ($scope.mode === modes.INPUT_JSON) {
+          $timeout(() => {
+            $scope.editor.focus();
+          });
+        }
+      });
     },
     controller: function ($scope) {
       $scope.states = Sample.states;
@@ -34,6 +43,7 @@ app.directive('pipelineInputsJson', function () {
       };
 
       $scope.aceLoaded = function (editor) {
+        $scope.editor = editor;
         editor.$blockScrolling = Infinity;
       };
 

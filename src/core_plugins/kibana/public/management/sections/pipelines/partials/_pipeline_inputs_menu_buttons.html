@@ -1,12 +1,12 @@
 <div style="float:right;">
   <button
-    ng-click="duplicateSample(sample)"
-    class="btn btn-default"
-    aria-label="Duplicate Sample"
-    tooltip="Duplicate Sample"
+    ng-click="selectSample(index)"
+    class="btn btn-primary"
+    aria-label="View In Pipeline Builder"
+    tooltip="View In Pipeline Builder"
     tooltip-append-to-body="true">
-    <span class="sr-only">Duplicate</span>
-    <i aria-hidden="true" class="fa fa-clone"></i>
+    <span class="sr-only">View In Pipeline Builder</span>
+    <i aria-hidden="true" class="fa fa-eye"></i>
   </button>
 
   <button
@@ -17,6 +17,16 @@
     tooltip-append-to-body="true">
     <span class="sr-only">Edit</span>
     <i aria-hidden="true" class="fa fa-pencil"></i>
+  </button>
+
+  <button
+    ng-click="duplicateSample(sample)"
+    class="btn btn-default"
+    aria-label="Duplicate Sample"
+    tooltip="Duplicate Sample"
+    tooltip-append-to-body="true">
+    <span class="sr-only">Duplicate</span>
+    <i aria-hidden="true" class="fa fa-clone"></i>
   </button>
 
   <button

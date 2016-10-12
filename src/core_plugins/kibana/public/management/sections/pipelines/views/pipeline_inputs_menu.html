@@ -1,6 +1,4 @@
-<h2><em>Pipeline Samples</em>
-  - Define one or more sample documents to build your pipeline against.
-</h2>
+<h2><em>Pipeline Samples</em></h2>
 
 <paginated-table
   class="pattern-review-field-table"
@@ -8,6 +6,8 @@
   rows="rows"
   per-page="10">
 </paginated-table>
+
+<p class="text-center default-message" ng-if="rows.length === 0">No Samples defined. Add at least one to start editing the Pipeline.</p>
 
 <div class="buttons">
   <button
@@ -21,12 +21,5 @@
     type="button"
     class="btn btn-primary">
     Add Single Sample
-  </button>
-  <button
-    ng-click="returnToPipeline()"
-    type="button"
-    class="btn btn-primary"
-    ng-disabled="sampleCollection.samples.length === 0">
-    Define Pipeline
   </button>
 </div>

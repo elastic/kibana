@@ -7,13 +7,24 @@ import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 
-app.directive('pipelineInputsLogs', function () {
+app.directive('pipelineInputsLogs', function ($timeout) {
   return {
     restrict: 'E',
     template: template,
     scope: {
       pipeline: '=',
       mode: '='
+    },
+    link: function ($scope, $el, attr) {
+      $scope.$textArea = $el.find('textarea')[0];
+
+      $scope.$watch('mode', () => {
+        if ($scope.mode === modes.INPUT_LOGS) {
+          $timeout(() => {
+            $scope.$textArea.focus();
+          });
+        }
+      });
     },
     controller: function ($scope) {
       const sampleCollection = $scope.pipeline.sampleCollection;

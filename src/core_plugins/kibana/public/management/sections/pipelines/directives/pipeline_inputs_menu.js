@@ -1,5 +1,6 @@
 import uiModules from 'ui/modules';
 import template from '../views/pipeline_inputs_menu.html';
+import selectedTemplate from '../partials/_pipeline_inputs_menu_selected.html';
 import buttonsTemplate from '../partials/_pipeline_inputs_menu_buttons.html';
 import statusTemplate from '../partials/_pipeline_inputs_menu_status.html';
 import sampleTemplate from '../partials/_pipeline_inputs_menu_sample.html';
@@ -25,10 +26,6 @@ app.directive('pipelineInputsMenu', function () {
       $scope.states = Sample.states;
       $scope.isEmpty = isEmpty;
 
-      $scope.returnToPipeline = () => {
-        $scope.mode = modes.PIPELINE;
-      };
-
       $scope.addFromLogs = () => {
         $scope.mode = modes.INPUT_LOGS;
       };
@@ -36,6 +33,11 @@ app.directive('pipelineInputsMenu', function () {
       $scope.addFromJson = () => {
         $scope.sample = new Sample();
         $scope.mode = modes.INPUT_JSON;
+      };
+
+      const selectSample = (index) => {
+        sampleCollection.index = index;
+        $scope.mode = modes.PIPELINE;
       };
 
       const deleteSample = (sample) => {
@@ -59,6 +61,7 @@ app.directive('pipelineInputsMenu', function () {
             index: index,
             sample: sample,
             buildRows: buildRows,
+            selectSample: selectSample,
             deleteSample: deleteSample,
             editSample: editSample,
             duplicateSample: duplicateSample
@@ -66,7 +69,7 @@ app.directive('pipelineInputsMenu', function () {
 
           return [
             {
-              markup: '<input type="radio" name="selected" ng-model="sampleCollection.index" ng-value="index" />',
+              markup: selectedTemplate,
               scope: rowScope
             },
             {

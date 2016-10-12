@@ -1,15 +1,10 @@
-"pipeline-meta": {
+PUT .kibana/pipeline-meta/_mapping
+{
   "properties": {
     "samples": {
       "properties": {
         "description": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+          "type": "text"
         },
         "doc": {
           "type": "object"
