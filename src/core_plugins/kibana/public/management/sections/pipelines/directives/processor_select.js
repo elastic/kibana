@@ -12,11 +12,13 @@ function buildProcessorTypeList(processorRegistry) {
   const result = [];
   _.forIn(processorRegistry.byId, (registryItem) => {
     const instance = new registryItem.ViewModel(processorRegistry);
-    result.push({
-      typeId: instance.typeId,
-      title: instance.title,
-      helpText: instance.helpText
-    });
+    if (instance.typeId !== 'unknown') {
+      result.push({
+        typeId: instance.typeId,
+        title: instance.title,
+        helpText: instance.helpText
+      });
+    }
   });
 
   return _(result)
