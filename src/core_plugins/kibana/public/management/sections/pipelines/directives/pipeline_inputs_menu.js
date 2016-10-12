@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import $ from 'jquery';
 import template from '../views/pipeline_inputs_menu.html';
 import selectedTemplate from '../partials/_pipeline_inputs_menu_selected.html';
 import buttonsTemplate from '../partials/_pipeline_inputs_menu_buttons.html';
@@ -11,7 +12,7 @@ import { Sample } from 'ui/pipelines/sample_collection/view_model';
 
 const app = uiModules.get('kibana');
 
-app.directive('pipelineInputsMenu', function () {
+app.directive('pipelineInputsMenu', function ($timeout) {
   return {
     restrict: 'E',
     template: template,
@@ -19,6 +20,18 @@ app.directive('pipelineInputsMenu', function () {
       pipeline: '=',
       mode: '=',
       sample: '='
+    },
+    link: function ($scope, $el, attrs) {
+      $scope.$watch('sampleCollection.index', (index) => {
+        $timeout(() => {
+          const $paginateScope = $el.find('paginate').scope();
+          if (!$paginateScope) return;
+
+          const paginate = $paginateScope.paginate;
+          const newPage = Math.ceil((index + 1) / paginate.perPage);
+          paginate.goToPage(newPage);
+        });
+      });
     },
     controller: function ($scope) {
       const pipeline = $scope.pipeline;
