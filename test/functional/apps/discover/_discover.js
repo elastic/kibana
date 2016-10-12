@@ -54,22 +54,20 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('load query should show query name', async function () {
       await PageObjects.discover.loadSavedSearch(queryName1);
-      await PageObjects.common.sleep(3000);
 
-      var actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
       await PageObjects.common.saveScreenshot('Discover-load-query');
-      expect(actualQueryNameString).to.be(queryName1);
+      await PageObjects.common.try(async function() {
+        expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
+      });
     });
 
     bdd.it('should show the correct hit count', async function () {
-      var hitCount = await PageObjects.discover.getHitCount();
-
-      expect(hitCount).to.be('14,004');
+      await PageObjects.common.try(async function() {
+        expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+      });
     });
 
     bdd.it('should show the correct bar chart', async function () {
-      await PageObjects.common.sleep(4000);
-
       var expectedBarChartData = [ '3.237',
         '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
         '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
@@ -93,7 +91,6 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show correct data for chart interval Hourly', async function () {
       await PageObjects.discover.setChartInterval('Hourly');
-      await PageObjects.common.sleep(4000);
 
       var expectedBarChartData = [ '1.527', '2.290',
         '5.599', '7.890', '13.236', '30.290', '46.072', '55.490', '86.8',
@@ -151,7 +148,6 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedBarChartData = [ '122.535'];
 
       await PageObjects.discover.setChartInterval(chartInterval);
-      await PageObjects.common.sleep(2000);
       await verifyChartData(expectedBarChartData);
     });
 
@@ -160,7 +156,6 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedBarChartData = [ '122.535'];
 
       await PageObjects.discover.setChartInterval(chartInterval);
-      await PageObjects.common.sleep(2000);
       await verifyChartData(expectedBarChartData);
     });
 
@@ -174,7 +169,6 @@ bdd.describe('discover app', function describeIndexTests() {
       ];
 
       await PageObjects.discover.setChartInterval(chartInterval);
-      await PageObjects.common.sleep(4000);
       await verifyChartData(expectedBarChartData);
     });
 
