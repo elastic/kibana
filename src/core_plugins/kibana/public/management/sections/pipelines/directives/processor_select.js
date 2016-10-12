@@ -8,10 +8,9 @@ import processorRegistryProvider from 'ui/registry/pipelines_processors';
 
 const app = uiModules.get('kibana');
 
-function buildProcessorTypeList(processorRegistry, enabledProcessorTypeIds) {
+function buildProcessorTypeList(processorRegistry) {
   const result = [];
-  const filtered = _.pick(processorRegistry.byId, enabledProcessorTypeIds);
-  _.forIn(filtered, (registryItem) => {
+  _.forIn(processorRegistry.byId, (registryItem) => {
     const instance = new registryItem.ViewModel(processorRegistry);
     result.push({
       typeId: instance.typeId,
@@ -41,16 +40,9 @@ app.directive('processorSelect', function ($timeout, Private) {
     controller: function ($scope, Private, Notifier) {
       const pipelines = Private(PipelinesProvider);
       const notify = new Notifier({ location: `Ingest Pipeline Setup` });
-
       const processorRegistry = Private(processorRegistryProvider);
 
-      //determines which processors are available on the cluster
-      pipelines.processors.getProcessors()
-      .then((enabledProcessorTypeIds) => {
-        $scope.processorTypes = buildProcessorTypeList(processorRegistry, enabledProcessorTypeIds);
-      })
-      .catch(notify.error);
-
+      $scope.processorTypes = buildProcessorTypeList(processorRegistry);
       $scope.$watch('selectedItem.value', (newVal) => {
         if (!newVal) return;
 

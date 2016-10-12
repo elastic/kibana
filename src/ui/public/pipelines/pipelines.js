@@ -114,20 +114,6 @@ export default function PipelinesProvider($http, $q, Private) {
     }
   };
 
-  this.processors = {
-    getProcessors: () => {
-      function unpack(response) {
-        return response.data;
-      }
-
-      return $http.get(`${apiPrefix}/processors`)
-      .then(unpack)
-      .catch(err => {
-        return $q.reject(new Error('Error fetching enabled processors'));
-      });
-    }
-  };
-
   this.pipelines = {
     load: function () {
       function unpack(response) {
