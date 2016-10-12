@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { cloneDeep, map, forEach, last, indexOf } from 'lodash';
+import { cloneDeep, map, forEach, last, indexOf, get } from 'lodash';
 
 export class Sample {
   constructor(model) {
@@ -34,12 +34,20 @@ Sample.states = {
 
 export class SampleCollection {
   constructor(model) {
-    this.index = -1;
-
     this.samples = [];
-    forEach(model, (sampleModel) => {
+    forEach(get(model, 'samples'), (sampleModel) => {
       this.add(new Sample(sampleModel));
     });
+
+    const defaultModel = {
+      index: -1
+    };
+
+    _.defaults(
+      this,
+      _.pick(model, _.keys(defaultModel)),
+      defaultModel
+    );
   }
 
   getCurrentSample() {

@@ -30,6 +30,7 @@ export default (server) => {
         type: 'pipeline-meta',
         id: pipelineApiDocument.pipeline_id,
         body: {
+          'sample-index': pipelineApiDocument.sample_index,
           samples: pipelineApiDocument.samples
         }
       }))

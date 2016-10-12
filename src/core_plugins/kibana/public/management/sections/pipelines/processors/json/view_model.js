@@ -32,7 +32,8 @@ export default class Json extends Processor {
     return assign(
       super.model,
       {
-        sourceField: this.sourceField || ''
+        sourceField: this.sourceField || '',
+        targetField: this.targetField || ''
       }
     );
   }

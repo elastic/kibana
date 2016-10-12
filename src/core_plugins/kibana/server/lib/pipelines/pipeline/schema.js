@@ -8,5 +8,6 @@ export default Joi.object({
   failure_action: Joi.string().allow(''),
   failure_processors: processorArraySchema.optional(),
   processors: processorArraySchema,
-  samples: sampleArraySchema
+  samples: sampleArraySchema,
+  sample_index: Joi.number().integer()
 });

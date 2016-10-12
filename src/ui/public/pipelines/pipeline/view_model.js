@@ -30,7 +30,10 @@ export default class Pipeline {
       _.get(model, 'failureProcessors'),
       ProcessorCollection.types.GLOBAL_FAILURE
     );
-    this.sampleCollection = new SampleCollection(_.get(model, 'samples'));
+    this.sampleCollection = new SampleCollection({
+      samples: _.get(model, 'samples'),
+      index: _.get(model, 'sampleIndex')
+    });
 
     this.processorRegistry = processorRegistry;
     this.processorCollections = [];
@@ -56,7 +59,8 @@ export default class Pipeline {
       failureAction: this.failureAction,
       failureProcessors: this.failureProcessorCollection.model,
       processors: this.processorCollection.model,
-      samples: this.sampleCollection.model
+      samples: this.sampleCollection.model,
+      sampleIndex: this.sampleCollection.index
     };
 
     return result;
