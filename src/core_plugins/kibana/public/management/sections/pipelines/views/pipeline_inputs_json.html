@@ -10,15 +10,18 @@
       ng-model="editSample.description"
       input-focus />
   </div>
-  <div
-    class="json-editor"
-    json-input
-    require-keys="true"
-    ui-ace="{
-      mode: 'json',
-      onLoad: aceLoaded
-    }"
-    ng-model="editSample.doc">
+  <div class="form-group">
+    <label>JSON Document</label>
+    <div
+      class="json-editor"
+      json-input
+      require-keys="true"
+      ui-ace="{
+        mode: 'json',
+        onLoad: aceLoaded
+      }"
+      ng-model="editSample.doc">
+    </div>
   </div>
   <div class="form-group buttons">
     <button
