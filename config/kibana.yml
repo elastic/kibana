@@ -100,4 +100,4 @@
 
 # The default locale to use for translations if the locale specified by user
 # is not supported
-# i18n.locale: "en"
+#i18n.locale: "en"

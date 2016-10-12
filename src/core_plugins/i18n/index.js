@@ -1,4 +1,4 @@
-import i18n from './server/i18n/i18n';
+import * as i18n from './server/i18n/i18n';
 
 export default function (kibana) {
   return new kibana.Plugin({

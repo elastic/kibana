@@ -24,7 +24,6 @@ target
 .eslintcache
 /plugins/
 data
-installedPlugins
 disabledPlugins
 webpackstats.json
 config/*

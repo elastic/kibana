@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import UiExports from '../ui_exports';
 import * as kbnTestServer from '../../../test/utils/kbn_server';
 import UiI18n from '../ui_i18n';
-import i18n from '../../core_plugins/i18n/server/i18n/i18n';
+import * as i18n from '../../core_plugins/i18n/server/i18n/i18n';
 import langParser from 'accept-language-parser';
 
 const DATA_PATH = __dirname + '/fixtures/i18n';

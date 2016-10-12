@@ -1,97 +1,91 @@
 import expect from 'expect.js';
-import i18n from '../i18n/i18n';
+import * as i18n from '../i18n/i18n';
 import path from 'path';
-import Promise from 'bluebird';
+import _ from 'lodash';
 
-const PATH_SEPARATOR = path.sep;
-const DATA_PATH = __dirname + PATH_SEPARATOR + 'data';
+const FIXTURES = path.join(__dirname, 'fixtures');
 
-describe('Test registering translations for test_plugin_1', function () {
-  const pluginName = 'test_plugin_1';
-  const pluginTranslationPath = DATA_PATH + PATH_SEPARATOR + 'translations' + PATH_SEPARATOR + pluginName;
-
-  it('Register translations' , function (done) {
-    let result = true;
-    const translationFiles = [
-      pluginTranslationPath + PATH_SEPARATOR + 'de.json',
-      pluginTranslationPath + PATH_SEPARATOR + 'en.json'
-    ];
-
-    registerTranslations(translationFiles);
-    expect(result).to.be(true);
-    done();
-  });
-
-  it('EN translations are registered' , function (done) {
-    const locale = 'en';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR +
-      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + locale +
-      '.json';
-    const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(locale, expectedTranslationJson, done);
-  });
-
-  it('DE translations are registered' , function (done) {
-    const locale = 'de';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR +
-      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + locale +
-      '.json';
-    const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(locale, expectedTranslationJson, done);
-  });
-
-  it('Translation locales are registered', function (done) {
-    const expectedLocales = ['en', 'de'];
-    checkRegisteredLocales(expectedLocales, done);
-  });
-});
-
-describe('Test registering translations for test_plugin_1 and test_plugin_2', function () {
-
-  it('Register translations for test_plugin_1' , function (done) {
-    let result = true;
+describe('i18n module', function () {
+  before('registerTranslations - one plugin', function () {
     const pluginName = 'test_plugin_1';
-    const pluginTranslationPath = DATA_PATH + PATH_SEPARATOR + 'translations' + PATH_SEPARATOR + pluginName;
+    const pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
     const translationFiles = [
-      pluginTranslationPath + PATH_SEPARATOR + 'de.json',
-      pluginTranslationPath + PATH_SEPARATOR + 'en.json'
+      path.join(pluginTranslationPath, 'de.json'),
+      path.join(pluginTranslationPath, 'en.json')
     ];
-
     registerTranslations(translationFiles);
-    expect(result).to.be(true);
-    done();
   });
-
-  it('Register translations for test_plugin_2' , function (done) {
-    let result = true;
-    const pluginName = 'test_plugin_2';
-    const pluginTranslationPath = DATA_PATH + PATH_SEPARATOR + 'translations' + PATH_SEPARATOR + pluginName;
-    const translationFiles = [
-      pluginTranslationPath + PATH_SEPARATOR + 'en.json'
-    ];
-
-    registerTranslations(translationFiles);
-    expect(result).to.be(true);
-    done();
+  describe('one plugin', function () {
+    describe('getRegisteredLocaleTranslations', function () {
+      it('EN translations are registered' , function () {
+        const locale = 'en';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the server with development mode defaults',
+          'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
+          'test_plugin_1-HOME': 'Run along home now!'
+        };
+        checkTranslations(locale, expectedTranslationJson);
+      });
+      it('DE translations are registered' , function () {
+        const locale = 'de';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
+        };
+        checkTranslations(locale, expectedTranslationJson);
+      });
+      it('ES translations not registered' , function () {
+        const locale = 'es';
+        checkTranslations(locale, null);
+      });
+    });
+    describe('getRegisteredTranslationLocales', function () {
+      it('Translation locales are registered', function () {
+        const expectedLocales = ['en', 'de'];
+        checkRegisteredLocales(expectedLocales);
+      });
+    });
   });
-
-  it('EN translations are registered' , function (done) {
-    const locale = 'en';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + locale + '.json';
-    const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(locale, expectedTranslationJson, done);
-  });
-
-  it('DE translations are registered' , function (done) {
-    const locale = 'de';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + locale + '.json';
-    const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(locale, expectedTranslationJson, done);
-  });
-
-  it('Translation locales are registered', function (done) {
-    const expectedLocales = ['en', 'de'];
-    checkRegisteredLocales(expectedLocales, done);
+  describe('multiple plugins', function () {
+    before('registerTranslations - another plugin', function () {
+      const pluginName = 'test_plugin_2';
+      const pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
+      const translationFiles = [
+        path.join(pluginTranslationPath, 'en.json')
+      ];
+      registerTranslations(translationFiles);
+    });
+    describe('getRegisteredLocaleTranslations', function () {
+      it('EN translations are registered' , function () {
+        const locale = 'en';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the server with development mode defaults',
+          'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
+          'test_plugin_1-HOME': 'Run along home now!',
+          'test_plugin_2-XXXXXX': 'This is XXXXXX string',
+          'test_plugin_2-YYYY_PPPP': 'This is YYYY_PPPP string',
+          'test_plugin_2-FFFFFFFFFFFF': 'This is FFFFFFFFFFFF string',
+          'test_plugin_2-ZZZ': 'This is ZZZ string'
+        };
+        checkTranslations(locale, expectedTranslationJson);
+      });
+      it('DE translations are registered' , function () {
+        const locale = 'de';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
+        };
+        checkTranslations(locale, expectedTranslationJson);
+      });
+    });
+    describe('getRegisteredTranslationLocales', function () {
+      it('Translation locales are registered', function () {
+        const expectedLocales = ['en', 'de'];
+        checkRegisteredLocales(expectedLocales);
+      });
+    });
   });
 });
 
@@ -112,20 +106,11 @@ function compareTranslations(actual, expected) {
   return equal;
 }
 
-function checkTranslations(locale, expectedTranslations, done) {
+function checkTranslations(locale, expectedTranslations) {
   let result = true;
 
-  i18n.getRegisteredLocaleTranslations(locale).then(function (actualTranslationJson) {
-    if (!compareTranslations(actualTranslationJson, expectedTranslations)) {
-      result = false;
-    }
-    expect(result).to.be(true);
-    done();
-  }).catch(function (err) {
-    console.log(err);
-    result = false;
-    expect(result).to.be(true);
-    done();
+  return i18n.getRegisteredLocaleTranslations(locale).then(function (actualTranslationJson) {
+    expect(_.isEqual(actualTranslationJson, expectedTranslations)).to.be(true);
   });
 }
 
@@ -136,23 +121,9 @@ function registerTranslations(pluginTranslationFiles) {
   }
 }
 
-function checkRegisteredLocales(expectedLocales, done) {
-  let result = true;
-
+function checkRegisteredLocales(expectedLocales) {
   const actualLocales = i18n.getRegisteredTranslationLocales();
-  if (actualLocales.length !== expectedLocales.length) {
-    result = false;
-  } else {
-    let index = actualLocales.length;
-    actualLocales.sort();
-    expectedLocales.sort();
-    while (index--) {
-      if (actualLocales[index] !== expectedLocales[index]) {
-        result = false;
-        break;
-      }
-    }
-  }
-  expect(result).to.be(true);
-  done();
+  actualLocales.sort();
+  expectedLocales.sort();
+  expect(_.isEqual(actualLocales, expectedLocales)).to.be(true);
 }
