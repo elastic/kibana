@@ -3,8 +3,10 @@ export default function buildPhraseFilter(field, value, indexPattern) {
   let filter = { meta: { index: indexPattern.id} };
 
   if (field.scripted) {
+    // painless expects params.value while groovy and expression languages expect value.
+    const valueClause = field.lang === 'painless' ? 'params.value' : 'value';
     _.set(filter, 'script.script', {
-      inline: '(' + field.script + ') == value',
+      inline: '(' + field.script + ') == ' + valueClause,
       lang: field.lang,
       params: {
         value: value
