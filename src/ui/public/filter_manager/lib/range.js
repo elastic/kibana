@@ -33,15 +33,18 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
       lt: '<',
     };
 
-    const script = _.map(params, function (val, key) {
-      return '(' + field.script + ')' + operators[key] + key;
+    const knownParams = _.pick(params, (val, key) => { return key in operators; });
+    const script = _.map(knownParams, function (val, key) {
+      // painless expects params.[key] while groovy and expression languages expect [key] only.
+      const valuePrefix = field.lang === 'painless' ? 'params.' : '';
+      return '(' + field.script + ')' + operators[key] + valuePrefix + key;
     }).join(' && ');
 
-    const value = _.map(params, function (val, key) {
+    const value = _.map(knownParams, function (val, key) {
       return operators[key] + field.format.convert(val);
     }).join(' ');
 
-    _.set(filter, 'script.script', { inline: script, params: params, lang: field.lang });
+    _.set(filter, 'script.script', { inline: script, params: knownParams, lang: field.lang });
     filter.script.script.params.value = value;
     filter.meta.field = field.name;
   } else {
