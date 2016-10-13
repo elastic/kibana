@@ -185,6 +185,7 @@
     "grunt-run": "0.6.0",
     "grunt-simple-mocha": "0.4.0",
     "gruntify-eslint": "1.0.1",
+    "gulp-sourcemaps": "1.7.3",
     "handlebars": "4.0.5",
     "husky": "0.8.1",
     "image-diff": "1.6.0",
