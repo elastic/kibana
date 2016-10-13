@@ -57,7 +57,7 @@ describe('pointSeriesChartDataFromTable', function () {
 
     let y = {
       agg: vis.aggs[0],
-      col: { aggConfig: vis.aggs[0] },
+      col: { aggConfig: vis.aggs[0], title: vis.aggs[0].makeLabel() },
       at: function (i) { return 100 * i; }
     };
 
@@ -81,6 +81,7 @@ describe('pointSeriesChartDataFromTable', function () {
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(1);
     let series = chartData.series[0];
+    expect(series).to.have.property('label', y.col.title);
     expect(series.values).to.have.length(rowCount);
     series.values.forEach(function (point, i) {
       expect(point)
@@ -152,8 +153,7 @@ describe('pointSeriesChartDataFromTable', function () {
 
         expect(point).to.have.property('y');
         expect(point.y).to.be.a('number');
-
-        expect(point).to.not.have.property('series');
+        expect(point).to.have.property('series', siri.label);
 
         expect(point).to.have.property('aggConfigResult');
         expect(point.aggConfigResult)

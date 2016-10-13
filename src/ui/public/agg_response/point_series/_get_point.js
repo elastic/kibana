@@ -27,6 +27,11 @@ export default function PointSeriesGetPoint() {
     if (series) {
       point.aggConfig = series.agg;
       point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
+    } else if (y) {
+      // If the data is not split up with a series aspect, then
+      // each point's "series" becomes the y-agg that produced it
+      point.aggConfig = y.col.aggConfig;
+      point.series = y.col.title;
     }
 
     if (yScale) {
