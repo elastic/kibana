@@ -26,7 +26,7 @@ let MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile) {
+module.directive('kbnTableRow', function ($compile, copee) {
   let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -78,33 +78,8 @@ module.directive('kbnTableRow', function ($compile) {
 
         $detailsScope.docUrl = `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}/?id=${$scope.row._id}`;
 
-        $detailsScope.copyTextToClipboard = text => {
-          const notify = new Notifier({
-            location: `Share Document`,
-          });
-
-          // This code was borrowed from 'copee', see https://github.com/styfle/copee
-          const ta = document.createElement('textarea');
-          ta.value = text;
-          ta.cols = 1;
-          ta.rows = 1;
-          ta.style.color = 'transparent';
-          ta.style.border = 'none';
-          document.body.appendChild(ta);
-          ta.select();
-          let success = false;
-          try {
-            success = document.execCommand('copy');
-          } catch (err) {
-            success = false;
-          }
-          document.body.removeChild(ta);
-
-          if (success) {
-            notify.info('URL copied to clipboard.');
-          } else {
-            notify.info('Failed to copy to clipboard');
-          }
+        $detailsScope.copyTextToClipboard = theUrl => {
+          copee.urlToClipboard(theUrl, 'Document');
         };
 
         $compile($detailsTr)($detailsScope);

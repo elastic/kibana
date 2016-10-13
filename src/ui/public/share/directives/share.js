@@ -28,7 +28,7 @@ app.directive('share', function (Private) {
     },
     template: shareTemplate,
     controllerAs: 'share',
-    controller: function ($scope, $document, $location, globalState) {
+    controller: function ($scope, $document, $location, globalState, copee) {
       if ($scope.allowEmbed !== 'false' && $scope.allowEmbed !== undefined) {
         throw new Error('allowEmbed must be "false" or undefined');
       }
@@ -145,23 +145,11 @@ app.directive('share', function (Private) {
       };
 
       this.copyToClipboard = selector => {
-        const notify = new Notifier({
-          location: `Share ${$scope.objectType}`,
-        });
-
-        // Select the text to be copied. If the copy fails, the user can easily copy it manually.
         const copyTextarea = $document.find(selector)[0];
-        copyTextarea.select();
-
-        try {
-          const isCopied = document.execCommand('copy');
-          if (isCopied) {
-            notify.info('URL copied to clipboard.');
-          } else {
-            notify.info('URL selected. Press Ctrl+C to copy.');
-          }
-        } catch (err) {
-          notify.info('URL selected. Press Ctrl+C to copy.');
+        const url = copyTextarea.value;
+        const success = copee.urlToClipboard(url, $scope.objectType);
+        if (!success) {
+          copyTextarea.select();
         }
       };
     }
