@@ -10,7 +10,7 @@
 
     <button
       class="btn btn-primary"
-      ng-show="failureAction === 'on_error'"
+      ng-if="failureAction === 'on_error'"
       ng-click="defineProcessors()">
       Define processors
     </button>
