@@ -8,7 +8,6 @@ pipeline-inputs-menu {
     float: right;
   }
 
-
   .status(@color, @icon) {
     &:before {
       font-family: 'FontAwesome';
@@ -29,7 +28,7 @@ pipeline-inputs-menu {
     }
 
     &-unknown {
-      .status(black, @fa-var-spinner);
+      .status(black, @fa-var-hourglass-o);
     }
   }
 
