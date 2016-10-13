@@ -1,6 +1,6 @@
 <div class="form-group">
   <div class="header">
-    <label>Processor Input:</label>
+    <label>Processor Input<span ng-if="processor.inputControlsState.showMeta"> (metadata)</span>:</label>
     <input-output-controls options="processor.inputControlsState"></input-output-controls>
   </div>
   <div ng-hide="processor.inputControlsState.showMeta">

@@ -70,6 +70,13 @@ export default class Processor {
     }
     this.outputObject = newOutputObject;
 
+    if (!_.isEqual(this.inputObject.meta, this.outputObject.meta)) {
+      this.outputControlsState.showMeta = true;
+    }
+    if (!_.isEqual(this.inputObject.doc, this.outputObject.doc)) {
+      this.outputControlsState.showMeta = false;
+    }
+
     this.error = error;
   }
 
