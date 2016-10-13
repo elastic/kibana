@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import keysDeep from 'ui/pipelines/lib/keys_deep';
-import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import ProcessorCollection from 'ui/pipelines/processor_collection/view_model';
 
 export default class Processor {
   constructor(processorRegistry, processorId, typeId, title, helpText, mainField, defaultModel, model) {

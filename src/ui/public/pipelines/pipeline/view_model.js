@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import ProcessorCollection from 'ui/pipelines/processor_collection/view_model';
 import { SampleCollection } from 'ui/pipelines/sample_collection/view_model';
 
 export default class Pipeline {

@@ -6,7 +6,7 @@ import '../styles/_pipeline_setup.less';
 import '../../indices/styles/_add_data_wizard.less'; //TODO: Need to find a better home for this stuff.
 import template from '../views/pipeline_setup.html';
 import processorRegistry from 'ui/registry/pipelines_processors';
-import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import ProcessorCollection from 'ui/pipelines/processor_collection/view_model';
 import './pipeline_inputs';
 import modes from '../lib/constants/pipeline_modes';
 
@@ -79,6 +79,7 @@ app.directive('pipelineSetup', function () {
         pipeline.dirty = true;
 
         window.pipeline = $scope.pipeline;
+        window.ProcessorCollection = ProcessorCollection;
       });
 
       $scope.expandContext = 1;

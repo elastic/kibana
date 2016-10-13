@@ -1,6 +1,6 @@
 import { assign, cloneDeep, get, map } from 'lodash';
 import Processor from 'ui/pipelines/processor/view_model';
-import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import ProcessorCollection from 'ui/pipelines/processor_collection/view_model';
 
 export default class Foreach extends Processor {
   constructor(processorRegistry, processorId, model) {

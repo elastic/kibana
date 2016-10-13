@@ -1,7 +1,7 @@
 import uiModules from 'ui/modules';
 import '../styles/_processor_ui_container_header.less';
 import processorUiContainerHeaderTemplate from '../views/processor_ui_container_header.html';
-import ProcessorCollection from 'ui/pipelines/lib/processor_collection';
+import ProcessorCollection from 'ui/pipelines/processor_collection/view_model';
 import Processor from 'ui/pipelines/processor/view_model';
 import 'ui/draggable/draggable_container';
 import 'ui/draggable/draggable_handle';
