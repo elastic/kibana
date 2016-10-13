@@ -37,6 +37,7 @@ app.directive('pipelineInputsJson', function ($timeout) {
 
       $scope.saveEdit = () => {
         $scope.pipeline.sampleCollection.replace($scope.sample, $scope.editSample);
+        $scope.pipeline.sampleCollection.setCurrent($scope.editSample);
 
         $scope.sample = undefined;
         $scope.mode = modes.PIPELINE;

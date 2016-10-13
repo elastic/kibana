@@ -61,7 +61,7 @@ export class SampleCollection {
   add(sample) {
     this.samples.push(sample);
     if (this.index === -1) {
-      this.index = 0;
+      this.setCurrent(sample);
     }
   }
 
@@ -72,6 +72,11 @@ export class SampleCollection {
     } else {
       this.samples.splice(index, 1, newSample);
     }
+  }
+
+  setCurrent(sample) {
+    const index = indexOf(this.samples, sample);
+    this.index = index;
   }
 
   remove(sample) {
