@@ -75,15 +75,16 @@ export default class Processor {
 
   setInput(input) {
     //TODO: Do I want to pull this from outputObject.meta?
-    const metaFields = [
-      '_index',
-      '_type',
-      '_id',
-      '_routing',
-      '_parent',
-      '_timestamp',
-      '_ttl'
-    ];
+    // const metaFields = [
+    //   '_index',
+    //   '_type',
+    //   '_id',
+    //   '_routing',
+    //   '_parent',
+    //   '_timestamp',
+    //   '_ttl'
+    // ];
+    const metaFields = [];
 
     this.inputObject = _.cloneDeep(input);
     this.suggestedFields = _.union(keysDeep(_.get(this.inputObject, 'doc')), metaFields);
