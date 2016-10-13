@@ -87,11 +87,17 @@ export default class Pipeline {
 
   updateOutput(allProcessors, simulateResults) {
     allProcessors = allProcessors || {};
-    const lastResult = _.last(simulateResults);
-    const lastProcessor = allProcessors[_.get(lastResult, 'processorId')];
 
-    this.output = _.get(lastProcessor, 'outputObject');
-    this.error = _.get(lastProcessor, 'causeIndexFail');
+    if (_.isEmpty(allProcessors)) {
+      this.output = { doc: this.input, meta: {} };
+      this.error = false;
+    } else {
+      const lastResult = _.last(simulateResults);
+      const lastProcessor = allProcessors[_.get(lastResult, 'processorId')];
+
+      this.output = _.get(lastProcessor, 'outputObject');
+      this.error = _.get(lastProcessor, 'causeIndexFail');
+    }
 
     this.dirty = false;
   }
