@@ -76,7 +76,7 @@ module.directive('kbnTableRow', function ($compile) {
         // empty the details and rebuild it
         $detailsTr.html(detailsHtml);
 
-        $detailsScope.row = $scope.row;
+        $detailsScope.docUrl = `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}/?id=${$scope.row._id}`;
 
         $detailsScope.copyTextToClipboard = text => {
           const notify = new Notifier({
