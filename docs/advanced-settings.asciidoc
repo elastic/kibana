@@ -1,6 +1,6 @@
 [[kibana-settings-reference]]
 
-WARNING: Modifying the following settings can signficantly affect Kibana's performance and cause problems that are difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
+WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
 
 .Kibana Settings Reference
 [horizontal]
@@ -12,7 +12,7 @@ WARNING: Modifying the following settings can signficantly affect Kibana's perfo
 `defaultIndex`:: Default is `null`. This property specifies the default index.
 `metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the document.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
-`doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighing makes request slow when working on big documents. Set this property to `false` to disable highlighting.
+`doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when working on big documents. Set this property to `false` to disable highlighting.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly increase request processing time.
 `fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
