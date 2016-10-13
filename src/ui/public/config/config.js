@@ -1,4 +1,6 @@
 define(function (require) {
+  require('ui/notify');
+
   let module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
   ]);
