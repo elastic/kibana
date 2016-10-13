@@ -18,13 +18,15 @@ describe('getPoint', function () {
   describe('Without series aspect', function () {
     let seriesAspect;
     let xAspect;
+    let yCol;
     let yAspect;
     let yScale;
 
     beforeEach(function () {
       seriesAspect = null;
       xAspect = { i: 0 };
-      yAspect = { i: 1 };
+      yCol = { title: 'Y', aggConfig: {} };
+      yAspect = { i: 1, col: yCol };
       yScale = 5;
     });
 
@@ -37,8 +39,8 @@ describe('getPoint', function () {
         .to.have.property('x', 1)
         .and.have.property('y', 10)
         .and.have.property('z', 3)
-        .and.have.property('aggConfigResult', row[1])
-        .and.not.have.property('series');
+        .and.have.property('series', yCol.title)
+        .and.have.property('aggConfigResult', row[1]);
     });
 
     it('ignores points with a y value of NaN', function () {

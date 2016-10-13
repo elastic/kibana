@@ -19,7 +19,6 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let yTitle;
   const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -28,6 +27,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
