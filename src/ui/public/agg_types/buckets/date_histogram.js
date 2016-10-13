@@ -41,7 +41,8 @@ export default function DateHistogramAggType(timefilter, config, Private) {
     makeLabel: function (agg) {
       const output = this.params.write(agg);
       const params = output.params;
-      return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+      const field = params.field || _.get(agg, 'params.field.displayName', '');
+      return field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
