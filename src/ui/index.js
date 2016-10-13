@@ -1,6 +1,6 @@
 import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
-import { defaults } from 'lodash';
+import { defaults, _ } from 'lodash';
 import { props } from 'bluebird';
 import Boom from 'boom';
 import { reduce as reduceAsync } from 'bluebird';
@@ -11,7 +11,7 @@ import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import langParser from 'accept-language-parser';
-import UiI18n from './ui_i18n';
+import * as UiI18n from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -100,12 +100,7 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-    let locale = UiI18n.getTranslationLocale(acceptLanguages, defaultLocale, server);
-    let translations = await UiI18n.getLocaleTranslations(locale, server);
-    if (locale !== defaultLocale) {
-      translations = await UiI18n.updateMissingTranslations(defaultLocale, translations, server);
-    }
-    const i18n = new UiI18n.I18n(translations);
+      const translations = await UiI18n.getTranslations(acceptLanguages, defaultLocale, server);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -114,7 +109,7 @@ export default async (kbnServer, server, config) => {
           includeUserProvidedConfig
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
-        i18n: i18n,
+        i18n: key => _.get(translations, key, ''),
       });
     } catch (err) {
       reply(err);

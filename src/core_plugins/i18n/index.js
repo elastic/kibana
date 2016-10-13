@@ -11,7 +11,8 @@ export default function (kibana) {
     },
 
     init(server, options) {
-      server.expose('getRegisteredLocaleTranslations', i18n.getRegisteredLocaleTranslations);
+      server.expose('getTranslationsForLocale', i18n.getTranslationsForLocale);
+      server.expose('getTranslationsForLocales', i18n.getTranslationsForLocales);
       server.expose('getRegisteredTranslationLocales', i18n.getRegisteredTranslationLocales);
       server.expose('registerTranslations', i18n.registerTranslations);
     }

@@ -16,7 +16,7 @@ describe('i18n module', function () {
     registerTranslations(translationFiles);
   });
   describe('one plugin', function () {
-    describe('getRegisteredLocaleTranslations', function () {
+    describe('getTranslationsForLocale', function () {
       it('EN translations are registered' , function () {
         const locale = 'en';
         const expectedTranslationJson = {
@@ -56,7 +56,7 @@ describe('i18n module', function () {
       ];
       registerTranslations(translationFiles);
     });
-    describe('getRegisteredLocaleTranslations', function () {
+    describe('getTranslationsForLocale', function () {
       it('EN translations are registered' , function () {
         const locale = 'en';
         const expectedTranslationJson = {
@@ -109,7 +109,7 @@ function compareTranslations(actual, expected) {
 function checkTranslations(locale, expectedTranslations) {
   let result = true;
 
-  return i18n.getRegisteredLocaleTranslations(locale).then(function (actualTranslationJson) {
+  return i18n.getTranslationsForLocale(locale).then(function (actualTranslationJson) {
     expect(_.isEqual(actualTranslationJson, expectedTranslations)).to.be(true);
   });
 }

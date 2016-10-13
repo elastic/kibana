@@ -14,7 +14,7 @@ let registeredTranslations = {};
  * @param {string} locale - Translation locale to be returned
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-const getRegisteredLocaleTranslations = function (locale) {
+const getTranslationsForLocale = function (locale) {
   if (!registeredTranslations.hasOwnProperty(locale)) {
     return new Promise(function (resolve, reject) {
       return null;
@@ -46,6 +46,28 @@ const getRegisteredTranslationLocales = function () {
 };
 
 /**
+ * Return translations for a suitable locale from a user side locale list
+ * @param {string} acceptLanguages - List of accept languages/locales from user side
+ * @param {string} defaultLocale - Default locale as configured in Kibana
+ * @return {object} - A Promise object which will contain on resolve a JSON object of all registered translations
+ */
+const getTranslationsForLocales = function (acceptLanguages, defaultLocale) {
+  let locale = '';
+
+  if (acceptLanguages !== null && acceptLanguages.length > 0) {
+    const registeredLocales = getRegisteredTranslationLocales();
+    locale = getTranslationLocaleExactMatch(acceptLanguages, registeredLocales);
+    if (locale === null || locale.length <= 0) {
+      locale = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale);
+    }
+  } else {
+    locale = defaultLocale;
+  }
+
+  return getTranslationsForLocale(locale);
+};
+
+/**
  * The translation file is registered with i18n plugin. The plugin contains a list of registered translation file paths per language.
  * @param {string} absolutePluginTranslationFilePath - Absolute path to the translation file to register.
  */
@@ -69,4 +91,40 @@ function isString(element, index, array) {
   return typeof element === 'string';
 }
 
-export { getRegisteredLocaleTranslations, getRegisteredTranslationLocales, registerTranslations };
+function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
+  let localeStr = '';
+
+  const acceptLangsLen = acceptLanguages.length;
+  for (let indx = 0; indx < acceptLangsLen; indx++) {
+    const language = acceptLanguages[indx];
+    if (language.region) {
+      localeStr = language.code + '-' + language.region;
+    } else {
+      localeStr = language.code;
+    }
+    if (registeredLocales.indexOf(localeStr) > -1) {
+      return localeStr;
+    }
+  }
+  return null;
+}
+
+function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale) {
+  let localeStr = '';
+
+  const acceptLangsLen = acceptLanguages.length;
+  const regLangsLen = registeredLocales.length;
+  for (let indx = 0; indx < acceptLangsLen; indx++) {
+    const language = acceptLanguages[indx];
+    localeStr = language.code;
+    for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
+      const locale = registeredLocales[regIndx];
+      if (locale.match('^' + localeStr)) {
+        return locale;
+      }
+    }
+  }
+  return defaultLocale;
+}
+
+export { getTranslationsForLocale, getTranslationsForLocales, getRegisteredTranslationLocales, registerTranslations };
