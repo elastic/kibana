@@ -1,10 +1,10 @@
 import { map, keys } from 'lodash';
 
 export default function (server) {
-  const pipelinesManager = server.plugins.kibana.pipelines;
-
   return {
     kibanaToEs: function (processorApiDocument) {
+      const pipelinesManager = server.plugins.kibana.pipelines;
+
       const result = map(processorApiDocument, (processor) => {
         const typeId = processor.type_id;
 
@@ -20,6 +20,8 @@ export default function (server) {
       return result;
     },
     esToKibana: function (processorEsDocument) {
+      const pipelinesManager = server.plugins.kibana.pipelines;
+
       const result = map(processorEsDocument, (processor) => {
         const typeId = keys(processor)[0];
 
