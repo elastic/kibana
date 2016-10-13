@@ -17,7 +17,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   let dataObj;
   const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -26,6 +25,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
