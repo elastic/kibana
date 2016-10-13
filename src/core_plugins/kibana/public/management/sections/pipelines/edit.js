@@ -2,6 +2,7 @@ import management from 'ui/management';
 import routes from 'ui/routes';
 import PipelinesProvider from 'ui/pipelines';
 import Pipeline from 'ui/pipelines/pipeline/view_model';
+import 'ui/directives/bread_crumbs';
 import template from './views/edit_app.html';
 import './directives/pipeline_edit';
 import processorRegistryProvider from 'ui/registry/pipelines_processors';
