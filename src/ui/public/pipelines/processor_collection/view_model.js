@@ -121,6 +121,23 @@ ProcessorCollection.resetIdCounters = function (processorRegistry) {
   });
 };
 
+ProcessorCollection.updateId = function (oldValue, requestedNewValue) {
+  function isValid(val) {
+    if (_.isEmpty(val)) return false;
+    if (_.contains(ProcessorCollection.usedProcessorIds, val)) return false;
+
+    return true;
+  }
+
+  if (!isValid(requestedNewValue)) {
+    return oldValue;
+  }
+
+  const index = _.indexOf(ProcessorCollection.usedProcessorIds, oldValue);
+  ProcessorCollection.usedProcessorIds[index] = requestedNewValue;
+  return requestedNewValue;
+};
+
 ProcessorCollection.generateId = function (typeId) {
   if (!_.has(ProcessorCollection.processorCounters, typeId)) {
     return undefined;

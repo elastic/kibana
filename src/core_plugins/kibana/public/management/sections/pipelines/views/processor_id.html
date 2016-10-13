@@ -5,5 +5,7 @@
     class="form-control"
     input-focus="select"
     ng-model="processor.processorId"
+    ng-change="changeProcessorId(processor.processorId)"
+    ng-model-options="{ updateOn: 'blur' }"
     required />
 </div>
