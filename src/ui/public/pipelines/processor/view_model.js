@@ -70,14 +70,17 @@ export default class Processor {
     }
     this.outputObject = newOutputObject;
 
-    if (this.inputObject && this.outputObject) {
-      if (!_.isEqual(this.inputObject.meta, this.outputObject.meta)) {
-        this.outputControlsState.showMeta = true;
-      }
-      if (!_.isEqual(this.inputObject.doc, this.outputObject.doc)) {
-        this.outputControlsState.showMeta = false;
-      }
-    }
+    //TODO: Don't know if this is what we want to do....
+    // if (this.inputObject && this.outputObject) {
+    //   if (!_.isEqual(this.inputObject.meta, this.outputObject.meta)) {
+    //     this.inputControlsState.showMeta = true;
+    //     this.outputControlsState.showMeta = true;
+    //   }
+    //   if (!_.isEqual(this.inputObject.doc, this.outputObject.doc)) {
+    //     this.inputControlsState.showMeta = false;
+    //     this.outputControlsState.showMeta = false;
+    //   }
+    // }
 
     this.error = error;
   }
