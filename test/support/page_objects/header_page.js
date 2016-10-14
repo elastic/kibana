@@ -42,8 +42,8 @@ export default class HeaderPage {
   }
 
   clickTimepicker() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findDisplayedByClassName('navbar-timepicker-time-desc').click();
+    return PageObjects.common.findTestSubject('globalTimepickerButton')
+    .click();
   }
 
   isTimepickerOpen() {
@@ -104,14 +104,8 @@ export default class HeaderPage {
       return this.getSpinnerDone();
     })
     .then(() => {
-      return this.collapseTimepicker();
+      return this.clickTimepicker();
     });
-  }
-
-  collapseTimepicker() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('.fa.fa-chevron-circle-up')
-    .click();
   }
 
   getToastMessage() {
