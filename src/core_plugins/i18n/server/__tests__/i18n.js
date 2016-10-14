@@ -17,7 +17,7 @@ describe('i18n module', function () {
   });
   describe('one plugin', function () {
     describe('getTranslationsForLocale', function () {
-      it('EN translations are registered' , function () {
+      it('en translations are registered' , function () {
         const locale = 'en';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
@@ -27,7 +27,7 @@ describe('i18n module', function () {
         };
         checkTranslations(locale, expectedTranslationJson);
       });
-      it('DE translations are registered' , function () {
+      it('de translations are registered' , function () {
         const locale = 'de';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -35,7 +35,7 @@ describe('i18n module', function () {
         };
         checkTranslations(locale, expectedTranslationJson);
       });
-      it('ES translations not registered' , function () {
+      it('es translations not registered' , function () {
         const locale = 'es';
         checkTranslations(locale, null);
       });
@@ -44,6 +44,42 @@ describe('i18n module', function () {
       it('Translation locales are registered', function () {
         const expectedLocales = ['en', 'de'];
         checkRegisteredLocales(expectedLocales);
+      });
+    });
+    describe('getTranslationsForLocales', function () {
+      it('de translations should be chosen' , function () {
+        const locales = [
+          { code: 'es', region: 'ES', quality: 1.0 },
+          { code: 'de', region: undefined, quality: 0.8 }
+        ];
+        const defaultLocale = 'en';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
+        };
+        checkTranslationsForLocales(locales, defaultLocale, expectedTranslationJson);
+      });
+      it('default locale  translations should be chosen' , function () {
+        const locales = [
+          { code: 'es', region: 'ES', quality: 1.0 },
+          { code: 'fr', region: undefined, quality: 0.8 }
+        ];
+        const defaultLocale = 'en';
+        const expectedTranslationJson = {
+          'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the server with development mode defaults',
+          'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
+          'test_plugin_1-HOME': 'Run along home now!'
+        };
+        checkTranslationsForLocales(locales, defaultLocale, expectedTranslationJson);
+      });
+      it('no translations as no locales or default loale registered' , function () {
+        const locales = [
+          { code: 'es', region: 'ES', quality: 1.0 },
+          { code: 'fr', region: undefined, quality: 0.8 }
+        ];
+        const defaultLocale = 'jp';
+        checkTranslationsForLocales(locales, defaultLocale, null);
       });
     });
   });
@@ -57,7 +93,7 @@ describe('i18n module', function () {
       registerTranslations(translationFiles);
     });
     describe('getTranslationsForLocale', function () {
-      it('EN translations are registered' , function () {
+      it('en translations are registered' , function () {
         const locale = 'en';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
@@ -71,7 +107,7 @@ describe('i18n module', function () {
         };
         checkTranslations(locale, expectedTranslationJson);
       });
-      it('DE translations are registered' , function () {
+      it('de translations are registered' , function () {
         const locale = 'de';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -107,10 +143,14 @@ function compareTranslations(actual, expected) {
 }
 
 function checkTranslations(locale, expectedTranslations) {
-  let result = true;
+  return i18n.getTranslationsForLocale(locale).then(function (actualTranslations) {
+    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
+  });
+}
 
-  return i18n.getTranslationsForLocale(locale).then(function (actualTranslationJson) {
-    expect(_.isEqual(actualTranslationJson, expectedTranslations)).to.be(true);
+function checkTranslationsForLocales(acceptLanguages, defaultLocale, expectedTranslations) {
+  return i18n.getTranslationsForLocales(acceptLanguages, defaultLocale).then(function (actualTranslations) {
+    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }
 

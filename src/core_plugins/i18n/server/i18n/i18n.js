@@ -16,9 +16,7 @@ let registeredTranslations = {};
  */
 const getTranslationsForLocale = function (locale) {
   if (!registeredTranslations.hasOwnProperty(locale)) {
-    return new Promise(function (resolve, reject) {
-      return null;
-    });
+    return Promise.resolve(null);
   }
 
   const translationFiles = registeredTranslations[locale];
@@ -47,7 +45,7 @@ const getRegisteredTranslationLocales = function () {
 
 /**
  * Return translations for a suitable locale from a user side locale list
- * @param {string} acceptLanguages - List of accept languages/locales from user side
+ * @param {array} acceptLanguages - Array of locale objects parsedfrom user side accept languages header
  * @param {string} defaultLocale - Default locale as configured in Kibana
  * @return {object} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
