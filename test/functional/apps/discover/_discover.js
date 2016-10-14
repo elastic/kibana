@@ -36,7 +36,8 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('should show correct time range string by timepicker', async function () {
       var actualTimeString = await PageObjects.discover.getTimespanText();
 
-      expect(actualTimeString).to.be(`${fromTimeString} to ${toTimeString}`);
+      var expectedTimeString = `${fromTimeString} to ${toTimeString}`;
+      expect(actualTimeString).to.be(expectedTimeString);
     });
 
     bdd.it('save query should show toast message and display query name', async function () {
@@ -44,7 +45,8 @@ bdd.describe('discover app', function describeIndexTests() {
       var toastMessage = await PageObjects.header.getToastMessage();
       await PageObjects.common.saveScreenshot('Discover-save-query-toast');
 
-      expect(toastMessage).to.be(`Discover: Saved Data Source "${queryName1}"`);
+      var expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
+      expect(toastMessage).to.be(expectedToastMessage);
 
       await PageObjects.header.waitForToastMessageGone();
       var actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
@@ -62,8 +64,9 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show the correct hit count', async function () {
+      var expectedHitCount = '14,004';
       await PageObjects.common.try(async function() {
-        expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
     });
 
@@ -80,13 +83,15 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('should show correct time range string in chart', async function () {
       var actualTimeString = await PageObjects.discover.getChartTimespan();
 
-      expect(actualTimeString).to.be(`${fromTimeString} - ${toTimeString}`);
+      var expectedTimeString = `${fromTimeString} - ${toTimeString}`;
+      expect(actualTimeString).to.be(expectedTimeString);
     });
 
     bdd.it('should show correct initial chart interval of 3 hours', async function () {
       var actualInterval = await PageObjects.discover.getChartInterval();
 
-      expect(actualInterval).to.be('by 3 hours');
+      var expectedInterval = 'by 3 hours';
+      expect(actualInterval).to.be(expectedInterval);
     });
 
     bdd.it('should show correct data for chart interval Hourly', async function () {
