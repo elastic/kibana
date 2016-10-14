@@ -26,7 +26,7 @@ let MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, copee) {
+module.directive('kbnTableRow', function ($compile, $filter, copee) {
   let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -76,7 +76,9 @@ module.directive('kbnTableRow', function ($compile, copee) {
         // empty the details and rebuild it
         $detailsTr.html(detailsHtml);
 
-        $detailsScope.docUrl = `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}/?id=${$scope.row._id}`;
+        const uriescape = $filter('uriescape');
+
+        $detailsScope.docUrl = `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}?id=${uriescape($scope.row._id)}`;
 
         $detailsScope.copyTextToClipboard = theUrl => {
           copee.urlToClipboard(theUrl, 'Document');
