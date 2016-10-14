@@ -18,6 +18,6 @@ describe('kbnGlobalTimepicker', function () {
   });
   it('injects the timepicker into the DOM', () => {
     const $el = compile();
-    expect($el.find('button[ng-click]')).to.have.length(3);
+    expect($el.attr('data-test-subj')).to.be('globalTimepicker');
   });
 });
