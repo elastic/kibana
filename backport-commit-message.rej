@@ -1,0 +1,10 @@
+Backport PR #8693
+---------
+
+**Commit 1:**
+[npm] update chromedriver
+
+The latest macOS version of Chrome is incompatible with the version of chromedriver we currently depend on, so this updates it.
+
+* Original sha: 29eeed22e23c0865202899b264fff94c63ea8ee5
+* Authored by spalger <email@spalger.com> on 2016-10-14T21:03:23Z
