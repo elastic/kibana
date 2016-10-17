@@ -96,7 +96,7 @@ and visualize data in the `logstash-*` indices.
 . Assign the appropriate roles to your Kibana users or groups of users:
 
 ** If you're using the `native` realm, you can assign roles using the
-{shield}/shield-rest.html#shield-users-rest[{scyld} User Management API]. For example, the following
+{xpack}/security-api-users.html[{scyld} User Management API]. For example, the following
 creates a user named `jacknich` and assigns it the `kibana_monitoring` role:
 +
 [source,js]
@@ -110,7 +110,7 @@ POST /_xpack/security/user/jacknich
 
 ** If you are using an LDAP or Active Directory realm, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
-mappings are stored in {shield}/mapping-roles.html[`CONFIGDIR/x-pack/role_mapping.yml`].
+mappings are stored in {xpack}/mapping-roles.html[`CONFIGDIR/x-pack/role_mapping.yml`].
 For example, the following snippet assigns the `kibana_monitoring` role to the
 group named `admins` and the user named Jack Nicholson:
 +
@@ -277,14 +277,14 @@ ca: /path/to/your/ca/cacert.pem
 [float]
 [[controlling-access]]
 === Controlling access
-You can use http://www.elastic.co/overview/shield/[{scyld}] to control what Elasticsearch data users can access through Kibana.
+You can use {xpack}/xpack-security.html[{scyld}] to control what Elasticsearch data users can access through Kibana.
 {scyld} provides index-level access control. If a user isn't authorized to run
 the query that populates a Kibana visualization, the user just sees an empty
 visualization.
 
 To configure access to Kibana using {scyld}, you create roles
 for Kibana using the `my_kibana_user` default role as a starting point. For more
-information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana with {scyld}].
+information, see {xpack}/kibana.html[Using Kibana with {scyld}].
 
 [float]
 [[load-balancing]]
