@@ -10,7 +10,7 @@ export default function SignificantTermsAggDefinition(Private) {
     name: 'significant_terms',
     title: 'Significant Terms',
     makeLabel: function (aggConfig) {
-      return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.displayName;
+      return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
     params: [

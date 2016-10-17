@@ -425,7 +425,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].field().format.getConverterFor());
+      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].getField().format.getConverterFor());
 
       vis = new Vis(indexPattern, {
         type: 'metric',
