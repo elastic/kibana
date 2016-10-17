@@ -126,7 +126,7 @@ Kibana must be upgraded together.
 
 To upgrade Kibana:
 
-. Create a https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot] 
+. Create a {ref}/modules-snapshots.html[snapshot]
 of the existing `.kibana` index.
 . Back up the `kibana.yml` configuration file.
 . Take note of the Kibana plugins that are installed:
