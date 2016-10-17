@@ -208,7 +208,7 @@ Kibana's performance. Keep in mind that there's no built-in validation of a scri
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
 Scripted fields use the Lucene expression syntax. For more information,
-see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[
+see {ref}/modules-scripting.html#_lucene_expressions_scripts[
 Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
@@ -228,7 +228,7 @@ To create a scripted field:
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see
-http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+{ref}/modules-scripting.html[Scripting].
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {ref}/modules-scripting.html[dynamic Groovy scripting].

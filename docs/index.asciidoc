@@ -1,8 +1,8 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
-:shield: https://www.elastic.co/guide/en/shield/current
+:ref: http://www.elastic.co/guide/en/elasticsearch/reference/2.4/
+:shield: https://www.elastic.co/guide/en/shield/2.4/
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
 :version: 4.6
