@@ -32,7 +32,7 @@ You can use the browser Back button to undo your changes.
 [[search]]
 === Searching Your Data
 You can search the indices that match the current index pattern by submitting a search from the Discover page.
-You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html[Elasticsearch Query DSL]. 
+You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
 
 When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
@@ -51,7 +51,7 @@ To search your data:
 * To specify more complex search criteria, you can use the Boolean operators `AND`, `OR`, and `NOT`. For example,
 to find entries that have 4xx status codes and have an extension of `php` or `html`, you could enter `status:[400 TO 499] AND (extension:php OR extension:html)`.
 +
-NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For examples, see http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch Reference.
+NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For examples, see {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch Reference.
 +
 . Press *Enter* or click the *Search* button to submit your search query.
 

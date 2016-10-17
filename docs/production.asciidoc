@@ -101,7 +101,7 @@ If you have multiple nodes in your Elasticsearch cluster, the easiest way to dis
 across the nodes is to run an Elasticsearch _client_ node on the same machine as Kibana.
 Elasticsearch client nodes are essentially smart load balancers that are part of the cluster. They
 process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and
-gather and return the results. For more information, see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html[Node] in the Elasticsearch reference.
+gather and return the results. For more information, see {ref}/modules-node.html[Node] in the Elasticsearch reference.
 
 To use a local client node to load balance Kibana requests:
 

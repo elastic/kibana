@@ -14,8 +14,8 @@ Setting up Kibana is a snap. You can install Kibana and start exploring your
 Elasticsearch indices in minutes--no code, no additional infrastructure required. 
 
 NOTE: This guide describes how to use Kibana 4. For information about what's new
-in Kibana 4, see <<whats-new>>. For information about Kibana 3, 
-see the http://www.elastic.co/guide/en/kibana/current/index.html[Kibana 3 User Guide].
+in Kibana 4, see <<whats-new>>. For information about Kibana 3,
+see the https://www.elastic.co/guide/en/kibana/3.0/index.html[Kibana 3 User Guide].
 
 [float]
 [[data-discovery]]
