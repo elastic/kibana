@@ -142,7 +142,7 @@ export default function AggTypeFactory(Private) {
    * @return {FieldFromat}
    */
   AggType.prototype.getFormat = function (agg) {
-    let field = agg.field();
+    let field = agg.getField();
     return field ? field.format : fieldFormats.getDefaultInstance('string');
   };
 

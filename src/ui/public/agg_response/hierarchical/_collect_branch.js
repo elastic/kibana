@@ -8,14 +8,14 @@ define(function () {
       // Using the aggConfig determine what the field name is. If the aggConfig
       // doesn't exist (which means it's an _all agg) then use the level for
       // the field name
-      let col = item.aggConfig;
-      let field = (col && col.params && col.params.field && col.params.field.displayName)
-        || (col && col.label)
+      const { aggConfig } = item;
+      let field = (aggConfig && aggConfig.getFieldDisplayName())
+        || (aggConfig && aggConfig.label)
         || ('level ' + item.depth);
 
       // Add the row to the tooltipScope.rows
       memo.unshift({
-        aggConfig: col,
+        aggConfig,
         depth: depth,
         field: field,
         bucket: item.name,
