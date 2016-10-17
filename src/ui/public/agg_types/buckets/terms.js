@@ -43,7 +43,6 @@ export default function TermsAggDefinition(Private) {
     params: [
       {
         name: 'field',
-        scriptable: true,
         filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
       },
       {
