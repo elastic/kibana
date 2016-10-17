@@ -25,8 +25,8 @@ That's it! Kibana is now running on port 5601.
 On Unix, you can also install Kibana using the package manager suited for your distribution. For more
 information, see <<setup-repositories, Installing Kibana with apt and yum>>.
 
-IMPORTANT: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield]
-see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana with Shield] for additional setup
+IMPORTANT: If your Elasticsearch installation is protected by {xpack}/xpack-security.html[{scyld}]
+see {xpack}/kibana.html[Using Kibana with X-Pack Security] for additional setup
 instructions.
 
 [float]
