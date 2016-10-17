@@ -14,7 +14,7 @@ export default function FieldAggParamFactory(Private, $filter) {
   }
 
   FieldAggParam.prototype.editor = editorHtml;
-  FieldAggParam.prototype.scriptable = false;
+  FieldAggParam.prototype.scriptable = true;
   FieldAggParam.prototype.filterFieldTypes = '*';
 
   /**
@@ -35,6 +35,10 @@ export default function FieldAggParamFactory(Private, $filter) {
     let fields = indexPattern.fields.raw;
 
     fields = fields.filter(f => f.aggregatable);
+
+    if (!this.scriptable) {
+      fields = fields.filter(field => !field.scripted);
+    }
 
     if (this.filterFieldTypes) {
       fields = $filter('fieldType')(fields, this.filterFieldTypes);
