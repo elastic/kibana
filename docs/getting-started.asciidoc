@@ -195,11 +195,11 @@ yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb    
 [[tutorial-define-index]]
 === Defining Your Index Patterns
 
-Each set of data loaded to Elasticsearch has an 
-https://www.elastic.co/guide/en/kibana/current/settings.html#settings-create-pattern[index pattern]. In the previous
-section, the Shakespeare data set has an index named `shakespeare`, and the accounts 
-data set has an index named `bank`. An _index pattern_ is a string with optional wildcards that can match multiple 
-indices. For example, in the common logging use case, a typical index name contains the date in MM-DD-YYYY 
+Each set of data loaded to Elasticsearch has an
+<<settings-create-pattern,index pattern>>. In the previous
+section, the Shakespeare data set has an index named `shakespeare`, and the accounts
+data set has an index named `bank`. An _index pattern_ is a string with optional wildcards that can match multiple
+indices. For example, in the common logging use case, a typical index name contains the date in MM-DD-YYYY
 format, and an index pattern for May would look something like `logstash-2015.05*`.
 
 For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and 

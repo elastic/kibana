@@ -204,8 +204,8 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are 
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-Scripted fields use the Lucene expression syntax. For more information, 
-see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[
+Scripted fields use the Lucene expression syntax. For more information,
+see {ref}/modules-scripting.html#_lucene_expressions_scripts[
 Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
@@ -224,8 +224,8 @@ To create a scripted field:
 . Enter the expression that you want to use to compute a value on the fly from your index data.
 . Click *Save Scripted Field*.
 
-For more information about scripted fields in Elasticsearch, see 
-http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+For more information about scripted fields in Elasticsearch, see
+{ref}/modules-scripting.html[Scripting].
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
 {ref}/modules-scripting.html[dynamic Groovy scripting].
