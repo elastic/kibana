@@ -7,7 +7,7 @@ export default function AggTypeMetricTopProvider(Private) {
 
   return new MetricAggType({
     name: 'top_hits',
-    title: 'Top',
+    title: 'Top Hit',
     makeLabel: function (aggConfig) {
       const prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Last' : 'First';
       return `${prefix} ${aggConfig.params.field.displayName}`;
