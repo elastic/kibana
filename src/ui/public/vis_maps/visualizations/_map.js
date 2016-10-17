@@ -11,9 +11,6 @@ export default function MapFactory(Private, tilemapSettings) {
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
-
-
-
   const mapTiles = {
     url: tilemapSettings.getUrl(),
     options: tilemapSettings.getOptions()
