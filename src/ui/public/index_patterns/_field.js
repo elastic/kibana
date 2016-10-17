@@ -71,6 +71,9 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     obj.comp('displayName', shortDotsFilter(spec.name));
     obj.comp('$$spec', spec);
 
+    // conflict info
+    obj.writ('conflictDescriptions');
+
     return obj.create();
   }
 
