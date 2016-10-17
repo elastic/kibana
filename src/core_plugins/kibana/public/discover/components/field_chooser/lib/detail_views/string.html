@@ -44,7 +44,7 @@
 
       <a
         ng-href="{{vizLocation(field)}}"
-        ng-if="field.aggregatable"
+        ng-show="field.aggregatable"
         class="sidebar-item-button primary">
           Visualize
           <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
