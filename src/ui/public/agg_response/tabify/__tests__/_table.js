@@ -54,12 +54,12 @@ describe('Table class', function () {
   });
 
   describe('#field', function () {
-    it('calls the columns aggConfig#field() method', function () {
+    it('calls the columns aggConfig#getField() method', function () {
       let table = new Table();
       let football = {};
       let column = {
         aggConfig: {
-          field: _.constant(football)
+          getField: _.constant(football)
         }
       };
 
