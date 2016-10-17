@@ -16,7 +16,7 @@ export default function AggTypeMetricTopProvider(Private) {
       {
         name: 'field',
         filterFieldTypes: function (vis, value) {
-          if (vis.type.name === 'table') {
+          if (vis.type.name === 'table' || vis.type.name === 'metric') {
             return true;
           }
           return value === 'number';
