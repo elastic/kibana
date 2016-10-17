@@ -43,10 +43,10 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('save query should show toast message and display query name', async function () {
       await PageObjects.discover.saveSearch(queryName1);
       var toastMessage = await PageObjects.header.getToastMessage();
-      await PageObjects.common.saveScreenshot('Discover-save-query-toast');
 
       var expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
       expect(toastMessage).to.be(expectedToastMessage);
+      await PageObjects.common.saveScreenshot('Discover-save-query-toast');
 
       await PageObjects.header.waitForToastMessageGone();
       var actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
@@ -57,10 +57,10 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('load query should show query name', async function () {
       await PageObjects.discover.loadSavedSearch(queryName1);
 
-      await PageObjects.common.saveScreenshot('Discover-load-query');
       await PageObjects.common.try(async function() {
         expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
       });
+      await PageObjects.common.saveScreenshot('Discover-load-query');
     });
 
     bdd.it('should show the correct hit count', async function () {
@@ -227,8 +227,8 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show "no results"', async () => {
       var isVisible = await PageObjects.discover.hasNoResults();
-      await PageObjects.common.saveScreenshot('Discover-no-results');
       expect(isVisible).to.be(true);
+      await PageObjects.common.saveScreenshot('Discover-no-results');
     });
 
     bdd.it('should suggest a new time range is picked', async () => {
