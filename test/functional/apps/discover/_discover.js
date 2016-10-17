@@ -11,10 +11,10 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover app', function describeIndexTests() {
-  var fromTime = '2015-09-19 06:31:44.000';
-  var fromTimeString = 'September 19th 2015, 06:31:44.000';
-  var toTime = '2015-09-23 18:31:44.000';
-  var toTimeString = 'September 23rd 2015, 18:31:44.000';
+  const fromTime = '2015-09-19 06:31:44.000';
+  const fromTimeString = 'September 19th 2015, 06:31:44.000';
+  const toTime = '2015-09-23 18:31:44.000';
+  const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
   bdd.before(async function () {
     // delete .kibana index and update configDoc
@@ -31,25 +31,25 @@ bdd.describe('discover app', function describeIndexTests() {
   });
 
   bdd.describe('query', function () {
-    var queryName1 = 'Query # 1';
+    const queryName1 = 'Query # 1';
 
     bdd.it('should show correct time range string by timepicker', async function () {
-      var actualTimeString = await PageObjects.discover.getTimespanText();
+      const actualTimeString = await PageObjects.discover.getTimespanText();
 
-      var expectedTimeString = `${fromTimeString} to ${toTimeString}`;
+      const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
       expect(actualTimeString).to.be(expectedTimeString);
     });
 
     bdd.it('save query should show toast message and display query name', async function () {
       await PageObjects.discover.saveSearch(queryName1);
-      var toastMessage = await PageObjects.header.getToastMessage();
+      const toastMessage = await PageObjects.header.getToastMessage();
 
-      var expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
+      const expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
       expect(toastMessage).to.be(expectedToastMessage);
       await PageObjects.common.saveScreenshot('Discover-save-query-toast');
 
       await PageObjects.header.waitForToastMessageGone();
-      var actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
+      const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
 
       expect(actualQueryNameString).to.be(queryName1);
     });
@@ -64,14 +64,14 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show the correct hit count', async function () {
-      var expectedHitCount = '14,004';
+      const expectedHitCount = '14,004';
       await PageObjects.common.try(async function() {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
     });
 
     bdd.it('should show the correct bar chart', async function () {
-      var expectedBarChartData = [ '3.237',
+      const expectedBarChartData = [ '3.237',
         '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
         '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
         '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
@@ -81,23 +81,23 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct time range string in chart', async function () {
-      var actualTimeString = await PageObjects.discover.getChartTimespan();
+      const actualTimeString = await PageObjects.discover.getChartTimespan();
 
-      var expectedTimeString = `${fromTimeString} - ${toTimeString}`;
+      const expectedTimeString = `${fromTimeString} - ${toTimeString}`;
       expect(actualTimeString).to.be(expectedTimeString);
     });
 
     bdd.it('should show correct initial chart interval of 3 hours', async function () {
-      var actualInterval = await PageObjects.discover.getChartInterval();
+      const actualInterval = await PageObjects.discover.getChartInterval();
 
-      var expectedInterval = 'by 3 hours';
+      const expectedInterval = 'by 3 hours';
       expect(actualInterval).to.be(expectedInterval);
     });
 
     bdd.it('should show correct data for chart interval Hourly', async function () {
       await PageObjects.discover.setChartInterval('Hourly');
 
-      var expectedBarChartData = [ '1.527', '2.290',
+      const expectedBarChartData = [ '1.527', '2.290',
         '5.599', '7.890', '13.236', '30.290', '46.072', '55.490', '86.8',
         '112', '122.181', '131.6', '132.872', '113.527', '102.581',
         '81.709', '65.672', '43.781', '24.181', '14', '9.672', '6.109',
@@ -114,8 +114,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Daily', async function () {
-      var chartInterval = 'Daily';
-      var expectedBarChartData = [
+      const chartInterval = 'Daily';
+      const expectedBarChartData = [
         '133.196', '129.192', '129.724'
       ];
       await PageObjects.discover.setChartInterval(chartInterval);
@@ -125,8 +125,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Weekly', async function () {
-      var chartInterval = 'Weekly';
-      var expectedBarChartData = [ '66.598', '129.458'];
+      const chartInterval = 'Weekly';
+      const expectedBarChartData = [ '66.598', '129.458'];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await PageObjects.common.try(async () => {
@@ -135,38 +135,38 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('browser back button should show previous interval Daily', async function () {
-      var expectedChartInterval = 'Daily';
-      var expectedBarChartData = [
+      const expectedChartInterval = 'Daily';
+      const expectedBarChartData = [
         '133.196', '129.192', '129.724'
       ];
 
       await this.remote.goBack();
       await PageObjects.common.try(async function tryingForTime() {
-        var actualInterval = await PageObjects.discover.getChartInterval();
+        const actualInterval = await PageObjects.discover.getChartInterval();
         expect(actualInterval).to.be(expectedChartInterval);
       });
       await verifyChartData(expectedBarChartData);
     });
 
     bdd.it('should show correct data for chart interval Monthly', async function () {
-      var chartInterval = 'Monthly';
-      var expectedBarChartData = [ '122.535'];
+      const chartInterval = 'Monthly';
+      const expectedBarChartData = [ '122.535'];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await verifyChartData(expectedBarChartData);
     });
 
     bdd.it('should show correct data for chart interval Yearly', async function () {
-      var chartInterval = 'Yearly';
-      var expectedBarChartData = [ '122.535'];
+      const chartInterval = 'Yearly';
+      const expectedBarChartData = [ '122.535'];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await verifyChartData(expectedBarChartData);
     });
 
     bdd.it('should show correct data for chart interval Auto', async function () {
-      var chartInterval = 'Auto';
-      var expectedBarChartData = [ '3.237',
+      const chartInterval = 'Auto';
+      const expectedBarChartData = [ '3.237',
         '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
         '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
         '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
@@ -178,25 +178,25 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show Auto chart interval of 3 hours', async function () {
-      var expectedChartInterval = 'by 3 hours';
+      const expectedChartInterval = 'by 3 hours';
 
-      var actualInterval = await PageObjects.discover.getChartInterval();
+      const actualInterval = await PageObjects.discover.getChartInterval();
       expect(actualInterval).to.be(expectedChartInterval);
     });
 
     bdd.it('should not show "no results"', async () => {
-      var isVisible = await PageObjects.discover.hasNoResults();
+      const isVisible = await PageObjects.discover.hasNoResults();
       expect(isVisible).to.be(false);
     });
 
     async function verifyChartData(expectedBarChartData) {
       await PageObjects.common.try(async function tryingForTime() {
-        var paths = await PageObjects.discover.getBarChartData();
+        const paths = await PageObjects.discover.getBarChartData();
         // the largest bars are over 100 pixels high so this is less than 1% tolerance
-        var barHeightTolerance = 1;
-        var stringResults = '';
-        var hasFailure = false;
-        for (var y = 0; y < expectedBarChartData.length; y++) {
+        const barHeightTolerance = 1;
+        let stringResults = '';
+        let hasFailure = false;
+        for (let y = 0; y < expectedBarChartData.length; y++) {
           stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
            ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
           if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
@@ -207,7 +207,7 @@ bdd.describe('discover app', function describeIndexTests() {
           PageObjects.common.log(stringResults);
           PageObjects.common.log(paths);
         }
-        for (var x = 0; x < expectedBarChartData.length; x++) {
+        for (let x = 0; x < expectedBarChartData.length; x++) {
           expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
         }
       });
@@ -216,8 +216,8 @@ bdd.describe('discover app', function describeIndexTests() {
   });
 
   bdd.describe('query #2, which has an empty time range', function () {
-    var fromTime = '1999-06-11 09:22:11.000';
-    var toTime = '1999-06-12 11:21:04.000';
+    const fromTime = '1999-06-11 09:22:11.000';
+    const toTime = '1999-06-12 11:21:04.000';
 
     bdd.before(() => {
       PageObjects.common.debug('setAbsoluteRangeForAnotherQuery');
@@ -226,18 +226,18 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show "no results"', async () => {
-      var isVisible = await PageObjects.discover.hasNoResults();
+      const isVisible = await PageObjects.discover.hasNoResults();
       expect(isVisible).to.be(true);
       await PageObjects.common.saveScreenshot('Discover-no-results');
     });
 
     bdd.it('should suggest a new time range is picked', async () => {
-      var isVisible = await PageObjects.discover.hasNoResultsTimepicker();
+      const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
       expect(isVisible).to.be(true);
     });
 
     bdd.it('should have a link that opens and closes the time picker', async function() {
-      var noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
+      const noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
       expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
 
       await noResultsTimepickerLink.click();
