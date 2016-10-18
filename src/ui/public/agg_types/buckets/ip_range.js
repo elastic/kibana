@@ -45,8 +45,16 @@ export default function RangeAggDefinition(Private) {
         },
         editor: ipRangesTemplate,
         write: function (aggConfig, output) {
-          let ipRangeType = aggConfig.params.ipRangeType;
-          output.params.ranges = aggConfig.params.ranges[ipRangeType];
+          const ipRangeType = aggConfig.params.ipRangeType;
+          let ranges = aggConfig.params.ranges[ipRangeType];
+
+          if (ipRangeType === 'fromTo') {
+            ranges = _.map(ranges, (range) => {
+              return _.omit(range, _.isNull);
+            });
+          }
+
+          output.params.ranges = ranges;
         }
       }
     ]
