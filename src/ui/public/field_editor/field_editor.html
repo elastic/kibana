@@ -40,14 +40,14 @@
   <div class="form-group">
     <label>Type</label>
     <select
-      ng-if="editor.field.scripted"
+      ng-if="editor.field.scripted || editor.field.meta"
       ng-model="editor.field.type"
       ng-options="type as type for type in editor.fieldTypes"
       class="form-control"
       data-test-subj="editorFieldType">
     </select>
     <input
-      ng-if="!editor.field.scripted"
+      ng-if="!editor.field.scripted && !editor.field.meta"
       ng-model="editor.field.type"
       readonly
       class="form-control">
