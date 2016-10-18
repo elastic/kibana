@@ -4,9 +4,11 @@ import editorHtml from 'ui/agg_types/controls/field.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import 'ui/filters/field_type';
 import IndexedArray from 'ui/indexed_array';
+import Notifier from 'ui/notify/notifier';
 
 export default function FieldAggParamFactory(Private, $filter) {
   let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const notifier = new Notifier();
 
   _.class(FieldAggParam).inherits(BaseAggParam);
   function FieldAggParam(config) {
@@ -67,7 +69,12 @@ export default function FieldAggParamFactory(Private, $filter) {
       throw new SavedObjectNotFound('index-pattern-field', fieldName);
     }
 
-    return field;
+    const validField = this.getFieldOptions(aggConfig).byName[fieldName];
+    if (!validField) {
+      notifier.error(`"field" is invalid`);
+    }
+
+    return validField;
   };
 
   /**
