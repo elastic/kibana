@@ -59,6 +59,9 @@ export default function AggTypeMetricTopProvider(Private) {
       }
     ],
     getValue(agg, bucket) {
+      if (!bucket[agg.id].hits.hits.length) {
+        return;
+      }
       return bucket[agg.id].hits.hits[0].fields[agg.params.field.name][0];
     }
   });
