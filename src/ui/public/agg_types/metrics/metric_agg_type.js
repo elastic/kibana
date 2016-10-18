@@ -42,7 +42,7 @@ export default function MetricAggTypeProvider(Private) {
    * @return {FieldFromat}
    */
   MetricAggType.prototype.getFormat = function (agg) {
-    let field = agg.field();
+    let field = agg.getField();
     return field ? field.format : fieldFormats.getDefaultInstance('number');
   };
 
