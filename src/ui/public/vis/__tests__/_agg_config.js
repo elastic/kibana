@@ -197,7 +197,7 @@ describe('AggConfig', function () {
         {
           type: 'count',
           schema: 'metric',
-          params: {field: '@timestamp'}
+          params: {field: 'time'}
         }
       ]
     }, {
@@ -295,7 +295,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: '@timestamp'}
+            params: {field: 'time'}
           }
         ]
       },
@@ -305,7 +305,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: '@timestamp'}
+            params: {field: 'time'}
           },
           {
             type: 'date_histogram',
@@ -421,7 +421,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: '@timestamp' }
+            params: { field: 'time' }
           }
         ]
       });
@@ -433,7 +433,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: { field: '@timestamp' }
+            params: { field: 'time' }
           }
         ]
       });
@@ -447,7 +447,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: '@timestamp' }
+            params: { field: 'time' }
           }
         ]
       });
@@ -464,7 +464,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: '@timestamp' }
+            params: { field: 'time' }
           }
         ]
       });
@@ -481,12 +481,12 @@ describe('AggConfig', function () {
           {
             type: 'avg',
             schema: 'metric',
-            params: { field: 'ssl' }
+            params: { field: 'bytes' }
           }
         ]
       });
 
-      let field = indexPattern.fields.byName.ssl;
+      let field = indexPattern.fields.byName.bytes;
       expect(vis.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
     });
   });
