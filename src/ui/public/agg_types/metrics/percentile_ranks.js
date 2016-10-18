@@ -27,7 +27,7 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
     name: 'percentile_ranks',
     title: 'Percentile Ranks',
     makeLabel: function (agg) {
-      return 'Percentile ranks of ' + agg.fieldDisplayName();
+      return 'Percentile ranks of ' + agg.getFieldDisplayName();
     },
     params: [
       {
