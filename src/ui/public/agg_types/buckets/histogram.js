@@ -16,7 +16,7 @@ export default function HistogramAggDefinition(Private) {
     title: 'Histogram',
     ordered: {},
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName;
+      return aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
     params: [

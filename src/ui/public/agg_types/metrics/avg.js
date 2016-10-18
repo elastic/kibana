@@ -7,7 +7,7 @@ export default function AggTypeMetricAvgProvider(Private) {
     name: 'avg',
     title: 'Average',
     makeLabel: function (aggConfig) {
-      return 'Average ' + aggConfig.params.field.displayName;
+      return 'Average ' + aggConfig.getFieldDisplayName();
     },
     params: [
       {
