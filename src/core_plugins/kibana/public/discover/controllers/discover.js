@@ -543,7 +543,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
           timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
           timefilter.time.mode = 'absolute';
         },
-        brush: brushEvent
+        brush: brushEvent($scope.state)
       },
       aggs: visStateAggs
     });
