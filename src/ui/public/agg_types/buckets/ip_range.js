@@ -14,7 +14,7 @@ export default function RangeAggDefinition(Private) {
     title: 'IPv4 Range',
     createFilter: createFilter,
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName + ' IP ranges';
+      return aggConfig.getFieldDisplayName() + ' IP ranges';
     },
     params: [
       {

@@ -7,7 +7,7 @@ export default function AggTypeMetricMaxProvider(Private) {
     name: 'max',
     title: 'Max',
     makeLabel: function (aggConfig) {
-      return 'Max ' + aggConfig.params.field.displayName;
+      return 'Max ' + aggConfig.getFieldDisplayName();
     },
     params: [
       {

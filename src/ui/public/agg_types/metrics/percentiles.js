@@ -16,7 +16,7 @@ export default function AggTypeMetricPercentilesProvider(Private) {
 
   let valueProps = {
     makeLabel: function () {
-      const label = this.params.customLabel || this.fieldDisplayName();
+      const label = this.params.customLabel || this.getFieldDisplayName();
       return ordinalSuffix(this.key) + ' percentile of ' + label;
     }
   };
@@ -25,7 +25,7 @@ export default function AggTypeMetricPercentilesProvider(Private) {
     name: 'percentiles',
     title: 'Percentiles',
     makeLabel: function (agg) {
-      return 'Percentiles of ' + agg.fieldDisplayName();
+      return 'Percentiles of ' + agg.getFieldDisplayName();
     },
     params: [
       {

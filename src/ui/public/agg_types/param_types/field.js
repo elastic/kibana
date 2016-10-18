@@ -53,7 +53,11 @@ export default function FieldAggParamFactory(Private) {
    * @return {undefined}
    */
   FieldAggParam.prototype.write = function (aggConfig, output) {
-    let field = aggConfig.params.field;
+    let field = aggConfig.getField();
+
+    if (!field) {
+      throw new Error(`"${aggConfig.makeLabel()}" requires a field`);
+    }
 
     if (field.scripted) {
       output.params.script = {
