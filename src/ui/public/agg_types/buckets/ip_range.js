@@ -13,6 +13,13 @@ export default function RangeAggDefinition(Private) {
     name: 'ip_range',
     title: 'IPv4 Range',
     createFilter: createFilter,
+    getKey: function (bucket, key, agg) {
+      if (key) return key;
+
+      const from = _.get(bucket, 'from', '*');
+      const to = _.get(bucket, 'to', '*');
+      return `${from}-${to}`;
+    },
     makeLabel: function (aggConfig) {
       return aggConfig.getFieldDisplayName() + ' IP ranges';
     },
