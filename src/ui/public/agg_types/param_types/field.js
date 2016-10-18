@@ -2,8 +2,10 @@ import { SavedObjectNotFound } from 'ui/errors';
 import _ from 'lodash';
 import editorHtml from 'ui/agg_types/controls/field.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-export default function FieldAggParamFactory(Private) {
+import 'ui/filters/field_type';
+import IndexedArray from 'ui/indexed_array';
 
+export default function FieldAggParamFactory(Private, $filter) {
   let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
   _.class(FieldAggParam).inherits(BaseAggParam);
@@ -26,6 +28,28 @@ export default function FieldAggParamFactory(Private) {
   };
 
   /**
+   * Get the options for this field from the indexPattern
+   */
+  FieldAggParam.prototype.getFieldOptions = function (aggConfig) {
+    const indexPattern = aggConfig.getIndexPattern();
+    let fields = indexPattern.fields.raw;
+
+    fields = fields.filter(f => f.aggregatable);
+
+    if (this.filterFieldTypes) {
+      fields = $filter('fieldType')(fields, this.filterFieldTypes);
+    }
+
+    fields = $filter('orderBy')(fields, ['type', 'name']);
+
+    return new IndexedArray({
+      index: ['name'],
+      group: ['type'],
+      initialSet: fields
+    });
+  };
+
+  /**
    * Called to read values from a database record into the
    * aggConfig object
    *
@@ -33,7 +57,7 @@ export default function FieldAggParamFactory(Private) {
    * @return {field}
    */
   FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-    let field = aggConfig.vis.indexPattern.fields.byName[fieldName];
+    const field = aggConfig.getIndexPattern().fields.byName[fieldName];
 
     if (!field) {
       throw new SavedObjectNotFound('index-pattern-field', fieldName);
@@ -56,7 +80,7 @@ export default function FieldAggParamFactory(Private) {
     let field = aggConfig.getField();
 
     if (!field) {
-      throw new Error(`"${aggConfig.makeLabel()}" requires a field`);
+      throw new TypeError('"field" is a required parameter');
     }
 
     if (field.scripted) {
