@@ -147,7 +147,7 @@ module.exports = () => Joi.object({
     }).default()
   }).default(),
 
-  uiSettings: Joi.object({ 
+  uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they
     // require the elasticsearch plugin in order to function we need to turn
     // them off when we turn off the elasticsearch plugin (like we do in the
