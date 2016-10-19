@@ -20,7 +20,17 @@ function createProxy(server, method, route, config) {
         xforward: true,
         timeout: server.config().get('elasticsearch.requestTimeout'),
         onResponse: function (err, responseFromUpstream, request, reply) {
-          reply(err, responseFromUpstream);
+          if (err) {
+            reply(err);
+            return;
+          }
+
+          if (responseFromUpstream.headers.location) {
+            // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
+            responseFromUpstream.headers.location = encodeURI(responseFromUpstream.headers.location);
+          }
+
+          reply(null, responseFromUpstream);
         }
       }
     },
