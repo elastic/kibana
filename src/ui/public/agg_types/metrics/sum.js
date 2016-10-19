@@ -7,7 +7,7 @@ export default function AggTypeMetricSumProvider(Private) {
     name: 'sum',
     title: 'Sum',
     makeLabel: function (aggConfig) {
-      return 'Sum of ' + aggConfig.params.field.displayName;
+      return 'Sum of ' + aggConfig.getFieldDisplayName();
     },
     params: [
       {

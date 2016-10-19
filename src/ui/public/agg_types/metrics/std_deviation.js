@@ -11,7 +11,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
       return details.valProp;
     },
     makeLabel: function () {
-      const fieldDisplayName = this.fieldDisplayName();
+      const fieldDisplayName = this.getFieldDisplayName();
       const details = this.keyedDetails(this.params.customLabel, fieldDisplayName);
       return _.get(details, [this.key, 'title']);
     },
@@ -35,7 +35,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
     dslName: 'extended_stats',
     title: 'Standard Deviation',
     makeLabel: function (agg) {
-      return 'Standard Deviation of ' + agg.fieldDisplayName();
+      return 'Standard Deviation of ' + agg.getFieldDisplayName();
     },
     params: [
       {

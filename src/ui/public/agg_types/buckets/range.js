@@ -18,7 +18,7 @@ export default function RangeAggDefinition(Private) {
     title: 'Range',
     createFilter: createFilter,
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName + ' ranges';
+      return aggConfig.getFieldDisplayName() + ' ranges';
     },
     getKey: function (bucket, key, agg) {
       let keys = keyCaches.get(agg);

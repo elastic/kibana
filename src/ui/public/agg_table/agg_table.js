@@ -83,7 +83,7 @@ uiModules
         $scope.rows = table.rows;
         $scope.formattedColumns = table.columns.map(function (col, i) {
           let agg = $scope.table.aggConfig(col);
-          let field = agg.field();
+          let field = agg.getField();
           let formattedColumn = {
             title: col.title,
             filterable: field && field.filterable && agg.schema.group === 'buckets'
