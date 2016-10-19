@@ -41,7 +41,7 @@ describe('AggConfig Filters', function () {
       });
 
       let aggConfig = vis.aggs.byTypeName.ip_range[0];
-      let filter = createFilter(aggConfig, '0.0.0.0-1.1.1.1');
+      let filter = createFilter(aggConfig, '0.0.0.0 to 1.1.1.1');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
