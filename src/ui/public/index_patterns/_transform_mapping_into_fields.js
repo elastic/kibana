@@ -47,7 +47,7 @@ export function IndexPatternsTransformMappingIntoFieldsProvider(Private, kbnInde
       if (fields[meta]) return;
 
       const field = { mapping: {} };
-      field.mapping[meta] = {};
+      field.mapping[meta] = { meta: true };
       fields[meta] = mapField(field, meta);
     });
 
