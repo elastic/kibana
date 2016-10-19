@@ -4,8 +4,8 @@ import defaultsProvider from './defaults';
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
 
-  if (!kbnServer.config.get('plugins.initialize')) {
-    status.disabled('Disabled because plugins are disabled');
+  if (!kbnServer.config.get('uiSettings.enabled')) {
+    status.disabled('uiSettings.enabled config is set to `false`');
     return;
   }
 
