@@ -74,6 +74,16 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
+    bdd.it('should save and load with non-ascii characters', async function () {
+      const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
+      const message = await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars);
+
+      PageObjects.common.debug(`Saved viz message with umlaut = ${message}`);
+      expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+
+      await PageObjects.visualize.waitForToastMessageGone();
+    });
+
     bdd.it('should save and load', function () {
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
