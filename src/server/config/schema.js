@@ -145,6 +145,10 @@ module.exports = () => Joi.object({
       reuseTiles: Joi.boolean(),
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
-  }).default()
+  }).default(),
+
+  uiSettings: Joi.object({
+    enabled: Joi.boolean().default(true)
+  }).default(),
 
 }).default();
