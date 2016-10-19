@@ -206,7 +206,7 @@
     "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
     "nock": "8.0.0",
-    "npm": "3.10.3",
+    "npm": "3.10.8",
     "portscanner": "1.0.0",
     "proxyquire": "1.7.10",
     "simple-git": "1.37.0",
@@ -217,7 +217,7 @@
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "6.7.0",
-    "npm": "3.10.3"
+    "node": "6.9.0",
+    "npm": "3.10.8"
   }
 }
