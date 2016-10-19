@@ -105,6 +105,11 @@ export default function setupSettings(kbnServer, server, config) {
   function mirrorEsStatus() {
     const esStatus = kbnServer.status.getForPluginId('elasticsearch');
 
+    if (!esStatus) {
+      status.red('UI Settings requires the elasticsearch plugin');
+      return;
+    }
+
     copyStatus();
     esStatus.on('change', copyStatus);
 
