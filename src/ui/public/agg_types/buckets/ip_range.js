@@ -15,10 +15,9 @@ export default function RangeAggDefinition(Private) {
     createFilter: createFilter,
     getKey: function (bucket, key, agg) {
       if (key) return key;
-
-      const from = _.get(bucket, 'from', '*');
-      const to = _.get(bucket, 'to', '*');
-      return `${from}-${to}`;
+      const from = _.get(bucket, 'from', '-Infinity');
+      const to = _.get(bucket, 'to', 'Infinity');
+      return `${from} to ${to}`;
     },
     makeLabel: function (aggConfig) {
       return aggConfig.getFieldDisplayName() + ' IP ranges';
