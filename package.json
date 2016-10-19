@@ -180,14 +180,14 @@
     "makelogs": "2.0.0",
     "mocha": "2.3.4",
     "nock": "8.0.0",
-    "npm": "3.10.3",
+    "npm": "3.10.8",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4"
   },
   "engines": {
-    "node": "6.7.0",
-    "npm": "3.10.3"
+    "node": "6.9.0",
+    "npm": "3.10.8"
   }
 }
