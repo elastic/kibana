@@ -3,6 +3,12 @@ import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
+
+  if (!kbnServer.config.get('plugins.initialize')) {
+    status.disabled('Disabled because plugins are disabled');
+    return;
+  }
+
   const uiSettings = {
     // returns a Promise for the value of the requested setting
     get,
@@ -26,7 +32,7 @@ export default function setupSettings(kbnServer, server, config) {
   };
 
   server.decorate('server', 'uiSettings', () => uiSettings);
-  kbnServer.ready().then(setStatus);
+  kbnServer.ready().then(mirrorEsStatus);
 
   function get(key) {
     return getAll().then(all => all[key]);
@@ -94,15 +100,6 @@ export default function setupSettings(kbnServer, server, config) {
       changes[key] = null;
     });
     return setMany(changes);
-  }
-
-  function setStatus() {
-    if (!kbnServer.config.get('plugins.initialize')) {
-      status.disabled('Disabled because plugins are disabled');
-      return;
-    }
-
-    mirrorEsStatus();
   }
 
   function mirrorEsStatus() {
