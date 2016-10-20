@@ -4,6 +4,7 @@ define(function (require) {
 
     const _ = require('lodash');
     const FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
     const DEFAULT_COLOR = {
       range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
       text: '#000000',
@@ -49,9 +50,10 @@ define(function (require) {
 
         if (!color) return _.asPrettyString(val);
 
-        const styleColor = color.text ? `color: ${color.text};` : '';
-        const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
-        return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
+        let style = '';
+        if (color.text) style += `color: ${color.text};`;
+        if (color.background) style += `background-color: ${color.background};`;
+        return convertTemplate({ val, style });
       }
     };
 
