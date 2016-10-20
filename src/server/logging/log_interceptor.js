@@ -27,7 +27,7 @@ export class LogInterceptor extends Stream.Transform {
     const isClientError = doTagsMatch(event, ['error', 'client', 'connection']);
     const isEconnreset = isClientError && get(event, 'data.errno') === 'ECONNRESET';
 
-    if (!isEconnreset) return false;
+    if (!isEconnreset) return null;
 
     return {
       event: 'log',
