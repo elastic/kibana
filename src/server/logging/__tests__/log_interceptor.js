@@ -10,7 +10,7 @@ function stubEconnresetEvent() {
     event: 'error',
     pid: 1234,
     timestamp: Date.now(),
-    tags: ['error', 'client', 'connection'],
+    tags: ['connection', 'client', 'error'],
     data: error
   };
 }

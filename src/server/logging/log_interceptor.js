@@ -24,7 +24,7 @@ export class LogInterceptor extends Stream.Transform {
    *  @param {object} - log event
    */
   downgradeIfEconnreset(event) {
-    const isClientError = doTagsMatch(event, ['error', 'client', 'connection']);
+    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
     const isEconnreset = isClientError && get(event, 'data.errno') === 'ECONNRESET';
 
     if (!isEconnreset) return null;
