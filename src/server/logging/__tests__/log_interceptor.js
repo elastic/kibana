@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import { shuffle } from 'lodash';
 
 import { LogInterceptor } from '../log_interceptor';
 
