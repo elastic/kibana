@@ -1,7 +1,9 @@
 import Stream from 'stream';
-import _ from 'lodash';
+import { get, isEqual, sortBy } from 'lodash';
 
-import { doTagsMatch } from './do_tags_match';
+function doTagsMatch(event, tags) {
+  return isEqual(sortBy(get(event, 'tags')), sortBy(tags));
+}
 
 export class LogInterceptor extends Stream.Transform {
   constructor() {
@@ -23,7 +25,7 @@ export class LogInterceptor extends Stream.Transform {
    */
   downgradeIfEconnreset(event) {
     const isClientError = doTagsMatch(event, ['error', 'client', 'connection']);
-    const isEconnreset = isClientError && _.get(event, 'data.errno') === 'ECONNRESET';
+    const isEconnreset = isClientError && get(event, 'data.errno') === 'ECONNRESET';
 
     if (!isEconnreset) return false;
 
