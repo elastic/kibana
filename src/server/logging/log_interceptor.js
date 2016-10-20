@@ -1,0 +1,45 @@
+import Stream from 'stream';
+import _ from 'lodash';
+
+import { doTagsMatch } from './do_tags_match';
+
+export class LogInterceptor extends Stream.Transform {
+  constructor() {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: true
+    });
+  }
+
+  /**
+   *  Since the upgrade to hapi 14, any socket read
+   *  error is surfaced as a generic "client error"
+   *  but "ECONNRESET" specifically is not useful for the
+   *  logs unless you are trying to debug edge-case behaviors.
+   *
+   *  For that reason, we downgrade this from error to debug level
+   *
+   *  @param {object} - log event
+   */
+  downgradeIfEconnreset(event) {
+    const isClientError = doTagsMatch(event, ['error', 'client', 'connection']);
+    const isEconnreset = isClientError && _.get(event, 'data.errno') === 'ECONNRESET';
+
+    if (!isEconnreset) return false;
+
+    return {
+      event: 'log',
+      pid: event.pid,
+      timestamp: event.timestamp,
+      tags: ['debug', 'connection', 'econnreset'],
+      data: 'ECONNRESET: Socket was closed by the client (probably the browser) before it could be read completely'
+    };
+  }
+
+  _transform(event, enc, next) {
+    const downgraded = this.downgradeIfEconnreset(event);
+
+    this.push(downgraded || event);
+    next();
+  }
+};
