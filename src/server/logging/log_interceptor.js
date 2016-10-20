@@ -1,8 +1,8 @@
 import Stream from 'stream';
-import { get, isEqual, sortBy } from 'lodash';
+import { get, isEqual } from 'lodash';
 
 function doTagsMatch(event, tags) {
-  return isEqual(sortBy(get(event, 'tags')), sortBy(tags));
+  return isEqual(get(event, 'tags'), tags);
 }
 
 export class LogInterceptor extends Stream.Transform {

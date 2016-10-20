@@ -31,11 +31,11 @@ describe('server logging LogInterceptor', () => {
       assertDowngraded(interceptor.downgradeIfEconnreset(event));
     });
 
-    it('matches even when the tags are out of order', () => {
+    it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
-      event.tags = shuffle(event.tags.slice(0));
-      assertDowngraded(interceptor.downgradeIfEconnreset(event));
+      event.tags = [...event.tags.slice(1), event.tags[0]];
+      expect(interceptor.downgradeIfEconnreset(event)).to.be(null);
     });
 
     it('ignores non ECONNRESET events', () => {
