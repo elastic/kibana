@@ -1,0 +1,2 @@
+[[breaking-changes-6.0]]
+=== Breaking changes in 6.0
