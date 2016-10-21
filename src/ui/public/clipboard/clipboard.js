@@ -2,7 +2,7 @@ import Notifier from 'ui/notify/notifier';
 import uiModules from 'ui/modules';
 // borrowed heavily from https://github.com/styfle/copee
 
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.service('clipboard', function () {
   const clipboard = this;
@@ -12,20 +12,21 @@ module.service('clipboard', function () {
       location: `Share ${name}`,
     });
 
-    const a = document.createElement('a');
-    a.style.color = 'transparent';
-    a.style.border = 'none';
-    document.body.appendChild(a);
-    a.href = url;
+    const anchorElement = document.createElement('a');
+    anchorElement.style.color = 'transparent';
+    anchorElement.style.border = 'none';
+    anchorElement.href = url;
 
-    const ta = document.createElement('textarea');
-    ta.value = a.href;
-    ta.cols = 1;
-    ta.rows = 1;
-    ta.style.color = 'transparent';
-    ta.style.border = 'none';
-    document.body.appendChild(ta);
-    ta.select();
+    const copyElement = document.createElement('textarea');
+    copyElement.value = anchorElement.href;
+    copyElement.cols = 1;
+    copyElement.rows = 1;
+    copyElement.style.color = 'transparent';
+    copyElement.style.border = 'none';
+    copyElement.style.position = 'absolute';
+    copyElement.style.left = '-999999px';
+    document.body.appendChild(copyElement);
+    copyElement.select();
 
     let success = false;
 
@@ -37,8 +38,7 @@ module.service('clipboard', function () {
       notify.info('Failed to copy to clipboard.');
     }
 
-    document.body.removeChild(ta);
-    document.body.removeChild(a);
+    document.body.removeChild(copyElement);
 
     return success;
   };
