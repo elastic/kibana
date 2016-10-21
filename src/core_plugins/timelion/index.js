@@ -18,6 +18,7 @@ module.exports = function (kibana) {
     uiExports: {
       app: {
         title: 'Timelion',
+        order: -1000,
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: mainFile,

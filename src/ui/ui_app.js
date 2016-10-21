@@ -13,6 +13,7 @@ class UiApp {
 
     this.main = this.spec.main;
     this.title = this.spec.title;
+    this.order = this.spec.order || 0;
     this.description = this.spec.description;
     this.icon = this.spec.icon;
     this.hidden = !!this.spec.hidden;
@@ -24,6 +25,7 @@ class UiApp {
       this.navLink = this.uiExports.navLinks.new({
         id: this.id,
         title: this.title,
+        order: this.order,
         description: this.description,
         icon: this.icon,
         url: this.spec.url || `/app/${this.id}`
