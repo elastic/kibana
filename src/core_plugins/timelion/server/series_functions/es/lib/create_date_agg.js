@@ -26,7 +26,7 @@ module.exports = function createDateAgg(config, tlConfig) {
       dateAgg.time_buckets.aggs[metric] = {
         bucket_script: {
           buckets_path: '_count',
-          script: {inline: '_value', lang: 'expression'}
+          script: {inline: '_value'}
         }
       };
     } else if (metric[0] && metric[1]) {
