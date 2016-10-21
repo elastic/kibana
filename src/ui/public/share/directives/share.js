@@ -145,11 +145,18 @@ app.directive('share', function (Private) {
       };
 
       this.copyToClipboard = selector => {
+        const notify = new Notifier({
+          location: `Share ${$scope.objectType}`,
+        });
         const copyTextarea = $document.find(selector)[0];
         const url = copyTextarea.value;
-        const success = clipboard.urlToClipboard(url, $scope.objectType);
-        if (!success) {
+        const success = clipboard.urlToClipboard(url, notify);
+
+        if (success) {
+          notify.info('URL copied to clipboard.');
+        } else {
           copyTextarea.select();
+          notify.info('URL selected. Press Ctrl+C to copy.');
         }
       };
     }

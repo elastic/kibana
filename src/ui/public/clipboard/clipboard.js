@@ -1,17 +1,12 @@
-import Notifier from 'ui/notify/notifier';
 import uiModules from 'ui/modules';
-// borrowed heavily from https://github.com/styfle/copee
 
 const module = uiModules.get('kibana');
 
+// borrowed heavily from https://github.com/styfle/copee
 module.service('clipboard', function () {
   const clipboard = this;
 
-  clipboard.urlToClipboard = (url, name) => {
-    const notify = new Notifier({
-      location: `Share ${name}`,
-    });
-
+  clipboard.urlToClipboard = (url, notifier) => {
     const anchorElement = document.createElement('a');
     anchorElement.style.color = 'transparent';
     anchorElement.style.border = 'none';
@@ -32,10 +27,8 @@ module.service('clipboard', function () {
 
     try {
       success = document.execCommand('copy');
-      notify.info('URL copied to clipboard.');
     } catch (err) {
       success = false;
-      notify.info('Failed to copy to clipboard.');
     }
 
     document.body.removeChild(copyElement);

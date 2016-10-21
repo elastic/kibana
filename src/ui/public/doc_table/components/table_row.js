@@ -81,7 +81,15 @@ module.directive('kbnTableRow', function ($compile, $filter, clipboard) {
         $detailsScope.docUrl = `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}?id=${uriescape($scope.row._id)}`;
 
         $detailsScope.copyTextToClipboard = theUrl => {
-          clipboard.urlToClipboard(theUrl, 'Document');
+          const notify = new Notifier({
+            location: `Share Document`,
+          });
+          const success = clipboard.urlToClipboard(theUrl, notify);
+          if (success) {
+            notify.info('URL copied to clipboard.');
+          } else {
+            notify.info('Failed to copy to clipboard.');
+          }
         };
 
         $compile($detailsTr)($detailsScope);
