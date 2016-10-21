@@ -18,7 +18,7 @@ module.exports = function (plugin) {
   vfs
     .src(files, { base: plugin.root })
     .pipe(rename(function nestFileInDir(path) {
-      path.dirname = join(buildId, path.dirname);
+      path.dirname = join('kibana', plugin.id, path.dirname);
     }))
     .pipe(zip(`${buildId}.zip`))
     .pipe(vfs.dest(join(plugin.root, 'build')));
