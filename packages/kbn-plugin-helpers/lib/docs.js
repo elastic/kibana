@@ -1,4 +1,4 @@
-var join = require('path').join;
+var resolve = require('path').resolve;
 var readFileSync = require('fs').readFileSync;
 
 function indent(txt, n) {
@@ -6,10 +6,10 @@ function indent(txt, n) {
   return space + txt.split('\n').join('\n' + space);
 }
 
-module.exports = function (name) {
-  return function () {
-    var md = readFileSync(join(__dirname, name + '.md'), 'utf8');
+module.exports = function docs(name) {
+  var md = readFileSync(resolve(__dirname, '../tasks', name, 'README.md'), 'utf8');
 
+  return function () {
     console.log('\n  Docs:');
     console.log('');
     console.log(indent(md, 4));
