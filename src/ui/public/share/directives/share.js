@@ -28,7 +28,7 @@ app.directive('share', function (Private) {
     },
     template: shareTemplate,
     controllerAs: 'share',
-    controller: function ($scope, $document, $location, globalState, copee) {
+    controller: function ($scope, $document, $location, globalState, clipboard) {
       if ($scope.allowEmbed !== 'false' && $scope.allowEmbed !== undefined) {
         throw new Error('allowEmbed must be "false" or undefined');
       }
@@ -147,7 +147,7 @@ app.directive('share', function (Private) {
       this.copyToClipboard = selector => {
         const copyTextarea = $document.find(selector)[0];
         const url = copyTextarea.value;
-        const success = copee.urlToClipboard(url, $scope.objectType);
+        const success = clipboard.urlToClipboard(url, $scope.objectType);
         if (!success) {
           copyTextarea.select();
         }

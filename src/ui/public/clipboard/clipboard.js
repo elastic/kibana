@@ -4,10 +4,10 @@ import uiModules from 'ui/modules';
 
 let module = uiModules.get('kibana');
 
-module.service('copee', function () {
-  const copee = this;
+module.service('clipboard', function () {
+  const clipboard = this;
 
-  copee.urlToClipboard = (url, name) => {
+  clipboard.urlToClipboard = (url, name) => {
     const notify = new Notifier({
       location: `Share ${name}`,
     });
