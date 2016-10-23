@@ -1,4 +1,4 @@
-import { noop } from 'lodash';
+import { get, has, noop } from 'lodash';
 import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
 
@@ -22,10 +22,21 @@ export default function AggTypeMetricTopProvider(Private) {
           return value === 'number';
         },
         write(agg, output) {
-          output.params = {
-            size: 1,
-            docvalue_fields: [ agg.params.field.name ]
-          };
+          const field = agg.params.field;
+          output.params = { size: 1 };
+
+          if (field.scripted) {
+            output.params.script_fields = {
+              [ field.name ]: {
+                script: {
+                  inline: field.script,
+                  lang: field.lang
+                }
+              }
+            };
+          } else {
+            output.params.docvalue_fields = [ field.name ];
+          }
         }
       },
       {
@@ -59,10 +70,11 @@ export default function AggTypeMetricTopProvider(Private) {
       }
     ],
     getValue(agg, bucket) {
-      if (!bucket[agg.id].hits.hits.length) {
+      const hits = get(bucket, `${agg.id}.hits.hits`);
+      if (!hits || !hits.length || !has(hits[0], 'fields')) {
         return;
       }
-      return bucket[agg.id].hits.hits[0].fields[agg.params.field.name][0];
+      return hits[0].fields[agg.params.field.name] && hits[0].fields[agg.params.field.name][0];
     }
   });
 };
