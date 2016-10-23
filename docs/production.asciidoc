@@ -2,7 +2,6 @@
 == Using Kibana in a Production Environment
 * <<configuring-kibana-shield, Configuring Kibana to Work with {scyld}>>
 * <<enabling-ssl, Enabling SSL>>
-* <<controlling-access, Controlling Access>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
@@ -20,6 +19,9 @@ and an Elasticsearch client node on the same machine. For more information, see
 [float]
 [[configuring-kibana-shield]]
 === Using Kibana with X-Pack
+
+You can use {xpack-ref}xpack-security.html[{scyld}] to control what
+Elasticsearch data users can access through Kibana.
 
 When you install X-Pack, Kibana users have to log in. They need to
 have the `kibana_user` role as well as access to the indices they
@@ -70,18 +72,6 @@ If you are using a self-signed certificate for Elasticsearch, set the `ca` prope
 # the path of the pem file here.
 ca: /path/to/your/ca/cacert.pem
 ----
-
-[float]
-[[controlling-access]]
-=== Controlling access
-You can use {xpack}/xpack-security.html[{scyld}] to control what Elasticsearch data users can access through Kibana.
-{scyld} provides index-level access control. If a user isn't authorized to run
-the query that populates a Kibana visualization, the user just sees an empty
-visualization.
-
-To configure access to Kibana using {scyld}, you create roles
-for Kibana using the `my_kibana_user` default role as a starting point.
-For more information, see {xpack-ref}kibana.html[Using Kibana with {scyld}].
 
 [float]
 [[load-balancing]]
