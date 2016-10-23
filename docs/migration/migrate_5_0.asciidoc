@@ -51,3 +51,16 @@ to the dashboard's metadata, which you can persist by saving the dashboard.
 
 *Impact:* This change will not affect the functionality of the dashboard itself,
 but you must save the dashboard before using certain features such as X-Pack reporting.
+
+==== Saved objects with previously deprecated Elasticsearch features
+
+*Details:* Since Kibana 4.3, users have been able to arbitrarily modify filters
+via a generic JSON editor. If users took advantage of any deprecated Elasticsearch
+features in this way, then they will cause errors in Kibana since they're removed
+from Elasticsearch 5.0. Check the Elasticsearch
+{ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
+documentation for more details.
+
+*Impact*: Discover, Visualize, and Dashboard will error for any saved objects that
+are relying on removed Elasticsearch functionality. Users will need to update the
+JSON of any affected filters.
