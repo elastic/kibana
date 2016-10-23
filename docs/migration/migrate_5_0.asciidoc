@@ -43,3 +43,11 @@ It should now be defined as follows (with a space between ### and the title):
 *Details:* The new installer can be found at `/bin/kibana-plugin`. When installing/removing Kibana plugins, you will now call `kibana-plugin` instead of the main kibana script.
 
 *Impact:* You may have to update your automation scripts.
+
+==== Dashboards created before 5.0
+
+*Details:* Loading a 4.x dashboard in Kibana 5.0 results in an internal change
+to the dashboard's metadata, which you can persist by saving the dashboard.
+
+*Impact:* This change will not affect the functionality of the dashboard itself,
+but you must save the dashboard before using certain features such as X-Pack reporting.
