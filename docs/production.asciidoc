@@ -21,9 +21,9 @@ and an Elasticsearch client node on the same machine. For more information, see
 [[configuring-kibana-shield]]
 === Using Kibana with X-Pack
 
-When you install X-Pack, Kibana users have to log in. They need to 
+When you install X-Pack, Kibana users have to log in. They need to
 have the `kibana_user` role as well as access to the indices they
-will be working with in Kibana. 
+will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
 are not authorized to view, they get an error that indicates the index does
@@ -80,8 +80,8 @@ the query that populates a Kibana visualization, the user just sees an empty
 visualization.
 
 To configure access to Kibana using {scyld}, you create roles
-for Kibana using the `my_kibana_user` default role as a starting point. For more
-information, see {xpack}/kibana.html[Using Kibana with {scyld}].
+for Kibana using the `my_kibana_user` default role as a starting point.
+For more information, see {xpack-ref}kibana.html[Using Kibana with {scyld}].
 
 [float]
 [[load-balancing]]
