@@ -106,7 +106,7 @@ Heatmaps have the following options:
 
 * *Radius*: Sets the size of the individual heatmap dots.
 * *Blur*: Sets the amount of blurring for the heatmap dots.
-* *Maximum zoom*: Tilemaps in Kibana support 18 zoom levels. This slider defines the maximum zoom level at which the
+* *Maximum zoom*: Tilemaps in Kibana support 10 zoom levels. This slider defines the maximum zoom level at which the
 heatmap dots appear at full intensity.
 * *Minimum opacity*: Sets the opacity cutoff for the dots.
 * *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.
