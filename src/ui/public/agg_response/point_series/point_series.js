@@ -28,7 +28,7 @@ export default function PointSeriesProvider(Private) {
       setupOrderedDateXAxis(vis, chart);
     }
 
-    chart.series = getSeries(table.rows, chart);
+    chart.series = getSeries(table.rows, chart, vis);
 
     delete chart.aspects;
     return chart;

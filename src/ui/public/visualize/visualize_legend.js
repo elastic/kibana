@@ -120,9 +120,7 @@ uiModules.get('kibana')
           return a.concat(b);
         }, []);
         return _.compact(_.uniq(values, 'label'));
-      }
-
-
+      };
     }
   };
 });

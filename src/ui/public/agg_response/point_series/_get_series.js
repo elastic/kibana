@@ -5,7 +5,21 @@ export default function PointSeriesGetSeries(Private) {
   let getPoint = Private(AggResponsePointSeriesGetPointProvider);
   let addToSiri = Private(AggResponsePointSeriesAddToSiriProvider);
 
-  return function getSeries(rows, chart) {
+  function showLabelCount(vis) {
+    if (!vis || !vis.params || !vis.params.addLegendCount) return false;
+    if (!vis.type.params.isLegendCountSupported) return false;
+    return true;
+  }
+
+  function canCountMetric(siri) {
+    const metricType = siri.values[0].aggConfigResult.aggConfig._opts.type;
+    if (siri.values.length === 0) return false;
+    if (!siri.values[0].aggConfigResult.aggConfig) return false;
+    if (['count', 'cardinality', 'sum'].indexOf(metricType) === -1) return false;
+    return true;
+  }
+
+  return function getSeries(rows, chart, vis) {
     let aspects = chart.aspects;
     let multiY = _.isArray(aspects.y);
     let yScale = chart.yScale;
@@ -57,6 +71,16 @@ export default function PointSeriesGetSeries(Private) {
         return y ? y.i : series.length;
       });
     }
+
+    series = _.map(series, siri => {
+      if (showLabelCount(vis) && canCountMetric(siri)) {
+        const count = siri.values.reduce((prev, curr) => prev + curr.y, 0);
+        siri.legendLabel = `${siri.label} (${count})`;
+      } else {
+        siri.legendLabel = siri.label;
+      }
+      return siri;
+    });
 
     return series;
   };

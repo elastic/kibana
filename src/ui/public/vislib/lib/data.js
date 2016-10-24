@@ -577,6 +577,7 @@ export default function DataFactory(Private) {
         obj.slices = self._removeZeroSlices(obj.slices);
 
         _.forEach(self.getNames(obj, columns), function (name) {
+          name.legendLabel = obj.labels[name.label];
           names.push(name);
         });
       });

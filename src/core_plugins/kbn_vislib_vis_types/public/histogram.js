@@ -28,7 +28,8 @@ export default function HistogramVisType(Private) {
       },
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'percentage', 'grouped'],
-      editor: histogramTemplate
+      editor: histogramTemplate,
+      isLegendCountSupported: true
     },
     schemas: new Schemas([
       {

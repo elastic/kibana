@@ -31,7 +31,8 @@ export default function HistogramVisType(Private) {
         yAxis: {}
       },
       scales: ['linear', 'log', 'square root'],
-      editor: lineTemplate
+      editor: lineTemplate,
+      isLegendCountSupported: true
     },
     schemas: new Schemas([
       {
