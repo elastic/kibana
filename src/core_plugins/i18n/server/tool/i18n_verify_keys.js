@@ -5,13 +5,33 @@ import globProm from 'glob-promise';
 
 const readFile = Promise.promisify(fs.readFile);
 
-const verifyTranslationKeys = function (filesPatterns, translationFiles, translationPatternRegEx) {
-  const translations = loadTranslationFiles(translationFiles);
+/**
+ * Verify translation keys in files are translated.
+ * @param {Array<string>} filesPatterns - List of file patterns to be checkd for translation keys
+ * @param {Object}} translations - Object of translations keys and their translations
+ * @param {RegExp} translationPatternRegEx - Pattern of translation method to check for so can get list of translation keys
+ * @return {Promise} - A Promise object which will contain an empty Object if all translation keys are translated. If translation keys are
+ * not translated then the Object will contain all non translated translation keys with value of file the key is from
+ */
+const verifyTranslationKeys = function (filesPatterns, translations, translationPatternRegEx) {
   return getFilesToVerify(filesPatterns).then(function (filesToVerify) {
     return verifyKeysInFiles(filesToVerify, translationPatternRegEx, translations).then(function (keysNotTranslated) {
       return keysNotTranslated;
     });
   });
+};
+
+/**
+ * Verify translation keys in files are translated.
+ * @param {Array<string>} filesPatterns - List of file patterns to be checkd for translation keys
+ * @param {Array<string>} translationFiles - List of the translation files to check keys in
+ * @param {RegExp} translationPatternRegEx - Pattern of translation method to check for so can get list of translation keys
+ * @return {Promise} - A Promise object which will contain an empty Object if all translation keys are translated. If translation keys are
+ * not translated then the Object will contain all non translated translation keys with value of file the key is from
+ */
+const verifyTranslationKeysFromFiles = function (filesPatterns, translationFiles, translationPatternRegEx) {
+  const translations = loadTranslationFiles(translationFiles);
+  return verifyTranslationKeys(filesPatterns, translations, translationPatternRegEx);
 };
 
 function loadTranslationFiles(translationFiles) {
@@ -76,12 +96,4 @@ function verifyKeysInFiles(filesToVerify, translationPatternRegEx, translations)
   });
 }
 
-/**
- * Verify translation keys in files are translated.
- * @param {Array<string>} filesPatterns - List of file patterns to be checkd for translation keys
- * @param {Array<string>} translationFiles - List of the tranlastion files to check keys in
- * @param {RegExp} translationPatternRegEx - Pattern of translation method to check for so can get list of translation keys
- * @return {Promise} - A Promise object which will contain an empty Object if all translatiuon keys are translated. If translation keys are
- * not translated then the Object will contain all non translated translation keys with value of file the key is from
- */
-module.exports.verifyTranslationKeys = verifyTranslationKeys;
+export { verifyTranslationKeys, verifyTranslationKeysFromFiles };
