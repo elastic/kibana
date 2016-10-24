@@ -29,6 +29,8 @@ include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
 
+include::timelion.asciidoc[]
+
 include::console.asciidoc[]
 
 include::management.asciidoc[]
