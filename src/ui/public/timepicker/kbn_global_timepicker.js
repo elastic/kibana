@@ -28,7 +28,7 @@ UiModules
       };
 
       // travel forward in time based on the interval between from and to
-      $scope.foward = function () {
+      $scope.forward = function () {
         const time = getFromTo();
         const diff = time.to.diff(time.from);
         const origTo = time.to.toISOString();
