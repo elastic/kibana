@@ -84,7 +84,7 @@ module.directive('kbnTableRow', function ($compile, $filter, clipboard) {
           const notify = new Notifier({
             location: `Share Document`,
           });
-          const success = clipboard.urlToClipboard(theUrl, notify);
+          const success = clipboard.urlToClipboard(theUrl);
           if (success) {
             notify.info('URL copied to clipboard.');
           } else {

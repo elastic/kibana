@@ -150,7 +150,7 @@ app.directive('share', function (Private) {
         });
         const copyTextarea = $document.find(selector)[0];
         const url = copyTextarea.value;
-        const success = clipboard.urlToClipboard(url, notify);
+        const success = clipboard.urlToClipboard(url);
 
         if (success) {
           notify.info('URL copied to clipboard.');
