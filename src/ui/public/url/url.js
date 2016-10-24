@@ -186,7 +186,11 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     let route = $route.current && $route.current.$$route;
     if (!route) return false;
 
-    if (next.path !== prev.path) return false;
+    // for the purposes of determining wether there will be a reload,
+    // '' and '/' are equal
+    const nextPath = next.path || '/';
+    const prevPath = prev.path || '/';
+    if (nextPath !== prevPath) return false;
 
     let reloadOnSearch = route.reloadOnSearch;
     let searchSame = _.isEqual(next.search, prev.search);
