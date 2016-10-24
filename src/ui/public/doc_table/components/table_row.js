@@ -88,7 +88,7 @@ module.directive('kbnTableRow', function ($compile, $filter, clipboard) {
           if (success) {
             notify.info('URL copied to clipboard.');
           } else {
-            notify.info('Failed to copy to clipboard.');
+            notify.error('Failed to copy to clipboard.');
           }
         };
 
