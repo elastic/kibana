@@ -300,7 +300,7 @@ export default function DispatchClass(Private, config) {
             });
           })
           .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+          .attr('height', height);
 
         return brush;
       }
