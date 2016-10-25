@@ -10,14 +10,11 @@ describe('ui/route_based_notifier', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(($injector) => {
+    remove(Notifier.prototype._notifs); // hack to reset the global notification array
     const Private = $injector.get('Private');
     routeBasedNotifier = Private(routeBasedNotifierProvider);
     $rootScope = $injector.get('$rootScope');
   }));
-
-  afterEach(() => {
-    Notifier.prototype._notifs.length = 0; // reset the global notification array
-  });
 
   describe('#warning()', () => {
     it('adds a warning notification', () => {

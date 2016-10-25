@@ -6,7 +6,6 @@ import chrome from 'ui/chrome';
 import Nonsense from 'Nonsense';
 import sinon from 'sinon';
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
 
 import StackTraceMapper from 'ui/stack_trace_mapper';
 import { parse } from 'url';
@@ -54,13 +53,6 @@ before(function () {
 
 before(function () {
   sinon.useFakeXMLHttpRequest();
-});
-
-beforeEach(function () {
-  if (Notifier.prototype._notifs.length) {
-    Notifier.prototype._notifs.length = 0;
-    throw new TypeError('notifications were left in the notifier');
-  }
 });
 
 

@@ -33,11 +33,8 @@ describe('Notifier', function () {
 
   beforeEach(function () {
     params = { location: 'foo' };
+    while (Notifier.prototype._notifs.pop()); // clear global notifications
     notifier = new Notifier(params);
-  });
-
-  afterEach(function () {
-    Notifier.prototype._notifs.length = 0; // clear global notifications
   });
 
   describe('#constructor()', function () {
@@ -468,12 +465,13 @@ describe('Directive Notification', function () {
       scope;
     });
 
+    while (Notifier.prototype._notifs.pop()); // clear global notifications
+
     notifier = new Notifier({ location: 'directiveFoo' });
     directiveNotification = notifier.directive(directiveParam, customParams);
   });
 
   afterEach(() => {
-    Notifier.prototype._notifs.length = 0; // clear global notifications
     directiveNotification.clear();
     scope.$destroy();
   });
