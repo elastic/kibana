@@ -81,6 +81,8 @@ describe('AggType Class', function () {
 
       describe('getFormat', function () {
         it('returns the formatter for the aggConfig', function () {
+          let aggType = new AggType({});
+
           let vis = new Vis(indexPattern, {
             type: 'histogram',
             aggs: [
@@ -92,7 +94,6 @@ describe('AggType Class', function () {
           });
 
           let aggConfig = vis.aggs.byTypeName.date_histogram[0];
-          const aggType = aggConfig.type;
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('date'));
 
