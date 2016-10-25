@@ -5,6 +5,13 @@ This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 5.0.
 
 [float]
+=== URL changes for DEB/RPM packages
+*Details:* The previous `packages.elastic.co` URL has been altered to `artifacts.elastic.co`.
+
+*Impact:* Ensure you update your repository files before running the upgrade process, or your operating system may not see the new
+packages.
+
+[float]
 === Kibana binds to localhost by default
 {pull}8013[Pull Request 8013]
 
