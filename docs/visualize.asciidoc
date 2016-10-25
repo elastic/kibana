@@ -5,7 +5,7 @@
 --
 _Visualize_ enables you to create visualizations of the data in your
 Elasticsearch indices. You can then build <<dashboard, dashboards>> that
-display related visualizations. 
+display related visualizations.
 
 Kibana visualizations are based on Elasticsearch queries. By using a
 series of Elasticsearch {es-ref}search-aggregations.html[aggregations]
@@ -21,13 +21,13 @@ or start with a new search query.
 
 To create a visualization:
 
-. Click on *Visualize* in the side navigation. 
+. Click on *Visualize* in the side navigation.
 . Choose the visualization type:
 +
 [horizontal]
 <<area-chart,Area chart>>:: Visualize the total contribution of several
 different series.
-<<data-table,Data table>>:: Display the raw data of a composed aggregation. 
+<<data-table,Data table>>:: Display the raw data of a composed aggregation.
 <<line-chart,Line chart>>:: Compare different series.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
@@ -36,17 +36,17 @@ instructions.
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
 Timeseries:: Compute and combine data from multiple time series
-data sets. 
+data sets.
 <<vertical-bar-chart,Vertical bar chart>>:: Graph values in a bar chart.
 
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
 contain the data you want to visualize. This opens the visualization builder
 with a wildcard query that matches all of the documents in the selected
-indices. 
+indices.
 ** To build a visualization from a saved search, click the name of the saved
 search you want to use. This opens the visualization builder and loads the
-selected query. 
+selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
 modifications to the saved search are automatically reflected in the
@@ -59,14 +59,14 @@ visualization's Y axis:
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
 * {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
 * {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
-* {es-ref}search-aggregations-metrics-median-aggregation.html[median]
 * {es-ref}search-aggregations-metrics-min-aggregation.html[min]
 * {es-ref}search-aggregations-metrics-max-aggregation.html[max]
 * {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
+* {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
 * {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
 * {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
 
-. For the visualizations X axis, select a bucket aggregation: 
+. For the visualizations X axis, select a bucket aggregation:
 +
 * {es-ref}search-aggregations-bucket-datehistogram-aggregation.html[date histogram]
 * {es-ref}search-aggregations-bucket-range-aggregation.html[range]
@@ -81,7 +81,7 @@ specifying a terms aggregation on the `geo.src` field:
 image::images/bar-terms-agg.jpg[]
 
 The y-axis shows the number of requests received from each country, and the
-countries are displayed across the x-axis. 
+countries are displayed across the x-axis.
 
 Bar, line, or area chart visualizations use _metrics_ for the y-axis and
 _buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
@@ -99,7 +99,7 @@ targeting.
 
 image::images/bar-terms-subagg.jpg[]
 
-For more information about working with sub aggregations, see 
+For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
