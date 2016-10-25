@@ -161,7 +161,7 @@ export default function PointSeriesFactory(Private) {
           return d.x;
         })
         .attr('y', 0)
-        .attr('height', height - margin.top - margin.bottom)
+        .attr('height', height)
         .attr('width', function (d) {
           return d.w;
         });
@@ -224,8 +224,8 @@ export default function PointSeriesFactory(Private) {
         selection.each(function (data) {
           const el = this;
 
-          width = elWidth - margin.left - margin.right;
-          height = elHeight - margin.top - margin.bottom;
+          width = elWidth;
+          height = elHeight;
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
@@ -239,8 +239,7 @@ export default function PointSeriesFactory(Private) {
           svg = div.append('svg')
           .attr('width', elWidth)
           .attr('height', elHeight)
-          .append('g')
-          .attr('transform', 'translate(0,' + margin.top + ')');
+          .append('g');
 
           self.addClipPath(svg, width, height);
 

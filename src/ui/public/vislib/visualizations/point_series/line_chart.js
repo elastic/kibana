@@ -99,8 +99,8 @@ export default function LineChartFactory(Private) {
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
           const margin = self.handler.visConfig.get('style.margin');
-          const width = self.baseChart.chartConfig.width - margin.left - margin.right;
-          const height = self.baseChart.chartConfig.height - margin.top - margin.bottom;
+          const width = self.baseChart.chartConfig.width;
+          const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
 
           return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
