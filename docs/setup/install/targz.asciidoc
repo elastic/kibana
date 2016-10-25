@@ -80,7 +80,7 @@ The Darwin archive for Kibana v{version} can be downloaded and installed as foll
 ["source","sh",subs="attributes"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
-sha1sum kibana-{version}-darwin-x86_64.tar.gz <1>
+shasum kibana-{version}-darwin-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
 cd kibana/ <2>
 --------------------------------------------
@@ -106,7 +106,7 @@ standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
 
 
 [[targz-configuring]]
-==== Configuring Kibana on the command line
+==== Configuring Kibana via config file
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in
@@ -131,35 +131,35 @@ important data later on.
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `%KIBANA_HOME%`
+  | Kibana home directory or `$KIBANA_HOME`
  d| Directory created by unpacking the archive
  d|
 
 | bin
   | Binary scripts including `kibana` to start the Kibana server
     and `kibana-plugin` to install plugins
-  | %KIBANA_HOME%\bin
+  | $KIBANA_HOME\bin
  d|
 
 | config
   | Configuration files including `kibana.yml`
-  | %KIBANA_HOME%\config
+  | $KIBANA_HOME\config
  d|
 
 | data
   | The location of the data files written to disk by Kibana and its plugins
-  | %KIBANA_HOME%\data
+  | $KIBANA_HOME\data
  d|
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | %KIBANA_HOME%\optimize
+  | $KIBANA_HOME\optimize
  d|
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | %KIBANA_HOME%\plugins
+  | $KIBANA_HOME\plugins
  d|
 
 |=======================================================================
