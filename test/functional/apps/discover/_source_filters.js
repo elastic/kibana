@@ -37,8 +37,7 @@ bdd.describe('source filters', function describeIndexTests() {
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
       return PageObjects.common.sleep(1000);
-    })
-    .catch(PageObjects.common.createErrorHandler(this));
+    });
   });
 
   bdd.it('should not get the field referer', function () {
@@ -47,7 +46,6 @@ bdd.describe('source filters', function describeIndexTests() {
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter((fieldName) => fieldName.indexOf('relatedContent') === 0);
       expect(relatedContentFields).to.have.length(0);
-    })
-    .catch(PageObjects.common.createErrorHandler(this));
+    });
   });
 });

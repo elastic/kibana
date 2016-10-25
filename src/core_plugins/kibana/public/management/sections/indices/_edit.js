@@ -5,7 +5,7 @@ import 'plugins/kibana/management/sections/indices/source_filters/source_filters
 import 'plugins/kibana/management/sections/indices/_index_header';
 import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import UrlProvider from 'ui/url';
-import IndicesSectionsProvider from 'plugins/kibana/management/sections/indices/_edit_sections';
+import IndicesEditSectionsProvider from 'plugins/kibana/management/sections/indices/_edit_sections';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
@@ -52,9 +52,8 @@ uiModules.get('apps/management')
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-  const editSections = Private(IndicesSectionsProvider);
   $scope.$watch('indexPattern.fields', function () {
-    $scope.editSections = editSections($scope.indexPattern);
+    $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
   });
 
   $scope.changeTab = function (obj) {
