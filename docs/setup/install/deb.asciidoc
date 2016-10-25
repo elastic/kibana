@@ -145,7 +145,7 @@ failure to STDOUT. Log files can be found in `/var/log/kibana/`.
 include::systemd.asciidoc[]
 
 [[deb-configuring]]
-==== Configuring Kibana
+==== Configuring Kibana via config file
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in
