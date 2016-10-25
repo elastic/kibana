@@ -46,8 +46,8 @@ export default class HeaderPage {
     .findDisplayedByClassName('navbar-timepicker-time-desc').click();
   }
 
-  isTimepickerOpen() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  isTimepickerOpen(findTimeout = defaultFindTimeout) {
+    return this.remote.setFindTimeout(findTimeout)
     .findDisplayedByCssSelector('.kbn-timepicker')
     .then(() => true)
     .catch(() => false);
