@@ -197,7 +197,7 @@ describe('AggConfig', function () {
         {
           type: 'count',
           schema: 'metric',
-          params: {field: 'time'}
+          params: {field: '@timestamp'}
         }
       ]
     }, {
@@ -295,7 +295,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: 'time'}
+            params: {field: '@timestamp'}
           }
         ]
       },
@@ -305,7 +305,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: 'time'}
+            params: {field: '@timestamp'}
           },
           {
             type: 'date_histogram',
@@ -421,7 +421,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: 'time' }
+            params: { field: '@timestamp' }
           }
         ]
       });
@@ -433,7 +433,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: { field: 'time' }
+            params: { field: '@timestamp' }
           }
         ]
       });
@@ -447,7 +447,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: 'time' }
+            params: { field: '@timestamp' }
           }
         ]
       });
@@ -464,7 +464,7 @@ describe('AggConfig', function () {
           {
             type: 'date_histogram',
             schema: 'segment',
-            params: { field: 'time' }
+            params: { field: '@timestamp' }
           }
         ]
       });
