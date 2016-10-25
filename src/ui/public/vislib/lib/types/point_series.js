@@ -64,7 +64,16 @@ export default function ColumnHandler(Private) {
         config.chart = {
           type: 'point_series',
           series: _.map(series, (seri) => {
-            return _.defaults({}, cfg, {
+            return _.defaults({
+              show: true,
+              type: cfg.type || 'line',
+              mode: cfg.mode || 'normal',
+              interpolate: cfg.interpolate,
+              smoothLines: cfg.smoothLines,
+              drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
+              showCircles: cfg.showCircles,
+              radiusRatio: cfg.radiusRatio
+            }, {
               data: seri
             });
           })
