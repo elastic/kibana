@@ -59,7 +59,6 @@ visualization's Y axis:
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
 * {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
 * {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
-* {es-ref}search-aggregations-metrics-median-aggregation.html[median]
 * {es-ref}search-aggregations-metrics-min-aggregation.html[min]
 * {es-ref}search-aggregations-metrics-max-aggregation.html[max]
 * {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
