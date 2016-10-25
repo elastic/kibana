@@ -1,0 +1,36 @@
+[[field-filter]]
+== Filtering by Field
+You can filter the search results to display only those documents that contain a particular value in a field. You can
+also create negative filters that exclude documents that contain the specified field value.
+
+You can add filters from the Fields list or from the Documents table. When you add a filter, it is displayed in the
+filter bar below the search query. From the filter bar, you can enable or disable a filter, invert the filter (change
+it from a positive filter to a negative filter and vice-versa), toggle the filter on or off, or remove it entirely.
+Click the small left-facing arrow to the right of the index pattern selection drop-down to collapse the Fields list.
+
+To add a filter from the Fields list:
+
+. Click the name of the field you want to filter on. This displays the top five values for that field. To the right of
+each value, there are two magnifying glass buttons--one for adding a regular (positive) filter, and
+one for adding a negative filter.
+. To add a positive filter, click the *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button].
+This filters out documents that don't contain that value in the field.
+. To add a negative filter, click the *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button].
+This excludes documents that contain that value in the field.
+
+To add a filter from the Documents table:
+
+. Expand a document in the Documents table by clicking the *Expand* button image:images/ExpandButton.jpg[Expand Button]
+to the left of the document's entry in the first column (the first column is usually Time). To the right of each field
+name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative
+filter.
+. To add a positive filter  based on the document's value in a field, click the
+*Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't
+contain the specified value in that field.
+. To add a negative filter based on the document's value in a field, click the
+*Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain
+the specified value in that field.
+
+[float]
+[[discover-filters]]
+include::filter-pinning.asciidoc[]

@@ -1,26 +1,27 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/5.0/
-:xpack: https://www.elastic.co/guide/en/x-pack/5.0/
-:scyld: X-Pack Security
-:k4issue: https://github.com/elastic/kibana/issues/
-:k4pull: https://github.com/elastic/kibana/pull/
-:version: 5.0.0-rc1
-:esversion: 5.0.0-rc1
-:packageversion: 5.0.0-rc
+:version:        5.0.0-rc1
+:major-version:  5.x
+
+//////////
+release-state can be: released | prerelease | unreleased
+//////////
+
+:release-state:  prerelease
+:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/5.0/
+:xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
+:issue:          https://github.com/elastic/elasticsearch/issues/
+:pull:           https://github.com/elastic/elasticsearch/pull/
+
 
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
+include::migration.asciidoc[]
+
 include::getting-started.asciidoc[]
-
-include::migration/index.asciidoc[]
-
-include::plugins.asciidoc[]
-
-include::access.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -30,8 +31,6 @@ include::dashboard.asciidoc[]
 
 include::console.asciidoc[]
 
-include::settings.asciidoc[]
+include::management.asciidoc[]
 
-include::production.asciidoc[]
-
-include::releasenotes.asciidoc[]
+include::plugins.asciidoc[]

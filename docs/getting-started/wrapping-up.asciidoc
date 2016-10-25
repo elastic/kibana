@@ -1,0 +1,5 @@
+[[wrapping-up]]
+== Wrapping Up
+
+Now that you've handled the basic aspects of Kibana's functionality, you're ready to explore Kibana in further detail.
+Take a look at the rest of the documentation for more details!

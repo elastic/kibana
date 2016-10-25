@@ -1,0 +1,61 @@
+[[document-data]]
+== Viewing Document Data
+
+When you submit a search query, the 500 most recent documents that match the query are listed in the Documents table.
+You can configure the number of documents shown in the table by setting the `discover:sampleSize` property in
+<<advanced-options,Advanced Settings>>. By default, the table shows the localized version of the time field specified
+in the selected index pattern and the document `_source`. You can <<adding-columns, add fields to the Documents table>>
+from the Fields list. You can <<sorting, sort the listed documents>> by any indexed field that's included in the table.
+
+To view a document's field data, click the *Expand* button image:images/ExpandButton.jpg[Expand Button] to the left of
+the document's entry in the first column (the first column is usually Time). Kibana reads the document data from
+Elasticsearch and displays the document fields in a table. The table contains a row for each field that contains the
+name of the field, add filter buttons, and the field value.
+
+image::images/Expanded-Document.png[]
+
+. To view the original JSON document (pretty-printed), click the *JSON* tab.
+. To view the document data as a separate page, click the link. You can bookmark and share this link to provide direct
+access to a particular document.
+. To collapse the document details, click the *Collapse* button image:images/CollapseButton.jpg[Collapse Button].
+. To toggle a particular field's column in the Documents table, click the
+image:images/add-column-button.png[Add Column] *Toggle column in table* button.
+
+[float]
+[[sorting]]
+=== Sorting the Document List
+You can sort the documents in the Documents table by the values in any indexed field. Documents in index patterns that
+are configured with time fields are sorted in reverse chronological order by default.
+
+To change the sort order, click the name of the field you want to sort by. The fields you can use for sorting have a
+sort button to the right of the field name. Clicking the field name a second time reverses the sort order.
+
+[float]
+[[adding-columns]]
+=== Adding Field Columns to the Documents Table
+By default, the Documents table shows the localized version of the time field specified in the selected index pattern
+and the document `_source`. You can add fields to the table from the Fields list or from a document's expanded view.
+
+To add field columns to the Documents table:
+
+. Mouse over a field in the Fields list and click its  *add* button image:images/AddFieldButton.jpg[Add Field Button].
+. Repeat until you've added all the fields you want to display in the Documents table.
+. Alternately, add a field column directly from a document's expanded view by clicking the
+image:images/add-column-button.png[Add Column] *Toggle column in table* button.
+
+The added field columns replace the `_source` column in the Documents table. The added fields are also
+listed in the *Selected Fields* section at the top of the field list.
+
+To rearrange the field columns in the table, mouse over the header of the column you want to move and click the *Move*
+button.
+
+image:images/Discover-MoveColumn.jpg[Move Column]
+
+[float]
+[[removing-columns]]
+=== Removing Field Columns from the Documents Table
+To remove field columns from the Documents table:
+
+. Mouse over the field you want to remove in the *Selected Fields* section of the Fields list and click its *remove*
+button image:images/RemoveFieldButton.jpg[Remove Field Button].
+. Repeat until you've removed all the fields you want to drop from the Documents table.
