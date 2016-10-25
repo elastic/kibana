@@ -59,7 +59,7 @@ before(function () {
 beforeEach(function () {
   if (Notifier.prototype._notifs.length) {
     Notifier.prototype._notifs.length = 0;
-    throw new TypeError('notifications were left in the notifier');
+    throw new Error('notifications were left in the notifier');
   }
 });
 
