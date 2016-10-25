@@ -51,7 +51,7 @@ describe('ResponseWriter class', function () {
 
     it('collects the aggConfigs from each column in aggStack', function () {
       let aggs = [
-        { type: 'date_histogram', schema: 'segment', params: { field: 'time' } },
+        { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
         { type: 'terms', schema: 'segment', params: { field: 'extension' } },
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } }
       ];
