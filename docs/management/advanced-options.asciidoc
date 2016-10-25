@@ -1,0 +1,76 @@
+[[advanced-options]]
+== Setting Advanced Options
+
+The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
+For example, you can change the format used to display dates, specify the default index pattern, and set the precision
+for displayed decimal values.
+
+To set advanced options:
+
+. Go to *Settings > Advanced*.
+. Click the *Edit* button for the option you want to modify.
+. Enter a new value for the option.
+. Click the *Save* button.
+
+[float]
+[[kibana-settings-reference]]
+
+WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are
+difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be
+compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
+
+.Kibana Settings Reference
+[horizontal]
+`query:queryString:options`:: Options for the Lucene query string parser.
+`sort:options`:: Options for the Elasticsearch {es-ref}search-request-sort.html[sort] parameter.
+`dateFormat`:: The format to use for displaying pretty-formatted dates.
+`dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
+`dateFormat:scaled`:: These values define the format used to render ordered time-based data. Formatted timestamps must
+adapt to the interval between measurements. Keys are http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
+`dateFormat:dow`:: This property defines what day weeks should start on.
+`defaultIndex`:: Default is `null`. This property specifies the default index.
+`defaultColumns`:: Default is `_source`. Defines the columns that appear by default on the Discover page.
+`metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the
+document.
+`discover:sampleSize`:: The number of rows to show in the Discover table.
+`doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
+working on big documents. Set this property to `false` to disable highlighting.
+`courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
+the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
+increase request processing time.
+`fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.
+`histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
+`histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
+when necessary.
+`visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
+12 is the maximum. {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
+`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the tile map.
+`visualization:colorMapping`:: Maps values to specified colors within visualizations.
+`visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
+`csv:separator`:: A string that serves as the separator for exported values.
+`csv:quoteValues`:: Set this property to `true` to quote exported values.
+`history:limit`:: In fields that have history, such as query inputs, the value of this property limits how many recent
+values are shown.
+`shortDots:enable`:: Set this property to `true` to shorten long field names in visualizations. For example, instead of
+`foo.bar.baz`, show `f.b.baz`.
+`truncate:maxHeight`:: This property specifies the maximum height that a cell occupies in a table. A value of 0 disables
+truncation.
+`indexPattern:fieldMapping:lookBack`:: The value of this property sets the number of recent matching patterns to query the
+field mapping for index patterns with names that contain timestamps.
+`format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
+mentioned use "_default_".
+`format:number:defaultPattern`:: Default numeral format for the "number" format.
+`format:bytes:defaultPattern`:: Default numeral format for the "bytes" format.
+`format:percent:defaultPattern`:: Default numeral format for the "percent" format.
+`format:currency:defaultPattern`:: Default numeral format for the "currency" format.
+`savedObjects:perPage`:: The number of objects shown on each page of the list of saved objects. The default value is 5.
+`timepicker:timeDefaults`:: The default time filter selection.
+`timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
+`dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
+`filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
+`notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports
+Markdown.
+`notifications:lifetime:banner`:: Specifies the duration in milliseconds for banner notification displays. The default value is 3000000. Set this field to `Infinity` to disable banner notifications.
+`notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
+`notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
+`notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
