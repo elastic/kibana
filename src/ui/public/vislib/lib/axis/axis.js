@@ -198,9 +198,9 @@ export default function AxisFactory(Private) {
     }
 
     getLength(el, n) {
-      const margin = this.visConfig.get('style.margin');
+      const widthSpacing = 43;
       if (this.axisConfig.isHorizontal()) {
-        return $(el).parent().width() / n - 50;
+        return $(el).parent().width() / n - widthSpacing;
       }
       return $(el).parent().height() / n;
     }
@@ -257,13 +257,14 @@ export default function AxisFactory(Private) {
             .attr('transform', 'translate(1,0)');
           }
         } else {
+          const axisSpacing = 2;
           selection.attr('width', length + xAxisPadding);
           if (position === 'left') {
-            const translateWidth = length + xAxisPadding - 2 - parseInt(style.lineWidth);
+            const translateWidth = length + xAxisPadding - axisSpacing - parseInt(style.lineWidth);
             selection.select('g')
             .attr('transform', `translate(${translateWidth},0)`);
           } else if (position === 'right') {
-            const translateWidth = parseInt(style.lineWidth);
+            const translateWidth = axisSpacing + parseInt(style.lineWidth);
             selection.select('g')
               .attr('transform', `translate(${translateWidth},0)`);
           }
