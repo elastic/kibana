@@ -1,0 +1,12 @@
+[[viewing-field-stats]]
+== Viewing Field Data Statistics
+
+From the field list, you can see how many documents in the Documents table contain a particular field, what the top 5
+values are, and what percentage of documents contain each value.
+
+To view field data statistics, click the name of a field in the Fields list. The field can be anywhere in the Fields
+list.
+
+image:images/Discover-FieldStats.jpg[Field Statistics]
+
+TIP: To create a visualization based on the field, click the *Visualize* button below the field statistics.

@@ -130,7 +130,7 @@ a {
   cursor: default;
 }
 
-[ng-click], [clip-copy], [href], [confirm-click] {
+.link, [ng-click], [clip-copy], [href], [confirm-click] {
   cursor: pointer;
 }
 
@@ -621,6 +621,10 @@ fieldset {
     padding: 7px 10px;
   }
 
+  .panel-heading--clickable {
+    cursor: pointer;
+  }
+
   .panel-heading-elasticsearch,
   .panel-heading-kibana,
   .panel-heading-beats,
@@ -654,6 +658,16 @@ fieldset {
   .panel-body {
     padding: 10px;
   }
+}
+
+.page-row {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+
+.page-row-text {
+  color: @kibanaGray2;
+  font-size: 14px;
 }
 
 @import "~dragula/dist/dragula.css";

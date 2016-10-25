@@ -1,21 +1,23 @@
 [[dashboard]]
-== Dashboard
+= Dashboard
 
+[partintro]
+--
 A Kibana _dashboard_ displays a set of saved visualizations in groups that you can arrange freely. You can save a
 dashboard to share or reload at a later time.
 
 .Sample dashboard
 image:images/tutorial-dashboard.png[Example dashboard]
+--
 
-[float]
 [[dashboard-getting-started]]
-=== Getting Started
+== Getting Started
 
 You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 [float]
 [[creating-a-new-dashboard]]
-==== Building a New Dashboard
+=== Building a New Dashboard
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
@@ -28,11 +30,11 @@ NOTE: You can change the default theme in the *Advanced* section of the *Setting
 
 [float]
 [[dash-autorefresh]]
-include::autorefresh.asciidoc[]
+include::discover/autorefresh.asciidoc[]
 
 [float]
 [[adding-visualizations-to-a-dashboard]]
-==== Adding Visualizations to a Dashboard
+=== Adding Visualizations to a Dashboard
 
 To add a visualization to the dashboard, click the *Add* button in the toolbar panel. Select a saved visualization
 from the list. You can filter the list of visualizations by typing a filter string into the *Visualization Filter*
@@ -45,7 +47,7 @@ container>>.
 
 [float]
 [[saving-dashboards]]
-==== Saving Dashboards
+=== Saving Dashboards
 
 To save the dashboard, click the *Save Dashboard* button in the toolbar panel, enter a name for the dashboard in the
 *Save As* field, and click the *Save* button. By default, dashboards store the time period specified in the time filter
@@ -54,7 +56,7 @@ when you save a dashboard. To disable this behavior, clear the *Store time with 
 
 [float]
 [[loading-a-saved-dashboard]]
-==== Loading a Saved Dashboard
+=== Loading a Saved Dashboard
 
 Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes
 a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can
@@ -62,7 +64,7 @@ also access the Object Editor by clicking *Settings > Objects*.
 
 [float]
 [[sharing-dashboards]]
-==== Sharing Dashboards
+=== Sharing Dashboards
 
 You can share dashboards with other users. You can share a direct link to the Kibana dashboard or embed the dashboard
 in your Web page.
@@ -77,27 +79,26 @@ embedding.
 
 [float]
 [[embedding-dashboards]]
-==== Embedding Dashboards
+=== Embedding Dashboards
 
 To embed a dashboard, copy the embed code from the _Share_ display into your external web application.
 
-[float]
 [[customizing-your-dashboard]]
-=== Customizing Dashboard Elements
+== Customizing Dashboard Elements
 
 The visualizations in your dashboard are stored in resizable _containers_ that you can arrange on the dashboard. This
 section discusses customizing these containers.
 
 [float]
 [[moving-containers]]
-==== Moving Containers
+=== Moving Containers
 
 Click and hold a container's header to move the container around the dashboard. Other containers will shift as needed
 to make room for the moving container. Release the mouse button to confirm the container's new location.
 
 [float]
 [[resizing-containers]]
-==== Resizing Containers
+=== Resizing Containers
 
 Move the cursor to the bottom right corner of the container until the cursor changes to point at the corner. After the
 cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to
@@ -105,14 +106,14 @@ confirm the new container size.
 
 [float]
 [[removing-containers]]
-==== Removing Containers
+=== Removing Containers
 
 Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a
 container from a dashboard does not delete the saved visualization in that container.
 
 [float]
 [[viewing-detailed-information]]
-==== Viewing Detailed Information
+=== Viewing Detailed Information
 
 To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
 information about the raw data replace the visualization, as in this example:
@@ -140,13 +141,12 @@ To export the raw data behind the visualization as a comma-separated-values (CSV
 *Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
 is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
 
-[float]
 [[changing-the-visualization]]
-=== Changing the Visualization
+== Changing the Visualization
 
 Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the
 visualization in the <<visualize,Visualize>> page.
 
 [float]
 [[dashboard-filters]]
-include::filter-pinning.asciidoc[]
+include::discover/filter-pinning.asciidoc[]

@@ -133,7 +133,7 @@ uiModules.get('kibana')
     function instantiate(prov, locals) {
       if (~privPath.indexOf(prov)) {
         throw new Error(
-          'Circular refrence to "' + name(prov) + '"' +
+          'Circular reference to "' + name(prov) + '"' +
           ' found while resolving private deps: ' + pathToString()
         );
       }

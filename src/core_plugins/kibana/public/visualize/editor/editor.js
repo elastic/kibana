@@ -17,7 +17,6 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 
-
 uiRoutes
 .when('/visualize/create', {
   template: editorTemplate,
@@ -77,16 +76,29 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   let stateMonitor;
   const $appStatus = this.appStatus = {};
 
+  // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
 
+  // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
+
+  // Clone the _vis instance.
   const editableVis = vis.createEditableVis();
+
+  // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
+  // vis should call it on both.
   vis.requesting = function () {
     const requesting = editableVis.requesting;
+    // Invoking requesting() calls onRequest on each agg's type param. When a vis is marked as being
+    // requested, the bounds of that vis are updated and new data is fetched using the new bounds.
     requesting.call(vis);
+
+    // We need to keep editableVis in sync with vis.
     requesting.call(editableVis);
   };
 
+  // SearchSource is a promise-based stream of search results that can inherit from other search
+  // sources.
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
@@ -115,6 +127,8 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     docTitle.change(savedVis.title);
   }
 
+  // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
+  // Consists of things like aggs, params, listeners, title, type, etc.
   const savedVisState = vis.getState();
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
@@ -124,12 +138,17 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     vis: savedVisState
   };
 
+  // Instance of app_state.js.
   let $state = $scope.$state = (function initState() {
-    $state = new AppState(stateDefaults);
+    // This is used to sync visualization state with the url when `appState.save()` is called.
+    const appState = new AppState(stateDefaults);
 
-    if (!angular.equals($state.vis, savedVisState)) {
+    // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
+    // defaults applied. If the url was from a previous session which included modifications to the
+    // appState then they won't be equal.
+    if (!angular.equals(appState.vis, savedVisState)) {
       Promise.try(function () {
-        editableVis.setState($state.vis);
+        editableVis.setState(appState.vis);
         vis.setState(editableVis.getEnabledState());
       })
       .catch(courier.redirectWhenMissing({
@@ -137,7 +156,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
       }));
     }
 
-    return $state;
+    return appState;
   }());
 
   function init() {
@@ -148,10 +167,16 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+
+    // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
+    // Associate PersistedState instance with the Vis instance, so that
+    // `uiStateVal` can be called on it. Currently this is only used to extract
+    // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
+
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
@@ -258,6 +283,9 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     kbnUrl.change('/visualize', {});
   };
 
+  /**
+   * Called when the user clicks "Save" button.
+   */
   $scope.doSave = function () {
     savedVis.id = savedVis.title;
     // vis.title was not bound and it's needed to reflect title into visState

@@ -21,4 +21,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-exec "${NODE}" $NODE_OPTIONS "${DIR}/src/cli" ${@}
+exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli" ${@}

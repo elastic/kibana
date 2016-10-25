@@ -54,11 +54,13 @@ export default function (Private) {
           break;
         default:
           if (field.scripted) {
+            // painless expects params.value while groovy and expression languages expect value.
+            const valueClause = field.lang === 'painless' ? 'params.value' : 'value';
             filter = {
               meta: { negate: negate, index: index, field: fieldName },
               script: {
                 script: {
-                  inline: '(' + field.script + ') == value',
+                  inline: '(' + field.script + ') == ' + valueClause,
                   lang: field.lang,
                   params: {
                     value: value
@@ -82,3 +84,4 @@ export default function (Private) {
 
   return filterManager;
 };
+

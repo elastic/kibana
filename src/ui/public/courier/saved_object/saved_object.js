@@ -1,3 +1,14 @@
+/**
+ * @name SavedObject
+ *
+ * NOTE: SavedObject seems to track a reference to an object in ES,
+ * and surface methods for CRUD functionality (save and delete). This seems
+ * similar to how Backbone Models work.
+ *
+ * This class seems to interface with ES primarily through the es Angular
+ * service and a DocSource instance.
+ */
+
 import angular from 'angular';
 import _ from 'lodash';
 

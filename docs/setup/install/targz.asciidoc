@@ -1,0 +1,165 @@
+[[targz]]
+=== Install Kibana with `.tar.gz`
+
+Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
+are the easiest formats to use when trying out Kibana.
+
+The latest stable version of Kibana can be found on the
+link:/downloads/kibana[Download Kibana] page.
+Other versions can be found on the
+link:/downloads/past-releases[Past Releases page].
+
+
+[[install-linux64]]
+==== Download and install the Linux 64-bit package
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The 64-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
+sha1sum kibana-{version}-linux-x86_64.tar.gz <1>
+tar -xzf kibana-{version}-linux-x86_64.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA].
+<2> This directory is known as `$KIBANA_HOME`.
+
+endif::[]
+
+
+[[install-linux32]]
+==== Download and install the Linux 32-bit package
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The 32-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz
+sha1sum kibana-{version}-linux-x86.tar.gz <1>
+tar -xzf kibana-{version}-linux-x86.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz.sha1[published SHA].
+<2> This directory is known as `$KIBANA_HOME`.
+
+endif::[]
+
+
+[[install-darwin64]]
+==== Download and install the Darwin package
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The Darwin archive for Kibana v{version} can be downloaded and installed as follows:
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
+shasum kibana-{version}-darwin-x86_64.tar.gz <1>
+tar -xzf kibana-{version}-darwin-x86_64.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha1[published SHA].
+<2> This directory is known as `$KIBANA_HOME`.
+
+endif::[]
+
+
+[[targz-running]]
+==== Running Kibana from the command line
+
+Kibana can be started from the command line as follows:
+
+[source,sh]
+--------------------------------------------
+./bin/kibana
+--------------------------------------------
+
+By default, Kibana runs in the foreground, prints its logs to the
+standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
+
+
+[[targz-configuring]]
+==== Configuring Kibana via config file
+
+Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
+file by default.  The format of this config file is explained in
+<<settings>>.
+
+
+[[targz-layout]]
+==== Directory layout of `.tar.gz` archives
+
+The `.tar.gz` packages are entirely self-contained. All files and directories
+are, by default, contained within `$KIBANA_HOME` -- the directory created when
+unpacking the archive.
+
+This is very convenient because you don't have to create any directories to
+start using Kibana, and uninstalling Kibana is as easy as removing the
+`$KIBANA_HOME` directory.  However, it is advisable to change the default
+locations of the config and data directories so that you do not delete
+important data later on.
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| Type | Description | Default Location | Setting
+| home
+  | Kibana home directory or `$KIBANA_HOME`
+ d| Directory created by unpacking the archive
+ d|
+
+| bin
+  | Binary scripts including `kibana` to start the Kibana server
+    and `kibana-plugin` to install plugins
+  | $KIBANA_HOME\bin
+ d|
+
+| config
+  | Configuration files including `kibana.yml`
+  | $KIBANA_HOME\config
+ d|
+
+| data
+  | The location of the data files written to disk by Kibana and its plugins
+  | $KIBANA_HOME\data
+ d|
+
+| optimize
+  | Transpiled source code. Certain administrative actions (e.g. plugin install)
+    result in the source code being retranspiled on the fly.
+  | $KIBANA_HOME\optimize
+ d|
+
+| plugins
+  | Plugin files location. Each plugin will be contained in a subdirectory.
+  | $KIBANA_HOME\plugins
+ d|
+
+|=======================================================================

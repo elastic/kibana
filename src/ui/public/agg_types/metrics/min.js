@@ -7,7 +7,7 @@ export default function AggTypeMetricMinProvider(Private) {
     name: 'min',
     title: 'Min',
     makeLabel: function (aggConfig) {
-      return 'Min ' + aggConfig.params.field.displayName;
+      return 'Min ' + aggConfig.getFieldDisplayName();
     },
     params: [
       {

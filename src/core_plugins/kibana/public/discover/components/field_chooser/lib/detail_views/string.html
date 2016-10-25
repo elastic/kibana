@@ -44,6 +44,7 @@
 
       <a
         ng-href="{{vizLocation(field)}}"
+        ng-show="field.visualizable"
         class="sidebar-item-button primary">
           Visualize
           <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">

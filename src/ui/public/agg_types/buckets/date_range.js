@@ -24,7 +24,7 @@ export default function DateRangeAggDefinition(Private, config) {
       return fieldFormats.getDefaultInstance('string');
     },
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName + ' date ranges';
+      return aggConfig.getFieldDisplayName() + ' date ranges';
     },
     params: [{
       name: 'field',
