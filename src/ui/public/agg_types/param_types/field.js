@@ -44,9 +44,9 @@ export default function FieldAggParamFactory(Private, $filter) {
 
     if (this.filterFieldTypes) {
       fields = $filter('fieldType')(fields, this.filterFieldTypes);
+      fields = $filter('orderBy')(fields, ['type', 'name']);
     }
 
-    fields = $filter('orderBy')(fields, ['type', 'name']);
 
     return new IndexedArray({
       index: ['name'],
