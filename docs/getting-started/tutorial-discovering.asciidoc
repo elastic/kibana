@@ -1,34 +1,42 @@
 [[tutorial-discovering]]
 == Discovering Your Data
 
-Click the *Discover* image:images/discover-compass.png[Compass icon] tab to display Kibana's data discovery functions:
+Click *Discover* in the side navigation to display Kibana's data discovery functions:
 
 image::images/tutorial-discover.png[]
 
-Right under the tab itself, there is a search box where you can search your data. Searches take a specific
-{es-ref}query-dsl-query-string-query.html#query-string-syntax[query syntax] that enable you to create custom searches,
-which you can save and load by clicking the buttons to the right of the search box.
+In the query bar, you can enter an 
+{es-ref}query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
+query] to search your data. You can explore the results in Discover and create
+visualizations of saved searches in Visualize. 
 
-Beneath the search box, the current index pattern is displayed in a drop-down. You can change the index pattern by
-selecting a different pattern from the drop-down selector.
+The current index pattern is displayed beneath the query bar. The index pattern
+determines which indices are searched when you submit a query. To search a
+different set of indices, select different pattern from the drop down menu.
+To add an index pattern, go to *Management/Kibana/Index Patterns* and click
+*Add New*.
 
-You can construct searches by using the field names and the values you're interested in. With numeric fields you can
-use comparison operators such as greater than (>), less than (<), or equals (=). You can link elements with the
+You can construct searches by using the field names and the values you're
+interested in. With numeric fields you can use comparison operators such as
+greater than (>), less than (<), or equals (=). You can link elements with the
 logical operators AND, OR, and NOT, all in uppercase.
 
-Try selecting the `ba*` index pattern and putting the following search into the search box:
+To try it out, select the `ba*` index pattern and enter the following query string
+in the query bar:
 
 [source,text]
 account_number:<100 AND balance:>47500
 
-This search returns all account numbers between zero and 99 with balances in excess of 47,500.
-
-If you're using the linked sample data set, this search returns 5 results: Account numbers 8, 32, 78, 85, and 97.
+This query returns all account numbers between zero and 99 with balances in
+excess of 47,500. When searching the sample bank data, it returns 5 results: 
+Account numbers 8, 32, 78, 85, and 97.
 
 image::images/tutorial-discover-2.png[]
 
-To narrow the display to only the specific fields of interest, highlight each field in the list that displays under the
-index pattern and click the *Add* button. Note how, in this example, adding the `account_number` field changes the
-display from the full text of five records to a simple list of five account numbers:
+By default, all fields are shown for each matching document. To choose which
+document fields to display, hover over the Available Fields list and click the
+*add* button next to each field you want include. For example, if you add
+just the `account_number`, the display changes to a simple list of five
+account numbers:
 
 image::images/tutorial-discover-3.png[]
