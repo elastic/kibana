@@ -20,6 +20,9 @@
   </li>
 
   <li>
+    <i ng-click="zoomIn()" class="time-nav-btn fa fa-search-plus ng-scope" tooltip="Zoom in"></i>
+    <i ng-click="zoomOut()" class="time-nav-btn fa fa-search-minus ng-scope" tooltip="Zoom out"></i>
+    <i ng-click="back()" class="time-nav-btn fa fa-arrow-left ng-scope" tooltip="Move backwards in time"></i>
     <button ng-class="{active: kbnTopNav.isCurrent('filter')}"
       ng-click="kbnTopNav.toggle('filter')"
       aria-haspopup="true"
@@ -28,5 +31,6 @@
       <i aria-hidden="true" class="fa fa-clock-o"></i>
       <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
     </button>
+    <i ng-click="forward()" class="time-nav-btn fa fa-arrow-right ng-scope" tooltip="Move forwards in time"></i>
   </li>
 </ul>
