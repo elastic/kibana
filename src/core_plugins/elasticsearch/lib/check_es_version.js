@@ -7,7 +7,6 @@ import _ from 'lodash';
 import esBool from './es_bool';
 import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
-import SetupError from './setup_error';
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -64,13 +63,11 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
     if (incompatibleNodes.length) {
       const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
-
-      const errorMessage =
+      throw new Error(
         `This version of Kibana requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
-        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(',')}`;
-
-      throw new SetupError(server, errorMessage);
+        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(',')}`
+      );
     }
 
     return true;
