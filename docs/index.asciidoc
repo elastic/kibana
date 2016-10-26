@@ -1,14 +1,14 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:version:        5.0.0-rc1
+:version:        5.0.0
 :major-version:  5.x
 
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
 
-:release-state:  prerelease
+:release-state:  released
 :es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/5.0/
 :xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
 :issue:          https://github.com/elastic/elasticsearch/issues/
