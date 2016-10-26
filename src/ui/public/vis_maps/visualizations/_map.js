@@ -7,11 +7,10 @@ import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/g
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
 
 export default function MapFactory(Private, tilemapSettings) {
-
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
-  const mapTiles = {
+  const mapConfiguration = {
     url: tilemapSettings.getUrl(),
     options: tilemapSettings.getOptions()
   };
@@ -43,13 +42,13 @@ export default function MapFactory(Private, tilemapSettings) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapTiles.options.maxZoom), mapTiles.options.minZoom);
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapConfiguration.options.maxZoom), mapConfiguration.options.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
       const mapOptions = {
-        minZoom: mapTiles.options.minZoom,
-        maxZoom: mapTiles.options.maxZoom,
+        minZoom: mapConfiguration.options.minZoom,
+        maxZoom: mapConfiguration.options.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
@@ -302,7 +301,7 @@ export default function MapFactory(Private, tilemapSettings) {
         });
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
-        this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
+        this._tileLayer = L.tileLayer(mapConfiguration.url, mapConfiguration.options);
       }
 
       // append tile layers, center and zoom to the map options
