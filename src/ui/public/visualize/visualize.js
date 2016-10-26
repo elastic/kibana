@@ -76,13 +76,20 @@ uiModules
 
       let applyClassNames = function () {
         let $visEl = getVisContainer();
+        const $spyEl = getter('.visualize-spy-container')();
         let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
+        if ($spyEl) {
+          $spyEl.toggleClass('only', Boolean(fullSpy));
+        }
 
         $timeout(function () {
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
+            if ($spyEl) {
+              $spyEl.addClass('only');
+            }
           };
         }, 0);
       };
