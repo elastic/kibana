@@ -3,6 +3,11 @@
 paginate {
   display: block;
 
+  .paginate-container {
+    width: 100%;
+    display: flex;
+  }
+
   paginate-controls {
     display: flex;
     align-items: center;
@@ -28,18 +33,20 @@ paginate {
           flex: 0 0 auto;
           user-select: none;
 
-          a {
+          span {
             text-decoration: none;
             background-color: @kibanaGray6;
             margin-left: 2px;
             padding: 8px 11px;
+            cursor: pointer;
+            color: @link-color;
           }
 
-          a:hover {
+          span:hover {
             text-decoration: underline;
           }
 
-          &.active a {
+          &.active span {
             text-decoration: none !important;
             font-weight: bold;
             color: @paginate-page-link-active-color;
@@ -53,6 +60,10 @@ paginate {
 
       input[type=number] {
         width: 3em;
+      }
+
+      label {
+        margin-right: 2px;
       }
     }
   }
