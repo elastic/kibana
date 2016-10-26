@@ -36,3 +36,5 @@ include::console.asciidoc[]
 include::management.asciidoc[]
 
 include::plugins.asciidoc[]
+
+include::release-notes.asciidoc[]

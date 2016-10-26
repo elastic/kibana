@@ -59,6 +59,60 @@ It should now be defined as follows (with a space between ### and the title):
 *Impact:* You may have to update your automation scripts.
 
 [float]
+=== Only whitelisted client headers are sent to Elasticsearch
+
+{pull}6896[Pull Request 6896]
+
+*Details:* The only headers that are proxied from the browser client to Elasticsearch are the ones set via the `elasticsearch.requestHeadersWhitelist` server configuration.
+
+*Impact:* If you're relying on client headers in Elasticsearch, you will need to whitelist the specific headers in your `kibana.yml`.
+
+[float]
+=== `server.defaultRoute` is now always prefixed by `server.basePath`
+
+{pull}6953[Pull Request 6953]
+
+*Details:* The base path configuration now precedes the default route configuration when accessing the default route.
+
+*Impact:* If you were relying on both `defaultRoute` and `basePath` configurations, you will need to remove the hardcoded `basePath` from your `defaultRoute`.
+
+[float]
+=== Directory listings of static assets are no longer rendered
+
+{pull}6764[Pull Request 6764]
+
+*Details:* The server no longer renders a list of static files if you try to access a directory.
+
+*Impact:* If you were relying on this behavior before, you will need to expose underlying directory listings via a reverse proxy instead.
+
+[float]
+=== Console logs display date/time in UTC
+
+{pull}8534[Pull Request 8534]
+
+*Details:* All server logs now render in UTC rather than the server's local time.
+
+*Impact:* If you are parsing the timestamps of Kibana server logs in an automated way, make sure to update your automation to accomodate UTC values.
+
+[float]
+=== A column for Average no longer renders along with Standard Deviation
+
+{pull}7827[Pull Request 7827]
+
+*Details:* From the early days of Kibana, adding a standard deviation metric to a data table also resulted in an average column being added to that data table. This is no longer the case.
+
+*Impact:* If you want to have both standard deviation and average in the same data table, then add both columns just as you would any other metric.
+
+[float]
+=== Minimum size on terms aggregations has been changed from 0 to 1
+
+{pull}8339[Pull Request 8339]
+
+*Details:* Elasticsearch has removed the ability to specify a size of 0 for terms aggregations, so Kibana's minimum value has been adjusted to follow suit.
+
+*Impact:* Any saved visualization that relies on size=0 will need to be updated.
+
+[float]
 === Dashboards created before 5.0
 
 *Details:* Loading a 4.x dashboard in Kibana 5.0 results in an internal change
