@@ -86,7 +86,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.yellow);
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(client.ping);
-          sinon.assert.calledOnce(client.nodes.info);
+          sinon.assert.calledTwice(client.nodes.info);
           sinon.assert.calledOnce(client.cluster.health);
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
@@ -106,7 +106,7 @@ describe('plugins/elasticsearch', () => {
             `Unable to connect to Elasticsearch at ${esUrl}.`
           );
           sinon.assert.calledTwice(client.ping);
-          sinon.assert.calledOnce(client.nodes.info);
+          sinon.assert.calledTwice(client.nodes.info);
           sinon.assert.calledOnce(client.cluster.health);
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
@@ -126,7 +126,7 @@ describe('plugins/elasticsearch', () => {
             'Elasticsearch is still initializing the kibana index.'
           );
           sinon.assert.calledOnce(client.ping);
-          sinon.assert.calledOnce(client.nodes.info);
+          sinon.assert.calledTwice(client.nodes.info);
           sinon.assert.calledTwice(client.cluster.health);
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
@@ -145,7 +145,7 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.yellow.args[1][0]).to.be('No existing Kibana index found');
           sinon.assert.calledOnce(client.ping);
           sinon.assert.calledOnce(client.indices.create);
-          sinon.assert.calledOnce(client.nodes.info);
+          sinon.assert.calledTwice(client.nodes.info);
           sinon.assert.calledTwice(client.cluster.health);
         });
     });
