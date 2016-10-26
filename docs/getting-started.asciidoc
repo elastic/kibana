@@ -3,18 +3,19 @@
 
 [partintro]
 --
-Now that you have Kibana <<setup,installed>>, you can step through this tutorial to get fast hands-on experience with
-key Kibana functionality. By the end of this tutorial, you will have:
+Ready to get some hands-on experience with Kibana? 
+This tutorial shows you how to:
 
-* Loaded a sample data set into your Elasticsearch installation
-* Defined at least one index pattern
-* Used the <<discover, Discover>> functionality to explore your data
-* Set up some <<visualize,_visualizations_>> to graphically represent your data
-* Assembled visualizations into a <<dashboard,Dashboard>>
+* Load a sample data set into Elasticsearch
+* Define an index pattern
+* Explore the sample data with <<discover, Discover>>
+* Set up <<visualize,_visualizations_>> of the sample data
+* Assemble visualizations into a <<dashboard,Dashboard>>
 
-The material in this section assumes you have a working Kibana install connected to a working Elasticsearch install.
+Before you begin, make sure you've <<install, installed Kibana>> and established
+a <<connect-to-elasticsearch, connection to Elasticsearch>>.
 
-Video tutorials are also available:
+You might also be interested in these video tutorials:
 
 * https://www.elastic.co/blog/kibana-4-video-tutorials-part-1[High-level Kibana introduction, pie charts]
 * https://www.elastic.co/blog/kibana-4-video-tutorials-part-2[Data discovery, bar charts, and line charts]
