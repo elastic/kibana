@@ -2,17 +2,11 @@ import expect from 'expect.js';
 import { noop } from 'lodash';
 import sinon from 'sinon';
 
-import SetupError from '../setup_error';
 import checkForTribe from '../check_for_tribe';
 
 describe('plugins/elasticsearch checkForTribe', () => {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
-
-  const stubServer = () => ({
-    log: noop,
-    config: () => ({ get: noop })
-  });
 
   const stubClient = (nodesInfoResp = { nodes: {} }) => ({
     nodes: {
@@ -22,7 +16,7 @@ describe('plugins/elasticsearch checkForTribe', () => {
 
   it('fetches the local node stats of the node that the elasticsearch client is connected to', async () => {
     const client = stubClient();
-    await checkForTribe(stubServer(), client);
+    await checkForTribe(client);
     sinon.assert.calledOnce(client.nodes.info);
   });
 
@@ -41,10 +35,10 @@ describe('plugins/elasticsearch checkForTribe', () => {
     };
 
     try {
-      await checkForTribe(stubServer(), stubClient(nodeInfo));
+      await checkForTribe(stubClient(nodeInfo));
       throw new Error('checkForTribe() should have thrown');
     } catch (err) {
-      expect(err).to.be.a(SetupError);
+      expect(err).to.be.a(Error);
     }
   });
 });
