@@ -61,7 +61,8 @@
     "makelogs": "makelogs",
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
-    "sterilize": "grunt sterilize"
+    "sterilize": "grunt sterilize",
+    "es-start": "grunt es-start"
   },
   "repository": {
     "type": "git",
@@ -146,6 +147,7 @@
     "tar": "2.2.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
+    "unzip": "0.1.11",
     "url-loader": "0.5.6",
     "validate-npm-package-name": "2.2.2",
     "webpack": "1.12.1",
