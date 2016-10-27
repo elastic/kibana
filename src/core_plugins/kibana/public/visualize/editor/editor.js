@@ -110,9 +110,9 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     description: 'Save Visualization'
   }, {
-    key: 'load',
+    key: 'open',
     template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    description: 'Load Saved Visualization',
+    description: 'Open Saved Visualization',
   }, {
     key: 'share',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
@@ -309,12 +309,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   $scope.unlink = function () {
     if (!$state.linked) return;
 
+    notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
+
     $state.linked = false;
     const parent = searchSource.getParent(true);
     const parentsParent = parent.getParent(true);
-
-    // display unlinking for 2 seconds, unless it is double clicked
-    $scope.unlinking = $timeout($scope.clearUnlinking, 2000);
 
     delete savedVis.savedSearchId;
     parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
@@ -330,13 +329,6 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $state.query = searchSource.get('query');
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
-  };
-
-  $scope.clearUnlinking = function () {
-    if ($scope.unlinking) {
-      $timeout.cancel($scope.unlinking);
-      $scope.unlinking = null;
-    }
   };
 
   function transferVisState(fromVis, toVis, stage) {
