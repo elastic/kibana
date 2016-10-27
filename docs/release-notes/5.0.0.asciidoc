@@ -62,7 +62,7 @@ Sharing::
 * Improve user interface to emphasize difference between Original URLs and Snapshot URLs. {pull}8172[#8172]
 Status::
 * Emit new state and message, on status change {pull}7513[#7513]
-timelion::
+Timelion::
 * Add Timelion to Kibana core {pull}7994[#7994]
 Visualize::
 * Add y-axis logarithmic scale for bar charts {pull}7939[#7939]
