@@ -9,6 +9,8 @@ import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 import SetupError from './setup_error';
 
+const lastWarnedAboutNodes = new WeakMap();
+
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
@@ -50,16 +52,19 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         ip: node.ip,
       }));
 
-      server.log(['warning'], {
-        tmpl: (
-          'You\'re running Kibana <%= kibanaVersion %> with some newer versions of ' +
-          'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
-          '<%= getHumanizedNodeNames(nodes).join(", ") %>'
-        ),
-        kibanaVersion,
-        getHumanizedNodeNames,
-        nodes: simplifiedNodes,
-      });
+      const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
+      if (lastWarnedAboutNodes.get(server) !== warningNodeNames) {
+        lastWarnedAboutNodes.set(server, warningNodeNames);
+        server.log(['warning'], {
+          tmpl: (
+            `You're running Kibana ${kibanaVersion} with some newer versions of ` +
+            'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
+            warningNodeNames
+          ),
+          kibanaVersion,
+          nodes: simplifiedNodes,
+        });
+      }
     }
 
     if (incompatibleNodes.length) {
