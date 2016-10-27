@@ -71,7 +71,7 @@ export default function FieldAggParamFactory(Private, $filter) {
 
     const validField = this.getFieldOptions(aggConfig).byName[fieldName];
     if (!validField) {
-      notifier.error(`"field" is invalid`);
+      notifier.error(`Saved "field" parameter is now invalid. Please select a new field.`);
     }
 
     return validField;
