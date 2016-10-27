@@ -3,8 +3,7 @@ import expect from 'expect.js';
 import uiModules from 'ui/modules';
 import $ from 'jquery';
 
-import '../directives/kbn_loading_indicator';
-
+import '../directives/loading_indicator/loading_indicator';
 
 describe('kbnLoadingIndicator', function () {
   let compile;
@@ -25,12 +24,12 @@ describe('kbnLoadingIndicator', function () {
 
   });
 
-  it('injects a loading .spinner into the element', function () {
+  it('injects a loading .loadingIndicator into the element', function () {
     const $el = compile();
-    expect($el.find('.spinner')).to.have.length(1);
+    expect($el.find('.loadingIndicator')).to.have.length(1);
   });
   it('applies removes ng-hide class when there are connections', function () {
     const $el  = compile(true);
-    expect($el.find('.spinner.ng-hide')).to.have.length(0);
+    expect($el.find('.loadingIndicator.ng-hide')).to.have.length(0);
   });
 });
