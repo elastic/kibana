@@ -196,7 +196,7 @@ Notice that all states contain a boolean keyword, typically "is".
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.localNavButton-is-pressed {
+  &.localNavButton-isPressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }
