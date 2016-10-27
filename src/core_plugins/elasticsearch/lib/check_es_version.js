@@ -9,7 +9,9 @@ import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 import SetupError from './setup_error';
 
-const lastWarnedAboutNodes = new WeakMap();
+// tracks the node descriptions that get logged in warnings so
+// that we don't spam the log with the same message over and over
+const lastWarnedNodesForServer = new WeakMap();
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -52,9 +54,10 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         ip: node.ip,
       }));
 
+      // Don't show the same warning over and over again.
       const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
-      if (lastWarnedAboutNodes.get(server) !== warningNodeNames) {
-        lastWarnedAboutNodes.set(server, warningNodeNames);
+      if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
+        lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
             `You're running Kibana ${kibanaVersion} with some newer versions of ` +
