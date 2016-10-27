@@ -1,4 +1,4 @@
-<h3>History</h3>
+<div class="localDropdownTitle">History</div>
 
 <div class="history-body">
   <ul class="list-group history-reqs">
@@ -11,8 +11,7 @@
       ng-dblclick="history.restore(req)"
       title="{{ req.description }}"
       class="list-group-item history-req"
-      >
-
+    >
       {{ history.describeReq(req) }}
       <span class="history-req-icon"><i class="fa fa-chevron-right"></i></span>
     </li>

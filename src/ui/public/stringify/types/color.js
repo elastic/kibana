@@ -5,6 +5,7 @@ import colorTemplate from 'ui/stringify/editors/color.html';
 export default function ColorFormatProvider(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
     regex: '<insert regex>',
@@ -61,9 +62,10 @@ export default function ColorFormatProvider(Private) {
 
       if (!color) return _.asPrettyString(val);
 
-      const styleColor = color.text ? `color: ${color.text};` : '';
-      const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
-      return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
+      let style = '';
+      if (color.text) style += `color: ${color.text};`;
+      if (color.background) style += `background-color: ${color.background};`;
+      return convertTemplate({ val, style });
     }
   };
 

@@ -425,7 +425,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].field().format.getConverterFor());
+      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].getField().format.getConverterFor());
 
       vis = new Vis(indexPattern, {
         type: 'metric',
@@ -481,12 +481,12 @@ describe('AggConfig', function () {
           {
             type: 'avg',
             schema: 'metric',
-            params: { field: 'ssl' }
+            params: { field: 'bytes' }
           }
         ]
       });
 
-      let field = indexPattern.fields.byName.ssl;
+      let field = indexPattern.fields.byName.bytes;
       expect(vis.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
     });
   });

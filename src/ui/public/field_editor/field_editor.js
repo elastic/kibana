@@ -46,6 +46,7 @@ uiModules
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
       self.formatParams = self.field.format.params();
+      self.conflictDescriptionsLength = (self.field.conflictDescriptions) ? Object.keys(self.field.conflictDescriptions).length : 0;
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];

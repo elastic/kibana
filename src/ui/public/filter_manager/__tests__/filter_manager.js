@@ -114,13 +114,13 @@ describe('Filter Manager', function () {
     checkAddFilters(0, null, 3);
     expect(appState.filters).to.have.length(2);
 
-    let scriptedField = {name: 'scriptedField', scripted: true, script: 1};
+    let scriptedField = {name: 'scriptedField', scripted: true, script: 1, lang: 'painless'};
     filterManager.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: {index: 'myIndex', negate: false, field: 'scriptedField'},
       script: {
         script: {
-          inline: '(' + scriptedField.script + ') == value',
+          inline: '(' + scriptedField.script + ') == params.value',
           lang: scriptedField.lang,
           params: {value: 1}
         }

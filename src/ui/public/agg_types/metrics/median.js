@@ -12,7 +12,7 @@ export default function AggTypeMetricMedianProvider(Private) {
     dslName: 'percentiles',
     title: 'Median',
     makeLabel: function (aggConfig) {
-      return 'Median ' + aggConfig.params.field.displayName;
+      return 'Median ' + aggConfig.getFieldDisplayName();
     },
     params: [
       {

@@ -17,38 +17,6 @@
     line-height: 1.3;
   }
 
-  navbar {
-    .bitty-modal-container {
-      position: relative;
-
-      .bitty-modal {
-        position: absolute;
-        cursor: pointer;
-        top: 0px;
-        left: 0px;
-        right: 0px;
-        bottom: 0px;
-        z-index: 10;
-        background: fadeout(@vis-editor-navbar-modal-bg, 10%);
-        color: @vis-editor-navbar-modal-color;
-        text-align: center;
-        padding-top: 6px;
-
-        // Don't overflow container
-        padding-left: 20px;
-        padding-right: 20px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        user-select: none;
-      }
-
-      a {
-        color: @vis-editor-navbar-modal-link-color;
-      }
-    }
-  }
-
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
@@ -79,17 +47,6 @@
     .flex-parent(0, 1, auto);
   }
 }
-
-  .vis-editor-info {
-    line-height: 30px;
-    padding: 0px 10px;
-    border-bottom-left-radius: @border-radius-base;
-  }
-
-    .vis-editor-info-title {
-      font-weight: bold;
-      margin-right: 10px;
-    }
 
   .vis-editor-content {
     .flex-parent();

@@ -37,13 +37,12 @@ export default function TermsAggDefinition(Private) {
     title: 'Terms',
     makeLabel: function (agg) {
       let params = agg.params;
-      return params.field.displayName + ': ' + params.order.display;
+      return agg.getFieldDisplayName() + ': ' + params.order.display;
     },
     createFilter: createFilter,
     params: [
       {
         name: 'field',
-        scriptable: true,
         filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
       },
       {
@@ -143,7 +142,7 @@ export default function TermsAggDefinition(Private) {
           // thus causing issues with filtering. This probably causes other issues since float might not
           // be able to contain the number on the elasticsearch side
           if (output.params.script) {
-            output.params.valueType = agg.field().type === 'number' ? 'float' : agg.field().type;
+            output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
           if (!orderAgg) {

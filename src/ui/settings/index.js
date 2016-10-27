@@ -3,6 +3,12 @@ import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
+
+  if (!config.get('uiSettings.enabled')) {
+    status.disabled('uiSettings.enabled config is set to `false`');
+    return;
+  }
+
   const uiSettings = {
     // returns a Promise for the value of the requested setting
     get,
@@ -98,6 +104,11 @@ export default function setupSettings(kbnServer, server, config) {
 
   function mirrorEsStatus() {
     const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+
+    if (!esStatus) {
+      status.red('UI Settings requires the elasticsearch plugin');
+      return;
+    }
 
     copyStatus();
     esStatus.on('change', copyStatus);

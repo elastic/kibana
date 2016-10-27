@@ -14,13 +14,13 @@ export default class DashboardPage {
 
   clickNewDashboard() {
     return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="New Dashboard"]')
+    .findByCssSelector('[aria-label="New Dashboard"]')
     .click();
   }
 
   clickAddVisualization() {
     return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Add a panel to the dashboard"]')
+    .findByCssSelector('[aria-label="Add a panel to the dashboard"]')
     .click();
   }
 
@@ -71,7 +71,7 @@ export default class DashboardPage {
 
   saveDashboard(dashName) {
     return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
+    .findByCssSelector('[aria-label="Save Dashboard"]')
     .click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
@@ -126,7 +126,7 @@ export default class DashboardPage {
   loadSavedDashboard(dashName) {
     var self = this;
     return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Load Saved Dashboard"]')
+    .findByCssSelector('[aria-label="Open Saved Dashboard"]')
     .click()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
