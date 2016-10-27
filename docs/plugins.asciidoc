@@ -24,10 +24,12 @@ $ bin/kibana-plugin install x-pack
 [float]
 === Installing Plugins from an Arbitrary URL
 
-You can specify a URL to a specific plugin, as in the following example:
+You can download official Elastic plugins simply by specifying their name. You
+can alternatively specify a URL to a specific plugin, as in the following
+example:
 
 ["source","shell",subs="attributes"]
-$ bin/kibana-plugin install https://download.elastic.co/kibana/x-pack/x-pack-{version}.zip
+$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{version}.zip
 
 You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 
