@@ -10,8 +10,8 @@ import uiModules from 'ui/modules';
 import aggParamsTemplate from 'plugins/kibana/visualize/editor/agg_params.html';
 
 uiModules
-.get('app/visualize')
-.directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
+.get('app/visualize', ['kibana/scripting'])
+.directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter, scriptingLangService) {
   const aggTypes = Private(AggTypesIndexProvider);
 
   const notify = new Notifier({
@@ -82,6 +82,12 @@ uiModules
         // build collection of agg params html
         type.params.forEach(function (param, i) {
           let aggParam;
+
+          if (param.type === 'scripting_lang') {
+            scriptingLangService
+              .getScriptingLangs()
+              .then(langs => $aggParamEditorsScope.scriptingLangs = langs);
+          }
 
           if ($aggParamEditorsScope.indexedFields) {
             const hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
