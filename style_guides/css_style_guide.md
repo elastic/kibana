@@ -1,6 +1,13 @@
 
 # CSS Style Guide
 
+## Background
+
+Our CSS naming convention is based on BEM:
+
+* [BEM 101 (CSS Tricks)](https://css-tricks.com/bem-101/)
+* [Getting your head around BEM syntax (CSS Wizardry)](http://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/)
+
 ## Concepts
 
 ### Think in terms of components
