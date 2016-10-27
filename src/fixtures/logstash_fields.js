@@ -1,36 +1,65 @@
 function stubbedLogstashFields() {
-  let sourceData = [
-    { name: 'bytes',              type: 'number',     indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 10 },
-    { name: 'ssl',                type: 'boolean',    indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 20 },
-    { name: '@timestamp',         type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },
-    { name: 'time',               type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },
-    { name: '@tags',              type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'utc_time',           type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'phpmemory',          type: 'number',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'ip',                 type: 'ip',         indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'request_body',       type: 'attachment', indexed: true,  analyzed: true, sortable:  false, filterable: true },
-    { name: 'point',              type: 'geo_point',  indexed: true,  analyzed: true, sortable:  false, filterable: false },
-    { name: 'area',               type: 'geo_shape',  indexed: true,  analyzed: true, sortable:  true,  filterable: false },
-    { name: 'hashed',             type: 'murmur3',    indexed: true,  analyzed: true, sortable:  false, filterable: false },
-    { name: 'geo.coordinates',    type: 'geo_point',  indexed: true,  analyzed: true, sortable:  false, filterable: true },
-    { name: 'extension',          type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'machine.os',         type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: '_type',              type: 'string',     indexed: false,  analyzed: true, sortable:  true,  filterable: true },
-    { name: '_id',                type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: true},
-    { name: '_source',            type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: false},
-    { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false, sortable: false, filterable: true },
-    { name: 'script string',      type: 'string',     scripted: true, script: '\'i am a string\'', lang: 'expression' },
-    { name: 'script number',      type: 'number',     scripted: true, script: '1234', lang: 'expression' },
-    { name: 'script date',        type: 'date',       scripted: true, script: '1234', lang: 'painless' },
-    { name: 'script murmur3',     type: 'murmur3',    scripted: true, script: '1234', lang: 'expression'},
-  ].map(function (field) {
-    field.count = field.count || 0;
-    field.scripted = field.scripted || false;
-    return field;
-  });
+  return [
+    //                                  |indexed
+    //                                  |      |analyzed
+    //                                  |      |      |aggregatable
+    //                                  |      |      |      |searchable
+    // name                type         |      |      |      |     |metadata
+    ['bytes',             'number',     true,  true,  true,  true,  { count: 10 } ],
+    ['ssl',               'boolean',    true,  true,  true,  true,  { count: 20 } ],
+    ['@timestamp',        'date',       true,  true,  true,  true,  { count: 30 } ],
+    ['time',              'date',       true,  true,  true,  true,  { count: 30 } ],
+    ['@tags',             'string',     true,  true,  true,  true ],
+    ['utc_time',          'date',       true,  true,  true,  true ],
+    ['phpmemory',         'number',     true,  true,  true,  true ],
+    ['ip',                'ip',         true,  true,  true,  true ],
+    ['request_body',      'attachment', true,  true,  true,  true ],
+    ['point',             'geo_point',  true,  true,  true,  true ],
+    ['area',              'geo_shape',  true,  true,  true,  true ],
+    ['hashed',            'murmur3',    true,  true,  false, true ],
+    ['geo.coordinates',   'geo_point',  true,  true,  true,  true ],
+    ['extension',         'string',     true,  true,  true,  true ],
+    ['machine.os',        'string',     true,  true,  true,  true ],
+    ['geo.src',           'string',     true,  true,  true,  true ],
+    ['_id',               'string',     false, false, true,  true ],
+    ['_type',             'string',     false, false, true,  true ],
+    ['_source',           'string',     false, false, true,  true ],
+    ['custom_user_field', 'conflict',   false, false, true,  true ],
+    ['script string',     'string',     false, false, true,  false, { script: '\'i am a string\'' } ],
+    ['script number',     'number',     false, false, true,  false, { script: '1234' } ],
+    ['script date',       'date',       false, false, true,  false, { script: '1234', lang: 'painless' } ],
+    ['script murmur3',    'murmur3',    false, false, true,  false, { script: '1234' } ],
+  ].map(function (row) {
+    const [
+      name,
+      type,
+      indexed,
+      analyzed,
+      aggregatable,
+      searchable,
+      metadata = {}
+    ] = row;
 
-  return sourceData;
+    const {
+      count = 0,
+      script,
+      lang = script ? 'expression' : undefined,
+      scripted = !!script,
+    } = metadata;
+
+    return {
+      name,
+      type,
+      indexed,
+      analyzed,
+      aggregatable,
+      searchable,
+      count,
+      script,
+      lang,
+      scripted,
+    };
+  });
 }
 
 export default stubbedLogstashFields;
