@@ -1,0 +1,23 @@
+<div class="form-group" ng-controller="aggParam.controller as controller">
+  <label>{{ aggParam.name | label }}</label>
+
+  <!-- placeholder so that auto-select works right -->
+  <select
+    class="form-control"
+    ng-if="controller.loading"
+    disabled
+    required
+    ng-model="agg.params[aggParam.name]"
+  ></select>
+
+  <!-- only render if the controller is ready or auto-select won't work -->
+  <select
+    class="form-control"
+    ng-if="!controller.loading"
+    required
+    ng-model="agg.params[aggParam.name]"
+    auto-select-if-only-one="controller.scriptingLangs"
+    ng-options="scriptingLang as scriptingLang for scriptingLang in controller.scriptingLangs"
+  ></select>
+
+</div>

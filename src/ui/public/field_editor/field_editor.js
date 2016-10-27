@@ -9,12 +9,14 @@ import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
+import { GetScriptingLangsProvider } from 'ui/scripting_langs';
 
 uiModules
-.get('kibana', ['colorpicker.module', 'kibana/scripting'])
+.get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
   let fieldFormats = Private(RegistryFieldFormatsProvider);
   let Field = Private(IndexPatternsFieldProvider);
+  const getScriptingLangs = Private(GetScriptingLangsProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -30,12 +32,12 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl, $http, scriptingLangService) {
+    controller: function ($scope, Notifier, kbnUrl, $http) {
       let self = this;
       let notify = new Notifier({ location: 'Field Editor' });
 
       self.docLinks = docLinks;
-      scriptingLangService.getScriptingLangs().then((langs) => {
+      getScriptingLangs().then((langs) => {
         self.scriptingLangs = langs;
         if (!_.includes(self.scriptingLangs, self.field.lang)) {
           self.field.lang = undefined;

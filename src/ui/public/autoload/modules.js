@@ -33,4 +33,3 @@ import 'ui/typeahead';
 import 'ui/url';
 import 'ui/validate_date_interval';
 import 'ui/watch_multi';
-import 'ui/scripting';

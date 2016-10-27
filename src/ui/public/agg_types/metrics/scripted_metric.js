@@ -32,7 +32,7 @@ export default function AggTypesMetricsScriptedMetricProvider(Private) {
     params: [
       {
         name: 'lang',
-        type: 'scripting_lang',
+        type: 'script_lang',
         write: function () {}
       },
       buildScriptParam('init_script'),
