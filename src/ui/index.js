@@ -10,7 +10,6 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import langParser from 'accept-language-parser';
 import * as UiI18n from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
@@ -59,8 +58,7 @@ export default async (kbnServer, server, config) => {
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
-      const acceptLanguageStr = req.headers['accept-language'];
-      const acceptLanguages = langParser.parse(acceptLanguageStr);
+      const acceptLanguages = req.headers['accept-language'];
 
       try {
         if (kbnServer.status.isGreen()) {

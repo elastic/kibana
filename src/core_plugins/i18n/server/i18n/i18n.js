@@ -1,6 +1,6 @@
-import { readFile } from 'fs';
 import path from 'path';
 import Promise from 'bluebird';
+import { readFile } from 'fs';
 import _ from 'lodash';
 
 const asyncReadFile = Promise.promisify(readFile);
@@ -14,52 +14,63 @@ let registeredTranslations = {};
  * @param {string} locale - Translation locale to be returned
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-const getTranslationsForLocale = function (locale) {
+export function getTranslationsForLocale(locale) {
   if (!registeredTranslations.hasOwnProperty(locale)) {
-    return Promise.resolve(null);
+    return Promise.resolve({});
   }
 
   const translationFiles = registeredTranslations[locale];
   const translations = _.map(translationFiles, (filename) => {
-    return asyncReadFile(filename, 'utf8').then(fileContents => JSON.parse(fileContents)).catch(SyntaxError, function (e) {
+    return asyncReadFile(filename, 'utf8')
+    .then(fileContents => JSON.parse(fileContents))
+    .catch(SyntaxError, function (e) {
       return Promise.reject('Invalid json in ' + filename);
     }).catch(function (e) {
-      return Promise.reject('Cannot read file ' + filename);
+      throw new Error('Cannot read file ' + filename);
     });
   });
 
-  return Promise.all(translations).then(translations => _.assign({}, ...translations)).then(function (translations) {
-    const vals = Object.values(translations);
-    if (!vals.every(isString)) return  Promise.reject('Invalid json schema for translations');
-    return translations;
-  });
+  return Promise.all(translations)
+  .then(translations => _.assign({}, ...translations));
+};
+
+/**
+ * Return all translations registered for the default locale.
+ * @param {Object} server - Hapi server instance
+ * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
+ */
+export function getTranslationsForDefaultLocale(server) {
+  let defaultLocale = '';
+  try {
+    defaultLocale = server.config.get('i18n.locale');
+  } catch (e) {
+    defaultLocale = 'en';
+  }
+  return getTranslationsForLocale(defaultLocale);
 };
 
 /**
  * Returns list of all registered locales.
  * @return {Array} - Registered locales
  */
-const getRegisteredTranslationLocales = function () {
+export function getRegisteredTranslationLocales() {
   return Object.keys(registeredTranslations);
 };
 
 /**
  * Return translations for a suitable locale from a user side locale list
- * @param {array} acceptLanguages - Array of locale objects parsedfrom user side accept languages header
- * @param {string} defaultLocale - Default locale as configured in Kibana
- * @return {object} - A Promise object which will contain on resolve a JSON object of all registered translations
+ * @param {Sring} languageTags -  BCP 47 language tags
+ * @return {Object} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-const getTranslationsForLocales = function (acceptLanguages, defaultLocale) {
+export function getTranslationsForLocales(languageTags) {
   let locale = '';
 
-  if (acceptLanguages !== null && acceptLanguages.length > 0) {
+  if (!_.isEmpty(languageTags)) {
     const registeredLocales = getRegisteredTranslationLocales();
-    locale = getTranslationLocaleExactMatch(acceptLanguages, registeredLocales);
+    locale = getTranslationLocaleExactMatch(languageTags, registeredLocales);
     if (locale === null || locale.length <= 0) {
-      locale = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale);
+      locale = getTranslationLocaleBestCaseMatch(languageTags, registeredLocales);
     }
-  } else {
-    locale = defaultLocale;
   }
 
   return getTranslationsForLocale(locale);
@@ -69,60 +80,46 @@ const getTranslationsForLocales = function (acceptLanguages, defaultLocale) {
  * The translation file is registered with i18n plugin. The plugin contains a list of registered translation file paths per language.
  * @param {string} absolutePluginTranslationFilePath - Absolute path to the translation file to register.
  */
-const registerTranslations = function (absolutePluginTranslationFilePath) {
+export function registerTranslations(absolutePluginTranslationFilePath) {
   const locale = getLocaleFromFileName(absolutePluginTranslationFilePath);
 
   registeredTranslations[locale] = _.get(registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath);
 };
 
 function getLocaleFromFileName(fullFileName) {
-  if (fullFileName === null || fullFileName.length <= 0) return '';
+  if (_.isEmpty(fullFileName)) throw new Error('Filename empty');
 
   const fileExt = path.extname(fullFileName);
-  if (fileExt.length <= 0) return '';
-  if (fileExt !== TRANSLATION_FILE_EXTENSION) return '';
+  if (fileExt.length <= 0 || fileExt !== TRANSLATION_FILE_EXTENSION) throw new Error('Invalid translation file ' + fullFileName);
 
   return path.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
 }
 
-function isString(element, index, array) {
-  return typeof element === 'string';
-}
-
-function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
-  let localeStr = '';
-
-  const acceptLangsLen = acceptLanguages.length;
-  for (let indx = 0; indx < acceptLangsLen; indx++) {
-    const language = acceptLanguages[indx];
-    if (language.region) {
-      localeStr = language.code + '-' + language.region;
-    } else {
-      localeStr = language.code;
-    }
-    if (registeredLocales.indexOf(localeStr) > -1) {
-      return localeStr;
+function getTranslationLocaleExactMatch(languageTags, registeredLocales) {
+  const languageTagsLen = languageTags.length;
+  for (let indx = 0; indx < languageTagsLen; indx++) {
+    const languageTag = languageTags[indx];
+    if (registeredLocales.indexOf(languageTag) > -1) {
+      return languageTag;
     }
   }
   return null;
 }
 
-function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale) {
-  let localeStr = '';
-
-  const acceptLangsLen = acceptLanguages.length;
+function getTranslationLocaleBestCaseMatch(languageTags, registeredLocales) {
+  const languageTagsLen = languageTags.length;
   const regLangsLen = registeredLocales.length;
-  for (let indx = 0; indx < acceptLangsLen; indx++) {
-    const language = acceptLanguages[indx];
-    localeStr = language.code;
+  for (let indx = 0; indx < languageTagsLen; indx++) {
+    const languageTag = languageTags[indx];
+    const languageCode = languageTag.slice(0, languageTag.indexOf('-'));
     for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
       const locale = registeredLocales[regIndx];
-      if (locale.match('^' + localeStr)) {
+      if (locale.match('^' + languageCode)) {
         return locale;
       }
     }
   }
-  return defaultLocale;
+  return '';
 }
 
-export { getTranslationsForLocale, getTranslationsForLocales, getRegisteredTranslationLocales, registerTranslations };
+//export { getTranslationsForLocale, getTranslationsForDefaultLocale, getTranslationsForLocales, getRegisteredTranslationLocales, registerTranslations };
