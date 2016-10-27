@@ -9,58 +9,58 @@ describe('Color Format', function () {
   beforeEach(ngMock.inject(function (Private) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
     ColorFormat = fieldFormats.getType('color');
-
   }));
 
-  it('should add colors if the value is in range', function () {
-    let colorer = new ColorFormat({
-      colors: [{
-        range: '100:150',
-        text: 'blue',
-        background: 'yellow'
-      }]
+  context('field is a number', () => {
+    it('should add colors if the value is in range', function () {
+      let colorer = new ColorFormat({
+        fieldType: 'number',
+        colors: [{
+          range: '100:150',
+          text: 'blue',
+          background: 'yellow'
+        }]
+      });
+      expect(colorer.convert(99, 'html')).to.eql('99');
+      expect(colorer.convert(100, 'html')).to.eql('<span style="color: blue;background-color: yellow;">100</span>');
+      expect(colorer.convert(150, 'html')).to.eql('<span style="color: blue;background-color: yellow;">150</span>');
+      expect(colorer.convert(151, 'html')).to.eql('151');
     });
-    let converter = colorer.getConverterFor('html');
-    let field = {type:'number'};
-    expect(converter(99, field)).to.eql('99');
-    expect(converter(100, field)).to.eql('<span style="color: blue;background-color: yellow;">100</span>');
-    expect(converter(150, field)).to.eql('<span style="color: blue;background-color: yellow;">150</span>');
-    expect(converter(151, field)).to.eql('151');
+
+    it('should not convert invalid ranges', function () {
+      let colorer = new ColorFormat({
+        fieldType: 'number',
+        colors: [{
+          range: '100150',
+          text: 'blue',
+          background: 'yellow'
+        }]
+      });
+      expect(colorer.convert(99, 'html')).to.eql('99');
+    });
   });
 
-  it('should not convert invalid ranges', function () {
-    let colorer = new ColorFormat({
-      colors: [{
-        range: '100150',
-        text: 'blue',
-        background: 'yellow'
-      }]
-    });
-    let converter = colorer.getConverterFor('html');
-    let field = {type:'number'};
-    expect(converter(99, field)).to.eql('99');
-  });
+  context('field is a string', () => {
+    it('should add colors if the regex matches', function () {
+      let colorer = new ColorFormat({
+        fieldType: 'string',
+        colors: [{
+          regex: 'A.*',
+          text: 'blue',
+          background: 'yellow'
+        }]
+      });
 
-  it('should add colors if the regex matches', function () {
-    let colorer = new ColorFormat({
-      colors: [{
-        regex: 'A.*',
-        text: 'blue',
-        background: 'yellow'
-      }]
-    });
-    let converter = colorer.getConverterFor('html');
-    let field = {type:'string'};
-    expect(converter('B', field)).to.eql('B');
-    expect(converter('AAA', field)).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
-    expect(converter('AB', field)).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
-    expect(converter('a', field)).to.eql('a');
+      let converter = colorer.getConverterFor('html');
+      expect(converter('B', 'html')).to.eql('B');
+      expect(converter('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
+      expect(converter('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
+      expect(converter('a', 'html')).to.eql('a');
 
-    // field is 'string' in case the code is triggered via vizualization (data table)
-    field = 'string';
-    expect(converter('B', field)).to.eql('B');
-    expect(converter('AAA', field)).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
-    expect(converter('AB', field)).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
-    expect(converter('a', field)).to.eql('a');
+      expect(converter('B', 'html')).to.eql('B');
+      expect(converter('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
+      expect(converter('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
+      expect(converter('a', 'html')).to.eql('a');
+    });
   });
 });

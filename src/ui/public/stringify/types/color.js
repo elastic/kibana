@@ -21,12 +21,17 @@ export default function ColorFormatProvider(Private) {
   _Color.id = 'color';
   _Color.title = 'Color';
   _Color.fieldType = [
-    'number', 'string'
+    'number',
+    'string'
   ];
 
   _Color.editor = {
     template: colorTemplate,
     controller($scope) {
+      $scope.$watch('editor.field.type', type => {
+        $scope.editor.formatParams.fieldType = type;
+      });
+
       $scope.addColor = function () {
         $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
       };
@@ -39,27 +44,32 @@ export default function ColorFormatProvider(Private) {
 
 
   _Color.paramDefaults = {
+    fieldType: null, // populated by editor, see controller below
     colors: [_.cloneDeep(DEFAULT_COLOR)]
   };
 
-  _Color.prototype._convert = {
-    html(val, field) {
-
-      var color;
-      if (field.type === 'string' || field === 'string') {
-        color = _.findLast(this.param('colors'), (colorParam) => {
+  _Color.prototype.findColorRuleForVal = function (val) {
+    switch (this.param('fieldType')) {
+      case 'string':
+        return _.findLast(this.param('colors'), (colorParam) => {
           return new RegExp(colorParam.regex).test(val);
         });
-      }
 
-      else {
-        color = _.findLast(this.param('colors'), ({ range }) => {
+      case 'number':
+        return _.findLast(this.param('colors'), ({ range }) => {
           if (!range) return;
           const [start, end] = range.split(':');
           return val >= Number(start) && val <= Number(end);
         });
-      }
 
+      default:
+        return null;
+    }
+  };
+
+  _Color.prototype._convert = {
+    html(val) {
+      const color = this.findColorRuleForVal(val);
       if (!color) return _.asPrettyString(val);
 
       let style = '';
