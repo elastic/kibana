@@ -50,6 +50,7 @@ uiModules
 
       let getVisEl = getter('.visualize-chart');
       let getVisContainer = getter('.vis-container');
+      let getSpyContainer = getter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
@@ -76,13 +77,16 @@ uiModules
 
       let applyClassNames = function () {
         let $visEl = getVisContainer();
+        const $spyEl = getSpyContainer();
         let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
+        $spyEl.toggleClass('only', Boolean(fullSpy));
 
         $timeout(function () {
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
+            $spyEl.addClass('only');
           };
         }, 0);
       };
