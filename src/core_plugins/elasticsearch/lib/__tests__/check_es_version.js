@@ -16,7 +16,7 @@ describe('plugins/elasticsearch', () => {
 
     beforeEach(function () {
       server = {
-        log: _.noop,
+        log: sinon.stub(),
         plugins: {
           elasticsearch: {
             client: {
@@ -89,6 +89,42 @@ describe('plugins/elasticsearch', () => {
       } catch (e) {
         expect(e).to.be.a(Error);
       }
+    });
+
+    it('warns if a node is only off by a patch version', async () => {
+      setNodes('5.1.1');
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 2);
+      expect(server.log.getCall(0).args[0]).to.contain('debug');
+      expect(server.log.getCall(1).args[0]).to.contain('warning');
+    });
+
+    it('only warns once per node list', async () => {
+      setNodes('5.1.1');
+
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 2);
+      expect(server.log.getCall(0).args[0]).to.contain('debug');
+      expect(server.log.getCall(1).args[0]).to.contain('warning');
+
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 3);
+      expect(server.log.getCall(2).args[0]).to.contain('debug');
+    });
+
+    it('warns again if the node list changes', async () => {
+      setNodes('5.1.1');
+
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 2);
+      expect(server.log.getCall(0).args[0]).to.contain('debug');
+      expect(server.log.getCall(1).args[0]).to.contain('warning');
+
+      setNodes('5.1.2');
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 4);
+      expect(server.log.getCall(2).args[0]).to.contain('debug');
+      expect(server.log.getCall(3).args[0]).to.contain('warning');
     });
   });
 });

@@ -11,8 +11,8 @@ release-state can be: released | prerelease | unreleased
 :release-state:  unreleased
 :es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/master/
 :xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
-:issue:          https://github.com/elastic/elasticsearch/issues/
-:pull:           https://github.com/elastic/elasticsearch/pull/
+:issue:          https://github.com/elastic/kibana/issues/
+:pull:           https://github.com/elastic/kibana/pull/
 
 
 include::introduction.asciidoc[]

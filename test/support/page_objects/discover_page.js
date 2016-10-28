@@ -23,8 +23,7 @@ export default class DiscoverPage {
   }
 
   getTimespanText() {
-    return this.findTimeout
-    .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
+    return PageObjects.common.findTestSubject('globalTimepickerRange')
     .getVisibleText();
   }
 
@@ -59,25 +58,24 @@ export default class DiscoverPage {
 
   clickNewSearchButton() {
     return this.findTimeout
-    .findByCssSelector('button[aria-label="New Search"]')
+    .findByCssSelector('[aria-label="New Search"]')
     .click();
   }
 
   clickSaveSearchButton() {
     return this.findTimeout
-    .findByCssSelector('button[aria-label="Save Search"]')
+    .findByCssSelector('[aria-label="Save Search"]')
     .click();
   }
 
   clickLoadSavedSearchButton() {
     return this.findTimeout
-    .findDisplayedByCssSelector('button[aria-label="Load Saved Search"]')
+    .findDisplayedByCssSelector('[aria-label="Load Saved Search"]')
     .click();
   }
 
   getCurrentQueryName() {
-    return this.findTimeout
-      .findByCssSelector('span.kibana-nav-info-title span')
+    return PageObjects.common.findTestSubject('discoverCurrentQuery')
       .getVisibleText();
   }
 
@@ -143,8 +141,7 @@ export default class DiscoverPage {
   getHitCount() {
     return PageObjects.header.getSpinnerDone()
     .then(() => {
-      return this.findTimeout
-      .findByCssSelector('strong.discover-info-hits')
+      return PageObjects.common.findTestSubject('discoverQueryHits')
       .getVisibleText();
     });
   }
@@ -196,31 +193,27 @@ export default class DiscoverPage {
 
   clickShare() {
     return this.findTimeout
-    .findByCssSelector('button[aria-label="Share Search"]')
+    .findByCssSelector('[aria-label="Share Search"]')
     .click();
   }
 
   clickShortenUrl() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotShortUrlButton"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotShortUrlButton')
     .click();
   }
 
   clickCopyToClipboard() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotCopyButton"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotCopyButton')
     .click();
   }
 
   getShareCaption() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="shareUiTitle"]')
+    return PageObjects.common.findTestSubject('shareUiTitle')
     .getVisibleText();
   }
 
   getSharedUrl() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotUrl"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotUrl')
     .getProperty('value');
   }
 
