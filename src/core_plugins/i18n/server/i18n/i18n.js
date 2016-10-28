@@ -86,6 +86,13 @@ export function registerTranslations(absolutePluginTranslationFilePath) {
   registeredTranslations[locale] = _.get(registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath);
 };
 
+/**
+ * Unregister translation files
+ */
+export function unregisterTranslations() {
+  registeredTranslations = [];
+};
+
 function getLocaleFromFileName(fullFileName) {
   if (_.isEmpty(fullFileName)) throw new Error('Filename empty');
 
@@ -121,5 +128,3 @@ function getTranslationLocaleBestCaseMatch(languageTags, registeredLocales) {
   }
   return '';
 }
-
-//export { getTranslationsForLocale, getTranslationsForDefaultLocale, getTranslationsForLocales, getRegisteredTranslationLocales, registerTranslations };

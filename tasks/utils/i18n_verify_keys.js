@@ -13,52 +13,13 @@ const readFile = Promise.promisify(fs.readFile);
  * @return {Promise} - A Promise object which will contain an empty Object if all translation keys are translated. If translation keys are
  * not translated then the Object will contain all non translated translation keys with value of file the key is from
  */
-const verifyTranslationKeys = function (filesPatterns, translations, translationPatternRegEx) {
+export function verifyTranslationKeys(filesPatterns, translations, translationPatternRegEx) {
   return getFilesToVerify(filesPatterns).then(function (filesToVerify) {
     return verifyKeysInFiles(filesToVerify, translationPatternRegEx, translations).then(function (keysNotTranslated) {
       return keysNotTranslated;
     });
   });
 };
-
-/**
- * Verify translation keys in files are translated.
- * @param {Array<string>} filesPatterns - List of file patterns to be checkd for translation keys
- * @param {Array<string>} translationFiles - List of the translation files to check keys in
- * @param {RegExp} translationPatternRegEx - Pattern of translation method to check for so can get list of translation keys
- * @return {Promise} - A Promise object which will contain an empty Object if all translation keys are translated. If translation keys are
- * not translated then the Object will contain all non translated translation keys with value of file the key is from
- */
-const verifyTranslationKeysFromFiles = function (filesPatterns, translationFiles, translationPatternRegEx) {
-  const translations = loadTranslationFiles(translationFiles);
-  return verifyTranslationKeys(filesPatterns, translations, translationPatternRegEx);
-};
-
-function loadTranslationFiles(translationFiles) {
-  let translations = {};
-  if (Array.isArray(translationFiles)) {
-    for (let translationFile of translationFiles) {
-      translations = loadTranslationFile(translationFile, translations);
-    }
-  } else {
-    translations = loadTranslationFile(translationFiles, null);
-  }
-  return translations;
-}
-
-function loadTranslationFile(translationFile, translations) {
-  let newTranslations = require(translationFile);
-  if (translations && Object.keys(translations).length > 0) {
-    for (let key in newTranslations) {
-      if (newTranslations.hasOwnProperty(key)) {
-        translations[key] = newTranslations[key];
-      }
-    }
-  } else {
-    translations = newTranslations;
-  }
-  return translations;
-}
 
 function getFilesToVerify(verifyFilesPatterns) {
   let filesToVerify = [];
@@ -79,7 +40,7 @@ function getFilesToVerify(verifyFilesPatterns) {
 function verifyKeysInFiles(filesToVerify, translationPatternRegEx, translations) {
   let keysNotTranslated = {};
 
-  return Promise.map(filesToVerify, (file) => {
+  return Promise.all(filesToVerify, (file) => {
     return readFile(file, 'utf8').then(function (fileContents) {
       let key = [];
       do {
@@ -95,5 +56,3 @@ function verifyKeysInFiles(filesToVerify, translationPatternRegEx, translations)
     return keysNotTranslated;
   });
 }
-
-export { verifyTranslationKeys, verifyTranslationKeysFromFiles };

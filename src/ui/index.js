@@ -10,7 +10,7 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import * as UiI18n from './ui_i18n';
+import * as uii18n from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -38,13 +38,6 @@ export default async (kbnServer, server, config) => {
   for (const gen of uiExports.getBundleProviders()) {
     const bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps(), kbnServer.plugins);
     if (bundle) bundles.add(bundle);
-  }
-
-  let defaultLocale = '';
-  try {
-    defaultLocale = config.get('i18n.locale');
-  } catch (e) {
-    defaultLocale = 'en';
   }
 
   // render all views from the ui/views directory
@@ -98,7 +91,7 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-      const translations = await UiI18n.getTranslations(acceptLanguages, defaultLocale, server);
+      const translations = await UiI18n.getTranslations(acceptLanguages, server);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({

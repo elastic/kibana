@@ -8,7 +8,7 @@ import _ from 'lodash';
  * @param {Object} server - Hapi server instance
  * @return {Object} - A JSON object of translations
  */
-const getTranslations = async function (acceptLanguages, server) {
+export async function getTranslations(acceptLanguages, server) {
   const languageTags = getLanguageTags(acceptLanguages);
   const translations = await server.plugins.i18n.getTranslationsForLocales(languageTags);
   let fullTranslations = {};
@@ -41,5 +41,3 @@ function getLanguageTags(acceptLanguages) {
   }
   return languageTags;
 }
-
-export { getTranslations };
