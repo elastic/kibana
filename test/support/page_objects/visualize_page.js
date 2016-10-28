@@ -296,7 +296,7 @@ export default class VisualizePage {
   clickNewVisualization() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="New Visualization"]')
+    .findByCssSelector('[aria-label="New Visualization"]')
     .click();
   }
 
@@ -304,7 +304,7 @@ export default class VisualizePage {
   saveVisualization(vizName) {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="Save Visualization"]')
+    .findByCssSelector('[aria-label="Save Visualization"]')
     .click()
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -319,9 +319,7 @@ export default class VisualizePage {
     //   // click save button
     .then(() => {
       PageObjects.common.debug('click submit button');
-      return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.config button[type="submit"]')
+      return PageObjects.common.findTestSubject('saveVisualizationButton')
       .click();
     })
     .then(function () {
@@ -343,7 +341,7 @@ export default class VisualizePage {
   clickLoadSavedVisButton() {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
+      .findDisplayedByCssSelector('[aria-label="Open Saved Visualization"]')
       .click();
   }
 

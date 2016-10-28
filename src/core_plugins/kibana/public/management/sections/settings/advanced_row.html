@@ -1,4 +1,4 @@
-<tr ng-class="conf.value === undefined ? 'default' : 'custom'" data-test-subj="advancedSetting {{conf.name}}" >
+<tr ng-class="conf.value === undefined ? 'default' : 'custom'">
   <td class="name">
     <b>{{conf.name}}</b>
     <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
@@ -18,7 +18,8 @@
       name="forms.configEdit"
       ng-if="conf.editing"
       ng-submit="save(conf)"
-      role="form">
+      role="form"
+    >
 
       <input
         ng-if="conf.normal"
@@ -26,7 +27,8 @@
         ng-keyup="maybeCancel($event, conf)"
         placeholder="{{conf.value || conf.defVal}}"
         type="text"
-        class="form-control">
+        class="form-control"
+      >
 
         <textarea
           ng-if="conf.markdown"
@@ -35,7 +37,7 @@
           ng-model="conf.unsavedValue"
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
-          ></textarea>
+        ></textarea>
 
       <textarea
         ng-if="conf.json"
@@ -45,7 +47,7 @@
         ng-keyup="maybeCancel($event, conf)"
         elastic-textarea
         validate-json
-        ></textarea>
+      ></textarea>
       <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>
 
       <input
@@ -55,13 +57,15 @@
         ng-keyup="maybeCancel($event, conf)"
         placeholder="{{(conf.value || conf.defVal).join(', ')}}"
         type="text"
-        class="form-control">
+        class="form-control"
+      >
 
       <input
         ng-if="conf.bool"
         ng-model="conf.unsavedValue"
         type="checkbox"
-        class="form-control">
+        class="form-control"
+      >
 
       <select
         ng-if="conf.select"
@@ -69,12 +73,12 @@
         ng-model="conf.unsavedValue"
         ng-options="option as option for option in conf.options"
         class="form-control"
-        data-test-subj="selectInput">
+      >
       </select>
     </form>
 
     <!-- Setting display formats -->
-    <span ng-if="!conf.editing" data-test-subj="currentValue">
+    <span ng-if="!conf.editing" data-test-subj="advancedSetting-{{conf.name}}-currentValue">
       <span ng-if="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
       <span ng-if="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
       <span ng-if="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
@@ -89,7 +93,8 @@
       class="btn btn-default"
       ng-disabled="conf.tooComplex"
       aria-label="Edit"
-      data-test-subj="editButton">
+      data-test-subj="advancedSetting-{{conf.name}}-editButton"
+    >
       <span class="sr-only">Edit</span>
       <i aria-hidden="true" class="fa fa-pencil"></i>
     </button>
@@ -100,7 +105,8 @@
       class="btn btn-success"
       ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
       aria-label="Save"
-      data-test-subj="saveButton">
+      data-test-subj="advancedSetting-{{conf.name}}-saveButton"
+    >
       <span class="sr-only">Save</span>
       <i aria-hidden="true" ng-if="!conf.loading" class="fa fa-save"></i>
       <i aria-hidden="true" ng-if="conf.loading" class="fa fa-spinner"></i>
@@ -112,7 +118,7 @@
       ng-hide="conf.value === undefined"
       class="btn btn-danger"
       aria-label="Clear"
-      data-test-subj="clearButton">
+    >
       <span class="sr-only">Clear</span>
       <i aria-hidden="true" class="fa fa-trash-o"></i>
     </button>
@@ -122,7 +128,7 @@
       ng-click="cancelEdit(conf)"
       class="btn btn-default"
       aria-label="Cancel edit"
-      data-test-subj="cancelButton">
+    >
       <span class="sr-only">Cancel Edit</span>
       <i aria-hidden="true" class="fa fa-times"></i>
     </button>
