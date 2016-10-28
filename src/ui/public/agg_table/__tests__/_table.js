@@ -179,7 +179,7 @@ describe('AggTable Directive', function () {
         '1,2,"""foobar"""' + '\r\n'
       ]);
       expect(call.args[0].opts).to.eql({
-        type: 'text/plain'
+        type: 'text/plain;charset=utf-8'
       });
       expect(call.args[1]).to.be('somefilename.csv');
     });

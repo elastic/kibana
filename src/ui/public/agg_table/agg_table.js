@@ -36,7 +36,7 @@ uiModules
       };
 
       self.exportAsCsv = function (formatted) {
-        let csv = new Blob([self.toCsv(formatted)], { type: 'text/plain' });
+        let csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
