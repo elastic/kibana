@@ -9,6 +9,16 @@ import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 import SetupError from './setup_error';
 
+/**
+ *  tracks the node descriptions that get logged in warnings so
+ *  that we don't spam the log with the same message over and over.
+ *
+ *  There are situations, like in testing or multi-tenancy, where
+ *  the server argument changes, so we must track the previous
+ *  node warnings per server
+ */
+const lastWarnedNodesForServer = new WeakMap();
+
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
@@ -50,16 +60,20 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         ip: node.ip,
       }));
 
-      server.log(['warning'], {
-        tmpl: (
-          'You\'re running Kibana <%= kibanaVersion %> with some newer versions of ' +
-          'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
-          '<%= getHumanizedNodeNames(nodes).join(", ") %>'
-        ),
-        kibanaVersion,
-        getHumanizedNodeNames,
-        nodes: simplifiedNodes,
-      });
+      // Don't show the same warning over and over again.
+      const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
+      if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
+        lastWarnedNodesForServer.set(server, warningNodeNames);
+        server.log(['warning'], {
+          tmpl: (
+            `You're running Kibana ${kibanaVersion} with some newer versions of ` +
+            'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
+            warningNodeNames
+          ),
+          kibanaVersion,
+          nodes: simplifiedNodes,
+        });
+      }
     }
 
     if (incompatibleNodes.length) {

@@ -1,0 +1,29 @@
+[[set-time-filter]]
+== Setting the Time Filter
+The Time Filter restricts the search results to a specific time period. You can set a time filter if your index
+contains time-based events and a time-field is configured for the selected index pattern.
+
+By default the time filter is set to the last 15 minutes. You can use the Time Picker to change the time filter
+or select a specific time interval or time range in the histogram at the top of the page.
+
+To set a time filter with the Time Picker:
+
+. Click the Time Filter displayed in the upper right corner of the menu bar to open the Time Picker.
+. To set a quick filter, simply click one of the shortcut links.
+. To specify a relative Time Filter, click *Relative* and enter the relative start time. You can specify
+the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
+. To specify an absolute Time Filter, click *Absolute* and enter the start date in the *From* field and the end date in
+the *To* field.
+. Click the caret at the bottom of the Time Picker to hide it.
+
+To set a Time Filter from the histogram, do one of the following:
+
+* Click the bar that represents the time interval you want to zoom in on.
+* Click and drag to view a specific timespan. You must start the selection with the cursor over the background of the
+chart--the cursor changes to a plus sign when you hover over a valid start point.
+
+You can use the browser Back button to undo your changes.
+
+The histogram lists the time range you're currently exploring, as well as the intervals that range is currently using.
+To change the intervals, click the link and select an interval from the drop-down. The default behavior automatically
+sets an interval based on the time range.

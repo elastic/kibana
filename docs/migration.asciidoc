@@ -1,0 +1,10 @@
+[[breaking-changes]]
+= Breaking changes
+
+[partintro]
+--
+This section discusses the changes that you need to be aware of when migrating
+your application from one version of Kibana to another.
+--
+
+include::migration/migrate_5_0.asciidoc[]

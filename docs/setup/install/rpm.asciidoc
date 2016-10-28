@@ -1,0 +1,199 @@
+[[rpm]]
+=== Install Kibana with RPM
+
+The RPM for Kibana can be <<install-rpm,downloaded from our website>>
+or from our  <<rpm-repo,RPM repository>>. It can be used to install
+Kibana on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
+and Oracle Enterprise.
+
+NOTE: RPM install is not supported on distributions with old versions of RPM,
+such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
+
+The latest stable version of Kibana can be found on the
+link:/downloads/kibana[Download Kibana] page. Other versions can
+be found on the link:/downloads/past-releases[Past Releases page].
+
+[[rpm-key]]
+==== Import the Elastic PGP Key
+
+include::key.asciidoc[]
+
+[source,sh]
+-------------------------
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+-------------------------
+
+[[rpm-repo]]
+==== Installing from the RPM repository
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Create a file called `kibana.repo` in the `/etc/yum.repos.d/` directory
+for RedHat based distributions, or in the `/etc/zypp/repos.d/` directory for
+OpenSuSE based distributions, containing:
+
+ifeval::["{release-state}"=="released"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+[kibana-{major-version}]
+name=Kibana repository for {major-version} packages
+baseurl=https://artifacts.elastic.co/packages/{major-version}/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+[kibana-{major-version}]
+name=Kibana repository for {major-version} packages
+baseurl=https://artifacts.elastic.co/packages/{major-version}-prerelease/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+--------------------------------------------------
+
+endif::[]
+
+And your repository is ready for use. You can now install Kibana with one of the following commands:
+
+[source,sh]
+--------------------------------------------------
+sudo yum install kibana <1>
+sudo dnf install kibana <2>
+sudo zypper install kibana <3>
+--------------------------------------------------
+<1> Use `yum` on CentOS and older Red Hat based distributions.
+<2> Use `dnf` on Fedora and other newer Red Hat distributions.
+<3> Use `zypper` on OpenSUSE based distributions
+
+endif::[]
+
+[[install-rpm]]
+==== Download and install the RPM manually
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The RPM for Kibana v{version} can be downloaded from the website and installed as follows:
+
+*64 bit:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm
+sha1sum kibana-{version}-x86_64.rpm <1>
+sudo rpm --install kibana-{version}-x86_64.rpm
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha1[published SHA].
+
+*32 bit:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i686.rpm
+sha1sum kibana-{version}-i686.rpm <1>
+sudo rpm --install kibana-{version}-i686.rpm
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i686.rpm.sha1[published SHA].
+
+endif::[]
+
+include::init-systemd.asciidoc[]
+
+[[rpm-running-init]]
+==== Running Kibana with SysV `init`
+
+Use the `chkconfig` command to configure Kibana to start automatically
+when the system boots up:
+
+[source,sh]
+--------------------------------------------------
+sudo chkconfig --add kibana
+--------------------------------------------------
+
+Kibana can be started and stopped using the `service` command:
+
+[source,sh]
+--------------------------------------------
+sudo -i service kibana start
+sudo -i service kibana stop
+--------------------------------------------
+
+If Kibana fails to start for any reason, it will print the reason for
+failure to STDOUT. Log files can be found in `/var/log/kibana/`.
+
+
+[[rpm-running-systemd]]
+include::systemd.asciidoc[]
+
+[[rpm-configuring]]
+==== Configuring Kibana via config file
+
+Kibana loads its configuration from the `/etc/kibana/kibana.yml`
+file by default.  The format of this config file is explained in
+<<settings>>.
+
+[[rpm-layout]]
+==== Directory layout of RPM
+
+The RPM places config files, logs, and the data directory in the appropriate
+locations for an RPM-based system:
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| Type | Description | Default Location | Setting
+| home
+  | Kibana home directory or `$KIBANA_HOME`
+  | /usr/share/kibana
+ d|
+
+| bin
+  | Binary scripts including `kibana` to start the Kibana server
+    and `kibana-plugin` to install plugins
+  | /usr/share/kibana/bin
+ d|
+
+| config
+  | Configuration files including `kibana.yml`
+  | /etc/kibana
+ d|
+
+| data
+  | The location of the data files written to disk by Kibana and its plugins
+  | /var/lib/kibana
+ d|
+
+| optimize
+  | Transpiled source code. Certain administrative actions (e.g. plugin install)
+    result in the source code being retranspiled on the fly.
+  | /usr/share/kibana/optimize
+ d|
+
+| plugins
+  | Plugin files location. Each plugin will be contained in a subdirectory.
+  | /usr/share/kibana/plugins
+ d|
+
+|=======================================================================
