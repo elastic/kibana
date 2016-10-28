@@ -20,7 +20,6 @@ export default function HandlerBaseClass(Private) {
    */
   class Handler {
     constructor(vis, opts) {
-
       this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
       this.vis = vis;
       this.el = vis.el;
@@ -77,6 +76,17 @@ export default function HandlerBaseClass(Private) {
        * @returns {*}
        */
       this.disable = this.chartEventProxyToggle('off');
+
+    }
+
+
+    /**
+     * Clients expect the Handler-type to have a highlight/unhighlight functions. The default implementation is a noop.
+     * Specific implementations are free to override this.
+     */
+    highlight() {
+    }
+    unHighlight() {
     }
 
     /**
