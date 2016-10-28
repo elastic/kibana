@@ -1,0 +1,15 @@
+docs: Overhaul of doc structure for 5.0+
+
+Backports PR #8821
+
+**Commit 1:**
+docs: Overhaul of doc structure for 5.0+
+
+This overhaul of the docs structure puts Kibana's documentation more
+inline with the structure that is used in Elasticsearch. This will help
+us better organize the docs going forward as more docs are added.
+
+This also includes a few necessary content changes for 5.0.
+
+* Original sha: ef57d9ad6ec3391034e93ea262b1f15e93af53cf
+* Authored by Court Ewing <court@epixa.com> on 2016-10-24T21:16:36Z
