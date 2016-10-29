@@ -5,7 +5,8 @@ module.exports = function (grunt) {
     grunt.task.run(flatten([
       'clean:build',
       'clean:target',
-      '_build:downloadNodeBuilds:start',
+      '_build:downloadNodeBuilds',
+      '_build:extractNodeBuilds',
       'copy:devSource',
       'babel:build',
       '_build:babelOptions',
@@ -21,7 +22,6 @@ module.exports = function (grunt) {
       'clean:deepModules',
       'run:optimizeBuild',
       'stop:optimizeBuild',
-      '_build:downloadNodeBuilds:finish',
       '_build:versionedLinks',
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
