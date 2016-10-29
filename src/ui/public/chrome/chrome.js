@@ -24,6 +24,7 @@ const internals = _.defaults(
     rootTemplate: null,
     showAppsLink: null,
     xsrfToken: null,
+    devMode: true,
     brand: null,
     nav: [],
     applicationClasses: []
