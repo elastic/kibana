@@ -1,25 +1,24 @@
-import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
+import Request from 'request';
 import { createWriteStream, unlinkSync } from 'fs';
 
-function sendRequest({ sourceUrl, timeout }) {
-  const maxRedirects = 11; //Because this one goes to 11.
-  return fn(cb => {
-    const req = Wreck.request('GET', sourceUrl, { timeout, redirects: maxRedirects }, (err, resp) => {
-      if (err) {
-        if (err.code === 'ECONNREFUSED') {
-          err = new Error('ENOTFOUND');
-        }
+function sendRequest({ sourceUrl, reqOptions }) {
+  return new Promise((resolve, reject) => {
+    const req = Request.get(sourceUrl, reqOptions);
 
-        return cb(err);
-      }
-
+    req.on('response', (resp) => {
       if (resp.statusCode >= 400) {
-        return cb(new Error('ENOTFOUND'));
+        return reject(new Error('ENOTFOUND'));
       }
+      return resolve({ req, resp });
+    });
 
-      cb(null, { req, resp });
+    req.on('error', (err) => {
+      if (err.code === 'ECONNREFUSED') {
+        err = new Error('ENOTFOUND');
+      }
+      return reject(err);
     });
   });
 }
@@ -48,9 +47,20 @@ function downloadResponse({ resp, targetPath, progress }) {
 /*
 Responsible for managing http transfers
 */
-export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
+export default async function downloadUrl(logger, sourceUrl, targetPath, timeout, proxy) {
+  const reqOptions = {
+    'timeout': timeout,
+    'maxRedirects': 11, //Because this one goes to 11.
+    'encoding': null
+  };
+
+  if (proxy) {
+    reqOptions.proxy = proxy;
+    logger.log(`Attempting to use the following proxy: ${proxy}`);
+  }
+
   try {
-    const { req, resp } = await sendRequest({ sourceUrl, timeout });
+    const { req, resp } = await sendRequest({ sourceUrl, reqOptions });
 
     try {
       let totalSize = parseFloat(resp.headers['content-length']) || 0;

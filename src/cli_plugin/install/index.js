@@ -4,7 +4,7 @@ import install from './install';
 import Logger from '../lib/logger';
 import pkg from '../../utils/package_json';
 import { getConfig } from '../../server/path';
-import { parse, parseMilliseconds } from './settings';
+import { parse, parseMilliseconds, parseProxy } from './settings';
 import { find } from 'lodash';
 import logWarnings from '../lib/log_warnings';
 
@@ -42,6 +42,11 @@ export default function pluginInstall(program) {
     '-d, --plugin-dir <path>',
     'path to the directory where plugins are stored',
     fromRoot('plugins')
+  )
+  .option(
+    '--proxy <url>',
+    'proxy url to use',
+    parseProxy
   )
   .description('install a plugin',
 `Common examples:

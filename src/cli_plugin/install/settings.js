@@ -23,6 +23,16 @@ export function parseMilliseconds(val) {
   return result;
 };
 
+export function parseProxy(val) {
+  const result = val.trim();
+  const regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  if (!regexp.test(result)) {
+    throw new Error(`Invalid proxy name ${result}`);
+  }
+
+  return result;
+}
+
 export function parse(command, options, kbnPackage) {
   const settings = {
     timeout: options.timeout || 0,
@@ -31,7 +41,8 @@ export function parse(command, options, kbnPackage) {
     config: options.config || '',
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir || ''
+    pluginDir: options.pluginDir || '',
+    proxy: options.proxy || ''
   };
 
   settings.urls = generateUrls(settings);

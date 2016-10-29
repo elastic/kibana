@@ -158,8 +158,7 @@
     "vision": "4.1.0",
     "webpack": "1.12.15",
     "webpack-directory-name-as-main": "1.0.0",
-    "whatwg-fetch": "0.9.0",
-    "wreck": "6.2.0"
+    "whatwg-fetch": "0.9.0"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.0.3",
