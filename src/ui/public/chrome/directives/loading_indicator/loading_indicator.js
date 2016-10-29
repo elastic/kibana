@@ -8,6 +8,7 @@ UiModules
 .directive('kbnLoadingIndicator', function ($compile) {
   return {
     restrict: 'E',
+    replace: true,
     template,
   };
 });

@@ -6,12 +6,15 @@
 @loadingIndcatorColor2: @kibanaPink2;
 
 /**
- * 1. Child is absolutely positioned.
+ * 1. Position this loader on top of the content.
  * 2. Make sure indicator isn't wider than the screen.
  */
 .loadingIndicator {
-  position: relative; // 1
-  max-width: 100%; // 2
+  position: fixed; // 1
+  top: 0; // 1
+  left: 0; // 1
+  right: 0; // 1
+  z-index: 1; // 1
   overflow: hidden; // 2
   height: @loadingIndicatorHeight;
 
