@@ -23,6 +23,8 @@ module.exports = function (grunt) {
       ? baseName.replace('-x64', '-x86_64')
       : baseName;
 
+    let nodeShaSums = `${baseUri}/SHASUMS256.txt`;
+
     let buildName = `kibana-${version}-${name}`;
     let buildDir = resolve(rootPath, `build/${buildName}`);
 
@@ -49,7 +51,7 @@ module.exports = function (grunt) {
     }
     return {
       name, win,
-      nodeUrl, nodeDir,
+      nodeUrl, nodeDir, nodeShaSums,
       buildName, buildDir,
       tarName, tarPath,
       zipName, zipPath,
