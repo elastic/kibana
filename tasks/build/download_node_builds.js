@@ -16,7 +16,7 @@ export default function downloadNodeBuilds(grunt) {
   const platforms = grunt.config.get('platforms');
   const downloadLimit = 3;
 
-  let shaSums = {};
+  const shaSums = {};
   const getShaSums = () => {
     const nodeVersion = grunt.config.get('nodeVersion');
     const shaSumsUri = `https://nodejs.org/dist/v${nodeVersion}/SHASUMS256.txt`;
@@ -82,9 +82,13 @@ export default function downloadNodeBuilds(grunt) {
     let isDownloadValid = false;
 
     await mkdirpAsync(downloadDir);
-    if (grunt.option('skip-download')) {
+    if (grunt.option('skip-node-download')) {
+      grunt.log.ok(`Verifying sha sum of ${platform.name}`);
       isDownloadValid = await checkShaSum(platform);
-      if (isDownloadValid) return;
+      if (!isDownloadValid) {
+        throw new Error(`${platform.name} sha verification failed.`);
+      }
+      return;
     }
 
     while (!isDownloadValid && (downloadCounter < downloadLimit)) {
