@@ -55,7 +55,7 @@ export default function PointSeriesFactory(Private) {
           matchingSeries.push(series[i]);
         }
       });
-      return matchingSeries;
+      return this.handler.data.injectZeros(matchingSeries);
     };
 
     stackData(data) {
@@ -66,30 +66,6 @@ export default function PointSeriesFactory(Private) {
         axis.stack(_.map(stackedData[id], 'values'));
       });
       return stackedData;
-    };
-
-    mapData(data, chart) {
-      const seriesConfig = chart.seriesConfig;
-      // todo: should stack or not should be defined per series
-      const shouldStack = seriesConfig.mode === 'stacked';
-
-      return _.map(data.values, val => {
-        const valueAxis = seriesConfig.valueAxis || chart.handler.valueAxes[0].id;
-        let y0 = 0;
-        if (shouldStack) {
-          if (!this.stackedData[valueAxis]) this.stackedData[valueAxis] = {};
-          y0 = this.stackedData[valueAxis][val.x] ? this.stackedData[valueAxis][val.x] : 0;
-          this.stackedData[valueAxis][val.x] = y0 + val.y;
-        }
-        return {
-          label: data.label,
-          x: val.x,
-          y: val.y,
-          y0: y0,
-          z: val.z,
-          _input: val
-        };
-      });
     };
 
     addClipPath(svg, width, height) {
