@@ -9,16 +9,12 @@ You can also see the number of documents that match the search query and get fie
 configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the
 top of the page.
 
-image::images/Discover-Start-Annotated.jpg[Discover Page]
+image::images/Discover-Start-Annotated.jpg[Discover]
 --
 
 include::discover/set-time-filter.asciidoc[]
 
 include::discover/search.asciidoc[]
-
-[float]
-[[auto-refresh]]
-include::discover/autorefresh.asciidoc[]
 
 include::discover/field-filter.asciidoc[]
 
