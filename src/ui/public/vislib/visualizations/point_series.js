@@ -95,13 +95,12 @@ export default function PointSeriesFactory(Private) {
       const xAxis = this.handler.categoryAxes[0];
       const xScale = xAxis.getScale();
       const ordered = xAxis.ordered;
+      const isHorizontal = xAxis.axisConfig.isHorizontal();
       const missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      const visConfig = this.handler.visConfig;
       const {width, height} = svg.node().getBBox();
-      const margin = visConfig.get('style.margin');
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just
@@ -111,15 +110,15 @@ export default function PointSeriesFactory(Private) {
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
       const leftEndzone = {
-        x: 0,
-        w: Math.max(xScale(ordered.min), 0)
+        x: isHorizontal ? 0 : Math.max(xScale(ordered.min), 0),
+        w: isHorizontal ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
       };
 
       const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
       const rightStart = rightLastVal + oneUnit;
       const rightEndzone = {
-        x: xScale(rightStart),
-        w: Math.max(width - xScale(rightStart), 0)
+        x: isHorizontal ? xScale(rightStart) : 0,
+        w: isHorizontal ? Math.max(width - xScale(rightStart), 0) : xScale(rightStart)
       };
 
       this.endzones = svg.selectAll('.layer')
@@ -130,26 +129,31 @@ export default function PointSeriesFactory(Private) {
         .append('rect')
         .attr('class', 'zone')
         .attr('x', function (d) {
-          return d.x;
+          return isHorizontal ? d.x : 0;
         })
-        .attr('y', 0)
-        .attr('height', height)
+        .attr('y', function (d) {
+          return isHorizontal ? 0 : d.x;
+        })
+        .attr('height', function (d) {
+          return isHorizontal ? height : d.w;
+        })
         .attr('width', function (d) {
-          return d.w;
+          return isHorizontal ? d.w : width;
         });
 
       function callPlay(event) {
         const boundData = event.target.__data__;
         const mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
+        const mouseChartYCoord = event.clientY - self.chartEl.getBoundingClientRect().top;
         const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        const min = leftEndzone.w;
-        const max = rightEndzone.x;
+        const min = isHorizontal ? leftEndzone.w : rightEndzone.w;
+        const max = isHorizontal ? rightEndzone.x : leftEndzone.x;
 
         // bounds of the cursor to consider
-        let xLeft = mouseChartXCoord;
-        let xRight = mouseChartXCoord;
+        let xLeft = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
+        let xRight = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
         if (wholeBucket) {
           xLeft = xScale(boundData.x);
           xRight = xScale(xAxis.addInterval(boundData.x));
