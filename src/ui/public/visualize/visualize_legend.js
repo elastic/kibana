@@ -29,7 +29,9 @@ uiModules.get('kibana')
       $scope.highlight = function (event) {
         let el = event.currentTarget;
         let handler = $scope.renderbot.vislibVis.handler;
-        if (!handler) {
+
+        //there is no guarantee that a Chart will set the highlight-function on its handler
+        if (!handler || typeof handler.highlight !== 'function') {
           return;
         }
         handler.highlight.call(el, handler.el);

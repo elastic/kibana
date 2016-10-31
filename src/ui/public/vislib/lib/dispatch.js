@@ -101,7 +101,9 @@ export default function DispatchClass(Private, config) {
       const isClickable = this.listenerCount('click') > 0;
       const addEvent = this.addEvent;
       const $el = this.handler.el;
-      this.handler.highlight = self.highlight;
+      if (!this.handler.highlight) {
+        this.handler.highlight = self.highlight;
+      }
 
       function hover(d, i) {
         // Add pointer if item is clickable
@@ -125,7 +127,9 @@ export default function DispatchClass(Private, config) {
       const self = this;
       const addEvent = this.addEvent;
       const $el = this.handler.el;
-      this.handler.unHighlight = self.unHighlight;
+      if (!this.handler.unHighlight) {
+        this.handler.unHighlight = self.unHighlight;
+      }
 
       function mouseout() {
         self.handler.unHighlight.call(this, $el);

@@ -76,19 +76,7 @@ export default function HandlerBaseClass(Private) {
        * @returns {*}
        */
       this.disable = this.chartEventProxyToggle('off');
-
     }
-
-
-    /**
-     * Clients expect the Handler-type to have a highlight/unhighlight functions. The default implementation is a noop.
-     * Specific implementations are free to override this.
-     */
-    highlight() {
-    }
-    unHighlight() {
-    }
-
     /**
      * Validates whether data is actually present in the data object
      * used to render the Vis. Throws a no results error if data is not
