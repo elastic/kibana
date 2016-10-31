@@ -17,6 +17,12 @@ export default function ColumnHandler(Private) {
 
       config.type = 'point_series';
 
+      if (!config.tooltip) {
+        config.tooltip = {
+          show: cfg.addTooltip
+        };
+      }
+
       if (!config.valueAxes) {
         config.valueAxes = [
           {
@@ -45,7 +51,6 @@ export default function ColumnHandler(Private) {
           {
             id: 'CategoryAxis-1',
             type: 'category',
-            ordered: data.ordered,
             labels: {
               axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
             },
@@ -88,12 +93,10 @@ export default function ColumnHandler(Private) {
     line: create(),
 
     column: create({
-      zeroFill: true,
       expandLastBucket: true
     }),
 
     area: create({
-      zeroFill: true,
       alerts: [
         {
           type: 'warning',
