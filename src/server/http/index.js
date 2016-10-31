@@ -9,6 +9,7 @@ import HapiStaticFiles from 'inert';
 import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
+import { shortUrlAssertValid } from './short_url_assert_valid';
 
 module.exports = async function (kbnServer, server, config) {
 
@@ -117,6 +118,7 @@ module.exports = async function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         const url = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
         reply(err);
@@ -129,6 +131,7 @@ module.exports = async function (kbnServer, server, config) {
     path: '/shorten',
     handler: async function (request, reply) {
       try {
+        shortUrlAssertValid(request.payload.url);
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
