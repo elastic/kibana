@@ -47,7 +47,7 @@ export default function HandlerBaseClass(Private) {
         this.alerts
       ], Boolean);
 
-      if (this.categoryAxes[0].axisConfig.isHorizontal()) {
+      if (this.categoryAxes.length && this.categoryAxes[0].axisConfig.isHorizontal()) {
         this.renderArray = this.renderArray
           .concat(this.categoryAxes)
           .concat(this.valueAxes);
