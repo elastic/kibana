@@ -78,7 +78,7 @@ export default class HeaderPage {
     .findByClassName('kbn-timepicker-go')
     .click()
     .then(function () {
-      return self.getSpinnerDone();
+      return self.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -101,7 +101,7 @@ export default class HeaderPage {
       return this.clickGoButton();
     })
     .then(() => {
-      return this.getSpinnerDone();
+      return this.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return this.clickTimepicker();
@@ -125,9 +125,9 @@ export default class HeaderPage {
     .click();
   }
 
-  getSpinnerDone() {
+  isGlobalLoadingIndicatorHidden() {
     return this.remote.setFindTimeout(defaultFindTimeout * 10)
-    .findByCssSelector('.spinner.ng-hide');
+    .findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
   }
 
 }

@@ -52,7 +52,7 @@ export default class DiscoverPage {
       this.findTimeout.findByLinkText(searchName).click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -80,7 +80,7 @@ export default class DiscoverPage {
   }
 
   getBarChartData() {
-    return PageObjects.header.getSpinnerDone()
+    return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
       return this.findTimeout
       .findAllByCssSelector('rect[data-label="Count"]');
@@ -134,12 +134,12 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
   getHitCount() {
-    return PageObjects.header.getSpinnerDone()
+    return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
       return PageObjects.common.findTestSubject('discoverQueryHits')
       .getVisibleText();
@@ -157,7 +157,7 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
