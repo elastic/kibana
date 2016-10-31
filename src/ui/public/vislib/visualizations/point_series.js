@@ -186,8 +186,8 @@ export default function PointSeriesFactory(Private) {
       let elWidth = this.chartConfig.width = $elem.width();
       let elHeight = this.chartConfig.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
-      let minWidth = 20;
-      let minHeight = 20;
+      let minWidth = 50;
+      let minHeight = 50;
       let addTimeMarker = this.chartConfig.addTimeMarker;
       let times = this.chartConfig.times || [];
       let timeMarker;
