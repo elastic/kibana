@@ -1,8 +1,5 @@
 import _ from 'lodash';
 import html from 'ui/visualize/visualize_legend.html';
-import $ from 'jquery';
-import d3 from 'd3';
-import findByParam from 'ui/utils/find_by_param';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
@@ -18,7 +15,7 @@ uiModules.get('kibana')
   return {
     restrict: 'E',
     template: html,
-    link: function ($scope, $elem) {
+    link: function ($scope) {
       let $state = getAppState();
       let clickHandler = filterBarClickHandler($state);
       $scope.open = $scope.uiState.get('vis.legendOpen', true);
@@ -32,7 +29,11 @@ uiModules.get('kibana')
       $scope.highlight = function (event) {
         let el = event.currentTarget;
         let handler = $scope.renderbot.vislibVis.handler;
-        if (!handler) return;
+
+        //there is no guarantee that a Chart will set the highlight-function on its handler
+        if (!handler || typeof handler.highlight !== 'function') {
+          return;
+        }
         handler.highlight.call(el, handler.el);
       };
 
@@ -110,7 +111,7 @@ uiModules.get('kibana')
         data = data.columns || data.rows || [data];
         if (type === 'pie') return Data.prototype.pieNames(data);
         return getSeriesLabels(data);
-      };
+      }
 
       function getSeriesLabels(data) {
         let values = data.map(function (chart) {
