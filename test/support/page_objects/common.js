@@ -120,8 +120,7 @@ export default class Common {
               self.debug('kibanaApp = ' + kibanaApp);
               if (kibanaApp === 'login') {
                 self.debug('Found loginPage username = '
-                  + config.servers.kibana.username
-                  + 'password = ' + config.servers.kibana.password);
+                  + config.servers.kibana.username);
                 return PageObjects.shield.login(config.servers.kibana.username,
                   config.servers.kibana.password)
                 .then(function () {
