@@ -33,7 +33,7 @@ export default function AreaChartFactory(Private) {
       super(handler, chartEl, chartData);
 
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
-      this.isOverlapping = (this.seriesConfig.mode === 'overlap');
+      this.isOverlapping = (this.seriesConfig.mode !== 'stacked');
       if (this.isOverlapping) {
 
         // todo ... default opacity handler should check what the opacity is and then move back to it on mouseout

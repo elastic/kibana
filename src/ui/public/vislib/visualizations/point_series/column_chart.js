@@ -75,10 +75,11 @@ export default function ColumnChartFactory(Private) {
     updateBars(bars) {
       const offset = this.seriesConfig.mode;
 
-      if (offset === 'grouped') {
-        return this.addGroupedBars(bars);
+      if (offset === 'stacked') {
+        return this.addStackedBars(bars);
       }
-      return this.addStackedBars(bars);
+      return this.addGroupedBars(bars);
+
     };
 
     /**
