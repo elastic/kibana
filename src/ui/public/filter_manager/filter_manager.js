@@ -23,7 +23,7 @@ define(function (require) {
             return filter.exists.field === value;
           }
 
-          if (filter.query) {
+          if (_.get(filter, 'query.match')) {
             return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
           }
 
