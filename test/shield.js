@@ -6,7 +6,7 @@ exports.kibanaUser = {
 };
 
 exports.kibanaServer = {
-  username: env.TEST_KIBANA_SERVER_USER || 'elastic',
+  username: env.TEST_KIBANA_SERVER_USER || 'kibana',
   password: env.TEST_KIBANA_SERVER_PASS || 'changeme'
 };
 
