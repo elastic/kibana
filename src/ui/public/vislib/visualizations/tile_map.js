@@ -106,10 +106,10 @@ export default function TileMapFactory(Private) {
         center: params.mapCenter,
         zoom: params.mapZoom,
         events: this.events,
-        markerType: this._attr.mapType,
+        markerType: this.handler.visConfig.get('mapType'),
         tooltipFormatter: this.tooltipFormatter,
         valueFormatter: this.valueFormatter,
-        attr: this._attr
+        attr: this.handler.visConfig._values
       });
 
       // add title for splits
