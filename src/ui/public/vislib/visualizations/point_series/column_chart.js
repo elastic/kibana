@@ -32,7 +32,7 @@ export default function ColumnChartFactory(Private) {
       const self = this;
       const color = this.handler.data.getColorFunc();
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
       .attr('class', function (d, i) {
