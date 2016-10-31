@@ -45,7 +45,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   });
 
