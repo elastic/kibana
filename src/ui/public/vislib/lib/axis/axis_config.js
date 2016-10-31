@@ -26,7 +26,7 @@ export default function AxisConfigFactory() {
       tickLength: '6px'
     },
     labels: {
-      axisFormatter: d3.format('n'),
+      axisFormatter: null,
       show: true,
       rotate: 0,
       rotateAnchor: 'center',
@@ -49,13 +49,19 @@ export default function AxisConfigFactory() {
       rotate: 0,
       rotateAnchor: 'end',
       filter: true,
-      truncate: 0
+      truncate: 0,
+    }
+  };
+
+  const valueDefaults = {
+    labels: {
+      axisFormatter: d3.format('n')
     }
   };
 
   class AxisConfig {
     constructor(chartConfig, axisConfigArgs) {
-      const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : {};
+      const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
       this._values = _.defaultsDeep({}, axisConfigArgs, typeDefaults, defaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
@@ -65,6 +71,9 @@ export default function AxisConfigFactory() {
       if (this._values.type === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
+        if (!this._values.labels.axisFormatter) {
+          this._values.labels.axisFormatter = this.data.data.xAxisFormatter || this.data.get('xAxisFormatter');
+        }
       }
 
       if (this._values.type === 'value') {
