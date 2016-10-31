@@ -154,32 +154,32 @@ export default function LineChartFactory(Private) {
       const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
 
       const line = svg.append('g')
-        .attr('class', 'pathgroup lines');
+      .attr('class', 'pathgroup lines');
 
       line.append('path')
-        .call(this.baseChart._addIdentifier)
-        .attr('d', () => {
-          const d3Line = d3.svg.line()
-            .defined(function (d) {
-              return !_.isNull(d.y);
-            })
-            .interpolate(interpolate)
-            .x(function x(d) {
-              if (ordered && ordered.date) {
-                return xScale(d.x);
-              }
-              return xScale(d.x) + xScale.rangeBand() / 2;
-            })
-            .y(function y(d) {
-              return yScale(d.y);
-            });
-          return d3Line(data.values);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', function lineStroke(d) {
-          return color(d.label || data.label);
-        })
-        .attr('stroke-width', 2);
+      .call(this.baseChart._addIdentifier)
+      .attr('d', () => {
+        const d3Line = d3.svg.line()
+          .defined(function (d) {
+            return !_.isNull(d.y);
+          })
+          .interpolate(interpolate)
+          .x(function x(d) {
+            if (ordered && ordered.date) {
+              return xScale(d.x);
+            }
+            return xScale(d.x) + xScale.rangeBand() / 2;
+          })
+          .y(function y(d) {
+            return yScale(d.y);
+          });
+        return d3Line(data.values);
+      })
+      .attr('fill', 'none')
+      .attr('stroke', function lineStroke(d) {
+        return color(d.label || data.label);
+      })
+      .attr('stroke-width', 2);
 
       return line;
     };
