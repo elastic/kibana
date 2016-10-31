@@ -1,4 +1,4 @@
-=== Automatically Refreshing the Page
+=== Refreshing the Search Results
 You can configure a refresh interval to automatically refresh the page with the latest index data. This periodically
 resubmits the search query.
 
