@@ -12,9 +12,14 @@ export default function AggTypesMetricsScriptedMetricProvider(Private) {
       type: 'string',
       editor: textHtml,
       write:function (aggConfig, output) {
+        var inlineScript = aggConfig.params[scriptName];
+        if (!inlineScript) {
+          return;
+        }
+
         output.params[scriptName] = {
           lang: aggConfig.params.lang,
-          inline: aggConfig.params[scriptName]
+          inline: inlineScript
         };
       }
     };
