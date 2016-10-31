@@ -129,7 +129,7 @@ export default function AreaChartFactory(Private) {
       const circleRadius = 12;
       const circleStrokeWidth = 0;
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isOverlapping = this.isOverlapping;
 
       const layer = svg.append('g')
@@ -179,13 +179,6 @@ export default function AreaChartFactory(Private) {
       }
 
       return circles;
-    };
-
-    validateWiggleSelection() {
-      const isWiggle = this.seriesConfig.mode === 'wiggle';
-      const ordered = this.handler.data.get('ordered');
-
-      if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();
     };
 
     /**

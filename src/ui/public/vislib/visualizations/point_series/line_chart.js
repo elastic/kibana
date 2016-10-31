@@ -39,7 +39,7 @@ export default function LineChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const radii = _(data.values)
         .map(function (point) {
