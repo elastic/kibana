@@ -74,7 +74,7 @@ export default class DashboardPage {
     .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -86,7 +86,7 @@ export default class DashboardPage {
       .type(dashName);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -101,7 +101,7 @@ export default class DashboardPage {
       });
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -136,7 +136,7 @@ export default class DashboardPage {
       .type(dashName.replace('-',' '));
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -146,7 +146,7 @@ export default class DashboardPage {
       .clickDashboardByLinkText(dashName);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
