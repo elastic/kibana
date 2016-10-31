@@ -22,9 +22,6 @@ module.exports = class KbnServer {
       require('./warnings'),
       require('./status'),
 
-      // sets config deprecation logging to use server.log
-      require('./config/server_deprecation_logging'),
-
       // writes pid file
       require('./pid'),
 

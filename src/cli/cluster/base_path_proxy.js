@@ -1,8 +1,8 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample } from 'lodash';
+import { map, merge, sample } from 'lodash';
 import { format as formatUrl } from 'url';
-import { map, fromNode } from 'bluebird';
+import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
@@ -24,19 +24,15 @@ export default class BasePathProxy {
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    const { certificate, certificateAuthorities, clientAuthentication } = config.get('server.ssl');
-    if (certificate) {
-      if (certificateAuthorities || clientAuthentication !== 'none') {
-        throw new Error('BasePathProxy doesn\'t support the settings: server.ssl.certificateAuthorities, server.ssl.clientAuthentication');
-      }
-
-      const httpsAgentConfig = {};
-      if (certificate === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
-        httpsAgentConfig.rejectUnauthorized = false;
-      } else {
-        httpsAgentConfig.ca = readFileSync(certificate);
-      }
-      this.proxyAgent = new HttpsAgent(httpsAgentConfig);
+    const sslEnabled = config.get('server.ssl.enabled');
+    if (sslEnabled) {
+      this.proxyAgent = new HttpsAgent({
+        key: readFileSync(config.get('server.ssl.key')),
+        passphrase: config.get('server.ssl.keyPassphrase'),
+        cert: readFileSync(config.get('server.ssl.certificate')),
+        ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+        rejectUnauthorized: false
+      });
     }
 
     if (!this.basePath) {
@@ -71,7 +67,7 @@ export default class BasePathProxy {
       config: {
         pre: [
           (req, reply) => {
-            map(clusterManager.workers, worker => {
+            promiseMap(clusterManager.workers, worker => {
               if (worker.type === 'server' && !worker.listening && !worker.crashed) {
                 return fromNode(cb => {
                   const done = () => {
