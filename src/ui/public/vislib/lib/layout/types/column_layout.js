@@ -82,18 +82,19 @@ export default function ColumnLayoutFactory(Private) {
                 children: [
                   {
                     type: 'div',
+                    class: 'x-axis-title axis-title'
+                  },
+                  {
+                    type: 'div',
                     class: 'x-axis-div-wrapper',
                     splits: xAxisSplit
-                  },
+                  }
                   /*{
                     type: 'div',
                     class: 'x-axis-chart-title',
                     splits: chartTitleSplit
                   },*/
-                  {
-                    type: 'div',
-                    class: 'x-axis-title axis-title'
-                  }
+
                 ]
               },
               {

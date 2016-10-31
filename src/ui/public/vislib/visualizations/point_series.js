@@ -38,13 +38,9 @@ export default function PointSeriesFactory(Private) {
     shouldBeStacked(seriesConfig) {
       const isHistogram = (seriesConfig.type === 'histogram');
       const isArea = (seriesConfig.type === 'area');
-      const isOverlapping = (seriesConfig.mode === 'overlap');
-      const grouped = (seriesConfig.mode === 'grouped');
+      const stacked = (seriesConfig.mode === 'stacked');
 
-      const stackedHisto = isHistogram && !grouped;
-      const stackedArea = isArea && !isOverlapping;
-
-      return stackedHisto || stackedArea;
+      return (isHistogram || isArea) && stacked;
     };
 
     getStackedSeries(axis, series, first = false) {
@@ -55,7 +51,7 @@ export default function PointSeriesFactory(Private) {
           matchingSeries.push(series[i]);
         }
       });
-      return matchingSeries;
+      return this.handler.data.injectZeros(matchingSeries);
     };
 
     stackData(data) {
@@ -66,30 +62,6 @@ export default function PointSeriesFactory(Private) {
         axis.stack(_.map(stackedData[id], 'values'));
       });
       return stackedData;
-    };
-
-    mapData(data, chart) {
-      const seriesConfig = chart.seriesConfig;
-      // todo: should stack or not should be defined per series
-      const shouldStack = seriesConfig.mode === 'stacked';
-
-      return _.map(data.values, val => {
-        const valueAxis = seriesConfig.valueAxis || chart.handler.valueAxes[0].id;
-        let y0 = 0;
-        if (shouldStack) {
-          if (!this.stackedData[valueAxis]) this.stackedData[valueAxis] = {};
-          y0 = this.stackedData[valueAxis][val.x] ? this.stackedData[valueAxis][val.x] : 0;
-          this.stackedData[valueAxis][val.x] = y0 + val.y;
-        }
-        return {
-          label: data.label,
-          x: val.x,
-          y: val.y,
-          y0: y0,
-          z: val.z,
-          _input: val
-        };
-      });
     };
 
     addClipPath(svg, width, height) {
@@ -123,13 +95,12 @@ export default function PointSeriesFactory(Private) {
       const xAxis = this.handler.categoryAxes[0];
       const xScale = xAxis.getScale();
       const ordered = xAxis.ordered;
+      const isHorizontal = xAxis.axisConfig.isHorizontal();
       const missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      const visConfig = this.handler.visConfig;
       const {width, height} = svg.node().getBBox();
-      const margin = visConfig.get('style.margin');
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just
@@ -139,15 +110,15 @@ export default function PointSeriesFactory(Private) {
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
       const leftEndzone = {
-        x: 0,
-        w: Math.max(xScale(ordered.min), 0)
+        x: isHorizontal ? 0 : Math.max(xScale(ordered.min), 0),
+        w: isHorizontal ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
       };
 
       const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
       const rightStart = rightLastVal + oneUnit;
       const rightEndzone = {
-        x: xScale(rightStart),
-        w: Math.max(width - xScale(rightStart), 0)
+        x: isHorizontal ? xScale(rightStart) : 0,
+        w: isHorizontal ? Math.max(width - xScale(rightStart), 0) : xScale(rightStart)
       };
 
       this.endzones = svg.selectAll('.layer')
@@ -158,26 +129,31 @@ export default function PointSeriesFactory(Private) {
         .append('rect')
         .attr('class', 'zone')
         .attr('x', function (d) {
-          return d.x;
+          return isHorizontal ? d.x : 0;
         })
-        .attr('y', 0)
-        .attr('height', height - margin.top - margin.bottom)
+        .attr('y', function (d) {
+          return isHorizontal ? 0 : d.x;
+        })
+        .attr('height', function (d) {
+          return isHorizontal ? height : d.w;
+        })
         .attr('width', function (d) {
-          return d.w;
+          return isHorizontal ? d.w : width;
         });
 
       function callPlay(event) {
         const boundData = event.target.__data__;
         const mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
+        const mouseChartYCoord = event.clientY - self.chartEl.getBoundingClientRect().top;
         const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        const min = leftEndzone.w;
-        const max = rightEndzone.x;
+        const min = isHorizontal ? leftEndzone.w : rightEndzone.w;
+        const max = isHorizontal ? rightEndzone.x : leftEndzone.x;
 
         // bounds of the cursor to consider
-        let xLeft = mouseChartXCoord;
-        let xRight = mouseChartXCoord;
+        let xLeft = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
+        let xRight = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
         if (wholeBucket) {
           xLeft = xScale(boundData.x);
           xRight = xScale(xAxis.addInterval(boundData.x));
@@ -210,8 +186,8 @@ export default function PointSeriesFactory(Private) {
       let elWidth = this.chartConfig.width = $elem.width();
       let elHeight = this.chartConfig.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
-      let minWidth = 20;
-      let minHeight = 20;
+      let minWidth = 50;
+      let minHeight = 50;
       let addTimeMarker = this.chartConfig.addTimeMarker;
       let times = this.chartConfig.times || [];
       let timeMarker;
@@ -224,8 +200,8 @@ export default function PointSeriesFactory(Private) {
         selection.each(function (data) {
           const el = this;
 
-          width = elWidth - margin.left - margin.right;
-          height = elHeight - margin.top - margin.bottom;
+          width = elWidth;
+          height = elHeight;
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
@@ -239,8 +215,7 @@ export default function PointSeriesFactory(Private) {
           svg = div.append('svg')
           .attr('width', elWidth)
           .attr('height', elHeight)
-          .append('g')
-          .attr('transform', 'translate(0,' + margin.top + ')');
+          .append('g');
 
           self.addClipPath(svg, width, height);
 

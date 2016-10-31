@@ -32,7 +32,7 @@ export default function ColumnChartFactory(Private) {
       const self = this;
       const color = this.handler.data.getColorFunc();
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
       .attr('class', function (d, i) {
@@ -75,10 +75,11 @@ export default function ColumnChartFactory(Private) {
     updateBars(bars) {
       const offset = this.seriesConfig.mode;
 
-      if (offset === 'grouped') {
-        return this.addGroupedBars(bars);
+      if (offset === 'stacked') {
+        return this.addStackedBars(bars);
       }
-      return this.addStackedBars(bars);
+      return this.addGroupedBars(bars);
+
     };
 
     /**
@@ -91,6 +92,7 @@ export default function ColumnChartFactory(Private) {
     addStackedBars(bars) {
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const height = yScale.range()[0];
       const yMin = yScale.domain()[0];
 
@@ -101,21 +103,23 @@ export default function ColumnChartFactory(Private) {
         const end = moment(min).add(interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
+        if (!isHorizontal) barWidth *= -1;
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
       }
 
-      // update
-      bars
-      .attr('x', function (d) {
+      function x(d) {
         return xScale(d.x);
-      })
-      .attr('width', function () {
-        return barWidth || xScale.rangeBand();
-      })
-      .attr('y', function (d) {
+      }
+
+      function y(d) {
         return yScale(d.y0 + d.y);
-      })
-      .attr('height', function (d) {
+      }
+
+      function widthFunc() {
+        return barWidth || xScale.rangeBand();
+      }
+
+      function heightFunc(d) {
         if (d.y < 0) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
         }
@@ -133,8 +137,17 @@ export default function ColumnChartFactory(Private) {
           return yScale(yMin) - yScale(d.y);
         }
 
-        return yScale(d.y0) - yScale(d.y0 + d.y);
-      });
+        return Math.abs(yScale(d.y0) - yScale(d.y0 + d.y));
+      }
+
+      // update
+      bars
+      .attr('x', isHorizontal ? x : function (d) {
+        return yScale(d.y0);
+      })
+      .attr('width', isHorizontal ? widthFunc : heightFunc)
+      .attr('y', isHorizontal ? y : x)
+      .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     };
@@ -154,25 +167,35 @@ export default function ColumnChartFactory(Private) {
       const height = yScale.range()[0];
       const groupSpacingPercentage = 0.15;
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const minWidth = 1;
       let barWidth;
 
       if (isTimeScale) {
         const {min, interval} = this.handler.data.get('ordered');
-        const groupWidth = xScale(min + interval) - xScale(min);
+        let groupWidth = xScale(min + interval) - xScale(min);
+        if (!isHorizontal) groupWidth *= -1;
         const groupSpacing = groupWidth * groupSpacingPercentage;
 
         barWidth = (groupWidth - groupSpacing) / n;
       }
-      // update
-      bars
-      .attr('x', function (d) {
+
+      function x(d) {
         if (isTimeScale) {
           return xScale(d.x) + barWidth * j;
         }
         return xScale(d.x) + xScale.rangeBand() / n * j;
-      })
-      .attr('width', function () {
+      }
+
+      function y(d) {
+        if (d.y < 0) {
+          return yScale(0);
+        }
+
+        return yScale(d.y);
+      }
+
+      function widthFunc() {
         if (barWidth < minWidth) {
           throw new errors.ContainerTooSmall();
         }
@@ -181,17 +204,18 @@ export default function ColumnChartFactory(Private) {
           return barWidth;
         }
         return xScale.rangeBand() / n;
-      })
-      .attr('y', function (d) {
-        if (d.y < 0) {
-          return yScale(0);
-        }
+      }
 
-        return yScale(d.y);
-      })
-      .attr('height', function (d) {
+      function heightFunc(d) {
         return Math.abs(yScale(0) - yScale(d.y));
-      });
+      }
+
+      // update
+      bars
+      .attr('x', isHorizontal ? x : 0)
+      .attr('width', isHorizontal ? widthFunc : heightFunc)
+      .attr('y', isHorizontal ? y : x)
+      .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     };

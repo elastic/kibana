@@ -290,8 +290,8 @@ export default function DataFactory(Private) {
      * @method injectZeros
      * @returns {Object} Data object with zeros injected
      */
-    injectZeros() {
-      return injectZeros(this.data);
+    injectZeros(data) {
+      return injectZeros(data);
     };
 
     /**

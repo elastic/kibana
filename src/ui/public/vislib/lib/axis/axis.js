@@ -198,11 +198,11 @@ export default function AxisFactory(Private) {
     }
 
     getLength(el, n) {
-      const margin = this.visConfig.get('style.margin');
+      const widthSpacing = 43;
       if (this.axisConfig.isHorizontal()) {
-        return $(el).parent().width() / n - margin.left - margin.right - 50;
+        return $(el).parent().width() / n - widthSpacing;
       }
-      return $(el).parent().height() / n - margin.top - margin.bottom;
+      return $(el).parent().height() / n;
     }
 
     updateXaxisHeight() {
@@ -245,7 +245,7 @@ export default function AxisFactory(Private) {
             }
           })());
         });
-        const length = lengths.length > 0 ? _.max(lengths) : 0;
+        let length = lengths.length > 0 ? _.max(lengths) : 0;
 
         if (config.isHorizontal()) {
           selection.attr('height', length);
@@ -257,11 +257,16 @@ export default function AxisFactory(Private) {
             .attr('transform', 'translate(1,0)');
           }
         } else {
+          const axisSpacing = 2;
           selection.attr('width', length + xAxisPadding);
           if (position === 'left') {
-            const translateWidth = length + xAxisPadding - 2 - parseInt(style.lineWidth);
+            const translateWidth = length + xAxisPadding - axisSpacing - parseInt(style.lineWidth);
             selection.select('g')
-            .attr('transform', `translate(${translateWidth},${margin.top})`);
+            .attr('transform', `translate(${translateWidth},0)`);
+          } else if (position === 'right') {
+            const translateWidth = axisSpacing + parseInt(style.lineWidth);
+            selection.select('g')
+              .attr('transform', `translate(${translateWidth},0)`);
           }
         }
       };
