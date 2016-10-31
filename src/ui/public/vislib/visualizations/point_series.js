@@ -38,13 +38,9 @@ export default function PointSeriesFactory(Private) {
     shouldBeStacked(seriesConfig) {
       const isHistogram = (seriesConfig.type === 'histogram');
       const isArea = (seriesConfig.type === 'area');
-      const isOverlapping = (seriesConfig.mode === 'overlap');
-      const grouped = (seriesConfig.mode === 'grouped');
+      const stacked = (seriesConfig.mode === 'stacked');
 
-      const stackedHisto = isHistogram && !grouped;
-      const stackedArea = isArea && !isOverlapping;
-
-      return stackedHisto || stackedArea;
+      return (isHistogram || isArea) && stacked;
     };
 
     getStackedSeries(axis, series, first = false) {
