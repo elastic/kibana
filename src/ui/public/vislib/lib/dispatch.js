@@ -191,7 +191,8 @@ export default function DispatchClass(Private, config) {
 
       function simulateClickWithBrushEnabled(d, i) {
         if (!validBrushClick(d3.event)) return;
-        if (xScale.invert) {
+
+        if (isQuantitativeScale(xScale)) {
           const bar = d3.select(this);
           const startX = d3.mouse(svg.node());
           const startXInv = xScale.invert(startX[0]);
@@ -212,7 +213,6 @@ export default function DispatchClass(Private, config) {
 
       return this.addEvent('mousedown', simulateClickWithBrushEnabled);
     };
-
 
     /**
      * Mouseover Behavior
@@ -307,6 +307,22 @@ export default function DispatchClass(Private, config) {
         return brush;
       }
     };
+  }
+
+  /**
+   * Determine if d3.Scale is quantitative
+   *
+   * @param element {d3.Scale}
+   * @method isQuantitativeScale
+   * @returns {boolean}
+   */
+  function isQuantitativeScale(scale) {
+    //Invert is a method that only exists on quantiative scales
+    if (scale.invert) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function validBrushClick(event) {
