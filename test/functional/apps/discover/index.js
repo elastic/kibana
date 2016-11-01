@@ -23,4 +23,5 @@ bdd.describe('discover app', function () {
   require('./_field_data');
   require('./_shared_links');
   require('./_collapse_expand');
+  require('./_source_filters');
 });

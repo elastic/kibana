@@ -25,7 +25,7 @@ uiModules.get('kibana')
      * 4. a function that will be called, like a normal function water
      *
      * 5. an object with any of the properties:
-     *   `get`: the getter called on each itteration
+     *   `get`: the getter called on each iteration
      *   `deep`: a flag to turn on objectEquality in $watch
      *   `fn`: the watch registration function ($scope.$watch or $scope.$watchCollection)
      *

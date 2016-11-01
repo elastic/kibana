@@ -1,0 +1,26 @@
+<div class="actions">
+  <button
+    aria-label="Edit source filter"
+    ng-if="sourceFilters.editing !== filter"
+    ng-click="sourceFilters.editing = filter"
+    type="button"
+    class="btn btn-xs btn-default">
+    <i aria-hidden="true" class="fa fa-pencil"></i>
+  </button>
+  <button
+    aria-label="Save source filter"
+    ng-if="sourceFilters.editing === filter"
+    ng-click="sourceFilters.save()"
+    ng-disabled="!filter.value"
+    type="button"
+    class="btn btn-xs btn-primary">
+    <i aria-hidden="true" class="fa fa-save"></i>
+  </button>
+  <button
+    aria-label="Delete source filter"
+    ng-click="sourceFilters.delete(filter)"
+    type="button"
+    class="btn btn-xs btn-danger">
+    <i aria-hidden="true" class="fa fa-trash"></i>
+  </button>
+</div>
