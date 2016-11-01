@@ -33,7 +33,8 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     edit: '/management/kibana/indices/{{id}}',
     addField: '/management/kibana/indices/{{id}}/create-field',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)'
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
   });
 
   const mapping = mappingSetup.expandShorthand({
@@ -42,6 +43,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     notExpandable: 'boolean',
     intervalName: 'string',
     fields: 'json',
+    sourceFilters: 'json',
     fieldFormatMap: {
       type: 'string',
       _serialize(map = {}) {
@@ -196,6 +198,13 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         .then(response => updateFromElasticSearch(this, response));
       })
       .then(() => this);
+    }
+
+    // Get the source filtering configuration for that index.
+    getSourceFiltering() {
+      return {
+        excludes: this.sourceFilters && this.sourceFilters.map(filter => filter.value) || []
+      };
     }
 
     addScriptedField(name, script, type = 'string', lang) {
