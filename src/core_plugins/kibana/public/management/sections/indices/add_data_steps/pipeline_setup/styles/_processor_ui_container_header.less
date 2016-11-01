@@ -15,33 +15,33 @@ processor-ui-container-header {
       width: 22px;
       border-radius: 4px;
     }
+  }
 
-    &-toggle {
-      flex: 0 0 auto;
-      margin-right: 5px;
+  .processor-ui-container-header-toggle {
+    flex: 0 0 auto;
+    margin-right: 5px;
+  }
+
+  .processor-ui-container-header-title {
+    flex: 1 1 auto;
+    .ellipsis();
+    font-weight: bold;
+
+    .processor-title {
+      width: 100%;
     }
 
-    &-title {
-      flex: 1 1 auto;
-      .ellipsis();
+    .processor-description {
+      font-weight: normal;
+    }
+
+    .processor-description.danger {
       font-weight: bold;
-
-      .processor-title {
-        width: 100%;
-      }
-
-      .processor-description {
-        font-weight: normal;
-      }
-
-      .processor-description.danger {
-        font-weight: bold;
-        color: @brand-danger;
-      }
+      color: @brand-danger;
     }
+  }
 
-    &-controls {
-      flex: 0 0 auto;
-    }
+  .processor-ui-container-header-controls {
+    flex: 0 0 auto;
   }
 }
