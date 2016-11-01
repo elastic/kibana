@@ -73,7 +73,7 @@ export default function buildHierarchicalDataProvider(Private, Notifier) {
       // Since splits display labels we need to set it.
       split.label = firstAgg.fieldFormatter()(agg.getKey(bucket));
 
-      let displayName = firstAgg.fieldDisplayName();
+      let displayName = firstAgg.getFieldDisplayName();
       if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
 
       split.tooltipFormatter = tooltipFormatter(raw.columns);

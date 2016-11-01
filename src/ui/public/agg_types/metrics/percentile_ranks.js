@@ -15,9 +15,9 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
 
   let valueProps = {
     makeLabel: function () {
-      let field = this.field();
+      let field = this.getField();
       let format = (field && field.format) || fieldFormats.getDefaultInstance('number');
-      const label = this.params.customLabel || this.fieldDisplayName();
+      const label = this.params.customLabel || this.getFieldDisplayName();
 
       return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + label + '"';
     }
@@ -27,7 +27,7 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
     name: 'percentile_ranks',
     title: 'Percentile Ranks',
     makeLabel: function (agg) {
-      return 'Percentile ranks of ' + agg.fieldDisplayName();
+      return 'Percentile ranks of ' + agg.getFieldDisplayName();
     },
     params: [
       {

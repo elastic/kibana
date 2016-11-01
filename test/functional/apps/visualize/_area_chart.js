@@ -53,9 +53,9 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function clickGo() {
       return PageObjects.visualize.clickGo();
     })
-    .then(function getSpinnerDone() {
+    .then(function isGlobalLoadingIndicatorHidden() {
       PageObjects.common.debug('Waiting...');
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   });
 
@@ -72,6 +72,16 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function testVisualizeWaitForToastMessageGone() {
         return PageObjects.visualize.waitForToastMessageGone();
       });
+    });
+
+    bdd.it('should save and load with non-ascii characters', async function () {
+      const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
+      const message = await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars);
+
+      PageObjects.common.debug(`Saved viz message with umlaut = ${message}`);
+      expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+
+      await PageObjects.visualize.waitForToastMessageGone();
     });
 
     bdd.it('should save and load', function () {

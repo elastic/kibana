@@ -59,6 +59,7 @@ uiModules
 
         // create child scope, used in the editors
         $aggParamEditorsScope = $scope.$new();
+        $aggParamEditorsScope.indexedFields = $scope.agg.getFieldOptions();
 
         const agg = $scope.agg;
         if (!agg) return;
@@ -84,9 +85,9 @@ uiModules
           let fields;
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
-            fields = $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+            fields = $aggParamEditorsScope.indexedFields;
           } else if (param.type === 'field') {
-            fields = $aggParamEditorsScope[`${param.name}Options`] = getIndexedFields(param);
+            fields = $aggParamEditorsScope[`${param.name}Options`] = param.getFieldOptions($scope.agg);
           }
 
           if (fields) {
@@ -138,31 +139,6 @@ uiModules
         .attr(attrs)
         .append(param.editor)
         .get(0);
-      }
-
-      function getIndexedFields(param) {
-        let fields = _.filter($scope.agg.vis.indexPattern.fields.raw, 'aggregatable');
-        const fieldTypes = param.filterFieldTypes;
-
-        if (fieldTypes) {
-          const filter = _.isFunction(fieldTypes) ? fieldTypes.bind(this, $scope.agg.vis) : fieldTypes;
-          fields = $filter('fieldType')(fields, filter);
-          fields = $filter('orderBy')(fields, ['type', 'name']);
-        }
-
-        return new IndexedArray({
-
-          /**
-           * @type {Array}
-           */
-          index: ['name'],
-
-          /**
-           * [group description]
-           * @type {Array}
-           */
-          initialSet: fields
-        });
       }
     }
   };

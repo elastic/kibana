@@ -12,10 +12,11 @@ module.directive('breadCrumbs', function () {
     },
     template: breadCrumbsTemplate,
     controller: function ($scope) {
-      $scope.crumbs = chrome.getBreadcrumbs();
+      // Capitalize the first letter of each bread crumb.
+      $scope.breadcrumbs = chrome.getBreadcrumbs().map(breadcrumb => _.startCase(breadcrumb));
 
       if ($scope.omitCurrentPage === true) {
-        $scope.crumbs.pop();
+        $scope.breadcrumbs.pop();
       }
     }
   };

@@ -1,0 +1,10 @@
+[[upgrade-new-install]]
+=== New Installation
+
+Kibana 4.0 introduced a major architectural overhaul. As a result, the
+underlying `.kibana` schema changed so significantly that upgrading from Kibana
+3.x requires recreating all visualizations, dashboards, etc.
+
+If you're upgrading from 3.x, please follow the
+<<install,installation instructions>> to install Kibana from scratch, and then
+manually recreate your searches, visualizations, and dashboards.

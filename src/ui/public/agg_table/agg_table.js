@@ -36,7 +36,7 @@ uiModules
       };
 
       self.exportAsCsv = function (formatted) {
-        let csv = new Blob([self.toCsv(formatted)], { type: 'text/plain' });
+        let csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
@@ -83,7 +83,7 @@ uiModules
         $scope.rows = table.rows;
         $scope.formattedColumns = table.columns.map(function (col, i) {
           let agg = $scope.table.aggConfig(col);
-          let field = agg.field();
+          let field = agg.getField();
           let formattedColumn = {
             title: col.title,
             filterable: field && field.filterable && agg.schema.group === 'buckets'

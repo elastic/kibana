@@ -1,41 +1,6 @@
-@import "~ui/styles/variables";
-
-@size: 400px;
-@color1: @kibanaPink1;
-@color2: @kibanaPink2;
-
 .spinner.ng-hide {
   visibility: hidden;
   display: block !important;
   opacity: 0;
   transition-delay: 0.25s;
-}
-
-.spinner {
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  position: absolute;
-  z-index: 10;
-  visibility: visible;
-  display: block;
-  animation: move 2s linear infinite;
-  background-color: @kibanaPink2;
-  background-image: linear-gradient(to right,
-    @color1 0%,
-    @color1 50%,
-    @color2 50%,
-    @color2 100%
-    );
-  background-size: @size @size;
-}
-
-@keyframes move {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: @size @size;
-  }
 }

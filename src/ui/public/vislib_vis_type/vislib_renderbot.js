@@ -2,7 +2,8 @@ import _ from 'lodash';
 import VislibProvider from 'ui/vislib';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
-module.exports = function VislibRenderbotFactory(Private) {
+module.exports = function VislibRenderbotFactory(Private, $injector) {
+  const AngularPromise = $injector.get('Promise');
   let vislib = Private(VislibProvider);
   let Renderbot = Private(VisRenderbotProvider);
   let buildChartData = Private(VislibVisTypeBuildChartDataProvider);
@@ -46,11 +47,8 @@ module.exports = function VislibRenderbotFactory(Private) {
   VislibRenderbot.prototype.buildChartData = buildChartData;
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
-    // to allow legend to render first (wait for angular digest cycle to complete)
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(this.vislibVis.render(this.chartData, this.uiState));
-      });
+    return AngularPromise.delay(1).then(() => {
+      this.vislibVis.render(this.chartData, this.uiState);
     });
   };
 

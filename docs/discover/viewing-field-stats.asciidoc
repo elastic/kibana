@@ -1,0 +1,10 @@
+[[viewing-field-stats]]
+== Viewing Field Data Statistics
+
+From the Fields list, you can see how many of the documents in the Documents
+table contain a particular field, what the top 5 values are, and what
+percentage of documents contain each value.
+
+To view field data statistics, click the name of a field in the Fields list.
+
+image:images/filter-field.jpg[Field Statistics]

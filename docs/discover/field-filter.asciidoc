@@ -1,0 +1,111 @@
+[[field-filter]]
+== Filtering by Field
+You can filter the search results to display only those documents that contain
+a particular value in a field. You can also create negative filters that
+exclude documents that contain the specified field value.
+
+You add field filters from the Fields list or the Documents table. In addition
+to creating positive and negative filters, the Documents table enables you to
+filter on whether or not a field is present. The applied
+filters are shown below the Query bar. Negative filters are shown in red. 
+
+To add a filter from the Fields list:
+
+. Click the name of the field you want to filter on. This displays the top
+five values for that field. 
++
+image::images/filter-field.jpg[]
+. To add a positive filter, click the *Positive Filter* button
+image:images/PositiveFilter.jpg[Positive Filter].
+This includes only those documents that contain that value in the field.
+. To add a negative filter, click the *Negative Filter* button
+image:images/NegativeFilter.jpg[Negative Filter].
+This excludes documents that contain that value in the field.
+
+To add a filter from the Documents table:
+
+. Expand a document in the Documents table by clicking the *Expand* button
+image:images/ExpandButton.jpg[Expand Button] to the left of the document's
+table entry. 
++
+image::images/Expanded-Document.png[]
+. To add a positive filter, click the *Positive Filter* button
+image:images/PositiveFilter.jpg[Positive Filter Button] to the right of the
+field name. This includes only those documents that contain that value in the
+field.
+. To add a negative filter, click the *Negative Filter* button
+image:images/NegativeFilter.jpg[Negative Filter Button] to the right of the
+field name. This excludes documents that contain that value in the field.
+. To filter on whether or not documents contain the field, click the
+*Exists* button image:images/ExistsButton.jpg[Exists Button] to the right of the
+field name. This includes only those documents that contain the field.
+
+[float]
+[[filter-pinning]]
+=== Managing Filters
+
+To modify a filter, hover over it and click one of the action buttons.
+
+image::images/filter-allbuttons.png[]
+
+&nbsp;
+
+image:images/filter-enable.png[] Enable Filter :: Disable the filter without
+removing it. Click again to reenable the filter. Diagonal stripes indicate
+that a filter is disabled.
+image:images/filter-pin.png[] Pin Filter :: Pin the filter. Pinned filters
+persist when you switch contexts in Kibana. For example, you can pin a filter
+in Discover and it remains in place when you switch to Visualize. 
+Note that a filter is based on a particular index field--if the indices being
+searched don't contain the field in a pinned filter, it has no effect. 
+image:images/filter-toggle.png[] Toggle Filter :: Switch from a positive
+filter to a negative filter and vice-versa. 
+image:images/filter-delete.png[] Remove Filter :: Remove the filter.
+image:images/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the 
+filter>> definition.  Enables you to manually update the filter query and
+specify a label for the filter.
+
+To apply a filter action to all of the applied filters, 
+click *Actions* and select the action.
+
+[float]
+[[filter-edit]]
+=== Editing a Filter
+You can edit a filter to directly modify the filter query that is performed
+to filter your search results. This enables you to create more complex
+filters that are based on multiple fields.
+
+image::images/filter-custom-json.png[]
+
+&nbsp;
+
+For example, you could use a {es-ref}/query-dsl-bool-query.html[bool query]
+to create a filter for the sample log data that displays the hits that 
+originated from Canada or China that resulted in a 404 error:
+
+==========
+[source,json]
+{
+  "bool": {
+    "should": [
+      {
+        "term": {
+          "geoip.country_name.raw": "Canada"
+        }
+      },
+      {
+        "term": {
+          "geoip.country_name.raw": "China"
+        }
+      }
+    ],
+    "must": [
+      {
+        "term": {
+          "response": "404"
+        }
+      }
+    ]
+  }
+}
+==========

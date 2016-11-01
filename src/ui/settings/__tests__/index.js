@@ -322,6 +322,7 @@ function instantiate({ getResult } = {}) {
   const configGet = sinon.stub();
   configGet.withArgs('kibana.index').returns('.kibana');
   configGet.withArgs('pkg.version').returns('1.2.3-test');
+  configGet.withArgs('uiSettings.enabled').returns(true);
   const config = {
     get: configGet
   };

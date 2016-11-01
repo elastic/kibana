@@ -9,7 +9,7 @@ export default function AggTypeMetricCardinalityProvider(Private) {
     name: 'cardinality',
     title: 'Unique Count',
     makeLabel: function (aggConfig) {
-      return 'Unique count of ' + aggConfig.params.field.displayName;
+      return 'Unique count of ' + aggConfig.getFieldDisplayName();
     },
     getFormat: function () {
       return fieldFormats.getDefaultInstance('number');

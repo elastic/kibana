@@ -1,3 +1,10 @@
+/**
+ * @name AggConfig
+ *
+ * @description This class represents an aggregation, which is displayed in the left-hand nav of
+ * the Visualize app.
+ */
+
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function AggConfigFactory(Private, fieldTypeFilter) {
@@ -141,17 +148,11 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {object} the new params object
    */
   AggConfig.prototype.resetParams = function () {
-    let fieldParam = this.type && this.type.params.byName.field;
     let field;
+    const fieldOptions = this.getFieldOptions();
 
-    if (fieldParam) {
-      let prevField = this.params.field;
-      let filters = fieldParam.filterFieldTypes;
-      if (_.isFunction(fieldParam.filterFieldTypes)) {
-        filters = fieldParam.filterFieldTypes.bind(this, this.vis);
-      }
-      let fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, filters);
-      field = _.contains(fieldOpts, prevField) ? prevField : null;
+    if (fieldOptions) {
+      field = fieldOptions.byName[this.fieldName()] || null;
     }
 
     return this.fillDefaults({ row: this.params.row, field: field });
@@ -166,8 +167,8 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
     }
 
-    let field = this.field();
-    let label = this.fieldDisplayName();
+    let field = this.getField();
+    let label = this.getFieldDisplayName();
     if (field && !field.filterable) {
       let message = 'The "' + label + '" field can not be used for filtering.';
       if (field.scripted) {
@@ -181,7 +182,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
 
   /**
    * Hook into param onRequest handling, and tell the aggConfig that it
-   * is being sent to elasticsearc.
+   * is being sent to elasticsearch.
    *
    * @return {[type]} [description]
    */
@@ -193,7 +194,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   /**
-   * Convert this aggConfig to it's dsl syntax.
+   * Convert this aggConfig to its dsl syntax.
    *
    * Adds params and adhoc subaggs to a pojo, then returns it
    *
@@ -264,6 +265,15 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     return this.type.getKey(bucket, key, this);
   };
 
+  AggConfig.prototype.getFieldDisplayName = function () {
+    let field = this.getField();
+    return field ? (field.displayName || this.fieldName()) : '';
+  };
+
+  AggConfig.prototype.getField = function () {
+    return this.params.field;
+  };
+
   AggConfig.prototype.makeLabel = function () {
     if (this.params.customLabel) {
       return this.params.customLabel;
@@ -274,8 +284,18 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     return pre += this.type.makeLabel(this);
   };
 
-  AggConfig.prototype.field = function () {
-    return this.params.field;
+  AggConfig.prototype.getIndexPattern = function () {
+    return this.vis.indexPattern;
+  };
+
+  AggConfig.prototype.getFieldOptions = function () {
+    const fieldParamType = this.type && this.type.params.byName.field;
+
+    if (!fieldParamType || !fieldParamType.getFieldOptions) {
+      return null;
+    }
+
+    return fieldParamType.getFieldOptions(this);
   };
 
   AggConfig.prototype.fieldFormatter = function (contentType, defaultFormat) {
@@ -285,7 +305,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   AggConfig.prototype.fieldOwnFormatter = function (contentType, defaultFormat) {
-    let field = this.field();
+    let field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
     if (!format) format = fieldFormats.getDefaultInstance('string');
@@ -293,13 +313,8 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   AggConfig.prototype.fieldName = function () {
-    let field = this.field();
+    let field = this.getField();
     return field ? field.name : '';
-  };
-
-  AggConfig.prototype.fieldDisplayName = function () {
-    let field = this.field();
-    return field ? (field.displayName || this.fieldName()) : '';
   };
 
   AggConfig.prototype.fieldIsTimeField = function () {

@@ -18,6 +18,7 @@ module.exports = class ClusterManager {
     const serverArgv = [];
     const optimizerArgv = [
       '--plugins.initialize=false',
+      '--uiSettings.enabled=false',
       '--server.autoListen=false',
     ];
 
