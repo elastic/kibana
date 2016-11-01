@@ -7,11 +7,13 @@ import RequestQueueProvider from '../_request_queue';
 import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
+import FieldWildcardProvider from '../../field_wildcard';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
   let requestQueue = Private(RequestQueueProvider);
   let errorHandlers = Private(ErrorHandlersProvider);
   let courierFetch = Private(FetchProvider);
+  let { fieldWildcardFilter } = Private(FieldWildcardProvider);
 
   function SourceAbstract(initialState, strategy) {
     let self = this;
@@ -285,12 +287,17 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
         if (flatState.body.size > 0) {
           let computedFields = flatState.index.getComputedFields();
           flatState.body.stored_fields = computedFields.storedFields;
-          flatState.body._source = computedFields._source;
           flatState.body.script_fields = flatState.body.script_fields || {};
           flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
 
           _.extend(flatState.body.script_fields, computedFields.scriptFields);
           flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
+
+          if (flatState.body._source) {
+            // exclude source fields for this index pattern specified by the user
+            const filter = fieldWildcardFilter(flatState.body._source.excludes);
+            flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
+          }
         }
 
         decorateQuery(flatState.body.query);
