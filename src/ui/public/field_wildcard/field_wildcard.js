@@ -10,7 +10,7 @@ export default function fieldWildcard(config) {
   function fieldWildcardMatcher(globs) {
     return function matcher(val) {
       // do not test metaFields or keyword
-      if (metaFields.indexOf(val) !== -1 || endsWith(val, '.keyword') || endsWith(val, '.raw')) {
+      if (metaFields.indexOf(val) !== -1) {
         return false;
       }
       return globs.some(p => makeRegEx(p).test(val));
