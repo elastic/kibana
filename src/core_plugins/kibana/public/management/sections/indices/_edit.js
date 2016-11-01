@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import 'plugins/kibana/management/sections/indices/_indexed_fields';
 import 'plugins/kibana/management/sections/indices/_scripted_fields';
+import 'plugins/kibana/management/sections/indices/source_filters/source_filters';
 import 'plugins/kibana/management/sections/indices/_index_header';
 import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import UrlProvider from 'ui/url';
-import IndicesFieldTypesProvider from 'plugins/kibana/management/sections/indices/_field_types';
+import IndicesEditSectionsProvider from 'plugins/kibana/management/sections/indices/_edit_sections';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
@@ -51,9 +52,8 @@ uiModules.get('apps/management')
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-  const fieldTypes = Private(IndicesFieldTypesProvider);
   $scope.$watch('indexPattern.fields', function () {
-    $scope.fieldTypes = fieldTypes($scope.indexPattern);
+    $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
   });
 
   $scope.changeTab = function (obj) {
@@ -62,7 +62,7 @@ uiModules.get('apps/management')
   };
 
   $scope.$watch('state.tab', function (tab) {
-    if (!tab) $scope.changeTab($scope.fieldTypes[0]);
+    if (!tab) $scope.changeTab($scope.editSections[0]);
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {

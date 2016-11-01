@@ -19,7 +19,6 @@ export default function () {
 
   return {
     storedFields: ['*'],
-    _source: true,
     scriptFields: scriptFields,
     docvalueFields: docvalueFields
   };
