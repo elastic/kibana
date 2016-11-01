@@ -29,6 +29,7 @@ define(function (require) {
     });
 
     const apps = [
+      'intern/dojo/node!./apps/xpack',
       'intern/dojo/node!./apps/discover',
       'intern/dojo/node!./apps/management',
       'intern/dojo/node!./apps/visualize',

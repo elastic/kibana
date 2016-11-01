@@ -20,6 +20,11 @@ bdd.describe('shared links', function describeIndexTests() {
 
   bdd.before(function () {
     baseUrl = PageObjects.common.getHostPort();
+    PageObjects.common.debug('baseUrl = ' + baseUrl);
+    // browsers don't show the ':port' if it's 80 or 443 so we have to
+    // remove that part so we can get a match in the tests.
+    baseUrl = baseUrl.replace(':80','').replace(':443','');
+    PageObjects.common.debug('New baseUrl = ' + baseUrl);
 
     var fromTime = '2015-09-19 06:31:44.000';
     var toTime = '2015-09-23 18:31:44.000';
