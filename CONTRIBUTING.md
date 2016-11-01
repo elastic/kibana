@@ -258,6 +258,24 @@ To execute the front-end browser tests, enter the following. This requires the s
 npm run test:ui:runner
 ```
 
+To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
+Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
+
+```bash
+export TEST_KIBANA_PROTOCOL=https
+export TEST_KIBANA_HOSTNAME=9249d04b1186b3e7bbe11ea60df4f963.us-east-1.aws.found.io
+export TEST_KIBANA_PORT=443
+export TEST_KIBANA_USER=elastic
+export TEST_KIBANA_PASS=<your password here>
+
+export TEST_ES_PROTOCOL=http
+export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
+export TEST_ES_PORT=9200
+export TEST_ES_USER=elastic
+export TEST_ES_PASS=<your password here>
+npm run test:ui:runner
+```
+
 ##### Browser Automation Notes
 
 - Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
