@@ -116,7 +116,7 @@ app.directive('share', function (Private) {
           shortSnapshotIframe: false,
         };
       };
-      $scope.updateUrls = updateUrls;
+      this.updateUrls = updateUrls;
 
       // When the URL changes, update the links in the UI.
       $scope.$watch(() => $location.absUrl(), () => {
