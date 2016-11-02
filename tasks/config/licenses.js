@@ -13,6 +13,8 @@ module.exports = function (grunt) {
         'BSD-like',
         'BSD-2-Clause',
         'BSD-3-Clause',
+        'BSD-3-Clause AND MIT',
+        'BSD-3-Clause OR MIT',
         'CC-BY',
         'Apache',
         'Apache*',
@@ -28,7 +30,6 @@ module.exports = function (grunt) {
         'UNLICENSE'
       ],
       overrides: {
-        'amdefine@1.0.0': ['BSD-3-Clause', 'MIT'],
         'angular-bootstrap@0.10.0': ['MIT'],
         'angular-ui-ace@0.2.3': ['MIT'],
         'assert-plus@0.1.5': ['MIT'],
