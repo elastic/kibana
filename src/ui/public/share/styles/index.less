@@ -4,7 +4,7 @@
 }
 
 .share-panel {
-  flex: 1 1 0%;
+  flex: 1 1 50%;
 }
 
 .share-panel--left {
@@ -20,6 +20,11 @@
     padding-bottom: 4px;
     font-size: 18px;
     color: #000000;
+
+    // Dark theme.
+    .theme-dark & {
+      color: #cecece;
+    }
   }
 
 .share-panel-section {
@@ -37,6 +42,11 @@
     font-size: 14px;
     font-weight: 700;
     color: #000000;
+
+    // Dark theme.
+    .theme-dark & {
+      color: #cecece;
+    }
   }
 
   .share-panel-header__actions {
@@ -57,17 +67,31 @@
   margin-bottom: 6px;
   border: 0;
   border-radius: 4px;
+
+  .theme-dark & {
+    background-color: #444444;
+  }
 }
 
 .share-panel-form-note {
   font-size: 14px;
   color: #5A5A5A;
+
+  // Dark theme.
+  .theme-dark & {
+    color: #8e8e8e;
+  }
 }
 
 .share-panel-help-text {
   margin-bottom: 16px;
   font-size: 14px;
   color: #2D2D2D;
+
+  // Dark theme.
+  .theme-dark & {
+    color: #9e9e9e;
+  }
 }
 
 .share-panel-warning {
@@ -76,4 +100,10 @@
   font-size: 14px;
   color: #2D2D2D;
   background-color: #e4e4e4;
+
+  // Dark theme.
+  .theme-dark & {
+    color: #9e9e9e;
+    background-color: #404040;
+  }
 }
