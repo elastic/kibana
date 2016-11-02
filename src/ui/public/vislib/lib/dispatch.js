@@ -317,7 +317,7 @@ export default function DispatchClass(Private, config) {
    * @returns {boolean}
    */
   function isQuantitativeScale(scale) {
-    //Invert is a method that only exists on quantiative scales
+    //Invert is a method that only exists on quantitative scales
     if (scale.invert) {
       return true;
     } else {
