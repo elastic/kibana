@@ -4,7 +4,7 @@
   data-test-subj="top-nav"
 >
   <!-- Top row -->
-  <div class="localNavRow">
+  <div class="localNavRow" ng-show="!kbnTopNav.isEmbedded()">
     <!-- Top left corner slot, e.g. breadcrumbs, title. -->
     <div
       class="localNavRow__section"

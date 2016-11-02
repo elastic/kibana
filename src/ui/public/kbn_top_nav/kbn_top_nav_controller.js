@@ -23,7 +23,11 @@ export default function ($compile) {
     }
 
     isVisible() {
-      return chrome.getVisible();
+      return chrome.getVisible() || chrome.getShowSearch();
+    }
+
+    isEmbedded() {
+      return !chrome.getVisible();
     }
 
     addItems(rawOpts) {
