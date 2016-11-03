@@ -88,8 +88,13 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(() => checkEsVersion(server, kibanaVersion.get()))
-    .then(() => checkForTribe(client))
+    .then(() => {
+      // execute version and tribe checks in parallel
+      // but always report the version check result first
+      const versionPromise = checkEsVersion(server, kibanaVersion.get());
+      const tribePromise = checkForTribe(client);
+      return versionPromise.then(() => tribePromise);
+    })
     .then(waitForShards)
     .then(setGreenStatus)
     .then(_.partial(migrateConfig, server))
