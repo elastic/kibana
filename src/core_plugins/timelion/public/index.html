@@ -1,11 +1,18 @@
 <div class="timelion app-container" ng-controller="timelion" fixed-element-root>
 
   <kbn-top-nav name="timelion" config="topNavMenu">
-    <div class="kibana-nav-info ng-scope">
-      <span class="kibana-nav-info-title">
-        <span ng-show="opts.savedSheet.id">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <div data-transclude-slot="topLeftCorner">
+        <span class="localTitle" ng-show="opts.savedSheet.id">
           {{opts.savedSheet.title}}
-          <i class="fa fa-bolt" ng-click="showStats = !showStats"></i>
+          &nbsp;
+          <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
+          &nbsp;
+          <span class="timelion-stats" ng-show="showStats">
+            Query Time {{stats.queryTime - stats.invokeTime}}ms /
+            Processing Time {{stats.sheetTime - stats.queryTime}}ms
+          </span>
         </span>
         <small class="timelion-stats" ng-show="showStats">
           Query Time {{stats.queryTime - stats.invokeTime}}ms /
