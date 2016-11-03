@@ -1,0 +1,15 @@
+Toggling spy panel no longer throws an error
+
+Backports PR #8877
+
+**Commit 1:**
+Toggling spy panel no longer throws an error
+
+* Original sha: 0de553d37ba74dd690d653cfb88face044fc2417
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-10-28T18:06:05Z
+
+**Commit 2:**
+Complete existence check before using handler
+
+* Original sha: 6fad2be793fe99ef6d736a6c6f8afba991b2ebca
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-10-31T14:11:40Z
