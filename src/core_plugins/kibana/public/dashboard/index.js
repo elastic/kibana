@@ -119,7 +119,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
       }, {
         key: 'open',
-        description: 'Load Saved Dashboard',
+        description: 'Open Saved Dashboard',
         template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
       }, {
         key: 'share',

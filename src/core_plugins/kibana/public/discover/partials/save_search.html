@@ -1,17 +1,16 @@
-<form role="form" class="container-fluid" ng-submit="opts.saveDataSource()">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="SaveSearch" class="control-label">Save Search</label>
-          <input id="SaveSearch" ng-model="opts.savedSearch.title" input-focus="select" class="form-control" placeholder="Name this search...">
-        </div>
-        <div class="form-group">
-          <button ng-disabled="!opts.savedSearch.title" data-test-subj="discover-save-search-btn" type="submit" class="btn btn-primary">
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+<form
+  role="form"
+  ng-submit="opts.saveDataSource()"
+>
+  <div class="localDropdownTitle">Save Search</div>
+  <input
+    class="localDropdownInput"
+    id="SaveSearch"
+    ng-model="opts.savedSearch.title"
+    input-focus="select"
+    placeholder="Name this search..."
+  >
+  <button ng-disabled="!opts.savedSearch.title" data-test-subj="discover-save-search-btn" type="submit" class="btn btn-primary">
+    Save
+  </button>
 </form>
