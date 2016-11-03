@@ -162,7 +162,8 @@ uiModules
         return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
         .then((res) => res.data)
         .catch(() => {
-          return notify.error('Error getting available scripting languages from Elasticsearch');
+          notify.error('Error getting available scripting languages from Elasticsearch');
+          return [];
         });
       }
 
