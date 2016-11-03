@@ -270,13 +270,13 @@ export default function MapFactory(Private, tilemap, $sanitize) {
           e: e,
           chart: self._chartData,
           bounds: {
-            top_left: {
-              lat: NWLat,
-              lon: NWlng
-            },
             bottom_right: {
               lat: SELat,
               lon: SElng
+            },
+            top_left: {
+              lat: NWLat,
+              lon: NWlng
             }
           }
         });
