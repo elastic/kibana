@@ -259,16 +259,23 @@ export default function MapFactory(Private, tilemap, $sanitize) {
         if (NWlng < -180) {
           NWlng += 360;
         }
+
+        const SELat = bounds.getSouthEast().lat;
+        const NWLat = bounds.getNorthWest().lat;
+        if (SELat === NWLat || SElng === NWlng) {
+          return;
+        }
+
         self._events.emit(drawType, {
           e: e,
           chart: self._chartData,
           bounds: {
             top_left: {
-              lat: bounds.getNorthWest().lat,
+              lat: NWLat,
               lon: NWlng
             },
             bottom_right: {
-              lat: bounds.getSouthEast().lat,
+              lat: SELat,
               lon: SElng
             }
           }
