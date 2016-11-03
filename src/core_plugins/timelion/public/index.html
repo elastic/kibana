@@ -3,16 +3,16 @@
   <kbn-top-nav name="timelion" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
-      <div data-transclude-slot="topLeftCorner" class="kibana-nav-info">
-        <span class="kibana-nav-info-title">
-          <span ng-show="opts.savedSheet.id">
-            {{opts.savedSheet.title}}
-            <i class="fa fa-bolt" ng-click="showStats = !showStats"></i>
-          </span>
-          <small class="timelion-stats" ng-show="showStats">
+      <div data-transclude-slot="topLeftCorner">
+        <span class="localTitle" ng-show="opts.savedSheet.id">
+          {{opts.savedSheet.title}}
+          &nbsp;
+          <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
+          &nbsp;
+          <span class="timelion-stats" ng-show="showStats">
             Query Time {{stats.queryTime - stats.invokeTime}}ms /
             Processing Time {{stats.sheetTime - stats.queryTime}}ms
-          </small>
+          </span>
         </span>
       </div>
 
