@@ -262,6 +262,9 @@ export default function MapFactory(Private, tilemap, $sanitize) {
 
         const SELat = bounds.getSouthEast().lat;
         const NWLat = bounds.getNorthWest().lat;
+
+        //Bounds cannot be created unless they form a box with larger than 0 dimensions
+        //Invalid areas are rejected by ES.
         if (SELat === NWLat || SElng === NWlng) {
           return;
         }
