@@ -32,14 +32,14 @@ export default class SettingsPage {
 
   getAdvancedSettings(propertyName) {
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
   setAdvancedSettings(propertyName, propertyValue) {
     var self = this;
 
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
     .click()
     .then(() => {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
@@ -56,7 +56,7 @@ export default class SettingsPage {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(function setAdvancedSettingsClickSaveButton() {
-      return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+      return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton')
       .click();
     })
     .then(() => {
@@ -67,7 +67,7 @@ export default class SettingsPage {
   getAdvancedSettings(propertyName) {
     var self = this;
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
