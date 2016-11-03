@@ -32,23 +32,26 @@ const internals = _.defaults(
 );
 
 // These favicons were generated from http://realfavicongenerator.net/.
+// The href attributes are specified by disabling all Webpack loaders, and explicitly using
+// the file loader. This way, Webpack emits all required files into the output dir and returns
+// the public URL.
 const favicons = [{
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/favicon.ico'),
+    href: require('-!file!ui/favicons/favicon.ico'),
     rel: 'shortcut icon',
   },
 }, {
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/apple-touch-icon.png'),
+    href: require('-!file!ui/favicons/apple-touch-icon.png'),
     sizes: '180x180',
     rel: 'apple-touch-icon',
   },
 }, {
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/favicon-32x32.png'),
+    href: require('-!file!ui/favicons/favicon-32x32.png'),
     type: 'image/png',
     sizes: '32x32',
     rel: 'icon',
@@ -56,7 +59,7 @@ const favicons = [{
 }, {
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/favicon-16x16.png'),
+    href: require('-!file!ui/favicons/favicon-16x16.png'),
     type: 'image/png',
     sizes: '16x16',
     rel: 'icon',
@@ -64,13 +67,13 @@ const favicons = [{
 }, {
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/manifest.json'),
+    href: require('-!file!ui/favicons/manifest.json'),
     rel: 'manifest',
   },
 }, {
   tag: '<link>',
   attrs: {
-    href: require('ui/favicons/safari-pinned-tab.svg'),
+    href: require('-!file!ui/favicons/safari-pinned-tab.svg'),
     color: '#e8488b',
     rel: 'mask-icon',
   },
