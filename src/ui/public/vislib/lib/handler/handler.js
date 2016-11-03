@@ -20,7 +20,6 @@ export default function HandlerBaseClass(Private) {
    */
   class Handler {
     constructor(vis, opts) {
-
       this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
       this.vis = vis;
       this.el = vis.el;
@@ -78,7 +77,6 @@ export default function HandlerBaseClass(Private) {
        */
       this.disable = this.chartEventProxyToggle('off');
     }
-
     /**
      * Validates whether data is actually present in the data object
      * used to render the Vis. Throws a no results error if data is not

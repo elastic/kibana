@@ -66,6 +66,12 @@ export default function SearchSourceFactory(Promise, Private, config) {
   let searchStrategy = Private(SearchStrategyProvider);
   let normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
+  let forIp = Symbol('for which index pattern?');
+
+  function isIndexPattern(val) {
+    return Boolean(val && typeof val.toIndexList === 'function');
+  }
+
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
     SearchSource.Super.call(this, initialState, searchStrategy);
@@ -94,13 +100,31 @@ export default function SearchSourceFactory(Promise, Private, config) {
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
-    if (indexPattern === undefined) return this._state.index;
-    if (indexPattern === null) return delete this._state.index;
-    if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
+    let state = this._state;
+
+    let hasSource = state.source;
+    let sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
+    let sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
+    if (sourceIsForOurIp) {
+      delete state.source;
+    }
+
+    if (indexPattern === undefined) return state.index;
+    if (indexPattern === null) return delete state.index;
+    if (!isIndexPattern(indexPattern)) {
       throw new TypeError('expected indexPattern to be an IndexPattern duck.');
     }
 
-    this._state.index = indexPattern;
+    state.index = indexPattern;
+    if (!state.source) {
+      // imply source filtering based on the index pattern, but allow overriding
+      // it by simply setting another value for "source". When index is changed
+      state.source = function () {
+        return indexPattern.getSourceFiltering();
+      };
+      state.source[forIp] = indexPattern;
+    }
+
     return this;
   };
 

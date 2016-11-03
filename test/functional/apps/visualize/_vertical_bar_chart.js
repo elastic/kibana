@@ -43,7 +43,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone(); // only matches the hidden spinner
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(function waitForVisualization() {
       return PageObjects.visualize.waitForVisualization();
@@ -66,7 +66,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function () {
-        return PageObjects.header.getSpinnerDone(); // only matches the hidden spinner
+        return PageObjects.header.isGlobalLoadingIndicatorHidden();
       })
       .then(function waitForVisualization() {
         return PageObjects.visualize.waitForVisualization();

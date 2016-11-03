@@ -1,84 +1,151 @@
-module.exports = function (grunt) {
-  let { map, fromNode } = require('bluebird');
-  let { resolve } = require('path');
-  let { pluck } = require('lodash');
-  let { createWriteStream } = require('fs');
-  let { createGunzip } = require('zlib');
-  let { Extract } = require('tar');
-  let { rename } = require('fs');
-  let wreck = require('wreck');
+import { Promise, map, fromNode, promisify } from 'bluebird';
+import { resolve, basename, dirname, join } from 'path';
+import { createReadStream, createWriteStream, writeFile } from 'fs';
+import { createGunzip } from 'zlib';
+import { Extract } from 'tar';
+import { fromFile } from 'check-hash';
+import wreck from 'wreck';
+import { mkdirp } from 'mkdirp';
 
-  let platforms = grunt.config.get('platforms');
-  let activeDownloads = [];
+const mkdirpAsync = promisify(mkdirp);
+const wreckGetAsync = promisify(wreck.get, wreck);
+const checkHashFromFileAsync = promisify(fromFile);
+const writeFileAsync = promisify(writeFile);
 
-  let start = async (platform) => {
-    let finalDir = platform.nodeDir;
-    let downloadDir = `${finalDir}.temp`;
+export default function downloadNodeBuilds(grunt) {
+  const platforms = grunt.config.get('platforms');
+  const downloadLimit = 3;
 
-    if (grunt.file.isDir(platform.nodeDir)) {
-      grunt.log.ok(`${platform.name} exists`);
+  const shaSums = {};
+  const getShaSums = () => {
+    const nodeVersion = grunt.config.get('nodeVersion');
+    const shaSumsUri = `https://nodejs.org/dist/v${nodeVersion}/SHASUMS256.txt`;
+
+    return wreckGetAsync(shaSumsUri).then(([resp, payload]) => {
+      if (resp.statusCode !== 200) {
+        throw new Error(`${shaSumsUri} failed with a ${resp.statusCode} response`);
+      }
+      payload
+      .toString('utf8')
+      .split('\n')
+      .forEach(line => {
+        const [sha, platform] = line.split('  ');
+        shaSums[platform] = sha;
+      });
+    });
+  };
+
+  const checkShaSum = (platform) => {
+    const file = basename(platform.nodeUrl);
+    const downloadDir = join(platform.nodeDir, '..');
+    const filePath = resolve(downloadDir, file);
+    const expected = {
+      hash: 'sha256',
+      expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/' + file] : shaSums[file]
+    };
+
+    if (!grunt.file.isFile(filePath)) {
+      return false;
+    }
+
+    return checkHashFromFileAsync(filePath, expected).then(([passed, actual]) => {
+      if (!passed) {
+        grunt.log.error(`${platform.name} shasum check failed`);
+      }
+      return passed;
+    });
+  };
+
+  const getNodeBuild = (platform) => {
+    const downloadDir = join(platform.nodeDir, '..');
+    const file = basename(platform.nodeUrl);
+    const filePath = resolve(downloadDir, file);
+
+    if (grunt.file.isFile(filePath)) {
+      grunt.file.delete(filePath);
+    }
+
+    return wreckGetAsync(platform.nodeUrl)
+    .then(([resp, payload]) => {
+      if (resp.statusCode !== 200) {
+        throw new Error(`${platform.nodeUrl} failed with a ${resp.statusCode} response`);
+      }
+      return payload;
+    })
+    .then(payload => writeFileAsync(filePath, payload));
+
+  };
+
+  const start = async (platform) => {
+    const downloadDir = join(platform.nodeDir, '..');
+    let downloadCounter = 0;
+    let isDownloadValid = false;
+
+    await mkdirpAsync(downloadDir);
+    if (grunt.option('skip-node-download')) {
+      grunt.log.ok(`Verifying sha sum of ${platform.name}`);
+      isDownloadValid = await checkShaSum(platform);
+      if (!isDownloadValid) {
+        throw new Error(`${platform.name} sha verification failed.`);
+      }
       return;
     }
 
-    let resp = await fromNode(cb => {
-      let req = wreck.request('GET', platform.nodeUrl, null, function (err, resp) {
-        if (err) {
-          return cb(err);
-        }
+    while (!isDownloadValid && (downloadCounter < downloadLimit)) {
+      grunt.log.ok(`Downloading ${platform.name} and corresponding sha`);
+      await getNodeBuild(platform);
+      isDownloadValid = await checkShaSum(platform);
+      ++downloadCounter;
+    }
 
-        if (resp.statusCode !== 200) {
-          return cb(new Error(`${platform.nodeUrl} failed with a ${resp.statusCode} response`));
-        }
+    if (!isDownloadValid) {
+      throw new Error(`${platform.name} download failed`);
+    }
 
-        return cb(null, resp);
-      });
-    });
-
-    // use an async iife to store promise for download
-    // then store platform in active downloads list
-    // which we will read from in the finish task
-    platform.downloadPromise = (async function () {
-      grunt.file.mkdir(downloadDir);
-
-      if (platform.win) {
-        await fromNode(cb => {
-          resp
-          .pipe(createWriteStream(resolve(downloadDir, 'node.exe')))
-          .on('error', cb)
-          .on('finish', cb);
-        });
-      } else {
-        await fromNode(cb => {
-          resp
-          .pipe(createGunzip())
-          .on('error', cb)
-          .pipe(new Extract({ path: downloadDir, strip: 1 }))
-          .on('error', cb)
-          .on('end', cb);
-        });
-      }
-
-      await fromNode(cb => {
-        rename(downloadDir, finalDir, cb);
-      });
-    }());
-
-    activeDownloads.push(platform);
-
-    var bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
-    var mb = ((bytes / 1024) / 1024).toFixed(2);
-    grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
+    grunt.log.ok(`${platform.name} downloaded and verified`);
   };
 
-  grunt.registerTask('_build:downloadNodeBuilds:start', function () {
-    map(platforms, start).nodeify(this.async());
+  grunt.registerTask('_build:downloadNodeBuilds', function () {
+    const done = this.async();
+    getShaSums()
+    .then(() => map(platforms, start))
+    .nodeify(done);
   });
 
-  grunt.registerTask('_build:downloadNodeBuilds:finish', function () {
-    map(activeDownloads, async (platform) => {
-      await platform.downloadPromise;
-      grunt.log.ok(`${platform.name} download complete`);
-    })
-    .nodeify(this.async());
+  const extractNodeBuild = async (platform) => {
+    const file = basename(platform.nodeUrl);
+    const downloadDir = join(platform.nodeDir, '..');
+    const filePath = resolve(downloadDir, file);
+
+    return new Promise((resolve, reject) => {
+      createReadStream(filePath)
+        .pipe(createGunzip())
+        .on('error', reject)
+        .pipe(new Extract({path: platform.nodeDir, strip: 1}))
+        .on('error', reject)
+        .on('end', resolve);
+    });
+  };
+
+  const extract = async(platform) => {
+    const file = basename(platform.nodeUrl);
+    const downloadDir = join(platform.nodeDir, '..');
+    const filePath = resolve(downloadDir, file);
+
+    if (grunt.file.isDir(platform.nodeDir)) {
+      grunt.file.delete(platform.nodeDir);
+    }
+
+    if (platform.win) {
+      grunt.file.mkdir(platform.nodeDir);
+      grunt.file.copy(filePath, resolve(platform.nodeDir, file));
+    } else {
+      await extractNodeBuild(platform);
+    }
+  };
+
+  grunt.registerTask('_build:extractNodeBuilds', function () {
+    map(platforms, extract).nodeify(this.async());
   });
+
 };
