@@ -1,7 +1,7 @@
 
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
-import {indexBy} from 'lodash';
+import { indexBy } from 'lodash';
 import Collection from '../../utils/collection';
 
 const byIdCache = Symbol('byIdCache');

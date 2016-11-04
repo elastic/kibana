@@ -34,12 +34,12 @@ export default function RangeAggDefinition(Private) {
         name: 'ranges',
         default: {
           fromTo: [
-            {from: '0.0.0.0', to: '127.255.255.255'},
-            {from: '128.0.0.0', to: '191.255.255.255'}
+            { from: '0.0.0.0', to: '127.255.255.255' },
+            { from: '128.0.0.0', to: '191.255.255.255' }
           ],
           mask: [
-            {mask: '0.0.0.0/1'},
-            {mask: '128.0.0.0/2'}
+            { mask: '0.0.0.0/1' },
+            { mask: '128.0.0.0/2' }
           ]
         },
         editor: ipRangesTemplate,

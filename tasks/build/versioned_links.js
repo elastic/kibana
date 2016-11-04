@@ -1,4 +1,4 @@
-import {basename, resolve} from 'path';
+import { basename, resolve } from 'path';
 module.exports = function (grunt) {
   const exec = require('../utils/exec').silent;
 

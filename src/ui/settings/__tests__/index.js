@@ -115,12 +115,12 @@ describe('ui settings', function () {
       const defaults = defaultsProvider();
       const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
       const expected = {
-        ip: {id: 'ip', params: {}},
-        date: {id: 'date', params: {}},
-        number: {id: 'number', params: {}},
-        boolean: {id: 'boolean', params: {}},
-        _source: {id: '_source', params: {}},
-        _default_: {id: 'string', params: {}}
+        ip: { id: 'ip', params: {} },
+        date: { id: 'date', params: {} },
+        number: { id: 'number', params: {} },
+        boolean: { id: 'boolean', params: {} },
+        _source: { id: '_source', params: {} },
+        _default_: { id: 'string', params: {} }
       };
 
       Object.keys(mapping).forEach(function (dataType) {

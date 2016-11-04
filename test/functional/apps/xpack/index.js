@@ -1,4 +1,4 @@
-import {bdd, defaultTimeout} from '../../../support';
+import { bdd, defaultTimeout } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

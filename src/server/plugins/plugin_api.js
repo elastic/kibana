@@ -1,5 +1,5 @@
 import Plugin from './plugin';
-import {join} from 'path';
+import { join } from 'path';
 
 module.exports = class PluginApi {
   constructor(kibana, pluginPath) {

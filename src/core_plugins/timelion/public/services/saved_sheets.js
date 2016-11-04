@@ -29,7 +29,7 @@ module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUr
   };
 
   this.urlFor = function (id) {
-    return kbnUrl.eval('#/{{id}}', {id: id});
+    return kbnUrl.eval('#/{{id}}', { id: id });
   };
 
   this.delete = function (ids) {
@@ -53,7 +53,7 @@ module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUr
         }
       };
     } else {
-      body = { query: {match_all: {}}};
+      body = { query: { match_all: {} } };
     }
 
     return es.search({

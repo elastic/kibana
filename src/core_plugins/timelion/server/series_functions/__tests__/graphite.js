@@ -19,7 +19,7 @@ const graphiteResponse = function () {
 };
 
 const filename = require('path').basename(__filename);
-const fn = proxyquire(`../${filename}`, {'node-fetch': graphiteResponse});
+const fn = proxyquire(`../${filename}`, { 'node-fetch': graphiteResponse });
 
 import invoke from './helpers/invoke_series_fn.js';
 

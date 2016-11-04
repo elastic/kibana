@@ -1,4 +1,4 @@
-import {resolve} from 'path';
+import { resolve } from 'path';
 module.exports = function (grunt) {
   const rootDir = grunt.config.get('root');
 

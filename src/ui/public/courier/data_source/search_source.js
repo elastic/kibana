@@ -273,7 +273,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       // ignore if we already have a value
       if (state.body[key] == null) {
         if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val }};
+          val = { query_string: { query: val } };
         }
 
         state.body[key] = val;

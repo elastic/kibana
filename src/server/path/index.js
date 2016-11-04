@@ -1,4 +1,4 @@
-import { accessSync, R_OK} from 'fs';
+import { accessSync, R_OK } from 'fs';
 import { find } from 'lodash';
 import { fromRoot } from '../../utils';
 

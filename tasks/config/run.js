@@ -1,5 +1,5 @@
-import {format} from 'url';
-import {resolve} from 'path';
+import { format } from 'url';
+import { resolve } from 'path';
 import chromedriver from 'chromedriver';
 module.exports = function (grunt) {
   const platform = require('os').platform();

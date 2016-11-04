@@ -13,7 +13,7 @@ const seriesData = {
   'series': [
     {
       'label': '100',
-      'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+      'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
     }
   ]
 };
@@ -25,7 +25,7 @@ const rowsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -34,7 +34,7 @@ const rowsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -43,7 +43,7 @@ const rowsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -52,7 +52,7 @@ const rowsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
@@ -66,7 +66,7 @@ const colsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -75,7 +75,7 @@ const colsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -84,7 +84,7 @@ const colsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -93,7 +93,7 @@ const colsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
@@ -127,9 +127,9 @@ describe('Vislib Data Class Test Suite', function () {
     const pieData = {
       slices: {
         children: [
-          {size: 30},
-          {size: 20},
-          {size: 0}
+          { size: 30 },
+          { size: 20 },
+          { size: 0 }
         ]
       }
     };
@@ -321,7 +321,7 @@ describe('Vislib Data Class Test Suite', function () {
         'series': [
           {
             'label': '200',
-            'values': [{x: 0, y: 1}, {x: 1, y: null}, {x: 2, y: 3}]
+            'values': [{ x: 0, y: 1 }, { x: 1, y: null }, { x: 2, y: 3 }]
           }
         ]
       });

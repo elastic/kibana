@@ -16,7 +16,7 @@ function IndexAutocompleteComponent(name, parent, multi_valued) {
 
 IndexAutocompleteComponent.prototype = _.create(
   autocomplete_engine.ListComponent.prototype,
-  {'constructor': IndexAutocompleteComponent});
+  { 'constructor': IndexAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
@@ -46,7 +46,7 @@ function TypeAutocompleteComponent(name, parent, multi_valued) {
 
 TypeAutocompleteComponent.prototype = _.create(
   autocomplete_engine.ListComponent.prototype,
-  {'constructor': TypeAutocompleteComponent});
+  { 'constructor': TypeAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
@@ -68,7 +68,7 @@ TypeAutocompleteComponent.prototype = _.create(
 
 function FieldGenerator(context) {
   return _.map(mappings.getFields(context.indices, context.types), function (field) {
-    return {name: field.name, meta: field.type};
+    return { name: field.name, meta: field.type };
   });
 }
 
@@ -78,7 +78,7 @@ function FieldAutocompleteComponent(name, parent, multi_valued) {
 
 FieldAutocompleteComponent.prototype = _.create(
   autocomplete_engine.ListComponent.prototype,
-  {'constructor': FieldAutocompleteComponent});
+  { 'constructor': FieldAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
@@ -108,7 +108,7 @@ function IdAutocompleteComponent(name, parent, multi) {
 
 IdAutocompleteComponent.prototype = _.create(
   autocomplete_engine.SharedComponent.prototype,
-  {'constructor': IdAutocompleteComponent});
+  { 'constructor': IdAutocompleteComponent });
 
 (function (cls) {
   cls.match = function (token, context, editor) {

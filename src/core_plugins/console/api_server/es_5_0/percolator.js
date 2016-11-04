@@ -38,7 +38,7 @@ module.exports = function (api) {
       query: {},
       filter: {},
       size: 10,
-      track_scores: {__one_of: [true, false]},
+      track_scores: { __one_of: [true, false] },
       sort: "_score",
       aggs: {},
       highlight: {}
@@ -64,7 +64,7 @@ module.exports = function (api) {
       query: {},
       filter: {},
       size: 10,
-      track_scores: {__one_of: [true, false]},
+      track_scores: { __one_of: [true, false] },
       sort: "_score",
       aggs: {},
       highlight: {}

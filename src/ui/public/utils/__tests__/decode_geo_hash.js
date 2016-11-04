@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import {geohashColumns} from 'ui/utils/decode_geo_hash';
+import { geohashColumns } from 'ui/utils/decode_geo_hash';
 
 describe('decode_geo_hash', function () {
   it('geohashColumns', function () {

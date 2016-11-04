@@ -73,7 +73,7 @@ describe('initDefaultFieldProps', function () {
   });
 
   it('should apply some overrides to metafields', function () {
-    const results = initDefaultFieldProps([{name: '_source'}, {name: '_timestamp'}]);
+    const results = initDefaultFieldProps([{ name: '_source' }, { name: '_timestamp' }]);
     const expected = [
       {
         name: '_source',

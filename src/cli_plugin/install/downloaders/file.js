@@ -1,5 +1,5 @@
 import Progress from '../progress';
-import {createWriteStream, createReadStream, statSync} from 'fs';
+import { createWriteStream, createReadStream, statSync } from 'fs';
 
 function openSourceFile({ sourcePath }) {
   try {

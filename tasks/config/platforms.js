@@ -1,6 +1,6 @@
 import { endsWith } from 'lodash';
 
-import {resolve} from 'path';
+import { resolve } from 'path';
 
 module.exports = function (grunt) {
   const { version } = grunt.config.get('build');

@@ -1,4 +1,4 @@
-import {defaults} from 'lodash';
+import { defaults } from 'lodash';
 module.exports = function (grunt) {
   const pkg = grunt.config.get('pkg');
   const deepModules = grunt.config.get('deepModules');

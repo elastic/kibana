@@ -1,5 +1,5 @@
-import {resolve} from 'path';
-import {debounce, invoke, bindAll, once, uniq} from 'lodash';
+import { resolve } from 'path';
+import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 
 import Log from '../log';
 import Worker from './worker';

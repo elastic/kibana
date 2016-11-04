@@ -29,9 +29,9 @@ describe('buildHierarchicalData()', function () {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);

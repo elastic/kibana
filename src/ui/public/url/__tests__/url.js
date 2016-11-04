@@ -251,7 +251,7 @@ describe('kbnUrl', function () {
 
     it('should change the entire url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -272,7 +272,7 @@ describe('kbnUrl', function () {
 
     it('should allow setting app state on the target url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -295,7 +295,7 @@ describe('kbnUrl', function () {
   describe('changePath', function () {
     it('should change just the path', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -318,7 +318,7 @@ describe('kbnUrl', function () {
   describe('redirect', function () {
     it('should change the entire url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -339,7 +339,7 @@ describe('kbnUrl', function () {
 
     it('should allow setting app state on the target url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -380,7 +380,7 @@ describe('kbnUrl', function () {
   describe('redirectPath', function () {
     it('should only change the path', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 

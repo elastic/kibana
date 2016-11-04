@@ -28,7 +28,7 @@ function tokensAsList() {
     t = input.parser.nextNonEmptyToken(iter);
   }
   while (t) {
-    ret.push({value: t.value, type: t.type});
+    ret.push({ value: t.value, type: t.type });
     t = input.parser.nextNonEmptyToken(iter);
   }
 
@@ -55,7 +55,7 @@ function token_test(token_list, prefix, data) {
       var tokens = tokensAsList();
       var normTokenList = [];
       for (var i = 0; i < token_list.length; i++) {
-        normTokenList.push({type: token_list[i++], value: token_list[i]});
+        normTokenList.push({ type: token_list[i++], value: token_list[i] });
       }
 
       deepEqual(tokens, normTokenList, "Doc:\n" + data);

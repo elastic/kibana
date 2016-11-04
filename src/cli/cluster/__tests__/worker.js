@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import cluster from 'cluster';
-import {findIndex} from 'lodash';
+import { findIndex } from 'lodash';
 
 import MockClusterFork from './_mock_cluster_fork';
 import Worker from '../worker';

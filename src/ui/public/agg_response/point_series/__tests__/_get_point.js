@@ -86,7 +86,7 @@ describe('getPoint', function () {
     });
 
     it ('adds the aggConfig to the points', function () {
-      const seriesAspect = { i: 1, agg:  truthFormatted};
+      const seriesAspect = { i: 1, agg:  truthFormatted };
       const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point).to.have.property('aggConfig', truthFormatted);

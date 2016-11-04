@@ -10,7 +10,7 @@ import UiBundlerEnv from './ui_bundler_env';
 
 export default async (kbnServer, server, config) => {
 
-  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
+  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64' });
 
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')

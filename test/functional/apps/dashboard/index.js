@@ -1,5 +1,5 @@
 
-import {bdd, remote, defaultTimeout} from '../../../support';
+import { bdd, remote, defaultTimeout } from '../../../support';
 
 bdd.describe('dashboard app', function () {
   this.timeout = defaultTimeout;

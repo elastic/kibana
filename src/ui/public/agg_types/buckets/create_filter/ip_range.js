@@ -13,6 +13,6 @@ export default function createIpRangeFilterProvider() {
       };
     }
 
-    return buildRangeFilter(aggConfig.params.field, {gte: range.from, lte: range.to}, aggConfig.vis.indexPattern);
+    return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.vis.indexPattern);
   };
 }

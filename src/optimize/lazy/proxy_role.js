@@ -14,7 +14,7 @@ module.exports = (kbnServer, server, config) => {
         xforward: true
       }
     },
-    config: {auth: false}
+    config: { auth: false }
   });
 
   return fromNode(cb => {

@@ -16,7 +16,7 @@ app.directive('fixedElementRoot', function () {
           fixedAt = $(window).scrollTop();
           fixed.addClass(fixed.attr('fixed-element'));
           body.addClass(fixed.attr('fixed-element-body'));
-          body.css({top: fixed.height()});
+          body.css({ top: fixed.height() });
         }
 
         if ($(window).scrollTop() < fixedAt) {

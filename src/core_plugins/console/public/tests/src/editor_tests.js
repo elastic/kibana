@@ -277,7 +277,7 @@ function multi_req_test(name, editor_input, range, expected) {
 }
 
 multi_req_test("mid body to mid body", editor_input1,
-  {start: {row: 12}, end: {row: 17}}, [{
+  { start: { row: 12 }, end: { row: 17 } }, [{
     method: "PUT",
     url: "index_1/type1/1",
     data: {
@@ -292,7 +292,7 @@ multi_req_test("mid body to mid body", editor_input1,
   }]);
 
 multi_req_test("single request start to end", editor_input1,
-  {start: {row: 10}, end: {row: 13}}, [{
+  { start: { row: 10 }, end: { row: 13 } }, [{
     method: "PUT",
     url: "index_1/type1/1",
     data: {
@@ -301,7 +301,7 @@ multi_req_test("single request start to end", editor_input1,
   }]);
 
 multi_req_test("start to end, with comment", editor_input1,
-  {start: {row: 6}, end: {row: 13}}, [{
+  { start: { row: 6 }, end: { row: 13 } }, [{
     method: "GET",
     url: "_stats?level=shards",
     data: null
@@ -315,7 +315,7 @@ multi_req_test("start to end, with comment", editor_input1,
     }]);
 
 multi_req_test("before start to after end, with comments", editor_input1,
-  {start: {row: 4}, end: {row: 14}}, [{
+  { start: { row: 4 }, end: { row: 14 } }, [{
     method: "GET",
     url: "_stats?level=shards",
     data: null
@@ -329,13 +329,13 @@ multi_req_test("before start to after end, with comments", editor_input1,
     }]);
 
 multi_req_test("between requests", editor_input1,
-  {start: {row: 21}, end: {row: 22}}, []);
+  { start: { row: 21 }, end: { row: 22 } }, []);
 
 multi_req_test("between requests - with comment", editor_input1,
-  {start: {row: 20}, end: {row: 22}}, []);
+  { start: { row: 20 }, end: { row: 22 } }, []);
 
 multi_req_test("between requests - before comment", editor_input1,
-  {start: {row: 19}, end: {row: 22}}, []);
+  { start: { row: 19 }, end: { row: 22 } }, []);
 
 
 function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
@@ -349,7 +349,7 @@ function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
 
 
 multi_req_copy_as_curl_test("start to end, with comment", editor_input1,
-  {start: {row: 6}, end: {row: 13}}, `
+  { start: { row: 6 }, end: { row: 13 } }, `
 curl -XGET "http://localhost:9200/_stats?level=shards"
 
 #in between comment

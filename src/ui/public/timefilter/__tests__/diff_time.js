@@ -30,14 +30,14 @@ describe('Timefilter service', function () {
     }));
 
     it('not emit anything if the time has not changed', function () {
-      timefilter.time = {from: 0, to: 1};
+      timefilter.time = { from: 0, to: 1 };
       fn();
       expect(update.called).to.be(false);
       expect(fetch.called).to.be(false);
     });
 
     it('emit update and fetch if the time has changed', function () {
-      timefilter.time = {from: 5, to: 10};
+      timefilter.time = { from: 5, to: 10 };
       fn();
       expect(update.called).to.be(true);
       expect(fetch.called).to.be(true);

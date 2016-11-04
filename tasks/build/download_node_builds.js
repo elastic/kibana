@@ -1,6 +1,6 @@
-import {Promise, map, promisify} from 'bluebird';
+import { Promise, map, promisify } from 'bluebird';
 import { resolve, basename, dirname, join } from 'path';
-import {createReadStream, writeFile} from 'fs';
+import { createReadStream, writeFile } from 'fs';
 import { createGunzip } from 'zlib';
 import { Extract } from 'tar';
 import { fromFile } from 'check-hash';
@@ -121,7 +121,7 @@ export default function downloadNodeBuilds(grunt) {
       createReadStream(filePath)
         .pipe(createGunzip())
         .on('error', reject)
-        .pipe(new Extract({path: platform.nodeDir, strip: 1}))
+        .pipe(new Extract({ path: platform.nodeDir, strip: 1 }))
         .on('error', reject)
         .on('end', resolve);
     });

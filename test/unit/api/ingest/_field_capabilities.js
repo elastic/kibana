@@ -43,8 +43,8 @@ export default function (bdd, scenarioManager, request) {
       .expect(200)
       .then(function (response) {
         const fields = response.body.fields;
-        expect(fields.foo).to.eql({searchable: true, aggregatable: false});
-        expect(fields['foo.keyword']).to.eql({searchable: true, aggregatable: true});
+        expect(fields.foo).to.eql({ searchable: true, aggregatable: false });
+        expect(fields['foo.keyword']).to.eql({ searchable: true, aggregatable: true });
         expect(fields).to.not.have.property('baz');
       });
     });
@@ -54,8 +54,8 @@ export default function (bdd, scenarioManager, request) {
       .expect(200)
       .then(function (response) {
         const fields = response.body.fields;
-        expect(fields.foo).to.eql({searchable: true, aggregatable: false});
-        expect(fields.baz).to.eql({searchable: true, aggregatable: false});
+        expect(fields.foo).to.eql({ searchable: true, aggregatable: false });
+        expect(fields.baz).to.eql({ searchable: true, aggregatable: false });
       });
     });
 
@@ -64,8 +64,8 @@ export default function (bdd, scenarioManager, request) {
       .expect(200)
       .then(function (response) {
         const fields = response.body.fields;
-        expect(fields.foo).to.eql({searchable: true, aggregatable: false});
-        expect(fields.baz).to.eql({searchable: true, aggregatable: false});
+        expect(fields.foo).to.eql({ searchable: true, aggregatable: false });
+        expect(fields.baz).to.eql({ searchable: true, aggregatable: false });
       });
     });
 

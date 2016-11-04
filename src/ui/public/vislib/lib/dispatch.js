@@ -59,7 +59,7 @@ export default function DispatchClass(Private, config) {
 
       if (isSeries) {
         // Find object with the actual d value and add it to the point object
-        const object = _.find(series, {'label': d.label});
+        const object = _.find(series, { 'label': d.label });
         eventData.value = +object.values[i].y;
 
         if (isPercentage) {

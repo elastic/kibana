@@ -14,31 +14,31 @@ module.exports = {
   },
   aggregations: {
     q: {
-      meta: {type: 'split'},
+      meta: { type: 'split' },
       buckets: {
         QueryA: {
           FieldA: {
-            meta: {type: 'split'},
+            meta: { type: 'split' },
             buckets: [
               {
                 key: 'ValueA',
                 FieldB: {
-                  meta: {type: 'split'},
+                  meta: { type: 'split' },
                   buckets: [
                     {
                       key: 'Value2A',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 264},
-                            MetricB: {value: 398}
+                            MetricA: { value: 264 },
+                            MetricB: { value: 398 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 264},
-                            MetricB: {value: 1124}
+                            MetricA: { value: 264 },
+                            MetricB: { value: 1124 }
                           }
                         ]
                       }
@@ -46,17 +46,17 @@ module.exports = {
                     {
                       key: 'Value2B',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 699},
-                            MetricB: {value: 457}
+                            MetricA: { value: 699 },
+                            MetricB: { value: 457 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 110},
-                            MetricB: {value: 506}
+                            MetricA: { value: 110 },
+                            MetricB: { value: 506 }
                           }
                         ]
                       }
@@ -67,22 +67,22 @@ module.exports = {
               {
                 key: 'ValueB',
                 FieldB: {
-                  meta: {type: 'split'},
+                  meta: { type: 'split' },
                   buckets: [
                     {
                       key: 'Value2B',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 152},
-                            MetricB: {value: 61}
+                            MetricA: { value: 152 },
+                            MetricB: { value: 61 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 518},
-                            MetricB: {value: 77}
+                            MetricA: { value: 518 },
+                            MetricB: { value: 77 }
                           }
                         ]
                       }
@@ -90,17 +90,17 @@ module.exports = {
                     {
                       key: 'Value2A',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 114},
-                            MetricB: {value: 23}
+                            MetricA: { value: 114 },
+                            MetricB: { value: 23 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 264},
-                            MetricB: {value: 45}
+                            MetricA: { value: 264 },
+                            MetricB: { value: 45 }
                           }
                         ]
                       }
@@ -113,27 +113,27 @@ module.exports = {
         },
         QueryB: {
           FieldA: {
-            meta: {type: 'split'},
+            meta: { type: 'split' },
             buckets: [
               {
                 key: 'ValueA',
                 FieldB: {
-                  meta: {type: 'split'},
+                  meta: { type: 'split' },
                   buckets: [
                     {
                       key: 'Value2B',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 621},
-                            MetricB: {value: 12}
+                            MetricA: { value: 621 },
+                            MetricB: { value: 12 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 751},
-                            MetricB: {value: 12}
+                            MetricA: { value: 751 },
+                            MetricB: { value: 12 }
                           }
                         ]
                       }
@@ -141,17 +141,17 @@ module.exports = {
                     {
                       key: 'Value2A',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 110},
-                            MetricB: {value: 11}
+                            MetricA: { value: 110 },
+                            MetricB: { value: 11 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 648},
-                            MetricB: {value: 12}
+                            MetricA: { value: 648 },
+                            MetricB: { value: 12 }
                           }
                         ]
                       }
@@ -162,22 +162,22 @@ module.exports = {
               {
                 key: 'ValueC',
                 FieldB: {
-                  meta: {type: 'split'},
+                  meta: { type: 'split' },
                   buckets: [
                     {
                       key: 'Value2C',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 755},
-                            MetricB: {value: 10}
+                            MetricA: { value: 755 },
+                            MetricB: { value: 10 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 713},
-                            MetricB: {value: 18}
+                            MetricA: { value: 713 },
+                            MetricB: { value: 18 }
                           }
                         ]
                       }
@@ -185,17 +185,17 @@ module.exports = {
                     {
                       key: 'Value2A',
                       time_buckets: {
-                        meta: {type: 'time_buckets'},
+                        meta: { type: 'time_buckets' },
                         buckets: [
                           {
                             key: 1000,
-                            MetricA: {value: 391},
-                            MetricB: {value: 4}
+                            MetricA: { value: 391 },
+                            MetricB: { value: 4 }
                           },
                           {
                             key: 2000,
-                            MetricA: {value: 802},
-                            MetricB: {value: 4}
+                            MetricA: { value: 802 },
+                            MetricB: { value: 4 }
                           }
                         ]
                       }

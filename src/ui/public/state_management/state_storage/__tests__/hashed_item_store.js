@@ -35,7 +35,7 @@ describe('hashedItemStore', () => {
           // so let's protect ourselves from accidentally breaking this test.
           throw new Error('Missing HashedItemStore.PERSISTED_INDEX_KEY');
         }
-        sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({a, b, c}));
+        sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({ a, b, c }));
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
         expect(hashedItemStore._indexedItems).to.eql([a, c, b]);
