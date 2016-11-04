@@ -47,7 +47,6 @@ require('ui/routes')
 
 app.controller('timelion', function (
   $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout, Private, savedVisualizations) {
-
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
@@ -61,7 +60,6 @@ app.controller('timelion', function (
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
-  const blankSheet = [defaultExpression];
 
   $scope.topNavMenu = [{
     key: 'new',

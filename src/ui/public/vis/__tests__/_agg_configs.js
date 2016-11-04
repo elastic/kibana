@@ -94,7 +94,7 @@ describe('AggConfigs', function () {
       ];
 
       const spy = sinon.spy(SpiedAggConfig, 'ensureIds');
-      const ac = new AggConfigs(vis, states);
+      new AggConfigs(vis, states);
       expect(spy.callCount).to.be(1);
       expect(spy.firstCall.args[0]).to.be(states);
     });

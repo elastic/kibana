@@ -1,14 +1,3 @@
-const testPipeline = {
-  processors: [{
-    processor_id: 'processor1',
-    type_id: 'geoip',
-    source_field: 'ip',
-    target_field: 'geoip'
-  }],
-  input: { ip: '74.125.21.103' }
-};
-
-
 export default function (bdd) {
   bdd.describe('simulate - geoip processor', () => {
 //TODO: These tests can be re-added when we address

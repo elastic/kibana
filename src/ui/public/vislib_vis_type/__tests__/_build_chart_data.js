@@ -68,7 +68,6 @@ describe('renderbot#buildChartData', function () {
     });
 
     it('converts table groups into rows/columns wrappers for charts', function () {
-      const chart = { hits: 1, rows: [], columns: [] };
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
       const tables = [new Table(), new Table(), new Table(), new Table()];
@@ -82,7 +81,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
 
-      const tabify = sinon.stub(aggResponse, 'tabify').returns({
+      sinon.stub(aggResponse, 'tabify').returns({
         tables: [
           {
             aggConfig: { params: { row: true } },

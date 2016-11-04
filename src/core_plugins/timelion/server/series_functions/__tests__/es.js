@@ -12,8 +12,6 @@ import _ from 'lodash';
 import {expect} from 'chai';
 import invoke from './helpers/invoke_series_fn.js';
 
-import createDateAgg from '../es/lib/create_date_agg';
-
 function stubResponse(response) {
   return {
     server: {plugins:{

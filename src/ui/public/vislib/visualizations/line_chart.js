@@ -188,7 +188,6 @@ export default function LineChartFactory(Private) {
     addLines(svg, data) {
       const xScale = this.handler.xAxis.xScale;
       const yScale = this.handler.yAxis.yScale;
-      const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;

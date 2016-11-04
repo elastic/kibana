@@ -167,13 +167,6 @@ var parametrizedComponentFactories = {
 };
 
 
-function expandAliases(indices) {
-  if (indices && indices.length > 0) {
-    indices = mappings.expandAliases(indices);
-  }
-  return indices;
-}
-
 function getUnmatchedEndpointComponents() {
   return ACTIVE_API.getUnmatchedEndpointComponents();
 }

@@ -41,16 +41,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   });
 
 
-  /**
-   * COPY AS CURL
-   *
-   * Since the copy functionality is powered by a flash movie (via ZeroClipboard)
-   * the only way to trigger the copy is with a litteral mouseclick from the user.
-   *
-   * The original shortcut will now just open the menu and highlight the
-   *
-   */
-  var zc = (function setupZeroClipboard() {
+  (function setupZeroClipboard() {
     var zc = new ZeroClipboard($copyAsCurlEl); // the ZeroClipboard instance
 
     zc.on('wrongflash noflash', function () {
@@ -85,7 +76,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
     });
 
     return zc;
-  }());
+  })();
 
   /**
    * Setup the "send" shortcut

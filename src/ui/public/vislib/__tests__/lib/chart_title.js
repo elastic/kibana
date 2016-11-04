@@ -4,13 +4,9 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
-  let Data;
-  let persistedState;
   let chartTitle;
   let el;
   const data = {
@@ -75,8 +71,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     ChartTitle = Private(VislibLibChartTitleProvider);
-    Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')

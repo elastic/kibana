@@ -23,12 +23,6 @@ function setWrapMode(mode) {
   return true;
 }
 
-function setBasicAuth(mode) {
-  storage.set('basic_auth', mode);
-  applyCurrentSettings();
-  return true;
-}
-
 export function getAutocomplete() {
   return storage.get('autocomplete_settings', { fields: true, indices: true });
 }

@@ -16,7 +16,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       $el = $('<ul>').appendTo($container);
 
       const $window = $(window);
-      const $body = $(document.body);
       const binder = new Binder($scope);
 
       // appState from controller

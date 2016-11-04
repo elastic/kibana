@@ -69,7 +69,7 @@ describe('pattern checker', function () {
   it('should throw a fatal notificaiton for any error other than a 404', function () {
     apiResponse.respond(500, 'Bad things happened');
 
-    const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
+    $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
     $httpBackend.flush();
     $rootScope.$digest();

@@ -271,13 +271,6 @@ function retrieveAutocompleteInfoFromServer() {
   ;
 }
 
-function autocomplete_retriever() {
-  retrieveAutocompleteInfoFromServer();
-  setTimeout(function () {
-    autocomplete_retriever();
-  }, 60000);
-}
-
 module.exports = _.assign(mappingObj, {
   getFields: getFields,
   getIndices: getIndices,

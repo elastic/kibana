@@ -83,7 +83,7 @@ describe('chrome nav apis', function () {
 
       let errorThrown = false;
       try {
-        const navLink = chrome.getNavLinkById('nonexistent');
+        chrome.getNavLinkById('nonexistent');
       } catch (e) {
         errorThrown = true;
       }

@@ -9,12 +9,8 @@ import aggParamsTemplate from 'plugins/kibana/visualize/editor/agg_params.html';
 
 uiModules
 .get('app/visualize')
-.directive('visEditorAggParams', function ($compile, $parse, Private, Notifier) {
+.directive('visEditorAggParams', function ($compile, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
-
-  const notify = new Notifier({
-    location: 'visAggGroup'
-  });
 
   return {
     restrict: 'E',

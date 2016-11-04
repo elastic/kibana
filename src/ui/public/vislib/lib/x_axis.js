@@ -433,14 +433,10 @@ export default function XAxisFactory(Private) {
         visEls.each(function () {
           const visEl = d3.select(this);
           const $visEl = $(this);
-          const xAxisTitle = $visEl.find('.x-axis-title');
-          const yAxisTitle = $visEl.find('.y-axis-title');
-          let titleWidth = xAxisTitle.width();
-          let titleHeight = yAxisTitle.height();
 
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
-            titleWidth = xAxisChartTitle.find('.chart-title').width();
+            xAxisChartTitle.find('.chart-title').width();
 
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {});
@@ -448,7 +444,7 @@ export default function XAxisFactory(Private) {
 
           if ($visEl.find('.y-axis-chart-title').length) {
             yAxisChartTitle = $visEl.find('.y-axis-chart-title');
-            titleHeight = yAxisChartTitle.find('.chart-title').height();
+            yAxisChartTitle.find('.chart-title').height();
 
             titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {});

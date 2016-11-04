@@ -29,7 +29,7 @@ describe('ui settings', function () {
 
     it('updates a single value in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.setMany({ one: 'value' });
+      uiSettings.setMany({ one: 'value' });
       expectElasticsearchUpdateQuery(server, configGet, {
         one: 'value'
       });
@@ -37,7 +37,7 @@ describe('ui settings', function () {
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.setMany({ one: 'value', another: 'val' });
+      uiSettings.setMany({ one: 'value', another: 'val' });
       expectElasticsearchUpdateQuery(server, configGet, {
         one: 'value', another: 'val'
       });
@@ -53,7 +53,7 @@ describe('ui settings', function () {
 
     it('updates single values by (key, value)', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.set('one', 'value');
+      uiSettings.set('one', 'value');
       expectElasticsearchUpdateQuery(server, configGet, {
         one: 'value'
       });
@@ -69,7 +69,7 @@ describe('ui settings', function () {
 
     it('removes single values by key', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.remove('one');
+      uiSettings.remove('one');
       expectElasticsearchUpdateQuery(server, configGet, {
         one: null
       });
@@ -85,7 +85,7 @@ describe('ui settings', function () {
 
     it('removes a single value', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.removeMany(['one']);
+      uiSettings.removeMany(['one']);
       expectElasticsearchUpdateQuery(server, configGet, {
         one: null
       });
@@ -93,7 +93,7 @@ describe('ui settings', function () {
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.removeMany(['one', 'two', 'three']);
+      uiSettings.removeMany(['one', 'two', 'three']);
       expectElasticsearchUpdateQuery(server, configGet, {
         one: null, two: null, three: null
       });
@@ -137,7 +137,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = { user: 'customized' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getUserProvided();
+      await uiSettings.getUserProvided();
       expectElasticsearchGetQuery(server, configGet);
     });
 
@@ -168,7 +168,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getRaw();
+      await uiSettings.getRaw();
       expectElasticsearchGetQuery(server, configGet);
     });
 
@@ -208,7 +208,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getAll();
+      await uiSettings.getAll();
       expectElasticsearchGetQuery(server, configGet);
     });
 
@@ -261,7 +261,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.get();
+      await uiSettings.get();
       expectElasticsearchGetQuery(server, configGet);
     });
 
@@ -350,7 +350,7 @@ function instantiate({ getResult } = {}) {
   const config = {
     get: configGet
   };
-  const setupSettings = init(kbnServer, server, config);
+  init(kbnServer, server, config);
   const uiSettings = server.uiSettings();
   return { server, uiSettings, configGet };
 }

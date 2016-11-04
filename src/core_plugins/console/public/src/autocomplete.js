@@ -79,17 +79,6 @@ module.exports = function (editor) {
     });
   }
 
-  function termToFilterRegex(term, prefix, suffix) {
-    if (!prefix) {
-      prefix = "";
-    }
-    if (!suffix) {
-      suffix = "";
-    }
-
-    return new RegExp(prefix + term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + suffix, 'i');
-  }
-
   function applyTerm(term) {
     var session = editor.getSession();
 

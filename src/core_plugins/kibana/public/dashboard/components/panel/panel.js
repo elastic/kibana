@@ -10,7 +10,6 @@ uiModules
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
   const loadPanel = Private(PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider);
   const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier();
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);

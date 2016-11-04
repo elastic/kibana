@@ -1620,7 +1620,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     request = function () {
       white();
-      var meth = method();
+      method();
       strictWhite();
       url();
       strictWhite(); // advance to one new line
@@ -1640,7 +1640,6 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         newLine();
         strictWhite();
       }
-
     },
 
     comment = function () {

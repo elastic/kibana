@@ -7,7 +7,7 @@ var HighlightRules = require("./output_highlight_rules").OutputJsonHighlightRule
 var MatchingBraceOutdent = ace.require("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
 var CstyleBehaviour = ace.require("ace/mode/behaviour/cstyle").CstyleBehaviour;
 var CStyleFoldMode = ace.require("ace/mode/folding/cstyle").FoldMode;
-var WorkerClient = ace.require("ace/worker/worker_client").WorkerClient;
+ace.require("ace/worker/worker_client").WorkerClient;
 var AceTokenizer = ace.require("ace/tokenizer").Tokenizer;
 
 var Mode = function () {

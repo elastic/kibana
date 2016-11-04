@@ -7,8 +7,6 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 
-const MAX_SIZE = Math.pow(2, 31) - 1;
-
 uiRoutes
 .when('/management/kibana/objects', {
   template: objectIndexHTML

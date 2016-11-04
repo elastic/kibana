@@ -8,7 +8,7 @@ import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
 import loadFunctions from '../lib/load_functions.js';
-const fitFunctions  = loadFunctions('fit_functions');
+loadFunctions('fit_functions');
 
 module.exports = function (tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
@@ -16,10 +16,6 @@ module.exports = function (tlConfig) {
   let queryCache = {};
   const stats = {};
   let sheet;
-
-  function getQueryCacheKey(query) {
-    return JSON.stringify(_.omit(query, 'label'));
-  }
 
   function throwWithCell(cell, exception) {
     throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);

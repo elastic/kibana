@@ -6,8 +6,6 @@ import 'ui/filters/moment';
 
 let filter;
 
-const anchor = '2014-01-01T06:06:06.666';
-
 const init = function () {
   // Load the application
   ngMock.module('kibana');

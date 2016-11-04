@@ -2,7 +2,6 @@ import exec from '../utils/exec';
 import { capitalize } from 'lodash';
 
 export default (grunt) => {
-  const userScriptsDir = grunt.config.get('userScriptsDir');
   const { path, user, group, name } = grunt.config.get('packages');
 
   grunt.registerTask('_build:pleaseRun', function () {

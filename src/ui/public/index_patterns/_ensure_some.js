@@ -1,6 +1,4 @@
 export default function EnsureSomeIndexPatternsFn(Private, Notifier, $location, kbnUrl) {
-  const notify = new Notifier();
-
   return function ensureSomeIndexPatterns() {
     return function promiseHandler(patterns) {
       if (!patterns || patterns.length === 0) {

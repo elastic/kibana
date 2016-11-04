@@ -61,7 +61,6 @@ uiModules.get('kibana')
           self.otherWidthGetter
         ], function (vals, oldVals) {
           const intChanges = vals[0] !== oldVals[0];
-          const extChanges = vals[1] !== oldVals[1];
 
           if (intChanges) {
             if (!setPerPage(self.perPage)) {

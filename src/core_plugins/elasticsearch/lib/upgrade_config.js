@@ -3,8 +3,6 @@ import isUpgradeable from './is_upgradeable';
 import _ from 'lodash';
 
 module.exports = function (server) {
-  const MAX_INTEGER = Math.pow(2, 53) - 1;
-
   const client = server.plugins.elasticsearch.client;
   const config = server.config();
 
