@@ -5,15 +5,18 @@ var program = require('commander');
 var pkg = require('../package.json');
 var run = require('../lib/run');
 var docs = require('../lib/docs');
+var enableCollectingUnknownOptions = require('../lib/enable_collecting_unknown_options');
 
 program
   .version(pkg.version);
 
-program
-  .command('start')
-  .description('Start kibana and have it include this plugin')
-  .on('--help', docs('start'))
-  .action(run('start'));
+enableCollectingUnknownOptions(
+  program
+    .command('start')
+    .description('Start kibana and have it include this plugin')
+    .on('--help', docs('start'))
+    .action(run('start'))
+);
 
 program
   .command('build')
