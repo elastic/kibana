@@ -69,7 +69,7 @@ export default function ColumnHandler(Private) {
         config.chart = {
           type: 'point_series',
           series: _.map(series, (seri) => {
-            return _.defaults({
+            return {
               show: true,
               type: cfg.type || 'line',
               mode: cfg.mode || 'normal',
@@ -77,10 +77,9 @@ export default function ColumnHandler(Private) {
               smoothLines: cfg.smoothLines,
               drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
               showCircles: cfg.showCircles,
-              radiusRatio: cfg.radiusRatio
-            }, {
+              radiusRatio: cfg.radiusRatio,
               data: seri
-            });
+            };
           })
         };
       }

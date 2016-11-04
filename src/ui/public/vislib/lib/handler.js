@@ -49,12 +49,12 @@ export default function HandlerBaseClass(Private) {
 
       if (this.categoryAxes.length && this.categoryAxes[0].axisConfig.isHorizontal()) {
         this.renderArray = this.renderArray
-          .concat(this.categoryAxes)
-          .concat(this.valueAxes);
-      } else {
-        this.renderArray = this.renderArray
           .concat(this.valueAxes)
           .concat(this.categoryAxes);
+      } else {
+        this.renderArray = this.renderArray
+          .concat(this.categoryAxes)
+          .concat(this.valueAxes);
       }
 
       // memoize so that the same function is returned every time,

@@ -198,30 +198,11 @@ export default function AxisFactory(Private) {
     }
 
     getLength(el, n) {
-      const widthSpacing = 43;
       if (this.axisConfig.isHorizontal()) {
-        return $(el).parent().width() / n - widthSpacing;
+        return $(el).parent().width() / n;
+      } else {
+        return $(el).parent().height() / n;
       }
-      return $(el).parent().height() / n;
-    }
-
-    updateXaxisHeight() {
-      const el = this.axisConfig.get('rootEl');
-      const position = this.axisConfig.get('position');
-      const selection = d3.select(el).selectAll('.vis-wrapper');
-
-      selection.each(function () {
-        const visEl = d3.select(this);
-
-        if (visEl.select('.inner-spacer-block').node() === null) {
-          visEl.selectAll('.y-axis-spacer-block')
-          .append('div')
-          .attr('class', 'inner-spacer-block');
-        }
-
-        const height = visEl.select(`.axis-wrapper-${position}`).style('height');
-        visEl.selectAll(`.y-axis-spacer-block-${position} .inner-spacer-block`).style('height', height);
-      });
     }
 
     adjustSize() {
@@ -249,7 +230,6 @@ export default function AxisFactory(Private) {
 
         if (config.isHorizontal()) {
           selection.attr('height', length);
-          self.updateXaxisHeight();
           if (position === 'top') {
             selection.select('g')
             .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
