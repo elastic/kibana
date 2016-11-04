@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
+import assets from './server/routes/assets';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
@@ -109,6 +110,7 @@ module.exports = function (kibana) {
       // uuid
       manageUuid(server);
       // routes
+      assets(server);
       ingest(server);
       search(server);
       settings(server);
