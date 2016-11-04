@@ -2,3 +2,4 @@
 extends: '@elastic/kibana'
 rules:
   object-curly-spacing: [error, always]
+  no-global-assign: [error]
