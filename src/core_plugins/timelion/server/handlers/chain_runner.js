@@ -40,15 +40,16 @@ module.exports = function (tlConfig) {
 
       if (_.isObject(item)) {
         switch (item.type) {
-          case 'function':
-            var itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
+          case 'function': {
+            const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
             return invoke(item.function, item.arguments);
-          case 'reference':
-            var reference;
+          }
+          case 'reference': {
+            let reference;
             if (item.series) {
               reference = sheet[item.plot - 1][item.series - 1];
             } else {
@@ -58,6 +59,7 @@ module.exports = function (tlConfig) {
               };
             }
             return invoke('first', [reference]);
+          }
           case 'chain':
             return invokeChain(item);
           case 'chainList':
