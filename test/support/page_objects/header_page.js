@@ -47,7 +47,7 @@ export default class HeaderPage {
   }
 
   isTimepickerOpen() {
-    return this.remote.setFindTimeout(2000)
+    return this.remote.setFindTimeout(defaultFindTimeout)
     .findDisplayedByCssSelector('.kbn-timepicker')
     .then(() => true)
     .catch(() => false);
