@@ -1,5 +1,7 @@
 const SetupError = require('./setup_error');
 const format = require('util').format;
+const { mappings } = require('./kibana_index_mappings');
+
 module.exports = function (server) {
   const client = server.plugins.elasticsearch.client;
   const index = server.config().get('kibana.index');
@@ -16,16 +18,7 @@ module.exports = function (server) {
       settings: {
         number_of_shards: 1
       },
-      mappings: {
-        config: {
-          properties: {
-            buildNum: {
-              type: 'string',
-              index: 'not_analyzed'
-            }
-          }
-        }
-      }
+      mappings
     }
   })
   .catch(handleError('Unable to create Kibana index "<%= kibana.index %>"'))

@@ -1,4 +1,5 @@
 const upgrade = require('./upgrade_config');
+const { mappings } = require('./kibana_index_mappings');
 
 module.exports = function (server) {
   const config = server.config();
@@ -8,11 +9,16 @@ module.exports = function (server) {
     type: 'config',
     body: {
       size: 1000,
-      sort: [ { buildNum: { order: 'desc', ignore_unmapped: true } } ]
+      sort: [
+        {
+          buildNum: {
+            order: 'desc',
+            unmapped_type: mappings.config.properties.buildNum.type
+          }
+        }
+      ]
     }
   };
 
   return client.search(options).then(upgrade(server));
 };
-
-
