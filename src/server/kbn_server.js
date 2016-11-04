@@ -84,7 +84,7 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    let { server, config } = this;
+    const { server, config } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));
