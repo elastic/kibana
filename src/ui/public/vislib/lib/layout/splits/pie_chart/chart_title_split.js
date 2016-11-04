@@ -36,4 +36,4 @@ export default function ChartTitleSplitFactory() {
       return d3.select(this).remove();
     });
   };
-};
+}

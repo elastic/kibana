@@ -61,4 +61,4 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
       return mapping;
     });
   };
-};
+}

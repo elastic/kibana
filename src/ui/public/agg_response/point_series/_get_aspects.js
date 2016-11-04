@@ -55,4 +55,4 @@ export default function PointSeriesGetAspects(Private) {
 
     return aspects;
   };
-};
+}

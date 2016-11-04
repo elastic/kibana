@@ -21,4 +21,4 @@ export class Split extends Processor {
       separator: this.separator || ''
     };
   }
-};
+}

@@ -39,7 +39,7 @@ export default function LayoutFactory(Private) {
     render() {
       this.removeAll(this.el);
       this.createLayout(this.layoutType);
-    };
+    }
 
     /**
      * Create the layout based on the json array provided
@@ -55,7 +55,7 @@ export default function LayoutFactory(Private) {
       return _.each(arr, function (obj) {
         self.layout(obj);
       });
-    };
+    }
 
     /**
      * Appends a DOM element based on the object keys
@@ -106,7 +106,7 @@ export default function LayoutFactory(Private) {
       }
 
       return childEl;
-    };
+    }
 
     /**
      * Appends a `type` of DOM element to `el` and gives it a class name attribute `className`
@@ -133,7 +133,7 @@ export default function LayoutFactory(Private) {
       return d3.select(el)
       .append(type)
       .attr('class', className);
-    };
+    }
 
     /**
      * Removes all DOM elements from DOM element
@@ -144,8 +144,8 @@ export default function LayoutFactory(Private) {
      */
     removeAll(el) {
       return d3.select(el).selectAll('*').remove();
-    };
+    }
   }
 
   return Layout;
-};
+}

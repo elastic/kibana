@@ -39,7 +39,7 @@ function createProxy(server, method, route, config) {
   assign(options.config, config);
 
   server.route(options);
-};
+}
 
 createProxy.createPath = function createPath(path) {
   const pre = '/elasticsearch';

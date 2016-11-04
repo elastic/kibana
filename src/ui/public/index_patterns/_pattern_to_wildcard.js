@@ -34,4 +34,4 @@ export default function PatternToWildcardFn() {
 
     return wildcard;
   };
-};
+}

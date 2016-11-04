@@ -57,4 +57,4 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
       return _.get(bucket[agg.parentId], agg.valProp());
     }
   });
-};
+}

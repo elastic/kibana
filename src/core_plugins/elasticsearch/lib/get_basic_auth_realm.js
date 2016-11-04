@@ -4,4 +4,4 @@ export default function getBasicAuthRealm(message) {
   const parts = message.match(/Basic\ realm=\\"(.*)\\"/);
   if (parts && parts.length === 2) return parts[1];
   else return null;
-};
+}

@@ -64,4 +64,4 @@ export default function ReflowWatcherService(Private, $rootScope, $http) {
   };
 
   return new ReflowWatcher();
-};
+}

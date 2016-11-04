@@ -44,4 +44,4 @@ export default function YAxisSplitFactory() {
 
     el.style('width', (width + padding) + 'px');
   }
-};
+}

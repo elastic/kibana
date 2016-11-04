@@ -382,4 +382,4 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
       });
     }
   }
-};
+}

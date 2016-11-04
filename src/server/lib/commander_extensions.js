@@ -6,4 +6,4 @@ export default function (program) {
   program.isCommandSpecified = function () {
     return program.args.some(isCommand);
   };
-};
+}

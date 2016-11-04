@@ -44,4 +44,4 @@ export default function addWordBreaks(text, minLineLength) {
   }
 
   return newText;
-};
+}

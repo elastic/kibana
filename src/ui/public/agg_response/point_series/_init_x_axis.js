@@ -12,4 +12,4 @@ export default function PointSeriesInitX() {
       chart.ordered.interval = xAggOutput.params.interval;
     }
   };
-};
+}

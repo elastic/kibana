@@ -282,4 +282,4 @@ export default function SearchSourceFactory(Promise, Private, config) {
   };
 
   return SearchSource;
-};
+}

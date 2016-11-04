@@ -59,4 +59,4 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
       return getPercentileValue(agg, bucket) / 100;
     }
   });
-};
+}

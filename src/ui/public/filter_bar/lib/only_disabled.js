@@ -12,4 +12,4 @@ export default function (newFilters, oldFilters) {
   return _.every(newFilters.concat(oldFilters), function (newFilter) {
     return pluckDisabled(newFilter);
   });
-};
+}

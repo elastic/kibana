@@ -67,7 +67,7 @@ export default function MarkerFactory() {
       };
 
       self._legend.addTo(self.map);
-    };
+    }
 
     /**
      * Apply style with shading to feature
@@ -86,7 +86,7 @@ export default function MarkerFactory() {
         opacity: 1,
         fillOpacity: 0.75
       };
-    };
+    }
 
     /**
      * Binds popup and events to each feature on map
@@ -114,7 +114,7 @@ export default function MarkerFactory() {
       });
 
       self.popups.push(popup);
-    };
+    }
 
     /**
      * d3 method returns a darker hex color,
@@ -128,7 +128,7 @@ export default function MarkerFactory() {
     darkerColor(color, amount) {
       amount = amount || 1.3;
       return d3.hcl(color).darker(amount).toString();
-    };
+    }
 
     destroy() {
       const self = this;
@@ -148,11 +148,11 @@ export default function MarkerFactory() {
         self.map.removeLayer(self._markerGroup);
         self._markerGroup = undefined;
       }
-    };
+    }
 
     _addToMap() {
       this.map.addLayer(this._markerGroup);
-    };
+    }
 
     /**
      * Creates leaflet marker group, passing options to L.geoJson
@@ -175,7 +175,7 @@ export default function MarkerFactory() {
 
       this._markerGroup = L.geoJson(this.geoJson, _.defaults(defaultOptions, options));
       this._addToMap();
-    };
+    }
 
     /**
      * return whether feature is within map bounds
@@ -191,7 +191,7 @@ export default function MarkerFactory() {
         const bucketRectBounds = _.get(feature, 'properties.rectangle');
         return mapBounds.intersects(bucketRectBounds);
       };
-    };
+    }
 
     /**
      * Checks if event latlng is within bounds of mapData
@@ -212,14 +212,14 @@ export default function MarkerFactory() {
 
       if (!content) return;
       this._createTooltip(content, latLng);
-    };
+    }
 
     _createTooltip(content, latLng) {
       L.popup({autoPan: false})
       .setLatLng(latLng)
       .setContent(content)
       .openOn(this.map);
-    };
+    }
 
     /**
      * Closes the tooltip on the map
@@ -231,7 +231,7 @@ export default function MarkerFactory() {
       if (!this.map) return;
 
       this.map.closePopup();
-    };
+    }
 
     /**
      * d3 quantize scale returns a hex color, used for marker fill color
@@ -259,8 +259,8 @@ export default function MarkerFactory() {
       }
 
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
-    };
+    }
   }
 
   return BaseMarker;
-};
+}

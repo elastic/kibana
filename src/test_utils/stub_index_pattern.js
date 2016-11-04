@@ -52,4 +52,4 @@ export default function (Private) {
   }
 
   return StubIndexPattern;
-};
+}

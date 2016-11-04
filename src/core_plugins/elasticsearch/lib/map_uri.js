@@ -45,4 +45,4 @@ export default function mapUri(server, prefix) {
     const mappedUrl = formatUrl(mappedUrlComponents);
     done(null, mappedUrl, mappedHeaders);
   };
-};
+}

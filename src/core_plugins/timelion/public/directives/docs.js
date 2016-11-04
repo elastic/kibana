@@ -21,7 +21,7 @@ app.directive('timelionDocs', function (config, $http) {
         };
         getFunctions();
         checkElasticsearch();
-      };
+      }
 
       function getFunctions() {
         return $http.get('../api/timelion/functions').then(function (resp) {
@@ -60,7 +60,7 @@ app.directive('timelionDocs', function (config, $http) {
           }
           return $scope.es.valid;
         });
-      };
+      }
       init();
     }
   };

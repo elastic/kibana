@@ -589,4 +589,4 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   }
 
   init();
-};
+}

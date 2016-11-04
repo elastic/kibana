@@ -20,4 +20,4 @@ export class Set extends Processor {
       value: this.value || ''
     };
   }
-};
+}

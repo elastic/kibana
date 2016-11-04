@@ -19,7 +19,7 @@ function unflatten(data) {
   });
 
   return result[''] || result;
-};
+}
 
 module.exports = new Chainable('props', {
   args: [

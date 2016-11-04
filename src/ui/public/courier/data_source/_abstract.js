@@ -396,4 +396,4 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
   };
 
   return SourceAbstract;
-};
+}

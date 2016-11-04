@@ -82,7 +82,7 @@ export default function AlertsFactory(Private) {
       $(vis.el).find('.vis-alerts').append(
         $('<div>').addClass('vis-alerts-tray').append(alerts.value())
       );
-    };
+    }
 
     /**
      * Tear down the Alerts
@@ -90,8 +90,8 @@ export default function AlertsFactory(Private) {
      */
     destroy() {
       this.binder.destroy();
-    };
+    }
   }
 
   return Alerts;
-};
+}

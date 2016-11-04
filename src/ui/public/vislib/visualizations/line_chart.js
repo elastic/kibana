@@ -56,7 +56,7 @@ export default function LineChartFactory(Private) {
       }
 
       return attachedEvents;
-    };
+    }
 
     /**
      * Adds circles to SVG
@@ -175,7 +175,7 @@ export default function LineChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Adds path to SVG
@@ -226,7 +226,7 @@ export default function LineChartFactory(Private) {
         .attr('stroke-width', 2);
 
       return lines;
-    };
+    }
 
     /**
      * Adds SVG clipPath
@@ -254,7 +254,7 @@ export default function LineChartFactory(Private) {
       // Adding clipPathBuffer to height so it doesn't
       // cutoff the lower part of the chart
       .attr('height', height + clipPathBuffer);
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -346,8 +346,8 @@ export default function LineChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return LineChart;
-};
+}

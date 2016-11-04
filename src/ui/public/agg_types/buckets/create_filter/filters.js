@@ -10,4 +10,4 @@ export default function CreateFilterFiltersProvider(Private) {
       return buildQueryFilter(filter.query, aggConfig.vis.indexPattern.id);
     }
   };
-};
+}

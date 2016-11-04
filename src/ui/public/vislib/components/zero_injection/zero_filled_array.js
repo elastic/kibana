@@ -24,4 +24,4 @@ export default function ZeroFilledArrayUtilService() {
 
     return zeroFilledArray;
   };
-};
+}

@@ -16,4 +16,4 @@ export default function (id) {
   id = id.replace(/[\s]+/g, '-');
   id = id.replace(/[\-]+/g, '-');
   return id;
-};
+}

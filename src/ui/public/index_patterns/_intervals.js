@@ -91,4 +91,4 @@ export default function IndexNameIntervalsService(timefilter) {
   };
 
   return intervals;
-};
+}

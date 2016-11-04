@@ -8,4 +8,4 @@ export default function (kbnServer, server, config) {
   for (let [key, val] of config.getPendingSets()) {
     server.log(['warning', 'config'], { key, val, tmpl });
   }
-};
+}

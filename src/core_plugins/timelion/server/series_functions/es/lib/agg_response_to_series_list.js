@@ -46,4 +46,4 @@ export default function toSeriesList(aggs, config) {
       label: name
     };
   });
-};
+}

@@ -15,4 +15,4 @@ export default function DecorateQuery(config) {
 
     return query;
   };
-};
+}

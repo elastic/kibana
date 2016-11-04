@@ -8,4 +8,4 @@ export default function SeedColorUtilService() {
     '#9e3533',
     '#daa05d'
   ];
-};
+}

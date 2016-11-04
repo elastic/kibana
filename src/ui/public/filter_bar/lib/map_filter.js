@@ -70,4 +70,4 @@ export default function mapFilterProvider(Promise, Private) {
       return filter;
     });
   };
-};
+}

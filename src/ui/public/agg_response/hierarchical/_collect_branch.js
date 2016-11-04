@@ -32,4 +32,4 @@ export default function (leaf) {
   }
 
   return walk(leaf, []);
-};
+}

@@ -28,4 +28,4 @@ export default function processors(bdd, scenarioManager, request) {
   split(bdd, scenarioManager, request);
   trim(bdd, scenarioManager, request);
   uppercase(bdd, scenarioManager, request);
-};
+}

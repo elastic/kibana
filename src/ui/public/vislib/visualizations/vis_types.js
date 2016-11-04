@@ -21,4 +21,4 @@ export default function VisTypeFactory(Private) {
     area: Private(VislibVisualizationsAreaChartProvider),
     tile_map: Private(VislibVisualizationsTileMapProvider)
   };
-};
+}

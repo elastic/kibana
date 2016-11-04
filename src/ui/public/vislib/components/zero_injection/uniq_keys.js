@@ -56,4 +56,4 @@ export default function UniqueXValuesUtilService(Private) {
 
     return uniqueXValues;
   };
-};
+}

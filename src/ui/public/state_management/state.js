@@ -275,4 +275,4 @@ export default function StateProvider(Private, $rootScope, $location, config) {
 
   return State;
 
-};
+}

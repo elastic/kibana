@@ -6,4 +6,4 @@ export default function buildQueryFilter(query, index) {
       index: index
     }
   };
-};
+}

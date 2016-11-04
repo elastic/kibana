@@ -105,4 +105,4 @@ export default function MappingSetupService(kbnIndex, es) {
     activeTypeCreations[type] = prom;
     return prom;
   };
-};
+}

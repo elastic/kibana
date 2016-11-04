@@ -30,4 +30,4 @@ export default function createUrlShortener(Notifier, $http, $location) {
   return {
     shortenUrl
   };
-};
+}

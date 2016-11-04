@@ -18,4 +18,4 @@ export class Remove extends Processor {
       sourceField: this.sourceField || ''
     };
   }
-};
+}

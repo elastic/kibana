@@ -40,4 +40,4 @@ export default function DocRequestProvider(Private) {
   }
 
   return DocRequest;
-};
+}

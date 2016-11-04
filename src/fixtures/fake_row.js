@@ -17,4 +17,4 @@ export default function (id, mapping) {
     $$_partialFormatted: fakeVals('formatted'),
     $$_flattened: fakeVals('_flattened')
   };
-};
+}

@@ -45,7 +45,7 @@ export default function HeatmapMarkerFactory(Private) {
       this._markerGroup = L.heatLayer(points, options);
       this._fixTooltips();
       this._addToMap();
-    };
+    }
 
     _fixTooltips() {
       const self = this;
@@ -88,7 +88,7 @@ export default function HeatmapMarkerFactory(Private) {
           this._showTooltip(feature, latlng);
         }
       }
-    };
+    }
 
     /**
      * Finds nearest feature in mapData to event latlng
@@ -118,7 +118,7 @@ export default function HeatmapMarkerFactory(Private) {
       }, Infinity);
 
       return nearest;
-    };
+    }
 
     /**
      * display tooltip if feature is close enough to event latlng
@@ -159,7 +159,7 @@ export default function HeatmapMarkerFactory(Private) {
       .domain([1, 18])
       .range([1500000, 50]);
       return showTip;
-    };
+    }
 
 
     /**
@@ -189,9 +189,9 @@ export default function HeatmapMarkerFactory(Private) {
 
         return [lat, lng, heatIntensity];
       });
-    };
+    }
   }
 
 
   return HeatmapMarker;
-};
+}

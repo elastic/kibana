@@ -19,4 +19,4 @@ export default function PatternCache() {
   this.clear = this.delete = function (id) {
     if (validId(id)) delete vals[id];
   };
-};
+}

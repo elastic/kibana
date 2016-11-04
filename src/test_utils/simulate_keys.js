@@ -101,4 +101,4 @@ export default function ($el, sequence) {
     const $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
     $target.trigger($event);
   }
-};
+}

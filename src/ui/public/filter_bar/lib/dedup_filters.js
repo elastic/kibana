@@ -17,4 +17,4 @@ export default function (existingFilters, filters, comparatorOptions) {
       return compareFilters(existingFilter, filter, comparatorOptions);
     });
   });
-};
+}

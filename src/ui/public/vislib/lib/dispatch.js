@@ -69,7 +69,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return eventData;
-    };
+    }
 
     /**
      * Returns a function that adds events and listeners to a D3 selection
@@ -89,7 +89,7 @@ export default function DispatchClass(Private, config) {
           }
         });
       };
-    };
+    }
 
     /**
      *
@@ -116,7 +116,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('mouseover', hover);
-    };
+    }
 
     /**
      *
@@ -136,7 +136,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('mouseout', mouseout);
-    };
+    }
 
     /**
      *
@@ -152,7 +152,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('click', click);
-    };
+    }
 
     /**
      * Determine if we will allow brushing
@@ -166,7 +166,7 @@ export default function DispatchClass(Private, config) {
       const hasTimeField = this.handler.vis._attr.hasTimeField;
 
       return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
-    };
+    }
 
     /**
      * Determine if brushing is currently enabled
@@ -176,7 +176,7 @@ export default function DispatchClass(Private, config) {
      */
     isBrushable() {
       return this.allowBrushing() && this.listenerCount('brush') > 0;
-    };
+    }
 
     /**
      *
@@ -208,7 +208,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return this.addEvent('mousedown', brushEnd);
-    };
+    }
 
 
     /**
@@ -219,7 +219,7 @@ export default function DispatchClass(Private, config) {
      */
     addMousePointer() {
       return d3.select(this).style('cursor', 'pointer');
-    };
+    }
 
     /**
      * Highlight the element that is under the cursor
@@ -246,7 +246,7 @@ export default function DispatchClass(Private, config) {
      */
     unHighlight(element) {
       $('[data-label]', element.parentNode).css('opacity', 1);
-    };
+    }
 
     /**
      * Adds D3 brush to SVG and returns the brush function
@@ -303,7 +303,7 @@ export default function DispatchClass(Private, config) {
 
         return brush;
       }
-    };
+    }
   }
 
   function validBrushClick(event) {
@@ -318,4 +318,4 @@ export default function DispatchClass(Private, config) {
   }
 
   return Dispatch;
-};
+}

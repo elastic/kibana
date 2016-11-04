@@ -215,11 +215,11 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         });
 
         return bestFunction;
-      };
+      }
 
       function getCaretPos() {
         return $elem[0].selectionStart;
-      };
+      }
 
       function digest() {
         $rootScope.$$phase || $scope.$digest();

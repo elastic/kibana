@@ -303,4 +303,4 @@ export default function defaultSettingsProvider() {
         'sessions storage could help. Please let us know how it goes!'
     }
   };
-};
+}

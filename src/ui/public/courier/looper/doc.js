@@ -16,4 +16,4 @@ export default function DocLooperService(Private) {
   });
 
   return docLooper;
-};
+}

@@ -5,4 +5,4 @@ export default function (grunt) {
     //the optimization process can't write to .babelcache.json.
     grunt.file.write('build/kibana/optimize/.babelcache.json', '{}\n');
   });
-};
+}

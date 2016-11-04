@@ -87,7 +87,7 @@ uiModules
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
             $spyEl.addClass('only');
-          };
+          }
         }, 0);
       };
 

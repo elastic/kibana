@@ -87,4 +87,4 @@ export default function (Promise, Private, es) {
       throw new errors.RequestFailure(err);
     });
   };
-};
+}

@@ -15,7 +15,7 @@ module.exports = function () {
       });
     }(nestedObj));
     return flatObj;
-  };
+  }
 
   const timelionDefaults = flattenWith('.', configFile);
   return _.reduce(timelionDefaults, (result, value, key) => {

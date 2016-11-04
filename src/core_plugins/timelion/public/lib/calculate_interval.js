@@ -40,4 +40,4 @@ function roundInterval(interval) {
     default:
       return '1y';
   }
-};
+}

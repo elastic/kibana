@@ -31,4 +31,4 @@ export default function parseInterval(interval) {
   } catch (e) {
     return null;
   }
-};
+}

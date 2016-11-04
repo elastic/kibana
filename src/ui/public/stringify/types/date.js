@@ -64,4 +64,4 @@ export default function DateTimeFormatProvider(Private) {
   };
 
   return DateTime;
-};
+}

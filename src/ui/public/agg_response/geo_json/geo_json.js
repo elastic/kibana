@@ -40,4 +40,4 @@ export default function TileMapConverterFn(Private, timefilter, $compile, $rootS
       }
     };
   };
-};
+}

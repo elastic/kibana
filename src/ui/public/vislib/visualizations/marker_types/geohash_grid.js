@@ -31,4 +31,4 @@ export default function GeohashGridMarkerFactory(Private) {
   }
 
   return GeohashGridMarker;
-};
+}

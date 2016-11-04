@@ -65,8 +65,8 @@ export function initializeOutput($el) {
   }
 
   return output;
-};
+}
 
 export default function getOutput() {
   return output;
-};
+}

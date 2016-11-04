@@ -20,5 +20,5 @@ export default function MapHandlerProvider(Private) {
 
     return MapHandler;
   };
-};
+}
 

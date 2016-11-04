@@ -38,5 +38,5 @@ export default function GetQueryFromUser(es, Private) {
       return getQueryStringQuery(text);
     }
   };
-};
+}
 

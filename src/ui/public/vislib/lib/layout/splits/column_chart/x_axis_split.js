@@ -22,4 +22,4 @@ export default function XAxisSplitFactory() {
         .attr('class', 'x-axis-div');
     });
   };
-};
+}

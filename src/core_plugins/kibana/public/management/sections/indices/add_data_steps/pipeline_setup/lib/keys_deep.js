@@ -18,4 +18,4 @@ export default function keysDeep(object, base) {
   }
 
   return result;
-};
+}

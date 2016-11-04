@@ -22,4 +22,4 @@ export default function mapScriptProvider(Promise, courier) {
     }
     return Promise.reject(filter);
   };
-};
+}
