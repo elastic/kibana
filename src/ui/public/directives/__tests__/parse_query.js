@@ -26,9 +26,8 @@ const init = function () {
   });
 
   // Create the scope
-  ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_, _Private_, _config_) {
+  ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Private_, _config_) {
     $compile = _$compile_;
-    Promise = _Promise_;
     Private = _Private_;
     config = _config_;
 

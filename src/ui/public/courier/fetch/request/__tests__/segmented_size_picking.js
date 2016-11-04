@@ -16,7 +16,6 @@ describe('Segmented Request Size Picking', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
-    Promise = $injector.get('Promise');
     HitSortFn = Private(HitSortFnProv);
     SegmentedReq = Private(SegmentedRequestProvider);
 

@@ -12,7 +12,6 @@ describe('ui/courier/fetch/strategy/search', () => {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject((Private, $injector) => {
-    Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
     search = Private(SearchStrategyProvider);
     reqsFetchParams = [

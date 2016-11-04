@@ -34,7 +34,6 @@ describe('ui/index_patterns/_calculate_indices', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
     es = $injector.get('es');
-    Promise = $injector.get('Promise');
     calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   }));
 
