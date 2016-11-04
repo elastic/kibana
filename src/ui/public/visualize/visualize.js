@@ -144,7 +144,12 @@ uiModules
         }
 
         if (oldVis) $scope.renderbot = null;
-        if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        if (vis) {
+          vis.on('renderComplete', () => {
+            $scope.$emit('renderComplete');
+          });
+          $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        }
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
@@ -164,6 +169,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
+          $scope.$emit('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +

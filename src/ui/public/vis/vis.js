@@ -13,17 +13,21 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import PersistedStateProvider from 'ui/persisted_state/persisted_state';
+import EventsProvider from 'ui/events';
+
 export default function VisFactory(Notifier, Private) {
   let aggTypes = Private(AggTypesIndexProvider);
   let visTypes = Private(RegistryVisTypesProvider);
   let AggConfigs = Private(VisAggConfigsProvider);
   const PersistedState = Private(PersistedStateProvider);
+  const EventEmitter = Private(EventsProvider);
 
   let notify = new Notifier({
     location: 'Vis'
   });
 
   function Vis(indexPattern, state, uiState) {
+    EventEmitter.call(this);
     state = state || {};
 
     if (_.isString(state)) {
@@ -79,6 +83,7 @@ export default function VisFactory(Notifier, Private) {
     };
   };
 
+  Vis.prototype = Object.create(EventEmitter.prototype);
   Vis.prototype.type = 'histogram';
 
   Vis.prototype.setState = function (state) {

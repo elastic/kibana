@@ -15,18 +15,22 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   }
 
   VislibRenderbot.prototype._createVis = function () {
-    let self = this;
+    if (this.vislibVis) this.destroy();
 
-    if (self.vislibVis) self.destroy();
+    this.vislibParams = this._getVislibParams();
+    this.vislibVis = new vislib.Vis(this.$el[0], this.vislibParams);
 
-    self.vislibParams = self._getVislibParams();
-    self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
-
-    _.each(self.vis.listeners, function (listener, event) {
-      self.vislibVis.on(event, listener);
+    _.each(this.vis.listeners, (listener, event) => {
+      this.vislibVis.on(event, listener);
     });
 
-    if (this.chartData) self.vislibVis.render(this.chartData, this.uiState);
+    this.vislibVis.on('renderComplete', () => {
+      this.vis.emit('renderComplete');
+    });
+
+    if (this.chartData) {
+      this.vislibVis.render(this.chartData, this.uiState);
+    }
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {

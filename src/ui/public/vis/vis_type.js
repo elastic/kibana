@@ -17,5 +17,9 @@ export default function VisTypeFactory(Private) {
     this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
   }
 
+  VisType.prototype.createRenderbot = function (vis, $el, uiState) {
+    throw new Error('not implemented');
+  };
+
   return VisType;
 };

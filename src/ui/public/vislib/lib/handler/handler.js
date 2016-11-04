@@ -185,9 +185,11 @@ export default function HandlerBaseClass(Private) {
 
         div.append('div').attr('class', 'item bottom');
         return div;
+      } else {
+        div.append('h4').text(message);
       }
-
-      return div.append('h4').text(message);
+      this.vis.emit('renderComplete');
+      return div;
     };
 
     /**
