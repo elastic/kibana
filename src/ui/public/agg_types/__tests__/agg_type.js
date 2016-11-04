@@ -12,7 +12,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 describe('AggType Class', function () {
   let AggType;
   let AggParams;
-  let AggConfig;
   let indexPattern;
   let fieldFormat;
   let Vis;
@@ -26,7 +25,6 @@ describe('AggType Class', function () {
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
     AggType = Private(AggTypesAggTypeProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -186,5 +184,4 @@ describe('AggType Class', function () {
     });
 
   });
-
 });

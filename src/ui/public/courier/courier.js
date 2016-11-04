@@ -31,7 +31,6 @@ uiModules.get('kibana/courier')
     const searchStrategy = Private(SearchStrategyProvider);
 
     const requestQueue = Private(RequestQueueProvider);
-    const errorHandlers = Private(ErrorHandlersProvider);
 
     const fetch = Private(FetchProvider);
     const docLooper = self.docLooper = Private(DocLooperProvider);
@@ -46,8 +45,6 @@ uiModules.get('kibana/courier')
 
     self.DocSource = DocSource;
     self.SearchSource = SearchSource;
-
-    const HastyRefresh = errors.HastyRefresh;
 
     /**
      * update the time between automatic search requests

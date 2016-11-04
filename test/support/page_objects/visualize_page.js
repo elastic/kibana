@@ -433,12 +433,10 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
     const self = this.remote;
     const chartData = [];
     let tempArray = [];
     let chartSections = 0;
-    const height = 0;
     let yAxisLabel = 0;
     let yAxisHeight = 0;
 

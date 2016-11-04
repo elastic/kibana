@@ -426,7 +426,6 @@ export default function XAxisFactory(Private) {
       const visEls = $('.vis-wrapper');
       let xAxisChartTitle;
       let yAxisChartTitle;
-      let text;
       let titles;
 
       return function () {
@@ -439,30 +438,12 @@ export default function XAxisFactory(Private) {
           let titleWidth = xAxisTitle.width();
           let titleHeight = yAxisTitle.height();
 
-          text = visEl.select('.x-axis-title')
-          .select('svg')
-          .attr('width', titleWidth)
-          .select('text')
-          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
-
-          text = visEl.select('.y-axis-title')
-          .select('svg')
-          .attr('height', titleHeight)
-          .select('text')
-          .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
-
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
             titleWidth = xAxisChartTitle.find('.chart-title').width();
 
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
-            titles.each(function () {
-              text = d3.select(this)
-              .select('svg')
-              .attr('width', titleWidth)
-              .select('text')
-              .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
-            });
+            titles.each(function () {});
           }
 
           if ($visEl.find('.y-axis-chart-title').length) {
@@ -470,15 +451,8 @@ export default function XAxisFactory(Private) {
             titleHeight = yAxisChartTitle.find('.chart-title').height();
 
             titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
-            titles.each(function () {
-              text = d3.select(this)
-              .select('svg')
-              .attr('height', titleHeight)
-              .select('text')
-              .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
-            });
+            titles.each(function () {});
           }
-
         });
 
       };

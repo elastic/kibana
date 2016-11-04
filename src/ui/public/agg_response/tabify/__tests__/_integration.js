@@ -6,9 +6,7 @@ import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('tabifyAggResponse Integration', function () {
-
   let Vis;
-  let Buckets;
   let indexPattern;
   let tabifyAggResponse;
 

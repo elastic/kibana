@@ -47,7 +47,6 @@ describe('State Management', function () {
 
     it('should be destroyed on $routeChangeStart', function () {
       const destroySpy = sinon.spy(appState, 'destroy');
-      const url = '/test/path';
 
       $rootScope.$emit('$routeChangeStart');
 

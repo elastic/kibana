@@ -41,11 +41,9 @@ uiRoutes
 
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
-
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
-  const ingest = Private(IngestProvider);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;

@@ -132,14 +132,9 @@ dataArray.forEach(function (data, i) {
         afterEvent
       ];
       let listeners;
-      let listener1;
-      let listener2;
 
       beforeEach(function () {
-        listeners = [
-          listener1 = function () {},
-          listener2 = function () {}
-        ];
+        listeners = [];
 
         // Add event and listeners to chart
         listeners.forEach(function (listener) {

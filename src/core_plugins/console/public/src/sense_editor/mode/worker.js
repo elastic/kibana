@@ -701,7 +701,6 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
     var disabled = handlers._disabled_[eventName];
 
     if (handlers[eventName] == callback) {
-      var old = handlers[eventName];
       if (disabled)
         this.setDefaultHandler(eventName, disabled.pop());
     } else if (disabled) {

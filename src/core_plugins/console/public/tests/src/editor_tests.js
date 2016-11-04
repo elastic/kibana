@@ -4,7 +4,13 @@ let input = require('../../src/input');
 let editor_input1 = require('raw!./editor_input1.txt');
 
 var aceRange = ace.require("ace/range");
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var {
+  module,
+  asyncTest,
+  deepEqual,
+  equal,
+  start
+} = QUnit;
 
 
 module("Editor", {

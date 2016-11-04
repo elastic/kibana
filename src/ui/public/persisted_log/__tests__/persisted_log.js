@@ -5,7 +5,6 @@ import ngMock from 'ng_mock';
 import 'ui/persisted_log';
 
 let storage;
-let config;
 let PersistedLog;
 
 const historyName = 'testHistory';

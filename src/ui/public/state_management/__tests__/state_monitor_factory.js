@@ -13,11 +13,9 @@ describe('stateMonitorFactory', function () {
   ];
 
   let mockState;
-  let stateJSON;
 
   function setState(mockState, obj, emit = true) {
     mockState.toJSON = () => cloneDeep(obj);
-    stateJSON = cloneDeep(obj);
     if (emit) mockState.emit(eventTypes[0]);
   }
 
@@ -226,7 +224,6 @@ describe('stateMonitorFactory', function () {
 
     describe('destroy', function () {
       let stateSpy;
-      let cleanMethod;
 
       beforeEach(() => {
         stateSpy = sinon.spy(mockState, 'off');

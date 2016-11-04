@@ -12,9 +12,7 @@ const typeaheadName = 'unittest';
 let $parentScope;
 let $typeaheadScope;
 let $elem;
-let $typeaheadInputScope;
 let typeaheadCtrl;
-let PersistedLog;
 
 let markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
@@ -51,8 +49,6 @@ const init = function () {
     $parentScope = $rootScope;
 
     $elem = angular.element(markup);
-
-    PersistedLog = $injector.get('PersistedLog');
 
     $compile($elem)($parentScope);
     $elem.scope().$digest();

@@ -2,7 +2,12 @@ let _ = require('lodash');
 let curl = require('../../src/curl');
 let curlTests = require('raw!./curl_parsing_tests.txt');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var {
+  test,
+  module,
+  ok,
+  equal
+} = QUnit;
 
 module("CURL");
 

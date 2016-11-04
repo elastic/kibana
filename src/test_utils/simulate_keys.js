@@ -3,7 +3,6 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import keyMap from 'ui/utils/key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
-const KeyboardEvent = window.KeyboardEvent;
 
 /**
  * Simulate keyboard events in an element. This allows testing the way that

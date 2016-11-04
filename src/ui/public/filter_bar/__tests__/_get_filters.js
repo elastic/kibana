@@ -9,7 +9,6 @@ describe('get filters', function () {
     global: 'globalState'
   };
   let queryFilter;
-  let $rootScope;
   let appState;
   let globalState;
 
@@ -30,7 +29,6 @@ describe('get filters', function () {
   ));
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-    $rootScope = _$rootScope_;
     queryFilter = Private(FilterBarQueryFilterProvider);
   }));
 

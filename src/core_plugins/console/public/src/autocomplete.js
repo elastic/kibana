@@ -320,7 +320,6 @@ module.exports = function (editor) {
     //   - Nice token, broken before: {, "bla"
 
     var session = editor.getSession();
-    var insertingRelativeToToken;
 
     context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
     if (!context.updatedForToken) {
@@ -601,7 +600,7 @@ module.exports = function (editor) {
   function getCurrentMethodAndTokenPaths(pos) {
     var tokenIter = editor.iterForPosition(pos.row, pos.column);
     var startPos = pos;
-    var bodyTokenPath = [], last_var = "", first_scope = true, ret = {};
+    var bodyTokenPath = [], ret = {};
 
     var STATES = {
       looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.

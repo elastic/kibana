@@ -1,5 +1,4 @@
 export default function (grunt) {
-  const { config } = grunt;
   const { sha, version } = grunt.config.get('build');
 
   return {

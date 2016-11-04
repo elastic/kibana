@@ -12,7 +12,6 @@ describe('plugins/elasticsearch', () => {
     const KIBANA_VERSION = '5.1.0';
 
     let server;
-    let plugin;
 
     beforeEach(function () {
       server = {

@@ -9,8 +9,6 @@ export default function normalizeSortRequest(config) {
    * @returns {object}
    */
   return function (sortObject, indexPattern) {
-    const normalizedSort = [];
-
     // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
     return [].concat(sortObject).map(function (sortable) {
       return normalize(sortable, indexPattern);

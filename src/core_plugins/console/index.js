@@ -7,7 +7,9 @@ module.exports = function (kibana) {
   let modules = resolve(__dirname, 'public/webpackShims/');
   let src = resolve(__dirname, 'public/src/');
   let { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
+  const {
+    endsWith
+  } = require('lodash');
 
   const apps = [];
 

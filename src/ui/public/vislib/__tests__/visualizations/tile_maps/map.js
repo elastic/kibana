@@ -44,12 +44,10 @@ describe('TileMap Map Tests', function () {
   }));
 
   describe('instantiation', function () {
-    let map;
     let createStub;
 
     beforeEach(function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the map', function () {
@@ -110,15 +108,12 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('attachEvents', function () {
-    let map;
-
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
         this._tileLayer = leafletMocks.tileLayer;
         this.map = leafletMocks.map;
         this._attachEvents();
       });
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should attach interaction events', function () {

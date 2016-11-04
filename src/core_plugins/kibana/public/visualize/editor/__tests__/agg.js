@@ -9,7 +9,6 @@ import 'plugins/kibana/visualize/editor/agg';
 
 describe('Vis-Editor-Agg plugin directive', function () {
   const $parentScope = {};
-  let $scope;
   let $elem;
 
   function makeConfig(which) {
@@ -72,9 +71,6 @@ describe('Vis-Editor-Agg plugin directive', function () {
 
     // Digest everything
     $elem.scope().$digest();
-
-    // give us a scope to work with
-    $scope = $elem.isolateScope();
   }));
 
   it('should only add the close button if there is more than the minimum', function () {

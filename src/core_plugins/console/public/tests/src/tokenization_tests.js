@@ -3,7 +3,12 @@ let $ = require('jquery');
 let input = require('../../src/input');
 
 var token_iterator = ace.require("ace/token_iterator");
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var {
+  module,
+  asyncTest,
+  deepEqual,
+  start
+} = QUnit;
 
 module("Tokenization", {
   setup: function () {

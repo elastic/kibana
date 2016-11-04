@@ -20,7 +20,6 @@ uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
   const Events = Private(EventsProvider);
-  const diff = Private(UtilsDiffTimePickerValsProvider);
 
   function convertISO8601(stringTime) {
     const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);

@@ -127,7 +127,6 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
-    let ordered;
     let timeScale;
     let timeDomain;
     let ordinalScale;
@@ -201,7 +200,6 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   describe('getXAxis Method', function () {
     let width;
-    let axis;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();

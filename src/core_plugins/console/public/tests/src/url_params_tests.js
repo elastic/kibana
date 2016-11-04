@@ -2,7 +2,11 @@ let _ = require('lodash');
 let url_params = require('../../src/autocomplete/url_params');
 let autocomplete_engine = require('../../src/autocomplete/engine');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var {
+  test,
+  module,
+  deepEqual
+} = QUnit;
 
 module("Url params");
 

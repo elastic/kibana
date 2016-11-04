@@ -11,7 +11,6 @@ import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/colo
 describe('Vislib Color Module Test Suite', function () {
   let seedColors;
   let mappedColors;
-  let config;
 
   describe('Color (main)', function () {
     let previousConfig;

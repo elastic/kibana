@@ -5,12 +5,7 @@ import _ from 'lodash';
 import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
-
   let config;
-
-  let indexPattern;
-
-  let getComputedFields;
 
   let fn;
   beforeEach(ngMock.module(
@@ -40,5 +35,4 @@ describe('Query decorator', function () {
     config.set('query:queryString:options', {analyze_wildcard: true});
     expect(fn({query_string: {query: '*'}})).to.eql({query_string: {query: '*', analyze_wildcard: true}});
   });
-
 });

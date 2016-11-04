@@ -9,7 +9,6 @@ import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/cre
 
 describe('AggConfig Filters', function () {
   describe('filters', function () {
-    let AggConfig;
     let indexPattern;
     let Vis;
     let createFilter;
@@ -17,7 +16,6 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
-      AggConfig = Private(VisAggConfigProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
     }));
@@ -45,6 +43,5 @@ describe('AggConfig Filters', function () {
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });
-
   });
 });

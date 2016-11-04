@@ -4,7 +4,6 @@ import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metri
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 export default function AggTypeMetricMedianProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
   const percentiles = Private(AggTypesMetricsPercentilesProvider);
 
   return new MetricAggType({
