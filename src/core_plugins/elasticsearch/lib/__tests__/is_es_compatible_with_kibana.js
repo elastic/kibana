@@ -17,10 +17,6 @@ describe('plugins/elasticsearch', () => {
       it('when majors are equal, but ES minor is less than Kibana minor', () => {
         expect(isEsCompatibleWithKibana('1.0.0', '1.1.0')).to.be(false);
       });
-
-      it('when majors and minors are equal, but ES patch is less than Kibana patch', () => {
-        expect(isEsCompatibleWithKibana('1.1.0', '1.1.1')).to.be(false);
-      });
     });
 
     describe('returns true', () => {
@@ -34,6 +30,10 @@ describe('plugins/elasticsearch', () => {
 
       it('when majors and minors are equal, and ES patch is greater than Kibana patch', () => {
         expect(isEsCompatibleWithKibana('1.1.1', '1.1.0')).to.be(true);
+      });
+
+      it('when majors and minors are equal, but ES patch is less than Kibana patch', () => {
+        expect(isEsCompatibleWithKibana('1.1.0', '1.1.1')).to.be(true);
       });
     });
   });
