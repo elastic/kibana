@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var moment = require('moment');
-var toMS = require('../../lib/to_milliseconds.js');
-var Datasource = require('../../lib/classes/datasource');
-var buildRequest = require('./lib/build_request');
+let _ = require('lodash');
+let moment = require('moment');
+let toMS = require('../../lib/to_milliseconds.js');
+let Datasource = require('../../lib/classes/datasource');
+let buildRequest = require('./lib/build_request');
 import toSeriesList from './lib/agg_response_to_series_list';
 
 module.exports = new Datasource('es', {
@@ -51,7 +51,7 @@ module.exports = new Datasource('es', {
   aliases: ['elasticsearch'],
   fn: function esFn(args, tlConfig) {
 
-    var config = _.defaults(_.clone(args.byName), {
+    let config = _.defaults(_.clone(args.byName), {
       q: '*',
       metric: ['count'],
       index: tlConfig.settings['timelion:es.default_index'],
@@ -61,9 +61,9 @@ module.exports = new Datasource('es', {
       fit: 'nearest'
     });
 
-    var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
+    let callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
 
-    var body = buildRequest(config, tlConfig);
+    let body = buildRequest(config, tlConfig);
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
       return {

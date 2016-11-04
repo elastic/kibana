@@ -1,15 +1,15 @@
-var filename = require('path').basename(__filename);
-var fn = require(`../${filename}`);
-var moment = require('moment');
-var expect = require('chai').expect;
-var invoke = require('./helpers/invoke_series_fn.js');
-var getSeriesList = require('./helpers/get_single_series_list');
-var _ = require('lodash');
+let filename = require('path').basename(__filename);
+let fn = require(`../${filename}`);
+let moment = require('moment');
+let expect = require('chai').expect;
+let invoke = require('./helpers/invoke_series_fn.js');
+let getSeriesList = require('./helpers/get_single_series_list');
+let _ = require('lodash');
 
 describe(filename, function () {
 
-  var comparable;
-  var seriesList;
+  let comparable;
+  let seriesList;
   beforeEach(function () {
     seriesList = require('./fixtures/seriesList.js')();
     comparable = getSeriesList('',[

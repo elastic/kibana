@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
+let _ = require('lodash');
+let Promise = require('bluebird');
 
 
 /**
@@ -15,8 +15,8 @@ var Promise = require('bluebird');
 module.exports = function reduce(args, fn) {
   return Promise.all(args).then(function (args) {
 
-    var seriesList = args.shift();
-    var argument = args.shift();
+    let seriesList = args.shift();
+    let argument = args.shift();
 
     if (seriesList.type !== 'seriesList') {
       throw new Error ('input must be a seriesList');
@@ -34,9 +34,9 @@ module.exports = function reduce(args, fn) {
     function reduceSeries(series) {
       return _.reduce(series, function (destinationObject, argument, i, p) {
 
-        var output = _.map(destinationObject.data, function (point, index) {
+        let output = _.map(destinationObject.data, function (point, index) {
 
-          var value = point[1];
+          let value = point[1];
 
           if (value == null) {
             return [point[0], null];
@@ -64,7 +64,7 @@ module.exports = function reduce(args, fn) {
 
     }
 
-    var reduced;
+    let reduced;
 
     if (argument != null) {
       reduced = _.map(seriesList.list, function (series) {

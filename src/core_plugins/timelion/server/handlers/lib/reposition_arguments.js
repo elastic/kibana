@@ -1,21 +1,21 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 // Applies to unresolved arguments in the AST
 module.exports = function repositionArguments(functionDef, unorderedArgs) {
-  var args = [];
+  let args = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
-    var argDef;
-    var targetIndex;
-    var value;
-    var storeAsArray;
+    let argDef;
+    let targetIndex;
+    let value;
+    let storeAsArray;
 
     if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];
 
       if (!argDef) {
         if (functionDef.extended) {
-          var namesIndex = functionDef.args.length;
+          let namesIndex = functionDef.args.length;
           targetIndex = functionDef.args.length + 1;
 
           args[namesIndex] = args[namesIndex] || [];

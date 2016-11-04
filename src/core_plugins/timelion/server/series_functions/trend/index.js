@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var Chainable = require('../../lib/classes/chainable');
+let _ = require('lodash');
+let Chainable = require('../../lib/classes/chainable');
 import * as regress from './lib/regress';
 
-var validRegressions = {
+let validRegressions = {
   linear: 'linear',
   log: 'logarithmic',
 };

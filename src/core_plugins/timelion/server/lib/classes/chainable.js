@@ -1,4 +1,4 @@
-var TimelionFunction = require('./timelion_function');
+let TimelionFunction = require('./timelion_function');
 
 module.exports = class Chainable extends TimelionFunction {
   constructor(name, config) {

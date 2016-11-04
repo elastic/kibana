@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
-  var { exec } = require('child_process');
-  var { resolve } = require('path');
+  let { exec } = require('child_process');
+  let { resolve } = require('path');
 
   grunt.registerTask('_build:installNpmDeps', function () {
     grunt.file.mkdir('build/kibana/node_modules');

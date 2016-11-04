@@ -1,20 +1,20 @@
-var filename = require('path').basename(__filename);
-var fn = require(`../${filename}`);
-var moment = require('moment');
-var expect = require('chai').expect;
-var _ = require('lodash');
+let filename = require('path').basename(__filename);
+let fn = require(`../${filename}`);
+let moment = require('moment');
+let expect = require('chai').expect;
+let _ = require('lodash');
 
 describe(filename, function () {
 
   describe('average', function () {
     it('fills holes in the data', function () {
-      var data = [
+      let data = [
         [moment.utc('1980', 'YYYY').valueOf(), 10],
         [moment.utc('1983', 'YYYY').valueOf(), 40],
         [moment.utc('1984', 'YYYY').valueOf(), 50],
       ];
 
-      var target = [
+      let target = [
         [moment.utc('1980', 'YYYY').valueOf(), null],
         [moment.utc('1981', 'YYYY').valueOf(), null],
         [moment.utc('1982', 'YYYY').valueOf(), null],
@@ -27,13 +27,13 @@ describe(filename, function () {
 
     describe('sampling', function () {
       it('up', function () {
-        var data = [
+        let data = [
           [moment.utc('1981', 'YYYY').valueOf(), 10],
           [moment.utc('1983', 'YYYY').valueOf(), 30],
           [moment.utc('1985', 'YYYY').valueOf(), 70],
         ];
 
-        var target = [
+        let target = [
           [moment.utc('1981', 'YYYY').valueOf(), null],
           [moment.utc('1982', 'YYYY').valueOf(), null],
           [moment.utc('1983', 'YYYY').valueOf(), null],
@@ -46,7 +46,7 @@ describe(filename, function () {
 
 
       it('down', function () {
-        var data = [
+        let data = [
           [moment.utc('1980', 'YYYY').valueOf(), 0],
           [moment.utc('1981', 'YYYY').valueOf(), 2],
           [moment.utc('1982', 'YYYY').valueOf(), 4],
@@ -56,7 +56,7 @@ describe(filename, function () {
           [moment.utc('1986', 'YYYY').valueOf(), 12],
         ];
 
-        var target = [
+        let target = [
           [moment.utc('1981', 'YYYY').valueOf(), null],
           [moment.utc('1983', 'YYYY').valueOf(), null],
           [moment.utc('1985', 'YYYY').valueOf(), null],

@@ -1,20 +1,20 @@
-var proxyquire =  require('proxyquire');
-var Promise = require('bluebird');
-var _ = require('lodash');
+let proxyquire =  require('proxyquire');
+let Promise = require('bluebird');
+let _ = require('lodash');
 const assert = require('chai');
 const expect = assert.expect;
 
-var parseURL = require('url').parse;
-var parseQueryString = require('querystring').parse;
-var tlConfig = require('./fixtures/tlConfig')();
-var moment = require('moment');
+let parseURL = require('url').parse;
+let parseQueryString = require('querystring').parse;
+let tlConfig = require('./fixtures/tlConfig')();
+let moment = require('moment');
 
-var filename = require('path').basename(__filename);
-var invoke = require('./helpers/invoke_series_fn.js');
+let filename = require('path').basename(__filename);
+let invoke = require('./helpers/invoke_series_fn.js');
 
-var fn;
-var response;
-var calledWith;
+let fn;
+let response;
+let calledWith;
 describe(filename, function () {
 
   beforeEach(function () {

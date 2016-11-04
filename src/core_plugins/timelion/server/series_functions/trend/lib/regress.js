@@ -4,7 +4,7 @@
 * Licensed under the MIT license.
 */
 
-var _ = require('lodash');
+let _ = require('lodash');
 
 function sum(data, fn) {
   return _.reduce(data, function (sum, d) {
@@ -25,34 +25,34 @@ function mapTuples(data, fn) {
 }
 
 export function linear(data) {
-  var xSum    = sum(data, (d) => {return d[0]; });
-  var ySum    = sum(data, (d) => {return d[1]; });
-  var xSqSum  = sum(data, (d) => {return d[0] * d[0]; });
-  var xySum   = sum(data, (d) => {return d[0] * d[1]; });
-  var observations = count(data);
+  let xSum    = sum(data, (d) => {return d[0]; });
+  let ySum    = sum(data, (d) => {return d[1]; });
+  let xSqSum  = sum(data, (d) => {return d[0] * d[0]; });
+  let xySum   = sum(data, (d) => {return d[0] * d[1]; });
+  let observations = count(data);
 
-  var gradient =
+  let gradient =
     ((observations * xySum)  - (xSum * ySum)) /
     ((observations * xSqSum) - (xSum * xSum));
 
-  var intercept =
+  let intercept =
     (ySum / observations) - (gradient * xSum) / observations;
 
   return mapTuples(data, (d) => { return d[0] * gradient + intercept; });
 }
 
 export function log(data) {
-  var logXSum   = sum(data, (d) => {return Math.log(d[0]); });
-  var yLogXSum  = sum(data, (d) => {return d[1] * Math.log(d[0]); });
-  var ySum      = sum(data, (d) => {return d[1]; });
-  var logXsqSum = sum(data, (d) => {return Math.pow(Math.log(d[0]), 2); });
-  var observations = count(data);
+  let logXSum   = sum(data, (d) => {return Math.log(d[0]); });
+  let yLogXSum  = sum(data, (d) => {return d[1] * Math.log(d[0]); });
+  let ySum      = sum(data, (d) => {return d[1]; });
+  let logXsqSum = sum(data, (d) => {return Math.pow(Math.log(d[0]), 2); });
+  let observations = count(data);
 
-  var b =
+  let b =
     ((observations * yLogXSum) -  (ySum * logXSum)) /
     ((observations * logXsqSum) - (logXSum * logXSum));
 
-  var a =
+  let a =
     (ySum - b * logXSum) /
     observations;
 

@@ -13,7 +13,7 @@ import PageObjects from '../../../support/page_objects';
 bdd.describe('dashboard tab', function describeIndexTests() {
   bdd.before(function () {
     PageObjects.common.debug('Starting dashboard before method');
-    var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    let logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     // and load a set of makelogs data
@@ -32,7 +32,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
   });
 
   bdd.describe('add visualizations to dashboard', function dashboardTest() {
-    var visualizations = ['Visualization漢字 AreaChart',
+    let visualizations = ['Visualization漢字 AreaChart',
       'Visualization☺漢字 DataTable',
       'Visualization漢字 LineChart',
       'Visualization PieChart',
@@ -61,8 +61,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     });
 
     bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
-      var fromTime = '2015-09-19 06:31:44.000';
-      var toTime = '2015-09-23 18:31:44.000';
+      let fromTime = '2015-09-19 06:31:44.000';
+      let toTime = '2015-09-23 18:31:44.000';
 
       // .then(function () {
       PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
@@ -111,7 +111,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     });
 
     bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
+      let visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
         { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
         { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
         { dataCol: '10', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization PieChart' },

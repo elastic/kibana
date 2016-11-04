@@ -1,7 +1,7 @@
-var reduce = require('../lib/reduce.js');
+let reduce = require('../lib/reduce.js');
 
 
-var Chainable = require('../lib/classes/chainable');
+let Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('subtract', {
   args: [
     {

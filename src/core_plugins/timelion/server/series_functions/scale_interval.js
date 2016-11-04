@@ -1,8 +1,8 @@
-var alter = require('../lib/alter.js');
-var toMS = require('../lib/to_milliseconds.js');
+let alter = require('../lib/alter.js');
+let toMS = require('../lib/to_milliseconds.js');
 
-var _ = require('lodash');
-var Chainable = require('../lib/classes/chainable');
+let _ = require('lodash');
+let Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('scale_interval', {
   args: [
     {
@@ -17,11 +17,11 @@ module.exports = new Chainable('scale_interval', {
   ],
   help: 'Changes scales a value (usually a sum or a count) to a new interval. For example, as a per-second rate',
   fn: function scaleIntervalFn(args, tlConfig) {
-    var currentInterval = toMS(tlConfig.time.interval);
-    var scaleInterval = toMS(args.byName.interval);
+    let currentInterval = toMS(tlConfig.time.interval);
+    let scaleInterval = toMS(args.byName.interval);
 
     return alter(args, function (eachSeries) {
-      var data = _.map(eachSeries.data, function (point) {
+      let data = _.map(eachSeries.data, function (point) {
         return [point[0], (point[1] / currentInterval) * scaleInterval];
       });
       eachSeries.data = data;

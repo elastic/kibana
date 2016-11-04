@@ -1,7 +1,7 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = function getSeries(name, buckets, points) {
-  var fill = _.partial(_.zip, _.map(buckets, function (bucket) { return bucket.valueOf(); }));
+  let fill = _.partial(_.zip, _.map(buckets, function (bucket) { return bucket.valueOf(); }));
   return {
     data:  fill(points),
     type: 'series',

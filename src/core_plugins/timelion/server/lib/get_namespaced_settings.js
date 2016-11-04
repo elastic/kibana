@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var configFile = require('../../timelion.json');
+let _ = require('lodash');
+let configFile = require('../../timelion.json');
 
 module.exports = function () {
   function flattenWith(dot, nestedObj, flattenArrays) {
@@ -17,7 +17,7 @@ module.exports = function () {
     return flatObj;
   };
 
-  var timelionDefaults = flattenWith('.', configFile);
+  let timelionDefaults = flattenWith('.', configFile);
   return _.reduce(timelionDefaults, (result, value, key) => {
     result['timelion:' + key] = value;
     return result;

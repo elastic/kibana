@@ -1,6 +1,6 @@
-var shield = require('./shield');
+let shield = require('./shield');
 
-var kibanaURL = '/app/kibana';
+let kibanaURL = '/app/kibana';
 
 module.exports = {
   servers: {

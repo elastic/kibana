@@ -1,10 +1,10 @@
 module.exports = function ($elem, fn, frequency) {
 
   frequency = frequency || 500;
-  var currentHeight = $elem.height();
-  var currentWidth = $elem.width();
+  let currentHeight = $elem.height();
+  let currentWidth = $elem.width();
 
-  var timeout;
+  let timeout;
 
   function checkLoop() {
     timeout = setTimeout(function () {
