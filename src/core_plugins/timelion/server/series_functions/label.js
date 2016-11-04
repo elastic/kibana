@@ -1,5 +1,4 @@
 const alter = require('../lib/alter.js');
-const util = require('util');
 
 const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('label', {

@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const $ = require('jquery');
-const moment = require('moment');
 
 const app = require('ui/modules').get('apps/timelion', []);
 const html = require('./interval.html');

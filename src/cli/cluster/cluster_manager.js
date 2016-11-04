@@ -2,7 +2,6 @@ import cluster from 'cluster';
 const {
   resolve
 } = require('path');
-const { format: formatUrl } = require('url');
 import Hapi from 'hapi';
 const {
   debounce,

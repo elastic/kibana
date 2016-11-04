@@ -1,12 +1,9 @@
-let history = require('./history');
 let kb = require('./kb');
-let mappings = require('./mappings');
 let ace = require('ace');
 let utils = require('./utils');
 let autocomplete_engine = require('./autocomplete/engine');
 let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
 let _ = require('lodash');
-let ext_lang_tools = require('ace/ext-language_tools');
 
 
 var AceRange = ace.require('ace/range').Range;

@@ -1,7 +1,4 @@
 let ace = require('ace');
-let acequire = require('acequire');
-let mode_json = require('ace/mode-json');
-let output_highlighting_rules = require('./output_highlight_rules');
 
 
 var oop = ace.require("ace/lib/oop");

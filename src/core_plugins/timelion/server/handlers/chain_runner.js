@@ -1,6 +1,5 @@
 
 const _ = require('lodash');
-const glob = require('glob');
 const Promise = require('bluebird');
 
 const parseSheet = require('./lib/parse_sheet.js');

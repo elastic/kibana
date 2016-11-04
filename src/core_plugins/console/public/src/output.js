@@ -1,5 +1,4 @@
 let ace = require('ace');
-let $ = require('jquery');
 let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');

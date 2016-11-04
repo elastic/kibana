@@ -1,8 +1,6 @@
-const Promise = require('bluebird');
 const buckets = require('./bucketList');
 const getSeries = require('../helpers/get_series');
 const getSeriesList = require('../helpers/get_series_list');
-const _ = require('lodash');
 
 module.exports = function () {
   return getSeriesList([

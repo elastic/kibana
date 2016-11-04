@@ -1,5 +1,3 @@
-const Promise = require('bluebird');
-const _ = require('intern/dojo/node!lodash');
 const expect = require('intern/dojo/node!expect.js');
 
 export default function (bdd, scenarioManager, request) {

@@ -1,6 +1,5 @@
 const proxyquire =  require('proxyquire');
 const Promise = require('bluebird');
-const _ = require('lodash');
 const assert = require('chai');
 const expect = assert.expect;
 

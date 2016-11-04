@@ -1,6 +1,5 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
-const Boom = require('boom');
 const chainRunnerFn = require('../handlers/chain_runner.js');
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 

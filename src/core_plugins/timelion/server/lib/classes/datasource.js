@@ -4,7 +4,6 @@ const TimelionFunction = require('./timelion_function');
 const offsetTime = require('../offset_time');
 
 const _ = require('lodash');
-const moment = require('moment');
 
 
 function offsetSeries(response, offset) {

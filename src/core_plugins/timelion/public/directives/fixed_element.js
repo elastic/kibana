@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const $ = require('jquery');
 
 const app = require('ui/modules').get('apps/timelion', []);

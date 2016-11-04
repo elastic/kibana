@@ -1,5 +1,4 @@
 const $ = require('jquery');
-const { uniq } = require('lodash');
 const storage = require('./storage');
 
 const history = module.exports = {

@@ -1,6 +1,3 @@
-const _ = require('lodash');
-const $ = require('jquery');
-
 require('angularSortableView');
 require('plugins/timelion/directives/chart/chart');
 require('plugins/timelion/directives/timelion_grid');

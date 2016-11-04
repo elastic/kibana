@@ -1,5 +1,4 @@
 let ace = require('ace');
-let es = require('../../src/es');
 let input = require('../../src/input');
 let editor_input1 = require('raw!./editor_input1.txt');
 

@@ -1,5 +1,3 @@
-let $ = require('jquery');
-let es = require('./es');
 const storage = require('./storage');
 
 import getInput from './input'

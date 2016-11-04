@@ -3,7 +3,6 @@ module.exports = function (grunt) {
   const url = require('url');
   const fs = require('fs');
   const path = require('path');
-  const _ = require('lodash');
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [

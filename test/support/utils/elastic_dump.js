@@ -4,10 +4,7 @@ import {
 } from './';
 
 export default (function () {
-  const util = require('util');
-  const path = require('path');
   const url = require('url');
-  const resolve = require('path').resolve;
   const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {

@@ -57,7 +57,6 @@ export default function licenses(grunt) {
     });
 
     if (Object.keys(invalidPackages).length) {
-      const util = require('util');
       const execSync = require('child_process').execSync;
       const names = Object.keys(invalidPackages);
 

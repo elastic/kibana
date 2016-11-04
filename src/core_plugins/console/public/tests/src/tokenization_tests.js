@@ -1,5 +1,4 @@
 let ace = require('ace');
-let $ = require('jquery');
 let input = require('../../src/input');
 
 var token_iterator = ace.require("ace/token_iterator");

@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const moment = require('moment');
 
 // Upsampling of non-cummulative sets
 // Good: average, min, max

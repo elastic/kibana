@@ -1,7 +1,6 @@
 let $ = require('jquery');
 let _ = require('lodash');
 let mappings = require('./mappings');
-let es = require('./es');
 let Api = require('./kb/api');
 let autocomplete_engine = require('./autocomplete/engine');
 
