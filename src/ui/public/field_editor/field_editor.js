@@ -13,7 +13,7 @@ import './field_editor.less';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce) {
+.directive('fieldEditor', function (Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
 
@@ -31,7 +31,7 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl, $http, $q) {
+    controller: function ($scope, Notifier, kbnUrl, $http) {
       const self = this;
       const notify = new Notifier({ location: 'Field Editor' });
 

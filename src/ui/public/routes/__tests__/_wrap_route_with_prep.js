@@ -40,7 +40,7 @@ describe('wrapRouteWithPrep fn', function () {
 
       routes
       .addSetupWork(function () {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
           setTimeout(function () {
             setupComplete = true;
             resolve();

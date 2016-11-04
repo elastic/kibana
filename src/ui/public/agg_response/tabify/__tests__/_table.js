@@ -7,7 +7,7 @@ describe('Table class', function () {
   let Table;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     Table = Private(AggResponseTabifyTableProvider);
   }));
 

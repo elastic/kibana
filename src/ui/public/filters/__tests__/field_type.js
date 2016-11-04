@@ -9,7 +9,7 @@ let filter;
 
 let types;
 
-const init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 

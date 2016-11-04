@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export default function IntervalOptionsService(Private) {
+export default function IntervalOptionsService() {
 
   // shorthand
   const ms = function (type) { return moment.duration(1, type).asMilliseconds(); };

@@ -5,7 +5,7 @@ const moment = require('moment');
 // Good: average, min, max
 // Bad: sum, count
 module.exports = function (dataTuples, targetTuples) {
-  return _.map(targetTuples, function (bucket, h) {
+  return _.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
     while (i < dataTuples.length - 1 &&

@@ -1,7 +1,7 @@
 const tzDetect = require('jstimezonedetect').jstz;
 const moment = require('moment');
 
-module.exports = function timezoneFn(config, Private) {
+module.exports = function timezoneFn(config) {
   return function () {
 
     if (config.isDefault('dateFormat:tz')) {

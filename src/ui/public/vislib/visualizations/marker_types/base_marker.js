@@ -46,7 +46,7 @@ export default function MarkerFactory() {
         // on relevant map events, and returns the element containing the control
         const $div = $('<div>').addClass('tilemap-legend');
 
-        _.each(self._legendColors, function (color, i) {
+        _.each(self._legendColors, function (color) {
           const labelText = self._legendQuantizer
           .invertExtent(color)
           .map(self._valueFormatter)

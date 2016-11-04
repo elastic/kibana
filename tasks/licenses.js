@@ -15,7 +15,7 @@ export default function licenses(grunt) {
     };
 
     const packages = await fromNode(cb => {
-      npmLicense.init(options, (result, error) => {
+      npmLicense.init(options, result => {
         cb(undefined, result);
       });
     });

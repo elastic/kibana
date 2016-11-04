@@ -29,7 +29,7 @@ describe('index pattern', function () {
   let intervals;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector, _config_) {
+  beforeEach(ngMock.inject(function (Private) {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
@@ -295,7 +295,7 @@ describe('index pattern', function () {
     });
 
     it('should decrement the poplarity count', function () {
-      indexPattern.fields.forEach(function (field, i) {
+      indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
         const decrementAmount = -2;

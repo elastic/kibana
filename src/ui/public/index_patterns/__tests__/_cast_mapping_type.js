@@ -5,7 +5,7 @@ import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mappin
 describe('type normalizer (castMappingType)', function () {
   let fn;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 

@@ -332,7 +332,7 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
       const fn = self[prop];
 
       return {
-        value: function cacheBreaker(input) {
+        value: function cacheBreaker() {
           const prev = setup.call(self);
           const ret = fn.apply(self, arguments);
 

@@ -7,7 +7,7 @@ describe('Filter Bar pushFilter()', function () {
   let pushFilterFn;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     pushFilterFn = Private(FilterBarPushFilterProvider);
   }));
 
@@ -25,7 +25,7 @@ describe('Filter Bar pushFilter()', function () {
     let pushFilter;
     let filter;
 
-    beforeEach(ngMock.inject(function (Private, $injector) {
+    beforeEach(ngMock.inject(function () {
       $state = {filters:[]};
       pushFilter = pushFilterFn($state);
       filter = {query: {query_string: {query: ''}}};

@@ -59,7 +59,7 @@ app.directive('pipelineSetup', function () {
       $scope.pipeline = pipeline;
 
       //initiates the simulate call if the pipeline is dirty
-      const simulatePipeline = debounce((event, message) => {
+      const simulatePipeline = debounce(() => {
         if (pipeline.processors.length === 0) {
           pipeline.updateOutput();
           return;
@@ -70,11 +70,11 @@ app.directive('pipelineSetup', function () {
         .catch(notify.error);
       }, 200);
 
-      $scope.$watchCollection('pipeline.processors', (newVal, oldVal) => {
+      $scope.$watchCollection('pipeline.processors', () => {
         pipeline.updateParents();
       });
 
-      $scope.$watch('sample', (newVal) => {
+      $scope.$watch('sample', () => {
         pipeline.input = $scope.sample;
         pipeline.updateParents();
       });

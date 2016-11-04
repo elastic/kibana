@@ -23,7 +23,7 @@ uiModules
         return movable;
       };
     },
-    link($scope, $el, attr) {
+    link() {
     }
   };
 });

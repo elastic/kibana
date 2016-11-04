@@ -19,7 +19,7 @@ app.directive('timelionCells', function () {
       onSelect: '=',
     },
     template: html,
-    link: function ($scope, $elem) {
+    link: function ($scope) {
 
       $scope.removeCell = function (index) {
         _.pullAt($scope.state.sheet, index);

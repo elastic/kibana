@@ -27,7 +27,7 @@ import applyScopeBindingsProvider from './apply_scope_bindings';
  */
 uiModules
 .get('kibana')
-.directive('renderDirective', function (Private, $parse) {
+.directive('renderDirective', function (Private) {
   const applyScopeBindings = Private(applyScopeBindingsProvider);
 
   return {
@@ -35,7 +35,7 @@ uiModules
     scope: {
       'definition': '='
     },
-    template: function ($el, $attrs) {
+    template: function ($el) {
       return $el.html();
     },
     controller: function ($scope, $element, $attrs, $transclude, $injector) {

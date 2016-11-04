@@ -6,7 +6,7 @@ const SCROLLER_HEIGHT = 20;
 
 uiModules
 .get('kibana')
-.directive('fixedScroll', function ($timeout) {
+.directive('fixedScroll', function () {
   return {
     restrict: 'A',
     link: function ($scope, $el) {

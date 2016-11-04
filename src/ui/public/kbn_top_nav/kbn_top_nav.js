@@ -111,7 +111,7 @@ module.directive('kbnTopNav', function (Private) {
       return $scope.kbnTopNav;
     },
 
-    link(scope, element) {
+    link(scope) {
       // These are the slots where transcluded elements can go.
       const transclusionSlotNames = ['topLeftCorner', 'bottomRow'];
 

@@ -5,7 +5,7 @@ const moment = require('moment');
 const app = require('ui/modules').get('apps/timelion', []);
 const html = require('./interval.html');
 
-app.directive('timelionInterval', function ($compile, $timeout, timefilter) {
+app.directive('timelionInterval', function ($compile, $timeout) {
   return {
     restrict: 'E',
     scope: {

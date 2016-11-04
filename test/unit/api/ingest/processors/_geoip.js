@@ -13,7 +13,7 @@ const testPipeline = {
 };
 
 
-export default function (bdd, scenarioManager, request) {
+export default function (bdd) {
   bdd.describe('simulate - geoip processor', () => {
 //TODO: These tests can be re-added when we address
 // installing plugins for integration tests

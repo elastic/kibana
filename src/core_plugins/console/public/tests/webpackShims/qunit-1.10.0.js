@@ -1309,7 +1309,7 @@
     }
   }
 
-  function checkPollution(name) {
+  function checkPollution() {
     var newGlobals,
         deletedGlobals,
         old = config.pollution;
