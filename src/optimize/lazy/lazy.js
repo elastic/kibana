@@ -3,7 +3,7 @@ module.exports = async (kbnServer, server, config) => {
 
 
   if (!isWorker) {
-    throw new Error(`lazy optimization is only available in "watch" mode`);
+    throw new Error('lazy optimization is only available in "watch" mode');
   }
 
   /**

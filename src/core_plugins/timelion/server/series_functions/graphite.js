@@ -12,7 +12,7 @@ module.exports = new Datasource ('graphite', {
       help: 'Graphite metric to pull, eg _test-data.users.*.data'
     }
   ],
-  help: `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
+  help: '[experimental] Pull data from graphite. Configure your graphite server in Kibana\'s Advanced Settings',
   fn: function graphite(args, tlConfig) {
 
     const config = args.byName;

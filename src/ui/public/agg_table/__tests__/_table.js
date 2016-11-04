@@ -186,7 +186,7 @@ describe('AggTable Directive', function () {
 
     it('should use the export-title attribute', function () {
       const expected = 'export file name';
-      const $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
+      const $el = $compile('<kbn-agg-table table="table" export-title="exportTitle">')($scope);
       $scope.$digest();
 
       const $tableScope = $el.isolateScope();

@@ -167,8 +167,8 @@ uiModules
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-              `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-              `the error.`
+              'aggregation with a size of 0. Please set it to a number greater than 0 to resolve ' +
+              'the error.'
             );
           }
 

@@ -96,7 +96,7 @@ describe('CLI cluster manager', function () {
 
   describe('#parseIncomingMessage()', function () {
     context('on a started worker', function () {
-      it(`is bound to fork's message event`, async function () {
+      it('is bound to fork\'s message event', async function () {
         const worker = setup();
         await worker.start();
         sinon.assert.calledWith(worker.fork.on, 'message');

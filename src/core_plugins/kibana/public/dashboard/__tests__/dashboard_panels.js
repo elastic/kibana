@@ -47,7 +47,7 @@ describe('dashboard panels', function () {
     ngMock.inject((SavedDashboard) => {
       const dash = new SavedDashboard();
       dash.init();
-      dash.panelsJSON = `[{"col":3,"id":"foo1","row":1,"size_x":2,"size_y":2,"type":"visualization"}]`;
+      dash.panelsJSON = '[{"col":3,"id":"foo1","row":1,"size_x":2,"size_y":2,"type":"visualization"}]';
       compile(dash);
     });
     expect($scope.state.panels.length).to.be(1);

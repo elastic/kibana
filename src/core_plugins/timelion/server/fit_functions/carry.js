@@ -9,7 +9,7 @@ const moment = require('moment');
 module.exports = function (dataTuples, targetTuples) {
 
   if (dataTuples.length > targetTuples.length) {
-    throw new Error (`Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`);
+    throw new Error ('Don\'t use the \'carry\' fit method to down sample, use \'scale\' or \'average\'');
   }
 
   let currentCarry = dataTuples[0][1];

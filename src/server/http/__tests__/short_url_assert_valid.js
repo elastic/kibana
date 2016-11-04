@@ -22,7 +22,7 @@ describe('shortUrlAssertValid()', () => {
     it(`fails when url has ${desc}`, () => {
       try {
         shortUrlAssertValid(url);
-        throw new Error(`expected assertion to throw`);
+        throw new Error('expected assertion to throw');
       } catch (err) {
         if (!err || !err.isBoom) {
           throw err;

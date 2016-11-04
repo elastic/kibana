@@ -18,12 +18,12 @@ describe('isTermSizeZeroError', () => {
     expect(isTermSizeZeroError(error)).to.be(true);
   });
 
-  it(`returns false if it doesn't contain the identifying string`, () => {
+  it('returns false if it doesn\'t contain the identifying string', () => {
     const error = {
       resp: {
         error: {
           root_cause: [{
-            reason: `Some crazy Java exception`,
+            reason: 'Some crazy Java exception',
           }],
         }
       }

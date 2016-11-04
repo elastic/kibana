@@ -24,7 +24,7 @@ describe('kbnLoadingIndicator', function () {
 
   });
 
-  it(`doesn't have ng-hide class when there are connections`, function () {
+  it('doesn\'t have ng-hide class when there are connections', function () {
     const $el = compile(true);
     expect($el.hasClass('ng-hide')).to.be(false);
   });
