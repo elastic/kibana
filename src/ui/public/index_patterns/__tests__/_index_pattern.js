@@ -24,7 +24,7 @@ describe('index pattern', function () {
   let DocSource;
   let config;
   let docSourceResponse;
-  let indexPatternId = 'test-pattern';
+  const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
   let $rootScope;
@@ -471,7 +471,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

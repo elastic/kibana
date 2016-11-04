@@ -1,6 +1,6 @@
-let Promise = require('bluebird');
-let _ = require('intern/dojo/node!lodash');
-let expect = require('intern/dojo/node!expect.js');
+const Promise = require('bluebird');
+const _ = require('intern/dojo/node!lodash');
+const expect = require('intern/dojo/node!expect.js');
 
 export default function (bdd, scenarioManager, request) {
   bdd.describe('processors', () => {

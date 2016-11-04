@@ -46,7 +46,7 @@ export default function licenses(grunt) {
      */
 
     function isInvalidLicense(name) {
-      let licenses = licensesForPackage(name);
+      const licenses = licensesForPackage(name);
 
       // verify all licenses for the package are in the config
       return _.intersection(licenses, config.licenses).length < licenses.length;

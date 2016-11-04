@@ -1,10 +1,10 @@
-let loadFunctions = require('./load_functions.js');
-let functions  = loadFunctions('series_functions/');
-let _ = require('lodash');
+const loadFunctions = require('./load_functions.js');
+const functions  = loadFunctions('series_functions/');
+const _ = require('lodash');
 
 
 module.exports = (function () {
-  let functionArray = _.map(functions, function (val, key) {
+  const functionArray = _.map(functions, function (val, key) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
     return _.extend({}, val, {name: key});
   });
@@ -18,7 +18,7 @@ module.exports = (function () {
     help += fn.help + '\n\n';
 
     // If chainable, drop first argument from help
-    let args = fn.chainable ? fn.args.slice(1) : fn.args.slice();
+    const args = fn.chainable ? fn.args.slice(1) : fn.args.slice();
     if (!args.length) {
       help += '*This function does not accept any arguments.*\n\n';
       return help;

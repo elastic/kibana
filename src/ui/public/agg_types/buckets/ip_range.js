@@ -6,8 +6,8 @@ import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/cre
 import ipRangesTemplate from 'ui/agg_types/controls/ip_ranges.html';
 
 export default function RangeAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
 
   return new BucketAggType({
     name: 'ip_range',

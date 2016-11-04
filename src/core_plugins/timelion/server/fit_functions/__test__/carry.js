@@ -1,18 +1,18 @@
-let filename = require('path').basename(__filename);
-let fn = require(`../${filename}`);
-let moment = require('moment');
-let expect = require('chai').expect;
-let _ = require('lodash');
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
+const moment = require('moment');
+const expect = require('chai').expect;
+const _ = require('lodash');
 
 describe(filename, function () {
   it('fills holes in the data', function () {
-    let data = [
+    const data = [
       [moment.utc('1980', 'YYYY').valueOf(), 10],
       [moment.utc('1983', 'YYYY').valueOf(), 40],
       [moment.utc('1984', 'YYYY').valueOf(), 50],
     ];
 
-    let target = [
+    const target = [
       [moment.utc('1980', 'YYYY').valueOf(), null],
       [moment.utc('1981', 'YYYY').valueOf(), null],
       [moment.utc('1982', 'YYYY').valueOf(), null],
@@ -25,13 +25,13 @@ describe(filename, function () {
 
   describe('sampling', function () {
     it('up', function () {
-      let data = [
+      const data = [
         [moment.utc('1981', 'YYYY').valueOf(), 10],
         [moment.utc('1983', 'YYYY').valueOf(), 30],
         [moment.utc('1985', 'YYYY').valueOf(), 70],
       ];
 
-      let target = [
+      const target = [
         [moment.utc('1981', 'YYYY').valueOf(), null],
         [moment.utc('1982', 'YYYY').valueOf(), null],
         [moment.utc('1983', 'YYYY').valueOf(), null],
@@ -44,7 +44,7 @@ describe(filename, function () {
 
 
     it('down does not make sense', function () {
-      let data = [
+      const data = [
         [moment.utc('1980', 'YYYY').valueOf(), 0],
         [moment.utc('1981', 'YYYY').valueOf(), 2],
         [moment.utc('1982', 'YYYY').valueOf(), 4],
@@ -54,7 +54,7 @@ describe(filename, function () {
         [moment.utc('1986', 'YYYY').valueOf(), 12],
       ];
 
-      let target = [
+      const target = [
         [moment.utc('1981', 'YYYY').valueOf(), null],
         [moment.utc('1983', 'YYYY').valueOf(), null],
         [moment.utc('1985', 'YYYY').valueOf(), null],

@@ -1,20 +1,20 @@
-let _ = require('lodash');
+const _ = require('lodash');
 require('ui/state_management/app_state');
 
 
 module.exports = function dashboardContext(Private, getAppState) {
   return function () {
-    let queryFilter = Private(require('ui/filter_bar/query_filter'));
-    let bool = {must: [], must_not: []};
-    let filterBarFilters = queryFilter.getFilters();
-    let queryBarFilter = getAppState().query;
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const bool = {must: [], must_not: []};
+    const filterBarFilters = queryFilter.getFilters();
+    const queryBarFilter = getAppState().query;
 
     // Add the query bar filter, its handled differently.
     bool.must.push(queryBarFilter);
 
     // Add each of the filter bar filters
     _.each(filterBarFilters, function (filter) {
-      let esFilter = _.omit(filter, function (val, key) {
+      const esFilter = _.omit(filter, function (val, key) {
         if (key === 'meta' || key[0] === '$') return true;
         return false;
       });

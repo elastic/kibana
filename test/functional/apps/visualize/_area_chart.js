@@ -10,8 +10,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
-    let fromTime = '2015-09-19 06:31:44.000';
-    let toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
     return PageObjects.common.navigateToApp('visualize')
@@ -60,7 +60,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    let vizName1 = 'Visualization AreaChart';
+    const vizName1 = 'Visualization AreaChart';
 
     bdd.it('should save and load with special characters', function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
@@ -109,12 +109,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct chart, take screenshot', function () {
-      let chartHeight = 0;
-      let xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
+      const chartHeight = 0;
+      const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
         '2015-09-22 00:00', '2015-09-23 00:00'
       ];
-      let yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
-      let expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
+      const yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
+      const expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
         683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
       ];
 
@@ -144,7 +144,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data', function () {
-      let expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
+      const expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
         'September 20th 2015, 03:00:00.000 202',
         'September 20th 2015, 06:00:00.000 740',
         'September 20th 2015, 09:00:00.000 1,437',

@@ -10,15 +10,15 @@ uiModules.get('kibana')
   $rootScope.$on('$routeChangeSuccess', docTitle.update);
 })
 .service('docTitle', function ($rootScope) {
-  let baseTitle = document.title;
-  let self = this;
+  const baseTitle = document.title;
+  const self = this;
 
   let lastChange;
 
   function render() {
     lastChange = lastChange || [];
 
-    let parts = [lastChange[0]];
+    const parts = [lastChange[0]];
 
     if (!lastChange[1]) parts.push(baseTitle);
 

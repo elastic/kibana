@@ -1,5 +1,5 @@
-let module = require('ui/modules').get('app/sheet');
-let _ = require('lodash');
+const module = require('ui/modules').get('app/sheet');
+const _ = require('lodash');
 // bring in the factory
 require('./_saved_sheet.js');
 
@@ -40,7 +40,7 @@ module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUr
   };
 
   this.find = function (searchString) {
-    let self = this;
+    const self = this;
     let body;
     if (searchString) {
       body = {
@@ -66,7 +66,7 @@ module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUr
       return {
         total: resp.hits.total,
         hits: resp.hits.hits.map(function (hit) {
-          let source = hit._source;
+          const source = hit._source;
           source.id = hit._id;
           source.url = self.urlFor(hit._id);
           return source;

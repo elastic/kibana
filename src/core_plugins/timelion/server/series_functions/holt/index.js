@@ -1,9 +1,9 @@
-let _ = require('lodash');
-let Chainable = require('../../lib/classes/chainable');
-let ses = require('./lib/ses');
-let des = require('./lib/des');
-let tes = require('./lib/tes');
-let toMilliseconds = require('../../lib/to_milliseconds');
+const _ = require('lodash');
+const Chainable = require('../../lib/classes/chainable');
+const ses = require('./lib/ses');
+const des = require('./lib/des');
+const tes = require('./lib/tes');
+const toMilliseconds = require('../../lib/to_milliseconds');
 
 module.exports = new Chainable('holt', {
   args: [
@@ -56,7 +56,7 @@ module.exports = new Chainable('holt', {
     purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.`,
   fn: function expsmoothFn(args, tlConfig) {
 
-    let newSeries = _.cloneDeep(args.byName.inputSeries);
+    const newSeries = _.cloneDeep(args.byName.inputSeries);
 
     const alpha = args.byName.alpha;
     const beta = args.byName.beta;
@@ -71,7 +71,7 @@ module.exports = new Chainable('holt', {
       // points exponentially degrade relative to the alpha, eg:
       // 0.8^1, 0.8^2, 0.8^3, etc
 
-      let times = _.map(series.data, 0);
+      const times = _.map(series.data, 0);
       let points = _.map(series.data, 1);
 
       if (alpha != null && beta == null && gamma == null) {

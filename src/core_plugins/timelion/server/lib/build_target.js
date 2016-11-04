@@ -1,16 +1,16 @@
-let moment = require('moment');
+const moment = require('moment');
 
-let splitInterval = require('./split_interval.js');
+const splitInterval = require('./split_interval.js');
 
 module.exports = function (tlConfig) {
-  let min = moment(tlConfig.time.from);
-  let max = moment(tlConfig.time.to);
+  const min = moment(tlConfig.time.from);
+  const max = moment(tlConfig.time.to);
 
-  let intervalParts = splitInterval(tlConfig.time.interval);
+  const intervalParts = splitInterval(tlConfig.time.interval);
 
   let current = min.startOf(intervalParts.unit);
 
-  let targetSeries = [];
+  const targetSeries = [];
 
   while (current.valueOf() < max.valueOf()) {
     targetSeries.push(current.valueOf());

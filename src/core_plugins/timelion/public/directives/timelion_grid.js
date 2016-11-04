@@ -1,7 +1,7 @@
-let _ = require('lodash');
-let $ = require('jquery');
+const _ = require('lodash');
+const $ = require('jquery');
 
-let app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', []);
 app.directive('timelionGrid', function ($compile) {
   return {
     restrict: 'A',
@@ -28,9 +28,9 @@ app.directive('timelionGrid', function ($compile) {
       });
 
       function setDimensions() {
-        let borderSize = 2;
-        let headerSize = 45 + 35 + 28 + (20 * 2); // chrome + subnav + buttons + (container padding)
-        let verticalPadding = 10;
+        const borderSize = 2;
+        const headerSize = 45 + 35 + 28 + (20 * 2); // chrome + subnav + buttons + (container padding)
+        const verticalPadding = 10;
 
         if ($scope.timelionGridColumns != null) {
           $elem.width($elem.parent().width() / $scope.timelionGridColumns - (borderSize * 2));

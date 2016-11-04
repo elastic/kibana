@@ -1,18 +1,18 @@
 import _ from 'lodash';
 
 function create(min, max, length, mod) {
-  let seq = new Array(length);
+  const seq = new Array(length);
 
-  let valueDist = max - min;
+  const valueDist = max - min;
 
   // range of values that the mod creates
-  let modRange = [mod(0, length), mod(length - 1, length)];
+  const modRange = [mod(0, length), mod(length - 1, length)];
 
   // distance between
-  let modRangeDist = modRange[1] - modRange[0];
+  const modRangeDist = modRange[1] - modRange[0];
 
   _.times(length, function (i) {
-    let modIPercent = (mod(i, length) - modRange[0]) / modRangeDist;
+    const modIPercent = (mod(i, length) - modRange[0]) / modRangeDist;
 
     // percent applied to distance and added to min to
     // produce value
@@ -80,8 +80,8 @@ export default {
     // adapted from output of http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm
     // generates numbers from 0 to 100
 
-    let ts = (i /= length) * i;
-    let tc = ts * i;
+    const ts = (i /= length) * i;
+    const tc = ts * i;
     return 100 * (
       0.5 * tc * ts +
       -3 * ts * ts +

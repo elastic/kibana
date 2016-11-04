@@ -1,7 +1,7 @@
-let Promise = require('bluebird');
-let createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-let _ = require('intern/dojo/node!lodash');
-let expect = require('intern/dojo/node!expect.js');
+const Promise = require('bluebird');
+const createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
+const _ = require('intern/dojo/node!lodash');
+const expect = require('intern/dojo/node!expect.js');
 
 const testPipeline = {
   processors: [{

@@ -1,9 +1,9 @@
-let alter = require('../lib/alter.js');
-let _ = require('lodash');
-let Chainable = require('../lib/classes/chainable');
+const alter = require('../lib/alter.js');
+const _ = require('lodash');
+const Chainable = require('../lib/classes/chainable');
 
-let loadFunctions = require('../lib/load_functions.js');
-let fitFunctions  = loadFunctions('fit_functions');
+const loadFunctions = require('../lib/load_functions.js');
+const fitFunctions  = loadFunctions('fit_functions');
 
 module.exports = new Chainable('fit', {
   args: [
@@ -21,7 +21,7 @@ module.exports = new Chainable('fit', {
   fn: function absFn(args) {
     return alter(args, function (eachSeries, mode) {
 
-      let noNulls = _.filter(eachSeries.data, 1);
+      const noNulls = _.filter(eachSeries.data, 1);
 
       eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
       return eachSeries;

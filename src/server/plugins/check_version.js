@@ -17,7 +17,7 @@ export default async function (kbnServer, server, config) {
   const warningMessages = new Set();
   const plugins = kbnServer.plugins;
 
-  for (let plugin of plugins) {
+  for (const plugin of plugins) {
     const version = plugin.kibanaVersion;
     const name = get(plugin, 'pkg.name');
 
@@ -28,7 +28,7 @@ export default async function (kbnServer, server, config) {
     }
   }
 
-  for (let message of warningMessages) {
+  for (const message of warningMessages) {
     server.log(['warning'], message);
   }
 

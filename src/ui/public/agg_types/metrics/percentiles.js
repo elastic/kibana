@@ -8,13 +8,13 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import getPercentileValue from './percentiles_get_value';
 
 export default function AggTypeMetricPercentilesProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   // required by the percentiles editor
 
-  let valueProps = {
+  const valueProps = {
     makeLabel: function () {
       const label = this.params.customLabel || this.getFieldDisplayName();
       return ordinalSuffix(this.key) + ' percentile of ' + label;
@@ -44,7 +44,7 @@ export default function AggTypeMetricPercentilesProvider(Private) {
       }
     ],
     getResponseAggs: function (agg) {
-      let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+      const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
       return agg.params.percents.map(function (percent) {
         return new ValueAggConfig(percent);

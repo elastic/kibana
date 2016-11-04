@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('add filters', function () {
-  let storeNames = {
+  const storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -88,7 +88,7 @@ describe('add filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      let emitSpy = sinon.spy(queryFilter, 'emit');
+      const emitSpy = sinon.spy(queryFilter, 'emit');
 
       // set up the watchers, add new filters, and crank the digest loop
       $rootScope.$digest();
@@ -109,7 +109,7 @@ describe('add filters', function () {
 
   describe('filter reconciliation', function () {
     it('should de-dupe appState filters being added', function () {
-      let newFilter = _.cloneDeep(filters[1]);
+      const newFilter = _.cloneDeep(filters[1]);
       appState.filters = filters;
       $rootScope.$digest();
       expect(appState.filters.length).to.be(3);
@@ -120,7 +120,7 @@ describe('add filters', function () {
     });
 
     it('should de-dupe globalState filters being added', function () {
-      let newFilter = _.cloneDeep(filters[1]);
+      const newFilter = _.cloneDeep(filters[1]);
       globalState.filters = filters;
       $rootScope.$digest();
       expect(globalState.filters.length).to.be(3);
@@ -131,16 +131,16 @@ describe('add filters', function () {
     });
 
     it('should mutate global filters on appState filter changes', function () {
-      let idx = 1;
+      const idx = 1;
       globalState.filters = filters;
       $rootScope.$digest();
 
-      let appFilter = _.cloneDeep(filters[idx]);
+      const appFilter = _.cloneDeep(filters[idx]);
       appFilter.meta.negate = true;
       queryFilter.addFilters(appFilter);
       $rootScope.$digest();
 
-      let res = queryFilter.getFilters();
+      const res = queryFilter.getFilters();
       expect(res).to.have.length(3);
       _.each(res, function (filter, i) {
         expect(filter.$state.store).to.be('globalState');

@@ -7,7 +7,7 @@ import _ from 'lodash';
  * @param {$scope} $scope
  */
 function KbnFormController($scope, $element) {
-  let self = this;
+  const self = this;
 
   self.errorCount = function (predicate) {
     return self.$$invalidModels().length;
@@ -21,14 +21,14 @@ function KbnFormController($scope, $element) {
   };
 
   self.describeErrors = function () {
-    let count = self.softErrorCount();
+    const count = self.softErrorCount();
     return count + ' Error' + (count === 1 ? '' : 's');
   };
 
   self.$$invalidModels = function (predicate) {
     predicate = _.callback(predicate);
 
-    let invalid = [];
+    const invalid = [];
 
     _.forOwn(self.$error, function collect(models) {
       if (!models) return;

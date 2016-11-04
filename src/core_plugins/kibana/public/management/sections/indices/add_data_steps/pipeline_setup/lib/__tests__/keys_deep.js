@@ -5,11 +5,11 @@ import keysDeep from '../keys_deep';
 describe('keys deep', function () {
 
   it('should list first level properties', function () {
-    let object = {
+    const object = {
       property1: 'value1',
       property2: 'value2'
     };
-    let expected = [
+    const expected = [
       'property1',
       'property2'
     ];
@@ -20,14 +20,14 @@ describe('keys deep', function () {
   });
 
   it('should list nested properties', function () {
-    let object = {
+    const object = {
       property1: 'value1',
       property2: 'value2',
       property3: {
         subProperty1: 'value1.1'
       }
     };
-    let expected = [
+    const expected = [
       'property1',
       'property2',
       'property3.subProperty1',
@@ -40,7 +40,7 @@ describe('keys deep', function () {
   });
 
   it('should recursivly list nested properties', function () {
-    let object = {
+    const object = {
       property1: 'value1',
       property2: 'value2',
       property3: {
@@ -52,7 +52,7 @@ describe('keys deep', function () {
         subProperty3: 'value1.3'
       }
     };
-    let expected = [
+    const expected = [
       'property1',
       'property2',
       'property3.subProperty1',
@@ -69,11 +69,11 @@ describe('keys deep', function () {
   });
 
   it('should list array properties, but not contents', function () {
-    let object = {
+    const object = {
       property1: 'value1',
       property2: [ 'item1', 'item2' ]
     };
-    let expected = [
+    const expected = [
       'property1',
       'property2'
     ];

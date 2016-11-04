@@ -13,7 +13,7 @@ describe('Color Format', function () {
 
   context('field is a number', () => {
     it('should add colors if the value is in range', function () {
-      let colorer = new ColorFormat({
+      const colorer = new ColorFormat({
         fieldType: 'number',
         colors: [{
           range: '100:150',
@@ -28,7 +28,7 @@ describe('Color Format', function () {
     });
 
     it('should not convert invalid ranges', function () {
-      let colorer = new ColorFormat({
+      const colorer = new ColorFormat({
         fieldType: 'number',
         colors: [{
           range: '100150',
@@ -42,7 +42,7 @@ describe('Color Format', function () {
 
   context('field is a string', () => {
     it('should add colors if the regex matches', function () {
-      let colorer = new ColorFormat({
+      const colorer = new ColorFormat({
         fieldType: 'string',
         colors: [{
           regex: 'A.*',
@@ -51,7 +51,7 @@ describe('Color Format', function () {
         }]
       });
 
-      let converter = colorer.getConverterFor('html');
+      const converter = colorer.getConverterFor('html');
       expect(converter('B', 'html')).to.eql('B');
       expect(converter('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
       expect(converter('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');

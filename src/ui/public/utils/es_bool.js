@@ -1,4 +1,4 @@
-let map = {
+const map = {
   'false': false,
   'off': false,
   'no': false,
@@ -10,7 +10,7 @@ let map = {
 };
 
 export default function (str) {
-  let bool = map[String(str)];
+  const bool = map[String(str)];
 
   if (typeof bool !== 'boolean') {
     throw new TypeError('"' + str + '" does not map to an esBool');

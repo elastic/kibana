@@ -36,7 +36,7 @@ export default function CastMappingTypeFn() {
   function castMappingType(name) {
     if (!name) return 'unknown';
 
-    let match = castMappingType.types.byName[name];
+    const match = castMappingType.types.byName[name];
     return match ? match.type : 'string';
   }
 

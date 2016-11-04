@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let processFunctionDefinition = require('./server/lib/process_function_definition');
+const _ = require('lodash');
+const processFunctionDefinition = require('./server/lib/process_function_definition');
 
 module.exports = function (server) {
   //var config = server.config();
@@ -8,7 +8,7 @@ module.exports = function (server) {
   require('./server/routes/functions.js')(server);
   require('./server/routes/validate_es.js')(server);
 
-  let functions = require('./server/lib/load_functions')('series_functions');
+  const functions = require('./server/lib/load_functions')('series_functions');
 
   function addFunction(func) {
     _.assign(functions, processFunctionDefinition(func));

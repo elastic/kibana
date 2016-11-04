@@ -1,8 +1,8 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 export function timeBucketsToPairs(buckets) {
-  let timestamps = _.pluck(buckets, 'key');
-  let series = {};
+  const timestamps = _.pluck(buckets, 'key');
+  const series = {};
   _.each(buckets, function (bucket) {
     _.forOwn(bucket, function (val, key) {
       if (_.isPlainObject(val)) {
@@ -28,7 +28,7 @@ export function flattenBucket(bucket, path, result) {
         flattenBucket(bucket, path.concat([key + ':' + bucket.key]), result);
       });
     } else if (_.get(val, 'meta.type') === 'time_buckets') {
-      let metrics = timeBucketsToPairs(val.buckets);
+      const metrics = timeBucketsToPairs(val.buckets);
       _.each(metrics, function (pairs, metricName) {
         result[path.concat([metricName]).join(' > ')] = pairs;
       });

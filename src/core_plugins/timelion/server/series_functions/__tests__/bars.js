@@ -1,9 +1,9 @@
-let filename = require('path').basename(__filename);
-let fn = require(`../${filename}`);
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
 
-let _ = require('lodash');
-let expect = require('chai').expect;
-let invoke = require('./helpers/invoke_series_fn.js');
+const _ = require('lodash');
+const expect = require('chai').expect;
+const invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, () => {
 
@@ -14,7 +14,7 @@ describe(filename, () => {
 
   it('creates the bars property, with defaults, on all series', () => {
     return invoke(fn, [seriesList]).then((r) => {
-      let bars = _.map(r.output.list, 'bars');
+      const bars = _.map(r.output.list, 'bars');
       _.each(bars, (bar) => expect(bar).to.be.a('object'));
       _.each(bars, (bar) => expect(bar.lineWidth).to.equal(6));
       _.each(bars, (bar) => expect(bar.show).to.equal(1));
@@ -24,7 +24,7 @@ describe(filename, () => {
   it('leaves existing bars alone when called without option, if they exist', () => {
     seriesList.list[0].bars = {foo: true};
     return invoke(fn, [seriesList]).then((r) => {
-      let bars = _.map(r.output.list, 'bars');
+      const bars = _.map(r.output.list, 'bars');
       expect(bars[0].foo).to.equal(true);
       expect(bars[1].foo).to.equal(undefined);
     });
@@ -32,7 +32,7 @@ describe(filename, () => {
 
   it('sets lineWidth and show to the same value', () => {
     return invoke(fn, [seriesList, 0]).then((r) => {
-      let bars = _.map(r.output.list, 'bars');
+      const bars = _.map(r.output.list, 'bars');
       expect(bars[0].lineWidth).to.equal(0);
       expect(bars[0].show).to.equal(0);
 

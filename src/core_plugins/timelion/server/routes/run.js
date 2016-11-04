@@ -1,8 +1,8 @@
-let Promise = require('bluebird');
-let _ = require('lodash');
-let Boom = require('boom');
-let chainRunnerFn = require('../handlers/chain_runner.js');
-let timelionDefaults = require('../lib/get_namespaced_settings')();
+const Promise = require('bluebird');
+const _ = require('lodash');
+const Boom = require('boom');
+const chainRunnerFn = require('../handlers/chain_runner.js');
+const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
   reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
@@ -21,12 +21,12 @@ module.exports = (server) => {
       // down. Meh.
       return server.uiSettings().getAll().then((uiSettings) => {
         let sheet;
-        let tlConfig = require('../handlers/lib/tl_config.js')({
+        const tlConfig = require('../handlers/lib/tl_config.js')({
           server: server,
           request: request,
           settings: _.defaults(uiSettings, timelionDefaults) // Just in case they delete some setting.
         });
-        let chainRunner = chainRunnerFn(tlConfig);
+        const chainRunner = chainRunnerFn(tlConfig);
 
         try {
           sheet = chainRunner.processRequest(request.payload || {
@@ -44,7 +44,7 @@ module.exports = (server) => {
         }
 
         return Promise.all(sheet).then((sheet) => {
-          let response = {
+          const response = {
             sheet: sheet,
             stats: chainRunner.getStats()
           };

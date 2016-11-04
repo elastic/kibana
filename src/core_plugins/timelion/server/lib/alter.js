@@ -1,5 +1,5 @@
-let Promise = require('bluebird');
-let _ = require('lodash');
+const Promise = require('bluebird');
+const _ = require('lodash');
 
 /* @param {Array} args
  * - args[0] must be a seriesList
@@ -12,13 +12,13 @@ module.exports = function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
   return Promise.all(args).then(function (args) {
 
-    let seriesList = args.shift();
+    const seriesList = args.shift();
 
     if (seriesList.type !== 'seriesList') {
       throw new Error ('args[0] must be a seriesList');
     }
 
-    let list = _.chain(seriesList.list).map(function (series) {
+    const list = _.chain(seriesList.list).map(function (series) {
       return fn.apply(this, [series].concat(args));
     }).flatten().value();
 

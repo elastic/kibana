@@ -4,7 +4,7 @@ import addWordBreaks from 'ui/utils/add_word_breaks';
 
 describe('addWordBreaks', function () {
 
-  let fixtures = [
+  const fixtures = [
     ['aaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaa<wbr>aaaaaaaaa'],
     ['aaaa aaaaaaaaaaaaaaa', 'aaaa aaaaaaaaaaa<wbr>aaaa'],
     ['aaaa;aaaaaaaaaaaaaaa', 'aaaa;aaaaaaaaaaa<wbr>aaaa'],
@@ -16,9 +16,9 @@ describe('addWordBreaks', function () {
   ];
 
   _.each(fixtures, function (fixture) {
-    let msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
+    const msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
     it(msg, function () {
-      let results = addWordBreaks(fixture[0], 10);
+      const results = addWordBreaks(fixture[0], 10);
       expect(results).to.be(fixture[1]);
     });
   });

@@ -14,7 +14,7 @@ describe(filename, () => {
 
   it('computes the moving standard deviation of a list', () => {
     return invoke(fn, [seriesList, 2]).then((r) => {
-      let values = _.map(r.output.list[1].data, 1);
+      const values = _.map(r.output.list[1].data, 1);
       expect(values[0]).to.equal(null);
       expect(values[1]).to.equal(null);
       expect(values[2]).to.be.within(26, 27);

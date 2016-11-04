@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 export default function DiffTimePickerValuesFn() {
 
-  let valueOf = function (o) {
+  const valueOf = function (o) {
     if (o) return o.valueOf();
   };
 

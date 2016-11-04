@@ -1,8 +1,8 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 // Applies to unresolved arguments in the AST
 module.exports = function repositionArguments(functionDef, unorderedArgs) {
-  let args = [];
+  const args = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
@@ -15,7 +15,7 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
 
       if (!argDef) {
         if (functionDef.extended) {
-          let namesIndex = functionDef.args.length;
+          const namesIndex = functionDef.args.length;
           targetIndex = functionDef.args.length + 1;
 
           args[namesIndex] = args[namesIndex] || [];

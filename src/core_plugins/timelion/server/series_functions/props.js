@@ -1,12 +1,12 @@
-let alter = require('../lib/alter.js');
-let Chainable = require('../lib/classes/chainable');
-let _ = require('lodash');
+const alter = require('../lib/alter.js');
+const Chainable = require('../lib/classes/chainable');
+const _ = require('lodash');
 
 function unflatten(data) {
   if (Object(data) !== data || _.isArray(data)) return data;
 
-  let regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
-  let result = {};
+  const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
+  const result = {};
   _.each(data, function (val, p) {
     let cur = result;
     let prop = '';
@@ -43,7 +43,7 @@ module.exports = new Chainable('props', {
   // They will be passed as args._extended:{}
   help: 'Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)',
   fn: function firstFn(args) {
-    let properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
+    const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
 
     if (args.byName.global) {
       _.assign(args.byName.inputSeries, properties);

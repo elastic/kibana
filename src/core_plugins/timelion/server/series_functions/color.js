@@ -1,6 +1,6 @@
-let alter = require('../lib/alter.js');
-let Chainable = require('../lib/classes/chainable');
-let tinygradient = require('tinygradient');
+const alter = require('../lib/alter.js');
+const Chainable = require('../lib/classes/chainable');
+const tinygradient = require('tinygradient');
 
 module.exports = new Chainable('color', {
   args: [

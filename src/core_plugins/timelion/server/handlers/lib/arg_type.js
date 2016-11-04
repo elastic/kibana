@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function argType(arg) {
   if (_.isArray(arg)) {

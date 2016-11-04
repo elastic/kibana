@@ -1,11 +1,11 @@
-let  _ = require('lodash');
-let createDateAgg = require('./create_date_agg');
+const  _ = require('lodash');
+const createDateAgg = require('./create_date_agg');
 
 module.exports =  function buildRequest(config, tlConfig) {
 
-  let bool = {must: [], must_not: []};
+  const bool = {must: [], must_not: []};
 
-  let timeFilter = {range:{}};
+  const timeFilter = {range:{}};
   timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
   bool.must.push(timeFilter);
 
@@ -14,7 +14,7 @@ module.exports =  function buildRequest(config, tlConfig) {
     bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter') || {};
   }
 
-  let aggs = {
+  const aggs = {
     'q': {
       meta: {type: 'split'},
       filters: {

@@ -1,10 +1,10 @@
-let filename = require('path').basename(__filename);
-let fn = require(`../${filename}`);
-let moment = require('moment');
-let expect = require('chai').expect;
-let invoke = require('./helpers/invoke_series_fn.js');
-let getSeriesList = require('./helpers/get_single_series_list');
-let _ = require('lodash');
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
+const moment = require('moment');
+const expect = require('chai').expect;
+const invoke = require('./helpers/invoke_series_fn.js');
+const getSeriesList = require('./helpers/get_single_series_list');
+const _ = require('lodash');
 
 describe(filename, function () {
 

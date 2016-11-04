@@ -1,6 +1,6 @@
-let alter = require('../lib/alter.js');
-let _ = require('lodash');
-let Chainable = require('../lib/classes/chainable');
+const alter = require('../lib/alter.js');
+const _ = require('lodash');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('abs', {
   args: [
     {
@@ -11,7 +11,7 @@ module.exports = new Chainable('abs', {
   help: 'Return the absolute value of each value in the series list',
   fn: function absFn(args) {
     return alter(args, function (eachSeries) {
-      let data = _.map(eachSeries.data, function (point) {
+      const data = _.map(eachSeries.data, function (point) {
         return [point[0], Math.abs(point[1])];
       });
       eachSeries.data = data;

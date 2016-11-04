@@ -303,7 +303,7 @@ describe('KbnTopNavController', function () {
         expect(controller.menuItems).to.have.length(4);
 
         // check that the items were added
-        let matches = controller.menuItems.reduce((acc, item) => {
+        const matches = controller.menuItems.reduce((acc, item) => {
           if (item.key === 'green' || item.key === 'red') {
             acc[item.key] = item;
           }
@@ -324,7 +324,7 @@ describe('KbnTopNavController', function () {
         expect(controller.menuItems).to.have.length(3);
 
         // check that the items were added
-        let match = controller.menuItems.filter((item) => {
+        const match = controller.menuItems.filter((item) => {
           return item.key === 'green';
         });
         expect(match[0]).to.have.property('run');

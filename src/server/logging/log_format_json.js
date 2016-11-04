@@ -1,7 +1,7 @@
 import LogFormat from './log_format';
 import stringify from 'json-stringify-safe';
 
-let stripColors = function (string) {
+const stripColors = function (string) {
   return string.replace(/\u001b[^m]+m/g, '');
 };
 

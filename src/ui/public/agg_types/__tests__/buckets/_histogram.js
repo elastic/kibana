@@ -28,7 +28,7 @@ describe('Histogram Agg', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      let AggParamWriter = Private(AggParamWriterProvider);
+      const AggParamWriter = Private(AggParamWriterProvider);
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
 
@@ -36,28 +36,28 @@ describe('Histogram Agg', function () {
       // reads aggConfig.params.interval, writes to dsl.interval
 
       it('accepts a whole number', function () {
-        let output = paramWriter.write({ interval: 100 });
+        const output = paramWriter.write({ interval: 100 });
         expect(output.params).to.have.property('interval', 100);
       });
 
       it('accepts a decimal number', function () {
-        let output = paramWriter.write({ interval: 0.1 });
+        const output = paramWriter.write({ interval: 0.1 });
         expect(output.params).to.have.property('interval', 0.1);
       });
 
       it('accepts a decimal number string', function () {
-        let output = paramWriter.write({ interval: '0.1' });
+        const output = paramWriter.write({ interval: '0.1' });
         expect(output.params).to.have.property('interval', 0.1);
       });
 
       it('accepts a whole number string', function () {
-        let output = paramWriter.write({ interval: '10' });
+        const output = paramWriter.write({ interval: '10' });
         expect(output.params).to.have.property('interval', 10);
       });
 
       it('fails on non-numeric values', function () {
         // template validation prevents this from users, not devs
-        let output = paramWriter.write({ interval: [] });
+        const output = paramWriter.write({ interval: [] });
         expect(isNaN(output.params.interval)).to.be.ok();
       });
     });
@@ -91,7 +91,7 @@ describe('Histogram Agg', function () {
 
     describe('extended_bounds', function () {
       it('writes when only eb.min is set', function () {
-        let output = paramWriter.write({
+        const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: { min: 0 }
         });
@@ -100,7 +100,7 @@ describe('Histogram Agg', function () {
       });
 
       it('writes when only eb.max is set', function () {
-        let output = paramWriter.write({
+        const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: { max: 0 }
         });
@@ -109,7 +109,7 @@ describe('Histogram Agg', function () {
       });
 
       it('writes when both eb.min and eb.max are set', function () {
-        let output = paramWriter.write({
+        const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: { min: 99, max: 100 }
         });
@@ -118,7 +118,7 @@ describe('Histogram Agg', function () {
       });
 
       it('does not write when nothing is set', function () {
-        let output = paramWriter.write({
+        const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: {}
         });
@@ -126,7 +126,7 @@ describe('Histogram Agg', function () {
       });
 
       it('does not write when min_doc_count is false', function () {
-        let output = paramWriter.write({
+        const output = paramWriter.write({
           min_doc_count: false,
           extended_bounds: { min: 99, max: 100 }
         });
