@@ -1,6 +1,5 @@
+import {basename, resolve} from 'path';
 module.exports = function (grunt) {
-  const { basename, resolve } = require('path');
-
   const exec = require('../utils/exec').silent;
 
   grunt.registerTask('_build:versionedLinks', function () {

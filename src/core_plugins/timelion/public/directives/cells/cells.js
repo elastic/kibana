@@ -1,11 +1,11 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 require('angularSortableView');
 require('plugins/timelion/directives/chart/chart');
 require('plugins/timelion/directives/timelion_grid');
 
 const app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
-const html = require('./cells.html');
+import html from './cells.html';
 
 app.directive('timelionCells', function () {
   return {

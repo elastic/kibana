@@ -1,17 +1,17 @@
-const append = require('./_append');
-const convert = require('./_convert');
-const date = require('./_date');
-const geoip = require('./_geoip');
-const grok = require('./_grok');
-const gsub = require('./_gsub');
-const join = require('./_join');
-const lowercase = require('./_lowercase');
-const remove = require('./_remove');
-const rename = require('./_rename');
-const set = require('./_set');
-const split = require('./_split');
-const trim = require('./_trim');
-const uppercase = require('./_uppercase');
+import append from './_append';
+import convert from './_convert';
+import date from './_date';
+import geoip from './_geoip';
+import grok from './_grok';
+import gsub from './_gsub';
+import join from './_join';
+import lowercase from './_lowercase';
+import remove from './_remove';
+import rename from './_rename';
+import set from './_set';
+import split from './_split';
+import trim from './_trim';
+import uppercase from './_uppercase';
 
 export default function processors(bdd, scenarioManager, request) {
   append(bdd, scenarioManager, request);

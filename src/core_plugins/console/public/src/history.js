@@ -1,5 +1,5 @@
-const $ = require('jquery');
-const storage = require('./storage');
+import $ from 'jquery';
+import storage from './storage';
 
 const history = module.exports = {
   restoreFromHistory() {

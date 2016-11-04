@@ -1,5 +1,5 @@
-const  _ = require('lodash');
-const createDateAgg = require('./create_date_agg');
+import _ from 'lodash';
+import createDateAgg from './create_date_agg';
 
 module.exports =  function buildRequest(config, tlConfig) {
 

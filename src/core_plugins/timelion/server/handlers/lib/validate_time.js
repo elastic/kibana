@@ -1,5 +1,5 @@
-const parseDateMath = require('../../lib/date_math.js');
-const toMS = require('../../lib/to_milliseconds.js');
+import parseDateMath from '../../lib/date_math.js';
+import toMS from '../../lib/to_milliseconds.js';
 
 module.exports = function validateTime(time, tlConfig) {
   const span = parseDateMath(time.to, true) - parseDateMath(time.from);

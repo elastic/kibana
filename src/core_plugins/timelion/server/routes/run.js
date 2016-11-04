@@ -1,6 +1,6 @@
-const Promise = require('bluebird');
-const _ = require('lodash');
-const chainRunnerFn = require('../handlers/chain_runner.js');
+import Promise from 'bluebird';
+import _ from 'lodash';
+import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {

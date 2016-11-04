@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const moment = require('moment-timezone');
+import _ from 'lodash';
+import moment from 'moment-timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');

@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const moment = require('moment');
+import _ from 'lodash';
+import moment from 'moment';
 
 // map of moment's short/long unit ids and elasticsearch's long unit ids
 // to their value in milliseconds

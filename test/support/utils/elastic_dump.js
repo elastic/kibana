@@ -3,8 +3,9 @@ import {
   Log,
 } from './';
 
+import url from 'url';
+
 export default (function () {
-  const url = require('url');
   const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {

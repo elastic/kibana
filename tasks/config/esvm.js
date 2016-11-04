@@ -1,8 +1,8 @@
+import serverConfig from '../../test/server_config';
 module.exports = function (grunt) {
   const resolve = require('path').resolve;
   const directory = resolve(__dirname, '../../esvm');
   const dataDir = resolve(directory, 'data_dir');
-  const serverConfig = require('../../test/server_config');
 
   return {
     options: {

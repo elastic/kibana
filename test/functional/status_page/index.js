@@ -4,7 +4,7 @@ import {
 
 import PageObjects from '../../support/page_objects';
 
-const expect = require('expect.js');
+import expect from 'expect.js';
 
 bdd.describe('status page', function () {
   bdd.before(function () {

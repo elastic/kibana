@@ -1,5 +1,5 @@
-const _ = require('intern/dojo/node!lodash');
-const expect = require('intern/dojo/node!expect.js');
+import _ from 'intern/dojo/node!lodash';
+import expect from 'intern/dojo/node!expect.js';
 
 export default function (bdd, scenarioManager, request) {
   bdd.describe('processors', () => {

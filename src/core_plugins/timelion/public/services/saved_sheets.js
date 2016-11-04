@@ -1,5 +1,5 @@
 const module = require('ui/modules').get('app/sheet');
-const _ = require('lodash');
+import _ from 'lodash';
 // bring in the factory
 require('./_saved_sheet.js');
 

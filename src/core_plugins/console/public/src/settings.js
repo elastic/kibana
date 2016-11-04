@@ -1,4 +1,4 @@
-const storage = require('./storage');
+import storage from './storage';
 
 import getInput from './input'
 import getOutput from './output'

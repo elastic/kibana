@@ -1,4 +1,4 @@
-const serverConfig = require('intern/dojo/node!./server_config');
+import serverConfig from 'intern/dojo/node!./server_config';
 
 export default Object.assign({
   debug: true,

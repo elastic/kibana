@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Upsampling and downsampling of non-cummulative sets
 // Good: average, min, max

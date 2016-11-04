@@ -3,7 +3,7 @@ require('plugins/timelion/directives/interval/interval');
 require('plugins/timelion/directives/refresh_hack');
 require('ui/state_management/app_state');
 
-const _ = require('lodash');
+import _ from 'lodash';
 const module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
 module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter) {
   const queryFilter = Private(require('ui/filter_bar/query_filter'));

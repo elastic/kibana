@@ -3,7 +3,7 @@ const fn = require(`../${filename}`);
 
 const expect = require('chai').expect;
 const seriesList = require('./fixtures/seriesList.js')();
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, function () {
   it('should return exactly the data input', function () {

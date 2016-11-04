@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const worldbank = require('./worldbank.js');
-const Promise = require('bluebird');
-const Datasource = require('../lib/classes/datasource');
+import _ from 'lodash';
+import worldbank from './worldbank.js';
+import Promise from 'bluebird';
+import Datasource from '../lib/classes/datasource';
 
 
 module.exports = new Datasource ('worldbank_indicators', {

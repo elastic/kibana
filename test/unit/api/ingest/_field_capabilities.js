@@ -1,4 +1,4 @@
-const expect = require('intern/dojo/node!expect.js');
+import expect from 'intern/dojo/node!expect.js';
 
 export default function (bdd, scenarioManager, request) {
   bdd.describe('field_capabilities API', function postIngest() {

@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const Chainable = require('../../lib/classes/chainable');
+import _ from 'lodash';
+import Chainable from '../../lib/classes/chainable';
 import * as regress from './lib/regress';
 
 const validRegressions = {

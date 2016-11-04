@@ -12,6 +12,8 @@ import _ from 'lodash';
 import {expect} from 'chai';
 import invoke from './helpers/invoke_series_fn.js';
 
+import createDateAgg from '../es/lib/create_date_agg';
+
 function stubResponse(response) {
   return {
     server: {plugins:{
@@ -50,7 +52,6 @@ describe(filename, () => {
 
 
   describe('createDateAgg', () => {
-    const createDateAgg = require('../es/lib/create_date_agg');
     let tlConfig;
     let config;
     let agg;
@@ -102,7 +103,6 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
       });
     });
-
   });
 
   describe('buildRequest', () => {

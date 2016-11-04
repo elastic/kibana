@@ -1,8 +1,8 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
-const moment = require('moment');
+import moment from 'moment';
 const expect = require('chai').expect;
-const _ = require('lodash');
+import _ from 'lodash';
 
 describe(filename, function () {
 

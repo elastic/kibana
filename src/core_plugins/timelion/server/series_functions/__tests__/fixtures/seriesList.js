@@ -1,6 +1,6 @@
-const buckets = require('./bucketList');
-const getSeries = require('../helpers/get_series');
-const getSeriesList = require('../helpers/get_series_list');
+import buckets from './bucketList';
+import getSeries from '../helpers/get_series';
+import getSeriesList from '../helpers/get_series_list';
 
 module.exports = function () {
   return getSeriesList([

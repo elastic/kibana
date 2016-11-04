@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const loadFunctions = require('../load_functions.js');
+import _ from 'lodash';
+import loadFunctions from '../load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 
 module.exports = class TimelionFunction {

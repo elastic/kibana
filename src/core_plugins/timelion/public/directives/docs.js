@@ -1,7 +1,7 @@
-const html = require('../partials/docs/tutorial.html');
+import html from '../partials/docs/tutorial.html';
 const app = require('ui/modules').get('apps/timelion', []);
-const _ = require('lodash');
-const moment = require('moment');
+import _ from 'lodash';
+import moment from 'moment';
 
 app.directive('timelionDocs', function (config, $http) {
   return {

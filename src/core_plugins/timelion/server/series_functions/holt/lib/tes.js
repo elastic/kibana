@@ -1,14 +1,4 @@
-// Frequency = number of points per season
-// Season = 1 hump
-
-/*
-Hourly data might have:
- - Daily seasonality (frequency=24)
- - Weekly seasonality (frequency=24×7=168)
- - Annual seasonality (frequency=24×365.25=8766)
-*/
-
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Uh, I don't think this will work when you have nulls in the initial seasonal components
 function initSeasonalComponents(samplePoints, seasonLength) {

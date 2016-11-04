@@ -1,4 +1,4 @@
-const expect = require('intern/dojo/node!expect.js');
+import expect from 'intern/dojo/node!expect.js';
 
 export default function (bdd, request) {
   bdd.describe('Languages API', function getLanguages() {

@@ -1,5 +1,5 @@
-const Promise = require('bluebird');
-const expect = require('intern/dojo/node!expect.js');
+import Promise from 'bluebird';
+import expect from 'intern/dojo/node!expect.js';
 
 const testPipeline = {
   processors: [{

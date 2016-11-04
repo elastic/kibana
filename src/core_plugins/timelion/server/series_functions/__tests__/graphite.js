@@ -1,5 +1,5 @@
-const proxyquire =  require('proxyquire');
-const Promise = require('bluebird');
+import proxyquire from 'proxyquire';
+import Promise from 'bluebird';
 const expect = require('chai').expect;
 
 const graphiteResponse = function () {
@@ -21,7 +21,7 @@ const graphiteResponse = function () {
 const filename = require('path').basename(__filename);
 const fn = proxyquire(`../${filename}`, {'node-fetch': graphiteResponse});
 
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, function () {
   it('should wrap the graphite response up in a seriesList', function () {

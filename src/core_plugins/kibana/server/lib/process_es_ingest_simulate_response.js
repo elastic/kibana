@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 function buildError(error) {
   const errorMessage =  _.get(error, 'root_cause[0].reason') || _.get(error, 'root_cause[0].type');

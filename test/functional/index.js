@@ -2,8 +2,8 @@
 
 require('intern/dojo/node!../support/env_setup');
 
-const bdd = require('intern!bdd');
-const intern = require('intern');
+import bdd from 'intern!bdd';
+import intern from 'intern';
 
 global.__kibana__intern__ = { intern, bdd };
 

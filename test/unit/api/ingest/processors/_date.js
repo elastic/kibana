@@ -1,6 +1,6 @@
-const Promise = require('bluebird');
-const expect = require('intern/dojo/node!expect.js');
-const moment = require('intern/dojo/node!moment');
+import Promise from 'bluebird';
+import expect from 'intern/dojo/node!expect.js';
+import moment from 'intern/dojo/node!moment';
 
 const testPipeline = {
   processors: [{

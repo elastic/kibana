@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 export default function processESIngestProcessorsResponse(response) {
   const nodes = _.get(response, 'nodes');

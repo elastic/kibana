@@ -7,7 +7,7 @@ import {
 
 import PageObjects from '../../../support/page_objects';
 
-const expect = require('expect.js');
+import expect from 'expect.js';
 
 bdd.describe('source filters', function describeIndexTests() {
   bdd.before(function () {

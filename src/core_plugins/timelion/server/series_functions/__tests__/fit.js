@@ -1,10 +1,10 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
-const moment = require('moment');
+import moment from 'moment';
 const expect = require('chai').expect;
-const invoke = require('./helpers/invoke_series_fn.js');
-const getSeriesList = require('./helpers/get_single_series_list');
-const _ = require('lodash');
+import invoke from './helpers/invoke_series_fn.js';
+import getSeriesList from './helpers/get_single_series_list';
+import _ from 'lodash';
 
 describe(filename, function () {
 

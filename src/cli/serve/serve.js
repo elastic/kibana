@@ -8,6 +8,9 @@ import readYamlConfig from './read_yaml_config';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
+import ClusterManager from '../cluster/cluster_manager';
+import KbnServer from '../../server/kbn_server';
+
 let canCluster;
 try {
   require.resolve('../cluster/cluster_manager');
@@ -131,14 +134,11 @@ module.exports = function (program) {
     const settings = getCurrentSettings();
 
     if (canCluster && opts.dev && !isWorker) {
-      // stop processing the action and handoff to cluster manager
-      const ClusterManager = require('../cluster/cluster_manager');
       new ClusterManager(opts, settings);
       return;
     }
 
     let kbnServer = {};
-    const KbnServer = require('../../server/kbn_server');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
