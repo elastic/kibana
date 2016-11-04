@@ -36,7 +36,7 @@ module.exports = function (grunt) {
       client: {
         mocha: {
           reporter: 'html', // change Karma's debug.html to the mocha web reporter
-          timeout: 10000,
+          timeout: 20000,
           slow: 5000
         }
       }
