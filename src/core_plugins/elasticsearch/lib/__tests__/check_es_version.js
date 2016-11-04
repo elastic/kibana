@@ -99,6 +99,17 @@ describe('plugins/elasticsearch', () => {
       expect(server.log.getCall(1).args[0]).to.contain('warning');
     });
 
+    it('warns if a node is without http publish address', async () => {
+      const nodes = { 'node-without-http': { version: '5.1.1', ip: 'ip' } };
+      const client = server.plugins.elasticsearch.client;
+      client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
+
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 2);
+      expect(server.log.getCall(0).args[0]).to.contain('debug');
+      expect(server.log.getCall(1).args[0]).to.contain('warning');
+    });
+
     it('only warns once per node list', async () => {
       setNodes('5.1.1');
 
