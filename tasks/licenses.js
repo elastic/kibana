@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { fromNode } from 'bluebird';
-import npm from 'npm';
 import npmLicense from 'license-checker';
 
 export default function licenses(grunt) {

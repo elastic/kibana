@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import VisAggConfigProvider from 'ui/vis/agg_config';
 import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
 import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 export default function tabifyAggResponseProvider(Private, Notifier) {

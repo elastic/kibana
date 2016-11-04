@@ -9,7 +9,6 @@ import IndicesEditSectionsProvider from 'plugins/kibana/management/sections/indi
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
-import IngestProvider from 'ui/ingest';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId', {

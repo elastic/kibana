@@ -1,6 +1,6 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample } from 'lodash';
+import {sample} from 'lodash';
 import { format as formatUrl } from 'url';
 import { map, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';

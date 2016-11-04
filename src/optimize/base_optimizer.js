@@ -8,7 +8,6 @@ import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 
 import fromRoot from '../utils/from_root';
 import babelOptions from './babel_options';
-import { inherits } from 'util';
 import { defaults, transform } from 'lodash';
 import { resolve } from 'path';
 import { writeFile } from 'fs';

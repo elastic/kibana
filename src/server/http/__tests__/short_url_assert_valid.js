@@ -1,5 +1,3 @@
-import Boom from 'boom';
-
 import { shortUrlAssertValid } from '../short_url_assert_valid';
 
 

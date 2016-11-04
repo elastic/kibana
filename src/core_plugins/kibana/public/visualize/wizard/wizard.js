@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';

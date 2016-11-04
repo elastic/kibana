@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import truncText from 'trunc-text';
 import truncHTML from 'trunc-html';
 import uiModules from 'ui/modules';

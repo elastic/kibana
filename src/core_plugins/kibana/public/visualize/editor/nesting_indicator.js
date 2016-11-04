@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import $ from 'jquery';
 import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
 import uiModules from 'ui/modules';

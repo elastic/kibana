@@ -1,5 +1,4 @@
 
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/directives/auto_select_if_only_one';

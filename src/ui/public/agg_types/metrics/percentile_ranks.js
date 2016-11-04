@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import valuesEditor from 'ui/agg_types/controls/percentile_ranks.html';
 import 'ui/number_list';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';

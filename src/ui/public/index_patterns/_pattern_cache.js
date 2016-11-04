@@ -1,4 +1,3 @@
-import _ from 'lodash';
 export default function PatternCache() {
 
   const vals = {};

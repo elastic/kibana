@@ -1,6 +1,4 @@
 import Joi from 'joi';
-import { get } from 'lodash';
-import { randomBytes } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';

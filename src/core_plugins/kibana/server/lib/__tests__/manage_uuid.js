@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Joi from 'joi';
 import * as kbnTestServer from '../../../../../../test/utils/kbn_server.js';
 import fromRoot from '../../../../../utils/from_root';
 import manageUuid from '../manage_uuid';

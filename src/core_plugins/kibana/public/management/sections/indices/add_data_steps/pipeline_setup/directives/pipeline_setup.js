@@ -1,7 +1,6 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
-import angular from 'angular';
 import * as ProcessorTypes from '../processors/view_models';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';

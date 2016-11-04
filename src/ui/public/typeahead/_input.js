@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'ui/notify/directives';
 import uiModules from 'ui/modules';
 const typeahead = uiModules.get('kibana/typeahead');

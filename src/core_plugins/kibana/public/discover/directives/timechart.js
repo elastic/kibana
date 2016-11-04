@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import $ from 'jquery';
 import VislibProvider from 'ui/vislib';
 import uiModules from 'ui/modules';
 uiModules

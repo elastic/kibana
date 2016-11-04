@@ -1,6 +1,4 @@
-import cluster from 'cluster';
 import {resolve} from 'path';
-import Hapi from 'hapi';
 import {debounce, invoke, bindAll, once, uniq} from 'lodash';
 
 import Log from '../log';

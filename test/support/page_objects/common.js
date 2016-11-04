@@ -6,25 +6,16 @@ import bluebird, {
 import fs from 'fs';
 import _ from 'lodash';
 import mkdirp from 'mkdirp';
-import moment from 'moment';
 import path from 'path';
 import testSubjSelector from '@spalger/test-subj-selector';
 import {
   format,
   parse
 } from 'url';
-import util from 'util';
 
 import getUrl from '../../utils/get_url';
 
-import {
-  config,
-  defaultTryTimeout,
-  defaultFindTimeout,
-  remote,
-  shieldPage,
-  esClient
-} from '../index';
+import {config, defaultFindTimeout, esClient} from '../index';
 
 import PageObjects from './index';
 

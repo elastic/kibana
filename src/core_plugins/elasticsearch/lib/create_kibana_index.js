@@ -1,4 +1,3 @@
-import { format } from 'util';
 import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {

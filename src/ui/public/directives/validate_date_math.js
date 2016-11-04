@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import dateMath from '@elastic/datemath';
 import uiModules from 'ui/modules';
 

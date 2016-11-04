@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 
 uiModules.get('kibana')

@@ -1,6 +1,4 @@
-import moment from 'moment';
 import UiModules from 'ui/modules';
-import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import { once, clone } from 'lodash';
 
 import toggleHtml from './kbn_global_timepicker.html';

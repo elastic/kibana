@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import PluginsKibanaDashboardComponentsPanelLibVisualizationProvider from 'plugins/kibana/dashboard/components/panel/lib/visualization';
 import PluginsKibanaDashboardComponentsPanelLibSearchProvider from 'plugins/kibana/dashboard/components/panel/lib/search';
 export default function loadPanelFunction(Private) { // Inject services here

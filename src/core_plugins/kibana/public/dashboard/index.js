@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/courier';

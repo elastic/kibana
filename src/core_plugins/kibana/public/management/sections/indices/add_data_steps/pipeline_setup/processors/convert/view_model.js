@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Convert extends Processor {

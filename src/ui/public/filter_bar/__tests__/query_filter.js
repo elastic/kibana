@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import './_get_filters';

@@ -3,7 +3,6 @@ import _ from 'lodash';
 import help from './help';
 import { Command } from 'commander';
 import { red } from './color';
-import { yellow } from './color';
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;

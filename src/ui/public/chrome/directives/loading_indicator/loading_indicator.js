@@ -1,5 +1,4 @@
 import UiModules from 'ui/modules';
-import angular from 'angular';
 import template from './loading_indicator.html';
 import './loading_indicator.less';
 

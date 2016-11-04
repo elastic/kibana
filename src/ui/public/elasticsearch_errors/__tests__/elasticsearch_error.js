@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ElasticsearchError from '../elasticsearch_error';
 

@@ -1,5 +1,4 @@
 import 'ui/stringify/editors/duration.less';
-import _ from 'lodash';
 import moment from 'moment';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import durationTemplate from 'ui/stringify/editors/duration.html';

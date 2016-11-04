@@ -1,6 +1,5 @@
 import LazyServer from './lazy_server';
 import LazyOptimizer from './lazy_optimizer';
-import { fromRoot } from '../../utils';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
   const server = new LazyServer(
