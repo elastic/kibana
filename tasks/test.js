@@ -1,7 +1,31 @@
 import _, { keys } from 'lodash';
+import fs from 'fs';
+import path from 'path';
+
 const visualRegression = require('../utilities/visual_regression');
 
 module.exports = function (grunt) {
+  grunt.registerTask('checkPlugins', 'Checks for plugins which may disrupt tests', function checkPlugins() {
+    const done = this.async();
+    const pluginsDir = path.resolve('./plugins/');
+
+    fs.readdir(pluginsDir, (err, files) => {
+      const plugins = files.filter(file => {
+        return fs.statSync(path.join(pluginsDir, file)).isDirectory();
+      });
+
+      if (plugins.length) {
+        grunt.log.error('===================================================================================================');
+        plugins.forEach(plugin => {
+          grunt.log.error(`The ${plugin} plugin may disrupt the test process. Consider removing it and re-running your tests.`);
+        });
+        grunt.log.error('===================================================================================================');
+      }
+
+      done();
+    });
+  });
+
   grunt.registerTask('test:visualRegression', [
     'intern:visualRegression:takeScreenshots',
     'test:visualRegression:buildGallery'
@@ -21,8 +45,19 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
-  grunt.registerTask('test:browser', ['run:testServer', 'karma:unit']);
+  grunt.registerTask('test:server', [
+    'checkPlugins',
+    'esvm:test',
+    'simplemocha:all',
+    'esvm_shutdown:test',
+  ]);
+
+  grunt.registerTask('test:browser', [
+    'checkPlugins',
+    'run:testServer',
+    'karma:unit',
+  ]);
+
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
       .filter(key => key.startsWith('ciShard-'))
@@ -35,6 +70,7 @@ module.exports = function (grunt) {
       ...ciShardTasks
     ]);
   });
+
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
@@ -45,11 +81,13 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', [
+    'checkPlugins',
     'run:devTestServer',
     'karma:dev'
   ]);
 
   grunt.registerTask('test:ui', [
+    'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
     'run:chromeDriver',
@@ -66,6 +104,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:ui:runner', [
+    'checkPlugins',
     'clean:screenshots',
     'run:devChromeDriver',
     'intern:dev'
