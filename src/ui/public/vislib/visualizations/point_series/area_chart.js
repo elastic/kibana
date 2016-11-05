@@ -171,7 +171,7 @@ export default function AreaChartFactory(Private) {
       circles
       .enter()
       .append('circle')
-      .call(this.baseChart._addIdentifier)
+      .call(this.baseChart._addIdentifier, 'series')
       .attr('stroke', function strokeColor(d) {
         return color(d.series);
       })

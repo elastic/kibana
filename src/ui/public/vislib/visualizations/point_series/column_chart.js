@@ -49,7 +49,7 @@ export default function ColumnChartFactory(Private) {
       bars
       .enter()
       .append('rect')
-      .call(this.baseChart._addIdentifier)
+      .call(this.baseChart._addIdentifier, 'series')
       .attr('fill', function (d) {
         return color(d.label || data.label);
       });

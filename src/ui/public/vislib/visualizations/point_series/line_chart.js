@@ -116,7 +116,7 @@ export default function LineChartFactory(Private) {
       .attr('cx', isHorizontal ? cx : cy)
       .attr('cy', isHorizontal ? cy : cx)
       .attr('class', 'circle-decoration')
-      .call(this.baseChart._addIdentifier)
+      .call(this.baseChart._addIdentifier, 'series')
       .attr('fill', colorCircle);
 
       circles
@@ -127,7 +127,7 @@ export default function LineChartFactory(Private) {
       .attr('cy', isHorizontal ? cy : cx)
       .attr('fill', 'transparent')
       .attr('class', 'circle')
-      .call(this.baseChart._addIdentifier)
+      .call(this.baseChart._addIdentifier, 'series')
       .attr('stroke', cColor)
       .attr('stroke-width', 0);
 
