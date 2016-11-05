@@ -15,7 +15,7 @@ export default function AxisConfigFactory() {
       defaultYExtents: null,
       min: null,
       max: null,
-      mode: 'normal' // [percentage, normal, wiggle, silluete]
+      mode: 'normal' // [percentage, normal, wiggle, silhouette]
     },
     style: {
       color: '#ddd',
@@ -77,8 +77,8 @@ export default function AxisConfigFactory() {
       }
 
       if (this._values.type === 'value') {
-        const isWiggleOrSilluete = chartConfig.get('mode') === 'wiggle' || chartConfig.get('mode') === 'silluete';
-        // if show was not explicitly set and wiggle or silluete option was checked
+        const isWiggleOrSilluete = chartConfig.get('mode') === 'wiggle' || chartConfig.get('mode') === 'silhouette';
+        // if show was not explicitly set and wiggle or silhouette option was checked
         if (!axisConfigArgs.show && isWiggleOrSilluete) {
           this._values.show = false;
         }

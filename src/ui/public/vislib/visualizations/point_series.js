@@ -37,7 +37,7 @@ export default function PointSeriesFactory(Private) {
 
     findChartConfig() {
       const charts = this.handler.visConfig.get('charts');
-      const chartIndex = this.handler.data.pieData().indexOf(this.chartData);
+      const chartIndex = this.handler.data.chartData().indexOf(this.chartData);
       return charts[chartIndex];
     }
 
