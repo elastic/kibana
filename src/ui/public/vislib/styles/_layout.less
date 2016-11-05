@@ -12,6 +12,11 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+  padding: 10px 0;
+}
+
+.vis-wrapper svg {
+  overflow: visible;
 }
 
 /* YAxis logic */
@@ -82,7 +87,6 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  margin-right: 8px;
 }
 
 .chart-wrapper {
@@ -158,14 +162,17 @@
 }
 
 .x-axis-title {
-  min-height: 1px;
+  min-height: 0px;
   max-height: 15px;
   min-width: 20px;
   overflow: hidden;
 }
 
 .x-axis-div {
-  margin-top: -5px;
   min-height: 1px;
   min-width: 20px;
+}
+
+.axis-wrapper-top .axis-div svg {
+  margin-bottom: -5px;
 }

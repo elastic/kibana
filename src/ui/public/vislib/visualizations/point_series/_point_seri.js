@@ -57,13 +57,13 @@ export default function PointSeriProvider(Private) {
 
     getValueAxis() {
       return _.find(this.handler.valueAxes, axis => {
-        return axis.id === this.seriesConfig.valueAxis;
+        return axis.axisConfig.get('id') === this.seriesConfig.valueAxis;
       }) || this.handler.valueAxes[0];
     };
 
     getCategoryAxis() {
       return _.find(this.handler.categoryAxes, axis => {
-        return axis.id === this.seriesConfig.categoryAxis;
+        return axis.axisConfig.get('id') === this.seriesConfig.categoryAxis;
       }) || this.handler.categoryAxes[0];
     };
 

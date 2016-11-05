@@ -1,10 +1,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import $ from 'jquery';
 import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
+import AxisProvider from 'ui/vislib/lib/axis';
 export default function LayoutFactory(Private) {
 
   const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-
+  const Axis = Private(AxisProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -39,6 +41,10 @@ export default function LayoutFactory(Private) {
     render() {
       this.removeAll(this.el);
       this.createLayout(this.layoutType);
+      // update y-axis-spacer height based on precalculated horizontal axis heights
+      if (this.opts.get('type') === 'point_series') {
+        this.updateCategoryAxisSize();
+      }
     };
 
     /**
@@ -50,12 +56,38 @@ export default function LayoutFactory(Private) {
      * @returns {*} Creates the visualization layout
      */
     createLayout(arr) {
-      const self = this;
-
-      return _.each(arr, function (obj) {
-        self.layout(obj);
+      return _.each(arr, (obj) => {
+        this.layout(obj);
       });
     };
+
+    updateCategoryAxisSize() {
+      const visConfig = this.opts;
+      const axisConfig = visConfig.get('categoryAxes[0]');
+      const axis = new Axis(visConfig, axisConfig);
+      const position = axis.axisConfig.get('position');
+
+      const el = $(this.el).find(`.axis-wrapper-${position}`);
+      const length = axis.axisConfig.isHorizontal() ? $(this.el).width() : $(this.el).height();
+
+      // render svg and get the width of the bounding box
+      const svg = d3.select('body')
+        .append('svg')
+        .attr('style', 'position:absolute; top:-10000; left:-10000');
+      const {width, height} = svg.append('g')
+        .call(axis.getAxis(length)).node().getBBox();
+      svg.remove();
+
+      if (axis.axisConfig.isHorizontal()) {
+        const titleHeight = 15;
+        const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
+        el.find('.x-axis-div-wrapper').height(`${height}px`);
+        spacerNodes.height(el.height() + titleHeight);
+      } else {
+        el.find('.y-axis-div-wrapper').width(`${width}px`);
+      }
+    };
+
 
     /**
      * Appends a DOM element based on the object keys

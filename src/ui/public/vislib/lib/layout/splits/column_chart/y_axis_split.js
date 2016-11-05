@@ -1,6 +1,4 @@
 import d3 from 'd3';
-import _ from 'lodash';
-
 define(function () {
   return function YAxisSplitFactory() {
 
@@ -11,7 +9,7 @@ define(function () {
      */
 
     // render and get bounding box width
-    return function (selection, parent, opts) {
+    return function (selection) {
 
       selection.each(function () {
         const div = d3.select(this);

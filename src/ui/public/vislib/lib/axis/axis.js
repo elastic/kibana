@@ -198,30 +198,11 @@ export default function AxisFactory(Private) {
     }
 
     getLength(el, n) {
-      const margin = this.visConfig.get('style.margin');
       if (this.axisConfig.isHorizontal()) {
-        return $(el).parent().width() / n - margin.left - margin.right - 50;
+        return $(el).parent().width() / n;
+      } else {
+        return $(el).parent().height() / n;
       }
-      return $(el).parent().height() / n - margin.top - margin.bottom;
-    }
-
-    updateXaxisHeight() {
-      const el = this.axisConfig.get('rootEl');
-      const position = this.axisConfig.get('position');
-      const selection = d3.select(el).selectAll('.vis-wrapper');
-
-      selection.each(function () {
-        const visEl = d3.select(this);
-
-        if (visEl.select('.inner-spacer-block').node() === null) {
-          visEl.selectAll('.y-axis-spacer-block')
-          .append('div')
-          .attr('class', 'inner-spacer-block');
-        }
-
-        const height = visEl.select(`.axis-wrapper-${position}`).style('height');
-        visEl.selectAll(`.y-axis-spacer-block-${position} .inner-spacer-block`).style('height', height);
-      });
     }
 
     adjustSize() {
@@ -245,11 +226,10 @@ export default function AxisFactory(Private) {
             }
           })());
         });
-        const length = lengths.length > 0 ? _.max(lengths) : 0;
+        let length = lengths.length > 0 ? _.max(lengths) : 0;
 
         if (config.isHorizontal()) {
           selection.attr('height', length);
-          self.updateXaxisHeight();
           if (position === 'top') {
             selection.select('g')
             .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
@@ -257,11 +237,16 @@ export default function AxisFactory(Private) {
             .attr('transform', 'translate(1,0)');
           }
         } else {
+          const axisSpacing = 2;
           selection.attr('width', length + xAxisPadding);
           if (position === 'left') {
-            const translateWidth = length + xAxisPadding - 2 - parseInt(style.lineWidth);
+            const translateWidth = length + xAxisPadding - axisSpacing - parseInt(style.lineWidth);
             selection.select('g')
-            .attr('transform', `translate(${translateWidth},${margin.top})`);
+            .attr('transform', `translate(${translateWidth},0)`);
+          } else if (position === 'right') {
+            const translateWidth = axisSpacing + parseInt(style.lineWidth);
+            selection.select('g')
+              .attr('transform', `translate(${translateWidth},0)`);
           }
         }
       };

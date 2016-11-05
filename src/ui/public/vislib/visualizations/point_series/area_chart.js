@@ -33,7 +33,7 @@ export default function AreaChartFactory(Private) {
       super(handler, chartEl, chartData);
 
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
-      this.isOverlapping = (this.seriesConfig.mode === 'overlap');
+      this.isOverlapping = (this.seriesConfig.mode !== 'stacked');
       if (this.isOverlapping) {
 
         // todo ... default opacity handler should check what the opacity is and then move back to it on mouseout
@@ -71,6 +71,7 @@ export default function AreaChartFactory(Private) {
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
       const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       // Data layers
       const layer = svg.append('g')
@@ -88,21 +89,40 @@ export default function AreaChartFactory(Private) {
         return isOverlapping;
       });
 
+      function x(d) {
+        if (isTimeSeries) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      }
+
+      function y1(d) {
+        const y0 = d.y0 || 0;
+        return yScale(y0 + d.y);
+      }
+
+      function y0(d) {
+        const y0 = d.y0 || 0;
+        return yScale(y0);
+      }
+
+      function getArea() {
+        if (isHorizontal) {
+          return d3.svg.area()
+            .x(x)
+            .y0(y0)
+            .y1(y1);
+        } else {
+          return d3.svg.area()
+            .y(x)
+            .x0(y0)
+            .x1(y1);
+        }
+      }
+
       // update
       path.attr('d', function (d) {
-        const area = d3.svg.area()
-        .x(function (d) {
-          if (isTimeSeries) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y0(function (d) {
-          return yScale(d.y0);
-        })
-        .y1(function (d) {
-          return yScale(d.y0 + d.y);
-        })
+        const area = getArea()
         .defined(function (d) {
           return !_.isNull(d.y);
         })
@@ -129,8 +149,9 @@ export default function AreaChartFactory(Private) {
       const circleRadius = 12;
       const circleStrokeWidth = 0;
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isOverlapping = this.isOverlapping;
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const layer = svg.append('g')
       .attr('class', 'points area');
@@ -157,20 +178,24 @@ export default function AreaChartFactory(Private) {
       .attr('fill', 'transparent')
       .attr('stroke-width', circleStrokeWidth);
 
-      // update
-      circles
-      .attr('cx', function cx(d) {
+      function cx(d) {
         if (ordered && ordered.date) {
           return xScale(d.x);
         }
         return xScale(d.x) + xScale.rangeBand() / 2;
-      })
-      .attr('cy', function cy(d) {
+      }
+
+      function cy(d) {
         if (isOverlapping) {
           return yScale(d.y);
         }
         return yScale(d.y0 + d.y);
-      })
+      }
+
+      // update
+      circles
+      .attr('cx', isHorizontal ? cx : cy)
+      .attr('cy', isHorizontal ? cy : cx)
       .attr('r', circleRadius);
 
       // Add tooltip
@@ -179,13 +204,6 @@ export default function AreaChartFactory(Private) {
       }
 
       return circles;
-    };
-
-    validateWiggleSelection() {
-      const isWiggle = this.seriesConfig.mode === 'wiggle';
-      const ordered = this.handler.data.get('ordered');
-
-      if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();
     };
 
     /**

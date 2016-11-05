@@ -39,7 +39,8 @@ export default function LineChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
       const tooltip = this.baseChart.tooltip;
-      const isTooltip = this.seriesConfig.addTooltip;
+      const isTooltip = this.handler.visConfig.get('tooltip.show');
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const radii = _(data.values)
         .map(function (point) {
@@ -99,8 +100,8 @@ export default function LineChartFactory(Private) {
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
           const margin = self.handler.visConfig.get('style.margin');
-          const width = self.baseChart.chartConfig.width - margin.left - margin.right;
-          const height = self.baseChart.chartConfig.height - margin.top - margin.bottom;
+          const width = self.baseChart.chartConfig.width;
+          const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
 
           return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
@@ -112,8 +113,8 @@ export default function LineChartFactory(Private) {
       .append('circle')
       .attr('r', getCircleRadiusFn())
       .attr('fill-opacity', (this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7))
-      .attr('cx', cx)
-      .attr('cy', cy)
+      .attr('cx', isHorizontal ? cx : cy)
+      .attr('cy', isHorizontal ? cy : cx)
       .attr('class', 'circle-decoration')
       .call(this.baseChart._addIdentifier)
       .attr('fill', colorCircle);
@@ -122,8 +123,8 @@ export default function LineChartFactory(Private) {
       .enter()
       .append('circle')
       .attr('r', getCircleRadiusFn(10))
-      .attr('cx', cx)
-      .attr('cy', cy)
+      .attr('cx', isHorizontal ? cx : cy)
+      .attr('cy', isHorizontal ? cy : cx)
       .attr('fill', 'transparent')
       .attr('class', 'circle')
       .call(this.baseChart._addIdentifier)
@@ -152,34 +153,39 @@ export default function LineChartFactory(Private) {
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
       const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
+      const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const line = svg.append('g')
-        .attr('class', 'pathgroup lines');
+      .attr('class', 'pathgroup lines');
+
+      function cx(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      }
+
+      function cy(d) {
+        return yScale(d.y);
+      }
 
       line.append('path')
-        .call(this.baseChart._addIdentifier)
-        .attr('d', () => {
-          const d3Line = d3.svg.line()
-            .defined(function (d) {
-              return !_.isNull(d.y);
-            })
-            .interpolate(interpolate)
-            .x(function x(d) {
-              if (ordered && ordered.date) {
-                return xScale(d.x);
-              }
-              return xScale(d.x) + xScale.rangeBand() / 2;
-            })
-            .y(function y(d) {
-              return yScale(d.y);
-            });
-          return d3Line(data.values);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', function lineStroke(d) {
-          return color(d.label || data.label);
-        })
-        .attr('stroke-width', 2);
+      .call(this.baseChart._addIdentifier)
+      .attr('d', () => {
+        const d3Line = d3.svg.line()
+          .defined(function (d) {
+            return !_.isNull(d.y);
+          })
+          .interpolate(interpolate)
+          .x(isHorizontal ? cx : cy)
+          .y(isHorizontal ? cy : cx);
+        return d3Line(data.values);
+      })
+      .attr('fill', 'none')
+      .attr('stroke', function lineStroke(d) {
+        return color(d.label || data.label);
+      })
+      .attr('stroke-width', 2);
 
       return line;
     };

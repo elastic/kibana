@@ -17,6 +17,12 @@ export default function ColumnHandler(Private) {
 
       config.type = 'point_series';
 
+      if (!config.tooltip) {
+        config.tooltip = {
+          show: cfg.addTooltip
+        };
+      }
+
       if (!config.valueAxes) {
         config.valueAxes = [
           {
@@ -45,7 +51,6 @@ export default function ColumnHandler(Private) {
           {
             id: 'CategoryAxis-1',
             type: 'category',
-            ordered: data.ordered,
             labels: {
               axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
             },
@@ -64,9 +69,17 @@ export default function ColumnHandler(Private) {
         config.chart = {
           type: 'point_series',
           series: _.map(series, (seri) => {
-            return _.defaults({}, cfg, {
+            return {
+              show: true,
+              type: cfg.type || 'line',
+              mode: cfg.mode || 'normal',
+              interpolate: cfg.interpolate,
+              smoothLines: cfg.smoothLines,
+              drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
+              showCircles: cfg.showCircles,
+              radiusRatio: cfg.radiusRatio,
               data: seri
-            });
+            };
           })
         };
       }
@@ -79,12 +92,10 @@ export default function ColumnHandler(Private) {
     line: create(),
 
     column: create({
-      zeroFill: true,
       expandLastBucket: true
     }),
 
     area: create({
-      zeroFill: true,
       alerts: [
         {
           type: 'warning',
