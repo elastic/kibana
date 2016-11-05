@@ -39,6 +39,8 @@ export default function HandlerBaseClass(Private) {
       this.chartTitle = new ChartTitle(visConfig);
       this.alerts = new Alerts(this, visConfig.get('alerts'));
 
+      this.data.stackData(this);
+
       this.layout = new Layout(visConfig);
       this.binder = new Binder();
       this.renderArray = _.filter([

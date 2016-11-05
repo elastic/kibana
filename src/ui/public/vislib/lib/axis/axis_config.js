@@ -101,21 +101,24 @@ export default function AxisConfigFactory() {
       }
 
       let offset;
+      let stacked = true;
       switch (this.get('scale.mode')) {
         case 'normal':
           offset = 'zero';
-          break;
-        case 'percentage':
-          offset = 'expand';
+          stacked = false;
           break;
         case 'grouped':
           offset = 'group';
+          stacked = false;
+          break;
+        case 'percentage':
+          offset = 'expand';
           break;
         default:
           offset = this.get('scale.mode');
       }
       this.set('scale.offset', _.get(axisConfigArgs, 'scale.offset', offset));
-      this.set('scale.stacked', this.get('scale.mode') !== 'normal');
+      this.set('scale.stacked', stacked);
     };
 
     get(property, defaults = null) {

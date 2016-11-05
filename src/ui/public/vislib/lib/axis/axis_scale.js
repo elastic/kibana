@@ -98,15 +98,15 @@ export default function AxisScaleFactory(Private) {
           const seriConfig = this.visConfig.get(`charts[${chartIndex}].series[${seriIndex}]`);
           const matchingValueAxis = !!seriConfig.valueAxis && seriConfig.valueAxis === config.get('id');
           const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
-          const shouldStackData = seriConfig.mode === 'stacked';
 
           if (matchingValueAxis || (!seriConfig.valueAxis && isFirstAxis)) {
             // this wont work correctly with stacked data ... it will stack all n charts
             const axisPoints = seri.values.map(val => {
-              if (shouldStackData) {
-                const y0 = stackedData[val.x] ? stackedData[val.x] : 0;
-                stackedData[val.x] = y0 + val.y;
-                return stackedData[val.x];
+              if (val.y0) {
+                //const y0 = stackedData[val.x] ? stackedData[val.x] : 0;
+                //stackedData[val.x] = y0 + val.y;
+                //return stackedData[val.x];
+                return val.y0 + val.y;
               }
               return val.y;
             });

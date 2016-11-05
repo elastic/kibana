@@ -23,12 +23,53 @@ export default function DataFactory(Private) {
   class Data {
     constructor(data, uiState) {
       this.uiState = uiState;
-      this.data = data;
+      this.data = this.copyDataObj(data);
       this.type = this.getDataType();
 
       this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
+    }
+
+    copyDataObj(data) {
+      const copyChart = data => {
+        const newData = {};
+        Object.keys(data).forEach(key => {
+          if (key !== 'series') {
+            newData[key] = data[key];
+          } else {
+            newData[key] = data[key].map(seri => {
+              return {
+                label: seri.label,
+                values: seri.values.map(val => {
+                  const newVal = _.clone(val);
+                  newVal.aggConfig = seri.aggConfig;
+                  newVal.aggConfigResult = seri.aggConfigResult;
+                  newVal.extraMetrics = seri.extraMetrics;
+                  return newVal;
+                })
+              };
+            });
+          }
+        });
+        return newData;
+      };
+
+      if (!data.series) {
+        const newData = {};
+        Object.keys(data).forEach(key => {
+          if (!['rows', 'columns'].includes(key)) {
+            newData[key] = data[key];
+          }
+          else {
+            newData[key] = data[key].map(chart => {
+              return copyChart(chart);
+            });
+          }
+        });
+        return newData;
+      }
+      return copyChart(data);
     }
 
     _getLabels(data) {
@@ -66,6 +107,47 @@ export default function DataFactory(Private) {
       }
       return [this.data];
     };
+
+    shouldBeStacked(seriesConfig) {
+      const isHistogram = (seriesConfig.type === 'histogram');
+      const isArea = (seriesConfig.type === 'area');
+      const stacked = (seriesConfig.mode === 'stacked');
+
+      return (isHistogram || isArea) && stacked;
+    };
+
+    getStackedSeries(chartConfig, axis, series, first = false) {
+      const matchingSeries = [];
+      chartConfig.series.forEach((seriArgs, i) => {
+        const matchingAxis = seriArgs.valueAxis === axis.axisConfig.get('id') || (!seriArgs.valueAxis && first);
+        if (matchingAxis && (this.shouldBeStacked(seriArgs) || axis.axisConfig.get('scale.stacked'))) {
+          matchingSeries.push(series[i]);
+        }
+      });
+      return this.injectZeros(matchingSeries);
+    };
+
+    stackChartData(handler, data, chartConfig) {
+      const stackedData = {};
+      handler.valueAxes.forEach((axis, i) => {
+        const id = axis.axisConfig.get('id');
+        stackedData[id] = this.getStackedSeries(chartConfig, axis, data, i === 0);
+        axis.stack(_.map(stackedData[id], 'values'));
+      });
+      return stackedData;
+    };
+
+    stackData(handler) {
+      const data = this.data;
+      if (data.rows || data.columns) {
+        const charts = data.rows ? data.rows : data.columns;
+        charts.forEach((chart, i) => {
+          this.stackChartData(handler, chart.series, handler.visConfig.get(`charts[${i}]`));
+        });
+      } else {
+        this.stackChartData(handler, data.series, handler.visConfig.get('charts[0]'));
+      }
+    }
 
     /**
      * Returns an array of chart data objects
