@@ -1,6 +1,36 @@
 import _ from 'lodash';
 
 export default function ColumnHandler(Private) {
+
+  const createSeries = (cfg, series) => {
+    return {
+      type: 'point_series',
+      series: _.map(series, (seri) => {
+        return {
+          show: true,
+          type: cfg.type || 'line',
+          mode: cfg.mode || 'normal',
+          interpolate: cfg.interpolate,
+          smoothLines: cfg.smoothLines,
+          drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
+          showCircles: cfg.showCircles,
+          radiusRatio: cfg.radiusRatio,
+          data: seri
+        };
+      })
+    };
+  };
+
+  const createCharts = (cfg, data) => {
+    if (data.rows || data.columns) {
+      const charts = data.rows ? data.rows : data.columns;
+      return charts.map(chart => {
+        return createSeries(cfg, chart.series);
+      });
+    }
+
+    return [createSeries(cfg, data.series)];
+  };
   /*
    * Create handlers for Area, Column, and Line charts which
    * are all nearly the same minus a few details
@@ -64,24 +94,8 @@ export default function ColumnHandler(Private) {
         ];
       }
 
-      if (!config.chart) {
-        const series = data.get('series');
-        config.chart = {
-          type: 'point_series',
-          series: _.map(series, (seri) => {
-            return {
-              show: true,
-              type: cfg.type || 'line',
-              mode: cfg.mode || 'normal',
-              interpolate: cfg.interpolate,
-              smoothLines: cfg.smoothLines,
-              drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
-              showCircles: cfg.showCircles,
-              radiusRatio: cfg.radiusRatio,
-              data: seri
-            };
-          })
-        };
+      if (!config.charts) {
+        config.charts = createCharts(cfg, data.data);
       }
 
       return config;

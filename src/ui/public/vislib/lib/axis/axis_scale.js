@@ -90,18 +90,19 @@ export default function AxisScaleFactory(Private) {
     getAllPoints() {
       const config = this.axisConfig;
       const data = this.visConfig.data.chartData();
-      const chartPoints = _.reduce(data, (chartPoints, chart) => {
+      const chartPoints = _.reduce(data, (chartPoints, chart, chartIndex) => {
         const stackedData = {};
         // was visConfig.get('chart.series')
 
-        const points = chart.series.reduce((points, seri, i) => {
-          const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === config.get('id');
+        const points = chart.series.reduce((points, seri, seriIndex) => {
+          const seriConfig = this.visConfig.get(`charts[${chartIndex}].series[${seriIndex}]`);
+          const matchingValueAxis = !!seriConfig.valueAxis && seriConfig.valueAxis === config.get('id');
           const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
-          const shouldStackData = seri.mode === 'stacked';
+          const shouldStackData = seriConfig.mode === 'stacked';
 
-          if (matchingValueAxis || (!seri.valueAxis && isFirstAxis)) {
+          if (matchingValueAxis || (!seriConfig.valueAxis && isFirstAxis)) {
             // this wont work correctly with stacked data ... it will stack all n charts
-            const axisPoints = chart.series[i].values.map(val => {
+            const axisPoints = seri.values.map(val => {
               if (shouldStackData) {
                 const y0 = stackedData[val.x] ? stackedData[val.x] : 0;
                 stackedData[val.x] = y0 + val.y;

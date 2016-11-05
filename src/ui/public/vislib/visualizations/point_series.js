@@ -31,8 +31,14 @@ export default function PointSeriesFactory(Private) {
       this.handler = handler;
       this.chartData = chartData;
       this.chartEl = chartEl;
-      this.chartConfig = handler.visConfig.get('chart');
+      this.chartConfig = this.findChartConfig();
       this.handler.pointSeries = this;
+    }
+
+    findChartConfig() {
+      const charts = this.handler.visConfig.get('charts');
+      const chartIndex = this.handler.data.pieData().indexOf(this.chartData);
+      return charts[chartIndex];
     }
 
     shouldBeStacked(seriesConfig) {
@@ -72,14 +78,15 @@ export default function PointSeriesFactory(Private) {
 
       // Creating clipPath
       return svg
-      .attr('clip-path', 'url(#' + id + ')')
-      .append('clipPath')
-      .attr('id', id)
+      //.attr('clip-path', 'url(#' + id + ')')
+      //.append('clipPath')
+      //.attr('id', id)
       .append('rect')
       .attr('x', startX)
       .attr('y', startY)
       .attr('width', width)
-      .attr('height', height);
+      .attr('height', height)
+      .attr('fill', 'transparent');
     };
 
     addEvents(svg) {
@@ -183,8 +190,8 @@ export default function PointSeriesFactory(Private) {
       let self = this;
       let $elem = $(this.chartEl);
       let margin = this.handler.visConfig.get('style.margin');
-      let elWidth = this.chartConfig.width = $elem.width();
-      let elHeight = this.chartConfig.height = $elem.height();
+      const width = this.chartConfig.width = $elem.width();
+      const height = this.chartConfig.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
       let minWidth = 50;
       let minHeight = 50;
@@ -193,15 +200,11 @@ export default function PointSeriesFactory(Private) {
       let timeMarker;
       let div;
       let svg;
-      let width;
-      let height;
 
       return function (selection) {
         selection.each(function (data) {
           const el = this;
 
-          width = elWidth;
-          height = elHeight;
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
@@ -213,11 +216,12 @@ export default function PointSeriesFactory(Private) {
           div = d3.select(el);
 
           svg = div.append('svg')
-          .attr('width', elWidth)
-          .attr('height', elHeight)
-          .append('g');
+          .attr('width', width)
+          .attr('height', height);
 
           self.addClipPath(svg, width, height);
+          self.addEvents(svg);
+          self.createEndZones(svg);
 
           self.stackData(data);
           self.series = [];
@@ -228,9 +232,6 @@ export default function PointSeriesFactory(Private) {
             svg.call(series.draw());
             self.series.push(series);
           });
-
-          self.addEvents(svg);
-          self.createEndZones(svg);
 
           if (addTimeMarker) {
             timeMarker.render(svg);
