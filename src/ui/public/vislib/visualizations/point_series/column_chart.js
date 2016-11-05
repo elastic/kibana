@@ -73,9 +73,7 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     updateBars(bars) {
-      const offset = this.seriesConfig.mode;
-
-      if (offset === 'stacked') {
+      if (this.seriesConfig.mode === 'stacked') {
         return this.addStackedBars(bars);
       }
       return this.addGroupedBars(bars);

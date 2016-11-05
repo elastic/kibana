@@ -115,6 +115,7 @@ export default function AxisConfigFactory() {
           offset = this.get('scale.mode');
       }
       this.set('scale.offset', _.get(axisConfigArgs, 'scale.offset', offset));
+      this.set('scale.stacked', this.get('scale.mode') !== 'normal');
     };
 
     get(property, defaults = null) {

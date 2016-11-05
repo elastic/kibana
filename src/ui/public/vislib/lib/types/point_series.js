@@ -3,13 +3,14 @@ import _ from 'lodash';
 export default function ColumnHandler(Private) {
 
   const createSeries = (cfg, series) => {
+    const stacked = ['stacked', 'percentage'].includes(cfg.mode);
     return {
       type: 'point_series',
       series: _.map(series, (seri) => {
         return {
           show: true,
           type: cfg.type || 'line',
-          mode: cfg.mode || 'normal',
+          mode: stacked ? 'stacked' : 'normal',
           interpolate: cfg.interpolate,
           smoothLines: cfg.smoothLines,
           drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
@@ -54,6 +55,8 @@ export default function ColumnHandler(Private) {
       }
 
       if (!config.valueAxes) {
+        let mode = config.mode;
+        if (['stacked', 'overlap'].includes(mode)) mode = 'normal';
         config.valueAxes = [
           {
             id: 'ValueAxis-1',
@@ -64,7 +67,7 @@ export default function ColumnHandler(Private) {
               defaultYExtents: config.defaultYExtents,
               min : isUserDefinedYAxis ? config.yAxis.min : undefined,
               max : isUserDefinedYAxis ? config.yAxis.max : undefined,
-              mode : config.mode
+              mode : mode
             },
             labels: {
               axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')

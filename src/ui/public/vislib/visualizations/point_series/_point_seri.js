@@ -26,31 +26,31 @@ export default function PointSeriProvider(Private) {
     };
 
     getStackedCount() {
-      return this.handler.data.get('series').reduce(function (sum, val) {
-        return val.stacked ? sum + 1 : sum;
+      return this.baseChart.chartConfig.series.reduce(function (sum, seri) {
+        return seri.mode === 'stacked' ? sum + 1 : sum;
       }, 0);
     };
 
     getGroupedCount() {
-      return this.handler.data.get('series').reduce(function (sum, val) {
-        return val.stacked ? sum : sum + 1;
+      return this.baseChart.chartConfig.series.reduce(function (sum, seri) {
+        return seri.mode === 'stacked' ? sum : sum + 1;
       }, 0);
     };
 
     getStackedNum(data) {
       let i = 0;
-      for (const seri of this.handler.data.get('series')) {
-        if (seri === data) return i;
-        if (seri.stacked) i++;
+      for (const seri of this.baseChart.chartConfig.series) {
+        if (seri.data === data) return i;
+        if (seri.mode === 'stacked') i++;
       }
       return 0;
     };
 
     getGroupedNum(data) {
       let i = 0;
-      for (const seri of this.handler.data.get('series')) {
-        if (seri === data) return i;
-        if (!seri.stacked) i++;
+      for (const seri of this.baseChart.chartConfig.series) {
+        if (seri.data === data) return i;
+        if (seri.mode !== 'stacked') i++;
       }
       return 0;
     };

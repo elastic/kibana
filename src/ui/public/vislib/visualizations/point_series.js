@@ -53,7 +53,7 @@ export default function PointSeriesFactory(Private) {
       const matchingSeries = [];
       this.chartConfig.series.forEach((seriArgs, i) => {
         const matchingAxis = seriArgs.valueAxis === axis.axisConfig.get('id') || (!seriArgs.valueAxis && first);
-        if (matchingAxis && this.shouldBeStacked(seriArgs)) {
+        if (matchingAxis && (this.shouldBeStacked(seriArgs) || axis.axisConfig.get('scale.stacked'))) {
           matchingSeries.push(series[i]);
         }
       });
@@ -185,6 +185,26 @@ export default function PointSeriesFactory(Private) {
       endzoneTT.render()(svg);
     };
 
+    copyDataObj(data) {
+      const newData = {};
+      Object.keys(data).forEach(key => {
+        if (key !== 'series') newData[key] = data[key];
+        newData.series = data.series.map(seri => {
+          return {
+            label: seri.label,
+            values: seri.values.map(val => {
+              const newVal = _.clone(val);
+              newVal.aggConfig = seri.aggConfig;
+              newVal.aggConfigResult = seri.aggConfigResult;
+              newVal.extraMetrics = seri.extraMetrics;
+              return newVal;
+            })
+          };
+        });
+      });
+      return newData;
+    }
+
     draw() {
       // todo: do we need to handle width and height here ?
       let self = this;
@@ -223,7 +243,9 @@ export default function PointSeriesFactory(Private) {
           self.addEvents(svg);
           self.createEndZones(svg);
 
-          self.stackData(data);
+          data = self.copyDataObj(data);
+
+          const stackedData = self.stackData(data);
           self.series = [];
           _.each(self.chartConfig.series, (seriArgs, i) => {
             const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')];

@@ -60,7 +60,7 @@ export default function AreaChartFactory(Private) {
         };
       }
 
-      this.checkIfEnoughData();
+      //this.checkIfEnoughData();
     }
 
     addPath(svg, data) {
