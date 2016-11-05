@@ -92,7 +92,9 @@ export default function AxisScaleFactory(Private) {
       const data = this.visConfig.data.chartData();
       const chartPoints = _.reduce(data, (chartPoints, chart) => {
         const stackedData = {};
-        const points = this.visConfig.get('chart.series').reduce((points, seri, i) => {
+        // was visConfig.get('chart.series')
+
+        const points = chart.series.reduce((points, seri, i) => {
           const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === config.get('id');
           const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
           const shouldStackData = seri.mode === 'stacked';

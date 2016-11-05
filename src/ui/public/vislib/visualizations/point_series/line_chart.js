@@ -84,7 +84,7 @@ export default function LineChartFactory(Private) {
       }
 
       function cColor(d) {
-        return color(d.label);
+        return color(d.series);
       }
 
       function colorCircle(d) {

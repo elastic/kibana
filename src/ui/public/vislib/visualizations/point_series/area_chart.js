@@ -173,7 +173,7 @@ export default function AreaChartFactory(Private) {
       .append('circle')
       .call(this.baseChart._addIdentifier)
       .attr('stroke', function strokeColor(d) {
-        return color(d.label);
+        return color(d.series);
       })
       .attr('fill', 'transparent')
       .attr('stroke-width', circleStrokeWidth);
