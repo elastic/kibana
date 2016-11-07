@@ -17,6 +17,8 @@ export default function AxisTitleFactory(Private) {
 
       return function (selection) {
         selection.each(function () {
+          if (!config.get('show')) return;
+
           const el = this;
           const div = d3.select(el);
           const width = $(el).width();
