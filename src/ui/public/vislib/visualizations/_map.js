@@ -253,21 +253,21 @@ export default function MapFactory(Private, tilemap, $sanitize) {
 
         const southEast = bounds.getSouthEast();
         const northWest = bounds.getNorthWest();
-        let SouthEastLng = southEast.lng;
-        if (SouthEastLng > 180) {
-          SouthEastLng -= 360;
+        let southEastLng = southEast.lng;
+        if (southEastLng > 180) {
+          southEastLng -= 360;
         }
-        let NorthWestLng = northWest.lng;
-        if (NorthWestLng < -180) {
-          NorthWestLng += 360;
+        let northWestLng = northWest.lng;
+        if (northWestLng < -180) {
+          northWestLng += 360;
         }
 
-        const SouthEastLat = southEast.lat;
-        const NorthWestLat = northWest.lat;
+        const southEastLat = southEast.lat;
+        const northWestLat = northWest.lat;
 
         //Bounds cannot be created unless they form a box with larger than 0 dimensions
         //Invalid areas are rejected by ES.
-        if (SouthEastLat === NorthWestLat || SouthEastLng === NorthWestLng) {
+        if (southEastLat === northWestLat || southEastLng === northWestLng) {
           return;
         }
 
@@ -276,12 +276,12 @@ export default function MapFactory(Private, tilemap, $sanitize) {
           chart: self._chartData,
           bounds: {
             bottom_right: {
-              lat: SouthEastLat,
-              lon: SouthEastLng
+              lat: southEastLat,
+              lon: southEastLng
             },
             top_left: {
-              lat: NorthWestLat,
-              lon: NorthWestLng
+              lat: northWestLat,
+              lon: northWestLng
             }
           }
         });
