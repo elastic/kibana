@@ -4,7 +4,6 @@
  */
 
 import _ from 'lodash';
-import esBool from './es_bool';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 import SetupError from './setup_error';
 
