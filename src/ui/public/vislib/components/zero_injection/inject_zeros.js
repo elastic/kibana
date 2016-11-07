@@ -21,7 +21,7 @@ export default function ZeroInjectionUtilService(Private) {
     const keys = _(obj).map('values').flatten().map('x').uniq().sort().value();//orderXValues(obj);
 
     obj.forEach(function (series) {
-      const zeroArray = createZeroFilledArray(keys);
+      const zeroArray = createZeroFilledArray(keys, series.label);
       series.values = zeroFillDataArray(zeroArray, series.values);
     });
 
