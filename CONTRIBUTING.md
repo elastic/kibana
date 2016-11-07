@@ -74,10 +74,10 @@ We enjoy working with contributors to get their code accepted. There are many ap
 ### Branching
 
 * All work on the next major release goes into master.
-* Past major release branches are named `{majorVersion}.x`. They contain work that will go into the next minor release.
-* Past minor release branches are named `{majorVersion}.{minorVersion}`. They contain work that will go into the next patch release.
+* Past major release branches are named `{majorVersion}.x`. They contain work that will go into the next minor release. For example, if the next minor release is `5.2.0`, work for it should go into the `5.x` branch.
+* Past minor release branches are named `{majorVersion}.{minorVersion}`. They contain work that will go into the next patch release. For example, if the next patch release is `5.3.1`, work for it should go into the `5.3` branch.
 * All work is done on feature branches and merged into one of these branches.
-* Where appropriate, we'll backport changes into older release branche.
+* Where appropriate, we'll backport changes into older release branches.
 
 ### Commits and Merging
 
