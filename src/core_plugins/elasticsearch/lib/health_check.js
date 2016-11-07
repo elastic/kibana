@@ -6,6 +6,7 @@ import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import checkEsVersion from './check_es_version';
 import kibanaVersion from './kibana_version';
+import checkForTribe from './check_for_tribe';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -87,7 +88,13 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(() => checkEsVersion(server, kibanaVersion.get()))
+    .then(() => {
+      // execute version and tribe checks in parallel
+      // but always report the version check result first
+      const versionPromise = checkEsVersion(server, kibanaVersion.get());
+      const tribePromise = checkForTribe(client);
+      return versionPromise.then(() => tribePromise);
+    })
     .then(waitForShards)
     .then(setGreenStatus)
     .then(_.partial(migrateConfig, server))

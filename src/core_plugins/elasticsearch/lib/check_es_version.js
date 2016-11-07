@@ -7,12 +7,12 @@ import _ from 'lodash';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
- *  tracks the node descriptions that get logged in warnings so
- *  that we don't spam the log with the same message over and over.
+ * tracks the node descriptions that get logged in warnings so
+ * that we don't spam the log with the same message over and over.
  *
- *  There are situations, like in testing or multi-tenancy, where
- *  the server argument changes, so we must track the previous
- *  node warnings per server
+ * There are situations, like in testing or multi-tenancy, where
+ * the server argument changes, so we must track the previous
+ * node warnings per server
  */
 const lastWarnedNodesForServer = new WeakMap();
 
@@ -21,7 +21,13 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
   const client = server.plugins.elasticsearch.client;
 
-  return client.nodes.info()
+  return client.nodes.info({
+    filterPath: [
+      'nodes.*.version',
+      'nodes.*.http.publish_address',
+      'nodes.*.ip',
+    ]
+  })
   .then(function (info) {
     // Aggregate incompatible ES nodes.
     const incompatibleNodes = [];
