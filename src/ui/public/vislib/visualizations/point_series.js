@@ -41,17 +41,11 @@ export default function PointSeriesFactory(Private) {
       return charts[chartIndex];
     }
 
-    addClipPath(svg, width, height) {
-      // Prevents circles from being clipped at the top of the chart
+    addBackground(svg, width, height) {
       const startX = 0;
       const startY = 0;
-      const id = 'chart-area' + _.uniqueId();
 
-      // Creating clipPath
       return svg
-      //.attr('clip-path', 'url(#' + id + ')')
-      //.append('clipPath')
-      //.attr('id', id)
       .append('rect')
       .attr('x', startX)
       .attr('y', startY)
@@ -190,7 +184,7 @@ export default function PointSeriesFactory(Private) {
           .attr('width', width)
           .attr('height', height);
 
-          self.addClipPath(svg, width, height);
+          self.addBackground(svg, width, height);
           self.addEvents(svg);
           self.createEndZones(svg);
 
