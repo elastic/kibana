@@ -30,7 +30,7 @@ export default function AreaChartFactory(Private) {
    */
   class AreaChart extends PointSeri {
     constructor(handler, chartEl, chartData, seriesConfigArgs) {
-      super(handler, chartEl, chartData);
+      super(handler, chartEl, chartData, seriesConfigArgs);
 
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
       this.isOverlapping = (this.seriesConfig.mode !== 'stacked');
