@@ -12,6 +12,10 @@ A high level overview of our contributing guidelines.
   - [Voicing the importance of an issue](#voicing-the-importance-of-an-issue)
   - ["My issue isn't getting enough attention"](#my-issue-isnt-getting-enough-attention)
   - ["I want to help!"](#i-want-to-help)
+- [How We Use Git and GitHub](#how-we-use-git-and-github)
+  - [Branching](#branching)
+  - [Commits and Merging](#commits-and-merging)
+  - [What Goes Into a Pull Request](#what-goes-into-a-pull-request)
 - [Contributing Code](#contributing-code)
   - [Setting Up Your Development Environment](#setting-up-your-development-environment)
     - [Customizing `config/kibana.dev.yml`](#customizing-configkibanadevyml)
@@ -64,6 +68,31 @@ Feel free to bump your issues if you think they've been neglected for a prolonge
 **Now we're talking**. If you have a bug fix or new feature that you would like to contribute to Kibana, please **find or open an issue about it before you start working on it.** Talk about what you would like to do. It may be that somebody is already working on it, or that there are particular issues that you should know about before implementing the change.
 
 We enjoy working with contributors to get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code.
+
+## How We Use Git and GitHub
+
+### Branching
+
+* All work on the next major release goes into master.
+* Past major release branches are named `{majorVersion}.x`. They contain work that will go into the next minor release. For example, if the next minor release is `5.2.0`, work for it should go into the `5.x` branch.
+* Past minor release branches are named `{majorVersion}.{minorVersion}`. They contain work that will go into the next patch release. For example, if the next patch release is `5.3.1`, work for it should go into the `5.3` branch.
+* All work is done on feature branches and merged into one of these branches.
+* Where appropriate, we'll backport changes into older release branches.
+
+### Commits and Merging
+
+* Feel free to make as many commits as you want, while working on a branch.
+* When submitting a PR for review, please perform an interactive rebase to present a logical history that's easy for the reviewers to follow.
+* Please use your commit messages to include helpful information on your changes, e.g. changes to APIs, UX changes, bugs fixed, and an explanation of *why* you made the changes that you did.
+* Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing.
+* When merging, we'll squash your commits into a single commit.
+
+### What Goes Into a Pull Request
+
+* Please include an explanation of your changes in your PR description.
+* Links to relevant issues, external resources, or related PRs are very important and useful.
+* Please update any tests that pertain to your code, and add new tests where appropriate.
+* See [Submitting a Pull Request](#submitting-a-pull-request) for more info.
 
 ## Contributing Code
 
