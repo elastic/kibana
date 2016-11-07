@@ -69,8 +69,12 @@ export default function AxisConfigFactory() {
 
       this.data = chartConfig.data;
       if (this._values.type === 'category') {
-        this.values = this.data.xValues();
-        this.ordered = this.data.get('ordered');
+        if (!this._values.values) {
+          this.values = this.data.xValues();
+          this.ordered = this.data.get('ordered');
+        } else {
+          this.values = this._values.values;
+        }
         if (!this._values.labels.axisFormatter) {
           this._values.labels.axisFormatter = this.data.data.xAxisFormatter || this.data.get('xAxisFormatter');
         }

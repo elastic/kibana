@@ -10,8 +10,8 @@ export default function AxisScaleFactory(Private) {
       this.visConfig = visConfig;
 
       if (this.axisConfig.get('type') === 'category') {
-        this.values = this.visConfig.data.xValues();
-        this.ordered = this.visConfig.data.get('ordered');
+        this.values = this.axisConfig.values;
+        this.ordered = this.axisConfig.ordered;
       }
     };
 
@@ -23,7 +23,6 @@ export default function AxisScaleFactory(Private) {
       const config = this.axisConfig;
       return domain.map((val) => {
         val = parseInt(val, 10);
-
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
         if (config.isPercentage() && config.isUserDefined()) return val / 100;
         return val;
@@ -157,10 +156,9 @@ export default function AxisScaleFactory(Private) {
       return [1, max];
     };
 
-    getD3Scale(scaleType) {
-      // todo: why do we need this renaming ?
-      if (scaleType === 'square root') scaleType = 'sqrt'; // Rename 'square root' to 'sqrt'
-      scaleType = scaleType || 'linear';
+    getD3Scale(scaleTypeArg) {
+      let scaleType = scaleTypeArg || 'linear';
+      if (scaleType === 'square root') scaleType = 'sqrt';
 
       if (this.axisConfig.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
       if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();

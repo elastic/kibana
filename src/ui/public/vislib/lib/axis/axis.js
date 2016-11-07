@@ -22,8 +22,8 @@ export default function AxisFactory(Private) {
 
       this.axisConfig = new AxisConfig(this.visConfig, axisConfigArgs);
       if (this.axisConfig.get('type') === 'category') {
-        this.values = this.visConfig.data.xValues();
-        this.ordered = this.visConfig.data.get('ordered');
+        this.values = this.axisConfig.values;
+        this.ordered = this.axisConfig.ordered;
       }
       this.axisScale = new AxisScale(this.axisConfig, visConfig);
       this.axisTitle = new AxisTitle(this.axisConfig);
