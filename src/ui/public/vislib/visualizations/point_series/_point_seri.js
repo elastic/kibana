@@ -11,16 +11,12 @@ export default function PointSeriProvider(Private) {
       this.chartData = seriesData;
       this.seriesConfig = seriesConfig;
 
-      //this.validateDataCompliesWithScalingMethod(this.chartData);
+      this.validateDataCompliesWithScalingMethod(this.chartData);
     }
 
     validateDataCompliesWithScalingMethod(data) {
-      function valuesSmallerThanOne(d) {
-        return d.values && d.values.some(e => e.y < 1);
-      }
-
-      const invalidLogScale = data.series && data.series.some(valuesSmallerThanOne);
-      if (this.seriesConfig.scale === 'log' && invalidLogScale) {
+      const invalidLogScale = data.values && data.values.some(d => d.y < 1);
+      if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
         throw new errors.InvalidLogScaleValues();
       }
     };

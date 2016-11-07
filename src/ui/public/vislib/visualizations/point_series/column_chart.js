@@ -166,6 +166,7 @@ export default function ColumnChartFactory(Private) {
       const groupSpacingPercentage = 0.15;
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+      const isLogScale = this.getValueAxis().axisConfig.isLogScale();
       const minWidth = 1;
       let barWidth;
 
@@ -205,7 +206,8 @@ export default function ColumnChartFactory(Private) {
       }
 
       function heightFunc(d) {
-        return Math.abs(yScale(0) - yScale(d.y));
+        const baseValue = isLogScale ? 1 : 0;
+        return Math.abs(yScale(baseValue) - yScale(d.y));
       }
 
       // update

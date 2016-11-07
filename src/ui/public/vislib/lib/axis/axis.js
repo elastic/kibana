@@ -6,6 +6,7 @@ import AxisTitleProvider from 'ui/vislib/lib/axis/axis_title';
 import AxisLabelsProvider from 'ui/vislib/lib/axis/axis_labels';
 import AxisScaleProvider from 'ui/vislib/lib/axis/axis_scale';
 import AxisConfigProvider from 'ui/vislib/lib/axis/axis_config';
+import errors from 'ui/errors';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
@@ -252,6 +253,12 @@ export default function AxisFactory(Private) {
       };
     }
 
+    validate() {
+      if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
+        throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
+      }
+    }
+
     draw() {
       const self = this;
       const config = this.axisConfig;
@@ -271,6 +278,7 @@ export default function AxisFactory(Private) {
 
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
+          self.validate();
 
           const axis = self.getAxis(length);
 
