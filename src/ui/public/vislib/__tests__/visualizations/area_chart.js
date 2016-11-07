@@ -20,7 +20,8 @@ const someOtherVariables = {
 const visLibParams = {
   type: 'area',
   addLegend: true,
-  addTooltip: true
+  addTooltip: true,
+  mode: 'stacked'
 };
 
 
@@ -83,9 +84,9 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.chartData;
 
-          isStacked = stackedData['ValueAxis-1'].every(function (arr) {
+          isStacked = stackedData.series.every(function (arr) {
             return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });

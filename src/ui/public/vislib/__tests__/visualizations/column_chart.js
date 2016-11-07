@@ -58,9 +58,9 @@ dataTypesArray.forEach(function (dataType, i) {
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.chartData;
 
-          isStacked = stackedData['ValueAxis-1'].every(function (arr) {
+          isStacked = stackedData.series.every(function (arr) {
             return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });
@@ -69,7 +69,11 @@ dataTypesArray.forEach(function (dataType, i) {
       });
 
       it('should append a d.y0 key to the data object', function () {
-        expect(isStacked).to.be(true);
+        if (mode === 'grouped') {
+          expect(isStacked).to.be(false);
+        } else {
+          expect(isStacked).to.be(true);
+        }
       });
     });
 
