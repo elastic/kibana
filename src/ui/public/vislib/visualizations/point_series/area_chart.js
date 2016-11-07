@@ -81,7 +81,7 @@ export default function AreaChartFactory(Private) {
 
       // Append path
       const path = layer.append('path')
-      .call(this.baseChart._addIdentifier)
+      .attr('data-label', data.label)
       .style('fill', () => {
         return color(data.label);
       })
@@ -171,9 +171,9 @@ export default function AreaChartFactory(Private) {
       circles
       .enter()
       .append('circle')
-      .call(this.baseChart._addIdentifier, 'series')
-      .attr('stroke', function strokeColor(d) {
-        return color(d.series);
+      .attr('data-label', data.label)
+      .attr('stroke', () => {
+        return color(data.label);
       })
       .attr('fill', 'transparent')
       .attr('stroke-width', circleStrokeWidth);

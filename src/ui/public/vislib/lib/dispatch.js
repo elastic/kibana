@@ -235,7 +235,7 @@ export default function DispatchClass(Private, config) {
       const dimming = config.get('visualization:dimmingOpacity');
       $(element).parent().find('[data-label]')
         .css('opacity', 1)//Opacity 1 is needed to avoid the css application
-        .not((els, el) => $(el).data('label') === label)
+        .not((els, el) => String($(el).data('label')) === label)
         .css('opacity', justifyOpacity(dimming));
     }
 
