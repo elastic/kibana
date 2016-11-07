@@ -11,11 +11,10 @@ export function getTranslationsForLocale(locale) {
 
 /**
  * Return all translations registered for the default locale.
- * @param {Object} server - Hapi server instance
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-export function getTranslationsForDefaultLocale(server) {
-  return i18n.getTranslationsForDefaultLocale(server);
+export function getTranslationsForDefaultLocale() {
+  return i18n.getTranslationsForDefaultLocale();
 };
 
 /**
@@ -31,8 +30,8 @@ export function getRegisteredTranslationLocales() {
  * @param {Sring} languageTags -  BCP 47 language tags
  * @return {Object} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-export function getTranslationsForLocales(languageTags) {
-  return i18n.getTranslationsForLocales(languageTags);
+export function getTranslationsForPriorityLocaleFromLocaleList(languageTags) {
+  return i18n.getTranslationsForPriorityLocaleFromLocaleList(languageTags);
 };
 
 /**
@@ -41,4 +40,8 @@ export function getTranslationsForLocales(languageTags) {
  */
 export function registerTranslations(absolutePluginTranslationFilePath) {
   return i18n.registerTranslations(absolutePluginTranslationFilePath);
+};
+
+export function setI18nConfig(config) {
+  return i18n.setI18nConfig(config);
 };

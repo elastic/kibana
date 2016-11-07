@@ -67,7 +67,7 @@ describe('i18n module', function () {
 
     });
 
-    describe('getTranslationsForLocales', function () {
+    describe('getTranslationsForPriorityLocaleFromLocaleList', function () {
 
       it('no translations as no locale registered which matches, then get translations for default locale' , function () {
         const locales = [
@@ -87,8 +87,30 @@ describe('i18n module', function () {
             }
           }
         };
+        i18n.setI18nConfig(server.config);
         checkTranslationsForLocales(getLanguageTags(locales), {});
-        checkTranslationsForDefaultLocale(server, expectedTranslations);
+        checkTranslationsForDefaultLocale(expectedTranslations);
+        return;
+      });
+
+      it('de should be chosen as the default locale' , function () {
+        const locales = [
+          { code: 'es', region: 'ES', quality: 1.0 }
+        ];
+        const expectedTranslations = {
+          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
+          'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
+        };
+        const server = {
+          config: {
+            get: function () {
+              return 'de';
+            }
+          }
+        };
+        i18n.setI18nConfig(server.config);
+        checkTranslationsForLocales(getLanguageTags(locales), {});
+        checkTranslationsForDefaultLocale(expectedTranslations);
         return;
       });
 
@@ -97,11 +119,11 @@ describe('i18n module', function () {
           { code: 'es', region: 'ES', quality: 1.0 },
           { code: 'de', region: undefined, quality: 0.8 }
         ];
-        const expectedTranslationJson = {
+        const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
         };
-        checkTranslationsForLocales(getLanguageTags(locales), expectedTranslationJson);
+        checkTranslationsForLocales(getLanguageTags(locales), expectedTranslations);
         return;
       });
 
@@ -238,14 +260,14 @@ function checkTranslations(locale, expectedTranslations) {
   });
 }
 
-function checkTranslationsForDefaultLocale(server, expectedTranslations) {
-  return i18n.getTranslationsForDefaultLocale(server).then(function (actualTranslations) {
+function checkTranslationsForDefaultLocale(expectedTranslations) {
+  return i18n.getTranslationsForDefaultLocale().then(function (actualTranslations) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }
 
 function checkTranslationsForLocales(languageTags, expectedTranslations) {
-  return i18n.getTranslationsForLocales(languageTags).then(function (actualTranslations) {
+  return i18n.getTranslationsForPriorityLocaleFromLocaleList(languageTags).then(function (actualTranslations) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }

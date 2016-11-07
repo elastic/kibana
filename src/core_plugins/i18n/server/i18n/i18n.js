@@ -7,6 +7,7 @@ const asyncReadFile = Promise.promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
+let i18nConfig = null;
 let registeredTranslations = {};
 
 /**
@@ -24,8 +25,9 @@ export function getTranslationsForLocale(locale) {
     return asyncReadFile(filename, 'utf8')
     .then(fileContents => JSON.parse(fileContents))
     .catch(SyntaxError, function (e) {
-      return Promise.reject('Invalid json in ' + filename);
-    }).catch(function (e) {
+      throw new Error('Invalid json in ' + filename);
+    })
+    .catch(function (e) {
       throw new Error('Cannot read file ' + filename);
     });
   });
@@ -36,13 +38,12 @@ export function getTranslationsForLocale(locale) {
 
 /**
  * Return all translations registered for the default locale.
- * @param {Object} server - Hapi server instance
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-export function getTranslationsForDefaultLocale(server) {
+export function getTranslationsForDefaultLocale() {
   let defaultLocale = '';
   try {
-    defaultLocale = server.config.get('i18n.locale');
+    defaultLocale = i18nConfig.get('i18n.locale');
   } catch (e) {
     defaultLocale = 'en';
   }
@@ -59,18 +60,18 @@ export function getRegisteredTranslationLocales() {
 
 /**
  * Return translations for a suitable locale from a user side locale list
- * @param {Sring} languageTags -  BCP 47 language tags
- * @return {Object} - A Promise object which will contain on resolve a JSON object of all registered translations
+ * @param {Array<Sring>} languageTags -  BCP 47 language tags. The tags are listed in priority order as set in the Accept-Language header.
+ * @return {Object} - A Promise object which will contain on resolve a JSON object.
+ * This object will contain all registered translations for the highest priority locale which is registered with the i18n module.
+ * This object can be empty if no locale in the language tags can be matched against the registered locales.
  */
-export function getTranslationsForLocales(languageTags) {
+export function getTranslationsForPriorityLocaleFromLocaleList(languageTags) {
   let locale = '';
 
   if (!_.isEmpty(languageTags)) {
     const registeredLocales = getRegisteredTranslationLocales();
-    locale = getTranslationLocaleExactMatch(languageTags, registeredLocales);
-    if (locale === null || locale.length <= 0) {
-      locale = getTranslationLocaleBestCaseMatch(languageTags, registeredLocales);
-    }
+    locale = getTranslationLocaleExactMatch(languageTags, registeredLocales) ||
+      getTranslationLocaleBestCaseMatch(languageTags, registeredLocales) || '';
   }
 
   return getTranslationsForLocale(locale);
@@ -90,41 +91,37 @@ export function registerTranslations(absolutePluginTranslationFilePath) {
  * Unregister translation files
  */
 export function unregisterTranslations() {
-  registeredTranslations = [];
+  registeredTranslations = {};
 };
+
+/**
+ * Set the i18n configuration
+ * @param {Object} i18n module confioguration object
+ */
+export function setI18nConfig(config) {
+  i18nConfig = config;
+}
 
 function getLocaleFromFileName(fullFileName) {
   if (_.isEmpty(fullFileName)) throw new Error('Filename empty');
 
   const fileExt = path.extname(fullFileName);
-  if (fileExt.length <= 0 || fileExt !== TRANSLATION_FILE_EXTENSION) throw new Error('Invalid translation file ' + fullFileName);
+  if (fileExt.length <= 0 || fileExt !== TRANSLATION_FILE_EXTENSION) {
+    throw new Error('Translations must be in a JSON file. File being registered is ' + fullFileName);
+  }
 
   return path.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
 }
 
 function getTranslationLocaleExactMatch(languageTags, registeredLocales) {
-  const languageTagsLen = languageTags.length;
-  for (let indx = 0; indx < languageTagsLen; indx++) {
-    const languageTag = languageTags[indx];
-    if (registeredLocales.indexOf(languageTag) > -1) {
-      return languageTag;
-    }
-  }
-  return null;
+  return  _.find(languageTags, (tag) => _.contains(registeredLocales, tag));
 }
 
 function getTranslationLocaleBestCaseMatch(languageTags, registeredLocales) {
-  const languageTagsLen = languageTags.length;
-  const regLangsLen = registeredLocales.length;
-  for (let indx = 0; indx < languageTagsLen; indx++) {
-    const languageTag = languageTags[indx];
-    const languageCode = languageTag.slice(0, languageTag.indexOf('-'));
-    for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
-      const locale = registeredLocales[regIndx];
-      if (locale.match('^' + languageCode)) {
-        return locale;
-      }
-    }
-  }
-  return '';
+  // Find the first registered locale that begins with one of the language codes from the provided language tags.
+  // For example, if there is an 'en' language code, it would match an 'en-US' registered locale.
+  const languageCodes = _.map(languageTags, (tag) => _.first(tag.split('-'))) || [];
+  return _.find(languageCodes, (code) => {
+    return _.find(registeredLocales, (locale) => _.startsWith(locale, code));
+  });
 }
