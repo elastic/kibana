@@ -43,9 +43,9 @@ export default function DataFactory(Private) {
                 label: seri.label,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);
-                  newVal.aggConfig = seri.aggConfig;
-                  newVal.aggConfigResult = seri.aggConfigResult;
-                  newVal.extraMetrics = seri.extraMetrics;
+                  newVal.aggConfig = val.aggConfig;
+                  newVal.aggConfigResult = val.aggConfigResult;
+                  newVal.extraMetrics = val.extraMetrics;
                   return newVal;
                 })
               };
