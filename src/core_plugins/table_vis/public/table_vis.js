@@ -32,7 +32,7 @@ function TableVisTypeProvider(Private) {
     title: 'Data table',
     icon: 'fa-table',
     description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
-      'aggregation. Tip, a data table is available from many other charts by clicking grey bar at the bottom of the chart.',
+      'aggregation. Tip, a data table is available from many other charts by clicking the grey bar at the bottom of the chart.',
     template: tableVisTemplate,
     params: {
       defaults: {

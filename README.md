@@ -32,7 +32,7 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 | ES patch number is newer. | 5.1.__2__                  | 5.1.__5__          | ⚠️ Logged warning      |
 | ES minor number is newer. | 5.__1__.2                  | 5.__5__.0          | ⚠️ Logged warning      |
 | ES major number is newer. | __5__.1.2                  | __6__.0.0          | 🚫 Fatal error      |
-| ES patch number is older. | 5.1.__2__                  | 5.1.__0__          | 🚫 Fatal error      |
+| ES patch number is older. | 5.1.__2__                  | 5.1.__0__          | ⚠️ Logged warning      |
 | ES minor number is older. | 5.__1__.2                  | 5.__0__.0          | 🚫 Fatal error      |
 | ES major number is older. | __5__.1.2                  | __4__.0.0          | 🚫 Fatal error      |
 

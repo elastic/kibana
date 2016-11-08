@@ -164,7 +164,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     if ($injector.has('$route')) {
       const $route = $injector.get('$route');
 
-      if (self._shouldAutoReload(next, prev, $route)) {
+      if (self._shouldForceReload(next, prev, $route)) {
         const appState = Private(AppStateProvider).getAppState();
         if (appState) appState.destroy();
 
@@ -179,13 +179,18 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     }
   };
 
-  self._shouldAutoReload = function (next, prev, $route) {
+  // determine if the router will automatically reload the route
+  self._shouldForceReload = function (next, prev, $route) {
     if (reloading) return false;
 
     const route = $route.current && $route.current.$$route;
     if (!route) return false;
 
-    if (next.path !== prev.path) return false;
+    // for the purposes of determining whether the router will
+    // automatically be reloading, '' and '/' are equal
+    const nextPath = next.path || '/';
+    const prevPath = prev.path || '/';
+    if (nextPath !== prevPath) return false;
 
     const reloadOnSearch = route.reloadOnSearch;
     const searchSame = _.isEqual(next.search, prev.search);
