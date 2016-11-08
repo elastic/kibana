@@ -10,7 +10,7 @@ import _ from 'lodash';
  */
 export async function getTranslations(acceptLanguages, server) {
   const languageTags = getLanguageTags(acceptLanguages);
-  const translations = await server.plugins.i18n.getTranslationsForPriorityLocaleFromLocaleList(languageTags);
+  const translations = await server.plugins.i18n.getTranslations(languageTags);
   let fullTranslations = {};
   if (_.isEmpty(translations)) {
     fullTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();

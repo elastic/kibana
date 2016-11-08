@@ -1,75 +1,77 @@
 import expect from 'expect.js';
-import path from 'path';
 import _ from 'lodash';
 import { join } from 'path';
 
 import * as i18n from '../i18n/i18n';
 
-const FIXTURES = path.join(__dirname, 'fixtures');
+const FIXTURES = join(__dirname, 'fixtures');
 
 describe('i18n module', function () {
 
   describe('one plugin', function () {
 
-    before('registerTranslations - one plugin', function () {
+    beforeEach('registerTranslations - one plugin', function () {
       const pluginName = 'test_plugin_1';
-      const pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
+      const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
       const translationFiles = [
-        path.join(pluginTranslationPath, 'de.json'),
-        path.join(pluginTranslationPath, 'en.json')
+        join(pluginTranslationPath, 'de.json'),
+        join(pluginTranslationPath, 'en.json')
       ];
       translationFiles.forEach(i18n.registerTranslations);
     });
 
-    after('unregisterTranslations - one plugin', function () {
+    afterEach('unregisterTranslations - one plugin', function () {
       i18n.unregisterTranslations();
     });
 
     describe('getTranslationsForLocale', function () {
 
-      it('en translations are registered' , function () {
-        const locale = 'en';
+      it('should return the translations for en locale as registered' , function () {
+        const locales = [
+          { code: 'en', region: undefined, quality: 0.8 }
+        ];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the server with development mode defaults',
           'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
           'test_plugin_1-HOME': 'Run along home now!'
         };
-        checkTranslations(locale, expectedTranslationJson);
-        return;
+        return checkTranslations(locales, expectedTranslationJson);
       });
 
-      it('de translations are registered' , function () {
-        const locale = 'de';
+      it('should return the translations for de locale as registered' , function () {
+        const locales = [
+          { code: 'de', region: undefined, quality: 0.8 }
+        ];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
         };
-        checkTranslations(locale, expectedTranslationJson);
-        return;
+        return checkTranslations(locales, expectedTranslationJson);
       });
 
-      it('es translations not registered' , function () {
-        const locale = 'es';
-        checkTranslations(locale, {});
-        return;
+      it('should return an empty object for locale with no translations' , function () {
+        const locales = [
+          { code: 'es', region: undefined, quality: 0.8 }
+        ];
+        return checkTranslations(locales, {});
       });
 
     });
 
     describe('getRegisteredTranslationLocales', function () {
 
-      it('Translation locales are registered', function () {
+      it('should return all locales that are registered' , function () {
         const expectedLocales = ['en', 'de'];
-        checkRegisteredLocales(expectedLocales);
-        return;
+        return checkRegisteredLocales(expectedLocales);
       });
 
     });
 
     describe('getTranslationsForPriorityLocaleFromLocaleList', function () {
 
-      it('no translations as no locale registered which matches, then get translations for default locale' , function () {
+      it('should first return empty object for no locale registered and ' +
+         'then return translations for default locale as requested' , function () {
         const locales = [
           { code: 'es', region: 'ES', quality: 1.0 },
           { code: 'fr', region: undefined, quality: 0.8 }
@@ -88,12 +90,12 @@ describe('i18n module', function () {
           }
         };
         i18n.setI18nConfig(server.config);
-        checkTranslationsForLocales(getLanguageTags(locales), {});
-        checkTranslationsForDefaultLocale(expectedTranslations);
-        return;
+        checkTranslations(locales, {});
+        return checkTranslationsForDefaultLocale(expectedTranslations);
       });
 
-      it('de should be chosen as the default locale' , function () {
+      it('should first return empty object for no locale registered and then return translations for the' +
+         'default locale which is set to the de locale' , function () {
         const locales = [
           { code: 'es', region: 'ES', quality: 1.0 }
         ];
@@ -109,25 +111,40 @@ describe('i18n module', function () {
           }
         };
         i18n.setI18nConfig(server.config);
-        checkTranslationsForLocales(getLanguageTags(locales), {});
-        checkTranslationsForDefaultLocale(expectedTranslations);
-        return;
+        checkTranslations(locales, {});
+        return checkTranslationsForDefaultLocale(expectedTranslations);
       });
 
-      it('de translations should be chosen' , function () {
+      it('should pick the highest priority language for which translations exist' , function () {
         const locales = [
           { code: 'es', region: 'ES', quality: 1.0 },
-          { code: 'de', region: undefined, quality: 0.8 }
+          { code: 'de', region: undefined, quality: 0.8 },
+          { code: 'en', region: undefined, quality: 0.5 }
         ];
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
         };
-        checkTranslationsForLocales(getLanguageTags(locales), expectedTranslations);
-        return;
+        return checkTranslations(locales, expectedTranslations);
       });
 
-      it('No translations regsitered for locales, so empty translations returned' , function () {
+      it('should return translations for locale where best case match is chosen from registered locales' , function () {
+        const locales = [
+          { code: 'es', region: 'ES', quality: 1.0 },
+          { code: 'de-DE', region: undefined, quality: 0.8 }
+        ];
+        const expectedTranslations = {
+          'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
+        };
+        const pluginName = 'test_plugin_1';
+        const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
+        const translationFiles = [ join(pluginTranslationPath, 'es-ES.json') ];
+        translationFiles.forEach(i18n.registerTranslations);
+
+        return checkTranslations(locales, expectedTranslations);
+      });
+
+      it('should return an empty object for locales with no translations' , function () {
         const locales = [
           { code: 'es', region: 'ES', quality: 1.0 },
           { code: 'fr', region: undefined, quality: 0.8 }
@@ -138,8 +155,7 @@ describe('i18n module', function () {
           'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
           'test_plugin_1-HOME': 'Run along home now!'
         };
-        checkTranslationsForLocales(getLanguageTags(locales), {});
-        return;
+        return checkTranslations(locales, {});
       });
 
     });
@@ -148,27 +164,26 @@ describe('i18n module', function () {
 
   describe('multiple plugins', function () {
 
-    before('registerTranslations - multiple plugin', function () {
-      let pluginName = 'test_plugin_1';
-      let pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
-      let translationFiles = [
-        path.join(pluginTranslationPath, 'de.json'),
-        path.join(pluginTranslationPath, 'en.json')
+    beforeEach('registerTranslations - multiple plugin', function () {
+      const pluginTranslationPath = join(FIXTURES, 'translations');
+      const translationFiles = [
+        join(pluginTranslationPath, 'test_plugin_1', 'de.json'),
+        join(pluginTranslationPath, 'test_plugin_1', 'en.json'),
+        join(pluginTranslationPath, 'test_plugin_2', 'en.json')
       ];
-      pluginName = 'test_plugin_2';
-      pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
-      translationFiles.push(path.join(pluginTranslationPath, 'en.json'));
       translationFiles.forEach(i18n.registerTranslations);
     });
 
-    after('unregisterTranslations - multiple plugin', function () {
+    afterEach('unregisterTranslations - multiple plugin', function () {
       i18n.unregisterTranslations();
     });
 
     describe('getTranslationsForLocale', function () {
 
-      it('en translations are registered' , function () {
-        const locale = 'en';
+      it('should return the translations for en locale as registered' , function () {
+        const locales = [
+          { code: 'en', region: undefined, quality: 0.8 }
+        ];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the server with development mode defaults',
@@ -179,42 +194,42 @@ describe('i18n module', function () {
           'test_plugin_2-FFFFFFFFFFFF': 'This is FFFFFFFFFFFF string',
           'test_plugin_2-ZZZ': 'This is ZZZ string'
         };
-        checkTranslations(locale, expectedTranslationJson);
-        return;
+        return checkTranslations(locales, expectedTranslationJson);
       });
 
-      it('de translations are registered' , function () {
-        const locale = 'de';
+      it('should return the translations for de locale as registered' , function () {
+        const locales = [
+          { code: 'de', region: undefined, quality: 0.8 }
+        ];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
         };
-        checkTranslations(locale, expectedTranslationJson);
-        return;
+        return checkTranslations(locales, expectedTranslationJson);
       });
 
-      it('Translations are registered with non unique key' , function () {
+      it('should return the most recently registered translation for a key that has multiple translations' , function () {
         const pluginName = 'test_plugin_2';
-        const pluginTranslationPath = path.join(FIXTURES, 'translations', pluginName);
-        const translationFiles = [ path.join(pluginTranslationPath, 'de.json') ];
+        const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
+        const translationFiles = [ join(pluginTranslationPath, 'de.json') ];
         translationFiles.forEach(i18n.registerTranslations);
-        const locale = 'de';
+        const locales = [
+          { code: 'de', region: undefined, quality: 0.8 }
+        ];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS! I am regsitered afterwards!',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
         };
-        checkTranslations(locale, expectedTranslationJson);
-        return;
+        return checkTranslations(locales, expectedTranslationJson);
       });
 
     });
 
     describe('getRegisteredTranslationLocales', function () {
 
-      it('Translation locales are registered', function () {
+      it('should return all locales registered', function () {
         const expectedLocales = ['en', 'de'];
-        checkRegisteredLocales(expectedLocales);
-        return;
+        return checkRegisteredLocales(expectedLocales);
       });
 
     });
@@ -223,7 +238,10 @@ describe('i18n module', function () {
 
   describe('registerTranslations', function () {
 
-    it('Empty filename', function () {
+    it('should throw error when regsitering empty filename', function () {
+      // TODO mh: why does this line not work and linesbelow do?
+      //return expect(i18n.registerTranslations('')).to.throwError();
+
       try {
         i18n.registerTranslations('');
       } catch (err) {
@@ -232,7 +250,7 @@ describe('i18n module', function () {
       return;
     });
 
-    it('Filename no extension', function () {
+    it('should throw error when regsitering filename with no extension', function () {
       try {
         i18n.registerTranslations('file1');
       } catch (err) {
@@ -241,7 +259,7 @@ describe('i18n module', function () {
       return;
     });
 
-    it('Filename non JSON extension', function () {
+    it('should throw error when regsitering filename with non JSON extension', function () {
       try {
         i18n.registerTranslations('file1.txt');
       } catch (err) {
@@ -254,20 +272,17 @@ describe('i18n module', function () {
 
 });
 
-function checkTranslations(locale, expectedTranslations) {
-  return i18n.getTranslationsForLocale(locale).then(function (actualTranslations) {
-    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
-  });
-}
-
 function checkTranslationsForDefaultLocale(expectedTranslations) {
-  return i18n.getTranslationsForDefaultLocale().then(function (actualTranslations) {
+  return i18n.getTranslationsForDefaultLocale()
+  .then(function (actualTranslations) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }
 
-function checkTranslationsForLocales(languageTags, expectedTranslations) {
-  return i18n.getTranslationsForPriorityLocaleFromLocaleList(languageTags).then(function (actualTranslations) {
+function checkTranslations(locales, expectedTranslations) {
+  const languageTags = getLanguageTags(locales);
+  return i18n.getTranslations(languageTags)
+  .then(function (actualTranslations) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }

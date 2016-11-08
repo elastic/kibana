@@ -15,7 +15,7 @@ let registeredTranslations = {};
  * @param {string} locale - Translation locale to be returned
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
-export function getTranslationsForLocale(locale) {
+/*export function getTranslationsForLocale(locale) {
   if (!registeredTranslations.hasOwnProperty(locale)) {
     return Promise.resolve({});
   }
@@ -34,7 +34,7 @@ export function getTranslationsForLocale(locale) {
 
   return Promise.all(translations)
   .then(translations => _.assign({}, ...translations));
-};
+};*/
 
 /**
  * Return all translations registered for the default locale.
@@ -65,7 +65,7 @@ export function getRegisteredTranslationLocales() {
  * This object will contain all registered translations for the highest priority locale which is registered with the i18n module.
  * This object can be empty if no locale in the language tags can be matched against the registered locales.
  */
-export function getTranslationsForPriorityLocaleFromLocaleList(languageTags) {
+export function getTranslations(languageTags) {
   let locale = '';
 
   if (!_.isEmpty(languageTags)) {
@@ -101,6 +101,27 @@ export function unregisterTranslations() {
 export function setI18nConfig(config) {
   i18nConfig = config;
 }
+
+function getTranslationsForLocale(locale) {
+  if (!registeredTranslations.hasOwnProperty(locale)) {
+    return Promise.resolve({});
+  }
+
+  const translationFiles = registeredTranslations[locale];
+  const translations = _.map(translationFiles, (filename) => {
+    return asyncReadFile(filename, 'utf8')
+    .then(fileContents => JSON.parse(fileContents))
+    .catch(SyntaxError, function (e) {
+      throw new Error('Invalid json in ' + filename);
+    })
+    .catch(function (e) {
+      throw new Error('Cannot read file ' + filename);
+    });
+  });
+
+  return Promise.all(translations)
+  .then(translations => _.assign({}, ...translations));
+};
 
 function getLocaleFromFileName(fullFileName) {
   if (_.isEmpty(fullFileName)) throw new Error('Filename empty');
