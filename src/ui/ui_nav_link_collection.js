@@ -6,7 +6,7 @@ const inOrderCache = Symbol('inOrder');
 
 export default class UiNavLinkCollection extends Collection {
 
-  constructor(uiExports, parent) {
+  constructor(uiExports) {
     super();
     this.uiExports = uiExports;
   }
@@ -31,4 +31,4 @@ export default class UiNavLinkCollection extends Collection {
     return super.delete(value);
   }
 
-};
+}

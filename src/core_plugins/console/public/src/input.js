@@ -1,13 +1,9 @@
-let ace = require('ace');
 let $ = require('jquery');
 let ZeroClipboard = require('zeroclip');
-let ext_searchbox = require('ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');
-let mappings = require('./mappings');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
 let storage = require('./storage');
-let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
 import uiModules from 'ui/modules';
@@ -24,37 +20,28 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   input.commands.addCommand({
     name: 'auto indent request',
-    bindKey: {win: 'Ctrl-I', mac: 'Command-I'},
+    bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
     exec: function () {
       input.autoIndent();
     }
   });
   input.commands.addCommand({
     name: 'move to previous request start or end',
-    bindKey: {win: 'Ctrl-Up', mac: 'Command-Up'},
+    bindKey: { win: 'Ctrl-Up', mac: 'Command-Up' },
     exec: function () {
       input.moveToPreviousRequestEdge()
     }
   });
   input.commands.addCommand({
     name: 'move to next request start or end',
-    bindKey: {win: 'Ctrl-Down', mac: 'Command-Down'},
+    bindKey: { win: 'Ctrl-Down', mac: 'Command-Down' },
     exec: function () {
       input.moveToNextRequestEdge()
     }
   });
 
 
-  /**
-   * COPY AS CURL
-   *
-   * Since the copy functionality is powered by a flash movie (via ZeroClipboard)
-   * the only way to trigger the copy is with a litteral mouseclick from the user.
-   *
-   * The original shortcut will now just open the menu and highlight the
-   *
-   */
-  var zc = (function setupZeroClipboard() {
+  (function setupZeroClipboard() {
     var zc = new ZeroClipboard($copyAsCurlEl); // the ZeroClipboard instance
 
     zc.on('wrongflash noflash', function () {
@@ -89,7 +76,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
     });
 
     return zc;
-  }());
+  })();
 
   /**
    * Setup the "send" shortcut
@@ -224,7 +211,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   input.commands.addCommand({
     name: 'send to elasticsearch',
-    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+    bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     exec: sendCurrentRequestToES
   });
 
@@ -242,8 +229,8 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   require('./input_resize')(input, output);
 
   return input;
-};
+}
 
 export default function getInput() {
   return input;
-};
+}

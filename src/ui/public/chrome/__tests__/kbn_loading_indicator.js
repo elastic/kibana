@@ -1,6 +1,5 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import uiModules from 'ui/modules';
 import $ from 'jquery';
 
 import '../directives/loading_indicator/loading_indicator';
@@ -24,7 +23,7 @@ describe('kbnLoadingIndicator', function () {
 
   });
 
-  it(`doesn't have ng-hide class when there are connections`, function () {
+  it('doesn\'t have ng-hide class when there are connections', function () {
     const $el = compile(true);
     expect($el.hasClass('ng-hide')).to.be(false);
   });

@@ -31,7 +31,7 @@ describe('version_check request filter', function () {
     });
 
     return kbnServer;
-  };
+  }
 
   let kbnServer;
   beforeEach(async () => kbnServer = await makeServer());

@@ -1,10 +1,10 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-const _ = require('lodash');
-const assert = require('chai');
+import _ from 'lodash';
+import assert from 'chai';
 const expect = assert.expect;
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, () => {
 
@@ -44,7 +44,7 @@ describe(filename, () => {
   });
 
   describe('symbol', () => {
-    var symbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
+    const symbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
     _.each(symbols, (symbol) => {
       it(`is ${symbol}`, () => {
         return invoke(fn, [seriesList, null, null, null, null, symbol]).then((r) => {

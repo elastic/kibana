@@ -6,7 +6,7 @@ describe('Geohash Agg', function () {
 
   describe('write', function () {
 
-    let paramWriter = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
+    const paramWriter = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
       return function BucketMock(geohashProvider) {
         return geohashProvider.params[4];
       };
@@ -45,7 +45,7 @@ describe('Geohash Agg', function () {
 
       Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel) => {
         it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
-          const output = {params: {}};
+          const output = { params: {} };
           paramWriter.write({
             vis: {
               hasUiState: () => true,

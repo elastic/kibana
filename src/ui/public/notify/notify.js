@@ -1,13 +1,9 @@
-import _ from 'lodash';
-import $ from 'jquery';
 import modules from 'ui/modules';
-import errors from 'ui/notify/errors';
 import Notifier from 'ui/notify/notifier';
 import 'ui/notify/directives';
-import chrome from 'ui/chrome';
 import { kbnIndex } from 'ui/metadata';
-let module = modules.get('kibana/notify');
-let rootNotifier = new Notifier();
+const module = modules.get('kibana/notify');
+const rootNotifier = new Notifier();
 
 module.factory('createNotifier', function () {
   return function (opts) {

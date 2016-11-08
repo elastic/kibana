@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FilterBarLibMapScriptProvider from 'ui/filter_bar/lib/map_script';
@@ -22,9 +21,9 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      let filter = {
+      const filter = {
         meta: { index: 'logstash-*', field: 'script number' },
-        script: {script: { inline: 'doc["script number"].value * 5', params: { value: 35}}}
+        script: { script: { inline: 'doc["script number"].value * 5', params: { value: 35 } } }
       };
       mapScript(filter).then(function (result) {
         expect(result).to.have.property('key', 'script number');
@@ -35,7 +34,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapScript(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
@@ -44,7 +43,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return a value for a range/histogram filter from a scripted field', (done) => {
-      let filter = {
+      const filter = {
         meta: {
           index: 'logstash-*',
           formattedValue: '1,000.00 to 2,000.00',

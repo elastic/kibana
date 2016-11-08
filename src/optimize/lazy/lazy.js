@@ -1,9 +1,9 @@
 import { isWorker } from 'cluster';
-module.exports = async (kbnServer, server, config) => {
+module.exports = async kbnServer => {
 
 
   if (!isWorker) {
-    throw new Error(`lazy optimization is only available in "watch" mode`);
+    throw new Error('lazy optimization is only available in "watch" mode');
   }
 
   /**

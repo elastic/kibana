@@ -17,7 +17,7 @@ async function listPackages(settings) {
     .map(file => file.replace(/\\/g, '/'))
     .map(file => file.match(regExp))
     .compact()
-    .map(([ file, _, folder ]) => ({ file, folder }))
+    .map(([ file, , folder ]) => ({ file, folder }))
     .uniq()
     .value();
 }
@@ -140,4 +140,4 @@ export async function extract(settings, logger) {
     logger.error(err);
     throw new Error('Error extracting plugin archive');
   }
-};
+}

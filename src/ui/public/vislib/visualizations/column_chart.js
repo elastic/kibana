@@ -81,7 +81,7 @@ export default function ColumnChartFactory(Private) {
       }
 
       return bars;
-    };
+    }
 
     /**
      * Determines whether bars are grouped or stacked and updates the D3
@@ -98,7 +98,7 @@ export default function ColumnChartFactory(Private) {
         return this.addGroupedBars(bars);
       }
       return this.addStackedBars(bars);
-    };
+    }
 
     /**
      * Adds stacked bars to column chart visualization
@@ -111,7 +111,6 @@ export default function ColumnChartFactory(Private) {
       const data = this.chartData;
       const xScale = this.handler.xAxis.xScale;
       const yScale = this.handler.yAxis.yScale;
-      const height = yScale.range()[0];
       const yMin = this.handler.yAxis.yScale.domain()[0];
 
       let barWidth;
@@ -160,7 +159,7 @@ export default function ColumnChartFactory(Private) {
         });
 
       return bars;
-    };
+    }
 
     /**
      * Adds grouped bars to column chart visualization
@@ -174,7 +173,6 @@ export default function ColumnChartFactory(Private) {
       const yScale = this.handler.yAxis.yScale;
       const data = this.chartData;
       const n = data.series.length;
-      const height = yScale.range()[0];
       const groupSpacingPercentage = 0.15;
       const isTimeScale = (data.ordered && data.ordered.date);
       const minWidth = 1;
@@ -216,7 +214,7 @@ export default function ColumnChartFactory(Private) {
         });
 
       return bars;
-    };
+    }
 
     /**
      * Adds Events to SVG rect
@@ -242,7 +240,7 @@ export default function ColumnChartFactory(Private) {
       }
 
       return attachedEvents;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -322,8 +320,8 @@ export default function ColumnChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return ColumnChart;
-};
+}

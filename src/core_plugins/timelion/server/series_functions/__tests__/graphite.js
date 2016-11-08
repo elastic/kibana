@@ -1,9 +1,8 @@
-var proxyquire =  require('proxyquire');
-var Promise = require('bluebird');
-var _ = require('lodash');
-var expect = require('chai').expect;
+import proxyquire from 'proxyquire';
+import Promise from 'bluebird';
+const expect = require('chai').expect;
 
-var graphiteResponse = function (url) {
+const graphiteResponse = function () {
   return Promise.resolve({
     json: function () {
       return [{
@@ -19,10 +18,10 @@ var graphiteResponse = function (url) {
   });
 };
 
-var filename = require('path').basename(__filename);
-var fn = proxyquire(`../${filename}`, {'node-fetch': graphiteResponse});
+const filename = require('path').basename(__filename);
+const fn = proxyquire(`../${filename}`, { 'node-fetch': graphiteResponse });
 
-var invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, function () {
   it('should wrap the graphite response up in a seriesList', function () {

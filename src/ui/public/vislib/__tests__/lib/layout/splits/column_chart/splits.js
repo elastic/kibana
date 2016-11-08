@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
@@ -173,9 +172,9 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart title split function', function () {
-      var visEl;
-      var newEl;
-      var fixture;
+      let visEl;
+      let newEl;
+      let fixture;
 
       beforeEach(ngMock.inject(function () {
         visEl = el.append('div').attr('class', 'vis-wrapper');

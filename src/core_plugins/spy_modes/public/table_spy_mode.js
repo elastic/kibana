@@ -1,5 +1,3 @@
-import { saveAs } from '@spalger/filesaver';
-import _ from 'lodash';
 import 'ui/agg_table';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
@@ -14,7 +12,7 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     display: 'Table',
     order: 1,
     template: tableSpyModeTemplate,
-    link: function tableLinkFn($scope, $el) {
+    link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
         'esResp'

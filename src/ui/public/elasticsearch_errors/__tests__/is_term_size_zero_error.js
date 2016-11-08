@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import isTermSizeZeroError from '../is_term_size_zero_error';
 
@@ -18,12 +17,12 @@ describe('isTermSizeZeroError', () => {
     expect(isTermSizeZeroError(error)).to.be(true);
   });
 
-  it(`returns false if it doesn't contain the identifying string`, () => {
+  it('returns false if it doesn\'t contain the identifying string', () => {
     const error = {
       resp: {
         error: {
           root_cause: [{
-            reason: `Some crazy Java exception`,
+            reason: 'Some crazy Java exception',
           }],
         }
       }

@@ -6,14 +6,14 @@ import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/cre
 import ipRangesTemplate from 'ui/agg_types/controls/ip_ranges.html';
 
 export default function RangeAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
 
   return new BucketAggType({
     name: 'ip_range',
     title: 'IPv4 Range',
     createFilter: createFilter,
-    getKey: function (bucket, key, agg) {
+    getKey: function (bucket, key) {
       if (key) return key;
       const from = _.get(bucket, 'from', '-Infinity');
       const to = _.get(bucket, 'to', 'Infinity');
@@ -34,12 +34,12 @@ export default function RangeAggDefinition(Private) {
         name: 'ranges',
         default: {
           fromTo: [
-            {from: '0.0.0.0', to: '127.255.255.255'},
-            {from: '128.0.0.0', to: '191.255.255.255'}
+            { from: '0.0.0.0', to: '127.255.255.255' },
+            { from: '128.0.0.0', to: '191.255.255.255' }
           ],
           mask: [
-            {mask: '0.0.0.0/1'},
-            {mask: '128.0.0.0/2'}
+            { mask: '0.0.0.0/1' },
+            { mask: '128.0.0.0/2' }
           ]
         },
         editor: ipRangesTemplate,
@@ -58,4 +58,4 @@ export default function RangeAggDefinition(Private) {
       }
     ]
   });
-};
+}

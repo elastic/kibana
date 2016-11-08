@@ -130,7 +130,7 @@ export default function AreaChartFactory(Private) {
       });
 
       return path;
-    };
+    }
 
     /**
      * Adds Events to SVG circles
@@ -153,7 +153,7 @@ export default function AreaChartFactory(Private) {
       }
 
       return attachedEvents;
-    };
+    }
 
     /**
      * Adds SVG circles to area chart
@@ -225,7 +225,7 @@ export default function AreaChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Adds SVG clipPath
@@ -252,7 +252,7 @@ export default function AreaChartFactory(Private) {
       .attr('y', startY)
       .attr('width', width)
       .attr('height', height);
-    };
+    }
 
     checkIfEnoughData() {
       const series = this.chartData.series;
@@ -266,14 +266,14 @@ export default function AreaChartFactory(Private) {
       if (notEnoughData) {
         throw new errors.NotEnoughData(message);
       }
-    };
+    }
 
     validateWiggleSelection() {
       const isWiggle = this._attr.mode === 'wiggle';
       const ordered = this.handler.data.get('ordered');
 
       if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -372,8 +372,8 @@ export default function AreaChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return AreaChart;
-};
+}

@@ -7,7 +7,7 @@ import IndexedArray from 'ui/indexed_array';
 import Notifier from 'ui/notify/notifier';
 
 export default function FieldAggParamFactory(Private, $filter) {
-  let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
   const notifier = new Notifier();
 
   _.class(FieldAggParam).inherits(BaseAggParam);
@@ -71,7 +71,7 @@ export default function FieldAggParamFactory(Private, $filter) {
 
     const validField = this.getFieldOptions(aggConfig).byName[fieldName];
     if (!validField) {
-      notifier.error(`Saved "field" parameter is now invalid. Please select a new field.`);
+      notifier.error('Saved "field" parameter is now invalid. Please select a new field.');
     }
 
     return validField;
@@ -88,7 +88,7 @@ export default function FieldAggParamFactory(Private, $filter) {
    * @return {undefined}
    */
   FieldAggParam.prototype.write = function (aggConfig, output) {
-    let field = aggConfig.getField();
+    const field = aggConfig.getField();
 
     if (!field) {
       throw new TypeError('"field" is a required parameter');
@@ -105,4 +105,4 @@ export default function FieldAggParamFactory(Private, $filter) {
   };
 
   return FieldAggParam;
-};
+}

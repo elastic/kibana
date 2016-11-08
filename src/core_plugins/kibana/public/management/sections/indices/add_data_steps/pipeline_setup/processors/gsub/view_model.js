@@ -22,4 +22,4 @@ export class Gsub extends Processor {
       replacement: this.replacement || ''
     };
   }
-};
+}

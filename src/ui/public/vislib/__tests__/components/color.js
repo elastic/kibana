@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -11,7 +10,6 @@ import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/colo
 describe('Vislib Color Module Test Suite', function () {
   let seedColors;
   let mappedColors;
-  let config;
 
   describe('Color (main)', function () {
     let previousConfig;
@@ -116,7 +114,7 @@ describe('Vislib Color Module Test Suite', function () {
     });
 
     it('should return the value from the specified color mapping overrides', function () {
-      const colorFn = getColors(arr, {good: 'red'});
+      const colorFn = getColors(arr, { good: 'red' });
       expect(colorFn('good')).to.be('red');
     });
   });
@@ -151,7 +149,7 @@ describe('Vislib Color Module Test Suite', function () {
     }));
 
     it('should not include colors used by the config', ngMock.inject((config) => {
-      const newConfig = {bar: seedColors[0]};
+      const newConfig = { bar: seedColors[0] };
       config.set('visualization:colorMapping', newConfig);
 
       const arr = ['foo', 'baz', 'qux'];
@@ -163,7 +161,7 @@ describe('Vislib Color Module Test Suite', function () {
     }));
 
     it('should create a unique array of colors even when config is set', ngMock.inject((config) => {
-      const newConfig = {bar: seedColors[0]};
+      const newConfig = { bar: seedColors[0] };
       config.set('visualization:colorMapping', newConfig);
 
       const arr = ['foo', 'bar', 'baz', 'qux'];
@@ -177,7 +175,7 @@ describe('Vislib Color Module Test Suite', function () {
     it('should treat different formats of colors as equal', ngMock.inject((config) => {
       const color = d3.rgb(seedColors[0]);
       const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
-      const newConfig = {bar: rgb};
+      const newConfig = { bar: rgb };
       config.set('visualization:colorMapping', newConfig);
 
       const arr = ['foo', 'bar', 'baz', 'qux'];

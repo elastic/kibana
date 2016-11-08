@@ -9,7 +9,7 @@ function ObjDefine(defaults, prototype) {
 }
 
 ObjDefine.REDEFINE_SUPPORTED = (function () {
-  let a = Object.create(Object.prototype, {
+  const a = Object.create(Object.prototype, {
     prop: {
       configurable: true,
       value: 1
@@ -66,7 +66,7 @@ ObjDefine.prototype.comp = function (name, val) {
  * @return {object} - created object
  */
 ObjDefine.prototype.create = function () {
-  let self = this;
+  const self = this;
   self.obj = Object.create(this.prototype, self.descs);
 
   if (!ObjDefine.REDEFINE_SUPPORTED && !self.prototype.toJSON) {
@@ -76,7 +76,7 @@ ObjDefine.prototype.create = function () {
     // due to https://github.com/ariya/phantomjs/issues/11856
     self.obj.toJSON = function () {
       return _.transform(self.obj, function (json, val, key) {
-        let desc = self.descs[key];
+        const desc = self.descs[key];
         if (desc && desc.enumerable && val == null) return;
         json[key] = val;
       }, {});
@@ -97,8 +97,8 @@ ObjDefine.prototype._define = function (name, val, exported, changeable) {
 };
 
 ObjDefine.prototype._describe = function (name, val, exported, changeable) {
-  let self = this;
-  let exists = val != null;
+  const self = this;
+  const exists = val != null;
 
   if (exported && ObjDefine.REDEFINE_SUPPORTED) {
     return {

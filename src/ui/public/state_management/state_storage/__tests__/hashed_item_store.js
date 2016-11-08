@@ -35,7 +35,7 @@ describe('hashedItemStore', () => {
           // so let's protect ourselves from accidentally breaking this test.
           throw new Error('Missing HashedItemStore.PERSISTED_INDEX_KEY');
         }
-        sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({a, b, c}));
+        sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({ a, b, c }));
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
         expect(hashedItemStore._indexedItems).to.eql([a, c, b]);
@@ -65,8 +65,8 @@ describe('hashedItemStore', () => {
         });
       });
 
-      describe(`if the item doesn't exist in sessionStorage`, () => {
-        describe(`if there's storage space`, () => {
+      describe('if the item doesn\'t exist in sessionStorage', () => {
+        describe('if there\'s storage space', () => {
           let sessionStorage;
           let hashedItemStore;
           const hash = 'a';
@@ -88,7 +88,7 @@ describe('hashedItemStore', () => {
           });
         });
 
-        describe(`if there isn't storage space`, () => {
+        describe('if there isn\'t storage space', () => {
           let fakeTimer;
           let sessionStorage;
           let hashedItemStore;
@@ -143,7 +143,7 @@ describe('hashedItemStore', () => {
             });
           });
 
-          describe(`and the item won't fit`, () => {
+          describe('and the item won\'t fit', () => {
             let itemTooBigToFit;
 
             beforeEach(() => {
@@ -161,7 +161,7 @@ describe('hashedItemStore', () => {
               expect(sessionStorage.getItem('c')).to.equal(null);
             });
 
-            it(`doesn't persist the item in sessionStorage`, () => {
+            it('doesn\'t persist the item in sessionStorage', () => {
               setItemLater(hash, itemTooBigToFit);
               expect(sessionStorage.getItem(hash)).to.equal(null);
             });
@@ -230,7 +230,7 @@ describe('hashedItemStore', () => {
         });
       });
 
-      describe(`if the item doesn't exist in sessionStorage`, () => {
+      describe('if the item doesn\'t exist in sessionStorage', () => {
         let sessionStorage;
         let hashedItemStore;
         const hash = 'a';

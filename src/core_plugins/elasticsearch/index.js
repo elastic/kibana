@@ -46,7 +46,7 @@ module.exports = function ({ Plugin }) {
       }
     },
 
-    init(server, options) {
+    init(server) {
       const kibanaIndex = server.config().get('kibana.index');
 
       // Expose the client to the server

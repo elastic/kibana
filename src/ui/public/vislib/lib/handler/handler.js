@@ -27,7 +27,7 @@ export default function HandlerBaseClass(Private) {
       this.charts = [];
 
       this._attr = _.defaults(vis._attr || {}, {
-        'margin': {top: 10, right: 3, bottom: 5, left: 3}
+        'margin': { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
       this.xAxis = opts.xAxis;
@@ -90,7 +90,7 @@ export default function HandlerBaseClass(Private) {
       if (!dataType) {
         throw new errors.NoResults();
       }
-    };
+    }
 
     /**
      * Renders the constructors that create the visualization,
@@ -134,7 +134,7 @@ export default function HandlerBaseClass(Private) {
         charts.push(chart);
         chart.render();
       });
-    };
+    }
 
     chartEventProxyToggle(method) {
       return function (event, chart) {
@@ -157,7 +157,7 @@ export default function HandlerBaseClass(Private) {
      */
     removeAll(el) {
       return d3.select(el).selectAll('*').remove();
-    };
+    }
 
     /**
      * Displays an error message in the DOM
@@ -188,7 +188,7 @@ export default function HandlerBaseClass(Private) {
       }
 
       return div.append('h4').text(message);
-    };
+    }
 
     /**
      * Destroys all the charts in the visualization
@@ -209,8 +209,8 @@ export default function HandlerBaseClass(Private) {
           chart.destroy();
         }
       });
-    };
+    }
   }
 
   return Handler;
-};
+}

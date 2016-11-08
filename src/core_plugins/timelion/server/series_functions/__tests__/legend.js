@@ -1,9 +1,8 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-const _ = require('lodash');
 const expect = require('chai').expect;
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, () => {
 
@@ -15,7 +14,7 @@ describe(filename, () => {
   it('should create the _global object if it does not exist', () => {
     expect(seriesList.list[0]._global).to.equal(undefined);
     return invoke(fn, [seriesList, 'nw', 3]).then((r) => {
-      expect(r.output.list[0]._global).to.eql({legend:{noColumns: 3, position: 'nw'}});
+      expect(r.output.list[0]._global).to.eql({ legend:{ noColumns: 3, position: 'nw' } });
     });
   });
 

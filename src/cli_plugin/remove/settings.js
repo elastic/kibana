@@ -12,4 +12,4 @@ export function parse(command, options) {
   settings.pluginPath = resolve(settings.pluginDir, settings.plugin);
 
   return settings;
-};
+}

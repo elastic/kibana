@@ -34,7 +34,7 @@ export default function XAxisFactory(Private) {
      */
     render() {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
-    };
+    }
 
     /**
      * Returns d3 x axis scale function.
@@ -50,7 +50,7 @@ export default function XAxisFactory(Private) {
         return d3.time.scale.utc();
       }
       return d3.scale.ordinal();
-    };
+    }
 
     /**
      * Add domain to the x axis scale.
@@ -68,7 +68,7 @@ export default function XAxisFactory(Private) {
         return this.getTimeDomain(scale, this.xValues);
       }
       return this.getOrdinalDomain(scale, this.xValues);
-    };
+    }
 
     /**
      * Returns D3 time domain
@@ -80,15 +80,15 @@ export default function XAxisFactory(Private) {
      */
     getTimeDomain(scale, data) {
       return scale.domain([this.minExtent(data), this.maxExtent(data)]);
-    };
+    }
 
     minExtent(data) {
       return this._calculateExtent(data || this.xValues, 'min');
-    };
+    }
 
     maxExtent(data) {
       return this._calculateExtent(data || this.xValues, 'max');
-    };
+    }
 
     /**
      *
@@ -110,7 +110,7 @@ export default function XAxisFactory(Private) {
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, []));
-    };
+    }
 
     /**
      * Add the interval to a point on the x axis,
@@ -121,7 +121,7 @@ export default function XAxisFactory(Private) {
      */
     addInterval(x) {
       return this.modByInterval(x, +1);
-    };
+    }
 
     /**
      * Subtract the interval to a point on the x axis,
@@ -132,7 +132,7 @@ export default function XAxisFactory(Private) {
      */
     subtractInterval(x) {
       return this.modByInterval(x, -1);
-    };
+    }
 
     /**
      * Modify the x value by n intervals, properly
@@ -160,7 +160,7 @@ export default function XAxisFactory(Private) {
       });
 
       return y.valueOf();
-    };
+    }
 
     /**
      * Return a nominal(d3 ordinal) domain
@@ -172,7 +172,7 @@ export default function XAxisFactory(Private) {
      */
     getOrdinalDomain(scale, xValues) {
       return scale.domain(xValues);
-    };
+    }
 
     /**
      * Return the range for the x axis scale
@@ -190,7 +190,7 @@ export default function XAxisFactory(Private) {
         return domain.range([0, width]);
       }
       return domain.rangeBands([0, width], 0.1);
-    };
+    }
 
     /**
      * Return the x axis scale
@@ -203,7 +203,7 @@ export default function XAxisFactory(Private) {
       const domain = this.getDomain(this.getScale());
 
       return this.getRange(domain, width);
-    };
+    }
 
     /**
      * Creates d3 xAxis function
@@ -223,7 +223,7 @@ export default function XAxisFactory(Private) {
       .ticks(10)
       .tickFormat(this.xAxisFormatter)
       .orient('bottom');
-    };
+    }
 
     /**
      * Renders the x axis
@@ -263,7 +263,7 @@ export default function XAxisFactory(Private) {
 
         selection.call(self.filterOrRotate());
       };
-    };
+    }
 
     /**
      * Returns a function that evaluates scale type and
@@ -292,7 +292,7 @@ export default function XAxisFactory(Private) {
         selection.call(self.fitTitles());
 
       };
-    };
+    }
 
     /**
      * Rotate the axis tick labels within selection
@@ -344,7 +344,7 @@ export default function XAxisFactory(Private) {
           .attr('height', self._attr.xAxisLabelHt);
         }
       };
-    };
+    }
 
     /**
      * Returns a string that is truncated to fit size
@@ -371,7 +371,7 @@ export default function XAxisFactory(Private) {
         str = str.substr(0, endChar) + '...';
       }
       return str;
-    };
+    }
 
     /**
      * Filter out text labels by width and position on axis
@@ -410,7 +410,7 @@ export default function XAxisFactory(Private) {
           }
         });
       };
-    };
+    }
 
     /**
      * Returns a function that adjusts axis titles and
@@ -426,7 +426,6 @@ export default function XAxisFactory(Private) {
       const visEls = $('.vis-wrapper');
       let xAxisChartTitle;
       let yAxisChartTitle;
-      let text;
       let titles;
 
       return function () {
@@ -434,55 +433,26 @@ export default function XAxisFactory(Private) {
         visEls.each(function () {
           const visEl = d3.select(this);
           const $visEl = $(this);
-          const xAxisTitle = $visEl.find('.x-axis-title');
-          const yAxisTitle = $visEl.find('.y-axis-title');
-          let titleWidth = xAxisTitle.width();
-          let titleHeight = yAxisTitle.height();
-
-          text = visEl.select('.x-axis-title')
-          .select('svg')
-          .attr('width', titleWidth)
-          .select('text')
-          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
-
-          text = visEl.select('.y-axis-title')
-          .select('svg')
-          .attr('height', titleHeight)
-          .select('text')
-          .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
 
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
-            titleWidth = xAxisChartTitle.find('.chart-title').width();
+            xAxisChartTitle.find('.chart-title').width();
 
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
-            titles.each(function () {
-              text = d3.select(this)
-              .select('svg')
-              .attr('width', titleWidth)
-              .select('text')
-              .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
-            });
+            titles.each(function () {});
           }
 
           if ($visEl.find('.y-axis-chart-title').length) {
             yAxisChartTitle = $visEl.find('.y-axis-chart-title');
-            titleHeight = yAxisChartTitle.find('.chart-title').height();
+            yAxisChartTitle.find('.chart-title').height();
 
             titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
-            titles.each(function () {
-              text = d3.select(this)
-              .select('svg')
-              .attr('height', titleHeight)
-              .select('text')
-              .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
-            });
+            titles.each(function () {});
           }
-
         });
 
       };
-    };
+    }
 
     /**
      * Appends div to make .y-axis-spacer-block
@@ -506,8 +476,8 @@ export default function XAxisFactory(Private) {
         visEl.select('.inner-spacer-block').style('height', xAxisHt);
       });
 
-    };
+    }
   }
 
   return XAxis;
-};
+}

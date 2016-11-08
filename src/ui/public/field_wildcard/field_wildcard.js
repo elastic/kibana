@@ -1,4 +1,4 @@
-import { endsWith, escapeRegExp, memoize } from 'lodash';
+import { escapeRegExp, memoize } from 'lodash';
 
 export default function fieldWildcard(config) {
   const metaFields = config.get('metaFields');
@@ -25,4 +25,4 @@ export default function fieldWildcard(config) {
   }
 
   return { makeRegEx, fieldWildcardMatcher, fieldWildcardFilter };
-};
+}

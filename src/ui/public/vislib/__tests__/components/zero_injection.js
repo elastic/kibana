@@ -1,5 +1,4 @@
 
-import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -166,11 +165,11 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: 'v1', y: 234},
-          {x: 'v2', y: 34},
-          {x: 'v3', y: 834},
-          {x: 'v4', y: 1234},
-          {x: 'v5', y: 4}
+          { x: 'v1', y: 234 },
+          { x: 'v2', y: 34 },
+          { x: 'v3', y: 834 },
+          { x: 'v4', y: 1234 },
+          { x: 'v5', y: 4 }
         ]
       }
     ]
@@ -181,25 +180,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: '1', y: 234},
-          {x: '2', y: 34},
-          {x: '3', y: 834},
-          {x: '4', y: 1234},
-          {x: '5', y: 4}
+          { x: '1', y: 234 },
+          { x: '2', y: 34 },
+          { x: '3', y: 834 },
+          { x: '4', y: 1234 },
+          { x: '5', y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: '1', y: 1234},
-          {x: '3', y: 234},
-          {x: '5', y: 34}
+          { x: '1', y: 1234 },
+          { x: '3', y: 234 },
+          { x: '5', y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: '3', y: 834}
+          { x: '3', y: 834 }
         ]
       }
     ]
@@ -210,25 +209,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: 1, y: 234},
-          {x: 2, y: 34},
-          {x: 3, y: 834},
-          {x: 4, y: 1234},
-          {x: 5, y: 4}
+          { x: 1, y: 234 },
+          { x: 2, y: 34 },
+          { x: 3, y: 834 },
+          { x: 4, y: 1234 },
+          { x: 5, y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: 1, y: 1234},
-          {x: 3, y: 234},
-          {x: 5, y: 34}
+          { x: 1, y: 1234 },
+          { x: 3, y: 234 },
+          { x: 5, y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: 3, y: 834}
+          { x: 3, y: 834 }
         ]
       }
     ]
@@ -581,7 +580,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     const xValueArr = [1, 2, 3, 4, 5];
     let createZeroArray;
     let arr1;
-    const arr2 = [ {x: 3, y: 834} ];
+    const arr2 = [ { x: 3, y: 834 } ];
     let results;
 
     beforeEach(ngMock.module('kibana'));

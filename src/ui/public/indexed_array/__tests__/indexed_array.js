@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import IndexedArray from 'ui/indexed_array';
 
 // this is generally a data-structure that IndexedArray is good for managing
-let users = [
+const users = [
   { name: 'John', id: 69, username: 'beast', group: 'admins' },
   { name: 'Anon', id:  0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
@@ -43,7 +43,7 @@ describe('IndexedArray', function () {
 
   describe('Indexing', function () {
     it('provides the initial set', function () {
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         initialSet: [1, 2, 3]
       });
 
@@ -55,7 +55,7 @@ describe('IndexedArray', function () {
     });
 
     it('indexes the initial set', function () {
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         index: ['username'],
         initialSet: users
       });
@@ -66,11 +66,11 @@ describe('IndexedArray', function () {
 
     it('updates indices after values are added', function () {
       // split up the user list, and add it in chunks
-      let firstUser = users.slice(0, 1).pop();
-      let otherUsers = users.slice(1);
+      const firstUser = users.slice(0, 1).pop();
+      const otherUsers = users.slice(1);
 
       // start off with all but the first
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
         initialSet: otherUsers
@@ -86,7 +86,7 @@ describe('IndexedArray', function () {
 
     it('updates indices after values are removed', function () {
       // start off with all
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
         initialSet: users
@@ -95,24 +95,24 @@ describe('IndexedArray', function () {
       // remove the last
       reg.pop();
 
-      let expectedCount = users.length - 1;
+      const expectedCount = users.length - 1;
       // indexed lists should be updated
       expect(reg).to.have.length(expectedCount);
 
-      let sumOfGroups = _.reduce(reg.byGroup, function (note, group) {
+      const sumOfGroups = _.reduce(reg.byGroup, function (note, group) {
         return note + group.length;
       }, 0);
       expect(sumOfGroups).to.eql(expectedCount);
     });
 
     it('removes items based on a predicate', function () {
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
         initialSet: users
       });
 
-      reg.remove({name: 'John'});
+      reg.remove({ name: 'John' });
 
       expect(_.eq(reg.raw, reg.slice(0))).to.be(true);
       expect(reg.length).to.be(3);
@@ -120,7 +120,7 @@ describe('IndexedArray', function () {
     });
 
     it('updates indices after values are re-ordered', function () {
-      let rawUsers = users.slice(0);
+      const rawUsers = users.slice(0);
 
       // collect and shuffle the ids available
       let ids = [];
@@ -128,18 +128,18 @@ describe('IndexedArray', function () {
       ids = _.shuffle(ids);
 
       // move something here
-      let toI = ids.shift();
+      const toI = ids.shift();
       // from here
-      let fromI = ids.shift();
+      const fromI = ids.shift();
       // do the move
-      let move = function (arr) { arr.splice(toI, 0, arr.splice(fromI, 1)[0]); };
+      const move = function (arr) { arr.splice(toI, 0, arr.splice(fromI, 1)[0]); };
 
-      let reg = new IndexedArray({
+      const reg = new IndexedArray({
         index: ['username'],
         initialSet: rawUsers
       });
 
-      let index = reg.byUsername;
+      const index = reg.byUsername;
 
       move(reg);
 

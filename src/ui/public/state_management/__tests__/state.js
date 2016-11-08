@@ -53,7 +53,7 @@ describe('State Management', function () {
     it('should reset the state to the defaults', function () {
       const { state, getUnhashedSearch } = setup({ initial: { message: ['test'] } });
       state.reset();
-      let search = getUnhashedSearch(state);
+      const search = getUnhashedSearch(state);
       expect(search).to.have.property('_s');
       expect(search._s).to.equal('(message:!(test))');
       expect(state.message).to.eql(['test']);
@@ -97,7 +97,7 @@ describe('State Management', function () {
     it('should save to $location.search()', function () {
       const { state, getUnhashedSearch } = setup({ initial: { test: 'foo' } });
       state.save();
-      let search = getUnhashedSearch(state);
+      const search = getUnhashedSearch(state);
       expect(search).to.have.property('_s');
       expect(search._s).to.equal('(test:foo)');
     });
@@ -160,7 +160,7 @@ describe('State Management', function () {
 
     it('should call fetch when $routeUpdate is fired on $rootScope', function () {
       const { state } = setup();
-      let spy = sinon.spy(state, 'fetch');
+      const spy = sinon.spy(state, 'fetch');
       $rootScope.$emit('$routeUpdate', 'test');
       sinon.assert.calledOnce(spy);
     });

@@ -5,12 +5,12 @@ describe('Table Group class', function () {
   let TableGroup;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     TableGroup = Private(AggResponseTabifyTableGroupProvider);
   }));
 
   it('exposes tables array and empty aggConfig, key and title', function () {
-    let tableGroup = new TableGroup();
+    const tableGroup = new TableGroup();
     expect(tableGroup.tables).to.be.an('array');
     expect(tableGroup.aggConfig).to.be(null);
     expect(tableGroup.key).to.be(null);

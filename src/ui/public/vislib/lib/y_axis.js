@@ -32,19 +32,19 @@ export default function YAxisFactory(Private) {
      */
     render() {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
-    };
+    }
 
     _isPercentage() {
       return (this._attr.mode === 'percentage');
-    };
+    }
 
     _isUserDefined() {
       return (this._attr.setYExtents);
-    };
+    }
 
     _isYExtents() {
       return (this._attr.defaultYExtents);
-    };
+    }
 
     _validateUserExtents(domain) {
       const self = this;
@@ -56,7 +56,7 @@ export default function YAxisFactory(Private) {
         if (self._isPercentage() && self._attr.setYExtents) return val / 100;
         return val;
       });
-    };
+    }
 
     _getExtents(domain) {
       const min = domain[0];
@@ -67,15 +67,15 @@ export default function YAxisFactory(Private) {
       if (this._attr.scale === 'log') return this._logDomain(min, max); // Negative values cannot be displayed with a log scale.
       if (!this._isYExtents() && !this._isUserDefined()) return [Math.min(0, min), Math.max(0, max)];
       return domain;
-    };
+    }
 
     _throwCustomError(message) {
       throw new Error(message);
-    };
+    }
 
     _throwLogScaleValuesError() {
       throw new errors.InvalidLogScaleValues();
-    };
+    }
 
     /**
      * Returns the appropriate D3 scale
@@ -90,7 +90,7 @@ export default function YAxisFactory(Private) {
       if (typeof d3.scale[fnName] !== 'function') return this._throwCustomError('YAxis.getScaleType: ' + fnName + ' is not a function');
 
       return d3.scale[fnName]();
-    };
+    }
 
     /**
      * Return the domain for log scale, i.e. the extent of the log scale.
@@ -103,7 +103,7 @@ export default function YAxisFactory(Private) {
     _logDomain(min, max) {
       if (min < 0 || max < 0) return this._throwLogScaleValuesError();
       return [1, max];
-    };
+    }
 
     /**
      * Creates the d3 y scale function
@@ -124,22 +124,22 @@ export default function YAxisFactory(Private) {
       // Prevents bars from going off the chart when the y extents are within the domain range
       if (this._attr.type === 'histogram') this.yScale.clamp(true);
       return this.yScale;
-    };
+    }
 
     getScaleType() {
       return this._attr.scale;
-    };
+    }
 
     tickFormat() {
       const isPercentage = this._attr.mode === 'percentage';
       if (isPercentage) return d3.format('%');
       if (this.yAxisFormatter) return this.yAxisFormatter;
       return d3.format('n');
-    };
+    }
 
     _validateYScale(yScale) {
       if (!yScale || _.isNaN(yScale)) throw new Error('yScale is ' + yScale);
-    };
+    }
 
     /**
      * Creates the d3 y axis function
@@ -160,7 +160,7 @@ export default function YAxisFactory(Private) {
       .orient('left');
 
       return this.yAxis;
-    };
+    }
 
     /**
      * Create a tick scale for the y axis that modifies the number of ticks
@@ -179,7 +179,7 @@ export default function YAxisFactory(Private) {
       .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(height));
-    };
+    }
 
     /**
      * Renders the y axis to the visualization
@@ -229,8 +229,8 @@ export default function YAxisFactory(Private) {
           }
         });
       };
-    };
+    }
   }
 
   return YAxis;
-};
+}

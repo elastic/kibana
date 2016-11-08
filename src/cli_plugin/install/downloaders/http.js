@@ -1,7 +1,7 @@
 import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
-import { createWriteStream, unlinkSync } from 'fs';
+import { createWriteStream } from 'fs';
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.
@@ -53,7 +53,7 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
     const { req, resp } = await sendRequest({ sourceUrl, timeout });
 
     try {
-      let totalSize = parseFloat(resp.headers['content-length']) || 0;
+      const totalSize = parseFloat(resp.headers['content-length']) || 0;
       const progress = new Progress(logger);
       progress.init(totalSize);
 

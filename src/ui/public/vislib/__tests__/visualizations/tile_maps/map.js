@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -44,12 +43,10 @@ describe('TileMap Map Tests', function () {
   }));
 
   describe('instantiation', function () {
-    let map;
     let createStub;
 
     beforeEach(function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the map', function () {
@@ -102,7 +99,7 @@ describe('TileMap Map Tests', function () {
 
     it('should create a WMS layer if WMS is enabled', function () {
       expect(L.tileLayer.wms.called).to.be(false);
-      map = new TileMapMap($mockMapEl, geoJsonData, {attr: {wms: {enabled: true}}});
+      map = new TileMapMap($mockMapEl, geoJsonData, { attr: { wms: { enabled: true } } });
       map._createMap({});
       expect(L.tileLayer.wms.called).to.be(true);
       L.tileLayer.restore();
@@ -110,15 +107,12 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('attachEvents', function () {
-    let map;
-
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
         this._tileLayer = leafletMocks.tileLayer;
         this.map = leafletMocks.map;
         this._attachEvents();
       });
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should attach interaction events', function () {

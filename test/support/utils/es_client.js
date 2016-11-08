@@ -4,11 +4,10 @@ import {
   Try,
 } from './';
 
+import elasticsearch from 'elasticsearch';
+import Promise from 'bluebird';
+
 export default (function () {
-
-  var elasticsearch = require('elasticsearch');
-  var Promise = require('bluebird');
-
   function EsClient(server) {
     if (!server) throw new Error('No server defined');
 
@@ -50,7 +49,7 @@ export default (function () {
     ** Also used after deleting .kibana index to know Kibana has recreated it.
     */
     getConfigId: function () {
-      var configId;
+      let configId;
 
       return this.client.search({
         index: '.kibana',
@@ -78,7 +77,7 @@ export default (function () {
     ** Gets defaultIndex from the config doc.
     */
     getDefaultIndex: function () {
-      var defaultIndex;
+      let defaultIndex;
 
       return this.client.search({
         index: '.kibana',
@@ -108,9 +107,8 @@ export default (function () {
     */
     updateConfigDoc: function (docMap) {
       // first we need to get the config doc's id so we can use it in our _update call
-      var self = this;
-      var configId;
-      var docMapString = JSON.stringify(docMap);
+      const self = this;
+      const docMapString = JSON.stringify(docMap);
 
       return this.getConfigId()
       // now that we have the id, we can update
@@ -137,8 +135,7 @@ export default (function () {
     * @return {Promise} A promise that is resolved when elasticsearch has a response
     */
     deleteAndUpdateConfigDoc: function (docMap) {
-      var self = this;
-      var configId;
+      const self = this;
 
       return this.delete('.kibana')
       .then(function () {
@@ -147,7 +144,6 @@ export default (function () {
             return self.getConfigId();
           });
         } else {
-          var docMapString = JSON.stringify(docMap);
           return Try.try(function () {
             return self.updateConfigDoc(docMap);
           });

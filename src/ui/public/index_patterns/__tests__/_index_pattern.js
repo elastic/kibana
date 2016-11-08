@@ -22,18 +22,14 @@ describe('index pattern', function () {
   let mappingSetup;
   let mockLogstashFields;
   let DocSource;
-  let config;
   let docSourceResponse;
-  let indexPatternId = 'test-pattern';
+  const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
-  let $rootScope;
   let intervals;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector, _config_) {
-    $rootScope = $injector.get('$rootScope');
-    config = _config_;
+  beforeEach(ngMock.inject(function (Private) {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
@@ -155,11 +151,9 @@ describe('index pattern', function () {
     // override the default indexPattern, with a truncated field list
     const indexPatternId = 'test-pattern';
     let indexPattern;
-    let fieldLength;
     let customFields;
 
     beforeEach(function () {
-      fieldLength = mockLogstashFields.length;
       customFields = [{
         analyzed: true,
         count: 30,
@@ -225,7 +219,7 @@ describe('index pattern', function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        const expected = _.filter(indexPattern.fields, {scripted: true});
+        const expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(['script number']);
       });
     });
@@ -301,7 +295,7 @@ describe('index pattern', function () {
     });
 
     it('should decrement the poplarity count', function () {
-      indexPattern.fields.forEach(function (field, i) {
+      indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
         const decrementAmount = -2;
@@ -471,7 +465,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

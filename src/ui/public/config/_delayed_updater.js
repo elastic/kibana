@@ -27,8 +27,8 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
     unsavedChanges = {};
 
     persist(changes)
-      .then(result => settle(promises, `resolve`, result))
-      .catch(reason => settle(promises, `reject`, reason));
+      .then(result => settle(promises, 'resolve', result))
+      .catch(reason => settle(promises, 'reject', reason));
   }
 
   function settle(listeners, decision, data) {
@@ -47,15 +47,15 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
   }
 
   function remove(key) {
-    return sync(`delete`, { postfix: `/${key}` });
+    return sync('delete', { postfix: `/${key}` });
   }
 
   function edit(key, value) {
-    return sync(`post`, { postfix: `/${key}`, data: { value } });
+    return sync('post', { postfix: `/${key}`, data: { value } });
   }
 
   function editMany(changes) {
-    return sync(`post`, { data: { changes } });
+    return sync('post', { data: { changes } });
   }
 
   function sync(method, { postfix = '', data } = {}) {
@@ -65,4 +65,4 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
       data
     });
   }
-};
+}

@@ -1,6 +1,4 @@
-let ace = require('ace');
 let acequire = require('acequire');
-let mode_json = require('ace/mode-json');
 
 var oop = acequire("ace/lib/oop");
 var TextMode = acequire("ace/mode/text").Mode;
@@ -24,7 +22,7 @@ var Mode = function () {
 oop.inherits(Mode, TextMode);
 
 (function () {
-  this.getCompletions = function (editor, session, pos, prefix) {
+  this.getCompletions = function () {
     // autocomplete is done by the autocomplete module.
     return [];
   };

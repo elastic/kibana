@@ -1,6 +1,5 @@
 import createAgent from './create_agent';
 import mapUri from './map_uri';
-import { resolve } from 'url';
 import { assign } from 'lodash';
 
 function createProxy(server, method, route, config) {
@@ -39,7 +38,7 @@ function createProxy(server, method, route, config) {
   assign(options.config, config);
 
   server.route(options);
-};
+}
 
 createProxy.createPath = function createPath(path) {
   const pre = '/elasticsearch';

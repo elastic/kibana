@@ -60,13 +60,13 @@ import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
 
 export default function SearchSourceFactory(Promise, Private, config) {
-  let SourceAbstract = Private(AbstractDataSourceProvider);
-  let SearchRequest = Private(SearchRequestProvider);
-  let SegmentedRequest = Private(SegmentedRequestProvider);
-  let searchStrategy = Private(SearchStrategyProvider);
-  let normalizeSortRequest = Private(NormalizeSortRequestProvider);
+  const SourceAbstract = Private(AbstractDataSourceProvider);
+  const SearchRequest = Private(SearchRequestProvider);
+  const SegmentedRequest = Private(SegmentedRequestProvider);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
-  let forIp = Symbol('for which index pattern?');
+  const forIp = Symbol('for which index pattern?');
 
   function isIndexPattern(val) {
     return Boolean(val && typeof val.toIndexList === 'function');
@@ -100,11 +100,11 @@ export default function SearchSourceFactory(Promise, Private, config) {
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
-    let state = this._state;
+    const state = this._state;
 
-    let hasSource = state.source;
-    let sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
-    let sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
+    const hasSource = state.source;
+    const sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
+    const sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
     if (sourceIsForOurIp) {
       delete state.source;
     }
@@ -147,7 +147,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
    * @return {undefined|searchSource}
    */
   SearchSource.prototype.getParent = function (onlyHardLinked) {
-    let self = this;
+    const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
     return onlyHardLinked ? undefined : Private(rootSearchSource).get();
@@ -168,9 +168,9 @@ export default function SearchSourceFactory(Promise, Private, config) {
   };
 
   SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
-    let self = this;
+    const self = this;
     return Promise.try(function addRequest() {
-      let req = new SegmentedRequest(self, Promise.defer(), initFunction);
+      const req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
       // return promises created by the completion handler so that
       // errors will bubble properly
@@ -215,7 +215,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
    */
   SearchSource.prototype._mergeProp = function (state, val, key) {
     if (typeof val === 'function') {
-      let source = this;
+      const source = this;
       return Promise.cast(val(this))
       .then(function (newVal) {
         return source._mergeProp(state, newVal, key);
@@ -273,7 +273,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       // ignore if we already have a value
       if (state.body[key] == null) {
         if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val }};
+          val = { query_string: { query: val } };
         }
 
         state.body[key] = val;
@@ -282,4 +282,4 @@ export default function SearchSourceFactory(Promise, Private, config) {
   };
 
   return SearchSource;
-};
+}

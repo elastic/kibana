@@ -1,9 +1,9 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function createDateAgg(config, tlConfig) {
-  var dateAgg = {
+  const dateAgg = {
     time_buckets: {
-      meta: {type: 'time_buckets'},
+      meta: { type: 'time_buckets' },
       date_histogram: {
         field: config.timefield,
         interval: config.interval,
@@ -18,7 +18,7 @@ module.exports = function createDateAgg(config, tlConfig) {
   };
 
   dateAgg.time_buckets.aggs = {};
-  _.each(config.metric, function (metric, i) {
+  _.each(config.metric, function (metric) {
     metric = metric.split(':');
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
@@ -26,13 +26,13 @@ module.exports = function createDateAgg(config, tlConfig) {
       dateAgg.time_buckets.aggs[metric] = {
         bucket_script: {
           buckets_path: '_count',
-          script: {inline: '_value', lang: 'expression'}
+          script: { inline: '_value', lang: 'expression' }
         }
       };
     } else if (metric[0] && metric[1]) {
-      var metricName = metric[0] + '(' + metric[1] + ')';
+      const metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
-      dateAgg.time_buckets.aggs[metricName][metric[0]] = {field: metric[1]};
+      dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
     } else {
       throw new Error ('`metric` requires metric:field or simply count');
     }

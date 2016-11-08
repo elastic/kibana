@@ -1,4 +1,4 @@
-import { bdd, defaultTimeout, scenarioManager, esClient, common } from '../../../support';
+import { bdd, defaultTimeout, scenarioManager, esClient } from '../../../support';
 
 bdd.describe('settings app', function () {
   this.timeout = defaultTimeout;

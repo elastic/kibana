@@ -66,7 +66,7 @@ export default function VisFactory(Private) {
 
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runWithoutResizeChecker('render');
-    };
+    }
 
     /**
      * Resizes the visualization
@@ -84,7 +84,7 @@ export default function VisFactory(Private) {
       } else {
         this.render(this.data, this.uiState);
       }
-    };
+    }
 
     _runWithoutResizeChecker(method) {
       this.resizeChecker.stopSchedule();
@@ -106,7 +106,7 @@ export default function VisFactory(Private) {
         }
 
       }
-    };
+    }
 
     /**
      * Destroys the visualization
@@ -125,7 +125,7 @@ export default function VisFactory(Private) {
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
-    };
+    }
 
     /**
      * Sets attributes on the visualization
@@ -137,7 +137,7 @@ export default function VisFactory(Private) {
     set(name, val) {
       this._attr[name] = val;
       this.render(this.data, this.uiState);
-    };
+    }
 
     /**
      * Gets attributes from the visualization
@@ -148,7 +148,7 @@ export default function VisFactory(Private) {
      */
     get(name) {
       return this._attr[name];
-    };
+    }
 
     /**
      * Turns on event listeners.
@@ -167,7 +167,7 @@ export default function VisFactory(Private) {
       if (first && added && this.handler) this.handler.enable(event);
 
       return ret;
-    };
+    }
 
     /**
      * Turns off event listeners.
@@ -184,8 +184,8 @@ export default function VisFactory(Private) {
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
-    };
+    }
   }
 
   return Vis;
-};
+}

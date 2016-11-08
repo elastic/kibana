@@ -11,7 +11,7 @@ uiModules
     require: ['?^ngModel', '^fieldEditor'],
     scope: true,
     link: function ($scope, $el, attrs, cntrls) {
-      let ngModelCntrl = cntrls[0];
+      const ngModelCntrl = cntrls[0];
 
       $scope.samples = null;
       $scope.$bind('inputs', attrs.inputs);
@@ -21,14 +21,14 @@ uiModules
         '[]inputs'
       ], function () {
         $scope.samples = null;
-        let field = $scope.editor.field;
+        const field = $scope.editor.field;
 
         if (!field || !field.format) {
           return;
         }
 
         Promise.try(function () {
-          let converter = field.format.getConverterFor('html');
+          const converter = field.format.getConverterFor('html');
           $scope.samples = _.map($scope.inputs, function (input) {
             return [input, $sce.trustAsHtml(converter(input))];
           });

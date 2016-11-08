@@ -18,4 +18,4 @@ export default function FetchForEachRequestStrategy(Private, Promise) {
   }
 
   return forEachStrategy;
-};
+}

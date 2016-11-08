@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function argType(arg) {
   if (_.isArray(arg)) {

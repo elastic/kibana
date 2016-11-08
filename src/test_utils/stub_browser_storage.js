@@ -67,7 +67,7 @@ export default class StubBrowserStorage {
   setStubbedSizeLimit(sizeLimit) {
     // We can't reconcile a size limit with the "stored" items, if the stored items size exceeds it.
     if (sizeLimit < this._size) {
-      throw new Error(`You can't set a size limit smaller than the current size.`);
+      throw new Error('You can\'t set a size limit smaller than the current size.');
     }
 
     this._sizeLimit = sizeLimit;

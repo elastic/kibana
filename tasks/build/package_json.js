@@ -1,8 +1,7 @@
+import { defaults } from 'lodash';
 module.exports = function (grunt) {
-  let { defaults } = require('lodash');
-
-  let pkg = grunt.config.get('pkg');
-  let deepModules = grunt.config.get('deepModules');
+  const pkg = grunt.config.get('pkg');
+  const deepModules = grunt.config.get('deepModules');
 
   grunt.registerTask('_build:packageJson', function () {
     const { sha, number, version } = grunt.config.get('build');

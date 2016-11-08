@@ -353,7 +353,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
-
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -365,7 +364,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     const sort = $state.sort;
     const timeField = $scope.indexPattern.timeFieldName;
-    const totalSize = $scope.size || $scope.opts.sampleSize;
 
     /**
      * Basically an emum.
@@ -482,7 +480,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       $scope.searchSource.highlight({
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
-        fields: {'*': {}},
+        fields: { '*': {} },
         require_field_match: false,
         fragment_size: 2147483647 // Limit of an integer.
       });
@@ -589,4 +587,4 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   }
 
   init();
-};
+}

@@ -1,9 +1,4 @@
-import {
-  bdd,
-  remote,
-  scenarioManager,
-  defaultTimeout
-} from '../../support';
+import { bdd, remote, defaultTimeout } from '../../support';
 
 bdd.describe('Home', function () {
   this.timeout = defaultTimeout;

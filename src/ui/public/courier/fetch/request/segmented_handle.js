@@ -37,4 +37,4 @@ export default function CourierSegmentedReqHandle(Private) {
       this[segmentedRequest].setSortFn(...args);
     }
   };
-};
+}

@@ -40,7 +40,7 @@ uiModules.get('apps/management')
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
         const sourceFilters = $scope.indexPattern.sourceFilters && $scope.indexPattern.sourceFilters.map(f => f.value) || [];
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
-        _.find($scope.editSections, {index: 'indexedFields'}).count = fields.length; // Update the tab count
+        _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });

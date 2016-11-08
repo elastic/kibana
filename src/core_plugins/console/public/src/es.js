@@ -1,4 +1,3 @@
-let _ = require('lodash');
 let $ = require('jquery');
 
 let esVersion = [];
@@ -7,16 +6,13 @@ module.exports.getVersion = function () {
   return esVersion;
 };
 
-module.exports.send = function (method, path, data, server, disable_auth_alert) {
+module.exports.send = function (method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
   if (data && method == "GET") {
     method = "POST";
   }
-
-  // delayed loading for circular references
-  var settings = require("./settings");
 
   let contentType;
   if (data) {

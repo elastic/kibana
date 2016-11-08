@@ -39,4 +39,4 @@ export default function pluginRemove(program) {
 `common examples:
   remove x-pack`)
   .action(processCommand);
-};
+}

@@ -9,7 +9,7 @@ let expected;
 describe('Filter Manager', function () {
   describe('Phrase filter builder', function () {
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));
     }));
@@ -22,7 +22,7 @@ describe('Filter Manager', function () {
       expected.query = {
         foo: 'bar'
       };
-      expect(fn({foo: 'bar'}, indexPattern.id)).to.eql(expected);
+      expect(fn({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
     });
 
   });

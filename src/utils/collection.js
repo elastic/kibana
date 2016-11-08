@@ -1,5 +1,5 @@
 
-let set = Symbol('internal set');
+const set = Symbol('internal set');
 
 module.exports = class Collection {
   constructor() { // Set's have a length of 0, mimic that

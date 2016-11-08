@@ -1,5 +1,4 @@
-var _ = require('lodash');
-var moment = require('moment');
+import _ from 'lodash';
 
 // Upsampling of non-cummulative sets
 // Good: average, min, max
@@ -9,13 +8,13 @@ var moment = require('moment');
 module.exports = function (dataTuples, targetTuples) {
 
   if (dataTuples.length > targetTuples.length) {
-    throw new Error (`Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`);
+    throw new Error ('Don\'t use the \'carry\' fit method to down sample, use \'scale\' or \'average\'');
   }
 
-  var currentCarry = dataTuples[0][1];
-  return _.map(targetTuples, function (bucket, h) {
-    var targetTime = bucket[0];
-    var dataTime = dataTuples[0][0];
+  let currentCarry = dataTuples[0][1];
+  return _.map(targetTuples, function (bucket) {
+    const targetTime = bucket[0];
+    const dataTime = dataTuples[0][0];
 
     if (dataTuples[0] && targetTime >= dataTime) {
       currentCarry = dataTuples[0][1];

@@ -195,7 +195,7 @@ module.exports = function (api) {
               __scope_link: '_put_mapping.type.properties.field'
             }
           },
-          copy_to: {__one_of: ['{field}', ['{field}']]},
+          copy_to: { __one_of: ['{field}', ['{field}']] },
 
           // nested
           include_in_parent: BOOLEAN,

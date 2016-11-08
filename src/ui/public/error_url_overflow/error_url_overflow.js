@@ -1,5 +1,4 @@
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
 import KbnUrlProvider from 'ui/url';
 
 import './error_url_overflow.less';

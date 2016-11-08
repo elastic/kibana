@@ -1,6 +1,6 @@
-var alter = require('../lib/alter.js');
-var _ = require('lodash');
-var Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('movingstd', {
   args: [
     {
@@ -19,19 +19,19 @@ module.exports = new Chainable('movingstd', {
   fn: function movingstdFn(args) {
     return alter(args, function (eachSeries, _window) {
 
-      var pairs = eachSeries.data;
+      const pairs = eachSeries.data;
 
       eachSeries.data = _.map(pairs, function (point, i) {
         if (i < _window) { return [point[0], null]; }
 
-        var average = _.chain(pairs.slice(i - _window, i))
+        const average = _.chain(pairs.slice(i - _window, i))
         .map(function (point) {
           return point[1];
         }).reduce(function (memo, num) {
           return (memo + num);
         }).value() / _window;
 
-        var variance = _.chain(pairs.slice(i - _window, i))
+        const variance = _.chain(pairs.slice(i - _window, i))
         .map(function (point) {
           return point[1];
         }).reduce(function (memo, num) {

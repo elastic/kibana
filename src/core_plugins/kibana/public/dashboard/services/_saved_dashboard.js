@@ -1,6 +1,5 @@
 import angular from 'angular';
 import _ from 'lodash';
-import moment from 'moment';
 import uiModules from 'ui/modules';
 const module = uiModules.get('app/dashboard');
 
@@ -60,10 +59,10 @@ module.factory('SavedDashboard', function (courier, config) {
     refreshInterval: {
       type: 'object',
       properties: {
-        display: {type: 'string'},
-        pause: { type: 'boolean'},
-        section: { type: 'integer'},
-        value: { type: 'integer'}
+        display: { type: 'string' },
+        pause: { type: 'boolean' },
+        section: { type: 'integer' },
+        value: { type: 'integer' }
       }
     }
   };

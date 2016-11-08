@@ -3,11 +3,9 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 describe('type normalizer (castMappingType)', function () {
-
   let fn;
-  let fields;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 
@@ -20,7 +18,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast numeric types to "number"', function () {
-    let types = [
+    const types = [
       'float',
       'double',
       'integer',
@@ -36,7 +34,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should treat non-numeric known types as what they are', function () {
-    let types = [
+    const types = [
       'date',
       'boolean',
       'ip',
@@ -53,7 +51,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast text and keyword types to "string"', function () {
-    let types = [
+    const types = [
       'keyword',
       'text'
     ];
@@ -66,5 +64,4 @@ describe('type normalizer (castMappingType)', function () {
   it('should treat everything else as a string', function () {
     expect(fn('fooTypeIsNotReal')).to.be('string');
   });
-
 });

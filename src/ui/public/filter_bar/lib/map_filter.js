@@ -11,7 +11,7 @@ import MapScriptProvider from './map_script';
 import MapDefaultProvider from './map_default';
 export default function mapFilterProvider(Promise, Private) {
 
-  let generateMappingChain = Private(GenerateMappingChainProvider);
+  const generateMappingChain = Private(GenerateMappingChainProvider);
 
   /** Mappers **/
 
@@ -29,7 +29,7 @@ export default function mapFilterProvider(Promise, Private) {
   // To create a new mapper you just need to create a function
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
-  let mappers = [
+  const mappers = [
     Private(MapMatchAllProvider),
     Private(MapTermsProvider),
     Private(MapRangeProvider),
@@ -41,14 +41,14 @@ export default function mapFilterProvider(Promise, Private) {
     Private(MapDefaultProvider)
   ];
 
-  let noop = function () {
+  const noop = function () {
     return Promise.reject(new Error('No mappings have been found for filter.'));
   };
 
   // Create a chain of responsibility by reducing all the
   // mappers down into one function.
-  let mapFn = _.reduceRight(mappers, function (memo, map) {
-    let filterChainFn = generateMappingChain(map);
+  const mapFn = _.reduceRight(mappers, function (memo, map) {
+    const filterChainFn = generateMappingChain(map);
     return filterChainFn(memo);
   }, noop);
 
@@ -70,4 +70,4 @@ export default function mapFilterProvider(Promise, Private) {
       return filter;
     });
   };
-};
+}

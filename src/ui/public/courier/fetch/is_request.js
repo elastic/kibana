@@ -6,4 +6,4 @@ export default function IsRequestProvider(Private) {
   return function isRequest(obj) {
     return obj instanceof AbstractRequest;
   };
-};
+}

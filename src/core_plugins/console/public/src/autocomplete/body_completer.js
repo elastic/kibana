@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const engine = require('./engine');
+import _ from 'lodash';
+import engine from './engine';
 
 function CompilingContext(endpoint_id, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;
@@ -97,7 +97,7 @@ function compileParametrizedValue(value, compilingContext, template) {
   }
   component = component(value, null, template);
   if (!_.isUndefined(template)) {
-    component = engine.wrapComponentWithDefaults(component, {template: template});
+    component = engine.wrapComponentWithDefaults(component, { template: template });
   }
   return component;
 
@@ -145,7 +145,7 @@ function compileList(listRule, compilingContext) {
 }
 
 /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
-function compileCondition(description, compiledObject, compilingContext) {
+function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
     return new ConditionalProxy(function (context, editor) {
       let lines = editor.getSession().getLines(context.requestStartRow, editor.getCursorPosition().row).join("\n");
@@ -169,7 +169,7 @@ function ObjectComponent(name, constants, patternsAndWildCards) {
 
 ObjectComponent.prototype = _.create(
   engine.AutocompleteComponent.prototype,
-  {'constructor': ObjectComponent});
+  { 'constructor': ObjectComponent });
 
 
 (function (cls) {
@@ -244,7 +244,7 @@ function ScopeResolver(link, compilingContext) {
 
 ScopeResolver.prototype = _.create(
   engine.SharedComponent.prototype,
-  {'constructor': ScopeResolver});
+  { 'constructor': ScopeResolver });
 
 
 (function (cls) {
@@ -316,7 +316,7 @@ function ConditionalProxy(predicate, delegate) {
 
 ConditionalProxy.prototype = _.create(
   engine.SharedComponent.prototype,
-  {'constructor': ConditionalProxy});
+  { 'constructor': ConditionalProxy });
 
 
 (function (cls) {
@@ -345,16 +345,16 @@ function GlobalOnlyComponent(name) {
 
 GlobalOnlyComponent.prototype = _.create(
   engine.AutocompleteComponent.prototype,
-  {'constructor': ObjectComponent});
+  { 'constructor': ObjectComponent });
 
 
 (function (cls) {
 
-  cls.getTerms = function (context, editor) {
+  cls.getTerms = function () {
     return null;
   };
 
-  cls.match = function (token, context, editor) {
+  cls.match = function (token, context) {
     var result = {
       next: []
     };

@@ -30,8 +30,8 @@ describe('Ingest Service', function () {
       .respond('ok');
 
       expect(config.get('defaultIndex')).to.be(null);
-      ingest.save({id: 'foo'});
-      ingest.save({id: 'bar'});
+      ingest.save({ id: 'foo' });
+      ingest.save({ id: 'bar' });
       $httpBackend.flush();
       expect(config.get('defaultIndex')).to.be('foo');
     });
@@ -41,7 +41,7 @@ describe('Ingest Service', function () {
       .expectPOST('/api/kibana/ingest')
       .respond(400);
 
-      ingest.save({id: 'foo'})
+      ingest.save({ id: 'foo' })
       .then(
         () => {
           throw new Error('expected an error response');
@@ -60,7 +60,7 @@ describe('Ingest Service', function () {
       .when('POST', '/api/kibana/ingest')
       .respond('ok');
 
-      ingest.save({id: 'foo'});
+      ingest.save({ id: 'foo' });
       $httpBackend.flush();
 
       expect($rootScope.$broadcast.calledOnce);
@@ -128,7 +128,7 @@ describe('Ingest Service', function () {
       })
       .respond('ok');
 
-      const file = new Blob(['foo,bar'], {type : 'text/csv'});
+      const file = new Blob(['foo,bar'], { type : 'text/csv' });
 
       ingest.uploadCSV(file, 'foo', ';');
       $httpBackend.flush();
@@ -139,7 +139,7 @@ describe('Ingest Service', function () {
       .expectPOST('/api/kibana/foo/_data?csv_delimiter=;')
       .respond(404);
 
-      const file = new Blob(['foo,bar'], {type : 'text/csv'});
+      const file = new Blob(['foo,bar'], { type : 'text/csv' });
 
       ingest.uploadCSV(file, 'foo', ';')
       .then(

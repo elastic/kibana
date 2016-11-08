@@ -1,8 +1,6 @@
-var Promise = require('bluebird');
-var buckets = require('./bucketList');
-var getSeries = require('../helpers/get_series');
-var getSeriesList = require('../helpers/get_series_list');
-var _ = require('lodash');
+import buckets from './bucketList';
+import getSeries from '../helpers/get_series';
+import getSeriesList from '../helpers/get_series_list';
 
 module.exports = function () {
   return getSeriesList([

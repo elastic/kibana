@@ -7,7 +7,6 @@ module.exports = function (kibana) {
   let modules = resolve(__dirname, 'public/webpackShims/');
   let src = resolve(__dirname, 'public/src/');
   let { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
 
   const apps = [];
 
@@ -112,7 +111,7 @@ module.exports = function (kibana) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist))
             },
             xforward: true,
-            onResponse(err, res, request, reply, settings, ttl) {
+            onResponse(err, res, request, reply) {
               if (err != null) {
                 reply("Error connecting to '" + uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
               } else {
@@ -151,7 +150,7 @@ module.exports = function (kibana) {
         method: ['GET', 'POST'],
         handler: function (req, reply) {
           let server = require('./api_server/server');
-          let {sense_version, apis} = req.query;
+          let { sense_version, apis } = req.query;
           if (!apis) {
             reply(Boom.badRequest('"apis" is a required param.'));
             return;

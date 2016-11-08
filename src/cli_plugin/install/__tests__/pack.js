@@ -173,7 +173,7 @@ describe('kibana cli', function () {
 
       it('throw an error if there is no kibana plugin', function () {
         return copyReplyFile('test_plugin_no_kibana.zip')
-        .then((data) => {
+        .then(() => {
           return getPackData(settings, logger);
         })
         .then(shouldReject, (err) => {
@@ -183,7 +183,7 @@ describe('kibana cli', function () {
 
       it('throw an error with a corrupt zip', function () {
         return copyReplyFile('corrupt.zip')
-        .then((data) => {
+        .then(() => {
           return getPackData(settings, logger);
         })
         .then(shouldReject, (err) => {
@@ -193,7 +193,7 @@ describe('kibana cli', function () {
 
       it('throw an error if there an invalid plugin name', function () {
         return copyReplyFile('invalid_name.zip')
-        .then((data) => {
+        .then(() => {
           return getPackData(settings, logger);
         })
         .then(shouldReject, (err) => {

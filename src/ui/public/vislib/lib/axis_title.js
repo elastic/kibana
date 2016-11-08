@@ -31,7 +31,7 @@ export default function AxisTitleFactory(Private) {
     render() {
       d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
       d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
-    };
+    }
 
     /**
      * Appends an SVG with title text
@@ -66,8 +66,8 @@ export default function AxisTitleFactory(Private) {
           .text(title);
         });
       };
-    };
+    }
   }
 
   return AxisTitle;
-};
+}

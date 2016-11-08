@@ -5,5 +5,5 @@
  */
 export default function (filter) {
   return filter.filter;
-};
+}
 

@@ -1,6 +1,6 @@
-import { Promise, map, fromNode, promisify } from 'bluebird';
+import { Promise, map, promisify } from 'bluebird';
 import { resolve, basename, dirname, join } from 'path';
-import { createReadStream, createWriteStream, writeFile } from 'fs';
+import { createReadStream, writeFile } from 'fs';
 import { createGunzip } from 'zlib';
 import { Extract } from 'tar';
 import { fromFile } from 'check-hash';
@@ -48,7 +48,7 @@ export default function downloadNodeBuilds(grunt) {
       return false;
     }
 
-    return checkHashFromFileAsync(filePath, expected).then(([passed, actual]) => {
+    return checkHashFromFileAsync(filePath, expected).then(([passed]) => {
       if (!passed) {
         grunt.log.error(`${platform.name} shasum check failed`);
       }
@@ -121,7 +121,7 @@ export default function downloadNodeBuilds(grunt) {
       createReadStream(filePath)
         .pipe(createGunzip())
         .on('error', reject)
-        .pipe(new Extract({path: platform.nodeDir, strip: 1}))
+        .pipe(new Extract({ path: platform.nodeDir, strip: 1 }))
         .on('error', reject)
         .on('end', resolve);
     });
@@ -148,4 +148,4 @@ export default function downloadNodeBuilds(grunt) {
     map(platforms, extract).nodeify(this.async());
   });
 
-};
+}

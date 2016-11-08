@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
 
 import isEsCompatibleWithKibana from '../is_es_compatible_with_kibana';
 

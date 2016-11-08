@@ -14,17 +14,17 @@ describe('KbnTopNavController', function () {
 
   describe('opts', function () {
     it('supports giving it no options', function () {
-      const controller = new KbnTopNavController();
+      new KbnTopNavController();
     });
 
     it('support empty options list', function () {
-      const controller = new KbnTopNavController([]);
+      new KbnTopNavController([]);
     });
 
     describe('key:', function () {
       it('requires every opt to have a key', function () {
         expect(function () {
-          const controller = new KbnTopNavController([
+          new KbnTopNavController([
             { foo: 'bar' }
           ]);
         }).to.throwError(TypeError);
@@ -50,7 +50,7 @@ describe('KbnTopNavController', function () {
     describe('description:', function () {
       it('defaults to "Toggle ${key} view" when using templates', function () {
         const controller = new KbnTopNavController([
-          { key: 'foo', template: '<h1></h1>'},
+          { key: 'foo', template: '<h1></h1>' },
           { key: 'Bar', description: 'not the default' },
           { key: '1234', run: ()=>{} },
         ]);
@@ -303,7 +303,7 @@ describe('KbnTopNavController', function () {
         expect(controller.menuItems).to.have.length(4);
 
         // check that the items were added
-        var matches = controller.menuItems.reduce((acc, item) => {
+        const matches = controller.menuItems.reduce((acc, item) => {
           if (item.key === 'green' || item.key === 'red') {
             acc[item.key] = item;
           }
@@ -324,7 +324,7 @@ describe('KbnTopNavController', function () {
         expect(controller.menuItems).to.have.length(3);
 
         // check that the items were added
-        var match = controller.menuItems.filter((item) => {
+        const match = controller.menuItems.filter((item) => {
           return item.key === 'green';
         });
         expect(match[0]).to.have.property('run');

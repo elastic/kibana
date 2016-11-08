@@ -2,7 +2,7 @@ import { fromNode } from 'bluebird';
 
 
 module.exports = class WeirdControlFlow {
-  constructor(work) {
+  constructor() {
     this.handlers = [];
   }
 
@@ -51,7 +51,7 @@ module.exports = class WeirdControlFlow {
   }
 
   _flush(args) {
-    for (let fn of this.handlers.splice(0)) {
+    for (const fn of this.handlers.splice(0)) {
       fn.apply(null, args);
     }
   }

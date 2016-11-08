@@ -5,10 +5,6 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('invert filters', function () {
-  let storeNames = {
-    app: 'appState',
-    global: 'globalState'
-  };
   let filters;
   let queryFilter;
   let $rootScope;
@@ -76,7 +72,7 @@ describe('invert filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      let emitSpy = sinon.spy(queryFilter, 'emit');
+      const emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
 
       // set up the watchers

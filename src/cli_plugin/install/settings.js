@@ -1,7 +1,5 @@
 import expiry from 'expiry-js';
-import { intersection } from 'lodash';
 import { resolve } from 'path';
-import { arch, platform } from 'os';
 
 function generateUrls({ version, plugin }) {
   return [
@@ -21,7 +19,7 @@ export function parseMilliseconds(val) {
   }
 
   return result;
-};
+}
 
 export function parse(command, options, kbnPackage) {
   const settings = {
@@ -44,4 +42,4 @@ export function parse(command, options, kbnPackage) {
   };
 
   return settings;
-};
+}

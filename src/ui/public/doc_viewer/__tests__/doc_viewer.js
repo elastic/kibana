@@ -9,8 +9,6 @@ import Registry from 'ui/registry/_registry';
 import 'ui/doc_viewer';
 
 describe('docViewer', function () {
-  let $rootScope;
-  let $compile;
   let stubRegistry;
   let $elem;
   let init;
@@ -32,10 +30,7 @@ describe('docViewer', function () {
     });
 
     // Create the scope
-    ngMock.inject(function ($injector) {
-      $rootScope = $injector.get('$rootScope');
-      $compile = $injector.get('$compile');
-    });
+    ngMock.inject(function () {});
   });
 
   beforeEach(function () {
@@ -58,21 +53,21 @@ describe('docViewer', function () {
           title: 'exampleView',
           order: 0,
           directive: {
-            template: `Example`
+            template: 'Example'
           }
         });
       });
     }
     it('should have a tab for the view', function () {
       registerExtension();
-      registerExtension({title: 'exampleView2'});
+      registerExtension({ title: 'exampleView2' });
       init();
       expect($elem.find('.nav-tabs li').length).to.be(2);
     });
 
     it('should activate the first view in order', function () {
-      registerExtension({order: 2});
-      registerExtension({title: 'exampleView2'});
+      registerExtension({ order: 2 });
+      registerExtension({ title: 'exampleView2' });
       init();
       expect($elem.find('.nav-tabs .active').text().trim()).to.be('exampleView2');
     });

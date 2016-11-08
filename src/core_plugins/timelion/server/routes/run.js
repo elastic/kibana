@@ -1,11 +1,10 @@
-var Promise = require('bluebird');
-var _ = require('lodash');
-var Boom = require('boom');
-var chainRunnerFn = require('../handlers/chain_runner.js');
-var timelionDefaults = require('../lib/get_namespaced_settings')();
+import Promise from 'bluebird';
+import _ from 'lodash';
+import chainRunnerFn from '../handlers/chain_runner.js';
+const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
-  reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
+  reply({ title: e.toString(), message: e.toString(), stack: e.stack }).code(400);
 }
 
 
@@ -20,13 +19,13 @@ module.exports = (server) => {
       // before every request. This just sucks because its going to slow things
       // down. Meh.
       return server.uiSettings().getAll().then((uiSettings) => {
-        var sheet;
-        var tlConfig = require('../handlers/lib/tl_config.js')({
+        let sheet;
+        const tlConfig = require('../handlers/lib/tl_config.js')({
           server: server,
           request: request,
           settings: _.defaults(uiSettings, timelionDefaults) // Just in case they delete some setting.
         });
-        var chainRunner = chainRunnerFn(tlConfig);
+        const chainRunner = chainRunnerFn(tlConfig);
 
         try {
           sheet = chainRunner.processRequest(request.payload || {
@@ -44,7 +43,7 @@ module.exports = (server) => {
         }
 
         return Promise.all(sheet).then((sheet) => {
-          var response = {
+          const response = {
             sheet: sheet,
             stats: chainRunner.getStats()
           };

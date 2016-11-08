@@ -1,11 +1,8 @@
-import _ from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 export default function AggTypeMetricMedianProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  let percentiles = Private(AggTypesMetricsPercentilesProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const percentiles = Private(AggTypesMetricsPercentilesProvider);
 
   return new MetricAggType({
     name: 'median',
@@ -32,4 +29,4 @@ export default function AggTypeMetricMedianProvider(Private) {
     getResponseAggs: percentiles.getResponseAggs,
     getValue: percentiles.getValue
   });
-};
+}

@@ -44,4 +44,4 @@ export class LogInterceptor extends Stream.Transform {
     this.push(downgraded || event);
     next();
   }
-};
+}

@@ -7,7 +7,7 @@
 
   window.console = function () {
     var msgs = Array.prototype.slice.call(arguments, 0);
-    window.postMessage({type: "log", data: msgs});
+    window.postMessage({ type: "log", data: msgs });
   };
   window.console.error =
     window.console.warn =
@@ -181,7 +181,7 @@
   };
 })(this);// https://github.com/kriskowal/es5-shim
 
-define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   exports.inherits = function (ctor, superCtor) {
@@ -208,7 +208,7 @@ define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, expo
   };
 
 });
-define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'ace/lib/lang'], function (require, exports, module) {
+define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'ace/lib/lang'], function (require, exports) {
   "use strict";
 
   var Document = require("../document").Document;
@@ -258,7 +258,7 @@ define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'a
 });
 
 define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter',
-  'ace/range', 'ace/anchor'], function (require, exports, module) {
+  'ace/range', 'ace/anchor'], function (require, exports) {
   "use strict";
 
   var oop = require("./lib/oop");
@@ -273,7 +273,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     } else if (Array.isArray(text)) {
       this._insertLines(0, text);
     } else {
-      this.insert({row: 0, column: 0}, text);
+      this.insert({ row: 0, column: 0 }, text);
     }
   };
 
@@ -283,7 +283,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     this.setValue = function (text) {
       var len = this.getLength();
       this.remove(new Range(0, 0, len, this.getLine(len - 1).length));
-      this.insert({row: 0, column: 0}, text);
+      this.insert({ row: 0, column: 0 }, text);
     };
     this.getValue = function () {
       return this.getAllLines().join(this.getNewLineCharacter());
@@ -386,12 +386,12 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     };
     this.insertLines = function (row, lines) {
       if (row >= this.getLength())
-        return this.insert({row: row, column: 0}, "\n" + lines.join("\n"));
+        return this.insert({ row: row, column: 0 }, "\n" + lines.join("\n"));
       return this._insertLines(Math.max(row, 0), lines);
     };
     this._insertLines = function (row, lines) {
       if (lines.length == 0)
-        return {row: row, column: 0};
+        return { row: row, column: 0 };
       var end;
       if (lines.length > 0xFFFF) {
         end = this._insertLines(row, lines.slice(0xFFFF));
@@ -596,9 +596,9 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
       for (var i = startRow || 0, l = lines.length; i < l; i++) {
         index -= lines[i].length + newlineLength;
         if (index < 0)
-          return {row: i, column: index + lines[i].length + newlineLength};
+          return { row: i, column: index + lines[i].length + newlineLength };
       }
-      return {row: l - 1, column: lines[l - 1].length};
+      return { row: l - 1, column: lines[l - 1].length };
     };
     this.positionToIndex = function (pos, startRow) {
       var lines = this.$lines || this.getAllLines();
@@ -616,7 +616,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
   exports.Document = Document;
 });
 
-define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   var EventEmitter = {};
@@ -680,7 +680,7 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
   EventEmitter.setDefaultHandler = function (eventName, callback) {
     var handlers = this._defaultHandlers
     if (!handlers)
-      handlers = this._defaultHandlers = {_disabled_: {}};
+      handlers = this._defaultHandlers = { _disabled_: {} };
 
     if (handlers[eventName]) {
       var old = handlers[eventName];
@@ -701,7 +701,6 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
     var disabled = handlers._disabled_[eventName];
 
     if (handlers[eventName] == callback) {
-      var old = handlers[eventName];
       if (disabled)
         this.setDefaultHandler(eventName, disabled.pop());
     } else if (disabled) {
@@ -746,7 +745,7 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
 
 });
 
-define('ace/range', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/range', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   var comparePoints = function (p1, p2) {
@@ -918,14 +917,14 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
     this.clipRows = function (firstRow, lastRow) {
       var start, end;
       if (this.end.row > lastRow)
-        end = {row: lastRow + 1, column: 0};
+        end = { row: lastRow + 1, column: 0 };
       else if (this.end.row < firstRow)
-        end = {row: firstRow, column: 0};
+        end = { row: firstRow, column: 0 };
 
       if (this.start.row > lastRow)
-        start = {row: lastRow + 1, column: 0};
+        start = { row: lastRow + 1, column: 0 };
       else if (this.start.row < firstRow)
-        start = {row: firstRow, column: 0};
+        start = { row: firstRow, column: 0 };
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
@@ -935,9 +934,9 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       if (cmp == 0)
         return this;
       else if (cmp == -1)
-        start = {row: row, column: column};
+        start = { row: row, column: column };
       else
-        end = {row: row, column: column};
+        end = { row: row, column: column };
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
@@ -987,7 +986,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
   exports.Range = Range;
 });
 
-define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports, module) {
+define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports) {
   "use strict";
 
   var oop = require("./lib/oop");
@@ -1134,7 +1133,7 @@ define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/e
 
 });
 
-define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   exports.stringReverse = function (string) {
@@ -1318,7 +1317,7 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
 });
 
 
-define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], function (require, exports, module) {
+define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], function () {
   "use strict";
 
   var at,     // The index of the current character
@@ -1337,7 +1336,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     text,
 
     annotate = function (type, text) {
-      annos.push({type: type, text: text, at: at});
+      annos.push({ type: type, text: text, at: at });
     },
 
     error = function (m) {
@@ -1621,7 +1620,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     request = function () {
       white();
-      var meth = method();
+      method();
       strictWhite();
       url();
       strictWhite(); // advance to one new line
@@ -1641,7 +1640,6 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         newLine();
         strictWhite();
       }
-
     },
 
     comment = function () {
@@ -1711,13 +1709,13 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         }
       }
       return reviver.call(holder, key, value);
-    })({'': result}, '') : result;
+    })({ '': result }, '') : result;
   };
 });
 
 
 define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror',
-  'sense_editor/mode/worker_parser'], function (require, exports, module) {
+  'sense_editor/mode/worker_parser'], function (require, exports) {
   "use strict";
 
 
@@ -1764,7 +1762,7 @@ define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oo
       var nl = this.doc.getNewLineCharacter().length;
 
       if (!len) {
-        return { row: 0, column: 0};
+        return { row: 0, column: 0 };
       }
 
       var lineStart = 0, line;

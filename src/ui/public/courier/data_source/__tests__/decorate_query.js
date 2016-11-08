@@ -1,16 +1,9 @@
-import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
 import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
-
   let config;
-
-  let indexPattern;
-
-  let getComputedFields;
 
   let fn;
   beforeEach(ngMock.module(
@@ -18,7 +11,7 @@ describe('Query decorator', function () {
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        let keys = {};
+        const keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }
@@ -37,8 +30,7 @@ describe('Query decorator', function () {
   });
 
   it('should merge in the query string options', function () {
-    config.set('query:queryString:options', {analyze_wildcard: true});
-    expect(fn({query_string: {query: '*'}})).to.eql({query_string: {query: '*', analyze_wildcard: true}});
+    config.set('query:queryString:options', { analyze_wildcard: true });
+    expect(fn({ query_string: { query: '*' } })).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
   });
-
 });

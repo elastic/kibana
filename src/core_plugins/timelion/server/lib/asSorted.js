@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var unzipPairs = require('./unzipPairs.js');
+import _ from 'lodash';
+import unzipPairs from './unzipPairs.js';
 
 module.exports = function asSorted(timeValObject, fn) {
-  var data = unzipPairs(timeValObject);
+  const data = unzipPairs(timeValObject);
   return _.zipObject(fn(data));
 };

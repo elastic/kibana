@@ -1,26 +1,24 @@
-define(function (require) {
-  require('intern/dojo/node!../support/env_setup');
+require('intern/dojo/node!../support/env_setup');
 
-  const bdd = require('intern!bdd');
-  const intern = require('intern');
-  const initCallbacks = [];
+import bdd from 'intern!bdd';
+import intern from 'intern';
+const initCallbacks = [];
 
-  function onInit(callback) {
-    initCallbacks.push(callback);
-  }
+function onInit(callback) {
+  initCallbacks.push(callback);
+}
 
-  global.__kibana__intern__ = { intern, bdd, onInit };
+global.__kibana__intern__ = { intern, bdd, onInit };
 
-  bdd.describe('Kibana visual regressions', function () {
-    bdd.before(function () {
-      initCallbacks.forEach(callback => {
-        callback.call(this);
-      });
+bdd.describe('Kibana visual regressions', function () {
+  bdd.before(function () {
+    initCallbacks.forEach(callback => {
+      callback.call(this);
     });
-
-    require([
-      'intern/dojo/node!../support/index',
-      'intern/dojo/node!./home',
-    ], function () {});
   });
+
+  require([
+    'intern/dojo/node!../support/index',
+    'intern/dojo/node!./home',
+  ], function () {});
 });

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 export default function TableGroupProvider() {
 
   /**
@@ -21,4 +20,4 @@ export default function TableGroupProvider() {
   };
 
   return TableGroup;
-};
+}

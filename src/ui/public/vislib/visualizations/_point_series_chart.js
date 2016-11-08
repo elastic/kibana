@@ -37,7 +37,7 @@ export default function PointSeriesChartProvider(Private) {
           currentStackOffsets[0] += y;
         }
       };
-    };
+    }
 
     /**
      * Stacks chart data values
@@ -64,7 +64,7 @@ export default function PointSeriesChartProvider(Private) {
           };
         });
       }));
-    };
+    }
 
 
     validateDataCompliesWithScalingMethod(data) {
@@ -76,7 +76,7 @@ export default function PointSeriesChartProvider(Private) {
       if (this._attr.scale === 'log' && invalidLogScale) {
         throw new errors.InvalidLogScaleValues();
       }
-    };
+    }
 
     /**
      * Creates rects to show buckets outside of the ordered.min and max, returns rects
@@ -169,8 +169,8 @@ export default function PointSeriesChartProvider(Private) {
         return callPlay(d3.event).touchdown;
       };
       endzoneTT.render()(svg);
-    };
+    }
   }
 
   return PointSeriesChart;
-};
+}

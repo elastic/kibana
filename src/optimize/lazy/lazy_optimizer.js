@@ -1,8 +1,6 @@
-import Boom from 'boom';
-
 import BaseOptimizer from '../base_optimizer';
 import WeirdControlFlow from './weird_control_flow';
-import { once, pick, size } from 'lodash';
+import { once } from 'lodash';
 import { join } from 'path';
 
 module.exports = class LazyOptimizer extends BaseOptimizer {
@@ -41,7 +39,7 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
         return;
       }
 
-      let err = this.failedStatsToError(stats);
+      const err = this.failedStatsToError(stats);
       this.logRunFailure(err);
       this.build.failure(err);
       this.watching.invalidate();
@@ -54,7 +52,7 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
       }
     });
 
-    let buildPromise = this.build.get();
+    const buildPromise = this.build.get();
     if (this.prebuild) await buildPromise;
 
     this.initializing = false;
@@ -75,7 +73,7 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
       method: 'GET',
       handler: async (request, reply) => {
         try {
-          let path = await this.getPath(request.params.asset);
+          const path = await this.getPath(request.params.asset);
           return reply.file(path);
         } catch (error) {
           console.log(error.stack);
@@ -87,7 +85,7 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
 
   logRunStart() {
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization started`,
+      tmpl: 'Lazy optimization started',
       bundles: this.bundles.getIds()
     });
   }

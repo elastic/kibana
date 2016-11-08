@@ -21,7 +21,7 @@ describe('pattern checker', function () {
     });
   }));
 
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector) {
     $httpBackend = $injector.get('$httpBackend');
     $compile = $injector.get('$compile');
     $rootScope = $injector.get('$rootScope');
@@ -31,29 +31,29 @@ describe('pattern checker', function () {
   }));
 
   it('should display the number of documents in a given index pattern', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
     $httpBackend.flush();
     $rootScope.$digest();
-    expect(_.contains(element.html(), `1 results`)).to.be.ok();
+    expect(_.contains(element.html(), '1 results')).to.be.ok();
   });
 
   it('should poll the api for changes to the document count and update the ui', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
     $httpBackend.flush();
     $rootScope.$digest();
-    expect(_.contains(element.html(), `1 results`)).to.be.ok();
+    expect(_.contains(element.html(), '1 results')).to.be.ok();
 
-    apiResponse.respond(200, {count: 2});
+    apiResponse.respond(200, { count: 2 });
     $timeout.flush();
     $httpBackend.flush();
     $rootScope.$digest();
-    expect(_.contains(element.html(), `2 results`)).to.be.ok();
+    expect(_.contains(element.html(), '2 results')).to.be.ok();
   });
 
   it('should display 0 results when API responds with 404', function () {
@@ -63,13 +63,13 @@ describe('pattern checker', function () {
 
     $httpBackend.flush();
     $rootScope.$digest();
-    expect(_.contains(element.html(), `0 results`)).to.be.ok();
+    expect(_.contains(element.html(), '0 results')).to.be.ok();
   });
 
   it('should throw a fatal notificaiton for any error other than a 404', function () {
     apiResponse.respond(500, 'Bad things happened');
 
-    const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
+    $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
     $httpBackend.flush();
     $rootScope.$digest();
@@ -78,14 +78,14 @@ describe('pattern checker', function () {
   });
 
   it('should stop polling when the scope is destroyed', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
     const scope = element.scope();
 
     $httpBackend.flush();
     $rootScope.$digest();
-    expect(_.contains(element.html(), `1 results`)).to.be.ok();
+    expect(_.contains(element.html(), '1 results')).to.be.ok();
 
     scope.$destroy();
     $timeout.flush();

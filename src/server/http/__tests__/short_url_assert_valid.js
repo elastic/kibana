@@ -1,5 +1,3 @@
-import Boom from 'boom';
-
 import { shortUrlAssertValid } from '../short_url_assert_valid';
 
 
@@ -22,7 +20,7 @@ describe('shortUrlAssertValid()', () => {
     it(`fails when url has ${desc}`, () => {
       try {
         shortUrlAssertValid(url);
-        throw new Error(`expected assertion to throw`);
+        throw new Error('expected assertion to throw');
       } catch (err) {
         if (!err || !err.isBoom) {
           throw err;

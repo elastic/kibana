@@ -35,7 +35,7 @@ const SERVER_DEFAULTS = {
 export function createServer(params = {}) {
   params = defaultsDeep({}, params, SERVER_DEFAULTS);
   return new KbnServer(params);
-};
+}
 
 /**
  * Creates request configuration with a basic auth header
@@ -44,7 +44,7 @@ export function authOptions() {
   const { username, password } = kibanaUser;
   const authHeader = basicAuthHeader(username, password);
   return set({}, 'headers.Authorization', authHeader);
-};
+}
 
 /**
  * Makes a request with test headers via hapi server inject()
@@ -60,4 +60,4 @@ export function authOptions() {
 export function makeRequest(kbnServer, options, fn) {
   options = defaultsDeep({}, authOptions(), options);
   return kbnServer.server.inject(options, fn);
-};
+}

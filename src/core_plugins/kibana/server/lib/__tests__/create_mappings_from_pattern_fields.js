@@ -36,7 +36,7 @@ describe('createMappingsFromPatternFields', function () {
   });
 
   it('should set the same default mapping for all non-strings', function () {
-    let mappings = createMappingsFromPatternFields(testFields);
+    const mappings = createMappingsFromPatternFields(testFields);
 
     _.forEach(mappings, function (mapping) {
       if (mapping.type !== 'text') {
@@ -50,7 +50,7 @@ describe('createMappingsFromPatternFields', function () {
   });
 
   it('should give strings a multi-field mapping with a "text" base type', function () {
-    let mappings = createMappingsFromPatternFields(testFields);
+    const mappings = createMappingsFromPatternFields(testFields);
 
     _.forEach(mappings, function (mapping) {
       if (mapping.type === 'text') {
@@ -60,8 +60,8 @@ describe('createMappingsFromPatternFields', function () {
   });
 
   it('should handle nested fields', function () {
-    testFields.push({name: 'geo.coordinates', type: 'geo_point'});
-    let mappings = createMappingsFromPatternFields(testFields);
+    testFields.push({ name: 'geo.coordinates', type: 'geo_point' });
+    const mappings = createMappingsFromPatternFields(testFields);
 
     expect(mappings).to.have.property('geo');
     expect(mappings.geo).to.have.property('properties');
@@ -74,7 +74,7 @@ describe('createMappingsFromPatternFields', function () {
   });
 
   it('should map all number fields as an ES double', function () {
-    let mappings = createMappingsFromPatternFields(testFields);
+    const mappings = createMappingsFromPatternFields(testFields);
 
     expect(mappings).to.have.property('bytes');
     expect(mappings.bytes).to.have.property('type', 'double');

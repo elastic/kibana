@@ -1,12 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  defaultTimeout,
-  scenarioManager,
-  esClient
-} from '../../../support';
+import { bdd, esClient } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -16,7 +11,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc();
   });
 
-  var columns = [{
+  const columns = [{
     heading: 'name',
     first: '@message',
     last: 'xss.raw',

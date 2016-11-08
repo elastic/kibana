@@ -2,34 +2,30 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesParamTypesCalculateIntervalProvider from 'ui/agg_types/param_types/_calculate_interval';
 
 describe('calculateInterval()', function () {
-  let AggConfig;
   let indexPattern;
   let Vis;
-  let createFilter;
   let calculateInterval;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     calculateInterval = Private(AggTypesParamTypesCalculateIntervalProvider);
   }));
 
-  let testInterval = function (option, expected) {
-    let msg = 'should return ' + JSON.stringify(expected) + ' for ' + option;
+  const testInterval = function (option, expected) {
+    const msg = 'should return ' + JSON.stringify(expected) + ' for ' + option;
     it(msg, function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: option } } ]
       });
-      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
-      let interval = calculateInterval(aggConfig);
+      const aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      const interval = calculateInterval(aggConfig);
       _.each(expected, function (val, key) {
         expect(interval).to.have.property(key, val);
       });
@@ -84,5 +80,4 @@ describe('calculateInterval()', function () {
     metricScale: 1,
     description: 'year'
   });
-
 });

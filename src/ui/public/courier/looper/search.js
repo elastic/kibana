@@ -4,18 +4,17 @@ import RequestQueueProvider from '../_request_queue';
 import LooperProvider from './_looper';
 
 export default function SearchLooperService(Private, Promise, Notifier, $rootScope) {
-  let fetch = Private(FetchProvider);
-  let searchStrategy = Private(SearchStrategyProvider);
-  let requestQueue = Private(RequestQueueProvider);
+  const fetch = Private(FetchProvider);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const requestQueue = Private(RequestQueueProvider);
 
-  let Looper = Private(LooperProvider);
-  let notif = new Notifier({ location: 'Search Looper' });
+  const Looper = Private(LooperProvider);
 
   /**
    * The Looper which will manage the doc fetch interval
    * @type {Looper}
    */
-  let searchLooper = new Looper(null, function () {
+  const searchLooper = new Looper(null, function () {
     $rootScope.$broadcast('courier:searchRefresh');
     return fetch.these(
       requestQueue.getInactive(searchStrategy)
@@ -35,4 +34,4 @@ export default function SearchLooperService(Private, Promise, Notifier, $rootSco
   };
 
   return searchLooper;
-};
+}

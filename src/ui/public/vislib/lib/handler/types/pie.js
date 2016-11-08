@@ -14,4 +14,4 @@ export default function PieHandler(Private) {
       chartTitle: new ChartTitle(vis.el)
     });
   };
-};
+}

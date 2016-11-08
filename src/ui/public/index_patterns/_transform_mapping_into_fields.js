@@ -3,7 +3,7 @@ import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
 import { ConflictTracker } from 'ui/index_patterns/_conflict_tracker';
 
 export default function transformMappingIntoFields(Private, kbnIndex, config) {
-  let mapField = Private(IndexPatternsMapFieldProvider);
+  const mapField = Private(IndexPatternsMapFieldProvider);
 
   /**
    * Convert the ES response into the simple map for fields to
@@ -15,17 +15,17 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
    *                    use-cases
    */
   return function (response) {
-    let fields = {};
+    const fields = {};
     const conflictTracker = new ConflictTracker();
 
     _.each(response, function (index, indexName) {
       if (indexName === kbnIndex) return;
       _.each(index.mappings, function (mappings) {
         _.each(mappings, function (field, name) {
-          let keys = Object.keys(field.mapping);
+          const keys = Object.keys(field.mapping);
           if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-          let mapping = mapField(field, name);
+          const mapping = mapField(field, name);
           // track the name, type and index for every field encountered so that the source
           // of conflicts can be described later
           conflictTracker.trackField(name, mapping.type, indexName);
@@ -46,7 +46,7 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
     config.get('metaFields').forEach(function (meta) {
       if (fields[meta]) return;
 
-      let field = { mapping: {} };
+      const field = { mapping: {} };
       field.mapping[meta] = {};
       fields[meta] = mapField(field, meta);
     });
@@ -61,4 +61,4 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
       return mapping;
     });
   };
-};
+}

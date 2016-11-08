@@ -1,6 +1,5 @@
-var _ = require('lodash');
-var logoUrl = require('./logo.png');
-var moment = require('moment-timezone');
+import _ from 'lodash';
+import moment from 'moment-timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -15,7 +14,7 @@ document.title = 'Timelion - Kibana';
 
 require('ui/chrome');
 
-var app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
@@ -27,7 +26,7 @@ require('./vis');
 require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
-var unsafeNotifications = require('ui/notify')._notifs;
+const unsafeNotifications = require('ui/notify')._notifs;
 //var ConfigTemplate = require('ui/config_template');
 
 require('ui/routes').enable();
@@ -48,21 +47,19 @@ require('ui/routes')
 
 app.controller('timelion', function (
   $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout, Private, savedVisualizations) {
-
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
   timefilter.enabled = true;
-  var notify = new Notifier({
+  const notify = new Notifier({
     location: 'Timelion'
   });
 
-  var timezone = Private(require('plugins/timelion/services/timezone'))();
-  var docTitle = Private(require('ui/doc_title'));
+  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const docTitle = Private(require('ui/doc_title'));
 
-  var defaultExpression = '.es(*)';
-  var savedSheet = $route.current.locals.savedSheet;
-  var blankSheet = [defaultExpression];
+  const defaultExpression = '.es(*)';
+  const savedSheet = $route.current.locals.savedSheet;
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -109,7 +106,7 @@ app.controller('timelion', function (
     };
   }
 
-  var init = function () {
+  const init = function () {
     $scope.running = false;
     $scope.search();
 
@@ -129,7 +126,7 @@ app.controller('timelion', function (
     };
   };
 
-  var refresher;
+  let refresher;
   $scope.$watchCollection('timefilter.refreshInterval', function (interval) {
     if (refresher) $timeout.cancel(refresher);
     if (interval.value > 0 && !interval.pause) {
@@ -138,7 +135,7 @@ app.controller('timelion', function (
           if (!$scope.running) $scope.search();
           startRefresh();
         }, interval.value);
-      };
+      }
       startRefresh();
     }
   });
@@ -192,7 +189,7 @@ app.controller('timelion', function (
       $scope.sheet = [];
       $scope.running = false;
 
-      var err = new Error(resp.message);
+      const err = new Error(resp.message);
       err.stack = resp.stack;
       notify.error(err);
 
@@ -212,14 +209,14 @@ app.controller('timelion', function (
       if (id) {
         notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {
-          kbnUrl.change('/{{id}}', {id: savedSheet.id});
+          kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
       }
     });
-  };
+  }
 
   function saveExpression(title) {
-    savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
+    savedVisualizations.get({ type: 'timelion' }).then(function (savedExpression) {
       savedExpression.id = title;
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
@@ -231,7 +228,7 @@ app.controller('timelion', function (
         if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
       });
     });
-  };
+  }
 
   function dismissNotifications() {
     unsafeNotifications.splice(0, unsafeNotifications.length);

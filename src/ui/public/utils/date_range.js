@@ -12,13 +12,13 @@ export default {
   },
   parse: function (rangeString, format) {
     let chunks = rangeString.split(' to ');
-    if (chunks.length === 2) return {from: moment(chunks[0], format), to: moment(chunks[1], format)};
+    if (chunks.length === 2) return { from: moment(chunks[0], format), to: moment(chunks[1], format) };
 
     chunks = rangeString.split('Before ');
-    if (chunks.length === 2) return {to: moment(chunks[1], format)};
+    if (chunks.length === 2) return { to: moment(chunks[1], format) };
 
     chunks = rangeString.split('After ');
-    if (chunks.length === 2) return {from: moment(chunks[1], format)};
+    if (chunks.length === 2) return { from: moment(chunks[1], format) };
 
     throw new Error('Error attempting to parse date range: ' + rangeString);
   }

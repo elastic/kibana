@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -14,7 +13,7 @@ const seriesData = {
   'series': [
     {
       'label': '100',
-      'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+      'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
     }
   ]
 };
@@ -26,7 +25,7 @@ const rowsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -35,7 +34,7 @@ const rowsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -44,7 +43,7 @@ const rowsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -53,7 +52,7 @@ const rowsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
@@ -67,7 +66,7 @@ const colsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -76,7 +75,7 @@ const colsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -85,7 +84,7 @@ const colsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -94,7 +93,7 @@ const colsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
@@ -128,9 +127,9 @@ describe('Vislib Data Class Test Suite', function () {
     const pieData = {
       slices: {
         children: [
-          {size: 30},
-          {size: 20},
-          {size: 0}
+          { size: 30 },
+          { size: 20 },
+          { size: 0 }
         ]
       }
     };
@@ -147,19 +146,11 @@ describe('Vislib Data Class Test Suite', function () {
 
   describe('Data.flatten', function () {
     let serIn;
-    let rowIn;
-    let colIn;
     let serOut;
-    let rowOut;
-    let colOut;
 
     beforeEach(function () {
       serIn = new Data(seriesData, {}, persistedState);
-      rowIn = new Data(rowsData, {}, persistedState);
-      colIn = new Data(colsData, {}, persistedState);
       serOut = serIn.flatten();
-      rowOut = rowIn.flatten();
-      colOut = colIn.flatten();
     });
 
     it('should return an array of value objects from every series', function () {
@@ -330,7 +321,7 @@ describe('Vislib Data Class Test Suite', function () {
         'series': [
           {
             'label': '200',
-            'values': [{x: 0, y: 1}, {x: 1, y: null}, {x: 2, y: 3}]
+            'values': [{ x: 0, y: 1 }, { x: 1, y: null }, { x: 2, y: 3 }]
           }
         ]
       });

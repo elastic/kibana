@@ -1,14 +1,10 @@
-/*
-  Single exponential smoothing. Assuming even interval
-*/
-
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function ses(points, alpha) {
   let origin;
   let level;
 
-  var smoothedPoints = _.reduce(points, (result, point, i) => {
+  const smoothedPoints = _.reduce(points, (result, point, i) => {
     if (i === 0) {
       origin = point;
       level = point;

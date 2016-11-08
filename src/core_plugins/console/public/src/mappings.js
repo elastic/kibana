@@ -1,6 +1,5 @@
 let $ = require('jquery');
 let _ = require('lodash');
-let utils = require('./utils');
 let es = require('./es');
 let settings = require('./settings');
 
@@ -89,7 +88,7 @@ function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(type_dict, function (type, fields) {
+    $.each(type_dict, function (type) {
       ret.push(type);
     });
 
@@ -155,7 +154,7 @@ function getFieldNamesFromFieldMapping(field_name, field_mapping) {
     return applyPathSettings(nested_fields);
   }
 
-  var ret = {name: field_name, type: field_type};
+  var ret = { name: field_name, type: field_type };
 
   if (field_mapping["index_name"]) {
     ret.name = field_mapping["index_name"];
@@ -270,13 +269,6 @@ function retrieveAutocompleteInfoFromServer() {
     }
   )
   ;
-}
-
-function autocomplete_retriever() {
-  retrieveAutocompleteInfoFromServer();
-  setTimeout(function () {
-    autocomplete_retriever();
-  }, 60000);
 }
 
 module.exports = _.assign(mappingObj, {

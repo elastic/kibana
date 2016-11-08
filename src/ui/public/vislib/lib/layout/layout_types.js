@@ -19,4 +19,4 @@ export default function LayoutTypeFactory(Private) {
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
     tile_map: Private(VislibLibLayoutTypesMapLayoutProvider)
   };
-};
+}

@@ -1,6 +1,6 @@
-var alter = require('../lib/alter.js');
-var _ = require('lodash');
-var Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('cusum', {
   args: [
     {
@@ -16,9 +16,9 @@ module.exports = new Chainable('cusum', {
   help: 'Return the cumulative sum of a series, starting at a base.',
   fn: function cusumFn(args) {
     return alter(args, function (eachSeries, base) {
-      var pairs = eachSeries.data;
-      var total = base || 0;
-      eachSeries.data = _.map(pairs, function (point, i) {
+      const pairs = eachSeries.data;
+      let total = base || 0;
+      eachSeries.data = _.map(pairs, function (point) {
         total += point[1];
         return [point[0], total];
       });

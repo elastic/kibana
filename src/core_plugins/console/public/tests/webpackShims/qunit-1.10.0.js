@@ -1202,7 +1202,7 @@
   function extractStacktrace(e, offset) {
     offset = offset === undefined ? 3 : offset;
 
-    var stack, include, i, regex;
+    var stack, include, i;
 
     if (e.stacktrace) {
       // Opera
@@ -1309,7 +1309,7 @@
     }
   }
 
-  function checkPollution(name) {
+  function checkPollution() {
     var newGlobals,
         deletedGlobals,
         old = config.pollution;

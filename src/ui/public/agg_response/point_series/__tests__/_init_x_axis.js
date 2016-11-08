@@ -11,7 +11,7 @@ describe('initXAxis', function () {
     initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
   }));
 
-  let baseChart = {
+  const baseChart = {
     aspects: {
       x: {
         agg: {
@@ -27,7 +27,7 @@ describe('initXAxis', function () {
   };
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    let chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
@@ -35,7 +35,7 @@ describe('initXAxis', function () {
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    let chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
 
     initXAxis(chart);
@@ -50,7 +50,7 @@ describe('initXAxis', function () {
   });
 
   it('reads the interval param from the x agg', function () {
-    let chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
     chart.aspects.x.agg.write = _.constant({ params: { interval: 10 } });
 

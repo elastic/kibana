@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/courier';
@@ -36,7 +35,7 @@ uiRoutes
 .when('/dashboard', {
   template: indexTemplate,
   resolve: {
-    dash: function (savedDashboards, config) {
+    dash: function (savedDashboards) {
       return savedDashboards.get();
     }
   }
@@ -91,7 +90,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
         options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
         uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
-        query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+        query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || { query_string: { query: '*' } },
         filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
       };
 
@@ -234,7 +233,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
             }
           }
         })

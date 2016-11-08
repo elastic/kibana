@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Binder from 'ui/binder';
-export default function AlertsFactory(Private) {
+export default function AlertsFactory() {
 
   /**
    * Adds allerts that float in front of a visualization
@@ -82,7 +82,7 @@ export default function AlertsFactory(Private) {
       $(vis.el).find('.vis-alerts').append(
         $('<div>').addClass('vis-alerts-tray').append(alerts.value())
       );
-    };
+    }
 
     /**
      * Tear down the Alerts
@@ -90,8 +90,8 @@ export default function AlertsFactory(Private) {
      */
     destroy() {
       this.binder.destroy();
-    };
+    }
   }
 
   return Alerts;
-};
+}
