@@ -16,6 +16,7 @@ class UiApp {
     this.order = this.spec.order || 0;
     this.description = this.spec.description;
     this.icon = this.spec.icon;
+    this.linkToLastSubUrl = this.spec.linkToLastSubUrl;
     this.hidden = !!this.spec.hidden;
     this.listed = this.spec.listed == null ? !this.hidden : this.spec.listed;
     this.templateName = this.spec.templateName || 'ui_app';
@@ -28,7 +29,8 @@ class UiApp {
         order: this.order,
         description: this.description,
         icon: this.icon,
-        url: this.spec.url || `/app/${this.id}`
+        url: this.spec.url || `/app/${this.id}`,
+        linkToLastSubUrl: this.linkToLastSubUrl
       });
 
       if (!this.listed) {
@@ -63,7 +65,7 @@ class UiApp {
   }
 
   toJSON() {
-    return pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink']);
+    return pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink', 'linkToLastSubUrl']);
   }
 }
 
