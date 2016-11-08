@@ -4,10 +4,7 @@ import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import Log from '../log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
-
-import chokidar from 'chokidar';
 import fromRoot from '../../utils/from_root';
-import readline from 'readline';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -84,6 +81,8 @@ module.exports = class ClusterManager {
   }
 
   setupWatching(extraPaths) {
+    const chokidar = require('chokidar');
+
     const watchPaths = [
       fromRoot('src/core_plugins'),
       fromRoot('src/server'),
@@ -112,6 +111,7 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
+    const readline = require('readline');
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;

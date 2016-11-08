@@ -1,6 +1,6 @@
-import serverConfig from 'intern/dojo/node!./server_config';
+const serverConfig = require('intern/dojo/node!./server_config');
 
-export default Object.assign({
+module.exports = Object.assign({
   debug: true,
   capabilities: {
     'idle-timeout': 99
