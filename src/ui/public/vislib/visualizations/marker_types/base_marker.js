@@ -50,7 +50,9 @@ export default function MarkerFactory() {
       self._legend.onAdd = function () {
         // creates all the neccessary DOM elements for the control, adds listeners
         // on relevant map events, and returns the element containing the control
+        const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
         const $div = $('<div>').addClass('tilemap-legend');
+        $wrapper.append($div);
 
         const titleText = self.getLabel();
         const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
@@ -62,18 +64,21 @@ export default function MarkerFactory() {
           .map(self._valueFormatter)
           .join(' – ');
 
-          const label = $('<div>').text(labelText);
+          const label = $('<div>');
 
           const icon = $('<i>').css({
             background: color,
             'border-color': self.darkerColor(color)
           });
 
+          const text = $('<span>').text(labelText);
+
           label.append(icon);
+          label.append(text);
           $div.append(label);
         });
 
-        return $div.get(0);
+        return $wrapper.get(0);
       };
 
       self._legend.addTo(self.map);
