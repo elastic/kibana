@@ -13,15 +13,26 @@ define(function () {
 
       selection.each(function () {
         const div = d3.select(this);
+        let rows;
 
         div.selectAll('.y-axis-div')
         .append('div')
         .data(function (d) {
+          rows = d.rows ? d.rows.length : 1;
           return d.rows ? d.rows : [d];
         })
         .enter()
           .append('div')
-          .attr('class', 'y-axis-div axis-div');
+          .attr('class', (d, i) => {
+            let divClass = '';
+            if (i === 0) {
+              divClass += ' chart-first';
+            }
+            if (i === rows - 1) {
+              divClass += ' chart-last';
+            }
+            return 'y-axis-div axis-div' + divClass;
+          });
       });
     };
   };

@@ -200,9 +200,9 @@ export default function AxisFactory(Private) {
 
     getLength(el, n) {
       if (this.axisConfig.isHorizontal()) {
-        return $(el).parent().width() / n;
+        return $(el).width();
       } else {
-        return $(el).parent().height() / n;
+        return $(el).height();
       }
     }
 
@@ -230,7 +230,7 @@ export default function AxisFactory(Private) {
         let length = lengths.length > 0 ? _.max(lengths) : 0;
 
         if (config.isHorizontal()) {
-          selection.attr('height', length);
+          selection.attr('height', Math.ceil(length));
           if (position === 'top') {
             selection.select('g')
             .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
@@ -272,7 +272,7 @@ export default function AxisFactory(Private) {
         selection.each(function () {
           const el = this;
           const div = d3.select(el);
-          const width = $(el).parent().width();
+          const width = $(el).width();
           const height = $(el).height();
           const length = self.getLength(el, n);
 
