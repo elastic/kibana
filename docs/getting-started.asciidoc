@@ -6,7 +6,7 @@ key Kibana functionality. By the end of this tutorial, you will have:
 
 * Loaded a sample data set into your Elasticsearch installation
 * Defined at least one index pattern
-* Use the <<discover, Discover>> functionality to explore your data
+* Used the <<discover, Discover>> functionality to explore your data
 * Set up some <<visualize,_visualizations_>> to graphically represent your data
 * Assembled visualizations into a <<dashboard,Dashboard>>
 
