@@ -2,13 +2,14 @@ const rimraf = promisify(require('rimraf'));
 const mkdirp = promisify(require('mkdirp'));
 const unlink = promisify(require('fs').unlink);
 const readdir = promisify(require('fs').readdir);
+const ncp = require('ncp').ncp;
 
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
 import { readFileSync as readSync } from 'fs';
 import { pull, transform, pluck } from 'lodash';
-import { join } from 'path';
-import { resolve, promisify } from 'bluebird';
+import { join, resolve } from 'path';
+import { promisify } from 'bluebird';
 import { makeRe } from 'minimatch';
 
 class UiBundleCollection {
@@ -71,6 +72,16 @@ class UiBundleCollection {
         await bundle.clearBundleFile();
       }
     }
+
+    // Copy fonts.
+    const FONTS_SRC = resolve(__dirname, './public/assets/fonts');
+    const FONTS_DEST = resolve(this.env.workingDir, 'fonts');
+
+    ncp(FONTS_SRC, FONTS_DEST, err => {
+      if (err) {
+        throw new Error(`Couldn't copy fonts to bundles directory. Got error: ${err}.`);
+      }
+    });
   }
 
   async getInvalidBundles() {

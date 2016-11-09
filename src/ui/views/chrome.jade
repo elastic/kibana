@@ -10,9 +10,37 @@ html(lang='en')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     meta(name='viewport', content='width=device-width')
     title Kibana
-    link(
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"
-    )
+    style.
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 300;
+        src: local('Open Sans Light'), local('OpenSans-Light'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_300.woff2') format('woff2'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_300.woff') format('woff'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_300.ttf') format('truetype'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_300.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Open Sans'), local('OpenSans'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_regular.woff2') format('woff2'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_regular.woff') format('woff'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_regular.ttf') format('truetype'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_regular.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 700;
+        src: local('Open Sans Bold'), local('OpenSans-Bold'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_700.woff2') format('woff2'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_700.woff') format('woff'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_700.ttf') format('truetype'),
+             url('bundles/fonts/open_sans/open_sans_v13_latin_700.svg#OpenSans') format('svg');
+      }
     block head
   body(kbn-chrome, id='#{appName}-body')
     kbn-initial-state(data=JSON.stringify(kibanaPayload))

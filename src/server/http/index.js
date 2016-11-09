@@ -1,12 +1,9 @@
-import { parse } from 'url';
-import { format } from 'url';
+import { parse, format } from 'url';
+import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
@@ -137,6 +134,19 @@ module.exports = async function (kbnServer, server, config) {
       } catch (err) {
         reply(err);
       }
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/bundles/fonts/open_sans/{fontFile}',
+    config: {
+      auth: false,
+    },
+    handler: (request, reply) => {
+      const fontPath =
+        resolve(`${process.env.PWD}/optimize/bundles/fonts/open_sans/${request.params.fontFile}`);
+      reply.file(fontPath);
     }
   });
 
