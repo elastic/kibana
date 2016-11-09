@@ -1,9 +1,13 @@
 [[docker]]
 === Install Kibana with Docker
 
+Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
+against the Elastic Docker registry.
+
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+However, version {version} of Kibana has not yet been released, so no Docker
+image is currently available for this version.
 
 endif::[]
 

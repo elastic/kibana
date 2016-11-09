@@ -31,8 +31,10 @@ Elastic website or from our RPM repository.
 
 `docker`::
 
-An image is available for running Kibana as a Docker container. The image is
-available from the Elastic Docker registry.
+An image is available for running Kibana as a Docker container. It ships
+with https://www.elastic.co/products/x-pack[X-Pack] pre-installed and is
+available from the Elastic
+Docker registry.
 +
 <<docker>>
 
