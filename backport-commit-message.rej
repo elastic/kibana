@@ -1,0 +1,23 @@
+Backport PR #6911
+---------
+
+**Commit 1:**
+[internal] Replace var with let in ui/public/vislib
+
+This change was applied to all .js files under src/ui/public/vislib.
+
+This was an automatic replacement from var to let for any variable
+declaration that doubles as the initial assignment. Ultimately we want
+most of these to be converted to const, but this commit is so large that
+it warrants breaking each step of automation up into its own commit.
+
+For example:
+
+`var foo = 'bar';` becomes `let foo = 'var';`
+
+This was accomplished by replacing:
+find: `var ([a-zA-Z_$][0-9a-zA-Z_$]*)(\s+)=`
+replace: `let $1$2=`
+
+* Original sha: 91c20ce8db0c66342d93c97874510633a4eea1f1
+* Authored by Court Ewing <court@epixa.com> on 2016-04-12T22:46:51Z
