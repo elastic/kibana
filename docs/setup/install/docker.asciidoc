@@ -1,0 +1,21 @@
+[[docker]]
+=== Install Kibana with Docker
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The Docker image can be retrieved with the following command:
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+docker pull {docker-image}
+--------------------------------------------
+
+endif::[]
+
+
