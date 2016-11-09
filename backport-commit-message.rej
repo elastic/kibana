@@ -1,0 +1,12 @@
+Backport PR #6736
+---------
+
+**Commit 1:**
+[internal] Remove all variable redeclarations
+
+Redeclaring variables causes ambiguity and serves no purpose. It
+actually causes a runtime error when you do it with `let`, and we can
+enforce not doing it via a linter rule.
+
+* Original sha: de20762889a72c060e46b5e7042320c71e44ad92
+* Authored by Court Ewing <court@epixa.com> on 2016-04-01T18:21:55Z
