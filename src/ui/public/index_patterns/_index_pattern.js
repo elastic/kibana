@@ -35,7 +35,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     addScriptedField: '/management/kibana/indices/{{id}}/create-field/scriptedField',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
     scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)',
     metaFields: '/management/kibana/indices/{{id}}?_a=(tab:metaFields)'
   });
 
