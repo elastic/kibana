@@ -1,0 +1,24 @@
+Backport PR #6909
+---------
+
+**Commit 1:**
+[internal] Replace var with let in ui/public P-T
+
+This change was applied to any .js files under directories beginning
+with `p` through `t` in src/ui/public. There are no `o` directories.
+
+This was an automatic replacement from var to let for any variable
+declaration that doubles as the initial assignment. Ultimately we want
+most of these to be converted to const, but this commit is so large that
+it warrants breaking each step of automation up into its own commit.
+
+For example:
+
+`var foo = 'bar';` becomes `let foo = 'var';`
+
+This was accomplished by replacing:
+find: `var ([a-zA-Z_$][0-9a-zA-Z_$]*)(\s+)=`
+replace: `let $1$2=`
+
+* Original sha: 1cddaab2c473103810eb47a016e9ca7290e36f6c
+* Authored by Court Ewing <court@epixa.com> on 2016-04-12T22:31:57Z
