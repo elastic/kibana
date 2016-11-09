@@ -5,6 +5,8 @@ var _ = require('lodash');
 var fs = require('fs');
 var util = require('util');
 var url = require('url');
+var AWS = require('aws-sdk');
+var Promise = require('bluebird');
 var uri = url.parse(config.elasticsearch);
 if (config.kibana.kibana_elasticsearch_username && config.kibana.kibana_elasticsearch_password) {
   uri.auth = util.format('%s:%s', config.kibana.kibana_elasticsearch_username, config.kibana.kibana_elasticsearch_password);
@@ -21,7 +23,7 @@ if (config.kibana.ca) {
   ssl.ca = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
-module.exports = new elasticsearch.Client({
+var options = {
   host: url.format(uri),
   ssl: ssl,
   pingTimeout: config.kibana.ping_timeout,
@@ -35,5 +37,14 @@ module.exports = new elasticsearch.Client({
     this.trace = _.noop;
     this.close = _.noop;
   }
-});
+};
 
+if(config.kibana.transport == "AWS") {
+  options.connectionClass = require('http-aws-es');
+  options.amazonES = {
+    region: config.kibana.region,
+    credentials: AWS.config.credentials
+  };
+}
+
+module.exports = new elasticsearch.Client(options);

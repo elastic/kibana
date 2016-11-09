@@ -10,6 +10,8 @@ var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
+var aws4 = require('aws4');
+var AWS = require('aws-sdk');
 
 
 // If the target is backed by an SSL and a CA is provided via the config
@@ -111,8 +113,50 @@ router.use(function (req, res, next) {
     options.headers.host = target.host;
   }
 
+  if(config.kibana.transport == "AWS") {
+    // Amazons signing escapes asterisks in addition to uri encoding
+    // in the uri context.
+    qs_index = path.indexOf("?");
+    if(qs_index >= 0) {
+     context = path.substring(0, qs_index);
+    } else {
+     context = path;
+    }
+    encodedContext = context.split("/")
+      .map(function (val) {
+        return encodeURIComponent(val).replace(/\*/g, '%2A');
+      }).join("/");
+    encodedPath = encodedContext;
+    if(qs_index >= 0) {
+      encodedPath += path.substring(qs_index, path.length);
+    }
+
+    var signingOptions = {
+      path: encodedPath,
+      body: options.body,
+      host: options.headers.host,
+      method: options.method,
+      service: "es",
+      region: config.kibana.region,
+      headers: {}
+    }
+    if(options.headers["content-type"]) {
+      signingOptions.headers["content-type"] = options.headers["content-type"];
+    }
+
+    if(options.headers["content-length"]) {
+      signingOptions.headers["content-length"] = options.headers["content-length"];
+    }
+
+    aws4.sign(signingOptions, AWS.config.credentials);
+    options.headers["x-amz-security-token"] = signingOptions.headers["X-Amz-Security-Token"];
+    options.headers["x-amz-date"] = signingOptions.headers["X-Amz-Date"];
+    options.headers["authorization"] = signingOptions.headers["Authorization"];
+  }
+
   // Create the request and pipe the response
   var esRequest = request(options);
+
   esRequest.on('error', function (err) {
     logger.error({ err: err });
     var code = 502;
@@ -131,4 +175,3 @@ router.use(function (req, res, next) {
   });
   esRequest.pipe(res);
 });
-
