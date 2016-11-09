@@ -1,0 +1,26 @@
+Backport PR #6651
+---------
+
+**Commit 1:**
+[courier/segmentedRequest] mark the request "started" synchronously
+
+* Original sha: 8a4992640bf1e8f74316dbbad0d5875182b91bbf
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-03-24T21:35:00Z
+
+**Commit 2:**
+[courier/fetch] detect aborted requests more agressively
+
+* Original sha: c12f18df2733f36819d482ad1c8b7152a5450584
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-03-24T21:35:46Z
+
+**Commit 3:**
+[courier/callClient] if there are no executable requests, do nothing
+
+* Original sha: 8fef03b816e016a1637a2557c1a1cb6e0cab7bc2
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-03-24T21:36:18Z
+
+**Commit 4:**
+[courier/tests] updated test
+
+* Original sha: 985f9970f3b73863b20d55369ac0e902e27384fd
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-03-24T22:25:31Z
