@@ -3085,6 +3085,7 @@
         }
 
         facet[name].terms.size = facetSize;
+        facet[name].terms.shard_size = 10 * facetSize;
         return this;
       },
 
