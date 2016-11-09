@@ -1,0 +1,24 @@
+Backport PR #6865
+---------
+
+**Commit 1:**
+[internal] Replace var assignments with let in ui tests
+
+This change was applied to any .js files under __tests__ directories in
+the ui module.
+
+This was an automatic replacement from var to let for any variable
+declaration that doubles as the initial assignment. Ultimately we want
+most of these to be converted to const, but this commit is so large that
+it warrants breaking each step of automation up into its own commit.
+
+For example:
+
+var foo = 'bar'; becomes let foo = 'var';
+
+This was accomplished by replacing:
+find: var ([a-zA-Z_$][0-9a-zA-Z_$]*)(\s+)=
+replace: let $1$2=
+
+* Original sha: 863228de379846b54d6a2dbfd56cb90ecaf86bb8
+* Authored by Court Ewing <court@epixa.com> on 2016-04-12T15:30:18Z
