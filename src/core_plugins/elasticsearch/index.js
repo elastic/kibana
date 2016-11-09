@@ -2,7 +2,9 @@ import { trim, trimRight } from 'lodash';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
-import exposeClient from './lib/expose_client';
+import exposeDataClient from './lib/expose_data_client';
+import exposeAdminClient from './lib/expose_admin_client';
+
 import createProxy, { createPath } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
@@ -33,6 +35,25 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: Joi.string().default('master'),
+        tribe: object({
+          url: string().uri({ scheme: ['http', 'https'] }),
+          preserveHost: boolean().default(true),
+          username: string(),
+          password: string(),
+          shardTimeout: number().default(0),
+          requestTimeout: number().default(30000),
+          requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
+          customHeaders: object().default({}),
+          pingTimeout: number().default(ref('requestTimeout')),
+          startupTimeout: number().default(5000),
+          ssl: object({
+            verify: boolean().default(true),
+            ca: array().single().items(string()),
+            cert: string(),
+            key: string()
+          }).default(),
+          apiVersion: Joi.string().default('master'),
+        }).default()
       }).default();
     },
 
@@ -42,6 +63,7 @@ module.exports = function ({ Plugin }) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
+          esDataIsTribe: options.tribe ? true : false,
         };
       }
     },
@@ -50,7 +72,9 @@ module.exports = function ({ Plugin }) {
       const kibanaIndex = server.config().get('kibana.index');
 
       // Expose the client to the server
-      exposeClient(server);
+      exposeDataClient(server);
+      exposeAdminClient(server);
+
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');
       createProxy(server, 'POST', '/{index}/_search');
@@ -69,7 +93,7 @@ module.exports = function ({ Plugin }) {
 
       function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
-        const matchPath = createPath(kibanaIndex);
+        const matchPath = createPath('/elasticsearch', kibanaIndex);
 
         if (requestPath === matchPath) {
           return reply(methodNotAllowed('You cannot modify the primary kibana index through this interface.'));
