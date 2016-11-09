@@ -601,7 +601,7 @@ export default function DataFactory(Private) {
      * @returns {Array} Array of x axis values
      */
     xValues() {
-      return orderKeys(this.data);
+      return orderKeys(this.data, this._attr.orderBucketsBySum);
     };
 
     /**
