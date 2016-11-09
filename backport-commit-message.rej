@@ -1,0 +1,14 @@
+Backport PR #7859
+---------
+
+**Commit 1:**
+downgrading chromedriver
+
+* Original sha: 13d7db3ebef77102f9441f403cd7bcf2443acfe6
+* Authored by ppisljar <peter.pisljar@gmail.com> on 2016-07-27T15:18:03Z
+
+**Commit 2:**
+upgrading chromedriver to latest version
+
+* Original sha: 0a1838ef6e23fa32f41009e94b54ab049c276452
+* Authored by ppisljar <peter.pisljar@gmail.com> on 2016-08-02T11:55:47Z
