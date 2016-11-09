@@ -34,6 +34,7 @@ if (key && cert) {
 } else {
   server = http.createServer(app);
 }
+server.timeout=config.request_timeout+100 // Give elasticsearch some time to answer after querry runs into timeout.
 server.on('error', onError);
 server.on('listening', onListening);
 

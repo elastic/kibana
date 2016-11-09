@@ -43,7 +43,7 @@ kibana.tilemap_subdomains = kibana.tilemap_subdomains || [];
 kibana.logging_filter_cookie = kibana.logging_filter_cookie || 'remove';
 kibana.logging_filter_authorization = kibana.logging_filter_authorization || 'remove';
 
-kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
+kibana.request_timeout = kibana.request_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
 
