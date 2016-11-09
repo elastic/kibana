@@ -67,7 +67,7 @@
         <tr ng-repeat="term in legend">
           <td><i class="icon-circle" ng-style="{color:term.color}"></i></i></td>
           <td class="terms-legend-term" style="padding-right:10px;padding-left:10px;">{{term.label}}</td>
-          <td>{{term.data[0][1]}}</td>
+          <td>{{term.data[0][1] | round:panel.precision}}</td>
         </tr>
       </table>
 
@@ -75,7 +75,7 @@
       <span class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
         <span>
           <i class="icon-circle" ng-style="{color:term.color}"></i>
-          <span class="terms-legend-term">{{term.label}}</span> ({{term.data[0][1]}})
+          <span class="terms-legend-term">{{term.label}}</span> ({{term.data[0][1] | round:panel.precision}})
         </span>
       </span>
 
