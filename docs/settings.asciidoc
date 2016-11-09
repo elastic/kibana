@@ -398,6 +398,12 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 +
 *alias*: `log_file` deprecated[4.2]
 
+`server.xsrf.token` added[4.3]:: A value to use as a XSRF token. This token is sent back to the server on each request and required if you want to execute requests from other clients (like curl). If you run multiple Kibana instances behind a load balancer, set this option to the same value for every Kibana instance.
+
+`server.xsrf.disableProtection` added[4.3]:: Disable usage of the XSRF token.
++
+*default*: `false`
+
 [[managing-saved-objects]]
 === Managing Saved Searches, Visualizations, and Dashboards 
 
