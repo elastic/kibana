@@ -15,8 +15,8 @@ require('plugins/kibana/management/saved_object_registry').register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl) {
-  const scanner = new Scanner(es, {
+module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, esAdmin, kbnUrl) {
+  const scanner = new Scanner(esAdmin, {
     index: kbnIndex,
     type: 'dashboard'
   });
@@ -78,7 +78,7 @@ module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, e
       body = { query: {match_all: {}}};
     }
 
-    return es.search({
+    return esAdmin.search({
       index: kbnIndex,
       type: 'dashboard',
       body: body,

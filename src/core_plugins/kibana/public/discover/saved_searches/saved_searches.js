@@ -16,8 +16,8 @@ require('plugins/kibana/management/saved_object_registry').register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
-  const scanner = new Scanner(es, {
+module.service('savedSearches', function (Promise, config, kbnIndex, esAdmin, createNotifier, SavedSearch, kbnUrl) {
+  const scanner = new Scanner(esAdmin, {
     index: kbnIndex,
     type: 'search'
   });
@@ -82,7 +82,7 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
       body = { query: {match_all: {}}};
     }
 
-    return es.search({
+    return esAdmin.search({
       index: kbnIndex,
       type: 'search',
       body: body,

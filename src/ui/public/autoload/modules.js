@@ -9,6 +9,7 @@ import 'ui/debounce';
 import 'ui/doc_title';
 import 'ui/elastic_textarea';
 import 'ui/es';
+import 'ui/es_admin';
 import 'ui/events';
 import 'ui/fancy_forms';
 import 'ui/filter_bar';

@@ -13,10 +13,10 @@ require('plugins/kibana/management/saved_object_registry').register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
+app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
   const visTypes = Private(RegistryVisTypesProvider);
 
-  const scanner = new Scanner(es, {
+  const scanner = new Scanner(esAdmin, {
     index: kbnIndex,
     type: 'visualization'
   });
@@ -95,7 +95,7 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
       body = { query: {match_all: {}}};
     }
 
-    return es.search({
+    return esAdmin.search({
       index: kbnIndex,
       type: 'visualization',
       body: body,
