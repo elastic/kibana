@@ -1,0 +1,8 @@
+Backport PR #6709
+---------
+
+**Commit 1:**
+[chore] Cleanup settings code style as reported. Fixes #6588.
+
+* Original sha: 7b43d523a6c6cda306accf4a1bc2e082ae496623
+* Authored by Nicolas Bevacqua <nicolasbevacqua@gmail.com> on 2016-03-30T20:11:35Z
