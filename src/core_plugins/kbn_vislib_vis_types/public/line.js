@@ -30,7 +30,19 @@ export default function HistogramVisType(Private) {
         setYExtents: false,
         yAxis: {}
       },
-      legendPositions: ['left', 'right', 'top', 'bottom'],
+      legendPositions: [{
+        value: 'left',
+        text: 'left',
+      }, {
+        value: 'right',
+        text: 'right',
+      }, {
+        value: 'top',
+        text: 'top',
+      }, {
+        value: 'bottom',
+        text: 'bottom',
+      }],
       scales: ['linear', 'log', 'square root'],
       editor: lineTemplate
     },

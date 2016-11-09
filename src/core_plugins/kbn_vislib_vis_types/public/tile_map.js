@@ -32,7 +32,19 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         mapCenter: [15, 5],
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
-      legendPositions: ['bottomleft', 'bottomright', 'topleft', 'topright'],
+      legendPositions: [{
+        value: 'bottomleft',
+        text: 'bottom left',
+      }, {
+        value: 'bottomright',
+        text: 'bottom right',
+      }, {
+        value: 'topleft',
+        text: 'top left',
+      }, {
+        value: 'topright',
+        text: 'top right',
+      }],
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       canDesaturate: !!supports.cssFilters,
       editor: tileMapTemplate
