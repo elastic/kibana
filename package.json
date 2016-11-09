@@ -50,7 +50,6 @@
     "test:coverage": "grunt test:coverage",
     "test:visualRegression": "grunt test:visualRegression",
     "checkLicenses": "grunt licenses",
-    "checkPlugins": "grunt checkPlugins",
     "build": "grunt build",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",

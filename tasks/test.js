@@ -10,6 +10,10 @@ module.exports = function (grunt) {
     const pluginsDir = path.resolve('./plugins/');
 
     fs.readdir(pluginsDir, (err, files) => {
+      if (!files) {
+        return done();
+      }
+
       const plugins = files.filter(file => {
         return fs.statSync(path.join(pluginsDir, file)).isDirectory();
       });
