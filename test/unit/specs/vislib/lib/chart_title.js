@@ -8,6 +8,7 @@ define(function (require) {
   describe('Vislib ChartTitle Class Test Suite', function () {
     var ChartTitle;
     var Data;
+    var SingleYAxisStrategy;
     var chartTitle;
     var el;
     var dataObj;
@@ -78,6 +79,7 @@ define(function (require) {
       inject(function (d3, Private) {
         ChartTitle = Private(require('components/vislib/lib/chart_title'));
         Data = Private(require('components/vislib/lib/data'));
+        SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
 
         el = d3.select('body').append('div')
           .attr('class', 'vis-wrapper')
@@ -87,7 +89,7 @@ define(function (require) {
           .attr('class', 'chart-title')
           .style('height', '20px');
 
-        dataObj = new Data(data, {});
+        dataObj = new Data(data, {}, new SingleYAxisStrategy());
         chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
       });
     });

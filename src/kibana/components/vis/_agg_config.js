@@ -13,6 +13,7 @@ define(function (require) {
       // setters
       self.type = opts.type;
       self.schema = opts.schema;
+      self.onSecondaryYAxis = opts.onSecondaryYAxis;
 
       // resolve the params
       self.fillDefaults(opts.params);
@@ -85,6 +86,14 @@ define(function (require) {
           }
 
           this.__schema = schema;
+        }
+      },
+      onSecondaryYAxis: {
+        get: function () {
+          return this.__onSecondaryYAxis || false;
+        },
+        set: function (onSecondaryYAxis) {
+          this.__onSecondaryYAxis = onSecondaryYAxis;
         }
       }
     });
@@ -234,6 +243,7 @@ define(function (require) {
         id: self.id,
         type: self.type && self.type.name,
         schema: self.schema && self.schema.name,
+        onSecondaryYAxis: self.onSecondaryYAxis || false,
         params: outParams
       };
     };

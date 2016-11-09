@@ -8,6 +8,7 @@ define(function (require) {
   describe('Vislib xAxis Class Test Suite', function () {
     var XAxis;
     var Data;
+    var SingleYAxisStrategy;
     var xAxis;
     var el;
     var fixture;
@@ -81,6 +82,7 @@ define(function (require) {
     beforeEach(function () {
       inject(function (d3, Private) {
         Data = Private(require('components/vislib/lib/data'));
+        SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
         XAxis = Private(require('components/vislib/lib/x_axis'));
 
         el = d3.select('body').append('div')
@@ -90,7 +92,7 @@ define(function (require) {
         fixture = el.append('div')
           .attr('class', 'x-axis-div');
 
-        dataObj = new Data(data, {});
+        dataObj = new Data(data, {}, new SingleYAxisStrategy());
         xAxis = new XAxis({
           el: $('.x-axis-div')[0],
           xValues: dataObj.xValues(),

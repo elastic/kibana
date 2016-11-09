@@ -4,6 +4,7 @@ define(function (require) {
     var errors = require('errors');
     var Binder = require('utils/Binder');
 
+    var SingleYAxisStrategy = Private(require('components/vislib/lib/_single_y_axis_strategy'));
     var Data = Private(require('components/vislib/lib/data'));
     var Layout = Private(require('components/vislib/lib/layout/layout'));
 
@@ -21,7 +22,7 @@ define(function (require) {
         return new Handler(vis, opts);
       }
 
-      this.data = opts.data || new Data(vis.data, vis._attr);
+      this.data = opts.data || new Data(vis.data, vis._attr, new SingleYAxisStrategy());
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -36,6 +37,7 @@ define(function (require) {
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
+      this.secondaryYAxis = opts.secondaryYAxis;
 
       if (this._attr.addLegend) {
         this.legend = opts.legend;
@@ -51,6 +53,7 @@ define(function (require) {
         this.alerts,
         this.xAxis,
         this.yAxis,
+        this.secondaryYAxis
       ], Boolean);
 
       // memoize so that the same function is returned every time,

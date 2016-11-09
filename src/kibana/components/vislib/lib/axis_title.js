@@ -14,7 +14,7 @@ define(function (require) {
      * @param xTitle {String} X-axis title
      * @param yTitle {String} Y-axis title
      */
-    function AxisTitle(el, xTitle, yTitle) {
+    function AxisTitle(el, xTitle, yTitle, secondaryYTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);
       }
@@ -22,6 +22,7 @@ define(function (require) {
       this.el = el;
       this.xTitle = xTitle;
       this.yTitle = yTitle;
+      this.secondaryYTitle = secondaryYTitle;
     }
 
     _(AxisTitle.prototype).extend(ErrorHandler.prototype);
@@ -35,6 +36,9 @@ define(function (require) {
     AxisTitle.prototype.render = function () {
       d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
       d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
+      if (this.secondaryYTitle) {
+        d3.select(this.el).select('.secondary-y-axis-title').call(this.draw(this.secondaryYTitle));
+      }
     };
 
     /**

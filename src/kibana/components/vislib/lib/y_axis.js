@@ -19,6 +19,8 @@ define(function (require) {
       this.domain = [args.yMin, args.yMax];
       this.yAxisFormatter = args.yAxisFormatter;
       this._attr = args._attr || {};
+      this.orientation = args.orientation;
+      this.yAxisDiv = args.yAxisDiv;
     }
 
     _(YAxis.prototype).extend(ErrorHandler.prototype);
@@ -30,7 +32,7 @@ define(function (require) {
      * @return {D3.UpdateSelection} Renders y axis to visualization
      */
     YAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
+      d3.select(this.el).selectAll('.' + this.yAxisDiv).call(this.draw());
     };
 
     YAxis.prototype._isPercentage = function () {
@@ -157,7 +159,7 @@ define(function (require) {
         .scale(yScale)
         .tickFormat(this.tickFormat(this.domain))
         .ticks(this.tickScale(height))
-        .orient('left');
+        .orient(this.orientation);
 
       return this.yAxis;
     };
@@ -210,21 +212,29 @@ define(function (require) {
           // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
+            var xTranslation = width - 2;
+            if (self.orientation === 'right') {
+              xTranslation = 4;
+            }
             var svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
 
             svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
+            .attr('transform', 'translate(' + xTranslation + ',' + margin.top + ')')
             .call(yAxis);
 
             var container = svg.select('g.y.axis').node();
             if (container) {
               var cWidth = Math.max(width, container.getBBox().width);
+              xTranslation = cWidth - 2;
+              if (self.orientation === 'right') {
+                xTranslation = 4;
+              }
               svg.attr('width', cWidth);
               svg.select('g')
-              .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+              .attr('transform', 'translate(' + xTranslation + ',' + margin.top + ')');
             }
           }
         });

@@ -4,7 +4,7 @@ define(function (require) {
     var getPoint = Private(require('components/agg_response/point_series/_get_point'));
     var addToSiri = Private(require('components/agg_response/point_series/_add_to_siri'));
 
-    return function getSeries(rows, chart) {
+    return function getSeries(rows, chart, aggs) {
       var aspects = chart.aspects;
       var multiY = _.isArray(aspects.y);
       var yScale = chart.yScale;
@@ -26,8 +26,10 @@ define(function (require) {
           var prefix = point.series ? point.series + ': ' : '';
           var seriesId = prefix + y.agg.id;
           var seriesLabel = prefix + y.col.title;
+          var aggId = y.agg.key ? y.agg.parentId : y.agg.id;
+          var onSecondaryYAxis = _.findWhere(aggs, {'id': aggId}).onSecondaryYAxis;
 
-          addToSiri(series, point, seriesId, seriesLabel);
+          addToSiri(series, point, seriesId, seriesLabel, onSecondaryYAxis);
         });
 
       }, {})
