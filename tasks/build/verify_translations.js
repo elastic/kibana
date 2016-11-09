@@ -7,10 +7,9 @@ import * as i18nVerify from '../utils/i18n_verify_keys';
 import * as i18n from '../../src/core_plugins/i18n/server/i18n';
 
 module.exports = function (grunt) {
-  grunt.registerTask('_build:verifyTranslations', async function () {
+  grunt.registerTask('_build:verifyTranslations', function () {
+    const done = this.async();
     const parsePaths = [fromRoot('/src/ui/views/*.jade')];
-    const keyPattern = 'i18n\\(\'(.*)\'\\)';
-    const keyPatternRegEx = new RegExp(keyPattern, 'g');
 
     const serverConfig = {
       env: 'production',
@@ -34,26 +33,41 @@ module.exports = function (grunt) {
         enabled: false
       }
     };
-    const kbnServer = new KbnServer(serverConfig);
-    await kbnServer.ready();
 
-    const done = this.async();
-    const locales = i18n.getRegisteredTranslationLocales();
-    Promise.all(locales.map(function (locale) {
-      return i18n.getTranslationsForLocale(locale).then(function (translations) {
-        i18nVerify.verifyTranslationKeys(parsePaths, translations, keyPatternRegEx).then(function (keysNotTranslated) {
-          if (!_.isEmpty(keysNotTranslated)) {
-            console.error('Verification of the following translations keys are not translated: ', keysNotTranslated);
-          } else {
-            console.log('Verification of translations keys are a success.');
-          }
+    const kbnServer = new KbnServer(serverConfig);
+    kbnServer.ready()
+    .then(function () {
+      verifyTranslations(parsePaths)
+      .then(function () {
+        kbnServer.close()
+        .then(function () {
+          done();
         });
+      })
+      .catch(function (err) {
+        kbnServer.close();
+        throw err;
       });
-    })).then(async function() {
-      await kbnServer.close();
-    }).catch(async function(e) {
-      await kbnServer.close();
-      throw e;
+    })
+    .catch(function (err) {
+      done(false);
+      throw err;
     });
   });
 };
+
+function verifyTranslations(parsePaths)
+{
+  const locales = i18n.getRegisteredTranslationLocales();
+  return Promise.all(locales.map(function (locale) {
+    return i18n.getTranslations([locale]).then(function (translations) {
+      return i18nVerify.verifyTranslationKeys(parsePaths, translations).then(function (keysNotTranslated) {
+        if (!_.isEmpty(keysNotTranslated)) {
+          console.error('Verification of the following translations keys are not translated: ', keysNotTranslated);
+        } else {
+          console.log('Verification of translations keys are a success.');
+        }
+      });
+    });
+  }));
+}

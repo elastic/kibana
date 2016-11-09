@@ -5,12 +5,13 @@ import { props } from 'bluebird';
 import Boom from 'boom';
 import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
+import langParser from 'accept-language-parser';
+
 import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import * as uii18n from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -91,7 +92,10 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-      const translations = await UiI18n.getTranslations(acceptLanguages, server);
+      const languageTags = getLanguageTags(acceptLanguages);
+      const requestedTranslations = await server.plugins.i18n.getTranslations(languageTags);
+      const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
+      const translations = _.defaults({}, requestedTranslations, defaultTranslations);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -123,3 +127,11 @@ export default async (kbnServer, server, config) => {
     });
   });
 };
+
+function getLanguageTags(acceptLanguages) {
+  if (_.isEmpty(acceptLanguages)) return [];
+  const languages = langParser.parse(acceptLanguages);
+  return _.map(languages, (language) => {
+    return _.compact([language.code, language.region, language.script]).join('-');
+  });
+}
