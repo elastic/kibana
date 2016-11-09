@@ -19,20 +19,7 @@ module.exports = {
       'dynamic_templates': [{
         'string_fields': {
           'mapping': {
-            'type': 'multi_field',
-            'doc_values': true,
-            'fields': {
-              '{name}': {
-                'index': 'analyzed',
-                'omit_norms': true,
-                'type': 'string'
-              },
-              'raw': {
-                'index': 'not_analyzed',
-                'type': 'string',
-                'doc_values': true
-              }
-            }
+            'type': 'string'
           },
           'match_mapping_type': 'string',
           'match': '*'
