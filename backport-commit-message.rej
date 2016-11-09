@@ -1,0 +1,111 @@
+Backport PR #7724
+---------
+
+**Commit 1:**
+[viz] Allow for configurable map urls
+
+* Original sha: 58844a0296e8f802e99f973e963e26e2fdf3799c
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-12T21:29:00Z
+
+**Commit 2:**
+Adds every config option from Leaflet
+
+* Original sha: 0b9388ce830af359ff73894189b4dda40b0dfbcd
+* Authored by Chris Earle <chris.earle@elastic.co> on 2016-07-13T00:31:04Z
+* Committed by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T01:55:01Z
+
+**Commit 3:**
+Removed confusing config options
+
+* Original sha: b1f8ac8afe2ec8947cc40db14f80ea8d17272b13
+* Authored by Chris Earle <chris.earle@elastic.co> on 2016-07-13T01:07:01Z
+* Committed by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T01:55:01Z
+
+**Commit 4:**
+[vis] Don't rewrite markdown
+
+* Original sha: c670a1c415002e8ef5e6910e3c53cfa8c14fcf97
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T02:52:39Z
+
+**Commit 5:**
+[config] Update default tile link
+
+* Original sha: 7c8ec7560c991e730aa34ad9ee647195fc78bf66
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T02:55:16Z
+
+**Commit 6:**
+Change bounds from object to GeoJSON (long, lat) array style
+
+* Original sha: 6d8f803f2b33b74fb157236bffa7948e34663625
+* Authored by Chris Earle <chris.earle@elastic.co> on 2016-07-13T02:58:07Z
+
+**Commit 7:**
+[config] Set max zoom to 7
+
+* Original sha: b7629490ad8c1667c0c84d2fec4622404dcba2e7
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T03:07:47Z
+
+**Commit 8:**
+[tests] Cleanup schema data
+
+* Original sha: c3d203f07b187e84ab6c884a8e789de524972720
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T04:04:04Z
+
+**Commit 9:**
+[vis] Bound tilemap zoom
+
+* Original sha: 3c1339e17c31ad9d10d94be3452ff9ea43dd6cb4
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-07-13T15:25:16Z
+
+**Commit 10:**
+Round out support for the initial Elastic Tile Service
+
+Correct links, legacy config handling, and wms server conditionals.
+
+* Original sha: 41fbb060c426c79c4198d00c8cee60aa0795c4be
+* Authored by Court Ewing <court@epixa.com> on 2016-07-15T20:50:47Z
+
+**Commit 11:**
+Made minZoom in test fixture consistent with reality
+
+* Original sha: 6494caa789d8b7069a82b376f586d7560ef03993
+* Authored by Court Ewing <court@epixa.com> on 2016-07-15T21:11:36Z
+
+**Commit 12:**
+Correctly check for enabled wms to determine zoom
+
+Without this defensive check, a JS console error is thrown whenever wms
+is not configured for a map visualization.
+
+* Original sha: c74041cadbc56c706dfc8021f0316d4807cc614f
+* Authored by Court Ewing <court@epixa.com> on 2016-07-15T21:15:10Z
+
+**Commit 13:**
+Remove duplicate wms conditional in tilemap createmap
+
+This separation made sense in the original implementation, but it is not
+necessary in this version.
+
+* Original sha: ca5a96838b0679df4697847cc085f5bc858092d1
+* Authored by Court Ewing <court@epixa.com> on 2016-07-15T21:35:21Z
+
+**Commit 14:**
+Remove optional joi references in tilemap config
+
+In joi, configurations are optional by default, so there's no need to be
+explicit here.
+
+* Original sha: 2feac112f389974afb6830d10a02df228e8b0429
+* Authored by Court Ewing <court@epixa.com> on 2016-07-19T17:34:38Z
+
+**Commit 15:**
+Re-disable scroll wheel zoom on maps
+
+Enabling scroll wheel search does not seem necessary in the context of
+this overall bug fix.
+
+* Original sha: 2862f94cda962bb78b6c31f11a745b664d758fd7
+* Authored by Court Ewing <court@epixa.com> on 2016-07-19T17:39:40Z
+
+-------------------------------
+**Backported based on diff from PR #7779**
