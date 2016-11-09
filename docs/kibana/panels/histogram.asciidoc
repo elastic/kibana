@@ -26,11 +26,13 @@ annotate.query::: Lucene query_string syntax query to use for markers.
 annotate.size::: Max number of markers to show
 annotate.field::: Field from documents to show
 annotate.sort::: Sort array in format [field,order], For example [`@timestamp',`desc']
+
 ==== Interval options
 auto_int:: Automatically scale intervals?
 resolution:: If auto_int is true, shoot for this many bars.
 interval:: If auto_int is set to false, use this as the interval.
 interval:: Array of possible intervals in the *View* selector. Example [`auto',`1s',`5m',`3h']
+
 ==== Drawing options
 lines:: Show line chart
 fill:: Area fill factor for line charts, 1-10
@@ -46,6 +48,7 @@ legend:: Display the legend
 show_query:: If no alias is set, should the query be displayed?
 interactive:: Enable click-and-drag to zoom functionality
 legend_counts:: Show counts in legend
+
 ==== Transformations
 timezone:: Correct for browser timezone?. Valid values: browser, utc
 percentage:: Show the y-axis as a percentage of the axis total. Only makes sense for multiple
