@@ -37,20 +37,22 @@ export default function UniqueXValuesUtilService(Private) {
     flattenedData.forEach(function (d, i) {
       const key = d.x;
       const prev = uniqueXValues.get(key);
-
+      let sum = d.y;
       if (d.xi != null) {
         i = d.xi;
       }
 
       if (prev) {
         i = Math.min(i, prev.index);
+        sum += prev.sum;
       }
 
       uniqueXValues.set(key, {
         index: i,
         isDate: isDate,
         isOrdered: isOrdered,
-        isNumber: _.isNumber(key)
+        isNumber: _.isNumber(key),
+        sum: sum
       });
     });
 

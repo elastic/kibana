@@ -29,12 +29,12 @@ export default function ZeroInjectionUtilService(Private) {
     }
   }
 
-  return function (obj) {
+  return function (obj, orderBucketsBySum = false) {
     if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
       throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
     }
 
-    const keys = orderXValues(obj);
+    const keys = orderXValues(obj, orderBucketsBySum);
     const arr = getDataArray(obj);
 
     arr.forEach(function (object) {
