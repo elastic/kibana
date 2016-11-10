@@ -75,8 +75,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       }
 
-      $scope.$on('$destroy', dash.destroy);
-
       const matchQueryFilter = function (filter) {
         return filter.query && filter.query.query_string && !filter.meta;
       };
@@ -103,6 +101,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$watchCollection('state.options', function (newVal, oldVal) {
         if (!angular.equals(newVal, oldVal)) $state.save();
       });
+
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
       $scope.topNavMenu = [{
@@ -154,7 +153,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         stateMonitor.onChange((status) => {
           $appStatus.dirty = status.dirty;
         });
-        $scope.$on('$destroy', () => stateMonitor.destroy());
+
+        $scope.$on('$destroy', () => {
+          stateMonitor.destroy();
+          dash.destroy();
+
+          // Remove dark theme to keep it from affecting the appearance of other apps.
+          setDarkTheme(false);
+        });
 
         $scope.$emit('application.load');
       }
