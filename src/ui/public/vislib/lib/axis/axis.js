@@ -264,7 +264,7 @@ export default function AxisFactory(Private) {
         throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
       }
 
-      const isWiggle = this.axisConfig.get('mode') === 'wiggle';
+      const isWiggle = this.visConfig.get('mode', 'normal') === 'wiggle';
       if (isWiggle && this.axisConfig.isTimeDomain()) {
         throw new errors.VislibError('In wiggle mode the area chart requires ordered values on the x-axis. ' +
           'Try using a Histogram or Date Histogram aggregation.');

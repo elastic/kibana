@@ -156,7 +156,8 @@ export default function LineChartFactory(Private) {
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const line = svg.append('g')
-      .attr('class', 'pathgroup lines');
+      .attr('class', 'pathgroup lines')
+      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       function cx(d) {
         if (ordered && ordered.date) {

@@ -54,6 +54,23 @@ export default function PointSeriesFactory(Private) {
       .attr('fill', 'transparent');
     };
 
+    addClipPath(svg) {
+      const {width, height} = svg.node().getBBox();
+      const startX = 0;
+      const startY = 0;
+      this.clipPathId = 'chart-area' + _.uniqueId();
+
+      // Creating clipPath
+      return svg
+      .append('clipPath')
+      .attr('id', this.clipPathId)
+      .append('rect')
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      .attr('height', height);
+    };
+
     addEvents(svg) {
       const isBrushable = this.events.isBrushable();
       if (isBrushable) {
@@ -185,6 +202,7 @@ export default function PointSeriesFactory(Private) {
           .attr('height', height);
 
           self.addBackground(svg, width, height);
+          self.addClipPath(svg);
           self.addEvents(svg);
           self.createEndZones(svg);
 

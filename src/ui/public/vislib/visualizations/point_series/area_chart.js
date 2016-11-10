@@ -87,7 +87,8 @@ export default function AreaChartFactory(Private) {
       })
       .classed('overlap_area', function () {
         return isOverlapping;
-      });
+      })
+      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       function x(d) {
         if (isTimeSeries) {
