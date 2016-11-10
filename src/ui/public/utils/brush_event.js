@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import moment from 'moment';
 import buildRangeFilter from 'ui/filter_manager/lib/range';
 export default function brushEventProvider(timefilter) {
@@ -26,9 +27,15 @@ export default function brushEventProvider(timefilter) {
             filter.meta && filter.meta.key === event.data.xAxisField.name
           ));
 
-          const range = {gte: event.range[0], lt: event.range[event.range.length - 1]};
-          if (existingFilter) {
+          const min = event.range[0];
+          const max = event.range[event.range.length - 1];
+          const range = {gte: min, lt: max};
+          if (_.has(existingFilter, 'range')) {
             existingFilter.range[event.data.xAxisField.name] = range;
+          } else if (_.has(existingFilter, 'script.script.params.gte')
+            && _.has(existingFilter, 'script.script.params.lt')) {
+            existingFilter.script.script.params.gte = min;
+            existingFilter.script.script.params.lt = max;
           } else {
             const newFilter = buildRangeFilter(
               event.data.xAxisField,
