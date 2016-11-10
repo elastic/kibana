@@ -68,21 +68,18 @@ export default function LayoutFactory(Private) {
       const position = axis.axisConfig.get('position');
 
       const el = $(this.el).find(`.axis-wrapper-${position}`);
-      const length = axis.axisConfig.isHorizontal() ? $(this.el).width() : $(this.el).height();
 
-      // render svg and get the width of the bounding box
-      const svg = d3.select('body')
-        .append('svg')
-        .attr('style', 'position:absolute; top:-10000; left:-10000');
-      const {width, height} = svg.append('g')
-        .call(axis.getAxis(length)).node().getBBox();
-      svg.remove();
+      el.css('visibility', 'hidden');
+      axis.render();
+      const width = el.width();
+      const height = el.height();
+      axis.destroy();
+      el.css('visibility', '');
 
       if (axis.axisConfig.isHorizontal()) {
-        const titleHeight = 15;
         const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
         el.find('.x-axis-div-wrapper').height(`${height}px`);
-        spacerNodes.height(el.height() + titleHeight);
+        spacerNodes.height(el.height());
       } else {
         el.find('.y-axis-div-wrapper').width(`${width}px`);
       }

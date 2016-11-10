@@ -34,7 +34,7 @@ export default function AxisConfigFactory() {
       color: '#ddd',
       font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif', // TODO
       fontSize: '8pt',
-      truncate: 100
+      truncate: 30
     },
     title: {
       text: '',
@@ -62,7 +62,9 @@ export default function AxisConfigFactory() {
   class AxisConfig {
     constructor(chartConfig, axisConfigArgs) {
       const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
-      this._values = _.defaultsDeep({}, axisConfigArgs, typeDefaults, defaults);
+      // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
+      const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
+      this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');
@@ -85,6 +87,7 @@ export default function AxisConfigFactory() {
         // if show was not explicitly set and wiggle or silhouette option was checked
         if (!axisConfigArgs.show && isWiggleOrSilluete) {
           this._values.show = false;
+          this._values.title.show = true;
         }
 
         // override axisFormatter (to replicate current behaviour)
@@ -101,7 +104,7 @@ export default function AxisConfigFactory() {
       // unless explicitly overriden by user
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
-        this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 70);
+        this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
       }
 
       let offset;

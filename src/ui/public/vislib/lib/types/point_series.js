@@ -3,7 +3,7 @@ import _ from 'lodash';
 export default function ColumnHandler(Private) {
 
   const createSeries = (cfg, series) => {
-    const stacked = ['stacked', 'percentage'].includes(cfg.mode);
+    const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
     return {
       type: 'point_series',
       series: _.map(series, (seri) => {

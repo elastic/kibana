@@ -17,7 +17,7 @@ export default function AxisTitleFactory(Private) {
 
       return function (selection) {
         selection.each(function () {
-          if (!config.get('show')) return;
+          if (!config.get('show') && !config.get('title.show', false)) return;
 
           const el = this;
           const div = d3.select(el);

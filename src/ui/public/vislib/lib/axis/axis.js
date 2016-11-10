@@ -165,6 +165,12 @@ export default function AxisFactory(Private) {
       d3.select(rootEl).selectAll(elSelector).call(this.draw());
     }
 
+    destroy() {
+      const elSelector = this.axisConfig.get('elSelector');
+      const rootEl = this.axisConfig.get('rootEl');
+      $(rootEl).find(elSelector).find('svg').remove();
+    }
+
     getAxis(length) {
       const scale = this.axisScale.getScale(length);
       const position = this.axisConfig.get('position');
@@ -256,6 +262,12 @@ export default function AxisFactory(Private) {
     validate() {
       if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
         throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
+      }
+
+      const isWiggle = this.axisConfig.get('mode') === 'wiggle';
+      if (isWiggle && this.axisConfig.isTimeDomain()) {
+        throw new errors.VislibError('In wiggle mode the area chart requires ordered values on the x-axis. ' +
+          'Try using a Histogram or Date Histogram aggregation.');
       }
     }
 
