@@ -44,6 +44,20 @@ $ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/direct
 
 NOTE: This command creates the specified directory if it does not already exist.
 
+[float]
+=== Installing Plugins with Linux packages
+
+The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
+
+[source,shell]
+$ sudo -u kibana bin/kibana-plugin install x-pack
+
+If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
+
+[source,shell]
+$ chown -R kibana:kibana /path/to/kibana/optimize
+
 == Updating & Removing Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.
