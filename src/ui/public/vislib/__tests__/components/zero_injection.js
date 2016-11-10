@@ -36,6 +36,34 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     }
   ];
 
+  const dateHistogramRowsObj = {
+    series: [
+      {
+        'label': 'html',
+        'values': [
+          {'x': 1418410560000, 'y': 2},
+          {'x': 1418410620000, 'y': 4},
+          {'x': 1418410680000, 'y': 1},
+          {'x': 1418410740000, 'y': 5},
+          {'x': 1418410800000, 'y': 2},
+          {'x': 1418410860000, 'y': 3},
+          {'x': 1418410920000, 'y': 2}
+        ]
+      },
+      {
+        'label': 'css',
+        'values': [
+          {'x': 1418410560000, 'y': 1},
+          {'x': 1418410620000, 'y': 3},
+          {'x': 1418410680000, 'y': 1},
+          {'x': 1418410740000, 'y': 4},
+          {'x': 1418410800000, 'y': 2}
+        ]
+      }
+    ]
+  };
+
+
   const seriesData = [
     {
       label: '200',
@@ -48,6 +76,21 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       ]
     }
   ];
+
+  const seriesDataObj = {
+    series: [
+      {
+        label: '200',
+        values: [
+          {x: 'v1', y: 234},
+          {x: 'v2', y: 34},
+          {x: 'v3', y: 834},
+          {x: 'v4', y: 1234},
+          {x: 'v5', y: 4}
+        ]
+      }
+    ]
+  };
 
   const multiSeriesData = [
     {
@@ -190,9 +233,9 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-      sample1 = injectZeros(seriesData);
-      sample2 = injectZeros(multiSeriesData);
-      sample3 = injectZeros(multiSeriesNumberedData);
+      sample1 = injectZeros(seriesData, seriesDataObj);
+      sample2 = injectZeros(multiSeriesData, multiSeriesDataObj);
+      sample3 = injectZeros(multiSeriesNumberedData, multiSeriesNumberedDataObj);
     }));
 
     it('should be a function', function () {
@@ -500,7 +543,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-      results = injectZeros(dateHistogramRows);
+      results = injectZeros(dateHistogramRows, dateHistogramRowsObj);
     }));
 
     it('should return an array of objects', function () {
