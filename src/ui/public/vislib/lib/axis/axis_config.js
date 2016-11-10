@@ -85,14 +85,19 @@ export default function AxisConfigFactory() {
       if (this._values.type === 'value') {
         const isWiggleOrSilluete = chartConfig.get('mode') === 'wiggle' || chartConfig.get('mode') === 'silhouette';
         // if show was not explicitly set and wiggle or silhouette option was checked
-        if (!axisConfigArgs.show && isWiggleOrSilluete) {
-          this._values.show = false;
-          this._values.title.show = true;
+        if (isWiggleOrSilluete) {
+          this._values.scale.defaultYExtents = false;
+
+          if (!axisConfigArgs.show) {
+            this._values.show = false;
+            this._values.title.show = true;
+          }
         }
 
         // override axisFormatter (to replicate current behaviour)
         if (this.isPercentage()) {
           this._values.labels.axisFormatter = d3.format('%');
+          this._values.scale.defaultYExtents = true;
         }
 
         if (this.isLogScale()) {

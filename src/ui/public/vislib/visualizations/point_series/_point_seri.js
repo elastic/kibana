@@ -72,7 +72,7 @@ export default function PointSeriProvider(Private) {
     };
 
     checkIfEnoughData() {
-      const message = 'Point series charts require more than one data point. Try adding ' +
+      const message = 'Area charts require more than one data point. Try adding ' +
         'an X-Axis Aggregation';
 
       const notEnoughData = this.chartData.values.length < 2;
