@@ -18,7 +18,7 @@ module.exports = new Datasource('es', {
       types: ['string', 'null'],
       multi: true,
       help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field.' +
-        ' Eg "sum:bytes", or just "count"'
+        ' Eg "sum:bytes", or just "count" or metric agg, eg avg, sum, min, max followed by "script",name and that followed by script in painless EG max:script:nice_name:doc["p"].value'
     },
     {
       name: 'split',

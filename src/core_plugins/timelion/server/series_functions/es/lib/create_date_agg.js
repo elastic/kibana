@@ -29,12 +29,17 @@ module.exports = function createDateAgg(config, tlConfig) {
           script: {inline: '_value', lang: 'expression'}
         }
       };
+    } else if (metric[1] === 'script' && metric[0] && metric[2] && metric[3]) {
+        var metricName = metric[0] + '(' + metric[2] + ')';
+        dateAgg.time_buckets.aggs[metricName] = {};
+        dateAgg.time_buckets.aggs[metricName][metric[0]] = {script:{}};
+        dateAgg.time_buckets.aggs[metricName][metric[0]].script = {inline:metric[3],lang:"painless"};
     } else if (metric[0] && metric[1]) {
       var metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
       dateAgg.time_buckets.aggs[metricName][metric[0]] = {field: metric[1]};
     } else {
-      throw new Error ('`metric` requires metric:field or simply count');
+      throw new Error ('`metric` requires metric:field or simply count or metric:script:name:script body');
     }
   });
 

@@ -101,6 +101,14 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs.count.bucket_script).to.be.an('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
       });
+
+      it('adds a metric with script',() => {
+        config.metric = ['sum:script:beer:doc["b4Time"].value - doc["b4InternalTime"].value'];
+        agg = createDateAgg(config, tlConfig);
+        expect(agg.time_buckets.aggs['sum(beer)']).to.eql({sum: {script:
+                {inline: 'doc["b4Time"].value - doc["b4InternalTime"].value',lang: 'painless'}}}
+        );
+      });
     });
 
   });
