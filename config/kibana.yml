@@ -20,13 +20,13 @@
 # The URL of the Elasticsearch instance to use for all your queries.
 #elasticsearch.url: "http://localhost:9200"
 
-# When this setting’s value is true Kibana uses the hostname specified in the server.host
+# When this setting's value is true Kibana uses the hostname specified in the server.host
 # setting. When the value of this setting is false, Kibana uses the hostname of the host
 # that connects to this Kibana instance.
 #elasticsearch.preserveHost: true
 
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations and
-# dashboards. Kibana creates a new index if the index doesn’t already exist.
+# dashboards. Kibana creates a new index if the index doesn't already exist.
 #kibana.index: ".kibana"
 
 # The default application to load.
@@ -53,7 +53,7 @@
 # authority for your Elasticsearch instance.
 #elasticsearch.ssl.ca: /path/to/your/CA.pem
 
-# To disregard the validity of SSL certificates, change this setting’s value to false.
+# To disregard the validity of SSL certificates, change this setting's value to false.
 #elasticsearch.ssl.verify: true
 
 # Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
