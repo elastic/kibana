@@ -6,6 +6,16 @@ doc-table {
 
   .discover-table-datafield {
     white-space: pre-wrap;
+
+    // break-word is what we really want but it hasn't been added to the standard and adopted by all browsers yet,
+    // so we provide break-all as a fallback
+    word-break: break-all;
+    word-break: break-word;
+  }
+
+  .discover-table-sourcefield {
+    word-break: break-all;
+    word-break: break-word;
   }
 
   .loading {
