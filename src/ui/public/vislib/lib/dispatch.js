@@ -162,10 +162,9 @@ export default function DispatchClass(Private, config) {
      */
     allowBrushing() {
       const xAxis = this.handler.xAxis;
-      // Don't allow brushing for time based charts from non-time-based indices
-      const hasTimeField = this.handler.vis._attr.hasTimeField;
 
-      return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
+      //Allow brushing for ordered axis - date histogram and histogram
+      return Boolean(xAxis.ordered);
     };
 
     /**
@@ -186,30 +185,34 @@ export default function DispatchClass(Private, config) {
     addBrushEvent(svg) {
       if (!this.isBrushable()) return;
 
+      const self = this;
       const xScale = this.handler.xAxis.xScale;
       const brush = this.createBrush(xScale, svg);
 
-      function brushEnd() {
+      function simulateClickWithBrushEnabled(d, i) {
         if (!validBrushClick(d3.event)) return;
 
-        const bar = d3.select(this);
-        const startX = d3.mouse(svg.node());
-        const startXInv = xScale.invert(startX[0]);
+        if (isQuantitativeScale(xScale)) {
+          const bar = d3.select(this);
+          const startX = d3.mouse(svg.node());
+          const startXInv = xScale.invert(startX[0]);
 
-        // Reset the brush value
-        brush.extent([startXInv, startXInv]);
+          // Reset the brush value
+          brush.extent([startXInv, startXInv]);
 
-        // Magic!
-        // Need to call brush on svg to see brush when brushing
-        // while on top of bars.
-        // Need to call brush on bar to allow the click event to be registered
-        svg.call(brush);
-        bar.call(brush);
+          // Magic!
+          // Need to call brush on svg to see brush when brushing
+          // while on top of bars.
+          // Need to call brush on bar to allow the click event to be registered
+          svg.call(brush);
+          bar.call(brush);
+        } else {
+          self.emit('click', self.eventResponse(d, i));
+        }
       }
 
-      return this.addEvent('mousedown', brushEnd);
+      return this.addEvent('mousedown', simulateClickWithBrushEnabled);
     };
-
 
     /**
      * Mouseover Behavior
@@ -304,6 +307,22 @@ export default function DispatchClass(Private, config) {
         return brush;
       }
     };
+  }
+
+  /**
+   * Determine if d3.Scale is quantitative
+   *
+   * @param element {d3.Scale}
+   * @method isQuantitativeScale
+   * @returns {boolean}
+   */
+  function isQuantitativeScale(scale) {
+    //Invert is a method that only exists on quantitative scales
+    if (scale.invert) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function validBrushClick(event) {
