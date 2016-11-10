@@ -373,7 +373,7 @@ export default function DataFactory(Private) {
      * @returns {Object} Data object with zeros injected
      */
     injectZeros(data) {
-      return injectZeros(data);
+      return injectZeros(data, this.data);
     };
 
     /**

@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
 import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/components/zero_injection/zero_filled_array';
 import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 export default function ZeroInjectionUtilService(Private) {
 
+  const orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
   const createZeroFilledArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
   const zeroFillDataArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
 
@@ -17,8 +19,8 @@ export default function ZeroInjectionUtilService(Private) {
    * and injects zeros where needed.
    */
 
-  return function (obj) {
-    const keys = _(obj).map('values').flatten().map('x').uniq().sort().value();//orderXValues(obj);
+  return function (obj, data) {
+    const keys = orderXValues(data); //_(obj).map('values').flatten().map('x').uniq().value();//
 
     obj.forEach(function (series) {
       const zeroArray = createZeroFilledArray(keys, series.label);
