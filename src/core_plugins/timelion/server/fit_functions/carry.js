@@ -12,6 +12,10 @@ module.exports = function (dataTuples, targetTuples) {
     throw new Error (`Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`);
   }
 
+  if (!dataTuples.length) {
+    return targetTuples;
+  }
+
   var currentCarry = dataTuples[0][1];
   return _.map(targetTuples, function (bucket, h) {
     var targetTime = bucket[0];
