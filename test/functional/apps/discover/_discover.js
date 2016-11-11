@@ -5,7 +5,7 @@ import {
   bdd,
   scenarioManager,
   esClient,
-  elasticDump
+  esIndexDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -20,7 +20,7 @@ bdd.describe('discover app', function describeIndexTests() {
     // delete .kibana index and update configDoc
     await esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
     PageObjects.common.debug('load kibana index with default index pattern');
-    await elasticDump.elasticLoad('visualize','.kibana');
+    await esIndexDump.load('visualize','.kibana');
 
     // and load a set of makelogs data
     await scenarioManager.loadIfEmpty('logstashFunctional');

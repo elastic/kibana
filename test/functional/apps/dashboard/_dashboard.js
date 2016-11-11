@@ -5,7 +5,7 @@ import {
   bdd,
   scenarioManager,
   esClient,
-  elasticDump
+  esIndexDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -19,7 +19,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     // and load a set of makelogs data
     .then(function loadkibanaVisualizations() {
       PageObjects.common.debug('load kibana index with visualizations');
-      return elasticDump.elasticLoad('dashboard','.kibana');
+      return esIndexDump.load('dashboard','.kibana');
     })
     .then(function () {
       PageObjects.common.debug('navigateToApp dashboard');

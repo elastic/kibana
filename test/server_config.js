@@ -54,5 +54,8 @@ module.exports = {
   },
   screenshots: {
     directory: resolve(__dirname, 'screenshots')
+  },
+  esIndexDump: {
+    dataDir: resolve(__dirname, 'fixtures/dump_data')
   }
 };

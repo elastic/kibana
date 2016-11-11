@@ -4,8 +4,8 @@ export {
 } from './bdd_wrapper';
 
 export {
-  default as ElasticDump
-} from './elastic_dump';
+  EsIndexDump
+} from './es_index_dump';
 
 export {
   default as EsClient
