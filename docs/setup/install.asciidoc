@@ -50,5 +50,3 @@ include::install/deb.asciidoc[]
 include::install/rpm.asciidoc[]
 
 include::install/windows.asciidoc[]
-
-include::install/docker.asciidoc[]
