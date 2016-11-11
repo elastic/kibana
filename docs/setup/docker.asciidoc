@@ -2,7 +2,12 @@
 == Running Kibana on Docker
 Docker images for Kibana are available from the Elastic Docker registry.
 The images are shipped with https://www.elastic.co/products/x-pack[X-Pack]
-pre-installed.
+installed.
+
+NOTE: https://www.elastic.co/guide/en/x-pack/current/index.html[X-Pack] is
+pre-installed in this image. With X-Pack installed, Kibana expects to
+connect to an Elasticsearch cluster that is also runnning X-Pack. The
+{es-ref}/docker.html[Elasticsearch Docker image] is built to match.
 
 === Pulling the image
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
