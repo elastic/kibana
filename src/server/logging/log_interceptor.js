@@ -50,9 +50,9 @@ export class LogInterceptor extends Stream.Transform {
    */
   downgradeIfEpipe(event) {
     const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-    const isEconnreset = isClientError && get(event, 'data.errno') === 'EPIPE';
+    const isEpipe = isClientError && get(event, 'data.errno') === 'EPIPE';
 
-    if (!isEconnreset) return null;
+    if (!isEpipe) return null;
 
     return {
       event: 'log',
