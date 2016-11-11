@@ -3,7 +3,7 @@
 
 :version:        6.0.0-alpha1
 :major-version:  6.x
-:docker-image:   docker.elastic.co/kibana/kibana:6.0.0-alpha1
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
 
 //////////
 release-state can be: released | prerelease | unreleased
