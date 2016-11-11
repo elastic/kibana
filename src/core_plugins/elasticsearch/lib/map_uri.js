@@ -1,5 +1,6 @@
 import { defaults, omit, trimLeft, trimRight } from 'lodash';
 import { parse as parseUrl, format as formatUrl, resolve } from 'url';
+import { parse as parseQuerystring}  from 'querystring';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
@@ -12,10 +13,6 @@ export default function mapUri(server, esClient, proxyPrefix) {
   }
 
   return function (request, done) {
-    const {
-      query: esUrlQuery
-    } = parseUrl(config.get('elasticsearch.url'), true);
-
     // copy most url components directly from the elasticsearch.url
     const mappedUrlComponents = {
       protocol: es.protocol,
@@ -27,10 +24,10 @@ export default function mapUri(server, esClient, proxyPrefix) {
 
     // pathname
     const reqSubPath = request.path.replace(proxyPrefix, '');
-    mappedUrlComponents.pathname = joinPaths(es.path, reqSubPath);
+    mappedUrlComponents.pathname = joinPaths(es.pathname, reqSubPath);
 
     // querystring
-    const mappedQuery = defaults(omit(request.query, '_'), es.query || {});
+    const mappedQuery = defaults(omit(request.query, '_'), parseQuerystring(es.query));
     if (Object.keys(mappedQuery).length) {
       mappedUrlComponents.query = mappedQuery;
     }

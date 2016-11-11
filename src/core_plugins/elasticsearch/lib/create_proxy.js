@@ -52,8 +52,10 @@ function createProxy(server, method, path, config) {
 };
 
 createProxy.createPath = function createPath(prefix, path) {
-  const sep = path[0] === '/' ? '' : '/';
-  return `${prefix}${sep}${path}`;
+  path = path[0] === '/' ? path : `/${path}`;
+  prefix = prefix[0] === '/' ? prefix : `/${prefix}`;
+
+  return `${prefix}${path}`;
 };
 
 module.exports = createProxy;
