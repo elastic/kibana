@@ -11,9 +11,14 @@ module.exports = function (plugin) {
   var files = [
     'package.json',
     'index.js',
-    '{lib,public,server,webpackShims}/**/*',
-    `node_modules/{${ deps.join(',') }}/**/*`,
+    '{lib,public,server,webpackShims}/**/*'
   ];
+
+  if (deps.length === 1) {
+    files.push(`node_modules/${ deps[0] }/**/*`);
+  } else {
+    files.push(`node_modules/{${ deps.join(',') }}/**/*`);
+  }
 
   vfs
     .src(files, { base: plugin.root })
