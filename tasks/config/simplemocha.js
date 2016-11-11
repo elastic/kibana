@@ -11,6 +11,7 @@ module.exports = {
       'src/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
+      '!**/_*.js',
       '!src/ui/**'
     ]
   }
