@@ -2,8 +2,8 @@ module.exports = function (plugin) {
   var execFileSync = require('child_process').execFileSync;
 
   var kbnServerArgs = [
-    '--kbnServer.testsBundle.pluginId', plugin.id,
-    '--kbnServer.plugin-path', plugin.root
+    '--kbnServer.testsBundle.pluginId=' + plugin.id,
+    '--kbnServer.plugin-path=' + plugin.root
   ];
 
   var cmd = 'npm';
