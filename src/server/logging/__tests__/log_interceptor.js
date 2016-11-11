@@ -2,9 +2,9 @@ import expect from 'expect.js';
 
 import { LogInterceptor } from '../log_interceptor';
 
-function stubEconnresetEvent() {
+function stubClientErrorEvent(errno) {
   const error = new Error();
-  error.errno = 'ECONNRESET';
+  error.errno = errno;
 
   return {
     event: 'error',
@@ -14,6 +14,9 @@ function stubEconnresetEvent() {
     data: error
   };
 }
+
+const stubEconnresetEvent = () => stubClientErrorEvent('ECONNRESET');
+const stubEpipeEvent = () => stubClientErrorEvent('EPIPE');
 
 function assertDowngraded(transformed) {
   expect(!!transformed).to.be(true);
@@ -30,6 +33,12 @@ describe('server logging LogInterceptor', () => {
       assertDowngraded(interceptor.downgradeIfEconnreset(event));
     });
 
+    it('transforms EPIPE events', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubEpipeEvent();
+      assertDowngraded(interceptor.downgradeIfEpipe(event));
+    });
+
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
@@ -39,8 +48,7 @@ describe('server logging LogInterceptor', () => {
 
     it('ignores non ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
-      const event = stubEconnresetEvent();
-      event.data.errno = 'not ECONNRESET';
+      const event = stubClientErrorEvent('not ECONNRESET');
       expect(interceptor.downgradeIfEconnreset(event)).to.be(null);
     });
 
