@@ -230,7 +230,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           }
 
           if ($scope.plot) {
-            $scope.$parent.$parent.vis.emit('renderComplete');
+            $scope.$emit('renderComplete');
           }
 
           legendScope.$destroy();
