@@ -43,8 +43,6 @@ function createProxy(server, method, path, config) {
       },
     };
 
-    console.log(options);
-
     assign(options.config, config);
 
     server.route(options);
