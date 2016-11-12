@@ -77,11 +77,13 @@ bdd.describe('visualize app', function describeIndexTests() {
       '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
       ];
 
-      return PageObjects.visualize.getDataTableData()
-      .then(function showData(data) {
-        PageObjects.common.debug(data.split('\n'));
-        PageObjects.common.saveScreenshot('Visualize-data-table');
-        expect(data.split('\n')).to.eql(expectedChartData);
+      return PageObjects.common.try(function () {
+        return PageObjects.visualize.getDataTableData()
+        .then(function showData(data) {
+          PageObjects.common.debug(data.split('\n'));
+          PageObjects.common.saveScreenshot('Visualize-data-table');
+          expect(data.split('\n')).to.eql(expectedChartData);
+        });
       });
     });
 

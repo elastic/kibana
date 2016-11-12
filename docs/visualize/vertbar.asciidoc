@@ -69,6 +69,7 @@ Checkboxes are available to enable and disable the following behaviors:
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check
 this box to change both upper and lower bounds to match the values returned in the data.
+*Order buckets by descending sum*:: Check this box to enforce sorting of buckets by descending sum in the visualization
 
 [float]
 [[vertbar-viewing-detailed-information]]

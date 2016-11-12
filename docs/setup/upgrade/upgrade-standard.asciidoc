@@ -5,7 +5,7 @@ A standard upgrade is the most straightforward way to upgrade Kibana, and it's
 possible when you're upgrading from Kibana version 4.2 or higher.
 
 If you haven't already, consult this <<upgrade,table>> to verify that standard
-upgrade is supported for your version of Kinana.
+upgrade is supported for your version of Kibana.
 
 NOTE: If you've saved and/or exported objects in Kibana that rely on the
 <<search,Elasticsearch Query DSL>>, make sure to check the Elasticsearch

@@ -62,12 +62,12 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
-    'run:testUIDevServer',
-    'run:devChromeDriver:keepalive'
+    'run:testUIDevServer:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
     'clean:screenshots',
+    'run:devChromeDriver',
     'intern:dev'
   ]);
 

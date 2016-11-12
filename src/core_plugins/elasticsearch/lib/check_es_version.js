@@ -4,8 +4,6 @@
  */
 
 import _ from 'lodash';
-import esBool from './es_bool';
-import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
@@ -37,9 +35,9 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         return incompatibleNodes.push(esNode);
       }
 
-      // It's acceptable if ES is ahead of Kibana, but we want to prompt users to upgrade Kibana
-      // to match it.
-      if (semver.gt(esNode.version, kibanaVersion)) {
+      // It's acceptable if ES and Kibana versions are not the same so long as
+      // they are not incompatible, but we should warn about it
+      if (esNode.version !== kibanaVersion) {
         warningNodes.push(esNode);
       }
     });
@@ -65,9 +63,9 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
-            `You're running Kibana ${kibanaVersion} with some newer versions of ` +
-            'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
-            warningNodeNames
+            `You're running Kibana ${kibanaVersion} with some different versions of ` +
+            'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
+            `version to prevent compatibility issues: ${warningNodeNames}`
           ),
           kibanaVersion,
           nodes: simplifiedNodes,

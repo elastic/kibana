@@ -26,6 +26,8 @@ import {
   esClient
 } from '../index';
 
+import PageObjects from './index';
+
 import {
   Log,
   Try
@@ -116,10 +118,10 @@ export default class Common {
         .then(function (currentUrl) {
           var loginPage = new RegExp('login').test(currentUrl);
           if (loginPage) {
-            self.debug('Found loginPage = ' + loginPage + ', username = '
-              + config.servers.kibana.shield.username);
-            return shieldPage.login(config.servers.kibana.shield.username,
-              config.servers.kibana.shield.password)
+            self.debug('Found loginPage username = '
+              + config.servers.kibana.username);
+            return PageObjects.shield.login(config.servers.kibana.username,
+              config.servers.kibana.password)
             .then(function () {
               return self.remote.getCurrentUrl();
             });
@@ -140,7 +142,11 @@ export default class Common {
           // Navigating to Settings when there is a default index pattern has a URL length of 196
           // (from debug output). Some other tabs may also be long. But a rather simple configured
           // visualization is about 1000 chars long. So at least we catch that case.
-          var navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+
+          // Browsers don't show the ':port' if it's 80 or 443 so we have to
+          // remove that part so we can get a match in the tests.
+          var navSuccessful = new RegExp(appUrl.replace(':80','').replace(':443','')
+           + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
           .test(currentUrl);
 
           if (!navSuccessful) {

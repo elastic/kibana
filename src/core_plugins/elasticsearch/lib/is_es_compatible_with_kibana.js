@@ -29,10 +29,5 @@ export default function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
     return false;
   }
 
-  // Reject older patch versions of ES.
-  if (esVersionNumbers.patch < kibanaVersionNumbers.patch) {
-    return false;
-  }
-
   return true;
 }

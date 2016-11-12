@@ -51,7 +51,7 @@ app.controller('doc', function ($scope, $route, es, timefilter) {
         }
       },
       stored_fields: computedFields.storedFields,
-      _source: computedFields._source,
+      _source: true,
       script_fields: computedFields.scriptFields,
       docvalue_fields: computedFields.docvalueFields
     }

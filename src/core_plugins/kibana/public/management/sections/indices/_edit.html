@@ -37,17 +37,30 @@
 
       <br />
 
+      <!-- tab list -->
       <ul class="nav nav-tabs">
-        <li class="kbn-management-tab" ng-class="{ active: state.tab === fieldType.index }" ng-repeat="fieldType in fieldTypes">
-          <a ng-click="changeTab(fieldType)">
-            {{ fieldType.title }}
-            <small>({{ fieldType.count }})</small>
+        <li class="kbn-management-tab" ng-class="{ active: state.tab === editSection.index }" ng-repeat="editSection in editSections">
+          <a ng-click="changeTab(editSection)">
+            {{ editSection.title }}
+            <small>({{ editSection.count }})</small>
           </a>
         </li>
       </ul>
 
-      <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields indexed-fields"></indexed-fields>
-      <scripted-fields ng-show="state.tab == 'scriptedFields'" class="fields scripted-fields"></scripted-fields>
+      <!-- tabs -->
+      <indexed-fields
+        ng-show="state.tab == 'indexedFields'"
+        class="fields indexed-fields"
+      ></indexed-fields>
+      <scripted-fields
+        ng-show="state.tab == 'scriptedFields'"
+        class="fields scripted-fields"
+      ></scripted-fields>
+      <source-filters
+        ng-show="state.tab == 'sourceFilters'"
+        index-pattern="indexPattern"
+        class="fields source-filters"
+      ></source-filters>
 
     </div>
   </kbn-management-indices>

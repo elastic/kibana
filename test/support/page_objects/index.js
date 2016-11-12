@@ -7,6 +7,7 @@ import HeaderPage from './header_page';
 import SettingsPage from './settings_page';
 import ShieldPage from './shield_page';
 import VisualizePage from './visualize_page';
+import MonitoringPage from './monitoring_page';
 
 const common = new Common();
 const consolePage = new ConsolePage();
@@ -16,6 +17,7 @@ const headerPage = new HeaderPage();
 const settingsPage = new SettingsPage();
 const shieldPage = new ShieldPage();
 const visualizePage = new VisualizePage();
+const monitoringPage = new MonitoringPage();
 
 class PageObjects {
 
@@ -35,6 +37,7 @@ class PageObjects {
     settingsPage.init(remote);
     shieldPage.init(remote);
     visualizePage.init(remote);
+    monitoringPage.init(remote);
   }
 
   assertInitialized() {
@@ -74,6 +77,10 @@ class PageObjects {
 
   get visualize() {
     return this.assertInitialized() && visualizePage;
+  }
+
+  get monitoring() {
+    return this.assertInitialized() && monitoringPage;
   }
 
 }

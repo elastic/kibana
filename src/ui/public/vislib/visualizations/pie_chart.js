@@ -119,6 +119,7 @@ export default function PieChartFactory(Private) {
         return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
       })
       .endAngle(function (d) {
+        if (d.dx < 1e-8) return x(d.x);
         return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
       })
       .innerRadius(function (d) {
