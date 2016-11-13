@@ -1,6 +1,7 @@
-import { get, has, noop } from 'lodash';
+import { isObject, get, has, noop } from 'lodash';
 import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
+import getValuesAtPath from './_get_values_at_path';
 
 export default function AggTypeMetricTopProvider(Private) {
   const MetricAggType = Private(MetricAggTypeProvider);
@@ -15,6 +16,7 @@ export default function AggTypeMetricTopProvider(Private) {
     params: [
       {
         name: 'field',
+        onlyAggregatable: false,
         filterFieldTypes: function (vis, value) {
           if (vis.type.name === 'table' || vis.type.name === 'metric') {
             return true;
@@ -35,7 +37,10 @@ export default function AggTypeMetricTopProvider(Private) {
               }
             };
           } else {
-            output.params.docvalue_fields = [ field.name ];
+            if (field.doc_values) {
+              output.params.docvalue_fields = [ field.name ];
+            }
+            output.params._source = field.name;
           }
         }
       },
@@ -71,10 +76,25 @@ export default function AggTypeMetricTopProvider(Private) {
     ],
     getValue(agg, bucket) {
       const hits = get(bucket, `${agg.id}.hits.hits`);
-      if (!hits || !hits.length || !has(hits[0], 'fields')) {
-        return;
+      if (!hits || !hits.length) {
+        return null;
       }
-      return hits[0].fields[agg.params.field.name] && hits[0].fields[agg.params.field.name][0];
+      const path = agg.params.field.name;
+      let values = getValuesAtPath(hits[0]._source, path.split('.'));
+
+      if (!values.length && hits[0].fields) {
+        // no values found in the source, check the doc_values fields
+        values = hits[0].fields[path] || [];
+      }
+
+      switch (values.length) {
+        case 0:
+          return null;
+        case 1:
+          return isObject(values[0]) ? JSON.stringify(values[0], null, ' ') : values [0];
+        default:
+          return JSON.stringify(values, null, ' ');
+      }
     }
   });
 };

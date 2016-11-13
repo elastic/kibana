@@ -18,6 +18,7 @@ export default function FieldAggParamFactory(Private, $filter) {
   FieldAggParam.prototype.editor = editorHtml;
   FieldAggParam.prototype.scriptable = true;
   FieldAggParam.prototype.filterFieldTypes = '*';
+  FieldAggParam.prototype.onlyAggregatable = true;
 
   /**
    * Called to serialize values for saving an aggConfig object
@@ -36,7 +37,9 @@ export default function FieldAggParamFactory(Private, $filter) {
     const indexPattern = aggConfig.getIndexPattern();
     let fields = indexPattern.fields.raw;
 
-    fields = fields.filter(f => f.aggregatable);
+    if (this.onlyAggregatable) {
+      fields = fields.filter(f => f.aggregatable);
+    }
 
     if (!this.scriptable) {
       fields = fields.filter(field => !field.scripted);
