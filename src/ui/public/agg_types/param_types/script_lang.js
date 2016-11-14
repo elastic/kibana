@@ -17,10 +17,11 @@ export default function ScriptingLangAggParamFactory(Private) {
         constructor($scope) {
           this.loading = true;
 
-          getScriptingLangs().then(scriptingLangs => {
-            this.loading = false;
-            this.scriptingLangs = scriptingLangs;
-          });
+          getScriptingLangs()
+            .then(scriptingLangs => {
+              this.loading = false;
+              this.scriptingLangs = scriptingLangs;
+            });
         };
       };
     }
