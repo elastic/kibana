@@ -239,33 +239,15 @@ describe('i18n module', function () {
   describe('registerTranslations', function () {
 
     it('should throw error when regsitering empty filename', function () {
-      // TODO mh: why does this line not work and linesbelow do?
-      //return expect(i18n.registerTranslations('')).to.throwError();
-
-      try {
-        i18n.registerTranslations('');
-      } catch (err) {
-        expect(err).to.eql(new Error());
-      }
-      return;
+      return expect(i18n.registerTranslations).withArgs('').to.throwError();
     });
 
     it('should throw error when regsitering filename with no extension', function () {
-      try {
-        i18n.registerTranslations('file1');
-      } catch (err) {
-        expect(err).to.eql(new Error());
-      }
-      return;
+      return expect(i18n.registerTranslations).withArgs('file1').to.throwError();
     });
 
     it('should throw error when regsitering filename with non JSON extension', function () {
-      try {
-        i18n.registerTranslations('file1.txt');
-      } catch (err) {
-        expect(err).to.eql(new Error());
-      }
-      return;
+      return expect(i18n.registerTranslations).withArgs('file1.txt').to.throwError();
     });
 
   });

@@ -11,32 +11,6 @@ let i18nConfig = null;
 let registeredTranslations = {};
 
 /**
- * Return all translations registered for a particular locale.
- * @param {string} locale - Translation locale to be returned
- * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
- */
-/*export function getTranslationsForLocale(locale) {
-  if (!registeredTranslations.hasOwnProperty(locale)) {
-    return Promise.resolve({});
-  }
-
-  const translationFiles = registeredTranslations[locale];
-  const translations = _.map(translationFiles, (filename) => {
-    return asyncReadFile(filename, 'utf8')
-    .then(fileContents => JSON.parse(fileContents))
-    .catch(SyntaxError, function (e) {
-      throw new Error('Invalid json in ' + filename);
-    })
-    .catch(function (e) {
-      throw new Error('Cannot read file ' + filename);
-    });
-  });
-
-  return Promise.all(translations)
-  .then(translations => _.assign({}, ...translations));
-};*/
-
-/**
  * Return all translations registered for the default locale.
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
