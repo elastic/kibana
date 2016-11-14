@@ -42,8 +42,8 @@ define(function (require) {
         return val.toLocaleString('en', { style: 'currency', currency: axis.options.units[1] });
       },
       'custom': function (val, axis) {
-        var prefix = axis.options._units[1] || '';
-        var suffix = axis.options._units[2] || '';
+        var prefix = axis.options.units[1] || '';
+        var suffix = axis.options.units[2] || '';
         return prefix + val + suffix;
       }
     };
