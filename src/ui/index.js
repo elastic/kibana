@@ -2,6 +2,7 @@ import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';
+import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
@@ -74,7 +75,11 @@ export default async (kbnServer, server, config) => {
         defaults: await server.uiSettings().getDefaults(),
         user: {}
       },
-      vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
+      vars: await reduceAsync(
+        uiExports.injectedVarsReplacers,
+        (acc, extender) => extender(acc, this.request, server),
+        defaults(await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
+      )
     };
   }
 
@@ -89,7 +94,7 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp(app) {
     const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
-    const payload = await getPayload(app);
+    const payload = await getPayload.call(this, app);
     if (!isElasticsearchPluginRed) {
       payload.uiSettings.user = await server.uiSettings().getUserProvided();
     }
@@ -97,7 +102,7 @@ export default async (kbnServer, server, config) => {
   }
 
   async function renderAppWithDefaultConfig(app) {
-    const payload = await getPayload(app);
+    const payload = await getPayload.call(this, app);
     return viewAppWithPayload.call(this, app, payload);
   }
 
