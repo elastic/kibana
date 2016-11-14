@@ -154,7 +154,10 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       const scripted = indexPattern.getScriptedFields();
       const fieldsWithScripted = fields.concat(scripted);
       const meta = indexPattern.getMetaFields();
-      const all = fieldsWithScripted.concat(meta);
+      const allDups = meta.concat(fieldsWithScripted);
+      const all = _.uniq(allDups, function (item) {
+        return item.name;
+      });
       initFields(indexPattern, all);
     });
   }

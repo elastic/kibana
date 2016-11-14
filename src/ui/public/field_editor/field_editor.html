@@ -126,6 +126,19 @@
       </div>
     </div>
   </div>
+ 
+ <div id="header">
+   <h4>Field Attributes</h4>
+ </div>
+ 
+  <div class="form-group">
+      <p><label>
+        <input type="checkbox" ng-model="editor.field.aggregatable"/> Aggregatable
+      </label></p>
+      <p><label>
+        <input type="checkbox" ng-model="editor.field.searchable"/> Searchable
+      </label></p>
+  </div>
 
   <div ng-if="editor.field.scripted">
     <div class="form-group">
