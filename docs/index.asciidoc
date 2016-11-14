@@ -3,6 +3,7 @@
 
 :version:        5.0.0
 :major-version:  5.x
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
 
 //////////
 release-state can be: released | prerelease | unreleased
