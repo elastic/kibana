@@ -7,7 +7,7 @@ const tickFormatters = {
   'bits/s':'bits/s',
   'bytes':'bytes',
   'bytes/s':'bytes/s',
-  'currency':'currency(:prefix)',
+  'currency':'currency(:ISO 4217 currency code)',
   'custom':'custom(:prefix:suffix)'
 };
 module.exports = new Chainable('yaxis', {
