@@ -15,6 +15,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const timezone = Private(require('plugins/timelion/services/timezone'))();
+        const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
@@ -147,7 +148,11 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             }
 
             if (y != null) {
-              legendValueNumbers.eq(i).text('(' + y.toFixed(precision) + ')');
+              let label = y.toFixed(precision);
+              if (series.yaxis.tickFormatter) {
+                label = series.yaxis.tickFormatter(label, series.yaxis);
+              }
+              legendValueNumbers.eq(i).text(`(${label})`);
             } else {
               legendValueNumbers.eq(i).empty();
             }
@@ -218,6 +223,12 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
                 // best you can do is an empty string. Deal with it.
                 if (objVal == null) return srcVal;
                 if (srcVal == null) return objVal;
+              });
+
+              _.forEach(options.yaxes, yaxis => {
+                if (yaxis.units) {
+                  yaxis.tickFormatter = tickFormatters[yaxis.units[0]];
+                }
               });
             }
 
