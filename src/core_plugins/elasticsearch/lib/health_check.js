@@ -23,14 +23,12 @@ module.exports = function (plugin, server) {
   const dataClient = server.plugins.elasticsearch.dataClient;
 
   plugin.status.yellow('Waiting for Elasticsearch');
-
-  function waitForPong(client) {
+  function waitForPong(client, url) {
     return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
-
-      return Promise.delay(REQUEST_DELAY).then(waitForPong);
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, client, url));
     });
   }
 
@@ -88,7 +86,7 @@ module.exports = function (plugin, server) {
 
   function check() {
     const healthChecks = [
-      waitForPong(adminClient)
+      waitForPong(adminClient, config.get('elasticsearch.url'))
       .then(() => {
         // execute version and tribe checks in parallel
         // but always report the version check result first
@@ -99,13 +97,15 @@ module.exports = function (plugin, server) {
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
     ];
-    const tribeConfigured = !!server.config().get('elasticsearch.tribe.url');
-    if (tribeConfigured) {
+
+    const tribeUrl = config.get('elasticsearch.tribe.url');
+    if (tribeUrl) {
       healthChecks.push(
-        waitForPong(dataClient)
+        waitForPong(dataClient, tribeUrl)
         .then(() => checkEsVersion(server, kibanaVersion.get(), dataClient))
       );
     }
+
     return Promise.all(healthChecks)
     .then(setGreenStatus)
     .catch(err => plugin.status.red(err));
