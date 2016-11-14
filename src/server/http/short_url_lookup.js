@@ -2,7 +2,7 @@ import crypto from 'crypto';
 
 export default function (server) {
   async function updateMetadata(urlId, urlDoc) {
-    const client = server.plugins.elasticsearch.client;
+    const client = server.plugins.elasticsearch.adminClient;
     const kibanaIndex = server.config().get('kibana.index');
 
     try {
@@ -25,7 +25,7 @@ export default function (server) {
 
   async function getUrlDoc(urlId) {
     const urlDoc = await new Promise((resolve, reject) => {
-      const client = server.plugins.elasticsearch.client;
+      const client = server.plugins.elasticsearch.adminClient;
       const kibanaIndex = server.config().get('kibana.index');
 
       client.get({
@@ -46,7 +46,7 @@ export default function (server) {
 
   async function createUrlDoc(url, urlId) {
     const newUrlId = await new Promise((resolve, reject) => {
-      const client = server.plugins.elasticsearch.client;
+      const client = server.plugins.elasticsearch.adminClient;
       const kibanaIndex = server.config().get('kibana.index');
 
       client.index({

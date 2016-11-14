@@ -52,7 +52,7 @@ describe('plugins/elasticsearch', () => {
         nodes[name] = node;
       }
 
-      const client = server.plugins.elasticsearch.client;
+      const client = server.plugins.elasticsearch.adminClient;
       client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
     }
 
