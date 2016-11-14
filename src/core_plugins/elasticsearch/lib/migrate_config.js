@@ -3,7 +3,7 @@ import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
   const config = server.config();
-  const client = server.plugins.elasticsearch.client;
+  const client = server.plugins.elasticsearch.adminClient;
   const options =  {
     index: config.get('kibana.index'),
     type: 'config',
