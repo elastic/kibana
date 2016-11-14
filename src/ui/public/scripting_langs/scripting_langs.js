@@ -2,7 +2,7 @@ import uiModules from 'ui/modules';
 import chrome from 'ui/chrome';
 import Notifier from 'ui/notify/notifier';
 
-let notify = new Notifier({ location: 'Scripting Lang Service' });
+const notify = new Notifier({ location: 'Scripting Lang Service' });
 
 export function GetScriptingLangsProvider($http) {
   return () => {

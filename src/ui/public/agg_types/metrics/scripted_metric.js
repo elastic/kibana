@@ -6,13 +6,13 @@ export default function AggTypesMetricsScriptedMetricProvider(Private) {
   let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   let fieldFormats = Private(RegistryFieldFormatsProvider);
 
-  let buildScriptParam = function (scriptName) {
+  const buildScriptParam = function (scriptName) {
     return {
       name: scriptName,
       type: 'string',
       editor: textHtml,
       write:function (aggConfig, output) {
-        var inlineScript = aggConfig.params[scriptName];
+        const inlineScript = aggConfig.params[scriptName];
         if (!inlineScript) {
           return;
         }
