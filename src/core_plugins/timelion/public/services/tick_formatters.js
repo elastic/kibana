@@ -5,7 +5,7 @@ define(function (require) {
       'bits': function (val, axis) {
         var labels = ['b','kb','mb','gb','tb','pb'];
         var index = 0;
-        while (val > 1000 && index < labels.length) {
+        while (val >= 1000 && index < labels.length) {
           val /= 1000;
           index++;
         }
@@ -14,7 +14,7 @@ define(function (require) {
       'bits/s': function (val, axis) {
         var labels = ['b/s','kb/s','mb/s','gb/s','tb/s','pb/s'];
         var index = 0;
-        while (val > 1000 && index < labels.length) {
+        while (val >= 1000 && index < labels.length) {
           val /= 1000;
           index++;
         }
@@ -23,7 +23,7 @@ define(function (require) {
       'bytes': function (val, axis) {
         var labels = ['B','KB','MB','GB','TB','PB'];
         var index = 0;
-        while (val > 1024 && index < labels.length) {
+        while (val >= 1024 && index < labels.length) {
           val /= 1024;
           index++;
         }
@@ -32,7 +32,7 @@ define(function (require) {
       'bytes/s': function (val, axis) {
         var labels = ['B/s','KB/s','MB/s','GB/s','TB/s','PB/s'];
         var index = 0;
-        while (val > 1024 && index < labels.length) {
+        while (val >= 1024 && index < labels.length) {
           val /= 1024;
           index++;
         }
