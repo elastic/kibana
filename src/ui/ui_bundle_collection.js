@@ -7,8 +7,7 @@ import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
 import { readFileSync as readSync } from 'fs';
 import { pull, transform, pluck } from 'lodash';
-import { join } from 'path';
-import { resolve, promisify } from 'bluebird';
+import { promisify } from 'bluebird';
 import { makeRe } from 'minimatch';
 
 class UiBundleCollection {

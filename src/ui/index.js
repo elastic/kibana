@@ -10,9 +10,6 @@ import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 
 export default async (kbnServer, server, config) => {
-
-  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
-
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
@@ -42,7 +39,6 @@ export default async (kbnServer, server, config) => {
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
-  server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
   server.route({
     path: '/app/{id}',
@@ -81,7 +77,6 @@ export default async (kbnServer, server, config) => {
   function viewAppWithPayload(app, payload) {
     return this.view(app.templateName, {
       app: app,
-      loadingGif: loadingGif,
       kibanaPayload: payload,
       bundlePath: `${config.get('server.basePath')}/bundles`,
     });
