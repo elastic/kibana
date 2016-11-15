@@ -32,7 +32,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       const spacerSize = SPACER * COLS;
 
       // debounced layout function is safe to call as much as possible
-      const safeLayout = _.debounce(layout, 200);
+      const safeLayout = _.debounce(layout, 200, {trailing: false, leading: true});
 
       function init() {
         $el.addClass('gridster');
