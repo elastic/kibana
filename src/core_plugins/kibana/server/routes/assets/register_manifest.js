@@ -1,6 +1,6 @@
 export default function registerManifest(server) {
   server.route({
-    path: '/plugins/kibana/assets/favicons/manifest.json',
+    path: '/ui/favicons/manifest.json',
     config: {
       auth: false,
     },
@@ -13,7 +13,7 @@ export default function registerManifest(server) {
         name: 'Kibana',
         icons: [
           {
-            src: `${basePath}/plugins/kibana/assets/favicons/android-chrome-192x192.png`,
+            src: `${basePath}/ui/favicons/android-chrome-192x192.png`,
             sizes: '192x192',
             type: 'image/png'
           }
