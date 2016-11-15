@@ -312,7 +312,7 @@ function instantiate({ getResult } = {}) {
     decorate: (_, key, value) => server[key] = value,
     plugins: {
       elasticsearch: {
-        client: {
+        adminClient: {
           get: sinon.stub().returns(Promise.resolve({ _source: getResult })),
           update: sinon.stub().returns(Promise.resolve())
         }

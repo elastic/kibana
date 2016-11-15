@@ -20,7 +20,7 @@ describe('plugins/elasticsearch', function () {
       config = function () { return { get: get }; };
       _.set(client, 'indices.create', sinon.stub());
       _.set(client, 'cluster.health', sinon.stub());
-      _.set(server, 'plugins.elasticsearch.client', client);
+      _.set(server, 'plugins.elasticsearch.adminClient', client);
       _.set(server, 'config', config);
     });
 

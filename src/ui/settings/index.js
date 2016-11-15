@@ -66,7 +66,7 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function getUserProvided() {
-    const { client } = server.plugins.elasticsearch;
+    const client = server.plugins.elasticsearch.adminClient;
     const clientSettings = getClientSettings(config);
     return client
       .get({ ...clientSettings })
@@ -76,7 +76,7 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function setMany(changes) {
-    const { client } = server.plugins.elasticsearch;
+    const client = server.plugins.elasticsearch.adminClient;
     const clientSettings = getClientSettings(config);
     return client
       .update({
