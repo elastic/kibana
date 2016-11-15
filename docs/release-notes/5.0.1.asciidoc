@@ -4,6 +4,15 @@
 Also see <<breaking-changes-5.0>>.
 
 [float]
+[[security-5.0.1]]
+=== Security fixes
+An Open Redirect vulnerability has been fixed with the short URL feature.
+Previously, a malicious user could use the internal API that powers the short
+URL feature to create a short URL in kibana that redirected to a different
+domain. +
+{security}ESA-2016-08[ESA-2016-08] ({commit}92ae3ae[92ae3ae])
+
+[float]
 [[bug-5.0.1]]
 === Bug fixes
 Core::
