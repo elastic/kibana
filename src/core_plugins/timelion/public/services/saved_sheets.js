@@ -13,7 +13,7 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUrl) {
+  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
     this.type = SavedSheet.type;
     this.Class = SavedSheet;
 
@@ -57,7 +57,7 @@ define(function (require) {
         body = { query: {match_all: {}}};
       }
 
-      return es.search({
+      return esAdmin.search({
         index: kbnIndex,
         type: 'timelion-sheet',
         body: body,

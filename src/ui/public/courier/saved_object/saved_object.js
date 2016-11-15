@@ -19,7 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import DocSourceProvider from '../data_source/doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 
-export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
+export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
 
   let DocSource = Private(DocSourceProvider);
   let SearchSource = Private(SearchSourceProvider);
@@ -253,7 +253,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     self.saveSource = function (source) {
       let finish = function (id) {
         self.id = id;
-        return es.indices.refresh({
+        return esAdmin.indices.refresh({
           index: kbnIndex
         })
         .then(function () {
@@ -296,12 +296,12 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @return {promise}
      */
     self.delete = function () {
-      return es.delete({
+      return esAdmin.delete({
         index: kbnIndex,
         type: type,
         id: this.id
       }).then(function () {
-        return es.indices.refresh({
+        return esAdmin.indices.refresh({
           index: kbnIndex
         });
       });

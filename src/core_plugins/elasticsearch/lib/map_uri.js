@@ -1,41 +1,33 @@
 import { defaults, omit, trimLeft, trimRight } from 'lodash';
 import { parse as parseUrl, format as formatUrl, resolve } from 'url';
+import { parse as parseQuerystring}  from 'querystring';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
-export default function mapUri(server, prefix) {
+export default function mapUri(server, esClient, proxyPrefix) {
   const config = server.config();
+  const es = esClient.transport._config.host;
 
   function joinPaths(pathA, pathB) {
     return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
   }
 
   return function (request, done) {
-    const {
-      protocol: esUrlProtocol,
-      slashes: esUrlHasSlashes,
-      auth: esUrlAuth,
-      hostname: esUrlHostname,
-      port: esUrlPort,
-      pathname: esUrlBasePath,
-      query: esUrlQuery
-    } = parseUrl(config.get('elasticsearch.url'), true);
-
     // copy most url components directly from the elasticsearch.url
     const mappedUrlComponents = {
-      protocol: esUrlProtocol,
-      slashes: esUrlHasSlashes,
-      auth: esUrlAuth,
-      hostname: esUrlHostname,
-      port: esUrlPort
+      protocol: es.protocol,
+      slashes: true, // QUESTION: would it every be anything else?
+      auth: es.auth, // QUESTION: should we pass this on?
+      hostname: es.host,
+      port: es.port
     };
 
     // pathname
-    const reqSubPath = request.path.replace('/elasticsearch', '');
-    mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
+    const reqSubPath = request.path.replace(proxyPrefix, '');
+    mappedUrlComponents.pathname = joinPaths(es.pathname, reqSubPath);
 
     // querystring
-    const mappedQuery = defaults(omit(request.query, '_'), esUrlQuery || {});
+    const mappedQuery = defaults(omit(request.query, '_'), parseQuerystring(es.query));
     if (Object.keys(mappedQuery).length) {
       mappedUrlComponents.query = mappedQuery;
     }
