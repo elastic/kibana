@@ -49,7 +49,7 @@ class PageObjects {
     });
 
     Object.defineProperty(this, name, {
-      configureable: true,
+      configurable: true,
       get() {
         if (initialized) return pageObject;
 
