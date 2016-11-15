@@ -93,11 +93,13 @@ export default async (kbnServer, server, config) => {
   }
 
   async function renderApp(app) {
-    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
     const payload = await getPayload.call(this, app);
-    if (!isElasticsearchPluginRed) {
+
+    const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+    if (esStatus && esStatus.state !== 'red') {
       payload.uiSettings.user = await server.uiSettings().getUserProvided();
     }
+
     return viewAppWithPayload.call(this, app, payload);
   }
 
