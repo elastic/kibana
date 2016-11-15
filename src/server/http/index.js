@@ -1,4 +1,4 @@
-import { parse, format } from 'url';
+import { format } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
@@ -137,18 +137,7 @@ module.exports = async function (kbnServer, server, config) {
     }
   });
 
-  server.route({
-    method: 'GET',
-    path: '/bundles/fonts/open_sans/{fontFile}',
-    config: {
-      auth: false,
-    },
-    handler: (request, reply) => {
-      const fontPath =
-        resolve(`${process.env.PWD}/optimize/bundles/fonts/open_sans/${request.params.fontFile}`);
-      reply.file(fontPath);
-    }
-  });
+  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
 
   kbnServer.mixin(versionCheckMixin);
 
