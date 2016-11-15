@@ -20,6 +20,19 @@ export default function HistogramVisType(Private) {
         legendPosition: 'right',
         isDonut: false
       },
+      legendPositions: [{
+        value: 'left',
+        text: 'left',
+      }, {
+        value: 'right',
+        text: 'right',
+      }, {
+        value: 'top',
+        text: 'top',
+      }, {
+        value: 'bottom',
+        text: 'bottom',
+      }],
       editor: pieTemplate
     },
     responseConverter: false,

@@ -1,12 +1,9 @@
-import { parse } from 'url';
 import { format } from 'url';
+import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
@@ -103,10 +100,10 @@ module.exports = async function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-
+      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
+        pathname: pathPrefix + path.slice(0, -1),
       }))
       .permanent(true);
     }
@@ -139,6 +136,8 @@ module.exports = async function (kbnServer, server, config) {
       }
     }
   });
+
+  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
 
   kbnServer.mixin(versionCheckMixin);
 
