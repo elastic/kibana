@@ -64,3 +64,4 @@ information and all requests.
 The minimum value is 100.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
+`console.enabled`:: *Default: true* Set to false to disable Console.  Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.
