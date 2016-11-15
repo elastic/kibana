@@ -314,7 +314,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.opts.saveDataSource = function () {
     return $scope.updateDataSource()
     .then(function () {
-      savedSearch.id = savedSearch.title;
       savedSearch.columns = $scope.state.columns;
       savedSearch.sort = $scope.state.sort;
 

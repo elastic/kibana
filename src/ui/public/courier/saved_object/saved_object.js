@@ -13,7 +13,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import errors from 'ui/errors';
-import slugifyId from 'ui/utils/slugify_id';
+import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import DocSourceProvider from '../data_source/doc_source';
@@ -38,7 +38,11 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     let docSource = new DocSource();
 
     // type name for this object, used as the ES-type
-    let type = config.type;
+    const type = config.type;
+
+    self.getDisplayName = function () {
+      return type.charAt(0).toUpperCase() + type.slice(1);
+    };
 
     // Create a notifier for sending alerts
     let notify = new Notifier({
@@ -55,11 +59,14 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     let customInit = config.init || _.noop;
 
     // optional search source which this object configures
-    self.searchSource = config.searchSource && new SearchSource();
+    self.searchSource = config.searchSource ? new SearchSource() : null;
 
     // the id of the document
     self.id = config.id || void 0;
-    self.defaults = config.defaults;
+
+    // Whether to create a copy when the object is saved. This should eventually go away
+    // in favor of a better rename/save flow.
+    self.copyOnSave = false;
 
     /**
      * Asynchronously initialize this object - will only run
@@ -74,9 +81,9 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
       // tell the docSource where to find the doc
       docSource
-      .index(kbnIndex)
-      .type(type)
-      .id(self.id);
+        .index(kbnIndex)
+        .type(type)
+        .id(self.id);
 
       // check that the mapping for this type is defined
       return mappingSetup.isDefined(type)
@@ -101,14 +108,13 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
         if (!self.id) {
           // just assign the defaults and be done
           _.assign(self, defaults);
-          return hydrateIndexPattern().then(function () {
+          return hydrateIndexPattern().then(() => {
             return afterESResp.call(self);
           });
         }
 
         // fetch the object from ES
-        return docSource.fetch()
-        .then(self.applyESResp);
+        return docSource.fetch().then(self.applyESResp);
       })
       .then(function () {
         return customInit.call(self);
@@ -145,14 +151,14 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       // Give obj all of the values in _source.fields
       _.assign(self, self._source);
 
-      return Promise.try(function () {
+      return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
+        return hydrateIndexPattern();
       })
-      .then(hydrateIndexPattern)
-      .then(function () {
+      .then(() => {
         return Promise.cast(afterESResp.call(self, resp));
       })
-      .then(function () {
+      .then(() => {
         // Any time obj is updated, re-call applyESResp
         docSource.onUpdate().then(self.applyESResp, notify.fatal);
       });
@@ -181,28 +187,31 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * After creation or fetching from ES, ensure that the searchSources index indexPattern
      * is an bonafide IndexPattern object.
      *
-     * @return {[type]} [description]
+     * @return {Promise<IndexPattern | null>}
      */
     function hydrateIndexPattern() {
-      return Promise.try(function () {
-        if (self.searchSource) {
+      if (!self.searchSource) { return Promise.resolve(null); }
 
-          let index = config.indexPattern || self.searchSource.getOwn('index');
-          if (!index) return;
-          if (config.clearSavedIndexPattern) {
-            self.searchSource.set('index', undefined);
-            return;
-          }
+      if (config.clearSavedIndexPattern) {
+        self.searchSource.set('index', undefined);
+        return Promise.resolve(null);
+      }
 
-          if (!(index instanceof indexPatterns.IndexPattern)) {
-            index = indexPatterns.get(index);
-          }
+      let index = config.indexPattern || self.searchSource.getOwn('index');
 
-          return Promise.resolve(index).then(function (indexPattern) {
-            self.searchSource.set('index', indexPattern);
-          });
-        }
-      });
+      if (!index) { return Promise.resolve(null); }
+
+      // If index is not an IndexPattern object at this point, then it's a string id of an index.
+      if (!(index instanceof indexPatterns.IndexPattern)) {
+        index = indexPatterns.get(index);
+      }
+
+      // At this point index will either be an IndexPattern, if cached, or a promise that
+      // will return an IndexPattern, if not cached.
+      return Promise.resolve(index)
+        .then((indexPattern) => {
+          self.searchSource.set('index', indexPattern);
+        });
     }
 
     /**
@@ -231,59 +240,54 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     };
 
     /**
-     * Save this object
+     * Checks the id of the instance. If it is not set, creates a uuid for it.
+     */
+    self.ensureId = function () {
+      this.id = this.id || uuid.v1();
+
+      // ensure that the docSource has the current id
+      docSource.id(self.id);
+    };
+
+    /**
+     * Returns true if the object's original title has been changed. New objects return false.
+     * @return {boolean}
+     */
+    self.titleChanged = function () {
+      return self._source && self._source.title !== self.title;
+    };
+
+    /**
+     * Saves this object.
      *
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
     self.save = function () {
+      // Read https://github.com/elastic/kibana/issues/9056 and
+      // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
+      // exists.
+      // The goal is to move towards a better rename flow, but since our users have been conditioned
+      // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
+      // UI/UX can be worked out.
+      if (this.copyOnSave) {
+        self.id = null;
+      }
+      self.ensureId();
 
-      let body = self.serialize();
-
-      // Slugify the object id
-      self.id = slugifyId(self.id);
-
-      // ensure that the docSource has the current self.id
-      docSource.id(self.id);
-
-      // index the document
-      return self.saveSource(body);
-    };
-
-    self.saveSource = function (source) {
-      let finish = function (id) {
-        self.id = id;
-        return es.indices.refresh({
-          index: kbnIndex
-        })
-        .then(function () {
-          return self.id;
-        });
-      };
+      let source = self.serialize();
 
       return docSource.doCreate(source)
-      .then(finish)
-      .catch(function (err) {
-        // record exists, confirm overwriting
-        if (_.get(err, 'origError.status') === 409) {
-          let confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
-
-          return safeConfirm(confirmMessage).then(
-            function () {
-              return docSource.doIndex(source).then(finish);
-            },
-            _.noop // if the user doesn't overwrite record, just swallow the error
-          );
-        }
-        return Promise.reject(err);
-      });
+        .then(self.refreshIndex)
+        .catch(function (err) {
+          // if record exists, overwrite it.
+          if (_.get(err, 'origError.status') === 409) {
+            return docSource.doIndex(source).then(self.refreshIndex);
+          }
+          return Promise.reject(err);
+        });
     };
 
-    /**
-     * Destroy this object
-     *
-     * @return {undefined}
-     */
     self.destroy = function () {
       docSource.cancelQueued();
       if (self.searchSource) {
@@ -292,19 +296,25 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     };
 
     /**
+     * Queries es to refresh the index.
+     * @returns {Promise}
+     */
+    self.refreshIndex = function () {
+      return es.indices.refresh({ index: kbnIndex });
+    };
+
+    /**
      * Delete this object from Elasticsearch
      * @return {promise}
      */
     self.delete = function () {
-      return es.delete({
-        index: kbnIndex,
-        type: type,
-        id: this.id
-      }).then(function () {
-        return es.indices.refresh({
-          index: kbnIndex
-        });
-      });
+      return es.delete(
+        {
+          index: kbnIndex,
+          type: type,
+          id: this.id
+        })
+        .then(() => { return this.refreshIndex(); });
     };
   }
 

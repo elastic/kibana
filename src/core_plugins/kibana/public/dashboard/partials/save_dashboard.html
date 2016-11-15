@@ -11,12 +11,18 @@
     placeholder="Dashboard title"
     input-focus="select"
   >
+
+  <saved-object-save-as-check-box saved-object="opts.dashboard"></saved-object-save-as-check-box>
+
   <div class="form-group">
     <label>
       <input type="checkbox" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">
-      Store time with dashboard
+      Store time with {{opts.dashboard.getDisplayName()}}
       <kbn-info info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
     </label>
   </div>
-  <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">Save</button>
+
+  <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">
+    Save
+  </button>
 </form>

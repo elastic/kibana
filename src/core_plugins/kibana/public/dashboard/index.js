@@ -222,7 +222,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.save = function () {
-        $state.title = dash.id = dash.title;
+        $state.title = dash.title;
         $state.save();
 
         const timeRestoreObj = _.pick(timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);

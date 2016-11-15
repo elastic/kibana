@@ -287,7 +287,6 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
    * Called when the user clicks "Save" button.
    */
   $scope.doSave = function () {
-    savedVis.id = savedVis.title;
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
     savedVis.visState = $state.vis;
