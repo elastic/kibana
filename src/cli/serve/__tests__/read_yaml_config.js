@@ -57,46 +57,4 @@ describe('cli/serve/read_yaml_config', function () {
       process.chdir(oldCwd);
     });
   });
-
-  context('stubbed stdout', function () {
-    let stub;
-
-    beforeEach(function () {
-      stub = sinon.stub(process.stdout, 'write');
-    });
-
-    context('deprecated settings', function () {
-      it('warns about deprecated settings', function () {
-        readYamlConfig(fixture('deprecated.yml'));
-        sinon.assert.calledOnce(stub);
-        expect(stub.firstCall.args[0]).to.match(/deprecated/);
-        stub.restore();
-      });
-
-      it('only warns once about deprecated settings', function () {
-        readYamlConfig(fixture('deprecated.yml'));
-        readYamlConfig(fixture('deprecated.yml'));
-        readYamlConfig(fixture('deprecated.yml'));
-        sinon.assert.notCalled(stub); // already logged in previous test
-        stub.restore();
-      });
-    });
-
-    context('legacy settings', function () {
-      it('warns about deprecated settings', function () {
-        readYamlConfig(fixture('legacy.yml'));
-        sinon.assert.calledOnce(stub);
-        expect(stub.firstCall.args[0]).to.match(/has been replaced/);
-        stub.restore();
-      });
-
-      it('only warns once about legacy settings', function () {
-        readYamlConfig(fixture('legacy.yml'));
-        readYamlConfig(fixture('legacy.yml'));
-        readYamlConfig(fixture('legacy.yml'));
-        sinon.assert.notCalled(stub); // already logged in previous test
-        stub.restore();
-      });
-    });
-  });
 });

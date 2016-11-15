@@ -160,13 +160,11 @@ describe('Config schema', function () {
           expect(error).to.be(null);
         });
 
-        it('rejects a single string', function () {
+        it('allows a single string', function () {
           const config = {};
           set(config, 'server.ssl.certificateAuthorities', '/path1.crt');
           const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.certificateAuthorities');
+          expect(error).to.be(null);
         });
       });
 

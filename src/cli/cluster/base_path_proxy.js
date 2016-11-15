@@ -10,6 +10,7 @@ import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
@@ -19,7 +20,8 @@ export default class BasePathProxy {
     this.clusterManager = clusterManager;
     this.server = new Server();
 
-    const config = Config.withDefaultSchema(userSettings);
+    const settings = transformDeprecations(userSettings);
+    const config = Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');

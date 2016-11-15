@@ -3,6 +3,7 @@ import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
 import { inherits } from 'util';
+import { Deprecations } from '../../deprecation';
 
 const extendInitFns = Symbol('extend plugin initialization');
 
@@ -68,6 +69,7 @@ module.exports = class Plugin {
     this.externalInit = opts.init || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
     this.getExternalConfigSchema = opts.config || _.noop;
+    this.getExternalDeprecations = opts.deprecations || _.noop;
     this.preInit = _.once(this.preInit);
     this.init = _.once(this.init);
     this[extendInitFns] = [];
@@ -97,6 +99,11 @@ module.exports = class Plugin {
   async getConfigSchema() {
     let schema = await this.getExternalConfigSchema(Joi);
     return schema || defaultConfigSchema;
+  }
+
+  getDeprecations() {
+    let rules = this.getExternalDeprecations(Deprecations);
+    return rules || [];
   }
 
   async preInit() {
