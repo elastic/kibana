@@ -48,15 +48,19 @@ export default async (kbnServer, server, config) => {
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    handler: function (req, reply) {
+    async handler(req, reply) {
       const id = req.params.id;
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
-      if (kbnServer.status.isGreen()) {
-        return reply.renderApp(app);
-      } else {
-        return reply.renderStatusPage();
+      try {
+        if (kbnServer.status.isGreen()) {
+          await reply.renderApp(app);
+        } else {
+          await reply.renderStatusPage();
+        }
+      } catch (err) {
+        reply(Boom.wrap(err));
       }
     }
   });
