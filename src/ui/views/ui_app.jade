@@ -14,18 +14,43 @@ block content
 
     .application {
       height: 100%;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex: 1 0 auto;
-      flex-direction: column;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 0 auto;
+          -ms-flex: 1 0 auto;
+              flex: 1 0 auto;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+              flex-direction: column;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
       background: #5A5A5A;
     }
 
+    /**
+     * 1. The kibanaLoadingMessage will push the loader up. This top margin pushes it back down so
+     *    it's in the same position as the login form.
+     */
     .kibanaLoader {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
       width: 620px;
       height: 185px;
-      margin: auto;
       padding: 0;
+      margin-top: 130px; /* 1 */
       text-align: center;
       background: #3caed2;
       box-shadow: 0 0 2em #444444;
@@ -36,7 +61,8 @@ block content
       height: 100%;
       padding: 20px;
       background-color: #E8488B;
-      animation: colorShift 3s infinite;
+      -webkit-animation: colorShift 3s infinite;
+              animation: colorShift 3s infinite;
       box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, 0.5);
     }
 
@@ -49,15 +75,42 @@ block content
     }
 
     .kibanaLoader__content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1 1 auto;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto;
       color: white;
       font-size: 38px;
       font-weight: 300;
-      font-family: "Open Sans", Helvetica, Arial, sans-serif;
-      padding-bottom: 12px;
+      font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding-bottom: 16px;
+    }
+
+    @-webkit-keyframes colorShift {
+      0% {
+        background-color: #DD4484;
+      }
+      33% {
+        background-color: #E4BB51;
+      }
+      66% {
+        background-color: #8AC336;
+      }
+      100% {
+        background-color: #DD4484;
+      }
     }
 
     @keyframes colorShift {
@@ -75,12 +128,31 @@ block content
       }
     }
 
+    /**
+     * 1. If we change the height or top margin, we'll need to increase the top margin on
+     *    kibanaLoader too.
+     */
+    .kibanaLoadingMessage {
+      font-family: "Open Sans", Helvetica, Arial, sans-serif;
+      color: white;
+      max-width: 540px;
+      height: 50px; /* 1 */
+      margin-top: 80px; /* 1 */
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.4;
+      opacity: 0.8;
+    }
+
   .application
     .kibanaLoader
       .kibanaLoader__logo
         .logo
       .kibanaLoader__content
         | Loading Kibana
+    .kibanaLoadingMessage.
+      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
