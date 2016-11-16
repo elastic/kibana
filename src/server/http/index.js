@@ -1,5 +1,5 @@
-import { parse } from 'url';
 import { format } from 'url';
+import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
@@ -139,6 +139,9 @@ module.exports = async function (kbnServer, server, config) {
       }
     }
   });
+
+  // Expose static assets (favicons).
+  server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
 
   kbnServer.mixin(versionCheckMixin);
 
