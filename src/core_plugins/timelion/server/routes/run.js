@@ -10,56 +10,43 @@ function replyWithError(e, reply) {
 
 
 module.exports = (server) => {
-
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
+      try {
+        const uiSettings = await server.uiSettings().getAll(request);
 
-      // I don't really like this, but we need to get all of the settings
-      // before every request. This just sucks because its going to slow things
-      // down. Meh.
-      return server.uiSettings().getAll().then((uiSettings) => {
-        var sheet;
-        var tlConfig = require('../handlers/lib/tl_config.js')({
-          server: server,
-          request: request,
+        const tlConfig = require('../handlers/lib/tl_config.js')({
+          server,
+          request,
           settings: _.defaults(uiSettings, timelionDefaults) // Just in case they delete some setting.
         });
-        var chainRunner = chainRunnerFn(tlConfig);
 
-        try {
-          sheet = chainRunner.processRequest(request.payload || {
-            sheet: [request.query.expression],
-            time: {
-              from: request.query.from,
-              to: request.query.to,
-              interval: request.query.interval,
-              timezone: request.query.timezone
-            }
-          });
-        } catch (e) {
-          replyWithError(e, reply);
-          return;
-        }
-
-        return Promise.all(sheet).then((sheet) => {
-          var response = {
-            sheet: sheet,
-            stats: chainRunner.getStats()
-          };
-          reply(response);
-        }).catch((e) => {
-          // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
-          if (e.isBoom) {
-            reply(e);
-          } else {
-            replyWithError(e, reply);
+        const chainRunner = chainRunnerFn(tlConfig);
+        const sheet = await Promise.all(chainRunner.processRequest(request.payload || {
+          sheet: [request.query.expression],
+          time: {
+            from: request.query.from,
+            to: request.query.to,
+            interval: request.query.interval,
+            timezone: request.query.timezone
           }
+        }));
+
+        reply({
+          sheet,
+          stats: chainRunner.getStats()
         });
-      });
 
-
+      } catch (err) {
+        // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
+        if (err.isBoom) {
+          reply(err);
+        } else {
+          replyWithError(err, reply);
+        }
+      }
     }
   });
 
