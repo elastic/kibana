@@ -21,7 +21,7 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The Docker image for Kibana v{version} can be retrieved with the following
+The Docker image for Kibana {version} can be retrieved with the following
 command:
 
 ["source","sh",subs="attributes"]
