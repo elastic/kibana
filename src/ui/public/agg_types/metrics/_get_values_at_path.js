@@ -36,11 +36,11 @@ export default function (json, path) {
     if (pathIndex >= path.length) {
       if (element) {
         if (element.constructor === Array) {
-          for (let i = 0; i < element.length; i++) {
-            if (element[i]) {
-              values.push(element[i]);
+          element.forEach(child => {
+            if (child) {
+              values.push(child);
             }
-          }
+          });
         } else {
           values.push(element);
         }
@@ -50,9 +50,7 @@ export default function (json, path) {
         getValues(element[path[pathIndex]], pathIndex + 1);
       }
     } else if (element.constructor === Array) {
-      for (let childi = 0; childi < element.length; childi++) {
-        getValues(element[childi], pathIndex);
-      }
+      element.forEach(child => getValues(child, pathIndex));
     }
   };
 
