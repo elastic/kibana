@@ -5,8 +5,7 @@ import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 
-describe('Utils brush_event()', function () {
-
+describe('brushEvent', function () {
   let brushEventFn;
   let timefilter;
 
@@ -21,18 +20,23 @@ describe('Utils brush_event()', function () {
     expect(brushEventFn({})).to.be.a(Function);
   });
 
-  describe('brushEvent($state)()', function () {
+  describe('returned function', function () {
     let $state;
     let brushEvent;
+
+    const baseState = {
+      filters:[],
+    };
+
     const baseEvent = {
       data: {
-        fieldFormatter: _.constant({})
-      }
+        fieldFormatter: _.constant({}),
+      },
     };
 
     beforeEach(ngMock.inject(function (Private, $injector) {
       baseEvent.data.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      $state = {filters:[]};
+      $state = _.cloneDeep(baseState);
       brushEvent = brushEventFn($state);
     }));
 
@@ -41,13 +45,13 @@ describe('Utils brush_event()', function () {
     });
 
     it('ignores event when data.xAxisField not provided', function () {
-      let event = _.cloneDeep(baseEvent);
+      const event = _.cloneDeep(baseEvent);
       brushEvent(event);
       expect($state)
         .not.have.property('$newFilters');
     });
 
-    describe('Processing event, x-axis field is date', function () {
+    describe('handles an event when the x-axis field is a date', function () {
       let dateEvent;
       const dateField = {
         name: 'dateField',
@@ -59,31 +63,34 @@ describe('Utils brush_event()', function () {
         dateEvent.data.xAxisField = dateField;
       }));
 
-      it('ignore event when range spans zero time', function () {
-        let event = _.cloneDeep(dateEvent);
+      it('by ignoring the event when range spans zero time', function () {
+        const event = _.cloneDeep(dateEvent);
         event.range = [1388559600000, 1388559600000];
         brushEvent(event);
         expect($state)
           .not.have.property('$newFilters');
       });
 
-      it('update timefilter', function () {
-        let event = _.cloneDeep(dateEvent);
-        event.range = [1388559600000, 1388646000000];
+      it('by updating the timefilter', function () {
+        const event = _.cloneDeep(dateEvent);
+        const DAY_IN_MS = 24 * 60 * 60 * 1000;
+        event.range = [1388559600000, 1388559600000 + DAY_IN_MS];
         brushEvent(event);
         expect(timefilter.time.mode).to.be('absolute');
-        expect(moment.isMoment(timefilter.time.to))
-          .to.be(true);
-        expect(timefilter.time.to.format('YYYY-MM-DD'))
-          .to.equal('2014-01-02');
         expect(moment.isMoment(timefilter.time.from))
           .to.be(true);
-        expect(timefilter.time.from.format('YYYY-MM-DD'))
+        // Set to a baseline timezone for comparison.
+        expect(timefilter.time.from.utcOffset(0).format('YYYY-MM-DD'))
           .to.equal('2014-01-01');
+        expect(moment.isMoment(timefilter.time.to))
+          .to.be(true);
+        // Set to a baseline timezone for comparison.
+        expect(timefilter.time.to.utcOffset(0).format('YYYY-MM-DD'))
+          .to.equal('2014-01-02');
       });
     });
 
-    describe('Processing event, x-axis field is number', function () {
+    describe('handles an event when the x-axis field is a number', function () {
       let numberEvent;
       const numberField = {
         name: 'numberField',
@@ -95,16 +102,16 @@ describe('Utils brush_event()', function () {
         numberEvent.data.xAxisField = numberField;
       }));
 
-      it('ignore event when range does not span at least 2 values', function () {
-        let event = _.cloneDeep(numberEvent);
+      it('by ignoring the event when range does not span at least 2 values', function () {
+        const event = _.cloneDeep(numberEvent);
         event.range = [1];
         brushEvent(event);
         expect($state)
           .not.have.property('$newFilters');
       });
 
-      it('create new filter', function () {
-        let event = _.cloneDeep(numberEvent);
+      it('by creating a new filter', function () {
+        const event = _.cloneDeep(numberEvent);
         event.range = [1,2,3,4];
         brushEvent(event);
         expect($state)
@@ -119,8 +126,8 @@ describe('Utils brush_event()', function () {
          .to.equal(4);
       });
 
-      it('update existing range filter', function () {
-        let event = _.cloneDeep(numberEvent);
+      it('by updating the existing range filter', function () {
+        const event = _.cloneDeep(numberEvent);
         event.range = [3,7];
         $state.filters.push({
           meta: {
@@ -139,8 +146,8 @@ describe('Utils brush_event()', function () {
          .to.equal(7);
       });
 
-      it('update existing scripted filter', function () {
-        let event = _.cloneDeep(numberEvent);
+      it('by updating the existing scripted filter', function () {
+        const event = _.cloneDeep(numberEvent);
         event.range = [3,7];
         $state.filters.push({
           meta: {
