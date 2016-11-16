@@ -167,6 +167,10 @@ export default function VisFactory(Notifier, Private) {
     return this.__uiState;
   };
 
+  Vis.prototype.implementsRenderComplete = function () {
+    return this.type.implementsRenderComplete;
+  };
+
   /**
    * Currently this is only used to extract map-specific information
    * (e.g. mapZoom, mapCenter).
