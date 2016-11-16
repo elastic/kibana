@@ -40,6 +40,8 @@ export default function VisFactory(Notifier, Private) {
 
     this.setState(state);
     this.setUiState(uiState);
+
+    this.on('renderComplete', () => this._renderComplete = true);
   }
 
   Vis.convertOldState = function (type, oldState) {
@@ -169,6 +171,14 @@ export default function VisFactory(Notifier, Private) {
 
   Vis.prototype.implementsRenderComplete = function () {
     return this.type.implementsRenderComplete;
+  };
+
+  Vis.prototype.onRenderComplete = function (cb) {
+    this.on('renderComplete', cb);
+    if (this._renderComplete) {
+      // guarantees that caller receives event in case visualization already finished rendering
+      this.emit('renderComplete');
+    }
   };
 
   /**
