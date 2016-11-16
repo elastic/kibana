@@ -48,6 +48,7 @@ function TableVisTypeProvider(Private) {
       },
       editor: '<table-vis-params></table-vis-params>'
     },
+    implementsRenderComplete: true,
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
     },

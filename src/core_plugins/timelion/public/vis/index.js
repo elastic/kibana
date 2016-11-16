@@ -24,7 +24,8 @@ define(function (require) {
       params: {
         editor: require('plugins/timelion/vis/timelion_vis_params.html')
       },
-      requiresSearch: false
+      requiresSearch: false,
+      implementsRenderComplete: true,
     });
   }
 

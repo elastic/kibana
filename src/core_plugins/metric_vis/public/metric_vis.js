@@ -31,6 +31,7 @@ function MetricVisProvider(Private) {
       },
       editor: metricVisParamsTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
