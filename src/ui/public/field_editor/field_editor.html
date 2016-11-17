@@ -147,6 +147,19 @@
         </p>
 
         <p>
+          Kibana currently imposes one special limitation on the scripts you write. Your scripts must consist of a single expression. Multi-statement scripts with an explicit return statement will not work.
+          In other words, the above example is a valid script, but something like the following is not.
+        </p>
+
+        <p>
+          <strong>Invalid</strong><br/>
+          <code>
+            def myField = doc['some_field'].value;<br/>
+            return myField;
+          </code>
+        </p>
+
+        <p>
           Coming from an older version of Kibana? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
         </p>
 
