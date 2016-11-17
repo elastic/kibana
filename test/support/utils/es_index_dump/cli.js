@@ -1,4 +1,11 @@
+/*************************************************************
+ *
+ *  Run `npm run esIndexDump -- --help` for usage information
+ *
+ *************************************************************/
+
 import { resolve, relative } from 'path';
+import { readFileSync } from 'fs';
 import program from 'commander';
 
 import { EsIndexDump } from './es_index_dump';
@@ -7,6 +14,11 @@ const DEFAULT_DATA_DIR = relative(
   process.cwd(),
   resolve(__dirname, '../../../fixtures/dump_data')
 );
+
+program.description(`A simple CLI to expose the EsIndexDump class's functionality`);
+program.on('--help', () => {
+  console.log(readFileSync(resolve(__dirname, './help.txt'), 'utf8'));
+});
 
 const makeAction = (method, description) =>
   program
