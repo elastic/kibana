@@ -1,7 +1,7 @@
 var resolve = require('path').resolve;
 
-module.exports = function () {
-  var root = process.cwd();
+module.exports = function (root) {
+  if (!root) root = process.cwd();
   var pkg = require(resolve(root, 'package.json'));
 
   return {
