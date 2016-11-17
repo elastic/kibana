@@ -26,6 +26,7 @@ export default function VislibVisTypeFactory(Private) {
     }
 
     this.listeners = opts.listeners || {};
+    this.implementsRenderComplete = true;
   }
 
   VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
