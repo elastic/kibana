@@ -13,12 +13,10 @@ describe('build_action', () => {
   beforeEach(() => del(PLUGIN_BUILD_DIR));
   afterEach(() => del(PLUGIN_BUILD_DIR));
 
-  it('creates a zip in the build directory', (done) => {
-    buildAction(PLUGIN, () => {
+  it('creates a zip in the build directory', () => {
+    return buildAction(PLUGIN).then(() => {
       if (!fs.existsSync(resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip'))) {
-        done(new Error('expected the plugin to build a zip file'));
-      } else {
-        done();
+        throw new Error('expected the plugin to build a zip file');
       }
     });
   });
