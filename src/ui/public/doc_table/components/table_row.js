@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import addWordBreaks from 'ui/utils/add_word_breaks';
 import 'ui/highlight';
 import 'ui/highlight/highlight_tags';
 import 'ui/doc_viewer';
@@ -150,18 +149,14 @@ module.directive('kbnTableRow', function ($compile) {
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row, fieldName, breakWords) {
+      function _displayField(row, fieldName, truncate) {
         let indexPattern = $scope.indexPattern;
         let text = indexPattern.formatField(row, fieldName);
 
-        if (breakWords) {
-          text = addWordBreaks(text, MIN_LINE_LENGTH);
-
-          if (text.length > MIN_LINE_LENGTH) {
-            return truncateByHeightTemplate({
-              body: text
-            });
-          }
+        if (truncate && text.length > MIN_LINE_LENGTH) {
+          return truncateByHeightTemplate({
+            body: text
+          });
         }
 
         return text;

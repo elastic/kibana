@@ -1,12 +1,9 @@
-import { parse } from 'url';
 import { format } from 'url';
+import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
@@ -139,6 +136,10 @@ module.exports = async function (kbnServer, server, config) {
       }
     }
   });
+
+  // Expose static assets (fonts, favicons).
+  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
+  server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
 
   kbnServer.mixin(versionCheckMixin);
 

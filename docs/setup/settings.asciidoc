@@ -14,6 +14,7 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a 
  to Kibana. This setting cannot end in a slash (`/`).
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes for incoming server requests.
 `server.name:`:: *Default: "your-hostname"* A human-readable display name that identifies this Kibana instance.
+`server.defaultRoute:`:: *Default: "/app/kibana"* This setting specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
 `elasticsearch.url:`:: *Default: "http://localhost:9200"* The URL of the Elasticsearch instance to use for all your
 queries.
 `elasticsearch.preserveHost:`:: *Default: true* When this setting’s value is true Kibana uses the hostname specified in
@@ -63,3 +64,4 @@ information and all requests.
 The minimum value is 100.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
+`console.enabled`:: *Default: true* Set to false to disable Console.  Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.
