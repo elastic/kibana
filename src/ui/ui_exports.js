@@ -110,8 +110,8 @@ class UiExports {
         };
 
       case 'replaceInjectedVars':
-        return (plugin, extender) => {
-          this.injectedVarsReplacers.push(extender);
+        return (plugin, replacer) => {
+          this.injectedVarsReplacers.push(replacer);
         };
     }
   }

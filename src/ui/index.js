@@ -77,7 +77,7 @@ export default async (kbnServer, server, config) => {
       },
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
-        (acc, extender) => extender(acc, this.request, server),
+        async (acc, replacer) => await replacer(acc, this.request, server),
         defaults(await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
       )
     };
