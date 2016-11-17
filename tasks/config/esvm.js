@@ -27,6 +27,51 @@ module.exports = function (grunt) {
         }
       }
     },
+    tribe: {
+      options: {
+        directory: resolve(directory, 'tribe'),
+        config: {
+          path: {
+            data: dataDir
+          }
+        },
+        nodes: [{
+          cluster: { name: 'cluster-01' },
+          http: { port: 9201 },
+          node: { name: 'node-01', data: true, master: true, max_local_storage_nodes: 3 }
+        }, {
+          cluster: { name: 'cluster-02' },
+          http: { port: 9202 },
+          node: { name: 'node-02', data: true, master: true, max_local_storage_nodes: 3 }
+        }, {
+          cluster: { name: 'tribe-01' },
+          http: { port: 9200 },
+          node: { name: 'node-03', max_local_storage_nodes: 3 },
+          tribe: {
+            c1: {
+              cluster: {
+                name: 'cluster-01'
+              }
+            },
+            c2: {
+              cluster: {
+                name: 'cluster-02'
+              }
+            },
+            on_conflict: 'prefer_c1'
+          },
+          discovery: {
+            zen: {
+              ping: {
+                unicast: {
+                  hosts: [ 'localhost:9201', 'localhost:9202' ]
+                }
+              }
+            }
+          }
+        }]
+      },
+    },
     test: {
       options: {
         directory: resolve(directory, 'test'),
