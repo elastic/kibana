@@ -52,7 +52,7 @@ module.exports = function (plugin) {
 
     if (deps.length === 1) {
       files.push(`node_modules/${ deps[0] }/**/*`);
-    } else if(deps.length) {
+    } else if (deps.length) {
       files.push(`node_modules/{${ deps.join(',') }}/**/*`);
     }
 
