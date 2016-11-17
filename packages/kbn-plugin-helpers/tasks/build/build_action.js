@@ -58,7 +58,7 @@ module.exports = function (plugin, callback) {
     }
 
     vfs
-      .src(files, { base: plugin.root })
+      .src(files, { cwd: plugin.root, base: plugin.root })
 
       // rewrite the target kibana version while the
       // file is on it's way to the archive
