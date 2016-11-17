@@ -43,6 +43,8 @@ module.controller('KbnTableVisController', function ($scope, Private) {
         if (table.tables) return table.tables.some(haveRows);
         return table.rows.length > 0;
       });
+
+      $scope.vis.emit('renderComplete');
     }
 
     $scope.hasSomeRows = hasSomeRows;

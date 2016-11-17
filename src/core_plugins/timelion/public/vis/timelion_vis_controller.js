@@ -59,5 +59,10 @@ define(function (require) {
 
     $scope.$on('fetch', $scope.search);
 
+    $scope.$on('renderComplete', event => {
+      event.stopPropagation();
+      $scope.vis.emit('renderComplete');
+    });
+
   });
 });

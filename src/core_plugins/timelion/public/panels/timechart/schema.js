@@ -229,6 +229,10 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             setTimeout(drawPlot, 500);
           }
 
+          if ($scope.plot) {
+            $scope.$emit('renderComplete');
+          }
+
           legendScope.$destroy();
           legendScope = $scope.$new();
           // Used to toggle the series, and for displaying values on hover
