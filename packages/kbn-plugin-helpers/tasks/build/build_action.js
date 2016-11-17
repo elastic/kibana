@@ -43,7 +43,7 @@ module.exports = function (plugin) {
     }
   }
 
-  function build(deps, kibanaVersion) {
+  function build(buildId, deps, kibanaVersion) {
     var files = [
       'package.json',
       'index.js',
@@ -52,7 +52,7 @@ module.exports = function (plugin) {
 
     if (deps.length === 1) {
       files.push(`node_modules/${ deps[0] }/**/*`);
-    } else {
+    } else if(deps.length) {
       files.push(`node_modules/{${ deps.join(',') }}/**/*`);
     }
 
@@ -80,4 +80,6 @@ module.exports = function (plugin) {
       .pipe(zip(`${buildId}.zip`))
       .pipe(vfs.dest(join(plugin.root, 'build')));
   }
+
+  main();
 };
