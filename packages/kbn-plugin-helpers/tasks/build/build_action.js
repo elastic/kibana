@@ -1,4 +1,5 @@
-module.exports = function (plugin) {
+module.exports = function (plugin, callback) {
+  if (!callback) callback = function () {};
 
   var vfs = require('vinyl-fs');
   var zip = require('gulp-zip');
@@ -78,7 +79,8 @@ module.exports = function (plugin) {
       }))
 
       .pipe(zip(`${buildId}.zip`))
-      .pipe(vfs.dest(join(plugin.root, 'build')));
+      .pipe(vfs.dest(join(plugin.root, 'build')))
+      .on('end', callback);
   }
 
   main();
