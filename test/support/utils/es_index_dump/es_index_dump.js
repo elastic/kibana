@@ -38,7 +38,7 @@ export class EsIndexDump {
 
     const dumpType = async type => {
       const output = resolve(dataDir, name, `${type}.json.gz`);
-      this.log('Dumping %s from %s/%s to %s', type, esUrl, inputIndex, output);
+      log('Dumping %s from %s/%s to %s', type, esUrl, inputIndex, output);
       await elasticDump(log, {
         type,
         input: esUrl,
@@ -81,7 +81,7 @@ export class EsIndexDump {
 
     const loadType = async type => {
       const input = resolve(dumpDir, `${type}.json.gz`);
-      this.log('Loading %s from %s to %s/%s', type, input, esUrl, outputIndex);
+      log('Loading %s from %s to %s/%s', type, input, esUrl, outputIndex);
       await elasticDump(log, {
         type,
         input,
