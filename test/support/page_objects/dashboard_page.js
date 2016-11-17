@@ -13,14 +13,12 @@ export default class DashboardPage {
   }
 
   clickNewDashboard() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="New Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardNewButton')
     .click();
   }
 
   clickAddVisualization() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Add a panel to the dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardAddPanelButton')
     .click();
   }
 
@@ -70,8 +68,7 @@ export default class DashboardPage {
   }
 
   saveDashboard(dashName) {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Save Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardSaveButton')
     .click()
     .then(() => {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
@@ -125,8 +122,7 @@ export default class DashboardPage {
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
     var self = this;
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Open Saved Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardOpenButton')
     .click()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
