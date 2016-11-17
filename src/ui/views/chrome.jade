@@ -10,6 +10,64 @@ html(lang='en')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     meta(name='viewport', content='width=device-width')
     title Kibana
+    style.
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 300;
+        src: local('Open Sans Light'), local('OpenSans-Light'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Open Sans'), local('OpenSans'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 700;
+        src: local('Open Sans Bold'), local('OpenSans-Bold'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.svg#OpenSans') format('svg');
+      }
+
+    //- Favicons (generated from http://realfavicongenerator.net/)
+    link(
+      rel='apple-touch-icon' sizes='180x180' href='#{kibanaPayload.basePath}/ui/favicons/apple-touch-icon.png'
+    )
+    link(
+      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-32x32.png' sizes='32x32'
+    )
+    link(
+      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-16x16.png' sizes='16x16'
+    )
+    link(
+      rel='manifest' href='#{kibanaPayload.basePath}/ui/favicons/manifest.json'
+    )
+    link(
+      rel='mask-icon' href='#{kibanaPayload.basePath}/ui/favicons/safari-pinned-tab.svg' color='#e8488b'
+    )
+    link(
+      rel='shortcut icon' href='#{kibanaPayload.basePath}/ui/favicons/favicon.ico'
+    )
+    meta(
+      name='msapplication-config' content='#{kibanaPayload.basePath}/ui/favicons/browserconfig.xml'
+    )
+    meta(
+      name='theme-color' content='#ffffff'
+    )
+
     block head
   body(kbn-chrome, id='#{appName}-body')
     kbn-initial-state(data=JSON.stringify(kibanaPayload))
