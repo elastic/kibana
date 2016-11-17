@@ -76,8 +76,10 @@ uiModules
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
       let applyClassNames = function () {
-        let $visEl = getVisContainer();
+        const $visEl = getVisContainer();
         const $spyEl = getSpyContainer();
+        if (!$spyEl) return;
+
         let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
