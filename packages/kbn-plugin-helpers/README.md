@@ -1,5 +1,7 @@
 # kibana-plugin-helpers
 
+[![CircleCI](https://circleci.com/gh/elastic/kibana-plugin-helpers/tree/master.svg?style=svg)](https://circleci.com/gh/elastic/kibana-plugin-helpers/tree/master)
+
 Just some helpers for kibana plugin devs.
 
 This simple CLI has several tasks that plugin devs can run from to easily debug, test, or package kibana plugins.
