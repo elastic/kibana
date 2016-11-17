@@ -12,20 +12,19 @@ block content
       margin: 0;
     }
 
-    .application {
-      height: 100%;
-      display: flex;
-      flex: 1 0 auto;
-      flex-direction: column;
-      background: #5A5A5A;
-    }
-
+    /**
+     * 1. The kibanaLoadingMessage will push the loader up. This top margin pushes it back down so
+     *    it's in the same position as the login form.
+     */
     .kibanaLoader {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
       width: 620px;
       height: 185px;
-      margin: auto;
       padding: 0;
+      margin-top: 130px; /* 1 */
       text-align: center;
       background: #3caed2;
       box-shadow: 0 0 2em #444444;
@@ -36,28 +35,48 @@ block content
       height: 100%;
       padding: 20px;
       background-color: #E8488B;
-      animation: colorShift 3s infinite;
+      -webkit-animation: colorShift 3s infinite;
+              animation: colorShift 3s infinite;
       box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, 0.5);
     }
 
-    .logo {
-      width: 100%;
-      height: 100%;
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 154.03 200.11"><title>Logo-KibanaIcon</title><path opacity="0.7" fill="%23fff" d="M479.29,273.54L557,179.94H403v75c1,0,1.92-.07,2.89-0.07A152.78,152.78,0,0,1,479.29,273.54Z" transform="translate(-402.99 -179.94)"/><polygon opacity="0.7" fill="%23fff" points="0 185.5 0 185.5 76.31 93.6 0 185.5"/><path opacity="0.7" fill="%23fff" d="M499.17,286.52l2.14,1.66C500.61,287.62,499.89,287.07,499.17,286.52Z" transform="translate(-402.99 -179.94)"/><path opacity="0.7" fill="%23fff" d="M493.27,282.19l1.22,0.87Z" transform="translate(-402.99 -179.94)"/><path opacity="0.7" fill="%23fff" d="M504.4,290.74l-74,89.32H556.81A153.4,153.4,0,0,0,504.4,290.74Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M492.54,281.67c-5.34-3.8-13.25-8.13-13.25-8.13a153.77,153.77,0,0,1,14,8.64Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M504.43,290.7s-1.16-1-3.11-2.51c1,0.83,2.06,1.69,3.08,2.55Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M494.49,283.06c1.59,1.12,3.15,2.29,4.69,3.47C497.81,285.49,496.23,284.31,494.49,283.06Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M501.32,288.19l-2.14-1.66c-1.54-1.18-3.1-2.34-4.69-3.47l-1.22-.87a153.77,153.77,0,0,0-14-8.64L403,365.44v14.62h27.39l74-89.32C503.38,289.88,502.36,289,501.32,288.19Z" transform="translate(-402.99 -179.94)"/><path fill="%23fff" d="M405.87,254.85c-1,0-1.92.06-2.89,0.07V365.44l76.31-91.9A152.78,152.78,0,0,0,405.87,254.85Z" transform="translate(-402.99 -179.94)"/></svg>');
-    }
-
     .kibanaLoader__content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1 1 auto;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto;
       color: white;
       font-size: 38px;
       font-weight: 300;
-      font-family: "Open Sans", Helvetica, Arial, sans-serif;
-      padding-bottom: 12px;
+      font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding-bottom: 16px;
+    }
+
+    @-webkit-keyframes colorShift {
+      0% {
+        background-color: #DD4484;
+      }
+      33% {
+        background-color: #E4BB51;
+      }
+      66% {
+        background-color: #8AC336;
+      }
+      100% {
+        background-color: #DD4484;
+      }
     }
 
     @keyframes colorShift {
@@ -75,12 +94,31 @@ block content
       }
     }
 
-  .application
+    /**
+     * 1. If we change the height or top margin, we'll need to increase the top margin on
+     *    kibanaLoader too.
+     */
+    .kibanaLoadingMessage {
+      font-family: "Open Sans", Helvetica, Arial, sans-serif;
+      color: white;
+      max-width: 540px;
+      height: 50px; /* 1 */
+      margin-top: 80px; /* 1 */
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.4;
+      opacity: 0.8;
+    }
+
+  .kibanaWelcomeView
     .kibanaLoader
       .kibanaLoader__logo
-        .logo
+        .kibanaWelcomeLogo
       .kibanaLoader__content
         | Loading Kibana
+    .kibanaLoadingMessage.
+      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
