@@ -39,11 +39,11 @@ define(function (require) {
         return (Math.round(val * 100) / 100) + labels[index];
       },
       'currency': function (val, axis) {
-        return val.toLocaleString('en', { style: 'currency', currency: axis.options.units[1] });
+        return val.toLocaleString('en', { style: 'currency', currency: axis.options.prefix || 'USD' });
       },
       'custom': function (val, axis) {
-        var prefix = axis.options.units[1] || '';
-        var suffix = axis.options.units[2] || '';
+        var prefix = axis.options.units.prefix;
+        var suffix = axis.options.units.suffix;
         return prefix + val + suffix;
       }
     };

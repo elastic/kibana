@@ -77,7 +77,11 @@ module.exports = new Chainable('yaxis', {
         if (!tickFormatters[unitTokens[0]]) {
           throw new Error (`${units} is not a supported unit type.`);
         }
-        myAxis.units = unitTokens;
+        myAxis.units = {
+          type: unitTokens[0],
+          prefix: unitTokens[1] || '',
+          suffix: unitTokens[2] || ''
+        };
       }
 
       return eachSeries;
