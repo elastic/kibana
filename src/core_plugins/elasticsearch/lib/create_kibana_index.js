@@ -2,7 +2,7 @@ import { format } from 'util';
 import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
-  const client = server.plugins.elasticsearch.client;
+  const client = server.plugins.elasticsearch.adminClient;
   const index = server.config().get('kibana.index');
 
   return client.indices.create({

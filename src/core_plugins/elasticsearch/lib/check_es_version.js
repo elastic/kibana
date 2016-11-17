@@ -16,10 +16,8 @@ import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-module.exports = function checkEsVersion(server, kibanaVersion) {
+module.exports = function checkEsVersion(server, kibanaVersion, client) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
-
-  const client = server.plugins.elasticsearch.client;
 
   return client.nodes.info({
     filterPath: [

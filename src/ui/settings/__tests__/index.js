@@ -272,8 +272,8 @@ describe('ui settings', function () {
 });
 
 function expectElasticsearchGetQuery(server, configGet) {
-  expect(server.plugins.elasticsearch.client.get.callCount).to.equal(1);
-  expect(isEqual(server.plugins.elasticsearch.client.get.firstCall.args, [{
+  expect(server.plugins.elasticsearch.adminClient.get.callCount).to.equal(1);
+  expect(isEqual(server.plugins.elasticsearch.adminClient.get.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config'
@@ -281,8 +281,8 @@ function expectElasticsearchGetQuery(server, configGet) {
 }
 
 function expectElasticsearchUpdateQuery(server, configGet, doc) {
-  expect(server.plugins.elasticsearch.client.update.callCount).to.equal(1);
-  expect(isEqual(server.plugins.elasticsearch.client.update.firstCall.args, [{
+  expect(server.plugins.elasticsearch.adminClient.update.callCount).to.equal(1);
+  expect(isEqual(server.plugins.elasticsearch.adminClient.update.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config',
@@ -312,7 +312,7 @@ function instantiate({ getResult } = {}) {
     decorate: (_, key, value) => server[key] = value,
     plugins: {
       elasticsearch: {
-        client: {
+        adminClient: {
           get: sinon.stub().returns(Promise.resolve({ _source: getResult })),
           update: sinon.stub().returns(Promise.resolve())
         }

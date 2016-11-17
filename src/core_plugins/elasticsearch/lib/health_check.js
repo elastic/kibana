@@ -19,23 +19,22 @@ const REQUEST_DELAY = 2500;
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const client = server.plugins.elasticsearch.client;
+  const adminClient = server.plugins.elasticsearch.adminClient;
+  const dataClient = server.plugins.elasticsearch.dataClient;
 
   plugin.status.yellow('Waiting for Elasticsearch');
-
-  function waitForPong() {
+  function waitForPong(client, url) {
     return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
-
-      return Promise.delay(REQUEST_DELAY).then(waitForPong);
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, client, url));
     });
   }
 
   // just figure out the current "health" of the es setup
   function getHealth() {
-    return client.cluster.health({
+    return adminClient.cluster.health({
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
@@ -86,19 +85,32 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    return waitForPong()
-    .then(() => {
-      // execute version and tribe checks in parallel
-      // but always report the version check result first
-      const versionPromise = checkEsVersion(server, kibanaVersion.get());
-      const tribePromise = checkForTribe(client);
-      return versionPromise.then(() => tribePromise);
-    })
-    .then(waitForShards)
+    const healthChecks = [
+      waitForPong(adminClient, config.get('elasticsearch.url'))
+      .then(() => {
+        // execute version and tribe checks in parallel
+        // but always report the version check result first
+        const versionPromise = checkEsVersion(server, kibanaVersion.get(), adminClient);
+        const tribePromise = checkForTribe(adminClient);
+        return versionPromise.then(() => tribePromise);
+      })
+      .then(waitForShards)
+      .then(_.partial(migrateConfig, server))
+    ];
+
+    const tribeUrl = config.get('elasticsearch.tribe.url');
+    if (tribeUrl) {
+      healthChecks.push(
+        waitForPong(dataClient, tribeUrl)
+        .then(() => checkEsVersion(server, kibanaVersion.get(), dataClient))
+      );
+    }
+
+    return Promise.all(healthChecks)
     .then(setGreenStatus)
-    .then(_.partial(migrateConfig, server))
     .catch(err => plugin.status.red(err));
   }
+
 
   let timeoutId = null;
 
