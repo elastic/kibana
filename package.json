@@ -63,7 +63,7 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "esIndexDump": "node ./test/support/utils/es_index_dump/bin/es_index_dump"
+    "esIndexDump": "node ./test/support/es_index_dump/bin/es_index_dump"
   },
   "repository": {
     "type": "git",

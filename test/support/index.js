@@ -7,6 +7,8 @@ import {
   EsClient,
   Log,
 } from './utils';
+
+import { EsIndexDump } from './es_index_dump';
 import ScenarioManager from '../fixtures/scenario_manager';
 import PageObjects from './page_objects';
 
