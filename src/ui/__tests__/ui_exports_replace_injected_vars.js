@@ -3,14 +3,14 @@ import { resolve } from 'path';
 import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import jsdom from 'jsdom';
+import cheerio from 'cheerio';
 import { noop } from 'lodash';
 
 import KbnServer from '../../server/kbn_server';
 
 const getInjectedVarsFromResponse = (resp) => {
-  const document = jsdom.jsdom(resp.payload);
-  const data = document.querySelector('kbn-initial-state').getAttribute('data');
+  const $ = cheerio.load(resp.payload);
+  const data = $('kbn-initial-state').attr('data');
   return JSON.parse(data).vars;
 };
 
