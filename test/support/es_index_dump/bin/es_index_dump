@@ -1,3 +1,0 @@
-#!/usr/bin/env node
-require('../../../env_setup');
-require('../cli');
