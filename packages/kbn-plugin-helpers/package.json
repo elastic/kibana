@@ -13,6 +13,8 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "scripts": {
+    "test": "npm run lint && npm run jest",
+    "jest": "jest",
     "lint": "eslint bin/ help/ tasks/"
   },
   "dependencies": {
@@ -28,9 +30,11 @@
     "doc": "docs"
   },
   "devDependencies": {
-    "eslint": "1.10.3",
     "babel-eslint": "4.1.8",
-    "eslint-plugin-mocha": "1.1.0"
+    "del": "^2.2.2",
+    "eslint": "1.10.3",
+    "eslint-plugin-mocha": "1.1.0",
+    "jest": "^17.0.3"
   },
   "repository": {
     "type": "git",
