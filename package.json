@@ -63,7 +63,7 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "esIndexDump": "node ./test/support/es_index_dump/bin/es_index_dump"
+    "esIndexDump": "node test/support/es_index_dump/cli_setup.js"
   },
   "repository": {
     "type": "git",
@@ -171,6 +171,7 @@
     "chai": "3.5.0",
     "chokidar": "1.6.0",
     "chromedriver": "2.24.1",
+    "del": "2.2.2",
     "elasticdump": "2.1.1",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
