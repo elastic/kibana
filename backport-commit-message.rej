@@ -1,0 +1,38 @@
+Speed up rendering of large docs in doc table
+
+Backports PR #9014
+
+**Commit 1:**
+Speed up rendering of large docs in doc table
+
+Back in 2014 a utility was added to insert <wbr> (word break opportunity)
+tags into doc table fields to improve their display in the browser. This
+utility looped over every character in _source when it was selected as a
+column in the doc table, which it was be default. That really started to
+slow things down when displaying large docs. I compared how the browser
+renders things with and without the <wbr>'s and there's almost no
+difference, certainly nothing as dramatic as shown in the linked PR
+which added this word breaking functionality. Perhaps browsers have
+improved in the last two years, or perhaps something changed in our CSS.
+Since we're getting no or negligible value from this utility and it
+makes Discover impossible to use with large docs, I simply removed it.
+
+Fixes https://github.com/elastic/kibana/issues/6328
+Related https://github.com/elastic/kibana/pull/1993
+
+* Original sha: fc443bb76dcfa3f1c69cb884c197307d3b0ab7eb
+* Authored by Matthew Bargar <mbargar@gmail.com> on 2016-11-09T00:11:45Z
+
+**Commit 2:**
+Improve word breaking in doc table
+
+To maintain similar word breaking without adding <wbr> tags I've added
+some css styles that do essentially the same job. word-break: break-word
+gives us the best formatting but it's not a part of the standard yet
+(see link below) so I provided an almost-as-good fallback with
+break-all.
+
+https://bugs.chromium.org/p/chromium/issues/detail?id=492202#c21
+
+* Original sha: ac385245e7a253d85486b005bc9e0482e4fe26af
+* Authored by Matthew Bargar <mbargar@gmail.com> on 2016-11-10T23:01:30Z
