@@ -1,0 +1,20 @@
+<div class="form-group">
+
+  <div class="form-group">
+    <label>Text Scale</label>
+    <select class="form-control" ng-model="vis.params.scale" ng-options="mode for mode in vis.type.params.scales"></select>
+  </div>
+
+  <div class="form-group">
+    <label>Orientations</label>
+    <select class="form-control" ng-model="vis.params.orientation" ng-options="mode for mode in vis.type.params.orientations"></select>
+  </div>
+
+  <label>Minimum Font Size - {{ vis.params.minFontSize }}px</label>
+  <input type="range" ng-model="vis.params.minFontSize" class="form-control" min="12" max="120">
+
+  <label>Maximum Font Size - {{ vis.params.maxFontSize }}px</label>
+  <input type="range" ng-model="vis.params.maxFontSize" class="form-control" min="12" max="120">
+
+
+</div>
