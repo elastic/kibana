@@ -1,4 +1,5 @@
 import expect from 'expect.js';
+import { reject } from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
@@ -29,7 +30,7 @@ describe('Field', function () {
   });
 
   describe('getFieldOptions', function () {
-    it('should return only aggregatable fields', function () {
+    it('should return only aggregatable fields by default', function () {
       const aggParam = new FieldAggParam({
         name: 'field'
       });
@@ -37,12 +38,13 @@ describe('Field', function () {
       const fields = aggParam.getFieldOptions({
         getIndexPattern: () => indexPattern
       });
+      expect(fields).to.not.have.length(0);
       for (let field of fields) {
         expect(field.aggregatable).to.be(true);
       }
     });
 
-    it('should return all fields', function () {
+    it('should return all fields if onlyAggregatable is false', function () {
       const aggParam = new FieldAggParam({
         name: 'field'
       });
@@ -52,13 +54,8 @@ describe('Field', function () {
       const fields = aggParam.getFieldOptions({
         getIndexPattern: () => indexPattern
       });
-      let nAggregatable = 0;
-      for (let field of fields) {
-        if (field.aggregatable) {
-          nAggregatable++;
-        }
-      }
-      expect(fields.length - nAggregatable > 0).to.be(true);
+      const nonAggregatableFields = reject(fields, 'aggregatable');
+      expect(nonAggregatableFields).to.not.be.empty();
     });
   });
 });
