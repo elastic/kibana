@@ -8,6 +8,8 @@ import getComputedFields from 'ui/index_patterns/_get_computed_fields';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import initDefaultFieldProps from '../core_plugins/kibana/server/lib/init_default_field_props';
+
 export default function (Private) {
   let fieldFormats = Private(RegistryFieldFormatsProvider);
   let flattenHit = Private(IndexPatternsFlattenHitProvider);
@@ -42,7 +44,7 @@ export default function (Private) {
       this.fields = new IndexedArray({
         index: ['name'],
         group: ['type'],
-        initialSet: fields.map(function (field) {
+        initialSet: initDefaultFieldProps(fields).map(function (field) {
           return new Field(this, field);
         }, this)
       });
