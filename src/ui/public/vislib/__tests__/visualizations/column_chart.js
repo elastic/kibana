@@ -8,7 +8,7 @@ import series from 'fixtures/vislib/mock_data/date_histogram/_series';
 import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
 import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
 import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
-//const histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
+import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
@@ -20,7 +20,7 @@ const dataTypesArray = [
   ['series with positive and negative values', 'stacked', seriesPosNeg],
   ['series with negative values', 'stacked', seriesNeg],
   ['terms columns', 'grouped', termsColumns],
-  // ['histogram rows', 'percentage', histogramRows],
+  ['histogram rows', 'percentage', histogramRows],
   ['stackedSeries', 'stacked', stackedSeries],
 ];
 
@@ -116,12 +116,12 @@ dataTypesArray.forEach(function (dataType, i) {
         };
       }
 
-      it('should attach the brush if data is a set of ordered dates', function () {
+      it('should attach the brush if data is a set is ordered', function () {
         vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
           const ordered = vis.handler.data.get('ordered');
-          const date = Boolean(ordered && ordered.date);
-          expect(has.brush).to.be(date);
+          const allowBrushing = Boolean(ordered);
+          expect(has.brush).to.be(allowBrushing);
         });
       });
 

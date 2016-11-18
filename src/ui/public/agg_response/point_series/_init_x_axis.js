@@ -7,6 +7,9 @@ define(function () {
 
       if (!x.agg || !x.agg.type.ordered) return;
 
+      chart.indexPattern = x.agg.vis.indexPattern;
+      chart.xAxisField = x.agg.params.field;
+
       chart.ordered = {};
       let xAggOutput = x.agg.write();
       if (xAggOutput.params.interval) {
