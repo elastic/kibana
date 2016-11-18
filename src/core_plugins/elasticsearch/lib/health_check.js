@@ -15,26 +15,25 @@ const NO_INDEX = 'no_index';
 const INITIALIZING = 'initializing';
 const READY = 'ready';
 
-const REQUEST_DELAY = 2500;
-
 module.exports = function (plugin, server) {
   const config = server.config();
-  const adminClient = server.plugins.elasticsearch.adminClient;
-  const dataClient = server.plugins.elasticsearch.dataClient;
+  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callAsKibanaUser;
+  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callAsKibanaUser;
+  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(client, url) {
-    return client.ping().catch(function (err) {
+  function waitForPong(callAsKibanaUser, url) {
+    return callAsKibanaUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, client, url));
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callAsKibanaUser, url));
     });
   }
 
   // just figure out the current "health" of the es setup
   function getHealth() {
-    return adminClient.cluster.health({
+    return callAdminAsKibanaUser('cluster.health', {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
@@ -86,12 +85,13 @@ module.exports = function (plugin, server) {
 
   function check() {
     const healthChecks = [
-      waitForPong(adminClient, config.get('elasticsearch.url'))
+      waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(() => {
         // execute version and tribe checks in parallel
         // but always report the version check result first
-        const versionPromise = checkEsVersion(server, kibanaVersion.get(), adminClient);
-        const tribePromise = checkForTribe(adminClient);
+        const versionPromise = checkEsVersion(server, kibanaVersion.get(), callAdminAsKibanaUser);
+        const tribePromise = checkForTribe(callAdminAsKibanaUser);
+
         return versionPromise.then(() => tribePromise);
       })
       .then(waitForShards)
@@ -101,8 +101,8 @@ module.exports = function (plugin, server) {
     const tribeUrl = config.get('elasticsearch.tribe.url');
     if (tribeUrl) {
       healthChecks.push(
-        waitForPong(dataClient, tribeUrl)
-        .then(() => checkEsVersion(server, kibanaVersion.get(), dataClient))
+        waitForPong(callDataAsKibanaUser, tribeUrl)
+        .then(() => checkEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser))
       );
     }
 

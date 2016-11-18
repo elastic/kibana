@@ -9,29 +9,15 @@ describe('plugins/elasticsearch', function () {
 
     let request;
 
-    function stubServer(settings) {
-      const values = defaults(settings || {}, {
-        'elasticsearch.url': 'http://localhost:9200',
-        'elasticsearch.requestHeadersWhitelist': ['authorization'],
-        'elasticsearch.customHeaders': {}
+    function stubCluster(settings) {
+      settings = defaults(settings || {}, {
+        url: 'http://localhost:9200',
+        requestHeadersWhitelist: ['authorization'],
+        customHeaders: {}
       });
-      const config = { get: (key, def) => get(values, key, def) };
 
       return {
-        config: () => config
-      };
-    }
-
-    function stubClient(server) {
-      let es = url.parse(server.config().get('elasticsearch.url'));
-      es.host = es.hostname;
-
-      return {
-        transport: {
-          _config: {
-            host: es
-          }
-        }
+        config: settings
       };
     }
 
@@ -51,34 +37,34 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('sends custom headers if set', function () {
-      const server = stubServer({
-        'elasticsearch.customHeaders': { foo: 'bar' }
-      });
+      const settings = {
+        customHeaders: { foo: 'bar' }
+      };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('foo', 'bar');
       });
     });
 
     it('sends configured custom headers even if the same named header exists in request', function () {
-      const server = stubServer({
-        'elasticsearch.requestHeadersWhitelist': ['x-my-custom-header'],
-        'elasticsearch.customHeaders': {'x-my-custom-header': 'asconfigured'}
-      });
+      const settings = {
+        requestHeadersWhitelist: ['x-my-custom-header'],
+        customHeaders: {'x-my-custom-header': 'asconfigured'}
+      };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('x-my-custom-header', 'asconfigured');
       });
     });
 
     it('only proxies the whitelisted request headers', function () {
-      const server = stubServer({
-        'elasticsearch.requestHeadersWhitelist': ['x-my-custom-HEADER', 'Authorization'],
-      });
+      const settings = {
+        requestHeadersWhitelist: ['x-my-custom-HEADER', 'Authorization'],
+      };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('authorization');
         expect(upstreamHeaders).to.have.property('x-my-custom-header');
@@ -87,24 +73,24 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('proxies no headers if whitelist is set to []', function () {
-      const server = stubServer({
-        'elasticsearch.requestHeadersWhitelist': [],
-      });
+      const settings = {
+        requestHeadersWhitelist: [],
+      };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(Object.keys(upstreamHeaders).length).to.be(0);
       });
     });
 
     it('proxies no headers if whitelist is set to no value', function () {
-      const server = stubServer({
+      const settings = {
         // joi converts `elasticsearch.requestHeadersWhitelist: null` into
         // an array with a null inside because of the `array().single()` rule.
-        'elasticsearch.requestHeadersWhitelist': [ null ],
-      });
+        requestHeadersWhitelist: [ null ],
+      };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(Object.keys(upstreamHeaders).length).to.be(0);
       });
@@ -112,9 +98,8 @@ describe('plugins/elasticsearch', function () {
 
     it('strips the /elasticsearch prefix from the path', () => {
       request.path = '/elasticsearch/es/path';
-      const server = stubServer();
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('http://localhost:9200/es/path');
       });
@@ -122,9 +107,9 @@ describe('plugins/elasticsearch', function () {
 
     it('extends the es.url path', function () {
       request.path = '/elasticsearch/index/type';
-      const server = stubServer({ 'elasticsearch.url': 'https://localhost:9200/base-path' });
+      const settings = { url: 'https://localhost:9200/base-path' };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('https://localhost:9200/base-path/index/type');
       });
@@ -133,9 +118,9 @@ describe('plugins/elasticsearch', function () {
     it('extends the es.url query string', function () {
       request.path = '/elasticsearch/*';
       request.query = { foo: 'bar' };
-      const server = stubServer({ 'elasticsearch.url': 'https://localhost:9200/?base=query' });
+      const settings = { url: 'https://localhost:9200/?base=query' };
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('https://localhost:9200/*?foo=bar&base=query');
       });
@@ -144,9 +129,8 @@ describe('plugins/elasticsearch', function () {
     it('filters the _ querystring param', function () {
       request.path = '/elasticsearch/*';
       request.query = { _: Date.now() };
-      const server = stubServer();
 
-      mapUri(server, stubClient(server), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('http://localhost:9200/*');
       });

@@ -66,13 +66,13 @@ export default function setupSettings(kbnServer, server, config) {
 
   async function getUserProvided(req, { ignore401Errors = false } = {}) {
     assertRequest(req);
-    const { callAdminWithRequest, errors } = server.plugins.elasticsearch;
+    const { callWithRequest, errors } = server.plugins.elasticsearch.getCluster('admin');
 
     const params = getClientSettings(config);
     const allowedErrors = [errors[404], errors[403], errors.NoConnections];
     if (ignore401Errors) allowedErrors.push(errors[401]);
 
-    return Bluebird.resolve(callAdminWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
+    return Bluebird.resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
       .catch(...allowedErrors, err => ({}))
       .then(resp => resp._source || {})
       .then(source => hydrateUserSettings(source));
@@ -80,12 +80,12 @@ export default function setupSettings(kbnServer, server, config) {
 
   async function setMany(req, changes) {
     assertRequest(req);
-    const { callAdminWithRequest } = server.plugins.elasticsearch;
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
     const clientParams = {
       ...getClientSettings(config),
       body: { doc: changes }
     };
-    return callAdminWithRequest(req, 'update', clientParams)
+    return callWithRequest(req, 'update', clientParams)
       .then(() => ({}));
   }
 

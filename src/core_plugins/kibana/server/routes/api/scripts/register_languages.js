@@ -6,7 +6,7 @@ export function registerLanguages(server) {
     path: '/api/kibana/scripts/languages',
     method: 'GET',
     handler: function (request, reply) {
-      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const callWithRequest = server.plugins.elasticsearch.getCluster('data').callWithRequest;
 
       return callWithRequest(request, 'cluster.getSettings', {
         include_defaults: true,

@@ -16,7 +16,7 @@ export function registerSimulate(server) {
       }
     },
     handler: function (request, reply) {
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, request);
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.getCluster('data').callWithRequest, request);
       const simulateApiDocument = request.payload;
       const body = ingestSimulateApiKibanaToEsConverter(simulateApiDocument);
 

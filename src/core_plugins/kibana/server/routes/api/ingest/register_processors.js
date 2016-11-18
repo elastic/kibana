@@ -8,7 +8,7 @@ export function registerProcessors(server) {
     path: '/api/kibana/ingest/processors',
     method: 'GET',
     handler: function (request, reply) {
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, request);
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.getCluster('data').callWithRequest, request);
 
       return boundCallWithRequest('transport.request', {
         path: '/_nodes/ingest',

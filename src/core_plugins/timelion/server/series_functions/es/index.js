@@ -61,7 +61,7 @@ module.exports = new Datasource('es', {
       fit: 'nearest'
     });
 
-    var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
+    var callWithRequest = tlConfig.server.plugins.elasticsearch.getCluster('data').callWithRequest;
 
     var body = buildRequest(config, tlConfig);
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {

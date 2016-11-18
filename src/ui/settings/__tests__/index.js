@@ -335,9 +335,9 @@ describe('ui settings', function () {
 });
 
 function expectElasticsearchGetQuery(server, req, configGet) {
-  const { callAdminWithRequest } = server.plugins.elasticsearch;
-  sinon.assert.calledOnce(callAdminWithRequest);
-  const [reqPassed, method, params] = callAdminWithRequest.args[0];
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  sinon.assert.calledOnce(callWithRequest);
+  const [reqPassed, method, params] = callWithRequest.args[0];
   expect(reqPassed).to.be(req);
   expect(method).to.be('get');
   expect(params).to.eql({
@@ -348,9 +348,9 @@ function expectElasticsearchGetQuery(server, req, configGet) {
 }
 
 function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
-  const { callAdminWithRequest } = server.plugins.elasticsearch;
-  sinon.assert.calledOnce(callAdminWithRequest);
-  const [reqPassed, method, params] = callAdminWithRequest.args[0];
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  sinon.assert.calledOnce(callWithRequest);
+  const [reqPassed, method, params] = callWithRequest.args[0];
   expect(reqPassed).to.be(req);
   expect(method).to.be('update');
   expect(params).to.eql({
@@ -379,27 +379,37 @@ function instantiate({ getResult, callWithRequest } = {}) {
     },
     ready: sinon.stub().returns(Promise.resolve())
   };
+
   const req = { __stubHapiRequest: true, path: '', headers: {} };
+
+  const adminCluster = {
+    errors: esErrors,
+    callAsKibanaUser: sinon.stub(),
+    callWithRequest: sinon.spy((withReq, method, params) => {
+      if (callWithRequest) {
+        return callWithRequest(withReq, method, params);
+      }
+
+      expect(withReq).to.be(req);
+      switch (method) {
+        case 'get':
+          return Promise.resolve({ _source: getResult });
+        case 'update':
+          return Promise.resolve();
+        default:
+          throw new Error(`callWithRequest() is using unexpected method "${method}"`);
+      }
+    })
+  };
+
+  adminCluster.callAsKibanaUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
+  adminCluster.callAsKibanaUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
+
   const server = {
     decorate: (_, key, value) => server[key] = value,
     plugins: {
       elasticsearch: {
-        errors: esErrors,
-        callAdminWithRequest: sinon.spy((withReq, method, params) => {
-          if (callWithRequest) {
-            return callWithRequest(withReq, method, params);
-          }
-
-          expect(withReq).to.be(req);
-          switch (method) {
-            case 'get':
-              return Promise.resolve({ _source: getResult });
-            case 'update':
-              return Promise.resolve();
-            default:
-              throw new Error(`callWithRequest() is using unexpected method "${method}"`);
-          }
-        })
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
       }
     }
   };
