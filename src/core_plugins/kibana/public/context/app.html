@@ -1,0 +1,32 @@
+<div class="app-container">
+  <kbn-top-nav name="context" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <div data-transclude-slot="topLeftCorner" class="localBreadcrumbs">
+        <div class="localBreadcrumb">
+          <span class="localBreadcrumb">Context</span>
+          <span ng-bind="contextApp.indexPattern.id" class="localBreadcrumb"></span>
+          <span ng-bind="contextApp.anchorUid" class="localBreadcrumb"></span>
+        </div>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="container-fluid" role="main">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="discover-table" fixed-scroll>
+          <doc-table
+            hits="contextApp.rows"
+            index-pattern="contextApp.indexPattern"
+            sorting="contextApp.sort"
+            columns="contextApp.columns"
+            infinite-scroll="true"
+          >
+          </doc-table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

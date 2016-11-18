@@ -35,7 +35,8 @@
         sorting="sorting"
         index-pattern="indexPattern"
         filter="filter"
-        class="discover-table-row"></tr>
+        class="discover-table-row"
+        ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"></tr>
     </tbody>
   </table>
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
