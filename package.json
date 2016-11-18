@@ -168,6 +168,7 @@
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.8",
     "chai": "3.5.0",
+    "cheerio": "0.22.0",
     "chokidar": "1.6.0",
     "chromedriver": "2.24.1",
     "elasticdump": "2.1.1",
