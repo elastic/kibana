@@ -11,6 +11,12 @@ export function visualizationLoaderProvider(savedVisualizations, Private) { // I
       // $scope.state comes via $scope inheritence from the dashboard app. Don't love this.
       savedVis.vis.listeners.click = filterBarClickHandler($scope.state);
       savedVis.vis.listeners.brush = brushEvent($scope.state);
+      savedVis.vis.getFilters = function () {
+        return savedVis.searchSource.getOwn('filter');
+      };
+      savedVis.vis.getQuery = function () {
+        return savedVis.searchSource.getOwn('query');
+      };
 
       return {
         savedObj: savedVis,

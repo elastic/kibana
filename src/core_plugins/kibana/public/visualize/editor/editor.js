@@ -201,6 +201,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
     editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
+    savedVis.vis.getFilters = function () {
+      return $state.filters;
+    };
+    savedVis.vis.getQuery = function () {
+      return $state.query;
+    };
 
     // track state of editable vis vs. "actual" vis
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
