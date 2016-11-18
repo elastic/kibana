@@ -9,7 +9,7 @@ module.exports = function (server, esIsTribe) {
   const config = server.config();
   const esPlugins = server.plugins.elasticsearch;
 
-  class ElasticsearchAdminClientLogging {
+  class ElasticsearchDataClientLogging {
     error(err) {
       server.log(['error', 'elasticsearch', 'data'], err);
     }
@@ -27,7 +27,7 @@ module.exports = function (server, esIsTribe) {
       {},
       config.get('elasticsearch'),
       config.get('elasticsearch.tribe'),
-      { log: ElasticsearchAdminClientLogging },
+      { log: ElasticsearchDataClientLogging },
       options
     );
 
@@ -40,7 +40,7 @@ module.exports = function (server, esIsTribe) {
   const noAuthClient = createClientWithConfig({ auth: false });
   server.on('close', bindKey(noAuthClient, 'close'));
 
-  server.expose('ElasticsearchAdminClientLogging', ElasticsearchAdminClientLogging);
+  server.expose('ElasticsearchDataClientLogging', ElasticsearchDataClientLogging);
   server.expose('dataClient', client);
   server.expose('createDataClient', createClientWithConfig);
   server.expose('callDataWithRequestFactory', partial(callWithRequest, server));
@@ -50,7 +50,7 @@ module.exports = function (server, esIsTribe) {
   server.expose('errors', elasticsearch.errors);
 
   // maintain backwards compatability?
-  server.expose('ElasticsearchClientLogging', esPlugins.ElasticsearchClientLogging);
+  server.expose('ElasticsearchClientLogging', esPlugins.ElasticsearchDataClientLogging);
   server.expose('client', esPlugins.dataClient);
   server.expose('createClient', esPlugins.createDataClient);
   server.expose('callWithRequestFactory', esPlugins.callDataWithRequestFactory);
