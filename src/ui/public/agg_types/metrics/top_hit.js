@@ -103,13 +103,31 @@ export default function AggTypeMetricTopProvider(Private) {
           { display: 'Ascending', val: 'asc' }
         ],
         write(agg, output) {
-          output.params.sort = [
-            {
-              [ agg.params.sortField.name ]: {
-                order: agg.params.sortOrder.val
+          const sortField = agg.params.sortField;
+          const sortOrder = agg.params.sortOrder;
+
+          if (sortField.scripted) {
+            output.params.sort = [
+              {
+                _script: {
+                  script: {
+                    inline: sortField.script,
+                    lang: sortField.lang
+                  },
+                  type: sortField.type,
+                  order: sortOrder.val
+                }
               }
-            }
-          ];
+            ];
+          } else {
+            output.params.sort = [
+              {
+                [ sortField.name ]: {
+                  order: sortOrder.val
+                }
+              }
+            ];
+          }
         }
       }
     ]
