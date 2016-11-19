@@ -86,6 +86,11 @@ uiModules
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
             fields = $aggParamEditorsScope.indexedFields;
+            $aggParamEditorsScope.showAnalyzedWarning = true;
+            if (!_.isUndefined(param.showAnalyzedWarning) && !param.showAnalyzedWarning) {
+              // if not explicitly set, always show the warning about analyzed field
+              $aggParamEditorsScope.showAnalyzedWarning = false;
+            }
           } else if (param.type === 'field') {
             fields = $aggParamEditorsScope[`${param.name}Options`] = param.getFieldOptions($scope.agg);
           }

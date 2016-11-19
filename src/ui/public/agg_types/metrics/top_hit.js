@@ -53,6 +53,7 @@ export default function AggTypeMetricTopProvider(Private) {
       {
         name: 'field',
         onlyAggregatable: false,
+        showAnalyzedWarning: false,
         filterFieldTypes: function (vis, value) {
           if (vis.type.name === 'table' || vis.type.name === 'metric') {
             return true;
