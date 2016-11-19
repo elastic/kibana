@@ -113,6 +113,21 @@ export default class Common {
           return self.remote.refresh();
         })
         .then(function () {
+          self.debug('check testStatusPage');
+          if (testStatusPage !== false) {
+            self.debug('self.checkForKibanaApp()');
+            return self.checkForKibanaApp()
+            .then(function (kibanaLoaded) {
+              self.debug('kibanaLoaded = ' + kibanaLoaded);
+              if (!kibanaLoaded) {
+                var msg = 'Kibana is not loaded, retrying';
+                self.debug(msg);
+                throw new Error(msg);
+              }
+            });
+          }
+        })
+        .then(function () {
           return self.remote.getCurrentUrl();
         })
         .then(function (currentUrl) {
@@ -204,6 +219,37 @@ export default class Common {
       }, 10);
     }).then(function () {
       return self.remote.execute(fn);
+    });
+  }
+
+  getApp() {
+    var self = this;
+
+    return self.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('.app-wrapper .application')
+    .then(function () {
+      return self.runScript(function () {
+        var $ = window.$;
+        var $scope = $('.app-wrapper .application').scope();
+        return $scope ? $scope.chrome.getApp() : {};
+      });
+    });
+  }
+
+  checkForKibanaApp() {
+    var self = this;
+
+    return self.getApp()
+    .then(function (app) {
+      var appId = app.id;
+      self.debug('current application: ' + appId);
+      return appId === 'kibana';
+    })
+    .catch(function (err) {
+      self.debug('kibana check failed');
+      self.debug(err);
+      // not on the kibana app...
+      return false;
     });
   }
 
