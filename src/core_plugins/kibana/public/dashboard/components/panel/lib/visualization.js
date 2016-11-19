@@ -12,10 +12,20 @@ export function visualizationLoaderProvider(savedVisualizations, Private) { // I
       savedVis.vis.listeners.click = filterBarClickHandler($scope.state);
       savedVis.vis.listeners.brush = brushEvent($scope.state);
       savedVis.vis.getFilters = function () {
-        return savedVis.searchSource.getOwn('filter');
+        if (!savedVis.savedSearchId) {
+          return savedVis.searchSource.getOwn('filter');
+        } else {
+          const parent = savedVis.searchSource.getParent(true);
+          return [...savedVis.searchSource.getOwn('filter'), ...parent.getOwn('filter')];
+        }
       };
       savedVis.vis.getQuery = function () {
-        return savedVis.searchSource.getOwn('query');
+        if (!savedVis.savedSearchId) {
+          return savedVis.searchSource.getOwn('query');
+        } else {
+          const parent = savedVis.searchSource.getParent(true);
+          return parent.getOwn('query');
+        }
       };
 
       return {

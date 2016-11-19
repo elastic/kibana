@@ -202,10 +202,20 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
     editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
     savedVis.vis.getFilters = function () {
-      return $state.filters;
+      if (!$state.linked) {
+        return $state.filters;
+      } else {
+        const parent = searchSource.getParent(true);
+        return [...searchSource.getOwn('filter'), ...parent.getOwn('filter'), ...$state.filters];
+      }
     };
     savedVis.vis.getQuery = function () {
-      return $state.query;
+      if (!$state.linked) {
+        return $state.query;
+      } else {
+        const parent = searchSource.getParent(true);
+        return parent.getOwn('query');
+      }
     };
 
     // track state of editable vis vs. "actual" vis
