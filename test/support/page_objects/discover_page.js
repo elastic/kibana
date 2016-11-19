@@ -57,20 +57,17 @@ export default class DiscoverPage {
   }
 
   clickNewSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="New Search"]')
+    return PageObjects.common.findTestSubject('discoverNewButton')
     .click();
   }
 
   clickSaveSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Save Search"]')
+    return PageObjects.common.findTestSubject('discoverSaveButton')
     .click();
   }
 
   clickLoadSavedSearchButton() {
-    return this.findTimeout
-    .findDisplayedByCssSelector('[aria-label="Load Saved Search"]')
+    return PageObjects.common.findTestSubject('discoverOpenButton')
     .click();
   }
 
@@ -192,8 +189,7 @@ export default class DiscoverPage {
   }
 
   clickShare() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Share Search"]')
+    return PageObjects.common.findTestSubject('discoverShareButton')
     .click();
   }
 
