@@ -28,7 +28,6 @@ require('ui/saved_objects/saved_object_registry').register(require('plugins/time
 
 // TODO: Expose an api for dismissing notifications
 var unsafeNotifications = require('ui/notify')._notifs;
-//var ConfigTemplate = require('ui/config_template');
 
 require('ui/routes').enable();
 
@@ -67,27 +66,33 @@ app.controller('timelion', function (
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Sheet',
-    run: function () { kbnUrl.change('/'); }
+    run: function () { kbnUrl.change('/'); },
+    testId: 'timelionNewButton',
   }, {
     key: 'add',
     description: 'Add a chart',
-    run: function () { $scope.newCell(); }
+    run: function () { $scope.newCell(); },
+    testId: 'timelionAddChartButton',
   }, {
     key: 'save',
     description: 'Save Sheet',
-    template: require('plugins/timelion/partials/save_sheet.html')
+    template: require('plugins/timelion/partials/save_sheet.html'),
+    testId: 'timelionSaveButton',
   }, {
     key: 'open',
-    description: 'Load Sheet',
-    template: require('plugins/timelion/partials/load_sheet.html')
+    description: 'Open Sheet',
+    template: require('plugins/timelion/partials/load_sheet.html'),
+    testId: 'timelionOpenButton',
   }, {
     key: 'options',
     description: 'Options',
-    template: require('plugins/timelion/partials/sheet_options.html')
+    template: require('plugins/timelion/partials/sheet_options.html'),
+    testId: 'timelionOptionsButton',
   }, {
     key: 'docs',
     description: 'Documentation',
-    template: '<timelion-docs></timelion-docs>'
+    template: '<timelion-docs></timelion-docs>',
+    testId: 'timelionDocsButton',
   }];
 
 
