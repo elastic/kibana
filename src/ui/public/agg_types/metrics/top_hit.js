@@ -1,48 +1,13 @@
 import _ from 'lodash';
-import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
+import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
 
 export default function AggTypeMetricTopProvider(Private) {
-  const AggType = Private(AggTypesAggTypeProvider);
+  const MetricAggType = Private(MetricAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
-  _.class(TopHitAggType).inherits(AggType);
-  function TopHitAggType(config) {
-    TopHitAggType.Super.call(this, config);
-  }
-
-  TopHitAggType.prototype.getValue = function (agg, bucket) {
-    const hits = _.get(bucket, `${agg.id}.hits.hits`);
-    if (!hits || !hits.length) {
-      return null;
-    }
-    const path = agg.params.field.name;
-    let values = agg.vis.indexPattern.formatField(hits[0], path);
-    if (!_.isArray(values)) {
-      values = [ values ];
-    }
-
-    if (!values.length && hits[0].fields) {
-      // no values found in the source, check the doc_values fields
-      values = hits[0].fields[path] || [];
-    }
-
-    switch (values.length) {
-      case 0:
-        return null;
-      case 1:
-        return _.isObject(values[0]) ? JSON.stringify(values[0], null, ' ') : values [0];
-      default:
-        return JSON.stringify(values, null, ' ');
-    }
-  };
-
-  TopHitAggType.prototype.getFormat = function (agg) {
-    return fieldFormats.getDefaultInstance('string');
-  };
-
-  return new TopHitAggType({
+  return new MetricAggType({
     name: 'top_hits',
     title: 'Top Hit',
     makeLabel: function (aggConfig) {
@@ -87,7 +52,7 @@ export default function AggTypeMetricTopProvider(Private) {
         name: 'sortField',
         type: 'field',
         editor: null,
-        filterFieldTypes: ['number', 'date', 'ip',  'string'],
+        filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
         default: function (agg) {
           return agg.vis.indexPattern.timeFieldName;
         },
@@ -130,6 +95,24 @@ export default function AggTypeMetricTopProvider(Private) {
           }
         }
       }
-    ]
+    ],
+    getValue(agg, bucket) {
+      const hits = _.get(bucket, `${agg.id}.hits.hits`);
+      if (!hits || !hits.length) {
+        return null;
+      }
+      const path = agg.params.field.name;
+      let values = agg.vis.indexPattern.flattenHit(hits[0])[path];
+
+      if ((values === '' || values === null || values === undefined) && hits[0].fields) {
+        // no values found in the source, check the doc_values fields
+        values = hits[0].fields[path] || [];
+        if (!values.length) {
+          return null;
+        }
+      }
+
+      return values;
+    }
   });
 };

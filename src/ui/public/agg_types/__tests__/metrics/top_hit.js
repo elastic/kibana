@@ -88,7 +88,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
     });
 
-    it ('should return null if the field has no value', function () {
+    it ('should return undefined if the field does not appear in the source', function () {
       const bucket = {
         '1': {
           hits: {
@@ -104,7 +104,7 @@ describe('Top hit metric', function () {
       };
 
       init({ field: '@tags' });
-      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(undefined);
     });
 
     it ('should return the field value from the top hit', function () {
@@ -126,7 +126,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be('aaa');
     });
 
-    it ('should return a stringified representation of the field value if it is an object', function () {
+    it ('should return the object if the field value is an object', function () {
       const bucket = {
         '1': {
           hits: {
@@ -144,10 +144,10 @@ describe('Top hit metric', function () {
       };
 
       init({ field: '@tags' });
-      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(JSON.stringify({ label: 'aaa' }, null, ' '));
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.eql({ label: 'aaa' });
     });
 
-    it ('should return a stringified representation of the field if it has more than one values', function () {
+    it ('should return an array if the field has more than one values', function () {
       const bucket = {
         '1': {
           hits: {
@@ -163,7 +163,50 @@ describe('Top hit metric', function () {
       };
 
       init({ field: '@tags' });
-      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(JSON.stringify([ 'aaa', 'bbb' ], null, ' '));
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.eql([ 'aaa', 'bbb' ]);
+    });
+
+    it ('should get the value from the doc_values field if the source does not have that field', function () {
+      const bucket = {
+        '1': {
+          hits: {
+            hits: [
+              {
+                _source: {
+                },
+                fields: {
+                  'machine.os': [ 'linux' ]
+                }
+              }
+            ]
+          }
+        }
+      };
+
+      init({ field: 'machine.os' });
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.be('linux');
+    });
+
+    it ('should return null if the field is not in the source nor in the doc_values field', function () {
+      const bucket = {
+        '1': {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  nope: 'aaa'
+                },
+                fields: {
+                  nope: [ 'aaa' ]
+                }
+              }
+            ]
+          }
+        }
+      };
+
+      init({ field: 'machine.os' });
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
     });
   });
 });
