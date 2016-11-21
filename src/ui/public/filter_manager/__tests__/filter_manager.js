@@ -120,7 +120,8 @@ describe('Filter Manager', function () {
       meta: {index: 'myIndex', negate: false, field: 'scriptedField'},
       script: {
         script: {
-          inline: '(' + scriptedField.script + ') == params.value',
+          inline: `boolean compare(Supplier s, def v) {return s.get() == v;}
+                        compare(() -> { ${scriptedField.script} }, params.value);`,
           lang: scriptedField.lang,
           params: {value: 1}
         }

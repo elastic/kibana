@@ -3,9 +3,6 @@ export default function buildPhraseFilter(field, value, indexPattern) {
   let filter = { meta: { index: indexPattern.id} };
 
   if (field.scripted) {
-    // painless expects params.value while groovy and expression languages expect value.
-    const valueClause = field.lang === 'painless' ? 'params.value' : 'value';
-
     // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
     // for the reason behind this change. ES doesn't handle boolean types very well, so they come
     // back as strings.
@@ -17,8 +14,15 @@ export default function buildPhraseFilter(field, value, indexPattern) {
       convertedValue = value === 'true' ? true : false;
     }
 
+    // We must wrap painless scripts in a lambda in case they're more than a simple expression
+    let script = `(${field.script}) == value`;
+    if (field.lang === 'painless') {
+      script = `boolean compare(Supplier s, def v) {return s.get() == v;}
+                compare(() -> { ${field.script} }, params.value);`;
+    }
+
     _.set(filter, 'script.script', {
-      inline: '(' + field.script + ') == ' + valueClause,
+      inline: script,
       lang: field.lang,
       params: {
         value: convertedValue

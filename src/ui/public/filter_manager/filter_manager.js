@@ -54,13 +54,17 @@ export default function (Private) {
           break;
         default:
           if (field.scripted) {
-            // painless expects params.value while groovy and expression languages expect value.
-            const valueClause = field.lang === 'painless' ? 'params.value' : 'value';
+            // We must wrap painless scripts in a lambda in case they're more than a simple expression
+            let script = `(${field.script}) == value`;
+            if (field.lang === 'painless') {
+              script = `boolean compare(Supplier s, def v) {return s.get() == v;}
+                        compare(() -> { ${field.script} }, params.value);`;
+            }
             filter = {
               meta: { negate: negate, index: index, field: fieldName },
               script: {
                 script: {
-                  inline: '(' + field.script + ') == ' + valueClause,
+                  inline: script,
                   lang: field.lang,
                   params: {
                     value: value
