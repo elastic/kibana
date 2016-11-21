@@ -2,6 +2,7 @@ import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';
+import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
@@ -10,9 +11,6 @@ import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 
 export default async (kbnServer, server, config) => {
-
-  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
-
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
@@ -42,20 +40,23 @@ export default async (kbnServer, server, config) => {
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
-  server.exposeStaticFile('/loading.gif', resolve(__dirname, 'public/loading.gif'));
 
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    handler: function (req, reply) {
+    async handler(req, reply) {
       const id = req.params.id;
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
-      if (kbnServer.status.isGreen()) {
-        return reply.renderApp(app);
-      } else {
-        return reply.renderStatusPage();
+      try {
+        if (kbnServer.status.isGreen()) {
+          await reply.renderApp(app);
+        } else {
+          await reply.renderStatusPage();
+        }
+      } catch (err) {
+        reply(Boom.wrap(err));
       }
     }
   });
@@ -74,30 +75,35 @@ export default async (kbnServer, server, config) => {
         defaults: await server.uiSettings().getDefaults(),
         user: {}
       },
-      vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
+      vars: await reduceAsync(
+        uiExports.injectedVarsReplacers,
+        async (acc, replacer) => await replacer(acc, this.request, server),
+        defaults(await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
+      )
     };
   }
 
   function viewAppWithPayload(app, payload) {
     return this.view(app.templateName, {
       app: app,
-      loadingGif: loadingGif,
       kibanaPayload: payload,
       bundlePath: `${config.get('server.basePath')}/bundles`,
     });
   }
 
   async function renderApp(app) {
-    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
-    const payload = await getPayload(app);
-    if (!isElasticsearchPluginRed) {
+    const payload = await getPayload.call(this, app);
+
+    const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+    if (esStatus && esStatus.state !== 'red') {
       payload.uiSettings.user = await server.uiSettings().getUserProvided();
     }
+
     return viewAppWithPayload.call(this, app, payload);
   }
 
   async function renderAppWithDefaultConfig(app) {
-    const payload = await getPayload(app);
+    const payload = await getPayload.call(this, app);
     return viewAppWithPayload.call(this, app, payload);
   }
 

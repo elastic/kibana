@@ -115,19 +115,23 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Search',
-    run: function () { kbnUrl.change('/discover'); }
+    run: function () { kbnUrl.change('/discover'); },
+    testId: 'discoverNewButton',
   }, {
     key: 'save',
     description: 'Save Search',
-    template: require('plugins/kibana/discover/partials/save_search.html')
+    template: require('plugins/kibana/discover/partials/save_search.html'),
+    testId: 'discoverSaveButton',
   }, {
     key: 'open',
-    description: 'Load Saved Search',
-    template: require('plugins/kibana/discover/partials/load_search.html')
+    description: 'Open Saved Search',
+    template: require('plugins/kibana/discover/partials/load_search.html'),
+    testId: 'discoverOpenButton',
   }, {
     key: 'share',
     description: 'Share Search',
-    template: require('plugins/kibana/discover/partials/share_search.html')
+    template: require('plugins/kibana/discover/partials/share_search.html'),
+    testId: 'discoverShareButton',
   }];
   $scope.timefilter = timefilter;
 
@@ -542,7 +546,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
           timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
           timefilter.time.mode = 'absolute';
         },
-        brush: brushEvent
+        brush: brushEvent($scope.state)
       },
       aggs: visStateAggs
     });

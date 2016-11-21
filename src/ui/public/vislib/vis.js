@@ -61,7 +61,12 @@ export default function VisFactory(Private) {
 
       if (!this.uiState) {
         this.uiState = uiState;
-        uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
+        this._uiStateChangeHandler = () => {
+          if (document.body.contains(this.el)) {
+            this.render(this.data, this.uiState);
+          }
+        };
+        uiState.on('change', this._uiStateChangeHandler);
       }
 
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);

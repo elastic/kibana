@@ -76,8 +76,10 @@ uiModules
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
       let applyClassNames = function () {
-        let $visEl = getVisContainer();
+        const $visEl = getVisContainer();
         const $spyEl = getSpyContainer();
+        if (!$spyEl) return;
+
         let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
@@ -144,7 +146,9 @@ uiModules
         }
 
         if (oldVis) $scope.renderbot = null;
-        if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        if (vis) {
+          $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        }
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
@@ -164,6 +168,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
+          $scope.vis.emit('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +

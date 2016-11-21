@@ -14,6 +14,7 @@ class UiExports {
     this.consumers = [];
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
+    this.injectedVarsReplacers = [];
   }
 
   consumePlugin(plugin) {
@@ -106,6 +107,11 @@ class UiExports {
           plugin.extendInit(async (server, options) => {
             _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
+        };
+
+      case 'replaceInjectedVars':
+        return (plugin, replacer) => {
+          this.injectedVarsReplacers.push(replacer);
         };
     }
   }

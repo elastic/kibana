@@ -77,7 +77,7 @@ describe('renderbot', function exportWrapper() {
     });
 
     it('should attach listeners and set vislibVis', function () {
-      expect(listenerSpy.callCount).to.be(3);
+      expect(listenerSpy.callCount).to.be(4);
       expect(listenerSpy.calledWith('test', _.noop)).to.be(true);
       expect(renderbot.vislibVis).to.be.a(Vis);
     });
