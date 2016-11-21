@@ -10,7 +10,8 @@ const ORIENTATIONS = {
     return hashCode(tag.text) % 2 * 90;
   },
   'multiple': (tag) => {
-    return (~~(hashCode(tag.text) % 12) * 15) - 90;
+    const hashcode = Math.abs(hashCode(tag.text));
+    return ((hashcode % 12) * 15) - 90;
   }
 };
 const D3_SCALING_FUNCTIONS = {
@@ -297,7 +298,7 @@ function getFill(tag) {
 }
 
 /**
- * Hash a string to a number. Removes random element
+ * Hash a string to a number. Ensures there is no random element in positioning strings
  * Retrieved from http://stackoverflow.com/questions/26057572/string-to-unique-hash-in-javascript-jquery
  * @param string
  */
