@@ -11,7 +11,7 @@ const ORIENTATIONS = {
   },
   'multiple': (tag) => {
     const hashcode = Math.abs(hashCode(tag.text));
-    return ((hashcode % 12) * 15) - 90;
+    return ((hashcode % 12) * 15) - 90;//fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   }
 };
 const D3_SCALING_FUNCTIONS = {

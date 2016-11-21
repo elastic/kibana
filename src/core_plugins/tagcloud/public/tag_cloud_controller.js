@@ -5,8 +5,6 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
-
-
 module.controller('KbnTagCloudController', function ($scope, $element, Private, getAppState) {
 
   const containerNode = $element[0];
@@ -76,7 +74,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
   });
 
 
-  $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
+  $scope.$watch('vis.params', (options) =>tagCloud.setOptions(options));
 
   $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();

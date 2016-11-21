@@ -1,9 +1,9 @@
 import 'plugins/tagcloud/tag_cloud.less';
-import 'plugins/tagcloud/tag_cloud_controller.js';
+import 'plugins/tagcloud/tag_cloud_controller';
+import 'plugins/tagcloud/tag_cloud_vis_params';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
-import tagCloudVisParamsTemplate from 'plugins/tagcloud/tag_cloud_vis_params.html';
 import visTypes from 'ui/registry/vis_types';
 
 visTypes.register(function TagCloudProvider(Private) {
@@ -27,7 +27,7 @@ visTypes.register(function TagCloudProvider(Private) {
       },
       scales: ['linear', 'log', 'square root'],
       orientations: ['single', 'right angled', 'multiple'],
-      editor: tagCloudVisParamsTemplate
+      editor: '<tagcloud-vis-params></tagcloud-vis-params>'
     },
     schemas: new Schemas([
       {
