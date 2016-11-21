@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import rison from 'rison-node';
 import 'ui/highlight';
 import 'ui/highlight/highlight_tags';
 import 'ui/doc_viewer';
@@ -24,7 +25,7 @@ let MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer) {
   let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -86,6 +87,16 @@ module.directive('kbnTableRow', function ($compile) {
       $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
+
+      $scope.getContextAppHref = () => {
+        return `#/context/${$scope.indexPattern.id}/${$scope.row._type}/${$scope.row._id}?${
+          $httpParamSerializer({
+            _a: rison.encode({
+              columns: $scope.columns,
+            }),
+          })
+        }`;
+      };
 
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
