@@ -8,6 +8,6 @@ module.exports = function (plugin, command) {
   var args = ['--dev', '--plugin-path', plugin.root, ...command.unkownOptions];
   execFileSync(cmd, args, {
     cwd: kibanaDir,
-    stdio: 'inherit'
+    stdio: ['ignore', 1, 2]
   });
 };

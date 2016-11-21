@@ -10,7 +10,7 @@ module.exports = function (plugin) {
   var args = ['run', 'test:dev', '--'].concat(kbnServerArgs);
   execFileSync(cmd, args, {
     cwd: plugin.kibanaRoot,
-    stdio: 'inherit'
+    stdio: ['ignore', 1, 2]
   });
 
 };

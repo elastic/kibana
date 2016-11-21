@@ -11,7 +11,7 @@ module.exports = function (plugin) {
   var path = `${kibanaBins}${delimiter}${process.env.PATH}`;
   execFileSync(cmd, args, {
     cwd: plugin.root,
-    stdio: 'inherit',
+    stdio: ['ignore', 1, 2],
     env: Object.assign({}, process.env, {
       PATH: path
     })
