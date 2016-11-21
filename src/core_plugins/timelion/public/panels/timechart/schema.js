@@ -230,15 +230,17 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             return series;
           });
 
-          options.yaxes.forEach(yaxis => {
-            if (yaxis && yaxis.units) {
-              yaxis.tickFormatter = tickFormatters[yaxis.units.type];
-              const byteModes = ['bytes', 'bytes/s'];
-              if (byteModes.includes(yaxis.units.type)) {
-                yaxis.tickGenerator = generateTicks(yaxis);
+          if (options.yaxes) {
+            options.yaxes.forEach(yaxis => {
+              if (yaxis && yaxis.units) {
+                yaxis.tickFormatter = tickFormatters[yaxis.units.type];
+                const byteModes = ['bytes', 'bytes/s'];
+                if (byteModes.includes(yaxis.units.type)) {
+                  yaxis.tickGenerator = generateTicks(yaxis);
+                }
               }
-            }
-          });
+            });
+          }
 
           try {
             $scope.plot = $.plot(canvasElem, _.compact(series), options);
