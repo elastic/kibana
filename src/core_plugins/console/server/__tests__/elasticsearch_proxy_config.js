@@ -91,6 +91,31 @@ describe('plugins/console', function () {
 
         expect(agent.options.checkServerIdentity).to.be(undefined);
       });
+
+      it(`sets ca when certificateAuthorities are specified`, function () {
+        setElasticsearchConfig('ssl.certificateAuthorities', [__dirname + '/fixtures/ca.crt']);
+
+        const { agent } = getElasticsearchProxyConfig(server);
+        expect(agent.options.ca).to.contain('test ca certificate\n');
+      });
+
+      it(`sets cert and key when certificate and key paths are specified`, function () {
+        setElasticsearchConfig('ssl.certificate', __dirname + '/fixtures/cert.crt');
+        setElasticsearchConfig('ssl.key', __dirname + '/fixtures/cert.key');
+
+        const { agent } = getElasticsearchProxyConfig(server);
+        expect(agent.options.cert).to.be('test certificate\n');
+        expect(agent.options.key).to.be('test key\n');
+      });
+
+      it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
+        setElasticsearchConfig('ssl.certificate', __dirname + '/fixtures/cert.crt');
+        setElasticsearchConfig('ssl.key', __dirname + '/fixtures/cert.key');
+        setElasticsearchConfig('ssl.keyPassphrase', 'secret');
+
+        const { agent } = getElasticsearchProxyConfig(server);
+        expect(agent.options.passphrase).to.be('secret');
+      });
     });
   });
 });
