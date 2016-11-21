@@ -15,16 +15,30 @@ uiRoutes
   template: (
     `<context-app
       anchor-uid="contextAppRoute.anchorUid"
-      columns="['_source']"
+      columns="contextAppRoute.state.columns"
       index-pattern="contextAppRoute.indexPattern"
-      size="5"
-      sort="['@timestamp', 'desc']"
+      size="contextAppRoute.state.size"
+      sort="contextAppRoute.state.sort"
     >`
   ),
 });
 
 
-function ContextAppRouteController($routeParams, indexPattern) {
+function ContextAppRouteController($routeParams, $scope, AppState, indexPattern) {
+  this.state = new AppState(createDefaultAppState());
+  $scope.$watchGroup([
+    'contextAppRoute.state.columns',
+    'contextAppRoute.state.size',
+    'contextAppRoute.state.sort',
+  ], () => this.state.save());
   this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
   this.indexPattern = indexPattern;
+}
+
+function createDefaultAppState() {
+  return {
+    columns: ['_source'],
+    size: 5,
+    sort: ['@timestamp', 'desc'],
+  };
 }
