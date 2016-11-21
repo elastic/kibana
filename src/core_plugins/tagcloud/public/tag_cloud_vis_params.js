@@ -18,7 +18,7 @@ uiModules.get('kibana/table_vis')
           connect: true,
           tooltips: true,
           step: 1,
-          range: {'min': 0, 'max': 100},
+          range: {'min': 1, 'max': 100},
           format: {to: (value) => parseInt(value) + 'px', from: value => parseInt(value)}
         });
         slider.noUiSlider.on('change', function () {
