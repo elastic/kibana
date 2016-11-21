@@ -59,7 +59,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     let customInit = config.init || _.noop;
 
     // optional search source which this object configures
-    self.searchSource = config.searchSource ? new SearchSource() : null;
+    self.searchSource = config.searchSource ? new SearchSource() : undefined;
 
     // the id of the document
     self.id = config.id || void 0;
