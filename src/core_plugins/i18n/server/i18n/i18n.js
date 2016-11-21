@@ -7,7 +7,7 @@ const asyncReadFile = Promise.promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
-let i18nConfig = null;
+let defaultLocale = 'en';
 let registeredTranslations = {};
 
 /**
@@ -15,12 +15,6 @@ let registeredTranslations = {};
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */
 export function getTranslationsForDefaultLocale() {
-  let defaultLocale = '';
-  try {
-    defaultLocale = i18nConfig.get('i18n.locale');
-  } catch (e) {
-    defaultLocale = 'en';
-  }
   return getTranslationsForLocale(defaultLocale);
 };
 
@@ -39,14 +33,11 @@ export function getRegisteredTranslationLocales() {
  * This object will contain all registered translations for the highest priority locale which is registered with the i18n module.
  * This object can be empty if no locale in the language tags can be matched against the registered locales.
  */
-export function getTranslations(languageTags) {
-  let locale = '';
-
-  if (!_.isEmpty(languageTags)) {
-    const registeredLocales = getRegisteredTranslationLocales();
-    locale = getTranslationLocaleExactMatch(languageTags, registeredLocales) ||
-      getTranslationLocaleBestCaseMatch(languageTags, registeredLocales) || '';
-  }
+export function getTranslations(...languageTags) {
+  const registeredLocales = getRegisteredTranslationLocales();
+  const locale = getTranslationLocaleExactMatch(languageTags, registeredLocales)
+    || getTranslationLocaleBestCaseMatch(languageTags, registeredLocales)
+    || '';
 
   return getTranslationsForLocale(locale);
 };
@@ -69,11 +60,11 @@ export function unregisterTranslations() {
 };
 
 /**
- * Set the i18n configuration
- * @param {Object} i18n module confioguration object
+ * Set the default locale
+ * @param {String} locale - Locale to set
  */
-export function setI18nConfig(config) {
-  i18nConfig = config;
+export function setDefaultLocale(locale) {
+  defaultLocale = locale;
 }
 
 function getTranslationsForLocale(locale) {

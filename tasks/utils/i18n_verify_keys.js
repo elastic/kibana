@@ -8,20 +8,38 @@ const readFile = Promise.promisify(fs.readFile);
 const globProm = Promise.promisify(glob);
 
 /**
- * Verify translation keys in files are translated.
+ * Return all the translation keys found for the file pattern
  * @param {Array<String>} filesPatterns - List of file patterns to be checkd for translation keys
- * @param {Object} translations - Object of translations keys and their translations
- * @return {Promise} - A Promise object which will contain an empty Object if all translation keys are translated. If translation keys are
+ * @param {Array<String>} translations - List of translations keys
+ * @return {Promise} - A Promise object which will return a String Array of the translation keys
  * not translated then the Object will contain all non translated translation keys with value of file the key is from
  */
-export function verifyTranslationKeys(filesPatterns, translations) {
+export function getTranslationKeys(filesPatterns) {
   return getFilesToVerify(filesPatterns)
   .then(function (filesToVerify) {
-    return verifyKeysInFiles(filesToVerify, translations)
-    .then(function (keysNotTranslated) {
-      return keysNotTranslated;
+    return getKeys(filesToVerify)
+    .then(function (keys) {
+      return keys;
     });
   });
+};
+
+/**
+ * Return translation keys that are not translated
+ * @param {Array<String>} translationKeys - List of translation keys to be checked if translated
+ * @param {Object} localeTranslations - Object of locales and their translations
+ * @return {Object} - A object which will be empty if all translation keys are translated. If translation keys are
+ * not translated then the Object will contain all non translated translation keys per localem
+ */
+export function getNonTranslatedKeys(translationKeys, localeTranslations) {
+  let keysNotTranslatedPerLocale = {};
+  _.map(localeTranslations, (translations, locale) => {
+    const keysNotTranslated = _.difference(translationKeys, Object.keys(translations));
+    if (!_.isEmpty(keysNotTranslated)) {
+      keysNotTranslatedPerLocale[locale] = keysNotTranslated;
+    }
+  });
+  return keysNotTranslatedPerLocale;
 };
 
 function getFilesToVerify(verifyFilesPatterns) {
@@ -42,8 +60,8 @@ function getFilesToVerify(verifyFilesPatterns) {
   });
 }
 
-function verifyKeysInFiles(filesToVerify, translations) {
-  let keysNotTranslated = {};
+function getKeys(filesToVerify) {
+  let translationKeys = [];
   const translationPattern = 'i18n\\(\'(.*)\'\\)';
   const translationRegEx = new RegExp(translationPattern, 'g');
 
@@ -51,19 +69,16 @@ function verifyKeysInFiles(filesToVerify, translations) {
     return readFile(file, 'utf8')
     .then(function (fileContents) {
       let regexMatch;
-      while (regexMatch = translationRegEx.exec(fileContents) !== null) {
+      while ((regexMatch = translationRegEx.exec(fileContents)) !== null) {
         if (regexMatch.length >= 2) {
           const translationKey = regexMatch[1];
-          if (!translations.hasOwnProperty(translationKey)) {
-            keysNotTranslated[translationKey] = file;
-          }
+          translationKeys.push(translationKey);
         }
       }
     });
   });
   return Promise.all(filePromises)
   .then(function () {
-    return keysNotTranslated;
+    return translationKeys;
   });
-
 }

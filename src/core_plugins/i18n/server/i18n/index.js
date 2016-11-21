@@ -3,5 +3,5 @@ export {
   getTranslations,
   getTranslationsForDefaultLocale,
   registerTranslations,
-  setI18nConfig
+  setDefaultLocale
 } from './i18n';

@@ -46,6 +46,7 @@ module.exports = function (grunt) {
       })
       .catch(function (err) {
         kbnServer.close();
+        done(false);
         throw err;
       });
     })
@@ -58,16 +59,26 @@ module.exports = function (grunt) {
 
 function verifyTranslations(parsePaths)
 {
+  let localeTranslations = {};
   const locales = i18n.getRegisteredTranslationLocales();
-  return Promise.all(locales.map(function (locale) {
-    return i18n.getTranslations([locale]).then(function (translations) {
-      return i18nVerify.verifyTranslationKeys(parsePaths, translations).then(function (keysNotTranslated) {
-        if (!_.isEmpty(keysNotTranslated)) {
-          console.error('Verification of the following translations keys are not translated: ', keysNotTranslated);
-        } else {
-          console.log('Verification of translations keys are a success.');
-        }
-      });
+  const translationPromises = _.map(locales, (locale) => {
+    return i18n.getTranslations(locale)
+    .then(function (translations) {
+      localeTranslations[locale] = translations;
     });
-  }));
+  });
+
+  return Promise.all(translationPromises)
+  .then(function () {
+    return i18nVerify.getTranslationKeys(parsePaths)
+    .then(function (translationKeys) {
+      const keysNotTranslatedPerLocale = i18nVerify.getNonTranslatedKeys(translationKeys, localeTranslations);
+      if (!_.isEmpty(keysNotTranslatedPerLocale)) {
+        const str  = JSON.stringify(keysNotTranslatedPerLocale);
+        const errMsg = 'The following translation keys per locale are not translated: ' + str;
+        throw new Error(errMsg);
+      }
+    });
+  });
 }
+
