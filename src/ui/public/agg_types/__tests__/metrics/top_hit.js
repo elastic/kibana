@@ -173,9 +173,10 @@ describe('Top hit metric', function () {
             hits: [
               {
                 _source: {
+                  'machine.os': 'linux'
                 },
                 fields: {
-                  'machine.os': [ 'linux' ]
+                  'machine.os.raw': [ 'linux' ]
                 }
               }
             ]
@@ -183,7 +184,7 @@ describe('Top hit metric', function () {
         }
       };
 
-      init({ field: 'machine.os' });
+      init({ field: 'machine.os.raw' });
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be('linux');
     });
 
@@ -194,10 +195,10 @@ describe('Top hit metric', function () {
             hits: [
               {
                 _source: {
-                  nope: 'aaa'
+                  bytes: 12345
                 },
                 fields: {
-                  nope: [ 'aaa' ]
+                  bytes: 12345
                 }
               }
             ]
@@ -205,7 +206,7 @@ describe('Top hit metric', function () {
         }
       };
 
-      init({ field: 'machine.os' });
+      init({ field: 'machine.os.raw' });
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
     });
   });
