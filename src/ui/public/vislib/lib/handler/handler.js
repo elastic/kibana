@@ -127,7 +127,9 @@ export default function HandlerBaseClass(Private) {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
             // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
-            charts[0].events.emit('renderComplete');
+            if (charts[0] && charts[0].events) {
+              charts[0].events.emit('renderComplete');
+            }
           }
         });
 
