@@ -10,11 +10,20 @@
     <select class="form-control" ng-model="vis.params.orientation" ng-options="mode for mode in vis.type.params.orientations"></select>
   </div>
 
+
   <label>Minimum Font Size - {{ vis.params.minFontSize }}px</label>
   <input type="range" ng-model="vis.params.minFontSize" class="form-control" min="12" max="120">
 
   <label>Maximum Font Size - {{ vis.params.maxFontSize }}px</label>
   <input type="range" ng-model="vis.params.maxFontSize" class="form-control" min="12" max="120">
+
+  <div>
+    <label>
+      <input type="checkbox" value="{{hideLabel}}" ng-model="vis.params.hideLabel" name="hideLabel"
+             ng-checked="vis.params.hideLabel">
+      Show label
+    </label>
+  </div>
 
 
 </div>
