@@ -52,7 +52,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
       const simplifiedNodes = warningNodes.map(node => ({
         version: node.version,
         http: {
-          publish_address: node.http.publish_address,
+          publish_address: (node.http && node.http.publish_address) ? node.http.publish_address : '',
         },
         ip: node.ip,
       }));
