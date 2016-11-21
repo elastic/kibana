@@ -39,7 +39,7 @@ define(function (require) {
         return (Math.round(val * 100) / 100) + labels[index];
       },
       'currency': function (val, axis) {
-        return val.toLocaleString('en', { style: 'currency', currency: axis.options.prefix || 'USD' });
+        return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
       },
       'custom': function (val, axis) {
         var prefix = axis.options.units.prefix;
