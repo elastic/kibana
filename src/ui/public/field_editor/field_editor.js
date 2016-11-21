@@ -10,12 +10,14 @@ import chrome from 'ui/chrome';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
+import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
   let fieldFormats = Private(RegistryFieldFormatsProvider);
   let Field = Private(IndexPatternsFieldProvider);
+  let getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -37,7 +39,7 @@ uiModules
 
       self.docLinks = docLinks;
       getScriptingLangs().then((langs) => {
-        self.scriptingLangs = langs;
+        self.scriptingLangs = _.intersection(langs, ['expression', 'painless']);
         if (!_.includes(self.scriptingLangs, self.field.lang)) {
           self.field.lang = undefined;
         }
@@ -159,11 +161,9 @@ uiModules
       }
 
       function getScriptingLangs() {
-        return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
-        .then((res) => res.data)
-        .catch(() => {
-          notify.error('Error getting available scripting languages from Elasticsearch');
-          return [];
+        return getEnabledScriptingLanguages()
+        .then((enabledLanguages) => {
+          return _.intersection(enabledLanguages, getSupportedScriptingLanguages());
         });
       }
 
