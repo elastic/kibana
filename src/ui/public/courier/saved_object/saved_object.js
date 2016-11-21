@@ -253,7 +253,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * Returns true if the object's original title has been changed. New objects return false.
      * @return {boolean}
      */
-    self.titleChanged = function () {
+    self.isTitleChanged = function () {
       return self._source && self._source.title !== self.title;
     };
 

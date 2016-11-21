@@ -7,7 +7,7 @@ uiModules
       restrict: 'E',
       template: `
         <div class="form-group" ng-hide="!savedObject.id">
-          <div ng-hide="!savedObject.titleChanged() || savedObject.copyOnSave" class="localDropdownWarning">
+          <div ng-hide="!savedObject.isTitleChanged() || savedObject.copyOnSave" class="localDropdownWarning">
             Note, saving a {{savedObject.getDisplayName()}} with a new name will no longer automatically create a copy.
           </div>
           <label>
