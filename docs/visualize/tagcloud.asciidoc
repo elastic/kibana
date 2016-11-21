@@ -1,16 +1,18 @@
-[[tagcloud]]
-== Tag Cloud
+[[tagcloud-chart]]
+== Cloud Tag Charts
 
-A tag cloud visualization is a representation of text data, typically used to visualize free form text. 
+A tag cloud visualization is a visual representation of text data, typically used to visualize free form text. 
 Tags are usually single words, and the importance of each tag is shown with font size or color.
 
 The font size for each word is determined by the _metrics_ aggregation. The following aggregations are available for
 this chart:
+
 include::y-axis-aggs.asciidoc[]
+
 
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
-Select the *Tags* option to configure a _buckets_ aggregation.
+Before you choose a buckets aggregation, select the *Split Tags* option.
 
 You can specify the following bucket aggregations for tag cloud visualization:
 
@@ -23,25 +25,20 @@ You can click the *Advanced* link to display more customization options for your
 definition, as in the following example:
 
 [source,shell]
-{ "script" : "doc['size'].value + 'px'" }
+{ "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {es-ref}modules-scripting.html[dynamic Groovy scripting].
+
 
 Select the *Options* tab to change the following aspects of the chart:
 
 *Text Scale*:: You can select *linear*, *log*, or *square root* scales for the text scale. You can use a log
 scale to display data that varies exponentially or a square root scale to
-regularize the display of data sets with variabilities that are themselves highly variable. This kind of data, where
-the variability is itself variable over the domain being examined, is known as _heteroscedastic_ data. For example, if
-a data set of height versus weight has a relatively narrow range of variability at the short end of height, but a wider
-range at the taller end, the data set is heteroscedastic.
-*Orientation*::
-- Single: all tags are orientation horizontally
-- right angles: tags are oriented horionztally and vertically 
-- multiple: tags are oriented with multiple orientations  
-*Font Size*:: Set the minimum and maximum font size.
-*Show Label*:: display or hide the default label.
+regularize the display of data sets with variabilities that are themselves highly variable.
+*Orientation*:: You can select how to orientate your text in the tag cloud. You can choose one of the following options:
+Single, right angles and multiple.
+*Font Size*:: Allows you to set minimum and maximum font size to use for this visualization.
 
 
 include::visualization-raw-data.asciidoc[]
