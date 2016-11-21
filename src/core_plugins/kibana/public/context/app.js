@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import 'ui/local_navigation';
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import {fetchAnchor} from './api/anchor';
@@ -10,6 +11,7 @@ const module = uiModules.get('apps/context', [
   'kibana',
   'ngRoute',
 ]);
+const DEFAULT_SIZE_INCREMENT = 5;
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -42,9 +44,7 @@ function ContextAppController($q, es) {
         .then(() => (
           fetchAnchor(es, this.indexPattern, this.anchorUid, _.zipObject([this.sort]))
         ))
-        .then(anchorRow => (
-          this.anchorRow = anchorRow
-        ))
+        .then(anchorRow => this.anchorRow = anchorRow)
     ),
     fetchContextRows: () => (
       $q.resolve(this.anchorRowPromise)
@@ -59,6 +59,8 @@ function ContextAppController($q, es) {
           this.rows = [].concat(this.predecessorRows, [this.anchorRow], this.successorRows)
         ))
     ),
+    increaseSize: (value = DEFAULT_SIZE_INCREMENT) => this.actions.setSize(this.size + value),
+    decreaseSize: (value = DEFAULT_SIZE_INCREMENT) => this.actions.setSize(this.size - value),
     reload: () => {
       this.anchorRowPromise = this.actions.fetchAnchorRow();
       this.contextRowsPromise = this.actions.fetchContextRows();
@@ -67,6 +69,10 @@ function ContextAppController($q, es) {
         this.anchorRowPromise,
         this.contextRowsPromise,
       ]);
+    },
+    setSize: (size) => {
+      this.size = size;
+      return this.actions.fetchContextRows();
     },
   };
 

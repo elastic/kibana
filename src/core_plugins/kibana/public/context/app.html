@@ -1,17 +1,27 @@
 <div class="app-container">
-  <kbn-top-nav name="context" config="topNavMenu">
+  <local-navigation>
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
-      <div data-transclude-slot="topLeftCorner" class="localBreadcrumbs">
-        <div class="localBreadcrumb">
-          <span class="localBreadcrumb">Context</span>
-          <span ng-bind="contextApp.indexPattern.id" class="localBreadcrumb"></span>
-          <span ng-bind="contextApp.anchorUid" class="localBreadcrumb"></span>
+      <div data-transclude-slot="primaryLeft" class="localBreadcrumbs">
+        <div class="localBreadcrumb">Context</div>
+        <div ng-bind="contextApp.indexPattern.id" class="localBreadcrumb"></div>
+        <div ng-bind="contextApp.anchorUid" class="localBreadcrumb"></div>
+      </div>
+
+      <div data-transclude-slot="primaryRight" class="localMenu">
+        <div class="localMenuItem" ng-click="contextApp.actions.increaseSize()">
+          <div class="localMenuItem__icon fa fa-plus"></div>
+        </div>
+        <div class="localMenuIten">
+          {{ contextApp.size }} surrounding entries
+        </div>
+        <div class="localMenuItem" ng-click="contextApp.actions.decreaseSize()">
+          <div class="localMenuItem__icon fa fa-minus"></div>
         </div>
       </div>
     </div>
-  </kbn-top-nav>
+  </local-navigation>
 
   <div class="container-fluid" role="main">
     <div class="row">
