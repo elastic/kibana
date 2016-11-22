@@ -6,7 +6,7 @@ export function stubMapper(Private, mockLogstashFields = Private(stubbedLogstash
   let stubbedMapper = Private(MapperService);
 
   sinon.stub(stubbedMapper, 'getFieldsForIndexPattern', function () {
-    return Promise.resolve(mockLogstashFields.filter((field) => { return field.scripted === false; }));
+    return Promise.resolve(mockLogstashFields.filter(field => field.scripted === false));
   });
 
   sinon.stub(stubbedMapper, 'clearCache', function () {

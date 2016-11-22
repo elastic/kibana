@@ -14,19 +14,9 @@ import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
-  let savedObjectFactory;
+  let SavedObject;
   let IndexPattern;
   let esStub;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
-    savedObjectFactory = Private(SavedObjectFactory);
-    IndexPattern = Private(IndexPatternFactory);
-    esStub = $injector.get('es');
-
-    mockEsService();
-    stubMapper(Private);
-  }));
 
   /**
    * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
@@ -45,7 +35,26 @@ describe('Saved Object', function () {
 
     // Necessary to avoid a timeout condition.
     sinon.stub(esStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-  };
+  }
+
+  /**
+   * Returns a fake doc response with the given index and id, of type dashboard
+   * that can be used to stub es calls.
+   * @param indexPatternId
+   * @param additionalOptions - object that will be assigned to the mocked doc response.
+   * @returns {{_source: {}, _index: *, _type: string, _id: *, found: boolean}}
+   */
+  function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
+    return Object.assign(
+      {
+        _source: {},
+        _index: indexPatternId,
+        _type: 'dashboard',
+        _id: indexPatternId,
+        found: true
+      },
+      additionalOptions);
+  }
 
   /**
    * Stubs some of the es retrieval calls so it returns the given response.
@@ -57,81 +66,210 @@ describe('Saved Object', function () {
   }
 
   /**
-   * Creates a new saved object with the given configuration. Does not call init.
+   * Creates a new saved object with the given configuration and initializes it.
+   * Returns the promise that will be completed when the initialization finishes.
+   *
    * @param {Object} config
-   * @returns {SavedObject} an instance of SavedObject
+   * @returns {Promise<SavedObject>} A promise that resolves with an instance of
+   * SavedObject
    */
-  function createSavedObject(config = {}) {
-    let savedObject = {};
-    savedObjectFactory.call(savedObject, config);
-    return savedObject;
+  function createInitializedSavedObject(config = {}) {
+    let savedObject = new SavedObject(config);
+    return savedObject.init();
   }
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function ($injector, Private) {
+    SavedObject = Private(SavedObjectFactory);
+    IndexPattern = Private(IndexPatternFactory);
+    esStub = $injector.get('es');
+
+    mockEsService();
+    stubMapper(Private);
+  }));
+
+  describe('applyESResp', function () {
+    it('throws error if not found', function () {
+      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
+        const response = {found: false};
+        try {
+          savedObject.applyESResp(response);
+          expect(true).to.be(false);
+        } catch (err) {
+          expect(!!err).to.be(true);
+        }
+      });
+    });
+
+    it('preserves original defaults if not overridden', function () {
+      const id = 'anid';
+      const preserveMeValue = 'here to stay!';
+      const config = {
+        defaults: {
+          preserveMe: preserveMeValue
+        },
+        type: 'dashboard',
+        id: id
+      };
+
+      const mockDocResponse = getMockedDocResponse(id);
+      stubESResponse(mockDocResponse);
+
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
+          const response = {found: true, _source: {}};
+          return savedObject.applyESResp(response);
+        }).then(() => {
+          expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
+        });
+    });
+
+    it('overrides defaults', function () {
+      const id = 'anid';
+      const config = {
+        defaults: {
+          flower: 'rose'
+        },
+        type: 'dashboard',
+        id: id
+      };
+
+      const mockDocResponse = getMockedDocResponse(id);
+      stubESResponse(mockDocResponse);
+
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          expect(savedObject._source.flower).to.equal('rose');
+          const response = {
+            found: true,
+            _source: {
+              flower: 'orchid'
+            }
+          };
+          return savedObject.applyESResp(response);
+        }).then(() => {
+          expect(savedObject._source.flower).to.equal('orchid');
+        });
+    });
+
+    it('overrides previous _source and default values', function () {
+      const id = 'anid';
+      const config = {
+        defaults: {
+          dinosaurs: {
+            tRex: 'is the scariest'
+          }
+        },
+        type: 'dashboard',
+        id: id
+      };
+
+      const mockDocResponse = getMockedDocResponse(
+        id,
+        { _source: { dinosaurs: { tRex: 'is not so bad'}, } });
+      stubESResponse(mockDocResponse);
+
+
+      let savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: { dinosaurs: { tRex: 'has big teeth' } }
+          };
+
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(savedObject._source.dinosaurs.tRex).to.equal('has big teeth');
+        });
+    });
+
+  });
 
   describe ('config', function () {
 
     it('afterESResp is called', function () {
-      let afterESRespCallback = sinon.spy();
+      const afterESRespCallback = sinon.spy();
       const config = {
         type: 'dashboard',
         afterESResp: afterESRespCallback
       };
 
-      let savedObject = createSavedObject(config);
-      return savedObject.init().then(() => {
+      return createInitializedSavedObject(config).then(() => {
         expect(afterESRespCallback.called).to.be(true);
       });
     });
 
     it('init is called', function () {
-      let initCallback = sinon.spy();
+      const initCallback = sinon.spy();
       const config = {
         type: 'dashboard',
         init: initCallback
       };
 
-      let savedObject = createSavedObject(config);
-      return savedObject.init().then(() => {
+      return createInitializedSavedObject(config).then(() => {
         expect(initCallback.called).to.be(true);
       });
     });
 
-    it('searchSource creates index when true', function () {
-      const indexPatternId = 'testIndexPattern';
-      let afterESRespCallback = sinon.spy();
+    describe('searchSource', function () {
 
-      const config = {
-        type: 'dashboard',
-        afterESResp: afterESRespCallback,
-        searchSource: true,
-        indexPattern: indexPatternId
-      };
+      it('when true, creates index', function () {
+        const indexPatternId = 'testIndexPattern';
+        const afterESRespCallback = sinon.spy();
 
-      const mockDocResponse = {
-        _source: {},
-        _index: indexPatternId,
-        _type: 'test-type',
-        _id: indexPatternId,
-        found: true
-      };
+        const config = {
+          type: 'dashboard',
+          afterESResp: afterESRespCallback,
+          searchSource: true,
+          indexPattern: indexPatternId
+        };
 
-      stubESResponse(mockDocResponse);
+        stubESResponse(getMockedDocResponse(indexPatternId));
 
-      let savedObject = createSavedObject(config);
-      expect(!!savedObject.searchSource.get('index')).to.be(false);
+        const savedObject = new SavedObject(config);
+        expect(!!savedObject.searchSource.get('index')).to.be(false);
 
-      return savedObject.init().then(() => {
-        expect(afterESRespCallback.called).to.be(true);
-        const index = savedObject.searchSource.get('index');
-        expect(index instanceof IndexPattern).to.be(true);
-        expect(index.id).to.equal(indexPatternId);
+        return savedObject.init().then(() => {
+          expect(afterESRespCallback.called).to.be(true);
+          const index = savedObject.searchSource.get('index');
+          expect(index instanceof IndexPattern).to.be(true);
+          expect(index.id).to.equal(indexPatternId);
+        });
+      });
+
+      it('when false, does not create index', function () {
+        const indexPatternId = 'testIndexPattern';
+        const afterESRespCallback = sinon.spy();
+
+        const config = {
+          type: 'dashboard',
+          afterESResp: afterESRespCallback,
+          searchSource: false,
+          indexPattern: indexPatternId
+        };
+
+        stubESResponse(getMockedDocResponse(indexPatternId));
+
+        const savedObject = new SavedObject(config);
+        expect(!!savedObject.searchSource).to.be(false);
+
+        return savedObject.init().then(() => {
+          expect(afterESRespCallback.called).to.be(true);
+          expect(!!savedObject.searchSource).to.be(false);
+        });
       });
     });
 
     describe('type', function () {
       it('that is not specified throws an error', function () {
-        let config = {};
+        const config = {};
 
-        let savedObject = createSavedObject(config);
+        const savedObject = new SavedObject(config);
         try {
           savedObject.init();
           expect(false).to.be(true);
@@ -141,9 +279,9 @@ describe('Saved Object', function () {
       });
 
       it('that is invalid invalid throws an error', function () {
-        let config = {type: 'notypeexists'};
+        const config = { type: 'notypeexists' };
 
-        let savedObject = createSavedObject(config);
+        const savedObject = new SavedObject(config);
         try {
           savedObject.init();
           expect(false).to.be(true);
@@ -153,22 +291,42 @@ describe('Saved Object', function () {
       });
 
       it('that is valid passes', function () {
-        let config = {type: 'dashboard'};
-        return createSavedObject(config).init();
+        const config = { type: 'dashboard' };
+        return new SavedObject(config).init();
       });
     });
 
     describe('defaults', function () {
-      it('applied to object with no id', function () {
-        let config = {
-          defaults: {testDefault: 'hi'},
-          type: 'dashboard'
-        };
 
-        let savedObject = createSavedObject(config);
-        return savedObject.init().then(() => {
-          expect(savedObject.searchSource).to.be(undefined);
-          expect(savedObject.defaults.testDefault).to.be(config.defaults.testDefault);
+      function getTestDefaultConfig(extraOptions) {
+        return Object.assign({
+          defaults: { testDefault: 'hi' },
+          type: 'dashboard'
+        }, extraOptions);
+      }
+
+      function expectDefaultApplied(config) {
+        return createInitializedSavedObject(config).then((savedObject) => {
+          expect(savedObject.defaults).to.be(config.defaults);
+        });
+      }
+
+      describe('applied to object when id', function () {
+
+        it('is not specified', function () {
+          expectDefaultApplied(getTestDefaultConfig());
+        });
+
+        it('is undefined', function () {
+          expectDefaultApplied(getTestDefaultConfig({ id: undefined }));
+        });
+
+        it('is 0', function () {
+          expectDefaultApplied(getTestDefaultConfig({ id: 0 }));
+        });
+
+        it('is false', function () {
+          expectDefaultApplied(getTestDefaultConfig({ id: false }));
         });
       });
 
@@ -177,7 +335,7 @@ describe('Saved Object', function () {
         const customDefault = 'hi';
         const initialOverwriteMeValue = 'this should get overwritten by the server response';
 
-        let config = {
+        const config = {
           defaults: {
             overwriteMe: initialOverwriteMeValue,
             customDefault: customDefault
@@ -188,22 +346,15 @@ describe('Saved Object', function () {
 
         const serverValue = 'this should override the initial default value given';
 
-        const mockDocResponse = {
-          _source: {
-            overwriteMe: serverValue
-          },
-          _index: myId,
-          _type: 'dashboard',
-          _id: myId,
-          found: true
-        };
+        const mockDocResponse = getMockedDocResponse(
+          myId,
+          { _source: { overwriteMe: serverValue } });
 
         stubESResponse(mockDocResponse);
 
-        let savedObject = createSavedObject(config);
-        return savedObject.init().then(() => {
+        return createInitializedSavedObject(config).then((savedObject) => {
           expect(!!savedObject._source).to.be(true);
-          expect(savedObject.defaults.overwriteMe).to.be(initialOverwriteMeValue);
+          expect(savedObject.defaults).to.be(config.defaults);
           expect(savedObject._source.overwriteMe).to.be(serverValue);
           expect(savedObject._source.customDefault).to.be(customDefault);
         });
