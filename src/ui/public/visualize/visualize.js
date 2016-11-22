@@ -72,6 +72,16 @@ uiModules
         return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
 
+      if ($scope.vis.implementsRenderComplete()) {
+        $el.attr('has-render-count', 'true');
+        let renderCount = 0;
+        $el.on('renderComplete', () => {
+          $el.attr('render-count', ++renderCount);
+        });
+      } else {
+        $el.attr('has-render-count', 'false');
+      }
+
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
@@ -168,7 +178,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
-          $scope.vis.emit('renderComplete');
+          $el.trigger('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
@@ -194,6 +204,7 @@ uiModules
 
       $scope.$on('$destroy', function () {
         if ($scope.renderbot) {
+          $el.off('renderComplete');
           $scope.renderbot.destroy();
         }
       });

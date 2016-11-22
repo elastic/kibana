@@ -46,6 +46,7 @@ export default function HistogramVisType(Private) {
       scales: ['linear', 'log', 'square root'],
       editor: lineTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
