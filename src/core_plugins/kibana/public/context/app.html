@@ -17,13 +17,20 @@
 
       <div data-transclude-slot="primaryRight" class="localMenu">
         <div class="localMenuItem" ng-click="contextApp.actions.increaseSize()">
-          <div class="localMenuItem__icon fa fa-plus"></div>
+          <div class="fa fa-plus"></div>
         </div>
-        <div class="localMenuIten">
-          {{ contextApp.size }} surrounding entries
+        <div class="localMenuItem">
+          <input
+            class="localMenuItem__input--inPlace"
+            ng-change="contextApp.actions.setSize(contextApp.size)"
+            ng-model-options="{updateOn: 'change'}"
+            ng-model="contextApp.size"
+            type="number"
+          />
+          <div>surrounding entries</div>
         </div>
         <div class="localMenuItem" ng-click="contextApp.actions.decreaseSize()">
-          <div class="localMenuItem__icon fa fa-minus"></div>
+          <div class="a fa-minus"></div>
         </div>
       </div>
     </div>

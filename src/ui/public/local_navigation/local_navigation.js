@@ -3,6 +3,7 @@ import angular from 'angular';
 import uiModules from 'ui/modules';
 
 import 'ui/multi_transclude';
+import './local_navigation.less';
 import localNavigationTemplate from './local_navigation.html';
 
 
