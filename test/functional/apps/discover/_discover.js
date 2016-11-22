@@ -193,7 +193,7 @@ bdd.describe('discover app', function describeIndexTests() {
       await PageObjects.common.try(async function tryingForTime() {
         const paths = await PageObjects.discover.getBarChartData();
         // the largest bars are over 100 pixels high so this is less than 1% tolerance
-        const barHeightTolerance = 1;
+        const barHeightTolerance = 2;
         let stringResults = '';
         let hasFailure = false;
         for (let y = 0; y < expectedBarChartData.length; y++) {
