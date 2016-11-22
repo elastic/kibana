@@ -250,11 +250,11 @@ export default function AxisFactory(Private) {
           }
         } else {
           const axisSpacing = 2;
-          selection.attr('width', length + xAxisPadding);
+          const axisWidth = Math.ceil(length + axisSpacing);
+          selection.attr('width', axisWidth);
           if (position === 'left') {
-            const translateWidth = length + xAxisPadding - axisSpacing - parseInt(style.lineWidth);
             selection.select('g')
-            .attr('transform', `translate(${translateWidth},0)`);
+            .attr('transform', `translate(${axisWidth},0)`);
           } else if (position === 'right') {
             const translateWidth = axisSpacing + parseInt(style.lineWidth);
             selection.select('g')
@@ -304,8 +304,9 @@ export default function AxisFactory(Private) {
             .attr('width', width)
             .attr('height', height);
 
+            const axisClass = self.axisConfig.isHorizontal() ? 'x' : 'y';
             svg.append('g')
-            .attr('class', `axis ${config.get('id')}`)
+            .attr('class', `${axisClass} axis ${config.get('id')}`)
             .call(axis);
 
             const container = svg.select('g.axis').node();
