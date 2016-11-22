@@ -15,8 +15,10 @@ describe('markdown vis controller', function () {
 
   it('should set html from markdown params', function () {
     expect($scope).to.not.have.property('html');
-    $scope.vis.params = {
-      markdown: 'This is a test of the [markdown](http://daringfireball.net/projects/markdown) vis.'
+    $scope.vis = {
+      params: {
+        markdown: 'This is a test of the [markdown](http://daringfireball.net/projects/markdown) vis.'
+      }
     };
     $scope.$digest();
 
