@@ -16,9 +16,7 @@ export default function VislibVisTypeFactory(Private) {
 
 
   _.class(VislibVisType).inherits(VisType);
-  function VislibVisType(opts) {
-    opts = opts || {};
-
+  function VislibVisType(opts = {}) {
     VislibVisType.Super.call(this, opts);
 
     if (this.responseConverter == null) {
@@ -26,7 +24,6 @@ export default function VislibVisTypeFactory(Private) {
     }
 
     this.listeners = opts.listeners || {};
-    this.implementsRenderComplete = true;
   }
 
   VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
