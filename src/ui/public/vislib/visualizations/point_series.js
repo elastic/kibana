@@ -168,6 +168,22 @@ export default function PointSeriesFactory(Private) {
       endzoneTT.render()(svg);
     };
 
+    calculateRadiusLimits(data) {
+      this.radii = _(data.series)
+        .map(function (series) {
+          return _.map(series.values, 'z');
+        })
+        .flattenDeep()
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {
+          min: Infinity,
+          max: -Infinity
+        });
+    }
+
     draw() {
       let self = this;
       let $elem = $(this.chartEl);
@@ -205,6 +221,7 @@ export default function PointSeriesFactory(Private) {
           self.addClipPath(svg);
           self.addEvents(svg);
           self.createEndZones(svg);
+          self.calculateRadiusLimits(data);
 
           self.series = [];
           _.each(self.chartConfig.series, (seriArgs, i) => {

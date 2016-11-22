@@ -42,18 +42,7 @@ export default function LineChartFactory(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
-      const radii = _(data.values)
-        .map(function (point) {
-          return point.z;
-        })
-        .reduce(function (result, val) {
-          if (result.min > val) result.min = val;
-          if (result.max < val) result.max = val;
-          return result;
-        }, {
-          min: Infinity,
-          max: -Infinity
-        });
+      const radii =  this.baseChart.radii;
 
       const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this.seriesConfig.radiusRatio, 2);
 
