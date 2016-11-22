@@ -46,8 +46,8 @@ export default function buildPhraseFilter(field, value, indexPattern) {
 export function buildInlineScriptForPhraseFilter(scriptedField) {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
-    return `boolean compare(Supplier s, def v) {return s.get() == v;}
-                compare(() -> { ${scriptedField.script} }, params.value);`;
+    return `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+           `compare(() -> { ${scriptedField.script} }, params.value);`;
   }
   else {
     return `(${scriptedField.script}) == value`;
