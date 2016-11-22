@@ -1,0 +1,22 @@
+
+@import "../variables";
+@import "./home/home_view";
+
+.guide {
+  display: flex;
+  height: 100%;
+}
+
+.guideContent {
+  flex: 1 1 auto;
+  padding-top: 100px;
+  transition: padding-right $guideCodeViewerTransition;
+
+  &.is-code-viewer-open {
+    padding-right: $guideCodeViewerWidth;
+
+    @include whenNarrowerThan($normalBreakpoint) {
+      padding-right: $guideCodeViewerSmallWidth;
+    }
+  }
+}

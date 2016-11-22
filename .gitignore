@@ -33,3 +33,4 @@ selenium
 *.swp
 *.swo
 *.out
+src/ui_framework/public/*.js*

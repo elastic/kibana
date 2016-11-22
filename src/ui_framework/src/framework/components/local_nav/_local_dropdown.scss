@@ -1,0 +1,140 @@
+
+.localDropdown {
+  padding: 10px $localNavSideSpacing 14px;
+  background-color: $localDropdownBackgroundColor;
+  line-height: 20px;
+
+  @include darkTheme {
+    background-color: $localDropdownBackgroundColor--darkTheme;
+  }
+}
+
+.localDropdownPanels {
+  display: flex;
+}
+
+.localDropdownPanel {
+  flex: 1 1 0%;
+}
+
+.localDropdownPanel--left {
+  margin-right: 30px;
+}
+
+.localDropdownPanel--right {
+  margin-left: 30px;
+}
+
+.localDropdownTitle {
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: $localNavTextColor;
+
+  @include darkTheme {
+    color: $localNavTextColor--darkTheme;
+  }
+}
+
+.localDropdownSection {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.localDropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+  .localDropdownHeader__label {
+    font-size: 14px;
+    font-weight: 700;
+    color: $localNavTextColor;
+
+    @include darkTheme {
+      color: $localNavTextColor--darkTheme;
+    }
+  }
+
+  .localDropdownHeader__actions {
+    display: flex;
+  }
+
+  .localDropdownHeader__action {
+    color: $linkColor;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+
+    & + & {
+      margin-left: 10px;
+    }
+
+    &:hover,
+    &:active {
+      color: $linkColor-isHover;
+    }
+
+    @include darkTheme {
+      color: $linkColor--darkTheme;
+
+      &:hover,
+      &:active {
+        color: $linkColor-isHover--darkTheme;
+      }
+    }
+  }
+
+.localDropdownInput {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 5px 15px;
+  font-size: 14px;
+  color: $inputTextColor;
+  background-color: $inputBackgroundColor;
+  border: 2px solid $inputBorderColor;
+  border-radius: 4px;
+
+  @include darkTheme {
+    color: $inputTextColor--darkTheme;
+    background-color: $inputBackgroundColor--darkTheme;
+    border-color: $inputBorderColor--darkTheme;
+  }
+}
+
+.localDropdownFormNote {
+  font-size: 14px;
+  color: $localDropdownFormNoteTextColor;
+
+  @include darkTheme {
+    color: $localDropdownFormNoteTextColor--darkTheme;
+  }
+}
+
+.localDropdownWarning {
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: $textColor;
+  background-color: $localNavBackgroundColor;
+
+  @include darkTheme {
+    color: $localDropdownWarningTextColor--darkTheme;
+    background-color: $localDropdownWarningBackgroundColor--darkTheme;
+  }
+}
+
+.localDropdownHelpText {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #2D2D2D;
+
+  @include darkTheme {
+    color: #9e9e9e;
+  }
+}

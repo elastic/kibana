@@ -1,0 +1,27 @@
+// Normal colors
+$textColor: #2d2d2d;
+$buttonTextColor: #ffffff;
+$buttonBackgroundColor: #9c9c9c;
+$linkColor: #328CAA;
+$linkColor-isHover: #105A73;
+$inputTextColor: $textColor;
+$inputBackgroundColor: #ffffff;
+$inputBorderColor: $inputBackgroundColor;
+
+// Dark theme colors
+$textColor--darkTheme: #cecece;
+$buttonTextColor--darkTheme: #ffffff;
+$buttonBackgroundColor--darkTheme: #777777;
+$linkColor--darkTheme: #b7e2ea;
+$linkColor-isHover--darkTheme: #def2f6;
+$inputTextColor--darkTheme: $textColor--darkTheme;
+$inputBackgroundColor--darkTheme: #444444;
+$inputBorderColor--darkTheme: $inputBackgroundColor--darkTheme;
+
+@mixin darkTheme() {
+  .theme-dark & {
+    @content;
+  }
+}
+
+@import "components/local_nav/index";

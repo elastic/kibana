@@ -108,6 +108,10 @@ class BaseOptimizer {
               `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
             )
           },
+          {
+            test: /\.scss$/,
+            loaders: ['style', 'css', 'sass'],
+          },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
           { test: /\.jade$/, loader: 'jade' },
           { test: /\.json$/, loader: 'json' },
