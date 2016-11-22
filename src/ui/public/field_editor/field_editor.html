@@ -136,6 +136,9 @@
           <i class="fa fa-question-circle text-info"></i> Scripting Help
         </h4>
 
+        <h5>
+	  Painless:
+	</h5>
         <p>
           By default, Kibana scripted fields use <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>, a simple and secure scripting language designed specifically for use with Elasticsearch.  To access values in the document use the following format:
         </p>
@@ -152,6 +155,11 @@
         </p>
 
         <p>
+          Sorting, aggregations, and <strong>access to field values in scripts</strong> require doc values which are supported (and on by default) on almost all field types, with the notable exception of analyzed string fields.
+	  You can check the Fields tab to make sure the fields you want to use in your scripts are aggregatable and not analyzed before using them in a script.
+        </p>
+
+        <p>
           <strong>Invalid</strong><br/>
           <code>
             def myField = doc['some_field'].value;<br/>
@@ -159,6 +167,9 @@
           </code>
         </p>
 
+        <h5>
+	  Expression:
+	</h5>
         <p>
           Coming from an older version of Kibana? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
         </p>
