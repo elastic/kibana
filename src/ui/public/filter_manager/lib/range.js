@@ -32,6 +32,12 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
       lte: '<=',
       lt: '<',
     };
+    const comparators = {
+      gt: 'boolean gt(Supplier s, def v) {return s.get() > v}',
+      gte: 'boolean gte(Supplier s, def v) {return s.get() >= v}',
+      lte: 'boolean lte(Supplier s, def v) {return s.get() <= v}',
+      lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
+    };
 
     const knownParams = _.pick(params, (val, key) => { return key in operators; });
     let script = _.map(knownParams, function (val, key) {
@@ -40,16 +46,13 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
 
     // We must wrap painless scripts in a lambda in case they're more than a simple expression
     if (field.lang === 'painless') {
-      const comparators = `boolean gt(Supplier s, def v) {return s.get() > v;}
-                           boolean gte(Supplier s, def v) {return s.get() >= v;}
-                           boolean lte(Supplier s, def v) {return s.get() <= v;}
-                           boolean lt(Supplier s, def v) {return s.get() < v;}`;
+      const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comparators[key]), []).join(' ');
 
       const comparisons = _.map(knownParams, function (val, key) {
         return `${key}(() -> { ${field.script} }, params.${key})`;
       }).join(' && ');
 
-      script = `${comparators}${comparisons}`;
+      script = `${currentComparators}${comparisons}`;
     }
 
     const value = _.map(knownParams, function (val, key) {
