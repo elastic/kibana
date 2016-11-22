@@ -293,8 +293,6 @@ export default function AxisFactory(Private) {
           const height = $(el).height();
           const length = self.getLength(el, n);
 
-          // Validate whether width and height are not 0 or `NaN`
-          self.validateWidthandHeight(width, height);
           self.validate();
 
           const axis = self.getAxis(length);
