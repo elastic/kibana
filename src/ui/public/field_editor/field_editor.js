@@ -87,6 +87,10 @@ uiModules
         });
       };
 
+      self.isSupportedLang = function (lang) {
+        return _.contains(['expression', 'painless'], lang);
+      };
+
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {
         let format = self.field.format;
         let changedFormat = cur !== prev;
