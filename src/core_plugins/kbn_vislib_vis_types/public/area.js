@@ -47,6 +47,7 @@ export default function HistogramVisType(Private) {
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
       editor: areaTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

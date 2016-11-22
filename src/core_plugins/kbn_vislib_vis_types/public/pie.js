@@ -37,6 +37,7 @@ export default function HistogramVisType(Private) {
     },
     responseConverter: false,
     hierarchicalData: true,
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

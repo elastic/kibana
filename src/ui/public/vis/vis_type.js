@@ -15,7 +15,7 @@ export default function VisTypeFactory(Private) {
     this.schemas = opts.schemas || new VisTypeSchemas();
     this.params = opts.params || {};
     this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
-    this.implementsRenderComplete = false;
+    this.implementsRenderComplete = opts.implementsRenderComplete || false;
   }
 
   VisType.prototype.createRenderbot = function (vis, $el, uiState) {
