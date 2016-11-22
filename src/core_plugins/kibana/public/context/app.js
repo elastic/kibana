@@ -33,10 +33,12 @@ module.directive('contextApp', function ContextApp() {
 function ContextAppController($q, es) {
   this.anchorRow = null;
   this.rows = [];
+  this.initialized = false;
 
-  this.initialize = () => {
-    this.actions.reload();
-  };
+  this.initialize = () => (
+    this.actions.reload()
+      .then(() => this.initialized = true)
+  );
 
   this.actions = {
     fetchAnchorRow: () => (
@@ -65,7 +67,7 @@ function ContextAppController($q, es) {
       this.anchorRowPromise = this.actions.fetchAnchorRow();
       this.contextRowsPromise = this.actions.fetchContextRows();
 
-      $q.all([
+      return $q.all([
         this.anchorRowPromise,
         this.contextRowsPromise,
       ]);
