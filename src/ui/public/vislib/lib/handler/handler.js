@@ -185,10 +185,10 @@ export default function HandlerBaseClass(Private) {
         .append('h4').text(message);
 
         div.append('div').attr('class', 'item bottom');
-        return div;
       } else {
         div.append('h4').text(message);
       }
+
       $(this.el).trigger('renderComplete');
       return div;
     };
