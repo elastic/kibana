@@ -168,7 +168,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
-          $scope.vis.emit('renderComplete');
+          $el.trigger('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
