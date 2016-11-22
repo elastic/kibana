@@ -41,7 +41,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     const type = config.type;
 
     self.getDisplayName = function () {
-      return type.charAt(0).toUpperCase() + type.slice(1);
+      return type;
     };
 
     // Create a notifier for sending alerts
@@ -240,16 +240,6 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     };
 
     /**
-     * Checks the id of the instance. If it is not set, creates a uuid for it.
-     */
-    self.ensureId = function () {
-      this.id = this.id || uuid.v1();
-
-      // ensure that the docSource has the current id
-      docSource.id(self.id);
-    };
-
-    /**
      * Returns true if the object's original title has been changed. New objects return false.
      * @return {boolean}
      */
@@ -273,7 +263,11 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       if (this.copyOnSave) {
         self.id = null;
       }
-      self.ensureId();
+
+      // Create a unique id for this object if it doesn't have one already.
+      this.id = this.id || uuid.v1();
+      // ensure that the docSource has the current id
+      docSource.id(self.id);
 
       let source = self.serialize();
 

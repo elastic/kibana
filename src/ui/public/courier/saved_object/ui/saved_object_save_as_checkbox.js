@@ -1,20 +1,12 @@
 import uiModules from 'ui/modules';
+import saveObjectSaveAsCheckboxTemplate from './saved_object_save_as_checkbox.html';
 
 uiModules
   .get('kibana')
   .directive('savedObjectSaveAsCheckBox', function () {
     return {
       restrict: 'E',
-      template: `
-        <div class="form-group" ng-hide="!savedObject.id">
-          <div ng-hide="!savedObject.isTitleChanged() || savedObject.copyOnSave" class="localDropdownWarning">
-            Note, saving a {{savedObject.getDisplayName()}} with a new name will no longer automatically create a copy.
-          </div>
-          <label>
-            <input type="checkbox" ng-model="savedObject.copyOnSave" ng-checked="savedObject.copyOnSave">
-            Save as a new {{savedObject.getDisplayName()}}
-          </label>
-        </div>`,
+      template: saveObjectSaveAsCheckboxTemplate,
       scope: {
         savedObject: '='
       }

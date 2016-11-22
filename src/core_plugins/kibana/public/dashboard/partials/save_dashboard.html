@@ -2,7 +2,7 @@
   role="form"
   ng-submit="opts.save()"
 >
-  <div class="localDropdownTitle">Save Dashboard</div>
+  <div class="localDropdownTitle">Save {{opts.dashboard.getDisplayName()}}</div>
   <input
     class="localDropdownInput"
     id="dashboardTitle"
@@ -18,7 +18,7 @@
     <label>
       <input type="checkbox" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">
       Store time with {{opts.dashboard.getDisplayName()}}
-      <kbn-info info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
+      <kbn-info placement="bottom" info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
     </label>
   </div>
 
