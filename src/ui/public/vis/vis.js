@@ -20,14 +20,12 @@ export default function VisFactory(Notifier, Private) {
   let visTypes = Private(RegistryVisTypesProvider);
   let AggConfigs = Private(VisAggConfigsProvider);
   const PersistedState = Private(PersistedStateProvider);
-  const EventEmitter = Private(EventsProvider);
 
   let notify = new Notifier({
     location: 'Vis'
   });
 
   function Vis(indexPattern, state, uiState) {
-    EventEmitter.call(this);
     state = state || {};
 
     if (_.isString(state)) {
@@ -83,7 +81,6 @@ export default function VisFactory(Notifier, Private) {
     };
   };
 
-  Vis.prototype = Object.create(EventEmitter.prototype);
   Vis.prototype.type = 'histogram';
 
   Vis.prototype.setState = function (state) {
