@@ -81,8 +81,8 @@ describe('i18n module', function () {
         return checkTranslations(expectedTranslations, languageTags);
       });
 
-      it('should return translations for locale where best case match is chosen from registered locales' , function () {
-        const languageTags = ['es-ES', 'de-DE'];
+      it('should return translations for highest priority locale where best case match is chosen from registered locales' , function () {
+        const languageTags = ['es', 'de'];
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
         };
