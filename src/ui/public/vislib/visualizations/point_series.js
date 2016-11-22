@@ -51,7 +51,8 @@ export default function PointSeriesFactory(Private) {
       .attr('y', startY)
       .attr('width', width)
       .attr('height', height)
-      .attr('fill', 'transparent');
+      .attr('fill', 'transparent')
+      .attr('class', 'background');
     };
 
     addClipPath(svg) {
