@@ -4,9 +4,15 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="primaryLeft" class="localBreadcrumbs">
-        <div class="localBreadcrumb">Context</div>
-        <div ng-bind="contextApp.indexPattern.id" class="localBreadcrumb"></div>
-        <div ng-bind="contextApp.anchorUid" class="localBreadcrumb"></div>
+        <div class="localBreadcrumb">
+          <a class="localBreadcrumb__link" href="#/discover">Discover</a>
+        </div>
+        <div class="localBreadcrumb">
+          <span>Context of </span>
+          <span class="localBreadcrumb__emphasis" ng-bind="contextApp.anchorUid"></span>
+          <span> in </span>
+          <span class="localBreadcrumb__emphasis" ng-bind="contextApp.indexPattern.id"></span>
+        </div>
       </div>
 
       <div data-transclude-slot="primaryRight" class="localMenu">
