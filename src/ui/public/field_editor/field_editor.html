@@ -150,13 +150,13 @@
         </p>
 
         <p>
-          Kibana currently imposes one special limitation on the scripts you write. Your scripts must consist of a single expression. Multi-statement scripts with an explicit return statement will not work.
-          In other words, the above example is a valid script, but something like the following is not.
+          Sorting, aggregations, and <strong>access to field values in scripts</strong> require doc values which are supported (and on by default) on almost all field types, with the notable exception of analyzed string fields.
+	  You can check the Fields tab to make sure the fields you want to use in your scripts are aggregatable and not analyzed before using them in a script.
         </p>
 
         <p>
-          Sorting, aggregations, and <strong>access to field values in scripts</strong> require doc values which are supported (and on by default) on almost all field types, with the notable exception of analyzed string fields.
-	  You can check the Fields tab to make sure the fields you want to use in your scripts are aggregatable and not analyzed before using them in a script.
+          Kibana currently imposes one special limitation on the scripts you write. Your scripts must consist of a single expression. Multi-statement scripts with an explicit return statement will not work.
+          In other words, the above example is a valid script, but something like the following is not.
         </p>
 
         <p>
