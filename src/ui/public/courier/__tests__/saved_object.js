@@ -79,10 +79,10 @@ describe('Saved Object', function () {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function (es, Private) {
     SavedObject = Private(SavedObjectFactory);
     IndexPattern = Private(IndexPatternFactory);
-    esStub = $injector.get('es');
+    esStub = es;
 
     mockEsService();
     stubMapper(Private);
