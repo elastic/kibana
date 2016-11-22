@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import { buildInlineScriptForPhraseFilter } from './lib/phrase';
+
 // Adds a filter to a passed state
 export default function (Private) {
   let queryFilter = Private(FilterBarQueryFilterProvider);
@@ -54,17 +56,11 @@ export default function (Private) {
           break;
         default:
           if (field.scripted) {
-            // We must wrap painless scripts in a lambda in case they're more than a simple expression
-            let script = `(${field.script}) == value`;
-            if (field.lang === 'painless') {
-              script = `boolean compare(Supplier s, def v) {return s.get() == v;}
-                        compare(() -> { ${field.script} }, params.value);`;
-            }
             filter = {
               meta: { negate: negate, index: index, field: fieldName },
               script: {
                 script: {
-                  inline: script,
+                  inline: buildInlineScriptForPhraseFilter(field),
                   lang: field.lang,
                   params: {
                     value: value

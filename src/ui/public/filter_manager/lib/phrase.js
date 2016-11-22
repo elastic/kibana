@@ -14,12 +14,7 @@ export default function buildPhraseFilter(field, value, indexPattern) {
       convertedValue = value === 'true' ? true : false;
     }
 
-    // We must wrap painless scripts in a lambda in case they're more than a simple expression
-    let script = `(${field.script}) == value`;
-    if (field.lang === 'painless') {
-      script = `boolean compare(Supplier s, def v) {return s.get() == v;}
-                compare(() -> { ${field.script} }, params.value);`;
-    }
+    const script = buildInlineScriptForPhraseFilter(field);
 
     _.set(filter, 'script.script', {
       inline: script,
@@ -38,3 +33,23 @@ export default function buildPhraseFilter(field, value, indexPattern) {
   }
   return filter;
 };
+
+
+/**
+ * Takes a scripted field and returns an inline script appropriate for use in a script query.
+ * Handles lucene expression and Painless scripts. Other langs aren't guaranteed to generate valid
+ * scripts.
+ *
+ * @param {object} scriptedField A Field object representing a scripted field
+ * @returns {string} The inline script string
+ */
+export function buildInlineScriptForPhraseFilter(scriptedField) {
+  // We must wrap painless scripts in a lambda in case they're more than a simple expression
+  if (scriptedField.lang === 'painless') {
+    return `boolean compare(Supplier s, def v) {return s.get() == v;}
+                compare(() -> { ${scriptedField.script} }, params.value);`;
+  }
+  else {
+    return `(${scriptedField.script}) == value`;
+  }
+}
