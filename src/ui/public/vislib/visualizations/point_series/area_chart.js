@@ -153,7 +153,8 @@ export default function AreaChartFactory(Private) {
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const layer = svg.append('g')
-      .attr('class', 'points area');
+        .attr('class', 'points area')
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       // append the circles
       const circles = layer.selectAll('circles')

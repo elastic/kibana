@@ -47,7 +47,8 @@ export default function LineChartFactory(Private) {
       const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this.seriesConfig.radiusRatio, 2);
 
       const layer = svg.append('g')
-      .attr('class', 'points line');
+        .attr('class', 'points line')
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const circles = layer
       .selectAll('circle')
