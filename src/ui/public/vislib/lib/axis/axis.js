@@ -250,7 +250,7 @@ export default function AxisFactory(Private) {
           }
         } else {
           const axisSpacing = 2;
-          const axisWidth = Math.ceil(length + axisSpacing);
+          const axisWidth = Math.ceil(length);
           selection.attr('width', axisWidth);
           if (position === 'left') {
             selection.select('g')
