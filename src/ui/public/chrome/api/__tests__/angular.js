@@ -10,9 +10,7 @@ describe('Chrome API :: Angular', () => {
         getInjected: noop,
         addBasePath: noop
       };
-      kbnAngular(chrome, {
-        devMode: true
-      });
+      kbnAngular(chrome, {});
     });
     it('should return breadcrumbs based on the url', () => {
     });
