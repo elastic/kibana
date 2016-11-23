@@ -61,6 +61,12 @@ describe('plugins/elasticsearch', () => {
       client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
     }
 
+    function setNodeWithoutHTTP(version) {
+      const nodes = { 'node-without-http': { version, ip: 'ip' } };
+      const client = server.plugins.elasticsearch.client;
+      client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
+    }
+
     it('returns true with single a node that matches', async () => {
       setNodes('5.1.0');
       const result = await checkEsVersion(server, KIBANA_VERSION);
@@ -102,6 +108,24 @@ describe('plugins/elasticsearch', () => {
       sinon.assert.callCount(server.log, 2);
       expect(server.log.getCall(0).args[0]).to.contain('debug');
       expect(server.log.getCall(1).args[0]).to.contain('warning');
+    });
+
+    it('warns if a node is off by a patch version and without http publish address', async () => {
+      setNodeWithoutHTTP('5.1.1');
+      await checkEsVersion(server, KIBANA_VERSION);
+      sinon.assert.callCount(server.log, 2);
+      expect(server.log.getCall(0).args[0]).to.contain('debug');
+      expect(server.log.getCall(1).args[0]).to.contain('warning');
+    });
+
+    it('errors if a node incompatible and without http publish address', async () => {
+      setNodeWithoutHTTP('6.1.1');
+      try {
+        await checkEsVersion(server, KIBANA_VERSION);
+      } catch (e) {
+        expect(e.message).to.contain('incompatible nodes');
+        expect(e).to.be.a(Error);
+      }
     });
 
     it('only warns once per node list', async () => {
