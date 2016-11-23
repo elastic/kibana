@@ -33,7 +33,7 @@ export function getRegisteredTranslationLocales() {
  * This object will contain all registered translations for the highest priority locale which is registered with the i18n module.
  * This object can be empty if no locale in the language tags can be matched against the registered locales.
  */
-export function getTranslations(...languageTags) {
+export function getTranslations([...languageTags]) {
   const locale = getTranslationLocale(languageTags);
   return getTranslationsForLocale(locale);
 };
@@ -96,26 +96,19 @@ function getLocaleFromFileName(fullFileName) {
 }
 
 function getTranslationLocale(languageTags) {
+  let locale = '';
   const registeredLocales = getRegisteredTranslationLocales();
-  const tagLen = languageTags.length;
-  for (let indx = 0; indx < tagLen; indx++) {
-    const tag = languageTags[indx];
-    if (isLocaleExactMatch(tag, registeredLocales)) {
-      return tag;
-    }
-    const localeBestCaseMatch = getLocaleBestCaseMatch(tag, registeredLocales);
-    if (!_.isEmpty(localeBestCaseMatch)) {
-      return localeBestCaseMatch;
-    }
+  _.forEach(languageTags, (tag) => {
+    locale = locale || getBestLocaleMatch(tag, registeredLocales);
+  });
+  return locale;
+}
+
+function getBestLocaleMatch(languageTag, registeredLocales) {
+  if (_.contains(registeredLocales, languageTag)) {
+    return languageTag;
   }
-  return '';
-}
 
-function isLocaleExactMatch(languageTag, registeredLocales) {
-  return  _.contains(registeredLocales, languageTag);
-}
-
-function getLocaleBestCaseMatch(languageTag, registeredLocales) {
   // Find the first registered locale that begins with one of the language codes from the provided language tag.
   // For example, if there is an 'en' language code, it would match an 'en-US' registered locale.
   const languageCode = _.first(languageTag.split('-')) || [];

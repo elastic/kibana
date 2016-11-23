@@ -27,7 +27,7 @@ describe('i18n module', function () {
     describe('getTranslationsForLocale', function () {
 
       it('should return the translations for en locale as registered' , function () {
-        const languageTag = ['en'];
+        const languageTag = 'en';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the server with development mode defaults',
@@ -38,7 +38,7 @@ describe('i18n module', function () {
       });
 
       it('should return the translations for de locale as registered' , function () {
-        const languageTag = ['de'];
+        const languageTag = 'de';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
@@ -46,9 +46,7 @@ describe('i18n module', function () {
         return checkTranslations(expectedTranslationJson, languageTag);
       });
 
-      it('should first return empty object for no locale registered and ' +
-         'then return translations for default locale as requested' , function () {
-        const languageTags = ['es-ES', 'fr'];
+      it('should return translations for default locale which is set to the en locale' , function () {
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the server with development mode defaults',
@@ -56,19 +54,15 @@ describe('i18n module', function () {
           'test_plugin_1-HOME': 'Run along home now!'
         };
         i18n.setDefaultLocale('en');
-        checkTranslations({}, languageTags);
         return checkTranslationsForDefaultLocale(expectedTranslations);
       });
 
-      it('should first return empty object for no locale registered and then return translations for the' +
-         'default locale which is set to the de locale' , function () {
-        const languageTag = ['es-ES'];
+      it('should return translations for the default locale which is set to the de locale' , function () {
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
         };
         i18n.setDefaultLocale('de');
-        checkTranslations({}, languageTag);
         return checkTranslationsForDefaultLocale(expectedTranslations);
       });
 
@@ -86,11 +80,7 @@ describe('i18n module', function () {
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
         };
-        const pluginName = 'test_plugin_1';
-        const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
-        const translationFiles = [ join(pluginTranslationPath, 'es-ES.json') ];
-        translationFiles.forEach(i18n.registerTranslations);
-
+        i18n.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1','es-ES.json'));
         return checkTranslations(expectedTranslations, languageTags);
       });
 
@@ -138,7 +128,7 @@ describe('i18n module', function () {
     describe('getTranslationsForLocale', function () {
 
       it('should return the translations for en locale as registered' , function () {
-        const languageTag = ['en'];
+        const languageTag = 'en';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the server with development mode defaults',
@@ -153,7 +143,7 @@ describe('i18n module', function () {
       });
 
       it('should return the translations for de locale as registered' , function () {
-        const languageTag = ['de'];
+        const languageTag = 'de';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
@@ -162,11 +152,8 @@ describe('i18n module', function () {
       });
 
       it('should return the most recently registered translation for a key that has multiple translations' , function () {
-        const pluginName = 'test_plugin_2';
-        const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
-        const translationFiles = [ join(pluginTranslationPath, 'de.json') ];
-        translationFiles.forEach(i18n.registerTranslations);
-        const languageTag = ['de'];
+        i18n.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_2', 'de.json'));
+        const languageTag = 'de';
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS! I am regsitered afterwards!',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
@@ -189,15 +176,15 @@ describe('i18n module', function () {
 
   describe('registerTranslations', function () {
 
-    it('should throw error when regsitering empty filename', function () {
+    it('should throw error when registering empty filename', function () {
       return expect(i18n.registerTranslations).withArgs('').to.throwError();
     });
 
-    it('should throw error when regsitering filename with no extension', function () {
+    it('should throw error when registering filename with no extension', function () {
       return expect(i18n.registerTranslations).withArgs('file1').to.throwError();
     });
 
-    it('should throw error when regsitering filename with non JSON extension', function () {
+    it('should throw error when registering filename with non JSON extension', function () {
       return expect(i18n.registerTranslations).withArgs('file1.txt').to.throwError();
     });
 
@@ -213,7 +200,7 @@ function checkTranslationsForDefaultLocale(expectedTranslations) {
 }
 
 function checkTranslations(expectedTranslations, languageTags) {
-  return i18n.getTranslations.apply(this, languageTags)
+  return i18n.getTranslations(languageTags)
   .then(function (actualTranslations) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });

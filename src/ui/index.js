@@ -93,7 +93,7 @@ export default async (kbnServer, server, config) => {
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
       const languageTags = getLanguageTags(acceptLanguages);
-      const requestedTranslations = await server.plugins.i18n.getTranslations.apply(this, languageTags);
+      const requestedTranslations = await server.plugins.i18n.getTranslations(languageTags);
 
       const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
       const translations = _.defaults({}, requestedTranslations, defaultTranslations);

@@ -36,23 +36,12 @@ module.exports = function (grunt) {
 
     const kbnServer = new KbnServer(serverConfig);
     kbnServer.ready()
-    .then(function () {
-      verifyTranslations(parsePaths)
-      .then(function () {
-        kbnServer.close()
-        .then(function () {
-          done();
-        });
-      })
-      .catch(function (err) {
-        kbnServer.close();
-        done(false);
-        throw err;
-      });
-    })
-    .catch(function (err) {
-      done(false);
-      throw err;
+    .then(() => verifyTranslations(parsePaths))
+    .then(() => kbnServer.close())
+    .then(done)
+    .catch((err) => {
+      kbnServer.close()
+      .then(() => done(err));
     });
   });
 };

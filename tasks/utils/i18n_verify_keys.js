@@ -17,10 +17,7 @@ const globProm = Promise.promisify(glob);
 export function getTranslationKeys(filesPatterns) {
   return getFilesToVerify(filesPatterns)
   .then(function (filesToVerify) {
-    return getKeys(filesToVerify)
-    .then(function (keys) {
-      return keys;
-    });
+    return getKeys(filesToVerify);
   });
 };
 
@@ -33,7 +30,7 @@ export function getTranslationKeys(filesPatterns) {
  */
 export function getNonTranslatedKeys(translationKeys, localeTranslations) {
   let keysNotTranslatedPerLocale = {};
-  _.map(localeTranslations, (translations, locale) => {
+  _.forEach(localeTranslations, (translations, locale) => {
     const keysNotTranslated = _.difference(translationKeys, Object.keys(translations));
     if (!_.isEmpty(keysNotTranslated)) {
       keysNotTranslatedPerLocale[locale] = keysNotTranslated;
@@ -51,7 +48,7 @@ function getFilesToVerify(verifyFilesPatterns) {
     return globProm(pattern, {cwd: baseSearchDir, matchBase: true})
     .then(function (files) {
       for (let file of files) {
-        filesToVerify.push(baseSearchDir + '/' + file);
+        filesToVerify.push(path.join(baseSearchDir, file));
       }
     });
   })
@@ -79,6 +76,6 @@ function getKeys(filesToVerify) {
   });
   return Promise.all(filePromises)
   .then(function () {
-    return translationKeys;
+    return _.uniq(translationKeys);
   });
 }
