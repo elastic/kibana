@@ -55,12 +55,6 @@ uiModules.get('kibana')
         $scope.limit += 50;
       };
 
-      $el.attr('has-render-count', 'true');
-      $el.attr('render-count', '0');
-      $el.on('renderComplete', () => {
-        $el.attr('render-count', parseInt($el.attr('render-count'), 10) + 1);
-      });
-
       // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
       $scope.$watch('columns', function (columns) {
         if (columns.length !== 0) return;
