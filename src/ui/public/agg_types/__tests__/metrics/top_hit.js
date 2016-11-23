@@ -47,12 +47,12 @@ describe('Top hit metric', function () {
     });
   }
 
-  it ('should return a label prefixed with Last if sorting in descending order', function () {
+  it('should return a label prefixed with Last if sorting in descending order', function () {
     init({ field: 'bytes' });
     expect(topHitMetric.makeLabel(aggConfig)).to.eql('Last bytes');
   });
 
-  it ('should return a label prefixed with First if sorting in ascending order', function () {
+  it('should return a label prefixed with First if sorting in ascending order', function () {
     init({
       field: 'bytes',
       sortOrder: {
@@ -62,20 +62,26 @@ describe('Top hit metric', function () {
     expect(topHitMetric.makeLabel(aggConfig)).to.eql('First bytes');
   });
 
-  it ('should request both for the source and doc_values fields', function () {
+  it('should request both for the source and doc_values fields', function () {
     init({ field: 'bytes' });
     expect(aggDsl.top_hits._source).to.be('bytes');
     expect(aggDsl.top_hits.docvalue_fields).to.eql([ 'bytes' ]);
   });
 
-  it ('should only request for the source if the field is an IP', function () {
+  it('should only request for the source if the field is an IP', function () {
     init({ field: 'ip' });
     expect(aggDsl.top_hits._source).to.be('ip');
     expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
   });
 
+  it('should only request for the source if the field does not have the doc_values property', function () {
+    init({ field: 'ssl' });
+    expect(aggDsl.top_hits._source).to.be('ssl');
+    expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
+  });
+
   describe('try to get the value from the top hit', function () {
-    it ('should return null if there is no hit', function () {
+    it('should return null if there is no hit', function () {
       const bucket = {
         '1': {
           hits: {
@@ -88,7 +94,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
     });
 
-    it ('should return undefined if the field does not appear in the source', function () {
+    it('should return undefined if the field does not appear in the source', function () {
       const bucket = {
         '1': {
           hits: {
@@ -107,7 +113,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be(undefined);
     });
 
-    it ('should return the field value from the top hit', function () {
+    it('should return the field value from the top hit', function () {
       const bucket = {
         '1': {
           hits: {
@@ -126,7 +132,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be('aaa');
     });
 
-    it ('should return the object if the field value is an object', function () {
+    it('should return the object if the field value is an object', function () {
       const bucket = {
         '1': {
           hits: {
@@ -147,7 +153,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.eql({ label: 'aaa' });
     });
 
-    it ('should return an array if the field has more than one values', function () {
+    it('should return an array if the field has more than one values', function () {
       const bucket = {
         '1': {
           hits: {
@@ -166,7 +172,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.eql([ 'aaa', 'bbb' ]);
     });
 
-    it ('should get the value from the doc_values field if the source does not have that field', function () {
+    it('should get the value from the doc_values field if the source does not have that field', function () {
       const bucket = {
         '1': {
           hits: {
@@ -188,7 +194,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be('linux');
     });
 
-    it ('should return null if the field is not in the source nor in the doc_values field', function () {
+    it('should return null if the field is not in the source nor in the doc_values field', function () {
       const bucket = {
         '1': {
           hits: {
