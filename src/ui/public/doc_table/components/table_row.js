@@ -40,10 +40,6 @@ module.directive('kbnTableRow', function ($compile) {
       $el.after('<tr>');
       $el.empty();
 
-      let init = function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      };
-
       // when we compile the details, we use this $scope
       let $detailsScope;
 
@@ -79,11 +75,11 @@ module.directive('kbnTableRow', function ($compile) {
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchCollection('columns', function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      });
-
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
+      $scope.$watchMulti([
+        'indexPattern.timeFieldName',
+        'row.highlight',
+        '[]columns'
+      ], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
@@ -161,8 +157,6 @@ module.directive('kbnTableRow', function ($compile) {
 
         return text;
       }
-
-      init();
     }
   };
 });
