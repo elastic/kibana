@@ -118,3 +118,5 @@ include::visualize/pie.asciidoc[]
 include::visualize/tilemap.asciidoc[]
 
 include::visualize/vertbar.asciidoc[]
+
+include::visualize/tagcloud.asciidoc[]
