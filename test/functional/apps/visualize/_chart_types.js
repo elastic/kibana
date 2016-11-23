@@ -1,9 +1,7 @@
-
 import expect from 'expect.js';
 
 import {
-  bdd,
-  scenarioManager,
+  bdd
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -19,16 +17,16 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should show the correct chart types', function () {
       var expectedChartTypes = [
         'Area chart', 'Data table', 'Line chart', 'Markdown widget',
-        'Metric', 'Pie chart', 'Tile map', 'Timeseries', 'Vertical bar chart'
+        'Metric', 'Pie chart', 'Tag cloud', 'Tile map', 'Timeseries', 'Vertical bar chart'
       ];
       // find all the chart types and make sure there all there
       return PageObjects.visualize.getChartTypes()
-      .then(function testChartTypes(chartTypes) {
-        PageObjects.common.debug('returned chart types = ' + chartTypes);
-        PageObjects.common.debug('expected chart types = ' + expectedChartTypes);
-        PageObjects.common.saveScreenshot('Visualize-chart-types');
-        expect(chartTypes).to.eql(expectedChartTypes);
-      });
+        .then(function testChartTypes(chartTypes) {
+          PageObjects.common.debug('returned chart types = ' + chartTypes);
+          PageObjects.common.debug('expected chart types = ' + expectedChartTypes);
+          PageObjects.common.saveScreenshot('Visualize-chart-types');
+          expect(chartTypes).to.eql(expectedChartTypes);
+        });
     });
   });
 });
