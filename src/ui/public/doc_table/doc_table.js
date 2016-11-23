@@ -24,7 +24,7 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
     },
-    link: function ($scope, $el) {
+    link: function ($scope) {
       let notify = new Notifier();
       $scope.limit = 50;
       $scope.persist = {
