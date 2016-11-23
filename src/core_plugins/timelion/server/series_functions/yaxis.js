@@ -77,6 +77,14 @@ module.exports = new Chainable('yaxis', {
         if (!tickFormatters[unitTokens[0]]) {
           throw new Error (`${units} is not a supported unit type.`);
         }
+        if (unitTokens[0] === 'currency') {
+          const threeLetterCode = /^[A-Za-z]{3}$/;
+          const currency = unitTokens[1];
+          if (currency && !threeLetterCode.test(currency)) {
+            throw new Error('Currency must be a three letter code');
+          }
+        }
+
         myAxis.units = {
           type: unitTokens[0],
           prefix: unitTokens[1] || '',
