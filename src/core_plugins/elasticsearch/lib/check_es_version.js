@@ -46,7 +46,8 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
     function getHumanizedNodeNames(nodes) {
       return nodes.map(node => {
-        return 'v' + node.version + ' @ ' + node.http.publish_address + ' (' + node.ip + ')';
+        const publishAddress =  _.get(node, 'http.publish_address') ? (_.get(node, 'http.publish_address') + ' ') : '';
+        return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
       });
     }
 
@@ -54,7 +55,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
       const simplifiedNodes = warningNodes.map(node => ({
         version: node.version,
         http: {
-          publish_address: node.http.publish_address,
+          publish_address: _.get(node, 'http.publish_address')
         },
         ip: node.ip,
       }));
@@ -81,7 +82,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
       const errorMessage =
         `This version of Kibana requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
-        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(',')}`;
+        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`;
 
       throw new SetupError(server, errorMessage);
     }
