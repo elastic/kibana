@@ -43,6 +43,7 @@ export default function HistogramVisType(Private) {
       modes: ['stacked', 'percentage', 'grouped'],
       editor: histogramTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
