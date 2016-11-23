@@ -168,10 +168,10 @@ describe('ui settings', function () {
       expect(await uiSettings.getUserProvided(req)).to.eql({});
     });
 
-    it('returns an empty object on 401 responses', async function () {
+    it('returns an empty object on 403 responses', async function () {
       const { uiSettings, req } = instantiate({
         async callWithRequest() {
-          throw new esErrors[401]();
+          throw new esErrors[403]();
         }
       });
 
@@ -186,6 +186,21 @@ describe('ui settings', function () {
       });
 
       expect(await uiSettings.getUserProvided(req)).to.eql({});
+    });
+
+    it('throws 401 errors', async function () {
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw new esErrors[401]();
+        }
+      });
+
+      try {
+        await uiSettings.getUserProvided(req);
+        throw new Error('expect getUserProvided() to throw');
+      } catch (err) {
+        expect(err).to.be.a(esErrors[401]);
+      }
     });
 
     it('throw when callWithRequest fails in some unexpected way', async function () {
