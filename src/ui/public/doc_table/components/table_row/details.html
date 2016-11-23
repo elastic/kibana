@@ -3,6 +3,7 @@
     <a
       class="btn btn-default btn-xs documentTableRow__action"
       ng-href="{{ getContextAppHref() }}"
+      ng-if="indexPattern.hasTimeField()"
     >
       <i class="fa fa-files-o" />
       View surrounding entries
