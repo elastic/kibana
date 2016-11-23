@@ -91,7 +91,12 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     if (value === null) {
       delete settings[key].userValue;
     } else {
-      settings[key].userValue = value;
+      const { type } = settings[key];
+      if (type === 'json' && typeof value !== 'string') {
+        settings[key].userValue = angular.toJson(value);
+      } else {
+        settings[key].userValue = value;
+      }
     }
   }
 

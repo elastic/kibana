@@ -1,6 +1,7 @@
 import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
+import { props } from 'bluebird';
 import Boom from 'boom';
 import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
@@ -61,7 +62,9 @@ export default async (kbnServer, server, config) => {
     }
   });
 
-  async function getPayload(app) {
+  async function getKibanaPayload({ app, request, includeUserProvidedConfig }) {
+    const uiSettings = server.uiSettings();
+
     return {
       app: app,
       nav: uiExports.navLinks.inOrder,
@@ -71,42 +74,47 @@ export default async (kbnServer, server, config) => {
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
-      uiSettings: {
-        defaults: await server.uiSettings().getDefaults(),
-        user: {}
-      },
+      uiSettings: await props({
+        defaults: uiSettings.getDefaults(),
+        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+      }),
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
-        async (acc, replacer) => await replacer(acc, this.request, server),
+        async (acc, replacer) => await replacer(acc, request, server),
         defaults(await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
-      )
+      ),
     };
   }
 
-  function viewAppWithPayload(app, payload) {
-    return this.view(app.templateName, {
-      app: app,
-      kibanaPayload: payload,
-      bundlePath: `${config.get('server.basePath')}/bundles`,
-    });
-  }
-
-  async function renderApp(app) {
-    const payload = await getPayload.call(this, app);
-
-    const esStatus = kbnServer.status.getForPluginId('elasticsearch');
-    if (esStatus && esStatus.state !== 'red') {
-      payload.uiSettings.user = await server.uiSettings().getUserProvided();
+  async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
+    try {
+      return reply.view(app.templateName, {
+        app,
+        kibanaPayload: await getKibanaPayload({
+          app,
+          request: reply.request,
+          includeUserProvidedConfig
+        }),
+        bundlePath: `${config.get('server.basePath')}/bundles`,
+      });
+    } catch (err) {
+      reply(err);
     }
-
-    return viewAppWithPayload.call(this, app, payload);
   }
 
-  async function renderAppWithDefaultConfig(app) {
-    const payload = await getPayload.call(this, app);
-    return viewAppWithPayload.call(this, app, payload);
-  }
+  server.decorate('reply', 'renderApp', function (app) {
+    return renderApp({
+      app,
+      reply: this,
+      includeUserProvidedConfig: true,
+    });
+  });
 
-  server.decorate('reply', 'renderApp', renderApp);
-  server.decorate('reply', 'renderAppWithDefaultConfig', renderAppWithDefaultConfig);
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+    return renderApp({
+      app,
+      reply: this,
+      includeUserProvidedConfig: false,
+    });
+  });
 };
