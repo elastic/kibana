@@ -140,6 +140,7 @@ module.directive('kbnTableRow', function ($compile) {
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
+        $el.trigger('renderComplete');
       }
 
       /**

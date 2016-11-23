@@ -24,7 +24,7 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
     },
-    link: function ($scope) {
+    link: function ($scope, $el) {
       let notify = new Notifier();
       $scope.limit = 50;
       $scope.persist = {
@@ -54,6 +54,12 @@ uiModules.get('kibana')
       $scope.addRows = function () {
         $scope.limit += 50;
       };
+
+      $el.attr('has-render-count', 'true');
+      $el.attr('render-count', '0');
+      $el.on('renderComplete', () => {
+        $el.attr('render-count', parseInt($el.attr('render-count'), 10) + 1);
+      });
 
       // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
       $scope.$watch('columns', function (columns) {
