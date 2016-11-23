@@ -28,13 +28,16 @@
     search-source="savedObj.searchSource"
     show-spy-panel="chrome.getVisible()"
     ui-state="uiState"
+    render-counter
     class="panel-content">
   </visualize>
 
-  <doc-table ng-switch-when="search"
+  <doc-table
+    ng-switch-when="search"
     search-source="savedObj.searchSource"
     sorting="panel.sort"
     columns="panel.columns"
+    render-counter
     class="panel-content"
     filter="filter">
   </doc-table>
