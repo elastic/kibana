@@ -18,7 +18,7 @@ uiRoutes
       columns="contextAppRoute.state.columns"
       index-pattern="contextAppRoute.indexPattern"
       size="contextAppRoute.state.size"
-      sort="contextAppRoute.state.sort"
+      sort="[contextAppRoute.indexPattern.timeFieldName, 'desc']"
     >`
   ),
 });
@@ -29,7 +29,6 @@ function ContextAppRouteController($routeParams, $scope, AppState, indexPattern)
   $scope.$watchGroup([
     'contextAppRoute.state.columns',
     'contextAppRoute.state.size',
-    'contextAppRoute.state.sort',
   ], () => this.state.save());
   this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
   this.indexPattern = indexPattern;
@@ -39,6 +38,5 @@ function createDefaultAppState() {
   return {
     columns: ['_source'],
     size: 5,
-    sort: ['@timestamp', 'desc'],
   };
 }
