@@ -9,12 +9,12 @@ export default function registerSet(server) {
       const { value } = req.payload;
       const uiSettings = server.uiSettings();
       uiSettings
-        .set(key, value)
+        .set(req, key, value)
         .then(() => uiSettings
-          .getUserProvided()
+          .getUserProvided(req)
           .then(settings => reply({ settings }).type('application/json'))
         )
-        .catch(reason => reply(Boom.wrap(reason)));
+        .catch(err => reply(Boom.wrap(err, err.statusCode)));
     }
   });
 }
