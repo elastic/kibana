@@ -8,12 +8,12 @@ export default function registerDelete(server) {
       const { key } = req.params;
       const uiSettings = server.uiSettings();
       uiSettings
-        .remove(key)
+        .remove(req, key)
         .then(() => uiSettings
-          .getUserProvided()
+          .getUserProvided(req)
           .then(settings => reply({ settings }).type('application/json'))
         )
-        .catch(reason => reply(Boom.wrap(reason)));
+        .catch(err => reply(Boom.wrap(err, err.statusCode)));
     }
   });
 }
