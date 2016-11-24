@@ -15,7 +15,7 @@ let notify = new Notifier({
   location: 'timepicker',
 });
 
-module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals, $timeout) {
   return {
     restrict: 'E',
     scope: {
@@ -26,7 +26,8 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       activeTab: '='
     },
     template: html,
-    controller: function ($scope) {
+    require: '^kbnTopNav',
+    link: function ($scope, element, attributes, kbnTopNav) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
@@ -125,6 +126,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.setQuick = function (from, to) {
         $scope.from = from;
         $scope.to = to;
+        $timeout(() => kbnTopNav.toggle('filter'));
       };
 
       $scope.setToNow = function () {
