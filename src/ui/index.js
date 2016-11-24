@@ -1,6 +1,7 @@
 import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
+import { props } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
 import fromRoot from '../utils/from_root';
@@ -60,7 +61,8 @@ export default async (kbnServer, server, config) => {
     }
   });
 
-  async function getPayload(app) {
+  async function getKibanaPayload({ app, request, includeUserProvidedConfig }) {
+    const uiSettings = server.uiSettings();
     return {
       app: app,
       nav: uiExports.navLinks.inOrder,
@@ -69,37 +71,44 @@ export default async (kbnServer, server, config) => {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
-      uiSettings: {
-        defaults: await server.uiSettings().getDefaults(),
-        user: {}
-      },
+      uiSettings: await props({
+        defaults: uiSettings.getDefaults(),
+        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+      }),
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
   }
 
-  function viewAppWithPayload(app, payload) {
-    return this.view(app.templateName, {
-      app: app,
-      loadingGif: loadingGif,
-      kibanaPayload: payload,
-      bundlePath: `${config.get('server.basePath')}/bundles`,
-    });
-  }
-
-  async function renderApp(app) {
-    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
-    const payload = await getPayload(app);
-    if (!isElasticsearchPluginRed) {
-      payload.uiSettings.user = await server.uiSettings().getUserProvided();
+  async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
+    try {
+      return reply.view(app.templateName, {
+        app,
+        loadingGif: loadingGif,
+        kibanaPayload: await getKibanaPayload({
+          app,
+          request: reply.request,
+          includeUserProvidedConfig
+        }),
+        bundlePath: `${config.get('server.basePath')}/bundles`,
+      });
+    } catch (err) {
+      reply(err);
     }
-    return viewAppWithPayload.call(this, app, payload);
   }
 
-  async function renderAppWithDefaultConfig(app) {
-    const payload = await getPayload(app);
-    return viewAppWithPayload.call(this, app, payload);
-  }
+  server.decorate('reply', 'renderApp', function (app) {
+    return renderApp({
+      app,
+      reply: this,
+      includeUserProvidedConfig: true,
+    });
+  });
 
-  server.decorate('reply', 'renderApp', renderApp);
-  server.decorate('reply', 'renderAppWithDefaultConfig', renderAppWithDefaultConfig);
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+    return renderApp({
+      app,
+      reply: this,
+      includeUserProvidedConfig: false,
+    });
+  });
 };
