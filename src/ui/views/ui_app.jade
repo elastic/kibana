@@ -125,7 +125,7 @@ block content
 
       var hideLoadingMessage = /#.*[?&]embed(&|$)/.test(window.location.href);
       if (hideLoadingMessage) {
-        var loading = document.querySelector('.ui-app-loading h1');
+        var loading = document.querySelector('.kibanaWelcomeView');
         loading.removeChild(loading.lastChild);
       }
 
