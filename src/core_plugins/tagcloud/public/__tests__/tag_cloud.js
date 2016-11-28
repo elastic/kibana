@@ -240,7 +240,7 @@ describe('tag cloud', function () {
   });
 
 
-  it(`should not put elements in view when container to small`, function (done) {
+  it(`should not put elements in view when container is too small`, function (done) {
 
     domNode.style.width = '1px';
     domNode.style.height = '1px';

@@ -255,7 +255,7 @@ class TagCloud extends EventEmitter {
       } else {
         this._updateLayout();
       }
-    }, 10);
+    }, 0);//unhook from callstack. this avoids kicking off multiple layouts if multiple changes come in succession
   }
 
   _scheduleLayout(job) {
