@@ -25,6 +25,7 @@ uiModules
 
   return {
     restrict: 'E',
+    require: '?renderCounter',
     scope : {
       showSpyPanel: '=?',
       vis: '=',
@@ -34,7 +35,7 @@ uiModules
       esResp: '=?',
     },
     template: visualizeTemplate,
-    link: function ($scope, $el, attr) {
+    link: function ($scope, $el, attr, renderCounter) {
       const minVisChartHeight = 180;
 
       if (_.isUndefined($scope.showSpyPanel)) {
@@ -71,6 +72,10 @@ uiModules
       $scope.getVisContainerClasses = function () {
         return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
+
+      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
+        renderCounter.disable();
+      }
 
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
@@ -168,7 +173,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
-          $scope.vis.emit('renderComplete');
+          $el.trigger('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
@@ -194,6 +199,7 @@ uiModules
 
       $scope.$on('$destroy', function () {
         if ($scope.renderbot) {
+          $el.off('renderComplete');
           $scope.renderbot.destroy();
         }
       });
