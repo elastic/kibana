@@ -92,11 +92,7 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-      const languageTags = getLanguageTags(acceptLanguages);
-      const requestedTranslations = await server.plugins.i18n.getTranslations(languageTags);
-
-      const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
-      const translations = _.defaults({}, requestedTranslations, defaultTranslations);
+      const translations = await getTranslations(acceptLanguages, server);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -112,18 +108,20 @@ export default async (kbnServer, server, config) => {
     }
   }
 
-  server.decorate('reply', 'renderApp', function (app) {
+  server.decorate('reply', 'renderApp', function (app, acceptLanguages) {
     return renderApp({
       app,
       reply: this,
+      acceptLanguages,
       includeUserProvidedConfig: true,
     });
   });
 
-  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app, acceptLanguages) {
     return renderApp({
       app,
       reply: this,
+      acceptLanguages,
       includeUserProvidedConfig: false,
     });
   });
@@ -135,4 +133,12 @@ function getLanguageTags(acceptLanguages) {
   return _.map(languages, (language) => {
     return _.compact([language.code, language.region, language.script]).join('-');
   });
+}
+
+async function getTranslations(acceptLanguages, server) {
+  const languageTags = getLanguageTags(acceptLanguages);
+  const requestedTranslations = await server.plugins.i18n.getTranslations(languageTags);
+  const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
+  const translations = _.defaults({}, requestedTranslations, defaultTranslations);
+  return translations;
 }
