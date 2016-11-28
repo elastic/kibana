@@ -8,7 +8,7 @@ const module = uiModules.get('kibana/table_vis', ['kibana']);
 
 // add a controller to tha module, which will transform the esResponse into a
 // tabular format that we can pass to the table directive
-module.controller('KbnTableVisController', function ($scope, Private) {
+module.controller('KbnTableVisController', function ($scope, $element, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   var uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
@@ -43,6 +43,8 @@ module.controller('KbnTableVisController', function ($scope, Private) {
         if (table.tables) return table.tables.some(haveRows);
         return table.rows.length > 0;
       });
+
+      $element.trigger('renderComplete');
     }
 
     $scope.hasSomeRows = hasSomeRows;

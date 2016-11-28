@@ -12,7 +12,7 @@ export default {
     configuration: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-configuration.html`,
     elasticsearchOutput: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/elasticsearch-output.html`,
     elasticsearchOutputAnchorParameters: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/elasticsearch-output.html#_parameters`,
-    startup: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/_step_5_starting_filebeat.html`,
+    startup: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-starting.html`,
     exportedFields: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/exported-fields.html`
   },
   scriptedFields: {

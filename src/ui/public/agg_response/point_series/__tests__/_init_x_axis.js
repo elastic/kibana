@@ -25,6 +25,8 @@ describe('initXAxis', function () {
       }
     }
   };
+  const field = {};
+  const indexPattern = {};
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
     let chart = _.cloneDeep(baseChart);
@@ -37,11 +39,19 @@ describe('initXAxis', function () {
   it('makes the chart ordered if the agg is ordered', function () {
     let chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
+    chart.aspects.x.agg.params = {
+      field: field
+    };
+    chart.aspects.x.agg.vis = {
+      indexPattern: indexPattern
+    };
 
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.agg.fieldFormatter())
+      .and.have.property('indexPattern', indexPattern)
+      .and.have.property('xAxisField', field)
       .and.have.property('ordered');
 
     expect(chart.ordered)
@@ -53,11 +63,19 @@ describe('initXAxis', function () {
     let chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
     chart.aspects.x.agg.write = _.constant({ params: { interval: 10 } });
+    chart.aspects.x.agg.params = {
+      field: field
+    };
+    chart.aspects.x.agg.vis = {
+      indexPattern: indexPattern
+    };
 
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.agg.fieldFormatter())
+      .and.have.property('indexPattern', indexPattern)
+      .and.have.property('xAxisField', field)
       .and.have.property('ordered');
 
     expect(chart.ordered)

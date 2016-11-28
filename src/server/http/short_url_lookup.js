@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 
 export default function (server) {
-  async function updateMetadata(urlId, urlDoc) {
-    const client = server.plugins.elasticsearch.adminClient;
+  async function updateMetadata(urlId, urlDoc, req) {
+    const callWithRequest = server.plugins.elasticsearch.callAdminWithRequest;
     const kibanaIndex = server.config().get('kibana.index');
 
     try {
-      await client.update({
+      await callWithRequest(req, 'update', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -23,12 +23,12 @@ export default function (server) {
     }
   }
 
-  async function getUrlDoc(urlId) {
+  async function getUrlDoc(urlId, req) {
     const urlDoc = await new Promise((resolve, reject) => {
-      const client = server.plugins.elasticsearch.adminClient;
+      const callWithRequest = server.plugins.elasticsearch.callAdminWithRequest;
       const kibanaIndex = server.config().get('kibana.index');
 
-      client.get({
+      callWithRequest(req, 'get', {
         index: kibanaIndex,
         type: 'url',
         id: urlId
@@ -44,12 +44,12 @@ export default function (server) {
     return urlDoc;
   }
 
-  async function createUrlDoc(url, urlId) {
+  async function createUrlDoc(url, urlId, req) {
     const newUrlId = await new Promise((resolve, reject) => {
-      const client = server.plugins.elasticsearch.adminClient;
+      const callWithRequest = server.plugins.elasticsearch.callAdminWithRequest;
       const kibanaIndex = server.config().get('kibana.index');
 
-      client.index({
+      callWithRequest(req, 'index', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -80,19 +80,19 @@ export default function (server) {
   }
 
   return {
-    async generateUrlId(url) {
+    async generateUrlId(url, req) {
       const urlId = createUrlId(url);
-      const urlDoc = await getUrlDoc(urlId);
+      const urlDoc = await getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
-      return createUrlDoc(url, urlId);
+      return createUrlDoc(url, urlId, req);
     },
-    async getUrl(urlId) {
+    async getUrl(urlId, req) {
       try {
-        const urlDoc = await getUrlDoc(urlId);
+        const urlDoc = await getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
 
-        updateMetadata(urlId, urlDoc);
+        updateMetadata(urlId, urlDoc, req);
 
         return urlDoc._source.url;
       } catch (err) {

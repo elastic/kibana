@@ -1,14 +1,15 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('markdown vis controller', function () {
   let $scope;
-  let $el;
 
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
-    $controller('KbnMarkdownVisController', {$scope: $scope});
+    const $element = $('<div>');
+    $controller('KbnMarkdownVisController', { $scope, $element });
     $scope.$digest();
   }));
 

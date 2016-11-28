@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import $ from 'jquery';
 import errors from 'ui/errors';
 import Binder from 'ui/binder';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
@@ -126,8 +127,8 @@ export default function HandlerBaseClass(Private) {
         binder.on(chart.events, 'rendered', () => {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
-            // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
-            charts[0].events.emit('renderComplete');
+            // events from all charts are propagated to vis, we only need to fire renderComplete once they all finish
+            $(self.el).trigger('renderComplete');
           }
         });
 
@@ -184,10 +185,12 @@ export default function HandlerBaseClass(Private) {
         .append('h4').text(message);
 
         div.append('div').attr('class', 'item bottom');
-        return div;
+      } else {
+        div.append('h4').text(message);
       }
 
-      return div.append('h4').text(message);
+      $(this.el).trigger('renderComplete');
+      return div;
     };
 
     /**

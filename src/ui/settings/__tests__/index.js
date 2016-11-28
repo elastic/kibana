@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import init from '..';
 import defaultsProvider from '../defaults';
+import { errors as esErrors } from 'elasticsearch';
 
 describe('ui settings', function () {
   describe('overview', function () {
@@ -22,23 +23,23 @@ describe('ui settings', function () {
 
   describe('#setMany()', function () {
     it('returns a promise', () => {
-      const { uiSettings } = instantiate();
-      const result = uiSettings.setMany({ a: 'b' });
+      const { uiSettings, req } = instantiate();
+      const result = uiSettings.setMany(req, { a: 'b' });
       expect(result).to.be.a(Promise);
     });
 
     it('updates a single value in one operation', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.setMany({ one: 'value' });
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.setMany(req, { one: 'value' });
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value'
       });
     });
 
     it('updates several values in one operation', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.setMany({ one: 'value', another: 'val' });
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.setMany(req, { one: 'value', another: 'val' });
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value', another: 'val'
       });
     });
@@ -46,15 +47,15 @@ describe('ui settings', function () {
 
   describe('#set()', function () {
     it('returns a promise', () => {
-      const { uiSettings } = instantiate();
-      const result = uiSettings.set('a', 'b');
+      const { uiSettings, req } = instantiate();
+      const result = uiSettings.set(req, 'a', 'b');
       expect(result).to.be.a(Promise);
     });
 
     it('updates single values by (key, value)', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.set('one', 'value');
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.set(req, 'one', 'value');
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value'
       });
     });
@@ -62,15 +63,15 @@ describe('ui settings', function () {
 
   describe('#remove()', function () {
     it('returns a promise', () => {
-      const { uiSettings } = instantiate();
-      const result = uiSettings.remove('one');
+      const { uiSettings, req } = instantiate();
+      const result = uiSettings.remove(req, 'one');
       expect(result).to.be.a(Promise);
     });
 
     it('removes single values by key', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.remove('one');
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.remove(req, 'one');
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null
       });
     });
@@ -78,23 +79,23 @@ describe('ui settings', function () {
 
   describe('#removeMany()', function () {
     it('returns a promise', () => {
-      const { uiSettings } = instantiate();
-      const result = uiSettings.removeMany(['one']);
+      const { uiSettings, req } = instantiate();
+      const result = uiSettings.removeMany(req, ['one']);
       expect(result).to.be.a(Promise);
     });
 
     it('removes a single value', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.removeMany(['one']);
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.removeMany(req, ['one']);
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null
       });
     });
 
     it('updates several values in one operation', function () {
-      const { server, uiSettings, configGet } = instantiate();
-      const result = uiSettings.removeMany(['one', 'two', 'three']);
-      expectElasticsearchUpdateQuery(server, configGet, {
+      const { server, uiSettings, configGet, req } = instantiate();
+      const result = uiSettings.removeMany(req, ['one', 'two', 'three']);
+      expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null, two: null, three: null
       });
     });
@@ -134,15 +135,15 @@ describe('ui settings', function () {
   describe('#getUserProvided()', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = { user: 'customized' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getUserProvided();
-      expectElasticsearchGetQuery(server, configGet);
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getUserProvided(req);
+      expectElasticsearchGetQuery(server, req, configGet);
     });
 
     it('returns user configuration', async function () {
       const getResult = { user: 'customized' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getUserProvided();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }
       })).to.equal(true);
@@ -150,33 +151,95 @@ describe('ui settings', function () {
 
     it('ignores null user configuration (because default values)', async function () {
       const getResult = { user: 'customized', usingDefault: null, something: 'else' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getUserProvided();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
       })).to.equal(true);
+    });
+
+    it('returns an empty object on 404 responses', async function () {
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw new esErrors[404]();
+        }
+      });
+
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
+    });
+
+    it('returns an empty object on 403 responses', async function () {
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw new esErrors[403]();
+        }
+      });
+
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
+    });
+
+    it('returns an empty object on NoConnections responses', async function () {
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw new esErrors.NoConnections();
+        }
+      });
+
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
+    });
+
+    it('throws 401 errors', async function () {
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw new esErrors[401]();
+        }
+      });
+
+      try {
+        await uiSettings.getUserProvided(req);
+        throw new Error('expect getUserProvided() to throw');
+      } catch (err) {
+        expect(err).to.be.a(esErrors[401]);
+      }
+    });
+
+    it('throw when callWithRequest fails in some unexpected way', async function () {
+      const expectedUnexpectedError = new Error('unexpected');
+
+      const { uiSettings, req } = instantiate({
+        async callWithRequest() {
+          throw expectedUnexpectedError;
+        }
+      });
+
+      try {
+        await uiSettings.getUserProvided(req);
+        throw new Error('expect getUserProvided() to throw');
+      } catch (err) {
+        expect(err).to.be(expectedUnexpectedError);
+      }
     });
   });
 
   describe('#getRaw()', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getRaw();
-      expectElasticsearchGetQuery(server, configGet);
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getRaw(req);
+      expectElasticsearchGetQuery(server, req, configGet);
     });
 
     it(`without user configuration it's equal to the defaults`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getRaw();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getRaw(req);
       expect(isEqual(result, defaultsProvider())).to.equal(true);
     });
 
     it(`user configuration gets merged with defaults`, async function () {
       const getResult = { foo: 'bar' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getRaw();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getRaw(req);
       const merged = defaultsProvider();
       merged.foo = { userValue: 'bar' };
       expect(isEqual(result, merged)).to.equal(true);
@@ -184,8 +247,8 @@ describe('ui settings', function () {
 
     it(`user configuration gets merged into defaults`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getRaw();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getRaw(req);
       const merged = defaultsProvider();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
       expect(isEqual(result, merged)).to.equal(true);
@@ -195,15 +258,15 @@ describe('ui settings', function () {
   describe('#getAll()', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getAll();
-      expectElasticsearchGetQuery(server, configGet);
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getAll(req);
+      expectElasticsearchGetQuery(server, req, configGet);
     });
 
     it(`returns key value pairs`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getAll();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -214,8 +277,8 @@ describe('ui settings', function () {
 
     it(`returns key value pairs including user configuration`, async function () {
       const getResult = { something: 'user-provided' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getAll();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -227,8 +290,8 @@ describe('ui settings', function () {
 
     it(`returns key value pairs including user configuration for existing settings`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.getAll();
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -242,55 +305,63 @@ describe('ui settings', function () {
   describe('#get()', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.get();
-      expectElasticsearchGetQuery(server, configGet);
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.get(req);
+      expectElasticsearchGetQuery(server, req, configGet);
     });
 
     it(`returns the promised value for a key`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.get('dateFormat');
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.get(req, 'dateFormat');
       const defaults = defaultsProvider();
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
     it(`returns the user-configured value for a custom key`, async function () {
       const getResult = { custom: 'value' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.get('custom');
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.get(req, 'custom');
       expect(result).to.equal('value');
     });
 
     it(`returns the user-configured value for a modified key`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet } = instantiate({ getResult });
-      const result = await uiSettings.get('dateFormat');
+      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const result = await uiSettings.get(req, 'dateFormat');
       expect(result).to.equal('YYYY-MM-DD');
     });
   });
 });
 
-function expectElasticsearchGetQuery(server, configGet) {
-  expect(server.plugins.elasticsearch.adminClient.get.callCount).to.equal(1);
-  expect(isEqual(server.plugins.elasticsearch.adminClient.get.firstCall.args, [{
+function expectElasticsearchGetQuery(server, req, configGet) {
+  const { callAdminWithRequest } = server.plugins.elasticsearch;
+  sinon.assert.calledOnce(callAdminWithRequest);
+  const [reqPassed, method, params] = callAdminWithRequest.args[0];
+  expect(reqPassed).to.be(req);
+  expect(method).to.be('get');
+  expect(params).to.eql({
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config'
-  }])).to.equal(true);
+  });
 }
 
-function expectElasticsearchUpdateQuery(server, configGet, doc) {
-  expect(server.plugins.elasticsearch.adminClient.update.callCount).to.equal(1);
-  expect(isEqual(server.plugins.elasticsearch.adminClient.update.firstCall.args, [{
+function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
+  const { callAdminWithRequest } = server.plugins.elasticsearch;
+  sinon.assert.calledOnce(callAdminWithRequest);
+  const [reqPassed, method, params] = callAdminWithRequest.args[0];
+  expect(reqPassed).to.be(req);
+  expect(method).to.be('update');
+  expect(params).to.eql({
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config',
     body: { doc }
-  }])).to.equal(true);
+  });
 }
 
-function instantiate({ getResult } = {}) {
+function instantiate({ getResult, callWithRequest } = {}) {
   const esStatus = {
     state: 'green',
     on: sinon.spy()
@@ -308,14 +379,27 @@ function instantiate({ getResult } = {}) {
     },
     ready: sinon.stub().returns(Promise.resolve())
   };
+  const req = { __stubHapiRequest: true, path: '', headers: {} };
   const server = {
     decorate: (_, key, value) => server[key] = value,
     plugins: {
       elasticsearch: {
-        adminClient: {
-          get: sinon.stub().returns(Promise.resolve({ _source: getResult })),
-          update: sinon.stub().returns(Promise.resolve())
-        }
+        errors: esErrors,
+        callAdminWithRequest: sinon.spy((withReq, method, params) => {
+          if (callWithRequest) {
+            return callWithRequest(withReq, method, params);
+          }
+
+          expect(withReq).to.be(req);
+          switch (method) {
+            case 'get':
+              return Promise.resolve({ _source: getResult });
+            case 'update':
+              return Promise.resolve();
+            default:
+              throw new Error(`callWithRequest() is using unexpected method "${method}"`);
+          }
+        })
       }
     }
   };
@@ -328,5 +412,5 @@ function instantiate({ getResult } = {}) {
   };
   const setupSettings = init(kbnServer, server, config);
   const uiSettings = server.uiSettings();
-  return { server, uiSettings, configGet };
+  return { server, uiSettings, configGet, req };
 }

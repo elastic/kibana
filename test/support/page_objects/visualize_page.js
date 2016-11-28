@@ -292,19 +292,13 @@ export default class VisualizePage {
     });
   }
 
-
   clickNewVisualization() {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[aria-label="New Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeNewButton')
     .click();
   }
 
-
   saveVisualization(vizName) {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[aria-label="Save Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -339,9 +333,7 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('[aria-label="Open Saved Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeOpenButton')
       .click();
   }
 
@@ -433,7 +425,6 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
     var self = this.remote;
     var chartData = [];
     var tempArray = [];
