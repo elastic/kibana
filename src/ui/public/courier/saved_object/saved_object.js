@@ -44,6 +44,14 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       return type;
     };
 
+    /**
+     * Flips to true during a save operation, and back to false once the save operation
+     * completes.
+     * @type {boolean}
+     */
+    self.isSaving = false;
+    self.defaults = config.defaults || {};
+
     // Create a notifier for sending alerts
     let notify = new Notifier({
       location: 'Saved ' + type
@@ -51,9 +59,6 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
     // mapping definition for the fields that this object will expose
     let mapping = mappingSetup.expandShorthand(config.mapping);
-
-    // default field values, assigned when the source is loaded
-    let defaults = config.defaults || {};
 
     let afterESResp = config.afterESResp || _.noop;
     let customInit = config.init || _.noop;
@@ -107,7 +112,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
         // If there is not id, then there is no document to fetch from elasticsearch
         if (!self.id) {
           // just assign the defaults and be done
-          _.assign(self, defaults);
+          _.assign(self, self.defaults);
           return hydrateIndexPattern().then(() => {
             return afterESResp.call(self);
           });
@@ -139,7 +144,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       }
 
       // assign the defaults to the response
-      _.defaults(self._source, defaults);
+      _.defaults(self._source, self.defaults);
 
       // transform the source using _deserializers
       _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
@@ -254,6 +259,8 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @resolved {String} - The id of the doc
      */
     self.save = function () {
+      // Save the original id in case the save fails.
+      let originalId = self.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
       // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
       // exists.
@@ -265,19 +272,23 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       }
 
       // Create a unique id for this object if it doesn't have one already.
-      this.id = this.id || uuid.v1();
+      self.id = this.id || uuid.v1();
       // ensure that the docSource has the current id
       docSource.id(self.id);
 
       let source = self.serialize();
 
-      return docSource.doCreate(source)
+      self.isSaving = true;
+      return docSource.doIndex(source)
+        .then((id) => { self.id = id; })
         .then(self.refreshIndex)
+        .then(() => {
+          self.isSaving = false;
+          return self.id;
+        })
         .catch(function (err) {
-          // if record exists, overwrite it.
-          if (_.get(err, 'origError.status') === 409) {
-            return docSource.doIndex(source).then(self.refreshIndex);
-          }
+          self.isSaving = false;
+          self.id = originalId;
           return Promise.reject(err);
         });
     };
