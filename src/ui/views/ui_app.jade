@@ -110,23 +110,28 @@ block content
       opacity: 0.8;
     }
 
-  .kibanaWelcomeView
+  .kibanaWelcomeView(
+    data-id="kibanaWelcomeView"
+  )
     .kibanaLoader
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
         | Loading Kibana
-    .kibanaLoadingMessage.
-      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
-      good stuff will be cached up for next time!
+    .kibanaLoadingMessage(
+      data-id="kibanaLoadingMessage"
+    )
+      | Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      | good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
 
       var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
       if (hideLoadingMessage) {
-        var loading = document.querySelector('.kibanaWelcomeView');
-        loading.removeChild(loading.lastChild);
+        var loadingContainer = document.querySelector('[data-id="kibanaWelcomeView"]');
+        var loadingMessage = document.querySelector('[data-id="kibanaLoadingMessage"]');
+        loadingContainer.removeChild(loadingMessage);
       }
 
       var buildNum = #{kibanaPayload.buildNum};
