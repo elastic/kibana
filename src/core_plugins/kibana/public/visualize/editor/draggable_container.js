@@ -7,19 +7,26 @@ uiModules
 .get('app/visualize')
 .directive('draggableContainer', function () {
 
+  const $scopes = new WeakMap();
+
   return {
     restrict: 'A',
     scope: true,
     controllerAs: 'draggableContainerCtrl',
-    controller($scope, $attrs, $parse) {
+    controller($scope, $attrs, $parse, $element) {
+      $scopes.set($element.get(0), $scope);
+      this.linkDraggableItem = (el, $scope) => {
+        $scopes.set(el, $scope);
+      };
+
       this.getList = () => $parse($attrs.draggableContainer)($scope);
     },
     link($scope, $el, attr) {
       const drake = dragula({
         containers: $el.toArray(),
         moves(el, source, handle) {
-          const itemScope = $(el).scope();
-          if (!('draggableItemCtrl' in itemScope)) {
+          const itemScope = $scopes.get(el);
+          if (!itemScope || !('draggableItemCtrl' in itemScope)) {
             return; // only [draggable-item] is draggable
           }
           return itemScope.draggableItemCtrl.moves(handle);
@@ -53,7 +60,8 @@ uiModules
 
       function markDragging(isDragging) {
         return el => {
-          const scope = $(el).scope();
+          const scope = $scopes.get(el);
+          if (!scope) return;
           scope.isDragging = isDragging;
           scope.$apply();
         };
@@ -61,13 +69,15 @@ uiModules
 
       function forwardEvent(type, el, ...args) {
         const name = `drag-${prettifiedDrakeEvents[type] || type}`;
-        const scope = $(el).scope();
+        const scope = $scopes.get(el);
+        if (!scope) return;
         scope.$broadcast(name, el, ...args);
       }
 
       function drop(el, target, source, sibling) {
         const list = $scope.draggableContainerCtrl.getList();
-        const itemScope = $(el).scope();
+        const itemScope = $scopes.get(el);
+        if (!itemScope) return;
         const item = itemScope.draggableItemCtrl.getItem();
         const fromIndex = list.indexOf(item);
         const siblingIndex = getItemIndexFromElement(list, sibling);
@@ -91,7 +101,8 @@ uiModules
       function getItemIndexFromElement(list, element) {
         if (!element) return -1;
 
-        const scope = $(element).scope();
+        const scope = $scopes.get(element);
+        if (!scope) return;
         const item = scope.draggableItemCtrl.getItem();
         const index = list.indexOf(item);
 
