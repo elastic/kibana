@@ -19,6 +19,7 @@ describe('tag cloud', function () {
   });
 
   afterEach(function () {
+    domNode.innerHTML = '';
     document.body.removeChild(domNode);
   });
 
@@ -97,15 +98,15 @@ describe('tag cloud', function () {
     trimDataTest
   ].forEach((test, index) => {
 
-    it(`should position elements correctly: ${index}`, done => {
+    it(`should position elements correctly: test#: ${index} options: ${JSON.stringify(test.options)}`, done => {
       const tagCloud = new TagCloud(domNode);
       tagCloud.setData(test.data);
       tagCloud.setOptions(test.options);
       tagCloud.on('renderComplete', function onRender() {
+        tagCloud.removeListener('renderComplete', onRender);
         try {
-          tagCloud.removeListener('renderComplete', onRender);
           const textElements = domNode.querySelectorAll('text');
-          verifyTagProperties(test.expected, textElements);
+          verifyTagProperties(test.expected, textElements, tagCloud);
           expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
           done();
         } catch (e) {
@@ -117,17 +118,17 @@ describe('tag cloud', function () {
   });
 
 
-  it('should use the latest state before notifying (modifying options)', function (done) {
+  it('should use the latest state before notifying (when modifying options multiple times)', function (done) {
 
     const tagCloud = new TagCloud(domNode);
     tagCloud.setData(baseTest.data);
     tagCloud.setOptions(baseTest.options);
     tagCloud.setOptions(logScaleTest.options);
     tagCloud.on('renderComplete', function onRender() {
+      tagCloud.removeListener('renderComplete', onRender);
       try {
-        tagCloud.removeListener('renderComplete', onRender);
         const textElements = domNode.querySelectorAll('text');
-        verifyTagProperties(logScaleTest.expected, textElements);
+        verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
         done();
       } catch (e) {
@@ -139,7 +140,7 @@ describe('tag cloud', function () {
   });
 
 
-  it('should use the latest state before notifying (modifying data)', function (done) {
+  it('should use the latest state before notifying (when modifying data multiple times)', function (done) {
 
     const tagCloud = new TagCloud(domNode);
     tagCloud.setData(baseTest.data);
@@ -150,7 +151,7 @@ describe('tag cloud', function () {
       tagCloud.removeListener('renderComplete', onRender);
       const textElements = domNode.querySelectorAll('text');
       try {
-        verifyTagProperties(trimDataTest.expected, textElements);
+        verifyTagProperties(trimDataTest.expected, textElements, tagCloud);
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
         done();
       } catch (e) {
@@ -167,15 +168,15 @@ describe('tag cloud', function () {
     300,
     500
   ].forEach(function (timeout, index) {
-    it(`should only send single renderComplete event: ${index}`, function (done) {
+    it(`should only send single renderComplete event: test#: ${index} waiting-time: ${timeout}`, function (done) {
       //TagCloud takes at least 600ms to complete (due to d3 animation)
       //renderComplete should only notify at the last one
       const tagCloud = new TagCloud(domNode);
       tagCloud.on('renderComplete', function onRender() {
+        tagCloud.removeListener('renderComplete', onRender);
         try {
-          tagCloud.removeListener('renderComplete', onRender);
           const textElements = domNode.querySelectorAll('text');
-          verifyTagProperties(logScaleTest.expected, textElements);
+          verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
           expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
           done();
         } catch (e) {
@@ -216,9 +217,10 @@ describe('tag cloud', function () {
       counter += 1;
       try {
         const textElements = domNode.querySelectorAll('text');
-        verifyTagProperties(logScaleTest.expected, textElements);
+        verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       } catch (e) {
+        tagCloud.removeListener('renderComplete', onRender);
         done(e);
       }
 
@@ -250,21 +252,26 @@ describe('tag cloud', function () {
             tagCloud.setData(baseTest.data);
             tagCloud.setOptions(baseTest.options);
           } catch (e) {
+            tagCloud.removeListener('renderComplete', onRender);
             done(e);
           }
+
+
         }, 200);
 
-        tagCloud.on('renderComplete', function onRender() {
+        function onRender() {
           try {
             tagCloud.removeListener('renderComplete', onRender);
             const textElements = domNode.querySelectorAll('text');
-            verifyTagProperties(baseTest.expected, textElements);
+            verifyTagProperties(baseTest.expected, textElements, tagCloud);
             expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
             done();
           } catch (e) {
             done(e);
           }
-        });
+        }
+
+        tagCloud.on('renderComplete', onRender);
       } catch (e) {
         done(e);
       }
@@ -289,7 +296,7 @@ describe('tag cloud', function () {
         const textElements = domNode.querySelectorAll('text');
         for (let i = 0; i < textElements; i++) {
           const bbox = textElements[i].getBoundingClientRect();
-          verifyBbox(bbox, false);
+          verifyBbox(bbox, false, tagCloud);
         }
         done();
       } catch (e) {
@@ -312,7 +319,8 @@ describe('tag cloud', function () {
       try {
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
       } catch (e) {
-        done(e);
+        done(new Error('Status should be incomplete before making container bigger: ' + e.message + '\n' + tagCloud.getDebugInfo()));
+        return;
       }
 
       domNode.style.width = '512px';
@@ -322,7 +330,7 @@ describe('tag cloud', function () {
           expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
           done();
         } catch (e) {
-          done(e);
+          done(new Error('Status should be complete after making container bigger: ' + e.message + '\n' + tagCloud.getDebugInfo()));
         }
       });
       tagCloud.resize();
@@ -340,7 +348,8 @@ describe('tag cloud', function () {
       try {
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       } catch (e) {
-        done(e);
+        done(new Error('Status should be complete before making container smaller: ' + e.message + '\n' + tagCloud.getDebugInfo()));
+        return;
       }
 
       domNode.style.width = '1px';
@@ -350,7 +359,7 @@ describe('tag cloud', function () {
           expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
           done();
         } catch (e) {
-          done(e);
+          done(new Error('Status should be incomplete after making container smaller: ' + e.message + '\n' + tagCloud.getDebugInfo()));
         }
       });
       tagCloud.resize();
@@ -359,7 +368,7 @@ describe('tag cloud', function () {
 
   });
 
-  function verifyTagProperties(expectedValues, actualElements) {
+  function verifyTagProperties(expectedValues, actualElements, tagCloud) {
     expect(actualElements.length).to.equal(expectedValues.length);
     expectedValues.forEach((test, index) => {
       try {
@@ -372,18 +381,20 @@ describe('tag cloud', function () {
       } catch (e) {
         throw new Error('fontsize is not correct: ' + e.message);
       }
-      isInsideContainer(actualElements[index]);
+      isInsideContainer(actualElements[index], tagCloud);
     });
   }
 
-  function isInsideContainer(actualElement) {
+  function isInsideContainer(actualElement, tagCloud) {
     const bbox = actualElement.getBoundingClientRect();
-    verifyBbox(bbox, true);
+    verifyBbox(bbox, true, tagCloud);
   }
 
-  function verifyBbox(bbox, shouldBeInside) {
+  function verifyBbox(bbox, shouldBeInside, tagCloud) {
     const message = ` | bbox-of-tag: ${JSON.stringify([bbox.left, bbox.top, bbox.right, bbox.bottom])} vs
-     bbox-of-container: ${domNode.offsetWidth},${domNode.offsetHeight}`;
+     bbox-of-container: ${domNode.offsetWidth},${domNode.offsetHeight}
+     debugInfo: ${JSON.stringify(tagCloud.getDebugInfo())}`;
+
     try {
       expect(bbox.top >= 0 && bbox.top <= domNode.offsetHeight).to.be(shouldBeInside);
     } catch (e) {
