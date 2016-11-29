@@ -26,13 +26,15 @@
 
   <div ng-if="editor.field.scripted" class="form-group">
     <label>Language</label>
-    <div class="hintbox" ng-if="!editor.isSupportedLang(editor.field.lang)">
+    <div class="hintbox" ng-if="editor.field.lang && !editor.isSupportedLang(editor.field.lang)">
       <h4>
         <i class="fa fa-warning text-warning"></i> Deprecation Warning
       </h4>
       <p>
         <span class="text-capitalize">{{editor.field.lang}}</span> is deprecated and support will be removed in the
-        next major version of Kibana and Elasticsearch. We recommend using Painless for new scripted fields.
+        next major version of Kibana and Elasticsearch. We recommend using
+        <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>
+        for new scripted fields.
       </p>
     </div>
     <select

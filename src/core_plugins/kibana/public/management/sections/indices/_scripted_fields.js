@@ -5,6 +5,7 @@ import controlsHtml from 'plugins/kibana/management/sections/indices/_field_cont
 import dateScripts from 'plugins/kibana/management/sections/indices/_date_scripts';
 import uiModules from 'ui/modules';
 import scriptedFieldsTemplate from 'plugins/kibana/management/sections/indices/_scripted_fields.html';
+import { getSupportedScriptingLangs } from 'ui/scripting_langs';
 import { scriptedFields as docLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
@@ -105,7 +106,7 @@ uiModules.get('apps/management')
       $scope.getDeprecatedLanguagesInUse = function () {
         const fields = $scope.indexPattern.getScriptedFields();
         const langsInUse = _.uniq(_.map(fields, 'lang'));
-        return _.difference(langsInUse, ['expression', 'painless']);
+        return _.difference(langsInUse, getSupportedScriptingLangs());
       };
     }
   };
