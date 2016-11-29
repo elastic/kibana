@@ -29,68 +29,35 @@ UiModules
 
       // travel forward in time based on the interval between from and to
       $scope.forward = function () {
-        const time = getFromTo();
-        const diff = time.to.diff(time.from);
-        const origTo = time.to.toISOString();
-
-        time.to.add(diff, 'milliseconds');
-        timefilter.time.from = origTo;
-        timefilter.time.to = time.to.toISOString();
+        const time = timefilter.getBounds();
+        const diff = time.max.diff(time.min);
+        timefilter.time.from = time.max.toISOString();
+        timefilter.time.to = time.max.add(diff, 'milliseconds').toISOString();
       };
 
       // travel backwards in time based on the interval between from and to
       $scope.back = function () {
-        const time = getFromTo();
-        const diff = time.to.diff(time.from);
-        const origFrom = time.from.toISOString();
-
-        time.from.subtract(diff, 'milliseconds');
-        timefilter.time.from = time.from.toISOString();
-        timefilter.time.to = origFrom;
+        const time = timefilter.getBounds();
+        const diff = time.max.diff(time.min);
+        timefilter.time.to = time.min.toISOString();
+        timefilter.time.from = time.min.subtract(diff, 'milliseconds').toISOString();
       };
 
       // zoom out, doubling the difference between start and end, keeping the same time range center
       $scope.zoomOut = function () {
-        const time = getFromTo();
-        const from = time.from.unix() * 1000;
-        const to = time.to.unix() * 1000;
-
-        const diff = Math.floor((to - from) / 2);
-
-        timefilter.time.from = moment(from - diff).toISOString();
-        timefilter.time.to = moment(to + diff).toISOString();
+        const time = timefilter.getBounds();
+        const diff = time.max.diff(time.min);
+        timefilter.time.from = time.min.subtract(diff / 2, 'milliseconds').toISOString();
+        timefilter.time.to = time.max.add(diff / 2, 'milliseconds').toISOString();
       };
 
       // zoom in, halving the difference between start and end, keeping the same time range center
       $scope.zoomIn = function () {
-        const time = getFromTo();
-        const from = time.from.unix() * 1000;
-        const to = time.to.unix() * 1000;
-
-        const diff = Math.floor((to - from) / 4);
-
-        timefilter.time.from = moment(from + diff).toISOString();
-        timefilter.time.to = moment(to - diff).toISOString();
+        const time = timefilter.getBounds();
+        const diff = time.max.diff(time.min);
+        timefilter.time.from = time.min.add(diff / 4, 'milliseconds').toISOString();
+        timefilter.time.to = time.max.subtract(diff / 4, 'milliseconds').toISOString();
       };
-
-      // find the from and to values from the timefilter
-      // if a quick or relative mode has been selected, work out the
-      // absolute times and then change the mode to absolute
-      function getFromTo() {
-        if (timefilter.time.mode === 'absolute') {
-          return {
-            to:   moment(timefilter.time.to),
-            from: moment(timefilter.time.from)
-          };
-        } else {
-          timefilter.time.mode = 'absolute';
-          return {
-            to:   dateMath.parse(timefilter.time.to, true),
-            from: dateMath.parse(timefilter.time.from)
-          };
-        }
-      }
-
     },
   };
 });
