@@ -38,7 +38,7 @@ export default function normalizeSortRequest(config) {
           inline: indexField.script,
           lang: indexField.lang
         },
-        type: indexField.type,
+        type: castSortType(indexField.type),
         order: direction
       };
     } else {
@@ -56,3 +56,19 @@ export default function normalizeSortRequest(config) {
     return normalized;
   }
 };
+
+function castSortType(type) {
+  const typeCastings = {
+    number: 'number',
+    string: 'string',
+    date: 'number',
+    boolean: 'string'
+  };
+
+  const castedType = typeCastings[type];
+  if (!castedType) {
+    throw new Error(`Unsupported script sort type: ${type}`);
+  }
+
+  return castedType;
+}
