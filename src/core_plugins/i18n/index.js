@@ -11,7 +11,7 @@ export default function (kibana) {
     },
 
     init(server, options) {
-      const defaultLocale = server.config.locale;
+      const defaultLocale = server.config().get('i18n.locale');
       i18n.setDefaultLocale(defaultLocale);
 
       server.expose('getTranslations', i18n.getTranslations);

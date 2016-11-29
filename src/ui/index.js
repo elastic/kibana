@@ -137,7 +137,7 @@ function getLanguageTags(acceptLanguages) {
 
 async function getTranslations(acceptLanguages, server) {
   const languageTags = getLanguageTags(acceptLanguages);
-  const requestedTranslations = await server.plugins.i18n.getTranslations(languageTags);
+  const requestedTranslations = await server.plugins.i18n.getTranslations(...languageTags);
   const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
   const translations = _.defaults({}, requestedTranslations, defaultTranslations);
   return translations;

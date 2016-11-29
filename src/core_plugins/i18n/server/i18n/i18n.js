@@ -33,7 +33,7 @@ export function getRegisteredTranslationLocales() {
  * This object will contain all registered translations for the highest priority locale which is registered with the i18n module.
  * This object can be empty if no locale in the language tags can be matched against the registered locales.
  */
-export function getTranslations([...languageTags]) {
+export function getTranslations(...languageTags) {
   const locale = getTranslationLocale(languageTags);
   return getTranslationsForLocale(locale);
 };
