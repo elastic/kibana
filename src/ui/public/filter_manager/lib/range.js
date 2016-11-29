@@ -32,13 +32,28 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
       lte: '<=',
       lt: '<',
     };
+    const comparators = {
+      gt: 'boolean gt(Supplier s, def v) {return s.get() > v}',
+      gte: 'boolean gte(Supplier s, def v) {return s.get() >= v}',
+      lte: 'boolean lte(Supplier s, def v) {return s.get() <= v}',
+      lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
+    };
 
     const knownParams = _.pick(params, (val, key) => { return key in operators; });
-    const script = _.map(knownParams, function (val, key) {
-      // painless expects params.[key] while groovy and expression languages expect [key] only.
-      const valuePrefix = field.lang === 'painless' ? 'params.' : '';
-      return '(' + field.script + ')' + operators[key] + valuePrefix + key;
+    let script = _.map(knownParams, function (val, key) {
+      return '(' + field.script + ')' + operators[key] + key;
     }).join(' && ');
+
+    // We must wrap painless scripts in a lambda in case they're more than a simple expression
+    if (field.lang === 'painless') {
+      const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comparators[key]), []).join(' ');
+
+      const comparisons = _.map(knownParams, function (val, key) {
+        return `${key}(() -> { ${field.script} }, params.${key})`;
+      }).join(' && ');
+
+      script = `${currentComparators}${comparisons}`;
+    }
 
     const value = _.map(knownParams, function (val, key) {
       return operators[key] + field.format.convert(val);
