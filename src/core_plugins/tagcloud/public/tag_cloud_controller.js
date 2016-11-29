@@ -21,7 +21,6 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     clickHandler({point: {aggConfigResult: aggConfigResult}});
   });
   tagCloud.on('renderComplete', () => {
-
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
     bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
 
@@ -58,7 +57,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const tags = buckets.map((bucket) => {
       return {
         text: bucket.key,
-        size: getValue(metricsAgg, bucket)
+        value: getValue(metricsAgg, bucket)
       };
     });
 
