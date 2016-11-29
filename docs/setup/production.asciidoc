@@ -79,8 +79,8 @@ ca: /path/to/your/ca/cacert.pem
 [[load-balancing]]
 === Load Balancing Across Multiple Elasticsearch Nodes
 If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
-across the nodes is to run an Elasticsearch _client_ node on the same machine as Kibana.
-Elasticsearch client nodes are essentially smart load balancers that are part of the cluster. They
+across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
+Elasticsearch Coordinating only nodes are essentially smart load balancers that are part of the cluster. They
 process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and
 gather and return the results. For more information, see
 {es-ref}modules-node.html[Node] in the Elasticsearch reference.
@@ -88,15 +88,16 @@ gather and return the results. For more information, see
 To use a local client node to load balance Kibana requests:
 
 . Install Elasticsearch on the same machine as Kibana.
-. Configure the node as a client node. In `elasticsearch.yml`, set both `node.data` and `node.master` to `false`:
+. Configure the node as a Coordinating only node. In `elasticsearch.yml`, set `node.data`, `node.master` and `node.ingest` to `false`:
 +
 --------
-# 3. You want this node to be neither master nor data node, but
+# 3. You want this node to be neither master nor data node nor ingest node, but
 #    to act as a "search load balancer" (fetching data from nodes,
 #    aggregating results, etc.)
 #
 node.master: false
 node.data: false
+node.ingest: false 
 --------
 . Configure the client node to join your Elasticsearch cluster. In `elasticsearch.yml`, set the `cluster.name` to the
 name of your cluster.
