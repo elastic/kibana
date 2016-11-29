@@ -369,7 +369,7 @@ describe('kbnUrl', function () {
     });
 
     it('should call replace on $location', function () {
-      sinon.stub(kbnUrl, '_shouldAutoReload').returns(false);
+      sinon.stub(kbnUrl, '_shouldForceReload').returns(false);
       sinon.stub($location, 'replace');
 
       expect($location.replace.callCount).to.be(0);
@@ -404,7 +404,7 @@ describe('kbnUrl', function () {
     });
 
     it('should call replace on $location', function () {
-      sinon.stub(kbnUrl, '_shouldAutoReload').returns(false);
+      sinon.stub(kbnUrl, '_shouldForceReload').returns(false);
       sinon.stub($location, 'replace');
 
       expect($location.replace.callCount).to.be(0);
@@ -413,7 +413,7 @@ describe('kbnUrl', function () {
     });
   });
 
-  describe('_shouldAutoReload', function () {
+  describe('_shouldForceReload', function () {
     let next;
     let prev;
 
@@ -431,7 +431,7 @@ describe('kbnUrl', function () {
 
     it('returns false if the passed url doesn\'t match the current route', function () {
       next.path = '/not current';
-      expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+      expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
     });
 
     describe('if the passed url does match the route', function () {
@@ -439,14 +439,14 @@ describe('kbnUrl', function () {
         describe('and the path is the same', function () {
           describe('and the search params are the same', function () {
             it('returns true', function () {
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(true);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(true);
             });
           });
           describe('but the search params are different', function () {
             it('returns false', function () {
               next.search = {};
               prev.search = { q: 'search term' };
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
             });
           });
         });
@@ -458,14 +458,14 @@ describe('kbnUrl', function () {
 
           describe('and the search params are the same', function () {
             it('returns false', function () {
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
             });
           });
           describe('but the search params are different', function () {
             it('returns false', function () {
               next.search = {};
               prev.search = { q: 'search term' };
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
             });
           });
         });
@@ -479,14 +479,14 @@ describe('kbnUrl', function () {
         describe('and the path is the same', function () {
           describe('and the search params are the same', function () {
             it('returns true', function () {
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(true);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(true);
             });
           });
           describe('but the search params are different', function () {
             it('returns true', function () {
               next.search = {};
               prev.search = { q: 'search term' };
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(true);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(true);
             });
           });
         });
@@ -498,14 +498,14 @@ describe('kbnUrl', function () {
 
           describe('and the search params are the same', function () {
             it('returns false', function () {
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
             });
           });
           describe('but the search params are different', function () {
             it('returns false', function () {
               next.search = {};
               prev.search = { q: 'search term' };
-              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
+              expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
             });
           });
         });

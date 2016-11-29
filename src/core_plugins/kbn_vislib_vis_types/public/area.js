@@ -30,10 +30,24 @@ export default function HistogramVisType(Private) {
         setYExtents: false,
         yAxis: {}
       },
+      legendPositions: [{
+        value: 'left',
+        text: 'left',
+      }, {
+        value: 'right',
+        text: 'right',
+      }, {
+        value: 'top',
+        text: 'top',
+      }, {
+        value: 'bottom',
+        text: 'bottom',
+      }],
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
       editor: areaTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

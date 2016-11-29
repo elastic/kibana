@@ -8,22 +8,26 @@ export function SenseTopNavController(Private) {
     {
       key: 'welcome',
       hideButton: true,
-      template: `<sense-welcome></sense-welcome>`
+      template: `<sense-welcome></sense-welcome>`,
+      testId: 'consoleWelcomeButton',
     },
     {
       key: 'history',
       description: 'History',
-      template: `<sense-history></sense-history>`
+      template: `<sense-history></sense-history>`,
+      testId: 'consoleHistoryButton',
     },
     {
       key: 'settings',
       description: 'Settings',
-      template: `<sense-settings></sense-settings>`
+      template: `<sense-settings></sense-settings>`,
+      testId: 'consoleSettingsButton',
     },
     {
       key: 'help',
       description: 'Help',
-      template: `<sense-help></sense-help>`
+      template: `<sense-help></sense-help>`,
+      testId: 'consoleHelpButton',
     },
   ]);
 

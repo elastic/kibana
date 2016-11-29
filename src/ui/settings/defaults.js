@@ -73,7 +73,7 @@ export default function defaultSettingsProvider() {
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
-        'Highlighing makes request slow when working on big documents.',
+        'Highlighting makes requests slow when working on big documents.',
     },
     'courier:maxSegmentCount': {
       value: 30,
@@ -94,11 +94,11 @@ export default function defaultSettingsProvider() {
     },
     'histogram:barTarget': {
       value: 50,
-      description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',
+      description: 'Attempt to generate around this many bars when using "auto" interval in date histograms',
     },
     'histogram:maxBars': {
       value: 100,
-      description: 'Never show more than this many bar in date histograms, scale values if needed',
+      description: 'Never show more than this many bars in date histograms, scale values if needed',
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,

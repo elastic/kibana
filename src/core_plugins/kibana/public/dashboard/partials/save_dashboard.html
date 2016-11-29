@@ -1,8 +1,16 @@
-<form ng-submit="opts.save()" role="form">
-  <div class="form-group">
-    <label for="dashboardTitle">Save As</label>
-    <input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus="select">
-  </div>
+<form
+  role="form"
+  ng-submit="opts.save()"
+>
+  <div class="localDropdownTitle">Save Dashboard</div>
+  <input
+    class="localDropdownInput"
+    id="dashboardTitle"
+    type="text"
+    ng-model="opts.dashboard.title"
+    placeholder="Dashboard title"
+    input-focus="select"
+  >
   <div class="form-group">
     <label>
       <input type="checkbox" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">

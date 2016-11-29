@@ -1,0 +1,22 @@
+[[management]]
+= Management
+
+[partintro]
+--
+The Management application is where you perform your runtime configuration of
+Kibana, including both the initial setup and ongoing configuration of index
+patterns, advanced settings that tweak the behaviors of Kibana itself, and
+the various "objects" that you can save throughout Kibana such as searches,
+visualizations, and dashboards.
+
+This section is pluginable, so in addition to the out of the box capabitilies,
+packs such as X-Pack can add additional management capabilities to Kibana.
+--
+
+include::management/index-patterns.asciidoc[]
+
+include::management/managing-fields.asciidoc[]
+
+include::management/advanced-options.asciidoc[]
+
+include::management/managing-saved-objects.asciidoc[]

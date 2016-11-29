@@ -251,25 +251,37 @@ export default function MapFactory(Private, tilemap, $sanitize) {
         // TODO: Different drawTypes need differ info. Need a switch on the object creation
         const bounds = e.layer.getBounds();
 
-        let SElng = bounds.getSouthEast().lng;
-        if (SElng > 180) {
-          SElng -= 360;
+        const southEast = bounds.getSouthEast();
+        const northWest = bounds.getNorthWest();
+        let southEastLng = southEast.lng;
+        if (southEastLng > 180) {
+          southEastLng -= 360;
         }
-        let NWlng = bounds.getNorthWest().lng;
-        if (NWlng < -180) {
-          NWlng += 360;
+        let northWestLng = northWest.lng;
+        if (northWestLng < -180) {
+          northWestLng += 360;
         }
+
+        const southEastLat = southEast.lat;
+        const northWestLat = northWest.lat;
+
+        //Bounds cannot be created unless they form a box with larger than 0 dimensions
+        //Invalid areas are rejected by ES.
+        if (southEastLat === northWestLat || southEastLng === northWestLng) {
+          return;
+        }
+
         self._events.emit(drawType, {
           e: e,
           chart: self._chartData,
           bounds: {
-            top_left: {
-              lat: bounds.getNorthWest().lat,
-              lon: NWlng
-            },
             bottom_right: {
-              lat: bounds.getSouthEast().lat,
-              lon: SElng
+              lat: southEastLat,
+              lon: southEastLng
+            },
+            top_left: {
+              lat: northWestLat,
+              lon: northWestLng
             }
           }
         });

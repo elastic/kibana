@@ -1,43 +1,57 @@
 <dashboard-app class="app-container dashboard-container">
+  <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
-    <div class="kibana-nav-info">
-      <span ng-show="dash.id" class="kibana-nav-info-title">
-        <span ng-bind="::dash.title"></span>
-      </span>
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+      <div
+        data-transclude-slot="topLeftCorner"
+        class="localTitle"
+      >
+        <span
+          ng-show="dash.id"
+          ng-bind="::dash.title"
+        ></span>
+      </div>
+
+      <!-- Search. -->
+      <form
+        data-transclude-slot="bottomRow"
+        class="fullWidth"
+        ng-show="chrome.getVisible()"
+        role="form"
+        name="queryInput"
+        ng-submit="filterResults()"
+      >
+        <div class="typeahead" kbn-typeahead="dashboard">
+          <div class="localSearch">
+            <input
+              parse-query
+              input-focus
+              kbn-typeahead-input
+              ng-model="state.query"
+              placeholder="Filter..."
+              aria-label="Filter input"
+              type="text"
+              class="localSearchInput"
+              ng-class="{'localSearchInput-isInvalid': queryInput.$invalid}"
+            >
+            <button
+              type="submit"
+              aria-label="Filter Dashboards"
+              class="localSearchButton"
+              ng-disabled="queryInput.$invalid"
+            >
+              <span class="fa fa-search" aria-hidden="true"></span>
+            </button>
+          </div>
+          <kbn-typeahead-items></kbn-typeahead-items>
+        </div>
+      </form>
     </div>
   </kbn-top-nav>
 
-  <navbar ng-show="chrome.getVisible()" name="dashboard-search">
-    <form name="queryInput"
-      class="fill inline-form"
-      ng-submit="filterResults()"
-      role="form">
-
-      <div class="typeahead" kbn-typeahead="dashboard">
-        <div class="input-group"
-          ng-class="queryInput.$invalid ? 'has-error' : ''">
-
-          <input
-            type="text"
-            placeholder="Filter..."
-            aria-label="Filter input"
-            class="form-control"
-            ng-model="state.query"
-            input-focus
-            kbn-typeahead-input
-            parse-query>
-          <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid" aria-label="Filter dashboards">
-            <span aria-hidden="true" class="fa fa-search"></span>
-          </button>
-        </div>
-
-        <kbn-typeahead-items></kbn-typeahead-items>
-      </div>
-
-    </form>
-    <div class="button-group"></div>
-  </navbar>
-
+  <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
   <div ng-show="!state.panels.length" class="text-center start-screen">

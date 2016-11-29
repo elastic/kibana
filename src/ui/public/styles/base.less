@@ -3,6 +3,9 @@
 @import (reference) "./variables";
 @import (reference) "~ui/styles/bootstrap/bootstrap";
 
+// Kibana UI Framework
+@import (less) "~@elastic/kibana-ui-framework/dist/framework.css";
+
 html,
 body {
   .flex-parent();
@@ -157,27 +160,7 @@ a {
       .button-group > :last-child {
         border-radius: 0;
       }
-
-      button.is-kbn-top-nav-button-disabled {
-        opacity: 0.5;
-        cursor: default;
-
-        &:active {
-          color: @kibanaGray2;
-          background-color: transparent;
-        }
-      }
     }
-
-    .kibana-nav-info {
-      line-height: 30px;
-      padding: 0 10px;
-    }
-
-      .kibana-nav-info-title {
-        font-weight: bold;
-        margin-right: 10px;
-      }
   }
 
   > config {
@@ -307,38 +290,6 @@ table {
     // cauase problems, but in the table it pushes the icon to the
     // top of the row
     line-height: @line-height-base;
-  }
-}
-
-//== breadCrumbsTemplate
-bread-crumbs {
-  display: block;
-
-  &.bread-crumbs--navbar {
-    background-color: @navbar-default-bg;
-  }
-
-  ul {
-    margin: 0;
-    padding: 8px 10px;
-    list-style-type: none;
-    text-transform: capitalize;
-
-    >li {
-      display: inline;
-      >span {
-        color: @kibanaGray2;
-      }
-      >span:hover {
-        color: @kibanaGray1;
-      }
-    }
-
-    >li:last-child {
-      >span {
-        color: @kibanaGray1;
-      }
-    }
   }
 }
 
@@ -676,5 +627,25 @@ fieldset {
   color: @kibanaGray2;
   font-size: 14px;
 }
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.fullWidth {
+  width: 100%;
+}
+
+/**
+ * TODO: This is a generic pattern that should be replaced by specific components, e.g. inputGroup.
+ */
+.flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+  .flexGroup__filler {
+    flex: 1 1 auto;
+  }
 
 @import "~dragula/dist/dragula.css";

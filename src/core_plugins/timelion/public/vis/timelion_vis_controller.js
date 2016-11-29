@@ -6,7 +6,16 @@ define(function (require) {
 
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-  module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter, getAppState) {
+  module.controller('TimelionVisController', function (
+    $scope,
+    $element,
+    Private,
+    Notifier,
+    $http,
+    $rootScope,
+    timefilter,
+    getAppState
+  ) {
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var timezone = Private(require('plugins/timelion/services/timezone'))();
     var dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
@@ -58,6 +67,11 @@ define(function (require) {
     $scope.$on('courier:searchRefresh', $scope.search);
 
     $scope.$on('fetch', $scope.search);
+
+    $scope.$on('renderComplete', event => {
+      event.stopPropagation();
+      $element.trigger('renderComplete');
+    });
 
   });
 });

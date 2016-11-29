@@ -21,7 +21,7 @@ function MetricVisProvider(Private) {
     name: 'metric',
     title: 'Metric',
     description: 'One big number for all of your one big number needs. Perfect for showing ' +
-      'a count of hits, or the exact average a numeric field.',
+      'a count of hits, or the exact average of a numeric field.',
     icon: 'fa-calculator',
     template: metricVisTemplate,
     params: {
@@ -31,6 +31,7 @@ function MetricVisProvider(Private) {
       },
       editor: metricVisParamsTemplate
     },
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

@@ -25,6 +25,7 @@ uiModules
 
   return {
     restrict: 'E',
+    require: '?renderCounter',
     scope : {
       showSpyPanel: '=?',
       vis: '=',
@@ -34,7 +35,7 @@ uiModules
       esResp: '=?',
     },
     template: visualizeTemplate,
-    link: function ($scope, $el, attr) {
+    link: function ($scope, $el, attr, renderCounter) {
       const minVisChartHeight = 180;
 
       if (_.isUndefined($scope.showSpyPanel)) {
@@ -50,6 +51,7 @@ uiModules
 
       let getVisEl = getter('.visualize-chart');
       let getVisContainer = getter('.vis-container');
+      let getSpyContainer = getter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
@@ -71,18 +73,27 @@ uiModules
         return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
 
+      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
+        renderCounter.disable();
+      }
+
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
       let applyClassNames = function () {
-        let $visEl = getVisContainer();
+        const $visEl = getVisContainer();
+        const $spyEl = getSpyContainer();
+        if (!$spyEl) return;
+
         let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
+        $spyEl.toggleClass('only', Boolean(fullSpy));
 
         $timeout(function () {
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
+            $spyEl.addClass('only');
           };
         }, 0);
       };
@@ -140,7 +151,9 @@ uiModules
         }
 
         if (oldVis) $scope.renderbot = null;
-        if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        if (vis) {
+          $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        }
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
@@ -160,6 +173,7 @@ uiModules
         }).catch(notify.fatal);
 
         searchSource.onError(e => {
+          $el.trigger('renderComplete');
           if (isTermSizeZeroError(e)) {
             return notify.error(
               `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
@@ -185,6 +199,7 @@ uiModules
 
       $scope.$on('$destroy', function () {
         if ($scope.renderbot) {
+          $el.off('renderComplete');
           $scope.renderbot.destroy();
         }
       });

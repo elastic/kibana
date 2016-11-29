@@ -1,0 +1,34 @@
+@import (reference) "~ui/styles/variables";
+
+source-filters {
+  .header {
+    text-align: center;
+  }
+
+  .source-filters-container {
+    margin-top: 15px;
+
+    &.saving {
+      pointer-events: none;
+      opacity: .4;
+      transition: opacity 0.75s;
+    }
+
+    .source-filter {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+
+      .value {
+        text-align: left;
+        flex: 1 1 auto;
+        padding-right: 5px;
+        font-family: @font-family-monospace;
+
+        :not(input) {
+          padding-left: 15px;
+        }
+      }
+    }
+  }
+}

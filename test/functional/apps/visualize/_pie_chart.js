@@ -39,7 +39,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectField('memory');
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(function sleep() {
       return PageObjects.common.sleep(1003);
@@ -53,7 +53,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   });
 

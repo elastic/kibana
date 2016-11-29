@@ -23,8 +23,7 @@ export default class DiscoverPage {
   }
 
   getTimespanText() {
-    return this.findTimeout
-    .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
+    return PageObjects.common.findTestSubject('globalTimepickerRange')
     .getVisibleText();
   }
 
@@ -53,36 +52,32 @@ export default class DiscoverPage {
       this.findTimeout.findByLinkText(searchName).click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
   clickNewSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('button[aria-label="New Search"]')
+    return PageObjects.common.findTestSubject('discoverNewButton')
     .click();
   }
 
   clickSaveSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('button[aria-label="Save Search"]')
+    return PageObjects.common.findTestSubject('discoverSaveButton')
     .click();
   }
 
   clickLoadSavedSearchButton() {
-    return this.findTimeout
-    .findDisplayedByCssSelector('button[aria-label="Load Saved Search"]')
+    return PageObjects.common.findTestSubject('discoverOpenButton')
     .click();
   }
 
   getCurrentQueryName() {
-    return this.findTimeout
-      .findByCssSelector('span.kibana-nav-info-title span')
+    return PageObjects.common.findTestSubject('discoverCurrentQuery')
       .getVisibleText();
   }
 
   getBarChartData() {
-    return PageObjects.header.getSpinnerDone()
+    return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
       return this.findTimeout
       .findAllByCssSelector('rect[data-label="Count"]');
@@ -136,15 +131,14 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
   getHitCount() {
-    return PageObjects.header.getSpinnerDone()
+    return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
-      return this.findTimeout
-      .findByCssSelector('strong.discover-info-hits')
+      return PageObjects.common.findTestSubject('discoverQueryHits')
       .getVisibleText();
     });
   }
@@ -160,7 +154,7 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -195,38 +189,41 @@ export default class DiscoverPage {
   }
 
   clickShare() {
-    return this.findTimeout
-    .findByCssSelector('button[aria-label="Share Search"]')
+    return PageObjects.common.findTestSubject('discoverShareButton')
     .click();
   }
 
   clickShortenUrl() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotShortUrlButton"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotShortUrlButton')
     .click();
   }
 
   clickCopyToClipboard() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotCopyButton"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotCopyButton')
     .click();
   }
 
   getShareCaption() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="shareUiTitle"]')
+    return PageObjects.common.findTestSubject('shareUiTitle')
     .getVisibleText();
   }
 
   getSharedUrl() {
-    return this.findTimeout
-    .findByCssSelector('[data-test-subj="sharedSnapshotUrl"]')
+    return PageObjects.common.findTestSubject('sharedSnapshotUrl')
     .getProperty('value');
   }
 
   toggleSidebarCollapse() {
     return this.findTimeout.findDisplayedByCssSelector('.sidebar-collapser .chevron-cont')
       .click();
+  }
+
+  getAllFieldNames() {
+    return this.findTimeout
+    .findAllByClassName('sidebar-item')
+    .then((items) => {
+      return Promise.all(items.map((item) => item.getVisibleText()));
+    });
   }
 
   getSidebarWidth() {

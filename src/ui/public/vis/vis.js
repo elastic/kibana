@@ -13,6 +13,8 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import PersistedStateProvider from 'ui/persisted_state/persisted_state';
+import EventsProvider from 'ui/events';
+
 export default function VisFactory(Notifier, Private) {
   let aggTypes = Private(AggTypesIndexProvider);
   let visTypes = Private(RegistryVisTypesProvider);
@@ -160,6 +162,10 @@ export default function VisFactory(Notifier, Private) {
   };
   Vis.prototype.getUiState = function () {
     return this.__uiState;
+  };
+
+  Vis.prototype.implementsRenderComplete = function () {
+    return this.type.implementsRenderComplete;
   };
 
   /**

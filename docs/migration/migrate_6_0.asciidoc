@@ -1,4 +1,4 @@
 [[breaking-changes-6.0]]
-=== Breaking changes in 6.0
+== Breaking changes in 6.0
 
 There are not yet any breaking changes in Kibana 6.0

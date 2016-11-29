@@ -16,9 +16,7 @@ export default function VislibVisTypeFactory(Private) {
 
 
   _.class(VislibVisType).inherits(VisType);
-  function VislibVisType(opts) {
-    opts = opts || {};
-
+  function VislibVisType(opts = {}) {
     VislibVisType.Super.call(this, opts);
 
     if (this.responseConverter == null) {

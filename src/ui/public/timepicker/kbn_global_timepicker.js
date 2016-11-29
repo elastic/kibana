@@ -19,6 +19,7 @@ UiModules
 
   return {
     template: toggleHtml,
+    replace: true,
     link: ($scope, $el, attrs) => {
       listenForUpdates($rootScope);
 

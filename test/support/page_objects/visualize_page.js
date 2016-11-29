@@ -288,23 +288,17 @@ export default class VisualizePage {
     .findByCssSelector('.btn-success')
     .click()
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
-
   clickNewVisualization() {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="New Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeNewButton')
     .click();
   }
 
-
   saveVisualization(vizName) {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="Save Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -319,13 +313,11 @@ export default class VisualizePage {
     //   // click save button
     .then(() => {
       PageObjects.common.debug('click submit button');
-      return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.config button[type="submit"]')
+      return PageObjects.common.findTestSubject('saveVisualizationButton')
       .click();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -341,9 +333,7 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeOpenButton')
       .click();
   }
 
@@ -435,7 +425,6 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
     var self = this.remote;
     var chartData = [];
     var tempArray = [];
@@ -706,7 +695,7 @@ export default class VisualizePage {
       return PageObjects.common.sleep(1000);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 

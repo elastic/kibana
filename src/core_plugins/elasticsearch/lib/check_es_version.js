@@ -4,10 +4,17 @@
  */
 
 import _ from 'lodash';
-import esBool from './es_bool';
-import semver from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
-import SetupError from './setup_error';
+
+/**
+ *  tracks the node descriptions that get logged in warnings so
+ *  that we don't spam the log with the same message over and over.
+ *
+ *  There are situations, like in testing or multi-tenancy, where
+ *  the server argument changes, so we must track the previous
+ *  node warnings per server
+ */
+const lastWarnedNodesForServer = new WeakMap();
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -28,16 +35,17 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         return incompatibleNodes.push(esNode);
       }
 
-      // It's acceptable if ES is ahead of Kibana, but we want to prompt users to upgrade Kibana
-      // to match it.
-      if (semver.gt(esNode.version, kibanaVersion)) {
+      // It's acceptable if ES and Kibana versions are not the same so long as
+      // they are not incompatible, but we should warn about it
+      if (esNode.version !== kibanaVersion) {
         warningNodes.push(esNode);
       }
     });
 
     function getHumanizedNodeNames(nodes) {
       return nodes.map(node => {
-        return 'v' + node.version + ' @ ' + node.http.publish_address + ' (' + node.ip + ')';
+        const publishAddress =  _.get(node, 'http.publish_address') ? (_.get(node, 'http.publish_address') + ' ') : '';
+        return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
       });
     }
 
@@ -45,32 +53,34 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
       const simplifiedNodes = warningNodes.map(node => ({
         version: node.version,
         http: {
-          publish_address: node.http.publish_address,
+          publish_address: _.get(node, 'http.publish_address')
         },
         ip: node.ip,
       }));
 
-      server.log(['warning'], {
-        tmpl: (
-          'You\'re running Kibana <%= kibanaVersion %> with some newer versions of ' +
-          'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' +
-          '<%= getHumanizedNodeNames(nodes).join(", ") %>'
-        ),
-        kibanaVersion,
-        getHumanizedNodeNames,
-        nodes: simplifiedNodes,
-      });
+      // Don't show the same warning over and over again.
+      const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
+      if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
+        lastWarnedNodesForServer.set(server, warningNodeNames);
+        server.log(['warning'], {
+          tmpl: (
+            `You're running Kibana ${kibanaVersion} with some different versions of ` +
+            'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
+            `version to prevent compatibility issues: ${warningNodeNames}`
+          ),
+          kibanaVersion,
+          nodes: simplifiedNodes,
+        });
+      }
     }
 
     if (incompatibleNodes.length) {
       const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
-
-      const errorMessage =
+      throw new Error(
         `This version of Kibana requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
-        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(',')}`;
-
-      throw new SetupError(server, errorMessage);
+        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`
+      );
     }
 
     return true;

@@ -55,10 +55,10 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
           'searchable',
           'aggregatable',
           'analyzed',
+          'excluded',
           'controls'
         ];
 
-        // 6 name   type  format  analyzed  indexed   controls
         expect(headers.length).to.be(expectedHeaders.length);
 
         var comparedHeaders = headers.map(function compareHead(header, i) {

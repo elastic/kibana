@@ -11,7 +11,7 @@ export default function OrderedXKeysUtilService(Private) {
    * else values sorted by index
    */
 
-  return function (obj) {
+  return function (obj, orderBucketsBySum = false) {
     if (!_.isObject(obj)) {
       throw new Error('OrderedXKeysUtilService expects an object');
     }
@@ -27,7 +27,7 @@ export default function OrderedXKeysUtilService(Private) {
       if (d[1].isDate || d[1].isOrdered) {
         return +d[0];
       }
-      return d[1].index;
+      return orderBucketsBySum ? -d[1].sum : d[1].index;
     })
     .map(function (d, i, list) {
       if (!d[1].isNumber) return d[0];

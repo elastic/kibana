@@ -68,7 +68,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       return PageObjects.header.setAbsoluteRange(fromTime, toTime)
       .then(function () {
-        return PageObjects.header.getSpinnerDone();
+        return PageObjects.header.isGlobalLoadingIndicatorHidden();
       })
       .then(function takeScreenshot() {
         PageObjects.common.saveScreenshot('Dashboard-set-timepicker');

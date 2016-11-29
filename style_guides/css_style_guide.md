@@ -1,6 +1,90 @@
 
 # CSS Style Guide
 
+- [CSS Style Guide](#css-style-guide)
+  - [Using the preprocessor](#using-the-preprocessor)
+    - [Don't build concatenated selector names](#dont-build-concatenated-selector-names)
+    - [Avoid nested selectors](#avoid-nested-selectors)
+  - [Rules](#rules)
+    - [Use uniquely-named "base classes" to represent components](#use-uniquely-named-base-classes-to-represent-components)
+    - [Create "descendant classes" to represent child components which can't stand on their own](#create-descendant-classes-to-represent-child-components-which-cant-stand-on-their-own)
+    - [Think of deeply-nested child components as "subcomponents" instead of descendants](#think-of-deeply-nested-child-components-as-subcomponents-instead-of-descendants)
+    - [Represent states with "state classes"](#represent-states-with-state-classes)
+    - [Variations on a component are represented with "modifier classes"](#variations-on-a-component-are-represented-with-modifier-classes)
+    - [Don't use multiple modifier classes together](#dont-use-multiple-modifier-classes-together)
+    - [How to apply DRY](#how-to-apply-dry)
+      - [Compelling reasons for using mixins](#compelling-reasons-for-using-mixins)
+
+## Using the preprocessor
+
+### Don't build concatenated selector names
+
+This kind of code makes the selector name really difficult to grep for:
+
+```less
+.chart {
+  // styles
+
+  &-content {
+    // styles
+
+    &-title {
+      // styles
+    }
+  }
+}
+
+```
+
+This is better:
+
+```less
+.chart {
+  // styles
+}
+
+.chart-content {
+  // styles
+}
+
+.chart-content-title {
+  // styles
+}
+```
+
+### Avoid nested selectors
+
+Writing selectors like this makes the markup less readable and the styling less explicit. It also
+results in unnecessarily higher selector specificity:
+
+```less
+.specialMenu {
+  // styles
+
+  > li {
+    // styles
+  }
+}
+```
+
+This is better:
+
+```less
+.specialMenu {
+  // styles
+}
+
+.specialMenu__item {
+  // styles
+}
+
+## Naming convention
+
+Our CSS naming convention is based on BEM:
+
+* [BEM 101 (CSS Tricks)](https://css-tricks.com/bem-101/)
+* [Getting your head around BEM syntax (CSS Wizardry)](http://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/)
+
 ## Concepts
 
 ### Think in terms of components
@@ -32,7 +116,7 @@ rules that underly these examples are below.
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.localNavButton-is-pressed {
+  &.localNavButton-isPressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }
@@ -196,7 +280,7 @@ Notice that all states contain a boolean keyword, typically "is".
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.localNavButton-is-pressed {
+  &.localNavButton-isPressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }

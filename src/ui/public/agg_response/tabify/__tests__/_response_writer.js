@@ -53,7 +53,7 @@ describe('ResponseWriter class', function () {
       let aggs = [
         { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
         { type: 'terms', schema: 'segment', params: { field: 'extension' } },
-        { type: 'avg', schema: 'metric', params: { field: '@timestamp' } }
+        { type: 'avg', schema: 'metric', params: { field: 'bytes' } }
       ];
 
       getColumns.returns(aggs.map(function (agg) {

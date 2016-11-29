@@ -1,7 +1,5 @@
 import _ from 'lodash';
 import template from 'ui/filter_bar/filter_bar.html';
-import moment from 'moment';
-import angular from 'angular';
 import 'ui/directives/json_input';
 import filterAppliedAndUnwrap from 'ui/filter_bar/lib/filter_applied_and_unwrap';
 import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';

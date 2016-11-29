@@ -1,78 +1,74 @@
 <visualize-app class="app-container vis-editor vis-type-{{ vis.type.name }}">
-
+  <!-- Local nav. -->
   <kbn-top-nav name="visualize" config="topNavMenu">
-    <div class="vis-editor-info">
-      <span ng-show="savedVis.id" class="vis-editor-info-title">
-        <span ng-bind="::savedVis.title"></span>
-      </span>
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+      <div
+        data-transclude-slot="topLeftCorner"
+        class="localTitle"
+      >
+        <span
+          ng-show="savedVis.id"
+          ng-bind="::savedVis.title"
+        ></span>
+      </div>
+
+      <!-- Search. -->
+      <div
+        data-transclude-slot="bottomRow"
+        ng-show="chrome.getVisible()"
+        class="fullWidth"
+      >
+        <!-- Block searching if the Visualization is linked to a Saved Search. -->
+        <div ng-if="vis.type.requiresSearch && $state.linked">
+          Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
+          &nbsp;
+          <a
+            href=""
+            ng-dblclick="unlink()"
+            tooltip="Double click to unlink from Saved Search"
+          >
+            <i aria-hidden="true" class="fa fa-chain-broken"></i>
+          </a>
+        </div>
+
+        <!-- Allow searching if there is no linked Saved Searc. -->
+        <form
+          ng-if="vis.type.requiresSearch && !$state.linked"
+          name="queryInput"
+          ng-submit="fetch()"
+          class="fullWidth"
+        >
+          <div class="typeahead" kbn-typeahead="visualize">
+            <div class="localSearch">
+              <input
+                ng-model="state.query"
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                placeholder="Search..."
+                type="text"
+                class="localSearchInput"
+                ng-class="{'localSearchInput-isInvalid': queryInput.$invalid}"
+              >
+              <button
+                type="submit"
+                aria-label="Search"
+                class="localSearchButton"
+                ng-disabled="queryInput.$invalid"
+              >
+                <span aria-hidden="true" class="fa fa-search"></span>
+              </button>
+            </div>
+            <kbn-typeahead-items></kbn-typeahead-items>
+          </div>
+        </form>
+      </div>
     </div>
   </kbn-top-nav>
-  <navbar ng-if="chrome.getVisible()" name="visualize-search">
-    <div class="fill bitty-modal-container">
-      <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
-        ng-dblclick="unlink()"
-        tooltip="Double click to unlink this visualization from the saved search"
-        class="bitty-modal visualize-linked">
-        <i aria-hidden="true" class="fa fa-link"></i>
-        &nbsp;
-        This visualization is linked to a saved search:
-        <b>{{ savedVis.savedSearch.title }}</b>
-      </div>
 
-      <div
-        ng-if="vis.type.requiresSearch && unlinking"
-        ng-click="clearUnlinking()"
-        class="bitty-modal">
-        <i aria-hidden="true" class="fa fa-chain-broken"></i> Unlinked!
-      </div>
-
-      <form ng-if="vis.type.requiresSearch && $state.linked" class="inline-form fill" name="queryInput">
-        <div class="typeahead">
-          <div class="input-group">
-            <input
-              disabled
-              type="text"
-              class="form-control">
-
-            <button
-              class="btn btn-default" type="submit"
-              ng-disabled="true" aria-label="Search">
-              <span aria-hidden="true" class="fa fa-search"></span>
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <form
-        ng-if="vis.type.requiresSearch && !$state.linked"
-        ng-submit="fetch()"
-        class="inline-form fill"
-        name="queryInput">
-        <div class="typeahead" kbn-typeahead="visualize">
-          <div class="input-group"
-            ng-class="queryInput.$invalid ? 'has-error' : ''">
-            <input
-              ng-model="state.query"
-              parse-query
-              input-focus
-              kbn-typeahead-input
-              placeholder="Search..."
-              type="text"
-              class="form-control">
-
-            <button
-              class="btn btn-default" type="submit"
-              ng-disabled="queryInput.$invalid" aria-label="Search">
-              <span aria-hidden="true" class="fa fa-search"></span>
-            </button>
-          </div>
-          <kbn-typeahead-items></kbn-typeahead-items>
-        </div>
-      </form>
-    </div>
-    <div class="button-group"></div>
-  </navbar>
-
+  <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
   <div class="vis-editor-content">
@@ -84,6 +80,7 @@
     <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
       <visualize
         vis="vis"
+        render-counter
         ui-state="uiState"
         show-spy-panel="chrome.getVisible()"
         editable-vis="editableVis"

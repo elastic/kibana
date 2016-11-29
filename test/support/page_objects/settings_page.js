@@ -32,17 +32,17 @@ export default class SettingsPage {
 
   getAdvancedSettings(propertyName) {
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
   setAdvancedSettings(propertyName, propertyValue) {
     var self = this;
 
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -53,21 +53,21 @@ export default class SettingsPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(function setAdvancedSettingsClickSaveButton() {
-      return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+      return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton')
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
   getAdvancedSettings(propertyName) {
     var self = this;
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
@@ -105,7 +105,7 @@ export default class SettingsPage {
       return this.getTimeFieldNameField().click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.try(() => {
@@ -134,7 +134,7 @@ export default class SettingsPage {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-scope').click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -167,7 +167,7 @@ export default class SettingsPage {
           if (chartString === columnName) {
             return chart.click()
             .then(function () {
-              return PageObjects.header.getSpinnerDone();
+              return PageObjects.header.isGlobalLoadingIndicatorHidden();
             });
           }
         });
@@ -240,7 +240,7 @@ export default class SettingsPage {
       (pageNum + 1) + ') a.ng-binding')
     .click()
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -262,7 +262,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -279,7 +279,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -288,7 +288,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -297,7 +297,7 @@ export default class SettingsPage {
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -315,7 +315,7 @@ export default class SettingsPage {
         });
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.try(() => {

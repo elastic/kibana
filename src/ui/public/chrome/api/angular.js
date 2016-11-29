@@ -8,7 +8,6 @@ import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 const URL_LIMIT_WARN_WITHIN = 1000;
 
 module.exports = function (chrome, internals) {
-
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
 
@@ -33,6 +32,11 @@ module.exports = function (chrome, internals) {
       return a.href;
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
+    .config(['$compileProvider', function ($compileProvider) {
+      if (!internals.devMode) {
+        $compileProvider.debugInfoEnabled(false);
+      }
+    }])
     .run(($location, $rootScope, Private) => {
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];

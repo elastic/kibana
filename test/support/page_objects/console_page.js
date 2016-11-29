@@ -17,7 +17,7 @@ export default class ConsolePage {
   }
 
   async getRequestEditor() {
-    return await PageObjects.common.findTestSubject('console request-editor');
+    return await PageObjects.common.findTestSubject('request-editor');
   }
 
   async getRequest() {
@@ -26,22 +26,22 @@ export default class ConsolePage {
   }
 
   async getResponse() {
-    const responseEditor = await PageObjects.common.findTestSubject('console response-editor');
+    const responseEditor = await PageObjects.common.findTestSubject('response-editor');
     return await getVisibleTextFromAceEditor(responseEditor);
   }
 
   async clickPlay() {
-    const sendRequestButton = await PageObjects.common.findTestSubject('console send-request-button');
+    const sendRequestButton = await PageObjects.common.findTestSubject('send-request-button');
     await sendRequestButton.click();
   }
 
   async collapseHelp() {
-    const closeButton = await PageObjects.common.findTestSubject('console help-close-button');
+    const closeButton = await PageObjects.common.findTestSubject('help-close-button');
     await closeButton.click();
   }
 
   async openSettings() {
-    const settingsButton = await PageObjects.common.findTestSubject('console top-nav menu-item-settings');
+    const settingsButton = await PageObjects.common.findTestSubject('consoleSettingsButton');
     await settingsButton.click();
   }
 
@@ -50,13 +50,13 @@ export default class ConsolePage {
 
     // while the settings form opens/loads this may fail, so retry for a while
     await PageObjects.common.try(async () => {
-      const fontSizeInput = await PageObjects.common.findTestSubject('console setting-font-size-input');
+      const fontSizeInput = await PageObjects.common.findTestSubject('setting-font-size-input');
       await fontSizeInput.clearValue();
       await fontSizeInput.click();
       await fontSizeInput.type(String(newSize));
     });
 
-    const saveButton = await PageObjects.common.findTestSubject('console settings-save-button');
+    const saveButton = await PageObjects.common.findTestSubject('settings-save-button');
     await saveButton.click();
   }
 

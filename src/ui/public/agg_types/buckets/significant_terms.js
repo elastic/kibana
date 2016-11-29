@@ -16,6 +16,7 @@ export default function SignificantTermsAggDefinition(Private) {
     params: [
       {
         name: 'field',
+        scriptable: false,
         filterFieldTypes: 'string'
       },
       {

@@ -6,7 +6,7 @@ export default function TemplateVisTypeFactory(Private) {
   let TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
 
   _.class(TemplateVisType).inherits(VisType);
-  function TemplateVisType(opts) {
+  function TemplateVisType(opts = {}) {
     TemplateVisType.Super.call(this, opts);
 
     this.template = opts.template;

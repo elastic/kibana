@@ -217,6 +217,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
                 // This is kind of gross, it means that you can't replace a global value with a null
                 // best you can do is an empty string. Deal with it.
                 if (objVal == null) return srcVal;
+                if (srcVal == null) return objVal;
               });
             }
 
@@ -227,6 +228,10 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             $scope.plot = $.plot(canvasElem, _.compact(series), options);
           } catch (e) {
             setTimeout(drawPlot, 500);
+          }
+
+          if ($scope.plot) {
+            $scope.$emit('renderComplete');
           }
 
           legendScope.$destroy();

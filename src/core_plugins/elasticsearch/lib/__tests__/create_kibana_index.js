@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import Promise from 'bluebird';
 
 import createKibanaIndex from '../create_kibana_index';
-import SetupError from '../setup_error';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {
@@ -88,12 +87,12 @@ describe('plugins/elasticsearch', function () {
     });
 
     describe('failure requests', function () {
-      it('should reject with a SetupError', function () {
+      it('should reject with an Error', function () {
         const error = new Error('Oops!');
         client.indices.create.returns(Promise.reject(error));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
-          expect(err).to.be.a(SetupError);
+          expect(err).to.be.a(Error);
         });
       });
 
@@ -103,7 +102,6 @@ describe('plugins/elasticsearch', function () {
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
           expect(err.message).to.be('Unable to create Kibana index ".my-kibana"');
-          expect(err).to.have.property('origError', error);
         });
       });
 
@@ -115,7 +113,6 @@ describe('plugins/elasticsearch', function () {
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
           expect(err.message).to.be('Waiting for Kibana index ".my-kibana" to come online failed.');
-          expect(err).to.have.property('origError', error);
         });
       });
     });

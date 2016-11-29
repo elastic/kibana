@@ -104,23 +104,28 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); }
+    run: function () { kbnUrl.change('/visualize', {}); },
+    testId: 'visualizeNewButton',
   }, {
     key: 'save',
+    description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
-    description: 'Save Visualization'
+    testId: 'visualizeSaveButton',
   }, {
-    key: 'load',
+    key: 'open',
+    description: 'Open Saved Visualization',
     template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    description: 'Load Saved Visualization',
+    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
+    description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    description: 'Share Visualization'
+    testId: 'visualizeShareButton',
   }, {
     key: 'refresh',
     description: 'Refresh',
-    run: function () { $scope.fetch(); }
+    run: function () { $scope.fetch(); },
+    testId: 'visualizeRefreshButton',
   }];
 
   if (savedVis.id) {
@@ -187,7 +192,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
-    editableVis.listeners.brush = vis.listeners.brush = brushEvent;
+    editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
 
     // track state of editable vis vs. "actual" vis
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -309,12 +314,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   $scope.unlink = function () {
     if (!$state.linked) return;
 
+    notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
+
     $state.linked = false;
     const parent = searchSource.getParent(true);
     const parentsParent = parent.getParent(true);
-
-    // display unlinking for 2 seconds, unless it is double clicked
-    $scope.unlinking = $timeout($scope.clearUnlinking, 2000);
 
     delete savedVis.savedSearchId;
     parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
@@ -330,13 +334,6 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $state.query = searchSource.get('query');
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
-  };
-
-  $scope.clearUnlinking = function () {
-    if ($scope.unlinking) {
-      $timeout.cancel($scope.unlinking);
-      $scope.unlinking = null;
-    }
   };
 
   function transferVisState(fromVis, toVis, stage) {

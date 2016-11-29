@@ -8,12 +8,15 @@ import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import DocSourceProvider from 'ui/courier/data_source/doc_source';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+import NoDigestPromises from 'test_utils/no_digest_promises';
+import { stubMapper } from 'test_utils/stub_mapper';
 
 describe('index pattern', function () {
+  NoDigestPromises.activateForSuite();
+
   let IndexPattern;
   let mapper;
   let mappingSetup;
@@ -37,15 +40,7 @@ describe('index pattern', function () {
     DocSource = Private(DocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
-
-    // stub mapper
-    mapper = Private(IndexPatternsMapperProvider);
-    sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
-      return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
-    });
-    sinon.stub(mapper, 'clearCache', function () {
-      return Promise.resolve();
-    });
+    mapper = stubMapper(Private, mockLogstashFields);
 
     // stub mappingSetup
     mappingSetup = Private(UtilsMappingSetupProvider);
@@ -55,7 +50,7 @@ describe('index pattern', function () {
 
     // stub calculateIndices
     calculateIndices = sinon.spy(function () {
-      return $injector.get('Promise').resolve([
+      return Promise.resolve([
         { index: 'foo', max: Infinity, min: -Infinity },
         { index: 'bar', max: Infinity, min: -Infinity }
       ]);
@@ -150,7 +145,6 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('test_utils/no_digest_promises').activateForSuite();
     const indexPatternId = 'test-pattern';
     let indexPattern;
     let fieldLength;
@@ -321,7 +315,6 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('test_utils/no_digest_promises').activateForSuite();
     context('when index pattern is an interval', function () {
       let interval;
       beforeEach(function () {
@@ -400,7 +393,6 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('test_utils/no_digest_promises').activateForSuite();
 
       let interval;
       beforeEach(function () {
@@ -431,7 +423,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -453,7 +444,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -472,13 +462,8 @@ describe('index pattern', function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
       });
 
-      it('is fulfilled by id', function () {
-        let indexList;
-        indexPattern.toIndexList().then(function (val) {
-          indexList = val;
-        });
-        $rootScope.$apply();
-
+      it('is fulfilled by id', async function () {
+        let indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

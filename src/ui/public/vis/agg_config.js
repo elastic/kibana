@@ -148,13 +148,11 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {object} the new params object
    */
   AggConfig.prototype.resetParams = function () {
-    let fieldParam = this.type && this.type.params.byName.field;
     let field;
+    const fieldOptions = this.getFieldOptions();
 
-    if (fieldParam) {
-      let prevField = this.params.field;
-      let fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
-      field = _.contains(fieldOpts, prevField) ? prevField : null;
+    if (fieldOptions) {
+      field = fieldOptions.byName[this.fieldName()] || null;
     }
 
     return this.fillDefaults({ row: this.params.row, field: field });
@@ -284,6 +282,20 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     if (!this.type) return '';
     let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
     return pre += this.type.makeLabel(this);
+  };
+
+  AggConfig.prototype.getIndexPattern = function () {
+    return this.vis.indexPattern;
+  };
+
+  AggConfig.prototype.getFieldOptions = function () {
+    const fieldParamType = this.type && this.type.params.byName.field;
+
+    if (!fieldParamType || !fieldParamType.getFieldOptions) {
+      return null;
+    }
+
+    return fieldParamType.getFieldOptions(this);
   };
 
   AggConfig.prototype.fieldFormatter = function (contentType, defaultFormat) {
