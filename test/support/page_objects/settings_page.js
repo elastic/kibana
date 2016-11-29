@@ -188,13 +188,25 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    var self = this;
-    var selector = 'li.kbn-management-tab.active a small';
+    var selector = 'a[data-test-subj="tab-indexedFields"] small';
 
-    return PageObjects.common.try(function () {
-      return self.remote.setFindTimeout(defaultFindTimeout / 10)
+    return PageObjects.common.try(() => {
+      return this.remote.setFindTimeout(defaultFindTimeout / 10)
       .findByCssSelector(selector).getVisibleText()
-      .then(function (theText) {
+      .then((theText) => {
+        // the value has () around it, remove them
+        return theText.replace(/\((.*)\)/, '$1');
+      });
+    });
+  }
+
+  getScriptedFieldsTabCount() {
+    var selector = 'a[data-test-subj="tab-scriptedFields"] small';
+
+    return PageObjects.common.try(() => {
+      return this.remote.setFindTimeout(defaultFindTimeout / 10)
+      .findByCssSelector(selector).getVisibleText()
+      .then((theText) => {
         // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
       });
@@ -369,5 +381,91 @@ export default class SettingsPage {
       return alertText;
     });
   }
+
+  clickFieldsTab() {
+    PageObjects.common.debug('click Fields tab');
+    return PageObjects.common.findTestSubject('tab-indexFields')
+    .click();
+  }
+
+  clickScriptedFieldsTab() {
+    PageObjects.common.debug('click Scripted Fields tab');
+    return PageObjects.common.findTestSubject('tab-scriptedFields')
+    .click();
+  }
+
+  clickSourceFiltersTab() {
+    PageObjects.common.debug('click Source Filters tab');
+    return PageObjects.common.findTestSubject('tab-sourceFilters')
+    .click();
+  }
+
+  async addScriptedField(name, language, type, format, popularity, script) {
+    await this.clickAddScriptedField();
+    await this.setScriptedFieldName(name);
+    if (language) await this.setScriptedFieldLanguage(language);
+    if (type) await this.setScriptedFieldType(type);
+    if (format) await this.setScriptedFieldFormat(format);
+    if (popularity) await this.setScriptedFieldPopularity(popularity);
+    await this.setScriptedFieldScript(script);
+    await this.clickSaveScriptedField();
+  }
+
+  clickAddScriptedField() {
+    PageObjects.common.debug('click Add Scripted Field');
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('a[aria-label="Add Scripted Field"]')
+    .click();
+  }
+
+  clickSaveScriptedField() {
+    PageObjects.common.debug('click Save Scripted Field');
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('button[aria-label="Create Field"]')
+    .click();
+  }
+
+  setScriptedFieldName(name) {
+    PageObjects.common.debug('set scripted field name = ' + name);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.field.name"]')
+    .type(name);
+  }
+
+  setScriptedFieldLanguage(language) {
+    PageObjects.common.debug('set scripted field language = ' + language);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.field.lang"] > option[label="' + language + '"]')
+    .click();
+  }
+
+  setScriptedFieldType(type) {
+    PageObjects.common.debug('set scripted field type = ' + type);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.field.type"] > option[label="' + type + '"]')
+    .click();
+  }
+
+  setScriptedFieldFormat(format) {
+    PageObjects.common.debug('set scripted field format = ' + format);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.selectedFormatId"] > option[label="' + format + '"]')
+    .click();
+  }
+
+  setScriptedFieldPopularity(popularity) {
+    PageObjects.common.debug('set scripted field popularity = ' + popularity);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.field.count"]')
+    .type(popularity);
+  }
+
+  setScriptedFieldScript(script) {
+    PageObjects.common.debug('set scripted field script = ' + script);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('textarea[ng-model="editor.field.script"]')
+    .type(script);
+  }
+
 
 }

@@ -26,9 +26,9 @@
               <div>
                 <span ng-show="field.filterable" class="pull-right">
                   <i aria-hidden="true" class="fa fa-search-minus pull-right discover-field-details-filter"
-                    ng-click="updateFilterInQuery(field, bucket.value, '-')"></i>
+                    ng-click="updateFilterInQuery(field, bucket.value, '-')"  data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"></i>
                   <i aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
-                    ng-click="updateFilterInQuery(field, bucket.value, '+')"></i>
+                    ng-click="updateFilterInQuery(field, bucket.value, '+')" data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"></i>
                 </span>
                 <div css-truncate css-truncate-expandable="true" class="discover-field-details-value" title="{{::bucket.display}}">
                   {{::bucket.display}} <i ng-show="bucket.display === ''">Empty string</i>

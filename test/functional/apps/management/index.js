@@ -22,4 +22,5 @@ bdd.describe('settings app', function () {
   require('./_index_pattern_results_sort');
   require('./_index_pattern_popularity');
   require('./_kibana_settings');
+  require('./_scripted_fields');
 });
