@@ -15,7 +15,7 @@ release-state can be: released | prerelease | unreleased
 :issue:          https://github.com/elastic/kibana/issues/
 :pull:           https://github.com/elastic/kibana/pull/
 :commit:         https://github.com/elastic/kibana/commit/
-:security:       https://www.elastic.co/community/security/
+:security:       https://www.elastic.co/community/security
 
 
 include::introduction.asciidoc[]
