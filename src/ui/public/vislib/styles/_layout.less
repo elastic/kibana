@@ -1,0 +1,172 @@
+.visualize-chart {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.vis-wrapper {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* YAxis logic */
+.y-axis-col-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.y-axis-col {
+  display: flex;
+  flex-direction: row;
+  flex: 1 0 36px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.y-axis-spacer-block {
+  min-height: 45px;
+}
+
+.y-axis-div-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 20px;
+  min-width: 0;
+}
+
+.y-axis-div {
+  flex: 1 1 25px;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.y-axis-title {
+  min-height: 14px;
+  min-width: 14px;
+}
+
+.y-axis-chart-title {
+  display: flex;
+  flex-direction: column;
+  min-height: 14px;
+  min-width: 0;
+  width: 14px;
+}
+
+.y-axis-title text, .x-axis-title text {
+  font-size: 9pt;
+  fill: @vis-axis-title-color;
+  font-weight: bold;
+}
+
+.chart-title {
+  flex: 1 1 100%;
+  min-height: 14px;
+  min-width: 14px;
+}
+
+.chart-title text {
+  font-size: 11px;
+  fill: @vis-chart-title-color;
+}
+
+.vis-col-wrapper {
+  display: flex;
+  flex: 1 0 20px;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.chart-wrapper {
+  display: flex;
+  flex: 1 0 20px;
+  overflow: visible;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart-wrapper-column {
+  display: flex;
+  flex: 1 0 20px;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart-wrapper-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart {
+  flex: 1 1 100%;
+  min-height: 0;
+  min-width: 0;
+
+  > svg {
+    display: block;
+  }
+
+  overflow: visible;
+}
+
+.chart-row {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart-column {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.x-axis-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 45px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.x-axis-div-wrapper {
+  display: flex;
+  flex-direction: row;
+  min-height: 20px;
+  min-width: 0;
+}
+
+.x-axis-chart-title {
+  display: flex;
+  flex-direction: row;
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
+}
+
+.x-axis-title {
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
+  overflow: hidden;
+}
+
+.x-axis-div {
+  margin-top: -5px;
+  min-height: 20px;
+  min-width: 20px;
+}

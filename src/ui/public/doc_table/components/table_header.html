@@ -1,0 +1,16 @@
+<tr>
+  <th width="1%"></th>
+  <th ng-if="indexPattern.timeFieldName">
+    <span>Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="sort(indexPattern.timeFieldName)" tooltip="Sort by time"></i></span>
+  </th>
+  <th ng-repeat="name in columns">
+    <span class="table-header-name">
+      {{name | shortDots}} <i ng-class="headerClass(name)" ng-click="sort(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
+    </span>
+    <span class="table-header-move">
+      <i ng-click="toggleColumn(name)" ng-show="canRemove(name)" class="fa fa-remove" tooltip="Remove column" tooltip-append-to-body="1"></i>
+      <i ng-click="moveLeft(name)" class="fa fa-angle-double-left" ng-show="!$first" tooltip="Move column to the left" tooltip-append-to-body="1"></i>
+      <i ng-click="moveRight(name)" class="fa fa-angle-double-right" ng-show="!$last" tooltip="Move column to the right" tooltip-append-to-body="1"></i>
+    </span>
+  </th>
+</tr>

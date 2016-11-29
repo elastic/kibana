@@ -1,28 +1,35 @@
+const camelCase = require('lodash').camelCase;
+require('babel/register')(require('./src/optimize/babel_options').node);
+
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
-  // and once durring so that we have access to it via
+  // and once during so that we have access to it via
   // grunt.config.get() within the config files
-  var config = {
+  const config = {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
-    src: __dirname + '/src', // unbuild version of build
-    build: __dirname + '/build', // copy of source, but optimized
-    app: __dirname + '/src/kibana', // source directory for the app
-    plugins: __dirname + '/src/kibana/plugins', // source directory for the app
-    server: __dirname + '/src/server', // source directory for the server
-    target: __dirname + '/target',  // location of the compressed build targets
-    buildApp: __dirname + '/build/kibana', // build directory for the app
-    configFile: __dirname + '/src/server/config/kibana.yml',
+    src: __dirname + '/src',
+    buildDir: __dirname + '/build', // temporary build directory
+    plugins: __dirname + '/src/core_plugins',
+    server: __dirname + '/src/server',
+    target: __dirname + '/target', // location of the compressed build targets
+    testUtilsDir: __dirname + '/src/test_utils',
+    configFile: __dirname + '/src/config/kibana.yml',
 
-    nodeVersion: '0.10.35',
-    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
-    services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
+    karmaBrowser: (function () {
+      if (grunt.option('browser')) {
+        return grunt.option('browser');
+      }
 
-    unitTestDir: __dirname + '/test/unit',
-    testUtilsDir: __dirname + '/test/utils',
-    bowerComponentsDir: __dirname + '/src/kibana/bower_components',
+      switch (require('os').platform()) {
+        case 'win32':
+          return 'IE';
+        default:
+          return 'Chrome';
+      }
+    }()),
 
-    devPlugins: 'vis_debug_spy',
+    nodeVersion: grunt.file.read('.node-version').trim(),
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
@@ -31,51 +38,59 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
+
     lintThese: [
       'Gruntfile.js',
       '<%= root %>/tasks/**/*.js',
-      '<%= src %>/kibana/*.js',
-      '<%= src %>/server/**/*.js',
-      '<%= src %>/kibana/{components,directives,factories,filters,plugins,registry,services,utils}/**/*.js',
-      '<%= unitTestDir %>/**/*.js',
-      '!<%= unitTestDir %>/specs/vislib/fixture/**/*'
+      '<%= root %>/test/**/*.js',
+      '<%= src %>/**/*.js',
+      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
+      '!<%= src %>/core_plugins/timelion/bower_components/**/*.js',
+      '!<%= src %>/core_plugins/timelion/vendor_components/**/*.js',
+      '!<%= src %>/fixtures/**/*.js',
+      '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],
-    lessFiles: [
-      '<%= src %>/kibana/components/*/*.less',
-      '<%= src %>/kibana/styles/main.less',
-      '<%= src %>/kibana/components/vislib/styles/main.less',
-      '<%= plugins %>/dashboard/styles/main.less',
-      '<%= plugins %>/discover/styles/main.less',
-      '<%= plugins %>/settings/styles/main.less',
-      '<%= plugins %>/visualize/styles/main.less',
-      '<%= plugins %>/visualize/styles/visualization.less',
-      '<%= plugins %>/visualize/styles/main.less',
-      '<%= plugins %>/table_vis/table_vis.less',
-      '<%= plugins %>/metric_vis/metric_vis.less',
-      '<%= plugins %>/markdown_vis/markdown_vis.less'
-    ]
+    deepModules: {
+      'caniuse-db': '1.0.30000265',
+      'chalk': '1.1.0',
+      'glob': '4.5.3',
+      'har-validator': '1.8.0',
+      'json5': '0.4.0',
+      'loader-utils': '0.2.11',
+      'micromatch': '2.2.0',
+      'postcss-normalize-url': '2.1.1',
+      'postcss-reduce-idents': '1.0.2',
+      'postcss-unique-selectors': '1.0.0',
+      'postcss-minify-selectors': '1.4.6',
+      'postcss-single-charset': '0.3.0',
+      'regenerator': '0.8.36',
+      'readable-stream': '2.1.0'
+    }
   };
 
   grunt.config.merge(config);
 
-  var dirname = require('path').dirname;
-  var indexFiles = grunt.file.expand({ cwd: 'src/kibana/plugins' }, [
-    '*/index.js',
-    '!' + config.devPlugins + '/index.js'
-  ]);
-  var moduleIds = indexFiles.map(function (fileName) {
-    return 'plugins/' + dirname(fileName) + '/index';
-  });
+  // must run before even services/platforms
+  grunt.config.set('build', require('./tasks/config/build')(grunt));
 
-  config.bundled_plugin_module_ids = grunt.bundled_plugin_module_ids = moduleIds;
+  config.packageScriptsDir = __dirname + '/tasks/build/package_scripts';
+  // ensure that these run first, other configs need them
+  config.services = require('./tasks/config/services')(grunt);
+  config.platforms = require('./tasks/config/platforms')(grunt);
+
+  grunt.config.merge(config);
 
   // load plugins
   require('load-grunt-config')(grunt, {
     configPath: __dirname + '/tasks/config',
     init: true,
-    config: config
+    config: config,
+    loadGruntTasks: {
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
+    }
   });
 
   // load task definitions
   grunt.task.loadTasks('tasks');
+  grunt.task.loadTasks('tasks/build');
 };

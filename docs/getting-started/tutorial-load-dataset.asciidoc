@@ -1,0 +1,171 @@
+[[tutorial-load-dataset]]
+== Loading Sample Data
+
+The tutorials in this section rely on the following data sets:
+
+* The complete works of William Shakespeare, suitably parsed into fields. Download this data set by clicking here:
+  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare.json[shakespeare.json].
+* A set of fictitious accounts with randomly generated data. Download this data set by clicking here:
+  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[accounts.zip]
+* A set of randomly generated log files. Download this data set by clicking here:
+  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[logs.jsonl.gz]
+
+Two of the data sets are compressed. Use the following commands to extract the files:
+
+[source,shell]
+unzip accounts.zip
+gunzip logs.jsonl.gz
+
+The Shakespeare data set is organized in the following schema:
+
+[source,json]
+{
+    "line_id": INT,
+    "play_name": "String",
+    "speech_number": INT,
+    "line_number": "String",
+    "speaker": "String",
+    "text_entry": "String",
+}
+
+The accounts data set is organized in the following schema:
+
+[source,json]
+{
+    "account_number": INT,
+    "balance": INT,
+    "firstname": "String",
+    "lastname": "String",
+    "age": INT,
+    "gender": "M or F",
+    "address": "String",
+    "employer": "String",
+    "email": "String",
+    "city": "String",
+    "state": "String"
+}
+
+The schema for the logs data set has dozens of different fields, but the notable ones used in this tutorial are:
+
+[source,json]
+{
+    "memory": INT,
+    "geo.coordinates": "geo_point"
+    "@timestamp": "date"
+}
+
+Before we load the Shakespeare and logs data sets, we need to set up {es-ref}mapping.html[_mappings_] for the fields.
+Mapping divides the documents in the index into logical groups and specifies a field's characteristics, such as the
+field's searchability or whether or not it's _tokenized_, or broken up into separate words.
+
+Use the following command to set up a mapping for the Shakespeare data set:
+
+[source,shell]
+curl -XPUT http://localhost:9200/shakespeare -d '
+{
+ "mappings" : {
+  "_default_" : {
+   "properties" : {
+    "speaker" : {"type": "string", "index" : "not_analyzed" },
+    "play_name" : {"type": "string", "index" : "not_analyzed" },
+    "line_id" : { "type" : "integer" },
+    "speech_number" : { "type" : "integer" }
+   }
+  }
+ }
+}
+';
+
+This mapping specifies the following qualities for the data set:
+
+* The _speaker_ field is a string that isn't analyzed. The string in this field is treated as a single unit, even if
+there are multiple words in the field.
+* The same applies to the _play_name_ field.
+* The _line_id_ and _speech_number_ fields are integers.
+
+The logs data set requires a mapping to label the latitude/longitude pairs in the logs as geographic locations by
+applying the `geo_point` type to those fields.
+
+Use the following commands to establish `geo_point` mapping for the logs:
+
+[source,shell]
+curl -XPUT http://localhost:9200/logstash-2015.05.18 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -XPUT http://localhost:9200/logstash-2015.05.19 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -XPUT http://localhost:9200/logstash-2015.05.20 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+The accounts data set doesn't require any mappings, so at this point we're ready to use the Elasticsearch
+{es-ref}docs-bulk.html[`bulk`] API to load the data sets with the following commands:
+
+[source,shell]
+curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
+curl -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+
+These commands may take some time to execute, depending on the computing resources available.
+
+Verify successful loading with the following command:
+
+[source,shell]
+curl 'localhost:9200/_cat/indices?v'
+
+You should see output similar to the following:
+
+[source,shell]
+health status index               pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   bank                  5   1       1000            0    418.2kb        418.2kb
+yellow open   shakespeare           5   1     111396            0     17.6mb         17.6mb
+yellow open   logstash-2015.05.18   5   1       4631            0     15.6mb         15.6mb
+yellow open   logstash-2015.05.19   5   1       4624            0     15.7mb         15.7mb
+yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb         16.4mb

@@ -1,0 +1,207 @@
+[[deb]]
+=== Install Kibana with Debian Package
+
+The Debian package for Kibana can be <<install-deb,downloaded from our website>>
+or from our  <<deb-repo,APT repository>>. It can be used to install
+Kibana on any Debian-based system such as Debian and Ubuntu.
+
+The latest stable version of Kibana can be found on the
+link:/downloads/kibana[Download Kibana] page. Other versions can
+be found on the link:/downloads/past-releases[Past Releases page].
+
+[[deb-key]]
+==== Import the Elastic PGP Key
+
+include::key.asciidoc[]
+
+[source,sh]
+-------------------------
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+-------------------------
+
+[[deb-repo]]
+==== Installing from the APT repository
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+You may need to install the `apt-transport-https` package on Debian before proceeding:
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get install apt-transport-https
+--------------------------------------------------
+
+Save the repository definition to  +/etc/apt/sources.list.d/elastic-{major-version}.list+:
+
+ifeval::["{release-state}"=="released"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}-prerelease/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+
+[WARNING]
+==================================================
+
+Do not use `add-apt-repository` as it will add a `deb-src` entry as well, but
+we do not provide a source package. If you have added the `deb-src` entry, you
+will see an error like the following:
+
+    Unable to find expected entry 'main/source/Sources' in Release file
+    (Wrong sources.list entry or malformed file)
+
+Delete the `deb-src` entry from the `/etc/apt/sources.list` file and the
+installation should work as expected.
+==================================================
+
+You can install the Kibana Debian package with:
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get update && sudo apt-get install kibana
+--------------------------------------------------
+
+[WARNING]
+==================================================
+If two entries exist for the same Kibana repository, you will see an error like this during `apt-get update`:
+
+["literal",subs="attributes,callouts"]
+
+Duplicate sources.list entry https://artifacts.elastic.co/packages/{major-version}/apt/ ...`
+
+Examine +/etc/apt/sources.list.d/kibana-{major-version}.list+ for the duplicate entry or locate the duplicate entry amongst the files in `/etc/apt/sources.list.d/` and the `/etc/apt/sources.list` file.
+==================================================
+
+endif::[]
+
+
+[[install-deb]]
+==== Download and install the Debian package manually
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The Debian package for Kibana v{version} can be downloaded from the website and installed as follows:
+
+*64 bit:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
+sha1sum kibana-{version}-amd64.deb <1>
+sudo dpkg -i kibana-{version}-amd64.deb
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha1[published SHA].
+
+*32 bit:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb
+sha1sum kibana-{version}-i386.deb <1>
+sudo dpkg -i kibana-{version}-i386.deb
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb.sha1[published SHA].
+
+endif::[]
+
+include::init-systemd.asciidoc[]
+
+[[deb-running-init]]
+==== Running Kibana with SysV `init`
+
+Use the `update-rc.d` command to configure Kibana to start automatically
+when the system boots up:
+
+[source,sh]
+--------------------------------------------------
+sudo update-rc.d kibana defaults 95 10
+--------------------------------------------------
+
+Kibana can be started and stopped using the `service` command:
+
+[source,sh]
+--------------------------------------------
+sudo -i service kibana start
+sudo -i service kibana stop
+--------------------------------------------
+
+If Kibana fails to start for any reason, it will print the reason for
+failure to STDOUT. Log files can be found in `/var/log/kibana/`.
+
+[[deb-running-systemd]]
+include::systemd.asciidoc[]
+
+[[deb-configuring]]
+==== Configuring Kibana via config file
+
+Kibana loads its configuration from the `/etc/kibana/kibana.yml`
+file by default.  The format of this config file is explained in
+<<settings>>.
+
+[[deb-layout]]
+==== Directory layout of Debian package
+
+The Debian package places config files, logs, and the data directory in the appropriate
+locations for a Debian-based system:
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| Type | Description | Default Location | Setting
+| home
+  | Kibana home directory or `$KIBANA_HOME`
+  | /usr/share/kibana
+ d|
+
+| bin
+  | Binary scripts including `kibana` to start the Kibana server
+    and `kibana-plugin` to install plugins
+  | /usr/share/kibana/bin
+ d|
+
+| config
+  | Configuration files including `kibana.yml`
+  | /etc/kibana
+ d|
+
+| data
+  | The location of the data files written to disk by Kibana and its plugins
+  | /var/lib/kibana
+ d|
+
+| optimize
+  | Transpiled source code. Certain administrative actions (e.g. plugin install)
+    result in the source code being retranspiled on the fly.
+  | /usr/share/kibana/optimize
+ d|
+
+| plugins
+  | Plugin files location. Each plugin will be contained in a subdirectory.
+  | /usr/share/kibana/plugins
+ d|
+
+|=======================================================================

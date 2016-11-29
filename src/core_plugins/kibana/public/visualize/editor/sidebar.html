@@ -1,0 +1,96 @@
+<div class="sidebar-container">
+  <form
+    class="sidebar-list"
+    ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
+    name="visualizeEditor"
+    novalidate
+  ><!-- see http://goo.gl/9kgz5w -->
+
+    <div css-truncate title="{{indexPattern.id}}" ng-if="vis.type.requiresSearch" class="index-pattern">
+      {{ indexPattern.id }}
+    </div>
+
+    <nav class="navbar navbar-default subnav">
+      <div class="container-fluid">
+
+        <!-- tabs -->
+        <ul class="nav navbar-nav">
+          <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
+            <a
+              class="vis-editor-subnav-link"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
+              ng-click="sidebar.section='data'"
+            >
+              Data
+            </a>
+          </li>
+          <li ng-class="{active: sidebar.section == 'options'}">
+            <a
+              class="vis-editor-subnav-link"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'options'}"
+              ng-click="sidebar.section='options'"
+            >
+              Options
+            </a>
+          </li>
+        </ul>
+
+        <!-- controls -->
+        <ul class="nav navbar-nav navbar-right">
+          <li
+            ng-if="visualizeEditor.softErrorCount() > 0"
+            disabled
+            tooltip="{{ visualizeEditor.describeErrors() }}"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
+          >
+            <a class="vis-editor-subnav-link vis-editor-subnav-link--danger">
+              <i class="fa fa-warning"></i>
+            </a>
+          </li>
+          <li
+            tooltip="Apply changes"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400" tooltip-append-to-body="1"
+          >
+            <button class="btn-success navbar-btn-link"
+              type="submit"
+              ng-disabled="!vis.dirty">
+
+              <i class="fa fa-play"></i>
+            </button>
+          </li>
+          <li
+            tooltip="Discard changes"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
+          >
+            <button class="btn-default navbar-btn-link"
+              ng-disabled="!vis.dirty"
+              ng-click="resetEditableVis()">
+
+              <i class="fa fa-close"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+      <!-- metrics -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+
+      <!-- buckets -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+    </div>
+
+    <div class="vis-editor-config" ng-show="sidebar.section == 'options'">
+      <!-- vis options -->
+      <vis-editor-vis-options vis="vis" saved-vis="savedVis"></vis-editor-vis-options>
+    </div>
+
+
+  </form>
+</div>

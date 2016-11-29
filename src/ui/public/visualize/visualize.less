@@ -1,0 +1,180 @@
+@import (reference) "~ui/styles/variables";
+
+visualize {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+
+  .k4tip {
+    white-space: pre-line;
+  }
+
+  .vis-container {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    -webkit-transition: opacity 0.01s;
+    transition: opacity 0.01s;
+    flex: 1 1 0;
+
+    // IE11 Hack
+    //
+    // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
+    // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
+    // have to use an IE-specific hack instead.
+    _:-ms-fullscreen, :root  & {
+      flex: 1 0;
+    }
+
+    &.vis-container--legend-left {
+      flex-direction: row-reverse;
+    }
+    &.vis-container--legend-right {
+      flex-direction: row;
+    }
+    &.vis-container--legend-top {
+      flex-direction: column-reverse;
+    }
+    &.vis-container--legend-bottom {
+      flex-direction: column;
+    }
+
+    &.spy-only {
+      display: none;
+    }
+
+  }
+
+  .loading {
+    opacity: @loading-opacity;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    opacity: @loading-opacity;
+  }
+}
+
+.visualize-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .top { align-self: flext-start; }
+  .item { }
+  .bottom { align-self: flext-end; }
+}
+
+visualize-spy {
+  // this element should flex
+  flex: 0 1 auto;
+  padding: 0px 0px 0px 15px;
+
+  // it's children should also flex vertically
+  flex-direction: column;
+  display: flex;
+
+  overflow: auto;
+
+  &.visible {
+    display: block;
+  }
+
+  &.only {
+    flex: 1 1 auto;
+    padding-top: 0px;
+  }
+
+  .visualize-spy-fill {
+    margin-right: 5px;
+  }
+
+  .visualize-spy-container {
+    &.only {
+      height: auto;
+    }
+  }
+
+  pre {
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+}
+
+.visualize-spy-container {
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  height: 482px;
+  overflow-y: auto;
+
+  header {
+    padding: 0 0 15px;
+  }
+
+  header + * {
+    flex: 1 1 auto;
+  }
+
+  > .alert {
+    flex: 0 0 auto;
+  }
+
+  tr > td {
+    font-size: 0.85em;
+  }
+}
+
+.visualize-spy-nav {
+  flex: 0 0 auto;
+
+  a.btn {
+    margin: @padding-small-vertical @padding-small-vertical;
+  }
+}
+
+.visualize-spy-content {
+  position: relative;
+}
+
+  .visualize-spy-loading {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    text-align: center;
+  }
+
+    .visualize-spy-loading-text {
+      display: inline-block;
+      margin: 0;
+      background: @alert-info-bg;
+      color: @alert-info-text;
+      padding: 5px 10px;
+      border-radius: @border-radius-base;
+
+      .spinner > * {
+        background-color: @alert-info-text;
+      }
+    }
+
+.visualize-show-spy {
+  flex: 0 0 auto;
+}
+
+  .visualize-show-spy-tab {
+    color: @kibanaGray4;
+    position: absolute;
+    z-index: 100;
+    left: 5px;
+    bottom: 0px;
+  }

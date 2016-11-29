@@ -1,0 +1,161 @@
+@import "~ui/styles/variables/colors.less";
+
+@brand-primary:                               @gray14;
+@brand-info:                                  #6482e5;
+
+@body-bg:                                     @gray3;
+@text-color:                                  #cecece;
+
+@link-color:                                  #b7e2ea;
+@link-hover-color:                            lighten(@link-color, 10%);
+
+@btn-default-color:                           @white;
+@btn-default-bg:                              @gray7;
+@btn-default-border:                          @btn-default-bg;
+
+@btn-primary-color:                           @white;
+@btn-primary-bg:                              @gray7;
+@btn-primary-border:                          @btn-primary-bg;
+
+@btn-success-bg:                              @brand-success;
+@btn-danger-bg:                               @brand-danger;
+
+@input-bg:                                    @gray4;
+@input-bg-disabled:                           @gray3;
+
+@input-color:                                 @text-color;
+@input-border:                                @gray6;
+
+@well-bg:                                     @gray4;
+
+@action-add:                                  desaturate(@btn-success-bg, 30%);
+@action-remove:                               desaturate(@btn-danger-bg, 30%);
+
+
+@table-border-color:                          #5c5c5c;
+@table-cell-hover-bg:                         transparent;
+@table-cell-hover-hover-bg:                   @gray6;
+@table-row-hover-bg:                          lighten(@gray6, 4%);
+@table-nested-bg:                             transparent;
+
+@table-sort-color:                            @gray6;
+@table-sort-asc-color:                        @gray11;
+@table-sort-desc-color:                       @gray11;
+
+
+@nav-link-hover-bg:                           @gray6;
+@nav-tabs-active-link-hover-bg:               @navbar-default-bg;
+
+@nav-tabs-border-color:                       @gray6;
+@nav-tabs-link-hover-border-color:            @gray7;
+@nav-tabs-active-link-hover-border-color:     @gray7;
+
+@nav-tabs-active-link-hover-color:            @brand-primary;
+
+@paginate-page-link-active-color:             @gray9;
+
+
+@dashboard-bg:                                #272727;
+@panel-bg:                                    @dashboard-bg;
+@panel-inner-border:                          @dashboard-bg;
+
+@panel-default-text:                          @brand-primary;
+@panel-default-border:                        @dashboard-bg;
+@panel-default-heading-bg:                    @dashboard-bg;
+
+@dashboard-panel-bg:                          @dashboard-bg;
+@dashboard-panel-color:                       @text-color;
+@dashboard-panel-heading-link-color:          #a6a6a6;
+@dashboard-panel-heading-link-hover-color:    #a6a6a6;
+@dashboard-panel-load-error-color:            @btn-danger-bg;
+
+@collapser-bg:                                @panel-bg;
+@collapser-border:                            #5c5c5c;
+@collapser-color:                             @gray8;
+@collapser-hover-bg:                          @gray6;
+@collapser-hover-color:                       @gray3;
+
+@visualize-show-spy-border:                   @collapser-border;
+@visualize-show-spy-bg:                       @collapser-bg;
+@visualize-show-spy-color:                    @collapser-color;
+@visualize-show-spy-hover-bg:                 @collapser-hover-bg;
+@visualize-show-spy-hover-color:              @collapser-hover-color;
+@visualize-spy-container-pre-color:           #a6a6a6;
+@visualize-spy-container-pre-bg:              darken(@panel-bg, 5%);
+
+@svg-axis-color:                              @gray8;
+@svg-tick-text-color:                         @gray10;
+@svg-brush-color:                             @white;
+@svg-endzone-bg:                              @white;
+@vis-axis-title-color:                        @gray10;
+@vis-chart-title-color:                       @gray10;
+
+@tilemap-border:                              @gray13;
+@tilemap-legend-base-bg:                      @gray3;
+@tilemap-legend-bg:                           fade(@tilemap-legend-base-bg, 100%);
+@tilemap-color:                               @gray12;
+@tilemap-legend-i-border:                     @gray9;
+@tilemap-legend-i-bg:                         @gray10;
+@tilemap-info-base-bg:                        @white;
+@tilemap-info-bg:                             fade(@tilemap-info-base-bg, 92%);
+@tilemap-info-header-color:                   @gray4;
+@tilemap-leaflet-control-bg:                  @white;
+@tilemap-leaflet-control-outline:             @black;
+@tilemap-leaflet-control-color:               @black;
+@tilemap-leaflet-control-draw-action-bg:      @gray11;
+@tilemap-leaflet-container-bg:                @body-bg;
+@tilemap-leaflet-popup-border:                @gray9;
+@tilemap-leaflet-footer-bg:                   fade(@gray3, 80%);
+@tilemap-leaflet-footer-color:                @gray12;
+@tilemap-filter:                              invert(1) brightness(1.75) grayscale(1) contrast(1);
+
+@tooltip-bg:                                  fadeout(@gray4, 7%);
+@tooltip-color:                               @gray14;
+
+@filter-bar-confirm-bg:                       @gray3;
+@filter-bar-confirm-filter-color:             @gray3;
+@filter-bar-confirm-border:                   @black;
+@filter-bar-confirm-filter-bg:                @gray12;
+@filter-bar-bar-bg:                           @gray3;
+@filter-bar-bar-border:                       @black;
+@filter-bar-bar-condensed-bg:                 darken(@filter-bar-bar-bg, 5%);
+@filter-bar-bar-filter-bg:                    @action-add;
+@filter-bar-bar-filter-color:                 @white;
+@filter-bar-bar-filter-negate-bg:             @action-remove;
+
+@legend-item-color:                           @gray10;
+
+@config-border:                               @gray4;
+@config-bg:                                   @body-bg;
+@config-close-bg:                             @gray3;
+@config-saved-object-finder-options-bg:       @body-bg;
+
+@saved-object-finder-link-color:              @text-color;
+@saved-object-finder-icon-color:              darken(@saved-object-finder-link-color, 10%);
+
+@list-group-bg:                               @gray3;
+@list-group-border:                           @gray7;
+@list-group-hover-bg:                         @gray14;
+@list-group-link-color:                       @gray5;
+@list-group-link-hover-color:                 @list-group-link-color;
+@list-group-link-heading-color:               @gray3;
+@list-group-menu-item-color:                  @text-color;
+@list-group-menu-item-select-color:           @link-color;
+@list-group-menu-item-active-bg:              @well-bg;
+@list-group-menu-item-hover-bg:               @well-bg;
+
+@component-active-color:                      @gray5;
+@component-active-bg:                         @gray9;
+
+@navbar-default-color:                        @white;
+@navbar-default-bg:                           #454545;
+@navbar-default-border:                       darken(@navbar-default-bg, 10%);
+
+@spinner-bg:                                  @white;
+
+@sidebar-bg:                                  @btn-default-bg;
+@sidebar-hover-bg:                            darken(@btn-default-bg, 5%);
+@sidebar-hover-color:                         @text-color;
+
+@dark-button-bg:                              @gray7;
+@dark-button-font:                            @white;

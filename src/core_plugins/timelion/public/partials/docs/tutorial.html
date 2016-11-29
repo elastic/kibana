@@ -1,0 +1,188 @@
+<div ng-show="section === 'tutorial'">
+	<div ng-show="page === 1">
+    <div class="doc-container-content">
+  		<h1>Welcome to <strong>timelion</strong> <small> the timeseries expression interface for everything</small></h1>
+  		<p>
+  			Timelion. Timeline. Get it? Ok, enough with the puns. Timelion is the, clawing, gnashing, zebra killing, pluggable timeseries interface for <em>everything</em>. If your datastore can produce a timeseries, then you have all of the awesome power of Timelion at your disposal. Timelion lets you compare, combine and combobulate (not actually a word) datasets across multiple data sources, even entirely different technologies, all with the same easy-to-master expression syntax.  While the beginning of this tutorial will focus on Elasticsearch, once you're rolling you'll discover you can use nearly everything you learn here with any datasource timelion supports.
+  		</p>
+
+  		<p>
+  			Why start with elasticsearch? Well, you're using timelion, so we know you have Kibana, so you definitely have Elasticsearch. So the answer is: <strong>Because its easy.</strong> Timelion want everything to be easy. Ok, let's do this thing. If you're already familar with Timelion's syntax, <a ng-click="section = 'functions'">Jump to the function reference</a>, otherwise click the <strong>Next</strong> button in the lower right corner.
+  		</p>
+    </div>
+
+    <div class="doc-container-buttons">
+      <button ng-click="opts.dontShowHelp()" class="btn btn-default btn-doc-prev">Don't show this again</button>
+      <button ng-click="page = page+1" class="btn btn-primary btn-doc-next">Next</button>
+    </div>
+	</div>
+	<div ng-show="page === 2">
+    <div ng-show="!es.valid">
+      <div class="doc-container-content">
+
+        <h2>First time configuration</h2>
+        <p>
+          If you're using logstash you're already done. Otherwise,
+					pop over to Kibana's "Advanced Settigns" and update <code>timelion:es.timefield</code> and <code>timelion:es.default_index</code> parameters to match your environment.
+        </p>
+
+        <p>
+        You'll see some other timelion parameters in there too, we won't be messing with them for now, but you can probably guess what they do. And frankly, most can be specified on-the-fly with the timelion expression syntax. More on that in a bit.
+        </p>
+      </div>
+      <div class="doc-container-buttons">
+        <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
+        <span ng-show="es.invalidCount > 0 && !es.valid">
+          Could not validate elasticsearch settings: <strong>{{es.invalidReason}}.</strong> Check your Advanced Settings and try again. ({{es.invalidCount}})
+        </span>
+        <button ng-click="recheckElasticsearch()" class="btn btn-success btn-doc-next">Validate Config</button>
+      </div>
+    </div>
+    <div ng-show="es.valid">
+      <div class="doc-container-content">
+        <h2>Good news <small>Elasticsearch is configured correctly!</small></h2>
+        <p>
+          Or at least, things look ok. I validated your default index and your timefield and everything looks ok. Given your settings I found data between <strong>{{es.stats.min}}</strong> and <strong>{{es.stats.max}}</strong>. You're probably all set. If this doesn't look right, <a ng-click="es.valid = false">Click here for instructions on configuring the elasticsearch data source</a>.
+        </p>
+        <p>
+          <h4>Intervals</h4>
+          You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top has two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>.
+          <span ng-show="state.interval == 'auto'"><strong>Looks good!</strong></span>
+          <span ng-show="state.interval != 'auto'">Set it to <code>auto</code></span>.
+          If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in Advanced Settings
+        </p>
+        <p>
+          <h4>Time range</h4>
+          Now see that <i class="fa fa-clock-o"></i> clock icon in the top right? Click it and select a time period that includes all or part of the time range in the first paragraph above. If you didn't before, you should now have a line chart with a count of your data points over time.
+        </p>
+      </div>
+      <div class="doc-container-buttons">
+        <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
+        <button ng-click="page = page+1" class="btn btn-primary btn-doc-next">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div ng-show="page === 3">
+    <div class="doc-container-content">
+      <h2>Elasticsearch querying in short</h2>
+      <p>
+        We're going to start off talking about the Elasticsearch datasource, because we've already validated that one works for you. Enter <code>.es(*)</code> in the expression input, if its not there already. Hit enter.
+      </p>
+      <p>
+        This said <em>"hey elasticsearch, find everything in my default index"</em>. If you wanted to find a subset you might do something like <code>.es(html)</code> to count events matching html, or <code>.es('user:bob AND bytes:>100')</code> to find events with <em>bob</em> in the <em>user</em> field, and a bytes field that is greater than 100. Note that we surrounded our query in single quotes this time, because it has spaces. You can enter any lucene query string as the first argument to the <code>.es()</code> function.
+
+      <p>
+        <h4>Passing arguments</h4>
+        Timelion has a number of shortcuts for doing common things, one of which is that for simple arguments, ones that don't contain spaces or special characters, you don't need quotes. Many functions also have defaults, for example <code>.es()</code> and <code>.es(*)</code> do the same thing. Arguments also have names, so you don't have to remember their position, you can pass <code>.es(index='logstash-*', q='*')</code> to tell the elasticsearch data source <em>"use * as the q (query) for the logstash-* index"</em>
+      </p>
+      <h4>Beyond count</h4>
+      <p>
+        Counting events is all well and good, but the elasticsearch data source also supports any Elasticsearch metric that returns a single value. Min, max, avg, sum and cardinality are some of the most useful. Let's say you want a unique count of the <code>src_ip</code> field. You could do say, <code>.es(*, metric='cardinality:src_ip')</code>. To get the average of the bytes field you would run: <code>.es(metric='avg:bytes')</code>.
+      </p>
+    </div>
+    <div class="doc-container-buttons">
+      <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
+      <button ng-click="page = page+1" class="btn btn-primary btn-doc-next">Next</button>
+    </div>
+  </div>
+
+  <div ng-show="page === 4">
+    <div class="doc-container-content">
+      <h3>Expressions and expressing yourself</h3>
+      <p>
+        Every timelion expression starts with a datasource function. From there, the sky is the limit and new functions can be appended, or "chained", to the data source to transform and augment it. From here we're going to assume you know something about your data. Feel free to replace the elasticsearch query with something more meaningful to you.
+      </p>
+
+      <p>
+        Up until now we've dealt with just the one chart. We're going to experiment, so add a few more. Click the <i class="fa fa-bars"></i> <strong>Menu</strong> icon in the top right to expand the menu. Then click the <i class="fa fa-area-chart"></i> <strong>Add Chart</strong> button.
+        <table class="table table-condensed table-striped">
+          <tr>
+            <td><code>.es(*)</code></td>
+            <td><strong>One expression</strong></td>
+          </tr>
+          <tr>
+            <td><code>.es(*), .es(US)</code></td>
+            <td><strong>Two expressions.</strong> Two expressions on the same chart!</td>
+          </tr>
+          <tr>
+            <td><code>.es(*).color(#f66), .es(US).bars(1)</code></td>
+            <td><strong>Red expression.</strong> Let's colorize the first series red instead. Also, instead of lines for 2nd series, we'll have some bars, with a 1 pixel width.</td>
+          </tr>
+          <tr>
+            <td><code>.es(*).color(#f66).lines(fill=3), .es(US).bars(1).points(radius=3, weight=1)</code></td>
+            <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma separated list. We can use named arguments to make expressions easier to read and arguments easier to remember.</td>
+          </tr>
+            <tr>
+            <td><code>(.es(*), .es(GB)).points()</code></td>
+            <td><strong>Also grouped expressions.</strong> Groups of expressions can be chained to functions as well. Both series will be shown as points instead of lines.</td>
+          </tr>
+        </table>
+      </p>
+
+    </div>
+    <div class="doc-container-buttons">
+      <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
+      <button ng-click="page = page+1" class="btn btn-primary btn-doc-next">Next</button>
+    </div>
+  </div>
+
+  <div ng-show="page === 5">
+    <div class="doc-container-content">
+      <h2>Data: Transform <small>insert beat boxing</small></h2>
+      <p>
+        We can make our charts pretty all day, but its time for <strong>businessing</strong>. As an example exercise, we're going to figure out what percentage some subset of our data represents of the whole, over time. For example, what percentage of my web traffic comes from the US? Let's start with finding all events that contain US: <code>.es('US')</code>. Now, to find that ratio to the whole, we'd need to divide <code>'US'</code> by everything, try this: <code>.es('US').divide(.es())</code>. Ah, not bad, but of course this provides us with a number between 0 and 1, let's correct that to a percentage: <code>.es('US').divide(.es()).multiply(100)</code>. There, now we've divided all US traffic by all worldwide traffic, then multiplied the result by 100 to get a percentage.
+      </p>
+      <p>Timelion has a number of built in arithmetic functions, such as <code>sum</code>, <code>subtract</code>, <code>multiply</code> and <code>divide</code>, many of which can take a series or a number. There are also other data transformation functions including <code>movingaverage</code>, <code>abs</code> and <code>derivative</code>. In addition there are other view transformation functions than the ones we learned on the previous page. See the function reference for the complete list of transforming, and drawing functions.
+
+      <p>Now that you know the syntax, jump over to the <a ng-click="section = 'functions'">Function Reference</a> for detailed info on all of Timelions available functions.
+    </div>
+    <div class="doc-container-buttons">
+      <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
+      <span><strong>Tip:</strong> You can always find this again by clicking the <i class="fa fa-question-circle"></i> in the menu</span>
+      <button ng-click="opts.dontShowHelp()" class="btn btn-default btn-doc-next">Don't show this again</button>
+    </div>
+  </div>
+</div>
+
+<div ng-show="section === 'functions'" class="localDropdown timelionFunctionsDropdown">
+  <div class="localDropdownTitle">
+    Function reference
+  </div>
+  <div class="localDropdownHelpText">
+    Click a function for details and arguments or <a ng-click="section = 'tutorial'">return to the tutorial.</a>
+  </div>
+  <table class="table table-condensed table-bordered timelionFunctionsTable">
+    <tr class="timelionFunctionsTableRow"
+      ng-repeat-start="function in functions.list"
+      ng-class="{active: functions.details === function.name}"
+      ng-click="functions.details = (functions.details === function.name ? null : function.name)">
+      <td><strong>.{{function.name}}()</strong></td>
+      <td>{{function.help}}</td>
+    </tr>
+
+    <!-- Function details -->
+    <tr ng-if="functions.details === function.name" ng-repeat-end>
+      <td colspan=2>
+        <div class="suggestion-details" >
+          <table class="table table-condensed table-bordered timelionFunctionDetailsTable"
+            ng-show="function.args.length > (function.chainable ? 1: 0)">
+          <thead>
+            <th>Argument Name</th>
+            <th>Accepted Types</th>
+            <th>Information</th>
+          </thead>
+          <tr ng-repeat="arg in function.args" ng-hide="$index < 1 && function.chainable">
+            <td>{{arg.name}}</td>
+            <td><em>{{arg.types.join(', ')}}</em></td>
+            <td>{{arg.help}}</td>
+          </tr>
+          </table>
+          <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
+            <em>This function does not accept any arguments. Well that's simple, isn't it?</em>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,28 @@
+<div class="editor-duration">
+  <div class="form-group">
+    <label>Input Format</label>
+    <select
+      ng-model="editor.formatParams.inputFormat"
+      ng-options="inputFormat.kind as inputFormat.text for inputFormat in editor.field.format.type.inputFormats"
+      class="form-control">
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Output Format</label>
+    <select
+      ng-model="editor.formatParams.outputFormat"
+      ng-options="outputFormat.method as outputFormat.text for outputFormat in editor.field.format.type.outputFormats"
+      class="form-control">
+    </select>
+  </div>
+  <div class="form-group" ng-hide="editor.field.format.isHuman()">
+    <label>Decimal Places</label>
+    <input type="number" min="0" max="20" ng-model="editor.formatParams.outputPrecision" class="form-control" />
+  </div>
+</div>
+<div>
+  <field-format-editor-samples
+    ng-model="editor.formatParams"
+    inputs="cntrl.sampleInputs">
+  </field-format-editor-samples>
+</div>

@@ -1,0 +1,185 @@
+@import (reference) "~ui/styles/variables";
+
+/* _tilemap */
+
+.tilemap {
+  margin-bottom: 6px;
+  border: 1px solid;
+  border-color: @tilemap-border;
+  position: relative;
+}
+
+/* leaflet Dom Util div for map label */
+
+.tilemap-legend {
+  padding: 5px 7px 5px 7px;
+  margin: 0;
+  font: 11px/13px Arial, Helvetica, sans-serif;
+  background: @tilemap-legend-base-bg;
+  background: @tilemap-legend-bg;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  border-radius: 5px;
+  text-align: left;
+  line-height: 15px;
+  color: @tilemap-color;
+}
+
+.tilemap-legend-title {
+  font-weight: bold;
+}
+
+.tilemap-legend i {
+  width: 10px;
+  height: 10px;
+  float: left;
+  margin: 2px 4px 0 0;
+  opacity: 1;
+  border-radius: 50%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: @tilemap-legend-i-border;
+  background: @tilemap-legend-i-bg;
+}
+
+/* top left needs some more styles */
+.leaflet-top.leaflet-left .tilemap-legend-wrapper {
+  position: absolute;
+  left: 50px;
+  white-space: nowrap;
+}
+
+.leaflet-top.leaflet-left .tilemap-legend-wrapper span {
+  padding-right: 20px;
+}
+
+/* leaflet Dom Util div for map legend */
+
+.tilemap-info {
+  padding: 3px 7px 3px 7px;
+  margin: 0;
+  font-size: 12px;
+  background: @tilemap-info-base-bg;
+  background: fade(@tilemap-info-bg, 92%);
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  border-radius: 5px;
+}
+
+.tilemap-info h2 {
+  font-size: 12px !important;
+  margin: 0 !important;
+  padding: 0;
+  color: @tilemap-info-header-color;
+}
+
+.leaflet-control-fit {
+  text-align: center;
+  background: @tilemap-leaflet-control-bg;
+  width: 26px;
+  height: 26px;
+  outline: 1px @tilemap-leaflet-control-outline;
+}
+
+/* over-rides leaflet popup styles to look like kibana tooltip */
+
+.leaflet-container {
+  background: @tilemap-leaflet-container-bg !important;
+  outline: 0 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup {
+  margin-bottom: 16px !important;
+  pointer-events: none;
+}
+
+.leaflet-popup-content-wrapper {
+  background: @tooltip-bg !important;
+  color: @tooltip-color !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 24px !important;
+  font-size: @font-size-base;
+  font-weight: normal;
+  word-wrap: break-word;
+  overflow: hidden;
+  pointer-events: none;
+
+  > :last-child {
+    margin-bottom: @tooltip-space;
+  }
+
+  > * {
+    margin: @tooltip-space @tooltip-space 0;
+  }
+
+  table {
+    td,th {
+      padding: @tooltip-space-tight;
+
+      &.row-bucket {
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+.leaflet-popup-tip-container, .leaflet-popup-close-button {
+  display: none !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 0;
+  margin: 0;
+  font: 12px/13px Arial, Helvetica, sans-serif;
+  line-height: 14px !important;
+}
+
+.leaflet-control-layers-expanded label {
+  font-weight: normal !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.leaflet-draw-tooltip {
+  display: none;
+}
+
+.leaflet-control-attribution {
+  background-color: @tilemap-leaflet-footer-bg !important;
+  color: @tilemap-leaflet-footer-color !important;
+
+  p {
+    display: inline;
+  }
+}
+
+.leaflet-left {
+  .leaflet-control {
+    a,
+    a:hover {
+      color: @tilemap-leaflet-control-color;
+    }
+  }
+
+  .leaflet-draw-actions a {
+    background-color: @tilemap-leaflet-control-draw-action-bg;
+  }
+}
+
+/* filter to desaturate mapquest tiles */
+
+img.leaflet-tile {
+  filter: @tilemap-filter;
+}
+
+img.leaflet-tile.filters-off {
+  filter: none;
+}

@@ -1,0 +1,32 @@
+<div ng-show="add.form" class="vis-editor-agg-add-schemas">
+  <label>Select {{ groupName }} type</label>
+  <ul class="form-group list-group list-group-menu">
+    <li
+      ng-hide="schema.deprecate"
+      ng-repeat="schema in availableSchema"
+      ng-click="add.submit(schema)"
+      class="list-group-item list-group-menu-item">
+      <i ng-show="schema.icon" ng-class="schema.icon"></i>
+      {{schema.title}}
+    </li>
+  </ul>
+</div>
+
+<div
+  ng-if="stats.max > stats.count"
+  ng-init="add.form = stats.count < 1 ? !add.form : add.form"
+  ng-click="add.form = !add.form"
+  class="vis-editor-agg-wide-btn">
+
+  <div ng-if="!add.form">
+    <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate">
+      Add {{ groupName }}
+    </div>
+    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate">
+      Add sub-{{ groupName }}
+    </div>
+  </div>
+  <div class="btn btn-sm btn-primary" ng-if="add.form">
+    Cancel
+  </div>
+</div>

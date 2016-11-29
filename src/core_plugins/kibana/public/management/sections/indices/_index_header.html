@@ -1,0 +1,35 @@
+<div class="index-pattern-name">
+  <h1 class="title" css-truncate>
+    <i aria-hidden="true" ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
+    {{indexPattern.id}}
+  </h1>
+  <div class="controls">
+    <button
+      ng-if="setDefault"
+      ng-click="setDefault()"
+      tooltip="Set as default index"
+      class="btn btn-success">
+      <span class="sr-only">Set as default index</span>
+      <i aria-hidden="true" class="fa fa-star"></i>
+    </button>
+    <button
+      ng-if="refreshFields"
+      confirm-click="refreshFields()"
+      confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
+      tooltip="Refresh field list"
+      class="btn btn-warning">
+      <span class="sr-only">Reload field list</span>
+      <i aria-hidden="true" class="fa fa-refresh"></i>
+    </button>
+    <button
+      ng-if="delete"
+      confirm-click="delete()"
+      aria-label="Remove index pattern"
+      confirmation="Are you sure you want to remove this index pattern?"
+      tooltip="Remove index pattern"
+      class="btn btn-danger">
+      <span class="sr-only">Remove index pattern</span>
+      <i aria-hidden="true" class="fa fa-trash"></i>
+    </button>
+  </div>
+</div>

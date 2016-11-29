@@ -1,0 +1,16 @@
+<div
+  id="json-ace"
+  ng-model="hitJson"
+  readonly
+  ui-ace="{
+    useWrapMode: true,
+    onLoad: aceLoaded,
+    advanced: {
+      highlightActiveLine: false
+    },
+    rendererOptions: {
+      showPrintMargin: false,
+      maxLines: 4294967296
+    },
+    mode: 'json'
+  }"></div>

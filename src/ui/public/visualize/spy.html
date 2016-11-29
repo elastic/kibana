@@ -1,0 +1,24 @@
+<div class="visualize-show-spy">
+  <div ng-click="toggleDisplay()" class="visualize-show-spy-tab">
+    <i class="fa" ng-class="spy.mode.name ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"></i>
+  </div>
+</div>
+<div ng-show="spy.mode.name" class="visualize-spy-container">
+  <header class="control-group">
+    <div class="fill visualize-spy-nav">
+      <a
+        class="btn btn-default"
+        ng-repeat="mode in modes.inOrder"
+        ng-class="{ active: spy.mode.name === mode.name }"
+        ng-click="setSpyMode(mode.name)">
+        {{mode.display}}
+      </a>
+    </div>
+    <div class="button-group visualize-spy-fill">
+      <a ng-click="toggleFullPage()">
+        <i ng-if="!spy.mode.fill" class="fa fa-expand"></i>
+        <i ng-if="spy.mode.fill" class="fa fa-compress"></i>
+      </a>
+    </div>
+  </header>
+</div>

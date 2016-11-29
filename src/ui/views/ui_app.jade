@@ -1,0 +1,181 @@
+extends ./chrome.jade
+
+block content
+  style.
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    /**
+     * 1. The kibanaLoadingMessage will push the loader up. This top margin pushes it back down so
+     *    it's in the same position as the login form.
+     */
+    .kibanaLoader {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      width: 620px;
+      height: 185px;
+      padding: 0;
+      margin-top: 130px; /* 1 */
+      text-align: center;
+      background: #3caed2;
+      box-shadow: 0 0 2em #444444;
+    }
+
+    .kibanaLoader__logo {
+      width: 150px;
+      height: 100%;
+      padding: 20px;
+      background-color: #E8488B;
+      -webkit-animation: colorShift 3s infinite;
+              animation: colorShift 3s infinite;
+      box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .kibanaLoader__content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto;
+      color: white;
+      font-size: 38px;
+      font-weight: 300;
+      font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding-bottom: 16px;
+    }
+
+    @-webkit-keyframes colorShift {
+      0% {
+        background-color: #DD4484;
+      }
+      33% {
+        background-color: #E4BB51;
+      }
+      66% {
+        background-color: #8AC336;
+      }
+      100% {
+        background-color: #DD4484;
+      }
+    }
+
+    @keyframes colorShift {
+      0% {
+        background-color: #DD4484;
+      }
+      33% {
+        background-color: #E4BB51;
+      }
+      66% {
+        background-color: #8AC336;
+      }
+      100% {
+        background-color: #DD4484;
+      }
+    }
+
+    /**
+     * 1. If we change the height or top margin, we'll need to increase the top margin on
+     *    kibanaLoader too.
+     */
+    .kibanaLoadingMessage {
+      font-family: "Open Sans", Helvetica, Arial, sans-serif;
+      color: white;
+      max-width: 540px;
+      height: 50px; /* 1 */
+      margin-top: 80px; /* 1 */
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.4;
+      opacity: 0.8;
+    }
+
+  .kibanaWelcomeView
+    .kibanaLoader
+      .kibanaLoader__logo
+        .kibanaWelcomeLogo
+      .kibanaLoader__content
+        | Loading Kibana
+    .kibanaLoadingMessage.
+      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      good stuff will be cached up for next time!
+
+  script.
+    window.onload = function () {
+
+      var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
+      if (hideLoadingMessage) {
+        var loading = document.querySelector('.kibanaWelcomeView');
+        loading.removeChild(loading.lastChild);
+      }
+
+      var buildNum = #{kibanaPayload.buildNum};
+      var cacheParam = buildNum ? '?v=' + buildNum : '';
+      function bundleFile(filename) {
+        var anchor = document.createElement('a');
+        anchor.setAttribute('href', !{JSON.stringify(bundlePath)} + '/' + filename + cacheParam);
+        return anchor.href;
+      }
+      var files = [
+        bundleFile('commons.style.css'),
+        bundleFile('#{app.id}.style.css'),
+        bundleFile('commons.bundle.js'),
+        bundleFile('#{app.id}.bundle.js')
+      ];
+
+      (function next() {
+        var file = files.shift();
+        if (!file) return;
+
+        var failure = function () {
+          // make subsequent calls to failure() noop
+          failure = function () {};
+
+          var err = document.createElement('h1');
+          err.style['color'] = 'white';
+          err.style['font-family'] = 'monospace';
+          err.style['text-align'] = 'center';
+          err.style['background'] = '#F44336';
+          err.style['padding'] = '25px';
+          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+
+          document.body.innerHTML = err.outerHTML;
+        }
+
+        var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
+        var dom = document.createElement(type);
+        dom.setAttribute('async', '');
+        dom.addEventListener('error', failure);
+
+        if (type === 'script') {
+          dom.setAttribute('src', file);
+          dom.addEventListener('load', next);
+          document.head.appendChild(dom);
+        } else {
+          dom.setAttribute('rel', 'stylesheet');
+          dom.setAttribute('href', file);
+          document.head.appendChild(dom);
+          next();
+        }
+      }());
+    };

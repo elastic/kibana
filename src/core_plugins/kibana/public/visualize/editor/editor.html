@@ -1,0 +1,91 @@
+<visualize-app class="app-container vis-editor vis-type-{{ vis.type.name }}">
+  <!-- Local nav. -->
+  <kbn-top-nav name="visualize" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+      <div
+        data-transclude-slot="topLeftCorner"
+        class="localTitle"
+      >
+        <span
+          ng-show="savedVis.id"
+          ng-bind="::savedVis.title"
+        ></span>
+      </div>
+
+      <!-- Search. -->
+      <div
+        data-transclude-slot="bottomRow"
+        ng-show="chrome.getVisible()"
+        class="fullWidth"
+      >
+        <!-- Block searching if the Visualization is linked to a Saved Search. -->
+        <div ng-if="vis.type.requiresSearch && $state.linked">
+          Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
+          &nbsp;
+          <a
+            href=""
+            ng-dblclick="unlink()"
+            tooltip="Double click to unlink from Saved Search"
+          >
+            <i aria-hidden="true" class="fa fa-chain-broken"></i>
+          </a>
+        </div>
+
+        <!-- Allow searching if there is no linked Saved Searc. -->
+        <form
+          ng-if="vis.type.requiresSearch && !$state.linked"
+          name="queryInput"
+          ng-submit="fetch()"
+          class="fullWidth"
+        >
+          <div class="typeahead" kbn-typeahead="visualize">
+            <div class="localSearch">
+              <input
+                ng-model="state.query"
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                placeholder="Search..."
+                type="text"
+                class="localSearchInput"
+                ng-class="{'localSearchInput-isInvalid': queryInput.$invalid}"
+              >
+              <button
+                type="submit"
+                aria-label="Search"
+                class="localSearchButton"
+                ng-disabled="queryInput.$invalid"
+              >
+                <span aria-hidden="true" class="fa fa-search"></span>
+              </button>
+            </div>
+            <kbn-typeahead-items></kbn-typeahead-items>
+          </div>
+        </form>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <!-- Filters. -->
+  <filter-bar state="state"></filter-bar>
+
+  <div class="vis-editor-content">
+
+    <div class="collapsible-sidebar" ng-if="chrome.getVisible()">
+        <vis-editor-sidebar class="vis-editor-sidebar"></vis-editor-sidebar>
+    </div>
+
+    <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
+      <visualize
+        vis="vis"
+        render-counter
+        ui-state="uiState"
+        show-spy-panel="chrome.getVisible()"
+        editable-vis="editableVis"
+        search-source="savedVis.searchSource">
+      </visualize>
+    </div>
+  </div>
+</visualize-app>

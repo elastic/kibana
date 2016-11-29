@@ -1,0 +1,61 @@
+@import "~ui/styles/variables";
+
+.table {
+  // Nesting
+  .table {
+    background-color: @table-nested-bg;
+  }
+}
+
+kbn-table, .kbn-table, tbody[kbn-rows] {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0px;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: bold;
+    }
+  }
+
+  dl.source {
+    margin-bottom: 0;
+    line-height: 2em;
+    word-break: break-all;
+
+    dt, dd {
+      display: inline;
+    }
+
+    dt {
+      background: @table-dt-bg;
+      color: @table-dt-color;
+      padding: @padding-xs-vertical @padding-xs-horizontal;
+      margin-right: @padding-xs-horizontal;
+      font-family: monospace;
+      word-break: normal;
+    }
+  }
+
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: @table-sort-color;
+    }
+
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: @table-sort-asc-color;
+    }
+
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: @table-sort-desc-color;
+    }
+  }
+}

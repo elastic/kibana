@@ -1,0 +1,20 @@
+<h3>Scripted fields</h3>
+<p>These scripted fields are computed on the fly from your data. They can be used in visualizations and displayed in your documents, however they can not be searched. You can manage them here and add new ones as you see fit, but be careful, scripts can be tricky! <!-- If you need some examples, why not let Kibana <a ng-click="addDateScripts()"><strong>create a few examples from your date fields.</strong></a --></p>
+
+<header>
+  <a
+    ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addField') }}"
+    class="btn btn-info"
+    aria-label="Add Scripted Field">
+    <i aria-hidden="true" class="fa fa-plus"></i>
+    Add Scripted Field
+  </a>
+</header>
+
+<paginated-table
+  columns="columns"
+  rows="rows"
+  per-page="perPage">
+</paginated-table>
+
+<p class="text-center" ng-if="rows.length === 0">No matching scripted fields found.</p>

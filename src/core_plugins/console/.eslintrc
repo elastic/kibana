@@ -1,0 +1,34 @@
+---
+
+root: true
+extends: '@elastic/kibana'
+
+rules:
+  block-scoped-var: [0]
+  camelcase: [0]
+  curly: [0]
+  dot-location: [0]
+  dot-notation: [0]
+  eqeqeq: [0]
+  guard-for-in: [0]
+  indent: [0]
+  max-len: [0]
+  new-cap: [0]
+  no-caller: [0]
+  no-empty: [0]
+  no-extend-native: [0]
+  no-loop-func: [0]
+  no-multi-str: [0]
+  no-nested-ternary: [0]
+  no-proto: [0]
+  no-sequences: [0]
+  no-undef: [0]
+  no-use-before-define: [0]
+  one-var: [0]
+  quotes: [0]
+  space-before-blocks: [0]
+  space-in-parens: [0]
+  space-infix-ops: [0]
+  semi: [0]
+  strict: [0]
+  wrap-iife: [0]

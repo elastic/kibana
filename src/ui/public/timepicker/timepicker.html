@@ -1,0 +1,175 @@
+<div class="kbn-timepicker">
+  <style>
+    .kbn-timepicker [kbn-time-input] {
+      text-align: center;
+    }
+    .kbn-timepicker-modes {
+      text-transform: capitalize;
+    }
+    .kbn-timepicker-section {
+      float: left;
+      padding: 0px 15px;
+    }
+    .kbn-refresh-section {
+      float: left;
+      padding: 0px 15px;
+    }
+    .kbn-timepicket-alert {
+      width: 100px;
+    }
+  </style>
+
+  <div class="tab-content">
+
+    <!-- Filters -->
+    <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
+      <div class="localDropdownTitle">Time Range</div>
+      <div class="row">
+        <div class="col-md-2">
+          <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
+            <li ng-class="{active: mode === 'quick' }">
+              <a ng-click="setMode('quick')">quick</a>
+            </li>
+            <li ng-class="{active: mode === 'relative' }">
+              <a ng-click="setMode('relative')">relative</a>
+            </li>
+            <li ng-class="{active: mode === 'absolute' }">
+              <a ng-click="setMode('absolute')">absolute</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-md-10">
+          <div ng-switch on="mode" class="container-fluid">
+            <div ng-switch-when="quick">
+
+              <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
+                <ul class="list-unstyled">
+                  <li ng-repeat="option in list">
+                    <a ng-click="setQuick(option.from, option.to)" ng-bind="::option.display"></a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- TODO: Add a section for custom intervals -->
+            </div>
+
+            <div ng-switch-when="relative">
+              <form role="form" ng-submit="applyRelative()" class="form-inline" name="relativeTime">
+                <div class="kbn-timepicker-section">
+                  <label>
+                    From:
+                    <span ng-show="relative.preview">{{relative.preview}}</span>
+                    <span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+                  </label>
+                  <br>
+                  <div class="form-group">
+                    <input
+                      required
+                      ng-model="relative.count"
+                      ng-change="formatRelative()"
+                      greater-than="-1"
+                      min="0"
+                      type="number"
+                      class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <select
+                      ng-model="relative.unit"
+                      ng-options="opt.value as opt.text for opt in relativeOptions"
+                      ng-change="formatRelative()"
+                      class="form-control col-xs-2">
+                    </select>
+                  </div>
+                  <br>
+                  <div class="small">
+                    <label>
+                      <input
+                        ng-model="relative.round"
+                        ng-checked="relative.round"
+                        ng-change="formatRelative()"
+                        type="checkbox">
+                      round to the {{units[relative.unit]}}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="kbn-timepicker-section">
+                  <label>
+                    To: Now
+                  </label>
+                  <br>
+                  <div class="form-group">
+                    <input type="text" disabled class="form-control" value="Now">
+                  </div>
+                </div>
+
+                <div class="kbn-timepicker-section">
+                  <label>&nbsp;</label>
+                  <br>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!relative.preview">
+                      Go
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div ng-switch-when="absolute">
+              <form name="absoluteTime" ng-submit="applyAbsolute()">
+                <div class="kbn-timepicker-section">
+                  <div>
+                    <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span>
+                    </label>
+                    <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
+                  </div>
+                  <div>
+                    <datepicker ng-model="absolute.from" max-date="absolute.to" show-weeks="false"></datepicker>
+                  </div>
+                </div>
+
+                <div class="kbn-timepicker-section">
+                  <div>
+                    <label class="small">To:
+                      <a class="label label-default" ng-click="setToNow()">Set To Now</a>
+                    </label>
+                    <span ng-show="!absolute.to"><i>Invalid Date</i></span>
+                    <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
+                  </div>
+                  <div>
+                    <datepicker ng-model="absolute.to" min-date="absolute.from" show-weeks="false"></datepicker>
+                  </div>
+                </div>
+
+                <div class="kbn-timepicker-section kbn-timepicker-alert">
+                  <label>&nbsp;</label>
+                  <div class="form-group">
+                    <button class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" type="submit">
+                      Go
+                    </button>
+                    <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Refresh Intervals -->
+    <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
+      <div class="localDropdownTitle">Refresh Interval</div>
+      <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
+        <ul class="list-unstyled">
+          <li ng-repeat="inter in list">
+            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value === inter.value }" ng-click="setRefreshInterval(inter)">
+              {{inter.display}}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

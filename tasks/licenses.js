@@ -1,84 +1,77 @@
-var _ = require('lodash');
-var npm = require('npm');
-var bowerLicense = require('bower-license');
-var npmLicense = require('license-checker');
+import _ from 'lodash';
+import { fromNode } from 'bluebird';
+import npm from 'npm';
+import npmLicense from 'license-checker';
 
-module.exports = function (grunt) {
-  grunt.registerTask('licenses', 'Checks dependency licenses', function () {
+export default function licenses(grunt) {
+  grunt.registerTask('licenses', 'Checks dependency licenses', async function () {
+    const config = this.options();
+    const done = this.async();
 
-    var config = this.options();
+    const result = [];
+    const options = {
+      start: process.cwd(),
+      production: true,
+      json: true
+    };
 
-    var done = this.async();
-
-    var result = {};
-    var options = {start: process.cwd(), json: true };
-    var checkQueueLength = 2;
-
-    function processPackage(info, dependency) {
-      var pkgInfo = {};
-      pkgInfo.name = dependency;
-      pkgInfo.licenses = config.overrides[dependency] || (info && info.licenses);
-      pkgInfo.licenses = _.isArray(pkgInfo.licenses) ? pkgInfo.licenses : [pkgInfo.licenses];
-      pkgInfo.valid = (function () {
-        if (_.intersection(pkgInfo.licenses, config.licenses).length > 0) {
-          return true;
-        }
-        return false;
-      })();
-      return pkgInfo;
-    }
-
-    function dequeue(output) {
-      checkQueueLength--;
-      _.extend(result, output);
-
-      if (!checkQueueLength) {
-        var licenseStats = _.map(result, processPackage);
-        var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid;});
-
-        if (grunt.option('only-invalid')) {
-          grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
-        } else {
-          grunt.log.debug(JSON.stringify(licenseStats, null, 2));
-        }
-
-
-        if (invalidLicenses.length) {
-          grunt.fail.warn('Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', ') +
-            '. Use --only-invalid for details.', invalidLicenses.length);
-        }
-        done();
-      }
-    }
-
-    bowerLicense.init(options, dequeue);
-    npmLicense.init(options, function (allDependencies) {
-      // Only check production NPM dependencies, not dev
-      npm.load({production: true}, function () {
-        npm.commands.list([], true, function (a, b, npmList) {
-
-          // Recurse npm --production --json ls output, create array of package@version
-          var getDependencies = function (dependencies, list) {
-            list = list || [];
-            _.each(dependencies, function (info, dependency) {
-              list.push(dependency + '@' + info.version);
-              if (info.dependencies) {
-                getDependencies(info.dependencies, list);
-              }
-            });
-            return list;
-          };
-
-          var productionDependencies = {};
-          _.each(getDependencies(npmList.dependencies), function (packageAndVersion) {
-            productionDependencies[packageAndVersion] = allDependencies[packageAndVersion];
-          });
-          dequeue(productionDependencies);
-
-        });
+    const packages = await fromNode(cb => {
+      npmLicense.init(options, (result, error) => {
+        cb(undefined, result);
       });
     });
 
+    /**
+     * Licenses for a package by name with overrides
+     *
+     * @param {String} name
+     * @return {Array}
+     */
 
+    function licensesForPackage(name) {
+      let licenses = packages[name].licenses;
+
+      if (config.overrides.hasOwnProperty(name)) {
+        licenses = config.overrides[name];
+      }
+
+      return typeof licenses === 'string' ? [licenses] : licenses;
+    }
+
+    /**
+     * Determine if a package has a valid license
+     *
+     * @param {String} name
+     * @return {Boolean}
+     */
+
+    function isInvalidLicense(name) {
+      let licenses = licensesForPackage(name);
+
+      // verify all licenses for the package are in the config
+      return _.intersection(licenses, config.licenses).length < licenses.length;
+    }
+
+    // Build object containing only invalid packages
+    const invalidPackages = _.pick(packages, (pkg, name) => {
+      return isInvalidLicense(name);
+    });
+
+    if (Object.keys(invalidPackages).length) {
+      const util = require('util');
+      const execSync = require('child_process').execSync;
+      const names = Object.keys(invalidPackages);
+
+      // Uses npm ls to create tree for package locations
+      const tree = execSync(`npm ls ${names.join(' ')}`);
+
+      grunt.log.debug(JSON.stringify(invalidPackages, null, 2));
+      grunt.fail.warn(
+        `Non-confirming licenses:\n ${names.join('\n ')}\n\n${tree}`,
+        invalidPackages.length
+      );
+    }
+
+    done();
   });
 };

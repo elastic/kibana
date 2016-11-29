@@ -1,17 +1,30 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
-:shield: https://www.elastic.co/guide/en/shield/current
-:k4pull: https://github.com/elastic/kibana/pull/
+:version:        6.0.0-alpha1
+:major-version:  6.x
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
+
+//////////
+release-state can be: released | prerelease | unreleased
+//////////
+
+:release-state:  unreleased
+:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/master/
+:xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
+:issue:          https://github.com/elastic/kibana/issues/
+:pull:           https://github.com/elastic/kibana/pull/
+:commit:         https://github.com/elastic/kibana/commit/
+:security:       https://www.elastic.co/community/security/
+
 
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::getting-started.asciidoc[]
+include::migration.asciidoc[]
 
-include::access.asciidoc[]
+include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -19,8 +32,10 @@ include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
 
-include::settings.asciidoc[]
+include::timelion.asciidoc[]
 
-include::production.asciidoc[]
+include::console.asciidoc[]
 
-include::whats-new.asciidoc[]
+include::management.asciidoc[]
+
+include::plugins.asciidoc[]

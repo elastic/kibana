@@ -1,0 +1,100 @@
+@import "./control_group";
+
+@navbar-margin: @padding-small-vertical;
+
+navbar {
+  .control-group();
+
+  max-height: @navbar-collapse-max-height;
+  margin-bottom: @navbar-margin-bottom;
+  // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
+  padding: 0 @navbar-padding-horizontal 6px @navbar-padding-horizontal;
+  color: @navbar-default-color;
+  background-color: @navbar-default-bg;
+  border: none;
+  z-index: @zindex-navbar;
+
+  /***
+   * components
+   ***/
+
+  > * {
+    padding-right: @navbar-padding-horizontal;
+  }
+
+  .navbar-text {
+    margin-top: @navbar-margin;
+    margin-bottom: @navbar-margin;
+  }
+
+  // the "brand" that is displayed, usually on the left of the navbar
+  > .name {
+    align-self: center;
+
+    font-size: @font-size-large;
+    .ellipsis();
+  }
+
+  button {
+    color: @navbar-default-link-color;
+    background-color: transparent;
+
+    &:hover {
+      color: @navbar-default-link-hover-color;
+      background-color: @navbar-default-link-hover-bg;
+    }
+
+    &:focus {
+      color: @navbar-default-link-color;
+      background-color: transparent;
+    }
+
+    &:active, &.active {
+      color: @navbar-default-link-active-color;
+      background-color: @navbar-default-link-active-bg;
+      box-shadow: none;
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &[disabled] {
+      color: @navbar-default-link-disabled-color;
+      background-color: @navbar-default-link-disabled-bg;
+    }
+  }
+
+  .inline-form .input-group {
+    button {
+      color: @navbar-button-color;
+      background-color: @navbar-button-bg;
+      border: none;
+    }
+  }
+
+  /***
+   * responsive modifications
+   ***/
+
+  // desktop
+  @media (min-width: @screen-md-min) {
+    > .name {
+      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
+      max-width: 500px;
+    }
+  }
+
+  // tablets/phones
+  @media (max-width: @screen-md-min) {
+    > .fill {
+      flex: 1 1 @screen-md;
+    }
+  }
+
+  // phones
+  @media (max-width: @screen-sm-min) {
+    > .name {
+      max-width: 100%;
+    }
+  }
+}

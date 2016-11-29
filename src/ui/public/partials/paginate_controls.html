@@ -1,0 +1,39 @@
+<div class="pagination-other-pages">
+  <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
+      <a ng-click="paginate.goToPage(page.prev)">«</a>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.first">
+      <a ng-click="paginate.goToPage(page.prev)">«</a>
+    </li>
+
+    <li ng-if="!otherPages.containsFirst">
+      <a ng-click="paginate.goToPage(1)">1...</a>
+    </li>
+
+    <li
+      ng-repeat="other in otherPages"
+      ng-class="{ active: other.number === page.number }">
+      <a ng-click="paginate.goToPage(other)">{{other.number}}</a>
+    </li>
+
+    <li ng-if="!otherPages.containsLast">
+      <a ng-click="paginate.goToPage(page.count)">...{{page.count}}</a>
+    </li>
+
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.last">
+      <a ng-click="paginate.goToPage(page.next)">»</a>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.last">
+      <a ng-click="paginate.goToPage(page.next)">»</a>
+    </li>
+  </ul>
+</div>
+
+<form class="form-inline pagination-size" ng-if="showSelector">
+  <div class="form-group">
+    <label>Page Size</label>
+    <select ng-model="paginate.perPage" ng-options="opt.value as opt.title for opt in paginate.sizeOptions">
+    </select>
+  </div>
+</form>

@@ -1,0 +1,294 @@
+// Flatly 3.1.1
+// Bootswatch
+// -----------------------------------------------------
+
+@import "~ui/styles/mixins";
+@import "~ui/styles/variables";
+@import "~ui/styles/theme/bootstrap";
+@import "~ui/styles/theme/font-awesome";
+
+// Navbar =====================================================================
+
+.navbar {
+  border-width: 0;
+}
+
+  .navbar-btn-link {
+    margin: 0;
+    border-radius: 0;
+
+    @media (max-width: @screen-sm-min) {
+      width: 100%;
+      text-align: left;
+    }
+  }
+
+  .navbar-default {
+    .badge {
+      background-color: @navbar-default-badge-bg;
+      color: @navbar-default-badge-color;
+    }
+  }
+
+  .navbar-inverse {
+    .logo {
+      height: @navbar-height;
+      width: 252px;
+      background-color: @navbar-inverse-brand-bg;
+    }
+
+    .logo-small {
+      height: @navbar-height;
+      width: 45px;
+      background-color: @navbar-inverse-brand-bg;
+    }
+
+    .badge {
+      background-color: @navbar-inverse-badge-bg;
+      color: @navbar-inverse-badge-color;
+    }
+  }
+
+  .navbar-brand {
+    cursor: default;
+    font-size: 1.8em;
+    user-select: none;
+  }
+
+  .navbar-nav {
+    font-size: @font-size-small;
+
+    & > .active > a {
+      border-bottom-color: @kibanaGray2;
+      background-color: transparent;
+    }
+  }
+
+  .navbar-toggle {
+    margin-top: 4px;
+  }
+
+// Buttons ====================================================================
+
+.btn:active {
+  .box-shadow(none);
+}
+
+.btn-group.open .dropdown-toggle {
+  .box-shadow(none);
+}
+
+/* Small devices (tablets, 768px and smaller) */
+@media (max-width: @screen-sm-min) {
+  .btn {
+    /* Fixes an issue with buttons not respecting the bounds of the screen */
+    white-space: normal;
+  }
+}
+
+// Typography =================================================================
+
+.text-primary,
+.text-primary:hover {
+  color: @brand-primary;
+}
+
+.text-success,
+.text-success:hover {
+  color: @brand-success;
+}
+
+.text-danger,
+.text-danger:hover {
+  color: @brand-danger;
+}
+
+.text-warning,
+.text-warning:hover {
+  color: @brand-warning;
+}
+
+.text-info,
+.text-info:hover {
+  color: @brand-info;
+}
+
+// Tables =====================================================================
+
+table,
+.table {
+
+  a {
+    text-decoration: underline;
+  }
+
+  .success,
+  .warning,
+  .danger,
+  .info {
+    color: @table-special-color;
+
+    a {
+      color: @table-special-color;
+    }
+  }
+}
+
+  .table-bordered > thead > tr > th,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tfoot > tr > td {
+    border: 1px solid @table-border-color;
+  }
+
+// Forms ======================================================================
+
+.form-control,
+input {
+  border-width: @input-border-width;
+  .box-shadow(none);
+
+  &:focus {
+    .box-shadow(none);
+  }
+}
+
+.has-warning {
+  .help-block,
+  .control-label,
+  .radio,
+  .checkbox,
+  .radio-inline,
+  .checkbox-inline,
+  .form-control-feedback {
+    color: @brand-warning;
+  }
+
+  .form-control,
+  .form-control:focus {
+    border: @input-border-width solid;
+    border-color: @brand-warning;
+  }
+
+  .input-group-addon {
+    border-color: @brand-warning;
+  }
+}
+
+.has-error {
+  .help-block,
+  .control-label,
+  .radio,
+  .checkbox,
+  .radio-inline,
+  .checkbox-inline,
+  .form-control-feedback {
+    color: @brand-danger;
+  }
+
+  .form-control,
+  .form-control:focus {
+    border: @input-border-width solid;
+    border-color: @brand-danger;
+  }
+
+  .input-group-addon {
+    border-color: @brand-danger;
+  }
+}
+
+.has-success {
+  .help-block,
+  .control-label,
+  .radio,
+  .checkbox,
+  .radio-inline,
+  .checkbox-inline,
+  .form-control-feedback {
+    color: @brand-success;
+  }
+
+  .form-control,
+  .form-control:focus {
+    border: solid @brand-success;
+  }
+
+  .input-group-addon {
+    border-color: @brand-success;
+  }
+}
+
+// Navs =======================================================================
+
+.nav {
+  .open > a,
+  .open > a:hover,
+  .open > a:focus {
+    border-color: transparent;
+  }
+}
+
+.pager {
+  a,
+  a:hover {
+    color: @pager-link-color;
+  }
+
+  .disabled {
+    &>a,
+    &>a:hover,
+    &>a:focus,
+    &>span {
+      background-color: @pagination-disabled-bg;
+    }
+  }
+}
+
+
+// Panel =================================================================
+
+.panel {
+  border-radius: 0;
+  .box-shadow(0 0 0 rgba(0,0,0,0));
+}
+
+// Indicators =================================================================
+
+.alert {
+
+  a,
+  .alert-link {
+    color: @alert-color;
+    text-decoration: underline;
+  }
+
+  .close {
+    color: @alert-color;
+    text-decoration: none;
+    opacity: 0.4;
+
+    &:hover,
+    &:focus {
+      color: @alert-color;
+      opacity: 1;
+    }
+  }
+}
+
+// Progress bars ==============================================================
+
+.progress {
+  .box-shadow(none);
+  .progress-bar {
+    font-size: 10px;
+    line-height: 10px;
+  }
+}
+
+// Containers =================================================================
+
+.well {
+  .box-shadow(none);
+}

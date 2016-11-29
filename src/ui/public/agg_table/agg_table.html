@@ -1,0 +1,20 @@
+<paginated-table
+  ng-if="rows.length"
+  rows="rows"
+  columns="formattedColumns"
+  per-page="perPage"
+  sort="sort"
+  show-total="showTotal"
+  totalFunc="totalFunc">
+
+  <div class="agg-table-controls">
+    <small>Export:</small>&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(false)">
+      Raw <i aria-hidden="true" class="fa fa-download"></i>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(true)">
+      Formatted <i aria-hidden="true" class="fa fa-download"></i>
+    </a>
+    <paginate-controls></paginate-controls>
+  </div>
+</paginated-table>

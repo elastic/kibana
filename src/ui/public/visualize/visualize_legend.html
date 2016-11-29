@@ -1,0 +1,45 @@
+<div class="legend-col-wrapper" ng-if="labels.length">
+  <div ng-click="toggleLegend()" class="legend-toggle">
+    <i class="legend-icon fa {{getToggleLegendClasses()}}"></i>
+  </div>
+  <ul class="legend-ul" ng-show="open">
+
+    <li
+      ng-repeat="legendData in labels track by legendData.label"
+      ng-mouseenter="highlight($event)"
+      ng-mouseleave="unhighlight($event)"
+      data-label="{{legendData.label}}"
+      class="legend-value color"
+    >
+
+      <div class="legend-value-container">
+        <div
+          ng-click="showDetails = !showDetails"
+          ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
+          class="legend-value-title"
+          tooltip="{{legendData.label}}"
+        >
+          <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
+        </div>
+
+        <div ng-if="showDetails" class="legend-value-details">
+          <div ng-show="canFilter(legendData)">
+            <button class="btn btn-xs filter-button" ng-click="filter(legendData, false)"><i class="fa fa-search-plus"></i></button>
+            <button class="btn btn-xs filter-button" ng-click="filter(legendData, true)"><i class="fa fa-search-minus"></i></button>
+          </div>
+
+          <div class="legend-value-color-picker">
+            <i ng-repeat="choice in colors"
+              ng-click="setColor(legendData.label, choice)"
+              ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
+              ng-style="{color: choice}" class="fa dot"
+            >
+            </i>
+          </div>
+
+        </div>
+      </div>
+
+    </li>
+  </ul>
+</div>

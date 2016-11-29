@@ -1,0 +1,61 @@
+<form role="form" class="form-inline">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="input-group form-group finder-form col-md-7">
+        <span class="input-group-addon">
+          <i class="fa fa-search"></i>
+        </span>
+        <input
+          input-focus
+          ng-model="filter"
+          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
+          ng-keydown="finder.filterKeyDown($event)"
+          class="form-control"
+          name="filter"
+          type="text"
+          autocomplete="off" />
+      </div>
+      <div class="finder-hit-count col-md-2">
+        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
+      </div>
+      <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
+          Manage {{finder.properties.nouns}}
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+<paginate list="finder.hits" per-page="20">
+  <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
+    <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
+      <span class="paginate-heading">
+        Name
+        <i
+          class="fa"
+          ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+        </i>
+      </span>
+    </li>
+    <li
+      class="list-group-item list-group-menu-item"
+      ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
+      ng-repeat="hit in page"
+      ng-keydown="finder.hitKeyDown($event, page, paginate)"
+      ng-click="finder.onChoose(hit, $event)">
+
+      <a ng-href="{{finder.makeUrl(hit)}}"
+          ng-blur="finder.hitBlur($event)"
+          ng-click="finder.preventClick($event)">
+          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+          <span>{{hit.title}}</span>
+          <p ng-if="hit.description" ng-bind="hit.description"></p>
+      </a>
+    </li>
+    <li
+      class="list-group-item list-group-no-results"
+      ng-if="finder.hits.length === 0">
+      <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+    </li>
+  </ul>
+</paginate>

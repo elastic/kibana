@@ -1,0 +1,74 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+pipeline-setup {
+  .main-panels {
+    display: flex;
+    margin-bottom: 10px;
+
+    .left-panel {
+      .flex-parent(1, 1, 1px);
+      width: 50%;
+
+      &>label {
+        margin-bottom: 2px;
+      }
+    }
+
+    .center-panel {
+      .flex-parent(0, 0, auto, column);
+      justify-content: center;
+
+      .buttons {
+        .flex-parent(0, 0, auto, column);
+      }
+    }
+
+    .right-panel {
+      .flex-parent(1, 1, 1px, column);
+      width: 50%;
+    }
+
+    .pipeline {
+      min-height: 450px;
+      background-color: @settings-filebeat-wizard-panel-bg;
+    }
+  }
+
+  label {
+    margin-bottom: 0px;
+  }
+
+  ul.pipeline-container {
+    list-style-type: none;
+    padding: 0px;
+    margin-bottom: 0px;
+
+    &>li {
+      padding: 1px;
+    }
+  }
+
+  .add-processor {
+    padding:10px;
+    margin-bottom: 10px;
+  }
+
+  .add-processor-dropdown {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    select.form-control {
+      background-color: @settings-filebeat-wizard-processor-select-bg;
+      border: none;
+      width: auto;
+      margin-right: 5px;
+    }
+  }
+
+  textarea.form-control {
+    min-height: 150px;
+  }
+}

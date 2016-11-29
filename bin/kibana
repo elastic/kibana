@@ -1,0 +1,24 @@
+#!/bin/sh
+SCRIPT=$0
+
+# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
+while [ -h "$SCRIPT" ] ; do
+  ls=$(ls -ld "$SCRIPT")
+  # Drop everything prior to ->
+  link=$(expr "$ls" : '.*-> \(.*\)$')
+  if expr "$link" : '/.*' > /dev/null; then
+    SCRIPT="$link"
+  else
+    SCRIPT=$(dirname "$SCRIPT")/"$link"
+  fi
+done
+
+DIR="$(dirname "${SCRIPT}")/.."
+NODE="${DIR}/node/bin/node"
+test -x "$NODE" || NODE=$(which node)
+if [ ! -x "$NODE" ]; then
+  echo "unable to find usable node.js executable."
+  exit 1
+fi
+
+exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli" ${@}

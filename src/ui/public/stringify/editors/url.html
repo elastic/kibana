@@ -1,0 +1,124 @@
+<div class="form-group">
+  <label>Type</label>
+  <select
+    ng-model="editor.formatParams.type"
+    ng-options="type.id as type.name for type in editor.field.format.type.urlTypes"
+    class="form-control">
+  </select>
+</div>
+
+<div class="form-group">
+  <span class="pull-right text-info hintbox-label" ng-click="editor.showUrlTmplHelp = !editor.showUrlTmplHelp">
+    <i class="fa fa-info"></i> Url Template Help
+  </span>
+
+  <label>Url Template</label>
+  <div class="hintbox" ng-if="editor.showUrlTmplHelp">
+    <h4 class="hintbox-heading">
+      <i class="fa fa-question-circle text-info"></i> Url Template Help
+    </h4>
+
+    <p>
+      If a field only contains part of a url then a "Url Template" can be used to format the value as a complete url. The format is a string which uses double curly brace notation <code ng-non-bindable>{{ }}</code> to inject values. The following values can be accessed:
+    </p>
+
+    <ul>
+      <li>
+        <strong>value</strong> &mdash; The uri-escaped value
+      </li>
+      <li>
+        <strong>rawValue</strong> &mdash; The unescaped value
+      </li>
+    </ul>
+
+    <table class="table table-striped table-bordered">
+      <caption>Examples</caption>
+      <thead>
+        <tr>
+          <th>Value</th>
+          <th>Template</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1234</td>
+          <td ng-non-bindable>http://company.net/profiles?user_id={{value}}</td>
+          <td>http://company.net/profiles?user_id=1234</td>
+        </tr>
+        <tr>
+          <td>users/admin</td>
+          <td ng-non-bindable>http://company.net/groups?id={{value}}</td>
+          <td>http://company.net/groups?id=users%2Fadmin</td>
+        </tr>
+        <tr>
+          <td>/images/favicon.ico</td>
+          <td ng-non-bindable>http://www.site.com{{rawValue}}</td>
+          <td>http://www.site.com/images/favicon.ico</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <input ng-model="editor.formatParams.urlTemplate" class="form-control">
+</div>
+
+<div class="form-group">
+  <span class="pull-right text-info hintbox-label" ng-click="editor.showLabelTmplHelp = !editor.showLabelTmplHelp">
+    <i class="fa fa-info"></i> Label Template Help
+  </span>
+
+  <label>Label Template</label>
+  <div class="hintbox" ng-if="editor.showLabelTmplHelp">
+    <h4 class="hintbox-heading">
+      <i class="fa fa-question-circle text-info"></i> Label Template Help
+    </h4>
+
+    <p>
+      If the url in this field is large, it might be useful to provide an alternate template for the text version of the url. This will be displayed instead of the url, but will still link to the url. The format is a string which uses double curly brace notation <code ng-non-bindable>{{ }}</code> to inject values. The following values can be accessed:
+    </p>
+
+    <ul>
+      <li>
+        <strong>value</strong> &mdash; The fields value
+      </li>
+      <li>
+        <strong>url</strong> &mdash; The formatted url
+      </li>
+    </ul>
+
+    <table class="table table-striped table-bordered">
+      <caption>Examples</caption>
+      <thead>
+        <tr>
+          <th>Value</th>
+          <th>Url Template</th>
+          <th>Label Template</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1234</td>
+          <td ng-non-bindable>http://company.net/profiles?user_id={{value}}</td>
+          <td ng-non-bindable>User #{{value}}</td>
+          <td>
+            <a href="http://company.net/profiles?user_id=1234">User #1234</a>
+          </td>
+        </tr>
+        <tr>
+          <td>/assets/main.css</td>
+          <td ng-non-bindable>http://site.com{{rawValue}}</td>
+          <td>View Asset</td>
+          <td>
+            <a href="http://site.com/assets/main.css">View Asset</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <input ng-model="editor.formatParams.labelTemplate" class="form-control">
+</div>
+
+<field-format-editor-samples inputs="url.samples[editor.formatParams.type]"></field-format-editor-samples>

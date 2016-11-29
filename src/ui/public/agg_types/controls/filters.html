@@ -1,0 +1,59 @@
+<div class="form-group">
+  <div ng-repeat="filter in agg.params.filters">
+    <div class="vis-editor-agg-header">
+      <label>
+          Filter {{$index + 1}}
+          <span ng-if="filter.label">- {{ filter.label }}</span>
+      </label>
+
+      <div class="btn-group">
+        <button
+          ng-click="showConfig = !showConfig"
+          type="button"
+          class="btn btn-default btn-xs">
+          <i class="fa fa-tag"></i>
+        </button>
+        <button
+          type="button"
+          ng-click="agg.params.filters.splice($index, 1)"
+          class="btn btn-danger btn-xs">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input
+        parse-query
+        ng-model="filter.input.query"
+        type="text"
+        class="form-control"
+        name="filter{{$index}}">
+    </div>
+
+    <div class="form-group" ng-show="showConfig">
+      <label>Filter {{$index + 1}} label</label>
+      <input
+        ng-model="filter.label"
+        placeholder="Label"
+        type="text"
+        class="form-control"
+        name="label{{$index}}">
+    </div>
+  </div>
+</div>
+
+<input ng-model="agg.params.filters.length" name="filterLength" required min="1" type="number" class="ng-hide" />
+<div class="hintbox" ng-show="aggForm.filterLength.$invalid">
+  <p>
+    <i class="fa fa-danger text-danger"></i>
+    <strong>Required:</strong> You must specify at least one filter.
+  </p>
+</div>
+
+<div
+  click-focus="'filter'+(agg.params.filters.length-1)"
+  ng-click="agg.params.filters.push({input:{}})"
+  class="sidebar-item-button primary">
+  Add Filter
+</div>

@@ -1,0 +1,53 @@
+@import "~ui/styles/variables";
+
+@loadingIndicatorBackgroundSize: 400px;
+@loadingIndicatorHeight: 2px;
+@loadingIndcatorColor1: @kibanaPink1;
+@loadingIndcatorColor2: @kibanaPink2;
+
+/**
+ * 1. Position this loader on top of the content.
+ * 2. Make sure indicator isn't wider than the screen.
+ */
+.loadingIndicator {
+  position: fixed; // 1
+  top: 0; // 1
+  left: 0; // 1
+  right: 0; // 1
+  z-index: 1; // 1
+  overflow: hidden; // 2
+  height: @loadingIndicatorHeight;
+
+  &.ng-hide {
+    visibility: hidden;
+    opacity: 0;
+    transition-delay: 0.25s;
+  }
+}
+
+  .loadingIndicator__bar {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    z-index: 10;
+    visibility: visible;
+    display: block;
+    animation: animate-loading-indcator 2s linear infinite;
+    background-color: @kibanaPink2;
+    background-image: linear-gradient(to right,
+      @loadingIndcatorColor1 0%,
+      @loadingIndcatorColor1 50%,
+      @loadingIndcatorColor2 50%,
+      @loadingIndcatorColor2 100%
+      );
+    background-repeat: repeat-x;
+    background-size: @loadingIndicatorBackgroundSize @loadingIndicatorBackgroundSize;
+    width: 200%;
+  }
+
+  @keyframes animate-loading-indcator {
+    from { transform: translateX(0); }
+    to { transform: translateX(-@loadingIndicatorBackgroundSize); }
+  }

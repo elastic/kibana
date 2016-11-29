@@ -1,0 +1,39 @@
+<div class="suggestions" ng-show="suggestions.show">
+  <div class="suggestion"
+    ng-click="completeExpression($index)"
+    ng-class="{active: $index === suggestions.selected}"
+    ng-repeat="suggestion in suggestions.list track by $index | orderBy:'name'">
+    <h4>
+      <strong>.{{suggestion.name}}()</strong>
+      <small>
+        {{suggestion.help}}
+        {{suggestion.chainable ? '(Chainable)' : '(Data Source)'}}
+      </small>
+    </h4>
+
+    <div ng-show="suggestion.args.length > (suggestion.chainable ? 1: 0)">
+      <div ng-show="suggestions.list.length > 1">
+        <strong>Arguments:</strong>
+        <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
+          <strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>)
+          <em ng-show="!$last">,</em>
+        </span>
+      </div>
+
+      <div class="suggestion-details" ng-show="suggestions.list.length === 1">
+        <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>Argument Name</th>
+          <th>Accepted Types</th>
+          <th>Information</th>
+        </thead>
+        <tr ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
+          <td>{{arg.name}}</td>
+          <td><em>{{arg.types.join(', ')}}</em></td>
+          <td>{{arg.help}}</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+<div class="vis-editor-agg-form-row">
+  <div ng-if="agg.type.params.byName.order" class="form-group">
+    <label>Order</label>
+    <select
+      name="order"
+      ng-model="agg.params.order"
+      required
+      ng-options="opt as opt.display for opt in aggParam.options"
+      class="form-control">
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Size</label>
+    <input
+      name="size"
+      ng-model="agg.params.size"
+      required
+      class="form-control"
+      type="number"
+      min="1"
+    >
+  </div>
+</div>

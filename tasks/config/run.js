@@ -1,35 +1,185 @@
 module.exports = function (grunt) {
-  var os = require('os');
-  var arch = os.arch();
-  var platform = os.platform();
+  let platform = require('os').platform();
+  let {format} = require('url');
+  let {resolve} = require('path');
+  let root = p => resolve(__dirname, '../../', p);
+  let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
+  let buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  let uiConfig = require(root('test/server_config'));
+  let chromedriver = require('chromedriver');
 
-  // config:
-  // wait: should task wait until the script exits before finishing
-  // ready: if not waiting, then how do we know the process is ready?
-  // quiet: ignore stdout from the process
-  // failOnError: the process is killed if output to stderr
+  const stdDevArgs = [
+    '--env.name=development',
+    '--logging.json=false',
+  ];
 
-  var options = {
-    wait: false,
-    ready: /kibana server started/i,
-    quiet: true,
-    failOnError: true
-  };
+  const buildTestsArgs = [
+    ...stdDevArgs,
+    '--plugins.initialize=false',
+    '--optimize.bundleFilter=tests',
+  ];
 
-  var args = ['-H', '127.0.0.1'];
+  const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
+    if (flag.startsWith('--kbnServer.')) {
+      flags.push(`--${flag.slice(12)}`);
+    }
 
-  var config = {
-    built_kibana: {
+    return flags;
+  }, []);
+
+  return {
+    testServer: {
       options: {
         wait: false,
-        ready: /Listening/i,
-        quiet: true,
+        ready: /Server running/,
+        quiet: false,
         failOnError: false
       },
-      cmd: './target/<%= pkg.name + "-" + pkg.version %>-' + platform + '-' + arch + '/bin/kibana',
-      args: args
+      cmd: binScript,
+      args: [
+        ...buildTestsArgs,
+        '--server.port=5610',
+        ...kbnServerFlags,
+      ]
+    },
+
+    apiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIDevServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testUiServer',
+        ...kbnServerFlags,
+      ]
+    },
+
+    testCoverageServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...buildTestsArgs,
+        '--server.port=5610',
+        '--tests_bundle.instrument=true',
+        ...kbnServerFlags,
+      ]
+    },
+
+    devTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...buildTestsArgs,
+        '--dev',
+        '--no-watch',
+        '--no-ssl',
+        '--no-base-path',
+        '--server.port=5610',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testdev',
+        ...kbnServerFlags,
+      ]
+    },
+
+    chromeDriver: {
+      options: {
+        wait: false,
+        ready: /Starting ChromeDriver/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: chromedriver.path,
+      args: [
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
+      ]
+    },
+
+    devChromeDriver: {
+      options: {
+        wait: false,
+        ready: /Starting ChromeDriver/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: chromedriver.path,
+      args: [
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
+      ]
+    },
+
+    optimizeBuild: {
+      options: {
+        wait: false,
+        ready: /Optimization .+ complete/,
+        quiet: true
+      },
+      cmd: buildScript,
+      args: [
+        '--env.name=production',
+        '--logging.json=false',
+        '--plugins.initialize=false',
+        '--server.autoListen=false',
+        ...kbnServerFlags,
+      ]
     }
   };
 
-  return config;
 };

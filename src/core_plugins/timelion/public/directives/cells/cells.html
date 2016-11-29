@@ -1,0 +1,24 @@
+<div sv-root
+  sv-part="state.sheet"
+  sv-on-sort="dropCell($item, $partFrom, $partTo, $indexFrom, $indexTo)"
+  >
+
+  <div sv-element
+    ng-repeat="cell in state.sheet track by $index"
+    class="chart-container col-md-{{12 / state.columns}} col-sm-12 col-xs-12"
+    timelion-grid timelion-grid-rows="state.rows"
+    ng-click="onSelect($index)"
+    ng-class="{active: $index === state.selected}"
+    >
+
+    <div chart="sheet[$index]" search="onSearch" interval="state.interval"></div>
+    <div class="cell-actions">
+      <div class="cell-id"><span>{{$index + 1}}</span></div>
+
+      <div class="cell-action" ng-click="removeCell($index)" tooltip="Remove" tooltip-append-to-body="1"><span class="fa fa-remove"></span></div>
+      <div class="cell-action" tooltip="Drag to reorder" tooltip-append-to-body="1" sv-handle><span class="fa fa-arrows"></span></div>
+      <div class="cell-action" ng-click="transient.fullscreen = true" tooltip="Full screen" tooltip-append-to-body="1"><span class="fa fa-expand"></span></div>
+    </div>
+  </div>
+
+</div>

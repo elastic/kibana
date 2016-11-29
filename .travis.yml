@@ -1,22 +1,21 @@
 language: node_js
-node_js: '0.12'
-install: npm install
-script: npm test
-sudo: false
+node_js: 4
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
+install:
+  - npm install
+  - npm run setup_kibana
+
 cache:
   directories:
-  - esvm
-  - node_modules
-  - src/kibana/bower_components
-before_cache:
-  - rm -rf esvm/*/logs esvm/data_dir
-notifications:
-  email:
-  - rashid.khan@elastic.co
-  hipchat:
-    rooms:
-      secure: UKrVR+5KztHarodQruQe97UJfwftutD6RNdXlVkr+oIr2GqccisDIIN9pAzS/kxl+eAnP1uT6VHzc9YI/jgbrmiSkz3DHViw+MwDwY2aIDgI8aHEbd/4B2ihtb15+OYTVbb+lytyz4+W8A8hSmbkTR/P/uFIJ+EYcBeYZfw1elo=
-    format: html
-    on_success: change
-    template:
-    - ! '%{repository_slug}/%{branch} by %{author}: %{commit_message} (<a href="%{build_url}">open</a>)'
+    - node_modules
+    - ../kibana
+
+script: npm test

@@ -1,0 +1,79 @@
+@import (reference) "~ui/styles/variables";
+
+.vis-tooltip,
+.vis-tooltip-sizing-clone {
+  visibility: hidden;
+  line-height: 1.1;
+  font-size: @font-size-base;
+  font-weight: normal;
+  background: @tooltip-bg;
+  color: @tooltip-color;
+  border-radius: 4px;
+  position: fixed;
+  z-index: 120;
+  word-wrap: break-word;
+  max-width: 40%;
+  overflow: hidden;
+  pointer-events: none;
+
+  > :last-child {
+    margin-bottom: @tooltip-space;
+  }
+
+  > * {
+    margin: @tooltip-space @tooltip-space 0;
+  }
+
+  .tooltip-label {
+    font-family: @font-family-sans-serif;
+
+    th {
+      font-weight: @tooltip-bold;
+    }
+  }
+
+  .tooltip-value {
+    font-family: @font-family-sans-serif;
+  }
+
+  table {
+    td,th {
+      padding: @tooltip-space-tight;
+
+      &.row-bucket {
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+.vis-tooltip-header {
+  margin: 0 0 @tooltip-space 0;
+  padding: @tooltip-space-tight @tooltip-space;
+  display: flex;
+  align-items: center;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  + * {
+    margin-top: @tooltip-space;
+  }
+}
+
+  .vis-tooltip-header-icon {
+    flex: 0 0 auto;
+    padding-right: @tooltip-space;
+  }
+
+  .vis-tooltip-header-text {
+    flex: 1 1 200px;
+  }
+
+.vis-tooltip-sizing-clone {
+  visibility: hidden;
+  position: fixed;
+  top: -500px;
+  left: -500px;
+}

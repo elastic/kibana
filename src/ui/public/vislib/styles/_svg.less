@@ -1,0 +1,96 @@
+@import (reference) "~ui/styles/variables";
+
+/* Axis Styles */
+.axis {
+  shape-rendering: crispEdges;
+  stroke-width: 1px;
+
+  line, path {
+    stroke: @svg-axis-color;
+    fill: none;
+    shape-rendering: crispEdges;
+  }
+}
+
+.x.axis path {
+  display: none;
+}
+
+.tick text {
+  font-size: 8pt;
+  fill: @svg-tick-text-color;
+}
+
+/* Brush Styling */
+.brush .extent {
+  stroke: @svg-brush-color;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+@vis-hover-opacity: 0.65;
+
+/* SVG Element Default Styling */
+rect {
+  stroke: none;
+  opacity: 1;
+
+  &:hover {
+    opacity: @vis-hover-opacity;
+  }
+}
+
+circle {
+  opacity: 0;
+
+  &:hover {
+    opacity: 1;
+    stroke-width: 10px;
+    stroke-opacity: @vis-hover-opacity;
+  }
+}
+
+.overlap_area {
+  opacity: 0.6;
+}
+
+.blur_shape {
+  opacity: 0.3 !important;
+}
+
+path {
+  &:hover {
+    //opacity: @vis-hover-opacity;
+  }
+}
+
+.slice {
+  &:hover {
+    opacity: @vis-hover-opacity;
+  }
+}
+
+.leaflet-clickable {
+  &:hover {
+    stroke-width: 10px;
+    stroke-opacity: @vis-hover-opacity;
+  }
+}
+
+/* Visualization Styling */
+.line {
+  circle {
+    opacity: 1;
+
+    &:hover {
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
+  }
+}
+
+.endzone {
+  opacity: 0.05;
+  fill: @svg-endzone-bg;
+  pointer-events: none;
+}

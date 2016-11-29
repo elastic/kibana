@@ -1,0 +1,152 @@
+@import "~ui/styles/mixins";
+@import "~ui/styles/variables";
+
+visualize-legend {
+  display: flex;
+  flex-direction: row;
+}
+
+.legend-icon {
+  color: #BEBEBE;
+  font-size: 1.2em;
+  margin: 1px;
+}
+
+.legend-col-wrapper {
+  .flex-parent(0, 0, auto);
+  z-index: 10;
+  min-height: 0;
+  overflow: hidden;
+  flex-direction: row;
+  padding-top: 5px;
+
+  .vis-container--legend-left & {
+    flex-direction: row-reverse;
+  }
+  .vis-container--legend-right & {
+    flex-direction: row;
+  }
+  .vis-container--legend-top & {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding-left: 25px;
+  }
+  .vis-container--legend-bottom & {
+    flex-direction: column;
+    width: 100%;
+    padding-left: 25px;
+  }
+
+  .header {
+    cursor: pointer;
+    width: 15px;
+  }
+
+  .legend-toggle {
+    &:hover {
+      color: @sidebar-hover-color;
+    }
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      text-align: center;
+    }
+
+    padding-right: 5px;
+    font-size: 14px;
+  }
+
+  .column-labels {
+    text-align: right;
+  }
+
+  .legend-ul {
+    width: 150px;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: @legend-item-color;
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 0;
+    visibility: visible;
+    min-height: 0;
+    font-size: 12px;
+    line-height: 13px;
+    text-align: left;
+
+    flex-direction: column;
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      width: auto;
+      overflow-y: hidden;
+
+      .legend-value {
+        display: inline-block;
+      }
+    }
+  }
+
+  .legend-ul.hidden {
+    visibility: hidden;
+  }
+}
+
+.legend-value {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+  .legend-value-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
+  }
+
+  .legend-value-truncate {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .legend-value-full {
+    white-space: normal;
+    word-break: break-all;
+    background-color: @sidebar-hover-bg;
+  }
+
+  .legend-value-details {
+    border-bottom: 1px solid @sidebar-bg;
+
+    .filter-button {
+      display: block;
+      float: left;
+      width: 50%;
+      border-radius: 0px;
+      background-color: @sidebar-bg;
+
+      &:hover {
+        background-color: @sidebar-hover-bg;
+      }
+    }
+  }
+
+  .legend-value-color-picker {
+    width: 130px;
+    margin: auto;
+
+    .dot {
+      line-height: 14px;
+      margin: 2px;
+      font-size: 14px;
+    }
+
+    .dot:hover {
+      margin: 0px;
+      font-size: 18px
+    }
+  }

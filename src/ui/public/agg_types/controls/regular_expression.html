@@ -1,0 +1,10 @@
+<div ng-if="!aggParam.disabled(agg)">
+  <div class="form-group regex">
+    <label>{{ aggParam.name | label }} Pattern</label>
+    <input
+      type="text"
+      class="form-control"
+      ng-model="agg.params[aggParam.name].pattern"
+    >
+  </div>
+</div>

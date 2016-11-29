@@ -1,0 +1,78 @@
+@import "~ui/styles/variables";
+@import "~ui/styles/mixins";
+
+.control-group {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+
+  padding: @padding-base-vertical @padding-base-horizontal;
+
+  /***
+   * components
+   ***/
+
+  > * {
+    padding-right: @padding-base-horizontal;
+    flex: 0 0 auto;
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  // horizontal group of buttons/form elements
+  .button-group,
+  .inline-form .input-group {
+    margin-bottom: 0px;
+    display: flex;
+
+    > * {
+      border-radius: 0;
+    }
+
+    > :first-child {
+      .border-left-radius(@input-border-radius-base);
+    }
+
+    > :last-child {
+      .border-right-radius(@input-border-radius-base);
+    }
+  }
+
+  .inline-form {
+    .flex-parent(0, 0, auto);
+    display: flex;
+
+    > .typeahead {
+      .flex-parent();
+
+      > .input-group {
+        display: flex;
+        flex: 1 0 auto;
+
+        > * {
+          float: none;
+          height: auto;
+          width: auto;
+          flex: 0 0 auto;
+        }
+
+        input[type="text"] {
+          flex: 1 1 100%;
+        }
+      }
+    }
+  }
+
+  // the element should take up an even share of available space
+  > .fill {
+    flex: 1 1 1%;
+  }
+}
+
+.nav-controls .column {
+  flex-direction: column;
+}

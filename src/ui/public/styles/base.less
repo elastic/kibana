@@ -1,0 +1,644 @@
+// generic mixins
+@import (reference) "./mixins";
+@import (reference) "./variables";
+@import (reference) "~ui/styles/bootstrap/bootstrap";
+
+// Kibana UI Framework
+@import (less) "~@elastic/kibana-ui-framework/dist/framework.css";
+
+html,
+body {
+  .flex-parent();
+  height: 100%;
+  margin: 0;
+}
+
+label > small {
+  font-weight: normal;
+}
+
+button {
+  // buttons have a stupid 1990's default look which should be disabled
+  .btn();
+}
+
+.small {
+  font-size: 0.9em !important;
+}
+.smaller {
+  font-size: 0.8em !important;
+}
+.smallest {
+  font-size: 0.7em !important;
+}
+
+// Colors available for font awesome icons, these might not look good with normal text
+.text-color-primary {
+  color: @brand-primary;
+}
+
+.text-color-info {
+  color: @brand-info;
+}
+
+.text-color-success {
+  color: @brand-success;
+}
+
+.text-color-warning {
+  color: @brand-warning;
+}
+
+.text-color-danger {
+  color: @brand-danger;
+}
+
+.text-monospace {
+  font-family: @font-family-monospace;
+}
+
+code {
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+ul.navbar-inline li {
+  display: inline;
+}
+
+.tooltip {
+  font-size: 8pt;
+  font-weight: normal;
+  opacity: 90%;
+}
+
+  .tooltip-inner {
+    word-break: normal;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+
+.content {
+  .real-flex-parent(@flow: row nowrap);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  > nav {
+    z-index: 1;
+
+    .navbar-right {
+      margin-right: 0 !important;
+    }
+  }
+}
+
+.application {
+  .flex-parent(@shrink: 0);
+  position: relative;
+  z-index: 0;
+  background-color: @white;
+}
+
+.top-fixed {
+  position: fixed;
+  bottom: 0px;
+}
+
+.checkbox label {
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+
+  input[type="checkbox"] {
+    float: none;
+    margin: 0 4px;
+    position: static;
+  }
+}
+
+notifications {
+  z-index: 1;
+}
+
+//== Subnav
+//
+// Use for adding a subnav to your app
+.navbar {
+  margin-bottom: 0px!important;
+}
+
+a {
+  // overriden by next rule for a tags that actually have an href
+  cursor: default;
+}
+
+.link, [ng-click], [clip-copy], [href], [confirm-click] {
+  cursor: pointer;
+}
+
+.application,
+.app-container {
+  > * {
+    position: relative;
+    z-index: 0;
+  }
+
+  .kibana-nav-options {
+    padding-bottom: 0;
+    padding-right: 0px;
+
+    kbn-global-timepicker {
+      line-height: 20px;
+    }
+
+    .kibana-nav-actions {
+      margin-left: auto;
+      padding-right: 0;
+      line-height: 20px;
+
+      .button-group > :last-child {
+        border-radius: 0;
+      }
+    }
+  }
+
+  > config {
+    z-index: 1;
+  }
+  > navbar { padding-bottom: 4px; }
+  > kbn-top-nav { z-index: 3; }
+
+  > nav,
+  > navbar {
+    z-index: 2 !important;
+  }
+}
+
+//== Nav tweaks
+.nav-condensed > li > a {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.navbar > .container-fluid {
+  > .navbar-nav,
+  > .navbar-form {
+    &:not(.pull-right):first-child {
+      // This is how .navbar-brand accomplishes it's solid placement
+      margin-left: -15px;
+      margin-top: 4px;
+    }
+  }
+}
+
+.navbtn {
+  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
+}
+
+.navbtn-inverse {
+  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
+}
+
+.navbar-timepicker {
+  > li > a {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  .fa {
+    font-size: 16px;
+    vertical-align: middle;
+  }
+
+  button {
+    background-color: transparent;
+    border-radius: 0;
+  }
+}
+
+  .navbar-timepicker-time-desc > .fa-clock-o {
+    padding-right: 5px;
+  }
+
+kbn-info i {
+  cursor: help;
+}
+
+.kbn-timepicker .btn-default {
+  background: transparent;
+  color: @text-color;
+  border: 0px;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.kbn-timepicker .btn-info {
+  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
+  .text-info { color: @btn-info-color; }
+  text-shadow: none;
+}
+
+.kbn-timepicker .refresh-interval {
+  padding: 0.2em 0.4em;
+  border-radius: @border-radius-small;
+}
+
+.kbn-timepicker .refresh-interval-active {
+  background-color: @btn-info-bg;
+  color: @btn-info-color;
+}
+
+//== Table
+
+kbn-table, .kbn-table {
+  font-size: @font-size-small;
+
+  th {
+    white-space: nowrap;
+    padding-right: 10px;
+
+    .table-header-move, .table-header-sortchange {
+      visibility: hidden;
+    }
+
+    .fa {
+      font-size: 1.1em;
+    }
+
+  }
+
+  th:hover {
+    .table-header-move, .table-header-sortchange {
+      visibility: visible;
+    }
+  }
+
+}
+
+//== Generic Table
+table {
+  td .fa {
+    // font-awesome's override of the line-height usually doesn't
+    // cauase problems, but in the table it pushes the icon to the
+    // top of the row
+    line-height: @line-height-base;
+  }
+}
+
+//== SavedObjectFinder
+saved-object-finder,
+paginated-selectable-list {
+  .row {
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .finder-hit-count,
+  .finder-manage-object {
+    min-width: 80px;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .finder-hit-count {
+    flex: 1;
+
+    span {
+      color: @kibanaGray3;
+    }
+  }
+
+  .finder-manage-object {
+    flex: 3;
+    text-align: left;
+    text-transform: capitalize;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+    float: left;
+    flex: 8;
+
+    input {
+      border: none;
+      padding: 5px 0px;
+      border-radius: @border-radius-base;
+    }
+
+    span {
+      padding: 5px 0px;
+      background-color: @white;
+      border: none;
+
+      i {
+        color: @kibanaGray3;
+        width: 15px;
+      }
+    }
+  }
+
+  ul.li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(odd) {
+      background-color: @kibanaGray6;
+    }
+
+    li:nth-child(even) {
+      background-color: @white;
+    }
+
+    .paginate-heading {
+      font-weight: normal;
+      color: @kibanaGray1;
+    }
+
+    .list-group-item {
+      padding: 8px 15px;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: 10px;
+        }
+      }
+
+      a {
+        i {
+          color: @saved-object-finder-icon-color !important;
+          margin-right: 10px;
+        }
+
+        display: block;
+        color: @saved-object-finder-link-color !important;
+      }
+
+      &:first-child {
+        .border-top-radius(0) !important;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0 !important;
+      }
+    }
+  }
+
+  .finder-form {
+    position: relative;
+  }
+
+    .finder-form-options {
+      .flex-parent();
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+
+  .finder-options {
+    max-height: 300px;
+    overflow: auto;
+    padding: 0;
+    .border-top-radius(0);
+
+    // replace the padding that was originally on the outer well
+    > * {
+      padding: @padding-base-vertical @padding-base-horizontal;
+      margin: 0;
+    }
+
+    // enable bigger backgrounds for "active" elements
+    > li {
+      margin-top: -ceil(@padding-base-vertical / 2);
+
+      &:first-child {
+        margin: 0;
+      }
+      &.active {
+        background-color: @component-active-bg;
+        color: @component-active-color;
+        a {
+          color: @component-active-color;
+        }
+      }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: 20px;
+    }
+  }
+}
+
+// when rendered within a config dropdown, don't use a bottom margin
+.config saved-object-finder .finder-options {
+  margin-bottom: 0;
+  background: @config-saved-object-finder-options-bg;
+}
+
+//== inputDatetime
+.input-datetime-format {
+  font-size: @font-size-small;
+  color: @text-muted;
+  padding: @padding-base-vertical @padding-base-horizontal;
+}
+
+//== clicking disabled buttons should not cause the whole page to get selected
+button[disabled] {
+  user-select: none;
+}
+
+//== override the disabled cursor that doesn't work everywhere
+.form-control{
+  &[disabled],
+  &[readonly],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+.fatal-body {
+  white-space: pre-wrap;
+}
+
+.ng-dirty, .ng-touched {
+  input.ng-invalid&,
+  textarea.ng-invalid&,
+  select.ng-invalid& {
+    border-color: @state-danger-bg !important;
+  }
+}
+
+input[type="radio"],
+input[type="checkbox"],
+.radio,
+.radio-inline,
+.checkbox,
+.checkbox-inline {
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+textarea {
+  resize: vertical;
+}
+
+.field-collapse-toggle {
+  color: @field-collapse-toggle-color;
+  margin-left: 10px !important;
+}
+
+style-compile {
+  display: none;
+}
+
+.tooltip-inner {
+  white-space: pre-wrap !important;
+}
+
+@import '../filter_bar/filter_bar.less';
+
+
+.cell-hover {
+  background-color: @table-cell-hover-bg;
+}
+
+  .cell-hover-show {
+    // so that the cell doesn't change size on hover
+    visibility: hidden;
+  }
+
+.cell-hover:hover {
+  background-color: @table-cell-hover-hover-bg;
+  cursor: cell;
+
+  .cell-hover-show {
+    visibility: visible;
+  }
+}
+
+mark, .mark {
+  background-color: @mark-bg;
+}
+
+fieldset {
+  margin: @form-group-margin-bottom;
+  padding: @form-group-margin-bottom;
+  border: 1px solid @input-border;
+  border-radius: @input-border-radius-base;
+}
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0px;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+.list-group {
+  .list-group-item {
+    &.active,
+    &.active:hover,
+    &.active:focus {
+      background-color: @list-group-menu-item-active-bg;
+      cursor: default;
+    }
+  }
+}
+
+.panel-product {
+  margin-bottom: 10px;
+
+  .panel-heading {
+    background-color: @kibanaBlue3;
+    border-radius: 0;
+    color: @white;
+    font-size: 17px;
+    padding: 7px 10px;
+  }
+
+  .panel-heading--clickable {
+    cursor: pointer;
+  }
+
+  .panel-heading-elasticsearch,
+  .panel-heading-kibana,
+  .panel-heading-beats,
+  .panel-heading-logstash {
+    background-position: 4px 7px;
+    background-repeat: no-repeat;
+    background-size: 26px 26px;
+    padding-left: 32px;
+  }
+
+  .panel-heading-elasticsearch {
+    background-color: @product-elasticsearch;
+    background-image: url("~ui/icons/elasticsearch.svg");
+  }
+
+  .panel-heading-kibana {
+    background-color: @product-kibana;
+    background-image: url("~ui/icons/kibana.svg");
+  }
+
+  .panel-heading-beats {
+    background-color: @product-beats;
+    background-image: url("~ui/icons/beats.svg");
+  }
+
+  .panel-heading-logstash {
+    background-color: @product-logstash;
+    background-image: url("~ui/icons/logstash.svg");
+  }
+
+  .panel-body {
+    padding: 10px;
+  }
+}
+
+.page-row {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+
+.page-row-text {
+  color: @kibanaGray2;
+  font-size: 14px;
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.fullWidth {
+  width: 100%;
+}
+
+/**
+ * TODO: This is a generic pattern that should be replaced by specific components, e.g. inputGroup.
+ */
+.flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+  .flexGroup__filler {
+    flex: 1 1 auto;
+  }
+
+@import "~dragula/dist/dragula.css";

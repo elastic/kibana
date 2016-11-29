@@ -1,0 +1,41 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+
+.typeahead {
+  position: relative;
+
+  .typeahead-items {
+    border: 1px solid;
+    border-color: @typeahead-item-border;
+    color: @typeahead-item-color;
+    background-color: @typeahead-item-bg;
+    position: absolute;
+    top: 32px;
+    z-index: @zindex-typeahead;
+    width: 100%;
+
+    .typeahead-item {
+      border-bottom: 1px solid;
+      border-bottom-color: @typeahead-item-border;
+      padding: @padding-base-vertical @padding-base-horizontal;
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: 0px;
+    }
+
+    .typeahead-item.active {
+      background-color: @typeahead-item-active-bg;
+    }
+  }
+}
+
+.button-group .typeahead.visible .input-group,
+.inline-form .typeahead.visible .input-group {
+  > :first-child {
+    .border-bottom-radius(0);
+  }
+  > :last-child {
+    .border-bottom-radius(0);
+  }
+}

@@ -1,0 +1,11 @@
+The `String` field formatter can apply the following transformations to the field's contents:
+
+* Convert to lowercase
+* Convert to uppercase
+* Convert to title case
+* Apply the short dots transformation, which replaces the content before a `.` character with the first character of
+that content, as in the following example:
+
+[horizontal]
+*Original*:: *Becomes*
+`com.organizations.project.ClassName`:: `c.o.p.ClassName`
