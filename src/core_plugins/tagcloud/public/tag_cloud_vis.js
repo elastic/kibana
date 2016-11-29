@@ -13,6 +13,7 @@ visTypes.register(function TagCloudProvider(Private) {
   return new TemplateVisType({
     name: 'tagcloud',
     title: 'Tag cloud',
+    implementsRenderComplete: true,
     description: 'A tag cloud visualization is a visual representation of text data, ' +
     'typically used to visualize free form text. Tags are usually single words. The font size of word corresponds' +
     'with its importance.',
