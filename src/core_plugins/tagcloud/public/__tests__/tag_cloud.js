@@ -102,11 +102,16 @@ describe('tag cloud', function () {
       tagCloud.setData(test.data);
       tagCloud.setOptions(test.options);
       tagCloud.on('renderComplete', function onRender() {
-        tagCloud.removeListener('renderComplete', onRender);
-        const textElements = domNode.querySelectorAll('text');
-        verifyTagProperties(test.expected, textElements);
-        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-        done();
+        try {
+          tagCloud.removeListener('renderComplete', onRender);
+          const textElements = domNode.querySelectorAll('text');
+          verifyTagProperties(test.expected, textElements);
+          expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+          done();
+        } catch (e) {
+          done(e);
+        }
+
       });
     });
   });
@@ -119,11 +124,16 @@ describe('tag cloud', function () {
     tagCloud.setOptions(baseTest.options);
     tagCloud.setOptions(logScaleTest.options);
     tagCloud.on('renderComplete', function onRender() {
-      tagCloud.removeListener('renderComplete', onRender);
-      const textElements = domNode.querySelectorAll('text');
-      verifyTagProperties(logScaleTest.expected, textElements);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-      done();
+      try {
+        tagCloud.removeListener('renderComplete', onRender);
+        const textElements = domNode.querySelectorAll('text');
+        verifyTagProperties(logScaleTest.expected, textElements);
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+        done();
+      } catch (e) {
+        done(e);
+      }
+
     });
 
   });
@@ -139,9 +149,13 @@ describe('tag cloud', function () {
     tagCloud.on('renderComplete', function onRender() {
       tagCloud.removeListener('renderComplete', onRender);
       const textElements = domNode.querySelectorAll('text');
-      verifyTagProperties(trimDataTest.expected, textElements);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-      done();
+      try {
+        verifyTagProperties(trimDataTest.expected, textElements);
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+        done();
+      } catch (e) {
+        done(e);
+      }
     });
 
   });
@@ -158,11 +172,15 @@ describe('tag cloud', function () {
       //renderComplete should only notify at the last one
       const tagCloud = new TagCloud(domNode);
       tagCloud.on('renderComplete', function onRender() {
-        tagCloud.removeListener('renderComplete', onRender);
-        const textElements = domNode.querySelectorAll('text');
-        verifyTagProperties(logScaleTest.expected, textElements);
-        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-        done();
+        try {
+          tagCloud.removeListener('renderComplete', onRender);
+          const textElements = domNode.querySelectorAll('text');
+          verifyTagProperties(logScaleTest.expected, textElements);
+          expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+          done();
+        } catch (e) {
+          done(e);
+        }
       });
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
@@ -196,9 +214,14 @@ describe('tag cloud', function () {
         throw new Error('Should not get multiple render events');
       }
       counter += 1;
-      const textElements = domNode.querySelectorAll('text');
-      verifyTagProperties(logScaleTest.expected, textElements);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+      try {
+        const textElements = domNode.querySelectorAll('text');
+        verifyTagProperties(logScaleTest.expected, textElements);
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+      } catch (e) {
+        done(e);
+      }
+
     }
 
     tagCloud.on('renderComplete', onRender);
@@ -216,24 +239,35 @@ describe('tag cloud', function () {
     tagCloud.setOptions(logScaleTest.options);
 
     setTimeout(() => {
-      domNode.style.width = '600px';
-      domNode.style.height = '600px';
+      try {
+        domNode.style.width = '600px';
+        domNode.style.height = '600px';
 
-      tagCloud.resize();
+        tagCloud.resize();
 
-      setTimeout(() => {
-        tagCloud.setData(baseTest.data);
-        tagCloud.setOptions(baseTest.options);
-      }, 200);
+        setTimeout(() => {
+          try {
+            tagCloud.setData(baseTest.data);
+            tagCloud.setOptions(baseTest.options);
+          } catch (e) {
+            done(e);
+          }
+        }, 200);
 
-
-      tagCloud.on('renderComplete', function onRender() {
-        tagCloud.removeListener('renderComplete', onRender);
-        const textElements = domNode.querySelectorAll('text');
-        verifyTagProperties(baseTest.expected, textElements);
-        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-        done();
-      });
+        tagCloud.on('renderComplete', function onRender() {
+          try {
+            tagCloud.removeListener('renderComplete', onRender);
+            const textElements = domNode.querySelectorAll('text');
+            verifyTagProperties(baseTest.expected, textElements);
+            expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+            done();
+          } catch (e) {
+            done(e);
+          }
+        });
+      } catch (e) {
+        done(e);
+      }
     }, 1000);
 
 
@@ -250,13 +284,17 @@ describe('tag cloud', function () {
     tagCloud.setOptions(baseTest.options);
     tagCloud.on('renderComplete', function onRender() {
       tagCloud.removeListener('renderComplete', onRender);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
-      const textElements = domNode.querySelectorAll('text');
-      for (let i = 0; i < textElements; i++) {
-        const bbox = textElements[i].getBoundingClientRect();
-        verifyBbox(bbox, false);
+      try {
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
+        const textElements = domNode.querySelectorAll('text');
+        for (let i = 0; i < textElements; i++) {
+          const bbox = textElements[i].getBoundingClientRect();
+          verifyBbox(bbox, false);
+        }
+        done();
+      } catch (e) {
+        done(e);
       }
-      done();
     });
   });
 
@@ -271,13 +309,21 @@ describe('tag cloud', function () {
     tagCloud.setOptions(baseTest.options);
     tagCloud.on('renderComplete', function onRender() {
       tagCloud.removeListener('renderComplete', onRender);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
+      try {
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
+      } catch (e) {
+        done(e);
+      }
 
       domNode.style.width = '512px';
       domNode.style.height = '512px';
       tagCloud.on('renderComplete', _ => {
-        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
-        done();
+        try {
+          expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+          done();
+        } catch (e) {
+          done(e);
+        }
       });
       tagCloud.resize();
 
@@ -291,13 +337,21 @@ describe('tag cloud', function () {
     tagCloud.setOptions(baseTest.options);
     tagCloud.on('renderComplete', function onRender() {
       tagCloud.removeListener('renderComplete', onRender);
-      expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+      try {
+        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
+      } catch (e) {
+        done(e);
+      }
 
       domNode.style.width = '1px';
       domNode.style.height = '1px';
       tagCloud.on('renderComplete', _ => {
-        expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
-        done();
+        try {
+          expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
+          done();
+        } catch (e) {
+          done(e);
+        }
       });
       tagCloud.resize();
 
@@ -308,8 +362,16 @@ describe('tag cloud', function () {
   function verifyTagProperties(expectedValues, actualElements) {
     expect(actualElements.length).to.equal(expectedValues.length);
     expectedValues.forEach((test, index) => {
-      expect(actualElements[index].style.fontSize).to.equal(test.fontSize);
-      expect(actualElements[index].innerHTML).to.equal(test.text);
+      try {
+        expect(actualElements[index].style.fontSize).to.equal(test.fontSize);
+      } catch (e) {
+        throw new Error('fontsize is not correct: ' + e.message);
+      }
+      try {
+        expect(actualElements[index].innerHTML).to.equal(test.text);
+      } catch (e) {
+        throw new Error('fontsize is not correct: ' + e.message);
+      }
       isInsideContainer(actualElements[index]);
     });
   }
@@ -320,10 +382,28 @@ describe('tag cloud', function () {
   }
 
   function verifyBbox(bbox, shouldBeInside) {
-    expect(bbox.top >= 0 && bbox.top <= domNode.offsetHeight).to.be(shouldBeInside);
-    expect(bbox.bottom >= 0 && bbox.bottom <= domNode.offsetHeight).to.be(shouldBeInside);
-    expect(bbox.left >= 0 && bbox.left <= domNode.offsetWidth).to.be(shouldBeInside);
-    expect(bbox.right >= 0 && bbox.right <= domNode.offsetWidth).to.be(shouldBeInside);
+    const message = ` | bbox-of-tag: ${JSON.stringify([bbox.left, bbox.top, bbox.right, bbox.bottom])} vs
+     bbox-of-container: ${domNode.offsetWidth},${domNode.offsetHeight}`;
+    try {
+      expect(bbox.top >= 0 && bbox.top <= domNode.offsetHeight).to.be(shouldBeInside);
+    } catch (e) {
+      throw new Error('top boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message);
+    }
+    try {
+      expect(bbox.bottom >= 0 && bbox.bottom <= domNode.offsetHeight).to.be(shouldBeInside);
+    } catch (e) {
+      throw new Error('bottom boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message);
+    }
+    try {
+      expect(bbox.left >= 0 && bbox.left <= domNode.offsetWidth).to.be(shouldBeInside);
+    } catch (e) {
+      throw new Error('left boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message);
+    }
+    try {
+      expect(bbox.right >= 0 && bbox.right <= domNode.offsetWidth).to.be(shouldBeInside);
+    } catch (e) {
+      throw new Error('right boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message);
+    }
   }
 
 
