@@ -4,6 +4,17 @@
 Also see <<breaking-changes-5.0>>.
 
 [float]
+[[security-5.0.2]]
+=== Security fixes
+Kibana 5.0.0 and 5.0.1 were making requests to advanced settings and the short
+URL service on behalf of the kibana server rather than the current user, which
+means that being authenticated at all was sufficient to have both read and
+write access to the advanced settings and short URLs. +
+Kibana 5.0.2 now authenticates requests for each service on behalf of the
+current user. +
+{security}[ESA-2016-10] ({pull}9214[#9214])
+
+[float]
 [[bug-5.0.2]]
 === Bug fixes
 Core::
