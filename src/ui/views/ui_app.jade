@@ -110,16 +110,14 @@ block content
       opacity: 0.8;
     }
 
-  .kibanaWelcomeView(
-    data-id="kibanaWelcomeView"
-  )
+  .kibanaWelcomeView
     .kibanaLoader
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
         | Loading Kibana
     .kibanaLoadingMessage(
-      data-id="kibanaLoadingMessage"
+      data-remove-message-when-embedded
     )
       | Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
       | good stuff will be cached up for next time!
@@ -129,9 +127,8 @@ block content
 
       var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
       if (hideLoadingMessage) {
-        var loadingContainer = document.querySelector('[data-id="kibanaWelcomeView"]');
-        var loadingMessage = document.querySelector('[data-id="kibanaLoadingMessage"]');
-        loadingContainer.removeChild(loadingMessage);
+        var loadingMessage = document.querySelector('[data-remove-message-when-embedded]');
+        loadingMessage.parentNode.removeChild(loadingMessage);
       }
 
       var buildNum = #{kibanaPayload.buildNum};
