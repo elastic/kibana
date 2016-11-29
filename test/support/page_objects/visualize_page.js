@@ -572,12 +572,12 @@ export default class VisualizePage {
     .then(function getRect() {
       return self
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('rect.background')
+      .findByCssSelector('div.chart-wrapper > div.chart > svg')
       .then(function getRectHeight(chartAreaObj) {
         return chartAreaObj
         .getAttribute('height')
         .then(function (theHeight) {
-          yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+          yAxisHeight = theHeight;
           PageObjects.common.debug('theHeight = ' + theHeight);
           return theHeight;
         });

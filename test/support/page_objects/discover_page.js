@@ -285,4 +285,55 @@ export default class DiscoverPage {
       .catch(() => false);
   }
 
+  clickFieldListItem(field) {
+    return this.findTimeout
+    .findByCssSelector('li[attr-field="' + field + '"]').click();
+  }
+
+  clickFieldListItemAdd(field) {
+    return this.findTimeout
+    .findByCssSelector('li[attr-field="' + field + '"] > div > button').click();
+  }
+
+  clickFieldListItemVisualize(field) {
+    return this.findTimeout
+    .findByCssSelector('li[attr-field="' + field + '"] > a').click();
+  }
+
+  clickFieldListPlusFilter(field, value) {
+    // this method requires the field details to be open from clickFieldListItem()
+    return PageObjects.common.findTestSubject('plus-' + field + '-' + value)
+    .click();
+  }
+
+  clickFieldListMinusFilter(field, value) {
+    // this method requires the field details to be open from clickFieldListItem()
+    return PageObjects.common.findTestSubject('minus-' + field + '-' + value)
+    .click();
+  }
+
+  // this doesn't work yet.  Seems like we have to mouse over first to get it to appear?
+  removeFilter(field) {
+    return PageObjects.common.findTestSubject('removeFilter-' + field)
+    .click();
+  }
+
+  // this doesn't work yet.  Seems like we have to mouse over first to get it to appear?
+  disableFilter(field) {
+    return PageObjects.common.findTestSubject('disableFilter-' + field)
+    .click();
+  }
+
+  removeAllFilters() {
+    return this.findTimeout
+    .findByCssSelector('a[ng-click="showFilterActions = !showFilterActions"]')
+    .click()
+    .then(() => {
+      return this.findTimeout
+      .findByCssSelector('a[ng-click="removeAll()"]')
+      .click();
+    });
+  }
+
+
 }
