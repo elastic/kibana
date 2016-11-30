@@ -57,6 +57,7 @@ export default function normalizeSortRequest(config) {
   }
 };
 
+// The ES API only supports sort scripts of type 'number' and 'string'
 function castSortType(type) {
   const typeCastings = {
     number: 'number',
