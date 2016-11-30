@@ -1,7 +1,7 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:version:        5.1.0
+:version:        5.1.1
 :major-version:  5.x
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 
