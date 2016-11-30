@@ -1,3 +1,3 @@
-export default function savedDashboardFn(savedDashboards) {
+export function savedDashboardRegister(savedDashboards) {
   return savedDashboards;
 };
