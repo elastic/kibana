@@ -16,7 +16,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       $el = $('<ul>').appendTo($container);
 
       const $window = $(window);
-      const $body = $(document.body);
       const binder = new Binder($scope);
 
       // appState from controller
@@ -221,7 +220,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
         g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
-        // const serializedGrid = g.serialize();
         g.$widgets.each(function (i, widget) {
           g.resize_widget($(widget));
         });
