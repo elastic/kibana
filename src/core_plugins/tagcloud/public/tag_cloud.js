@@ -39,7 +39,6 @@ class TagCloud extends EventEmitter {
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
     this._spiral = 'archimedean';//layout shape
-    this._timeInterval = 1000;//time allowed for layout algorithm
     this._padding = 5;
 
     //OPTIONS
@@ -281,7 +280,6 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
-    tagCloudLayoutGenerator.timeInterval(this._timeInterval);
     tagCloudLayoutGenerator.on('end', () => this._scheduleLayout(job));
     tagCloudLayoutGenerator.start();
   }
