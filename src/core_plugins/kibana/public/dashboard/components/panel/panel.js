@@ -27,7 +27,6 @@ uiModules
   return {
     restrict: 'E',
     template: panelTemplate,
-    requires: '^dashboardGrid',
     link: function ($scope) {
       // using $scope inheritance, panels are available in AppState
       const $state = $scope.state;
