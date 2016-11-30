@@ -1,0 +1,12 @@
+Panel clean up
+
+Backports PR #9282
+
+**Commit 1:**
+Panel clean up
+
+the right syntax is ‘require’ not ‘requires’, but it isn’t needed
+anyhow (and throws an error if the right syntax is used).
+
+* Original sha: 58892bdfcb0ed69309b9cc5ad539c5db1b86cd08
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-11-30T17:38:26Z
