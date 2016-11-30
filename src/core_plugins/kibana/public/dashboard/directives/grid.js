@@ -73,6 +73,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           gridster.enable().enable_resize();
         });
 
+        // Does not remove the panel from the ui - that will be handled by the watch below, which
+        // will be triggered by the removal.
+        $scope.removePanelFromState = (panel) => {
+          _.pull($scope.state.panels, panel);
+        };
+
         $scope.$watchCollection('state.panels', function (panels) {
           const currentPanels = gridster.$widgets.toArray().map(function (el) {
             return getPanelFor(el);
@@ -126,7 +132,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         const panel = $panel.data('panel');
 
         panel.$el = $panel;
-        panel.$scope = $panel.data('$scope');
+     //   panel.$scope = $panel.data('$scope');
 
         return panel;
       }
@@ -136,7 +142,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // want them to show up in the url)
       function makePanelSerializeable(panel) {
         delete panel.$el;
-        delete panel.$scope;
+       // delete panel.$scope;
       }
 
       // tell gridster to remove the panel, and cleanup our metadata
@@ -145,7 +151,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         gridster.remove_widget(panel.$el, silent);
 
         // destroy the scope
-        panel.$scope.$destroy();
+      //  panel.$scope.$destroy();
 
         panel.$el.removeData('panel');
         panel.$el.removeData('$scope');
@@ -170,11 +176,19 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           }
         }
 
-        panel.$scope = $scope.$new();
-        panel.$scope.panel = panel;
-        panel.$scope.parentUiState = $scope.uiState;
+        // panel.$scope = $scope.$new();
+        // panel.$scope.panel = panel;
+        // panel.$scope.parentUiState = $scope.uiState;
+        const panelIndex = _.indexOf($scope.state.panels, panel);
 
-        panel.$el = $compile('<li><dashboard-panel></li>')(panel.$scope);
+        const panelHtml = `
+            <li>
+                <dashboard-panel remove="removePanelFromState(state.panels[${panelIndex}])"
+                                 panel="state.panels[${panelIndex}]"
+                                 chrome="chrome"
+                                 parent-ui-state="uiState">
+            </li>`;
+        panel.$el = $compile(panelHtml)($scope);
 
         // tell gridster to use the widget
         gridster.add_widget(panel.$el, panel.size_x, panel.size_y, panel.col, panel.row);
@@ -184,7 +198,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
         // stash the panel and it's scope in the element's data
         panel.$el.data('panel', panel);
-        panel.$el.data('$scope', panel.$scope);
+      //  panel.$el.data('$scope', panel.$scope);
       }
 
       // ensure that the panel object has the latest size/pos info
@@ -202,7 +216,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         gridster.$widgets.each(function (i, el) {
           const panel = getPanelFor(el);
           refreshPanelStats(panel);
-          panel.$scope.$broadcast('resize');
           makePanelSerializeable(panel);
           $scope.$root.$broadcast('change:vis');
         });
