@@ -63,6 +63,14 @@ export function setDefaultLocale(locale) {
   defaultLocale = locale;
 }
 
+/**
+ * Returns list of all registered translations
+ * @return {Array<String>} - Registered translations
+ */
+export function getRegisteredTranslations() {
+  return _.flattenDeep(Object.values(registeredTranslations));
+};
+
 function getTranslationsForLocale(locale) {
   if (!registeredTranslations.hasOwnProperty(locale)) {
     return Promise.resolve({});

@@ -10,7 +10,11 @@ describe('i18n module', function () {
 
   describe('one plugin', function () {
 
+    let registeredTranslationsPriorToTest = [];
+
     beforeEach('registerTranslations - one plugin', function () {
+      registeredTranslationsPriorToTest = i18n.getRegisteredTranslations();
+      i18n.unregisterTranslations();
       const pluginName = 'test_plugin_1';
       const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
       const translationFiles = [
@@ -22,6 +26,7 @@ describe('i18n module', function () {
 
     afterEach('unregisterTranslations - one plugin', function () {
       i18n.unregisterTranslations();
+      registeredTranslationsPriorToTest.forEach(i18n.registerTranslations);
     });
 
     describe('getTranslations', function () {
@@ -114,7 +119,11 @@ describe('i18n module', function () {
 
   describe('multiple plugins', function () {
 
+    let registeredTranslationsPriorToTest = [];
+
     beforeEach('registerTranslations - multiple plugin', function () {
+      registeredTranslationsPriorToTest = i18n.getRegisteredTranslations();
+      i18n.unregisterTranslations();
       const pluginTranslationPath = join(FIXTURES, 'translations');
       const translationFiles = [
         join(pluginTranslationPath, 'test_plugin_1', 'de.json'),
@@ -126,6 +135,7 @@ describe('i18n module', function () {
 
     afterEach('unregisterTranslations - multiple plugin', function () {
       i18n.unregisterTranslations();
+      registeredTranslationsPriorToTest.forEach(i18n.registerTranslations);
     });
 
     describe('getTranslations', function () {
