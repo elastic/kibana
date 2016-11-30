@@ -116,17 +116,19 @@ block content
         .kibanaWelcomeLogo
       .kibanaLoader__content
         | Loading Kibana
-    .kibanaLoadingMessage.
-      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
-      good stuff will be cached up for next time!
+    .kibanaLoadingMessage(
+      data-remove-message-when-embedded
+    )
+      | Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      | good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
 
       var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
       if (hideLoadingMessage) {
-        var loading = document.querySelector('.kibanaWelcomeView');
-        loading.removeChild(loading.lastChild);
+        var loadingMessage = document.querySelector('[data-remove-message-when-embedded]');
+        loadingMessage.parentNode.removeChild(loadingMessage);
       }
 
       var buildNum = #{kibanaPayload.buildNum};
