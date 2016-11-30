@@ -6,8 +6,8 @@ module.exports = {
     config: {
       properties: {
         buildNum: {
-          type: 'string',
-          index: 'not_analyzed'
+          type: 'keyword',
+          index: true
         }
       }
     }

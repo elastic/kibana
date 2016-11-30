@@ -53,9 +53,9 @@ describe('plugins/elasticsearch', function () {
           expect(params.body.mappings.config.properties)
             .to.have.property('buildNum');
           expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('type', 'string');
+            .to.have.property('type', 'keyword');
           expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('index', 'not_analyzed');
+            .to.have.property('index', 'true');
         });
       });
 

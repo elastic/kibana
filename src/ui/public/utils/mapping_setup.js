@@ -45,7 +45,8 @@ define(function () {
         if (typeof val === 'string') val = { type: val };
 
         if (val.type === 'json') {
-          val.type = 'string';
+          val.type = 'keyword';
+          val.index = false;
           val._serialize = json._serialize;
           val._deserialize = json._deserialize;
         }
