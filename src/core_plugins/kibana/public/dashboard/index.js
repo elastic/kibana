@@ -144,10 +144,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       courier.setRootSearchSource(dash.searchSource);
 
+      const docTitle = Private(DocTitleProvider);
+
       function init() {
         updateQueryOnRootSource();
 
-        const docTitle = Private(DocTitleProvider);
         if (dash.id) {
           docTitle.change(dash.title);
         }
@@ -228,7 +229,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.save = function () {
-        $state.title = dash.title;
         $state.save();
 
         const timeRestoreObj = _.pick(timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
@@ -247,6 +247,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
               kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+            } else {
+              docTitle.change(dash.lastSavedTitle);
             }
           }
         })

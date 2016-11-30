@@ -163,7 +163,7 @@ app.controller('timelion', function (
     }
   });
 
-  $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
+  $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 

@@ -333,6 +333,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
           } else {
             // Update defaults so that "reload saved query" functions correctly
             $state.setDefaults(getStateDefaults());
+            docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });

@@ -155,6 +155,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
       // Give obj all of the values in _source.fields
       _.assign(self, self._source);
+      self.lastSavedTitle = self.title;
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
@@ -284,6 +285,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
         .then(self.refreshIndex)
         .then(() => {
           self.isSaving = false;
+          self.lastSavedTitle = self.title;
           return self.id;
         })
         .catch(function (err) {

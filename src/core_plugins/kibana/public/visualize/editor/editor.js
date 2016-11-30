@@ -304,8 +304,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if (savedVis.id === $route.current.params.id) return;
-        kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        if (savedVis.id === $route.current.params.id) {
+          docTitle.change(savedVis.lastSavedTitle);
+        } else {
+          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        }
       }
     }, notify.fatal);
   };
