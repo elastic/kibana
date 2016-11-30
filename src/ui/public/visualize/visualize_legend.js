@@ -40,7 +40,10 @@ uiModules.get('kibana')
       $scope.unhighlight = function (event) {
         let el = event.currentTarget;
         let handler = $scope.renderbot.vislibVis.handler;
-        if (!handler) return;
+        //there is no guarantee that a Chart will set the unhighlight-function on its handler
+        if (!handler || typeof handler.unHighlight !== 'function') {
+          return;
+        }
         handler.unHighlight.call(el, handler.el);
       };
 
