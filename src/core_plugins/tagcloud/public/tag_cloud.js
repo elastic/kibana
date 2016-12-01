@@ -15,9 +15,9 @@ const ORIENTATIONS = {
   }
 };
 const D3_SCALING_FUNCTIONS = {
-  'linear': d3.scale.linear(),
-  'log': d3.scale.log(),
-  'square root': d3.scale.sqrt()
+  'linear': () => d3.scale.linear(),
+  'log': () => d3.scale.log(),
+  'square root': () => d3.scale.sqrt()
 };
 
 
@@ -27,31 +27,43 @@ class TagCloud extends EventEmitter {
 
     super();
 
+    //DOM
     this._element = domNode;
     this._d3SvgContainer = d3.select(this._element).append('svg');
     this._svgGroup = this._d3SvgContainer.append('g');
     this._size = [1, 1];
     this.resize();
 
+    //SETTING (non-configurable)
     this._fontFamily = 'Impact';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
-    this._orientation = 'single';
-    this._minFontSize = 10;
-    this._maxFontSize = 36;
-    this._textScale = 'linear';
     this._spiral = 'archimedean';//layout shape
     this._timeInterval = 1000;//time allowed for layout algorithm
     this._padding = 5;
 
-  }
+    //OPTIONS
+    this._orientation = 'single';
+    this._minFontSize = 10;
+    this._maxFontSize = 36;
+    this._textScale = 'linear';
+    this._optionsAsString = null;
 
+    //DATA
+    this._words = null;
+
+    //UTIL
+    this._handle = null;
+    this._queue = [];
+    this._allInViewBox = false;
+    this._inFlight = false;
+
+  }
 
   setOptions(options) {
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
-
     this._optionsAsString = JSON.stringify(options);
     this._orientation = options.orientation;
     this._minFontSize = Math.min(options.minFontSize, options.maxFontSize);
@@ -62,24 +74,19 @@ class TagCloud extends EventEmitter {
 
 
   resize() {
-
     const newWidth = this._element.offsetWidth;
     const newHeight = this._element.offsetHeight;
-
     if (newWidth < 1 || newHeight < 1) {
       return;
     }
-
     if (newWidth === this._size[0] && newHeight === this._size[1]) {
       return;
     }
 
     const wasInside = this._size[0] >= this._cloudWidth && this._size[1] >= this._cloudHeight;
     const willBeInside = this._cloudWidth <= newWidth && this._cloudHeight <= newHeight;
-
     this._size[0] = newWidth;
     this._size[1] = newHeight;
-
     if (wasInside && willBeInside && this._allInViewBox) {
       this._invalidate(true);
     } else {
@@ -90,13 +97,11 @@ class TagCloud extends EventEmitter {
 
   setData(data) {
     this._words = data.map(toWordTag);
-    this._makeTextSizeMapper();
     this._invalidate(false);
   }
 
-
   destroy() {
-    clearTimeout(this._timeoutHandle);
+    clearTimeout(this._handle);
     this._element.innerHTML = '';
   }
 
@@ -111,24 +116,35 @@ class TagCloud extends EventEmitter {
     this._svgGroup.attr('height', this._size[1]);
   }
 
-  _washWords() {
-    if (!this._words) {
+  _processQueue() {
+
+    if (!this._queue.length) {
+      this.emit('renderComplete');
       return;
     }
 
-    //the tagCloudLayoutGenerator clobbers the word-object with metadata about positioning.
-    //This can causes corrupt states in the layout-generator
-    //where words get collapsed to the same location and do not reposition correctly.
-    //=> we recreate an empty word object without the metadata
-    this._words = this._words.map(toWordTag);
-    this._makeTextSizeMapper();
+    if (this._inFlight) {
+      return;
+    }
+
+    const job = this._queue.pop();
+    this._inFlight = true;
+    this._onLayoutEnd(job);
+
+
   }
 
-  _onLayoutEnd() {
+  _onLayoutEnd(job) {
 
+    if (this._handle !== null) {//a new configuration is coming, no need to update
+      this._processQueue();
+      return;
+    }
+
+    this._currentJob = null;
     const affineTransform = positionWord.bind(null, this._element.offsetWidth / 2, this._element.offsetHeight / 2);
     const svgTextNodes = this._svgGroup.selectAll('text');
-    const stage = svgTextNodes.data(this._words, getText);
+    const stage = svgTextNodes.data(job.words, getText);
 
     const enterSelection = stage.enter();
     const enteringTags = enterSelection.append('text');
@@ -180,9 +196,9 @@ class TagCloud extends EventEmitter {
           cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
           cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
 
-        this._dirtyPromise = null;
-        this._resolve(true);
-        this.emit('renderComplete');
+        this._inFlight = false;
+        this._currentJob = job;
+        this._processQueue();
       }
     };
     exitTransition.each(_ => exits++);
@@ -198,47 +214,59 @@ class TagCloud extends EventEmitter {
 
   };
 
-
   _makeTextSizeMapper() {
-    this._mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale];
-    if (this._words.length === 1) {
-      this._mapSizeToFontSize.range([this._maxFontSize, this._maxFontSize]);
-    } else {
-      this._mapSizeToFontSize.range([this._minFontSize, this._maxFontSize]);
-    }
-
+    const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
+    const range = this._words.length === 1 ? [this._maxFontSize, this._maxFontSize] : [this._minFontSize, this._maxFontSize];
+    mapSizeToFontSize.range(range);
     if (this._words) {
-      this._mapSizeToFontSize.domain(d3.extent(this._words, getSize));
+      mapSizeToFontSize.domain(d3.extent(this._words, getValue));
     }
+    return mapSizeToFontSize;
+  }
+
+  _makeJob() {
+    return {
+      words: this._words.map(toWordTag)
+    };
   }
 
   _invalidate(keepLayout) {
-
 
     if (!this._words) {
       return;
     }
 
-    if (!this._dirtyPromise) {
-      this._dirtyPromise = new Promise((resolve, reject) => {
-        this._resolve = resolve;
-      });
-    }
-
-    clearTimeout(this._timeoutHandle);
-    this._timeoutHandle = requestAnimationFrame(() => {
-      this._timeoutHandle = null;
+    clearTimeout(this._handle);
+    this._handle = setTimeout(() => {
+      this._handle = null;
       this._updateContainerSize();
-      if (keepLayout) {
-        this._onLayoutEnd();
+      if (keepLayout && this._currentJob && this._queue.length === 0) {
+        this._scheduleLayout({
+          words: this._currentJob.words.map(tag => {
+            return {
+              x: tag.x,
+              y: tag.y,
+              rotate: tag.rotate,
+              size: tag.size,
+              text: tag.text
+            };
+          })
+        });
       } else {
-        this._washWords();
         this._updateLayout();
       }
-    });
+    }, 0);//unhook from callstack. this avoids kicking off multiple layouts if multiple changes come in succession
+  }
+
+  _scheduleLayout(job) {
+    this._queue.unshift(job);
+    this._processQueue();
   }
 
   _updateLayout() {
+
+    const job = this._makeJob();
+    const mapSizeToFontSize = this._makeTextSizeMapper();
 
     const tagCloudLayoutGenerator = d3TagCloud();
     tagCloudLayoutGenerator.size(this._size);
@@ -247,15 +275,16 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => this._mapSizeToFontSize(tag.size));
+    tagCloudLayoutGenerator.fontSize(tag => {
+      return mapSizeToFontSize(tag.value);
+    });
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
-    tagCloudLayoutGenerator.words(this._words);
+    tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
-    tagCloudLayoutGenerator.on('end', this._onLayoutEnd.bind(this));
+    tagCloudLayoutGenerator.on('end', () =>this._scheduleLayout(job));
     tagCloudLayoutGenerator.start();
-
   }
 
 }
@@ -267,7 +296,7 @@ function seed() {
 }
 
 function toWordTag(word) {
-  return {size: word.size, text: word.text};
+  return {value: word.value, text: word.text};
 }
 
 
@@ -278,14 +307,15 @@ function getText(word) {
 function positionWord(xTranslate, yTranslate, word) {
 
   if (isNaN(word.x) || isNaN(word.y) || isNaN(word.rotate)) {
+    //move off-screen
     return `translate(${xTranslate * 3}, ${yTranslate * 3})rotate(0)`;
   }
 
   return `translate(${word.x + xTranslate}, ${word.y + yTranslate})rotate(${word.rotate})`;
 }
 
-function getSize(tag) {
-  return tag.size;
+function getValue(tag) {
+  return tag.value;
 }
 
 function getSizeInPixels(tag) {
