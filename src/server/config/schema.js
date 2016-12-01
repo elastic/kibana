@@ -76,6 +76,7 @@ module.exports = () => Joi.object({
 
     events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
+    timelion: Joi.boolean().default(false),
     filter: Joi.any().default({}),
     json: Joi.boolean()
     .when('dest', {
