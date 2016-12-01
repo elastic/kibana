@@ -120,10 +120,12 @@ describe('tag cloud tests', function () {
       });
 
       it('completeness should be ok', function () {
+        console.log('start', this.test.fullTitle());
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       });
 
       it('positions should be ok', function () {
+        console.log('start', this.test.fullTitle());
         const textElements = domNode.querySelectorAll('text');
         verifyTagProperties(test.expected, textElements, tagCloud);
       });
@@ -170,10 +172,12 @@ describe('tag cloud tests', function () {
       });
 
       it('completeness should be ok', function () {
+        console.log('start', this.test.fullTitle());
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       });
 
       it('positions should be ok', function () {
+        console.log('start', this.test.fullTitle());
         const textElements = domNode.querySelectorAll('text');
         verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
       });
@@ -204,9 +208,11 @@ describe('tag cloud tests', function () {
 
 
     it('completeness should be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     });
     it('positions should be ok', function () {
+      console.log('start', this.test.fullTitle());
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
     });
@@ -235,9 +241,11 @@ describe('tag cloud tests', function () {
 
 
     it('completeness should be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     });
     it('positions should be ok', function () {
+      console.log('start', this.test.fullTitle());
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(trimDataTest.expected, textElements, tagCloud);
     });
@@ -283,9 +291,11 @@ describe('tag cloud tests', function () {
     });
 
     it('completeness should be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     });
     it('positions should be ok', function () {
+      console.log('start', this.test.fullTitle());
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
     });
@@ -327,9 +337,11 @@ describe('tag cloud tests', function () {
     });
 
     it('completeness should be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     });
     it('positions should be ok', function () {
+      console.log('start', this.test.fullTitle());
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(baseTest.expected, textElements, tagCloud);
     });
@@ -361,9 +373,11 @@ describe('tag cloud tests', function () {
     });
 
     it('completeness should not be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
     });
     it('positions should not be ok', function () {
+      console.log('start', this.test.fullTitle());
       const textElements = domNode.querySelectorAll('text');
       for (let i = 0; i < textElements; i++) {
         const bbox = textElements[i].getBoundingClientRect();
@@ -407,6 +421,7 @@ describe('tag cloud tests', function () {
     });
 
     it('completeness should be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     });
 
@@ -442,6 +457,7 @@ describe('tag cloud tests', function () {
     });
 
     it('completeness should not be ok', function () {
+      console.log('start', this.test.fullTitle());
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
     });
 

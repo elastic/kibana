@@ -36,15 +36,9 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:browser-ci', () => {
-    const ciShardTasks = keys(grunt.config.get('karma'))
-      .filter(key => key.startsWith('ciShard-'))
-      .map(key => `karma:${key}`);
-
-    grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
-
     grunt.task.run([
       'run:testServer',
-      ...ciShardTasks
+      'karma:ciShard-3'
     ]);
   });
 
