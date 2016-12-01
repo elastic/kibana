@@ -106,7 +106,7 @@ export default function LineChartFactory(Private) {
       .attr('cx', isHorizontal ? cx : cy)
       .attr('cy', isHorizontal ? cy : cx)
       .attr('class', 'circle-decoration')
-        .attr('data-label', data.label)
+      .attr('data-label', data.label)
       .attr('fill', colorCircle);
 
       circles

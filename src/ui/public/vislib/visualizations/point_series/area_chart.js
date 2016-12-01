@@ -74,7 +74,7 @@ export default function AreaChartFactory(Private) {
       // Data layers
       const layer = svg.append('g')
       .attr('class', function (d, i) {
-        return 'pathgroup ' + i;
+        return 'series series-' + i;
       });
 
       // Append path
