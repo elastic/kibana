@@ -65,9 +65,11 @@ module.exports = new Datasource('es', {
 
     var body = buildRequest(config, tlConfig);
 
-    const logTimelionRequests = tlConfig.server.config().get('logging.timelion');
-    if (logTimelionRequests) {
-      tlConfig.server.log(['info', 'timelion'], JSON.stringify(body));
+    if (tlConfig.server.config) {
+      const logTimelionRequests = tlConfig.server.config().get('logging.timelion');
+      if (logTimelionRequests) {
+        tlConfig.server.log(['info', 'timelion'], JSON.stringify(body));
+      }
     }
 
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
