@@ -35,9 +35,7 @@ export default function ColumnChartFactory(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
-      .attr('class', function (d, i) {
-        return `series series-${i}`;
-      })
+      .attr('class', 'series')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')
@@ -110,25 +108,20 @@ export default function ColumnChartFactory(Private) {
       }
 
       function x(d) {
-        if (isTimeScale) {
-          return xScale(d.x) + barWidth * groupNum;
-        }
-        return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
+        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() / groupCount * groupNum;
+        return xScale(d.x) + groupPosition;
       }
 
       function y(d) {
         if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
-          return yScale(0);
+          return yScale(d.y0);
         }
-        if (!isHorizontal && d.y < 0) return yScale(d.y);
+        /*if (!isHorizontal && d.y < 0) return yScale(d.y);*/
         return yScale(d.y0 + d.y);
       }
 
       function widthFunc() {
-        if (isTimeScale) {
-          return barWidth;
-        }
-        return xScale.rangeBand() / groupCount;
+        return isTimeScale ? barWidth : xScale.rangeBand() / groupCount;
       }
 
       function heightFunc(d) {

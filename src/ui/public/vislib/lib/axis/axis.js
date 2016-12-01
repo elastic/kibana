@@ -41,6 +41,13 @@ export default function AxisFactory(Private) {
         return d.y;
       })
       .offset(this.axisConfig.get('scale.offset', 'zero'));
+
+      const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
+      if (stackedMode) {
+        this.stack.out((d, y0, y) => {
+          return this._stackNegAndPosVals(d, y0, y);
+        });
+      }
     }
 
     /**
@@ -77,6 +84,7 @@ export default function AxisFactory(Private) {
      * Calculates the d.y0 value for stacked data in D3.
      */
     _calcYZero(y, arr) {
+      if (y === 0 && this._lastY0) return this._sumYs(arr, this._lastY0 > 0 ? this._isPositive : this._isNegative);
       if (y >= 0) return this._sumYs(arr, this._isPositive);
       return this._sumYs(arr, this._isNegative);
     };
@@ -121,6 +129,8 @@ export default function AxisFactory(Private) {
       }
 
       d.y0 = this._calcYZero(y, this._cache.yValsArr);
+      if (d.y0 > 0) this._lastY0 = 1;
+      if (d.y0 < 0) this._lastY0 = -1;
       ++this._cache.index.stack;
 
 
