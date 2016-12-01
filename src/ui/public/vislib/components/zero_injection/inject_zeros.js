@@ -20,7 +20,7 @@ export default function ZeroInjectionUtilService(Private) {
    */
 
   return function (obj, data, orderBucketsBySum = false) {
-    const keys = orderXValues(data, orderBucketsBySum); //_(obj).map('values').flatten().map('x').uniq().value();//
+    const keys = orderXValues(data, orderBucketsBySum);
 
     obj.forEach(function (series) {
       const zeroArray = createZeroFilledArray(keys, series.label);

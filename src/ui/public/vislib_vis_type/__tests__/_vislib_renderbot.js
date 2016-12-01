@@ -94,13 +94,10 @@ describe('renderbot', function exportWrapper() {
       }, mockVisType)
     };
     let createVisSpy;
-    let getParamsStub;
     let renderbot;
 
     beforeEach(function () {
       createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
-      // getParamsStub = sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _identity);
-      // getParamsStub.returns(params);
       renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 

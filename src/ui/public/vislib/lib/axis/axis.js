@@ -7,6 +7,7 @@ import AxisLabelsProvider from './axis_labels';
 import AxisScaleProvider from './axis_scale';
 import AxisConfigProvider from './axis_config';
 import errors from 'ui/errors';
+import SCALE_MODES from './scale_modes';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
@@ -40,12 +41,6 @@ export default function AxisFactory(Private) {
         return d.y;
       })
       .offset(this.axisConfig.get('scale.offset', 'zero'));
-
-      if (this.axisConfig.get('scale.mode') === 'stacked'/* && visConfigArgs.type === 'histogram'*/) {
-        this.stack.out((d, y0, y) => {
-          return this._stackNegAndPosVals(d, y0, y);
-        });
-      }
     }
 
     /**
@@ -204,7 +199,7 @@ export default function AxisFactory(Private) {
       return Math.ceil(yTickScale(length));
     }
 
-    getLength(el, n) {
+    getLength(el) {
       if (this.axisConfig.isHorizontal()) {
         return $(el).width();
       } else {
@@ -214,7 +209,6 @@ export default function AxisFactory(Private) {
 
     adjustSize() {
       const config = this.axisConfig;
-      const xAxisPadding = 15;
       const style = config.get('style');
       const margin = this.visConfig.get('style.margin');
       const chartEl = this.visConfig.get('el');
@@ -267,12 +261,6 @@ export default function AxisFactory(Private) {
     validate() {
       if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
         throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
-      }
-
-      const isWiggle = this.visConfig.get('mode', 'normal') === 'wiggle';
-      if (isWiggle && !this.axisConfig.isTimeDomain()) {
-        throw new errors.VislibError('In wiggle mode the area chart requires ordered values on the x-axis. ' +
-          'Try using a Histogram or Date Histogram aggregation.');
       }
     }
 

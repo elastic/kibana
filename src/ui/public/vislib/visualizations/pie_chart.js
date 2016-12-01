@@ -12,8 +12,8 @@ export default function PieChartFactory(Private) {
     showTooltip: true,
     color: undefined,
     fillColor: undefined,
-    xValue: function (d) { return d.x; },
-    yValue: function (d) { return d.y; }
+    xValue: d => d.x,
+    yValue: d => d.y
   };
   /**
    * Pie Chart Visualization

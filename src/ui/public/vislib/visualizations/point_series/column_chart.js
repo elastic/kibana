@@ -121,14 +121,6 @@ export default function ColumnChartFactory(Private) {
         if (d.y < 0) {
           return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
         }
-        // todo:
-        // Due to an issue with D3 not returning zeros correctly when using
-        // an offset='expand', need to add conditional statement to handle zeros
-        // appropriately
-        //if (d._input.y === 0) {
-        //  return 0;
-        //}
-
         // for split bars or for one series,
         // last series will have d.y0 = 0
         if (d.y0 === 0 && yMin > 0) {

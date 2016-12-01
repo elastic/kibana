@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
+import SCALE_MODES from './scale_modes';
+
 export default function AxisConfigFactory() {
 
   const defaults = {
@@ -15,7 +17,7 @@ export default function AxisConfigFactory() {
       defaultYExtents: null,
       min: null,
       max: null,
-      mode: 'normal' // [percentage, normal, wiggle, silhouette]
+      mode: SCALE_MODES.NORMAL
     },
     style: {
       color: '#ddd',
@@ -82,10 +84,12 @@ export default function AxisConfigFactory() {
         }
       }
 
-      if (this._values.type === 'value') {
-        const isWiggleOrSilluete = chartConfig.get('mode') === 'wiggle' || chartConfig.get('mode') === 'silhouette';
+      if (this.get('type') === 'value') {
+        const isWiggleOrSilhouette =
+          this.get('scale.mode') === SCALE_MODES.WIGGLE ||
+          this.get('scale.mode') === SCALE_MODES.SILHOUETTE;
         // if show was not explicitly set and wiggle or silhouette option was checked
-        if (isWiggleOrSilluete) {
+        if (isWiggleOrSilhouette) {
           this._values.scale.defaultYExtents = false;
 
           if (!axisConfigArgs.show) {
@@ -115,15 +119,11 @@ export default function AxisConfigFactory() {
       let offset;
       let stacked = true;
       switch (this.get('scale.mode')) {
-        case 'normal':
+        case SCALE_MODES.NORMAL:
           offset = 'zero';
           stacked = false;
           break;
-        case 'grouped':
-          offset = 'group';
-          stacked = false;
-          break;
-        case 'percentage':
+        case SCALE_MODES.PERCENTAGE:
           offset = 'expand';
           break;
         default:
@@ -160,7 +160,7 @@ export default function AxisConfigFactory() {
     };
 
     isPercentage() {
-      return this._values.scale.mode === 'percentage';
+      return this._values.scale.mode === SCALE_MODES.PERCENTAGE;
     };
 
     isUserDefined() {

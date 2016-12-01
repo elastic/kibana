@@ -69,7 +69,7 @@ dataTypesArray.forEach(function (dataType, i) {
         });
       });
 
-      it('should append a d.y0 key to the data object', function () {
+      it('should not stack values if grouped mode is set', function () {
         if (mode === 'grouped') {
           expect(isStacked).to.be(false);
         } else {
@@ -90,17 +90,6 @@ dataTypesArray.forEach(function (dataType, i) {
           product = numOfSeries * numOfValues;
           expect($(chart.chartEl).find('.series rect')).to.have.length(product);
         });
-      });
-    });
-
-    describe('updateBars method', function () {
-      beforeEach(function () {
-        vis.handler.visConfig.set('mode', 'grouped');
-        vis.render(vis.data, persistedState);
-      });
-
-      it('should returned grouped bars', function () {
-        vis.handler.charts.forEach(function (chart) {});
       });
     });
 

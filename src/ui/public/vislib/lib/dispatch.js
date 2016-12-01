@@ -40,7 +40,7 @@ export default function DispatchClass(Private, config) {
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
       const color = _.get(handler, 'data.color');
-      const isPercentage = (handler && handler.visConfig.mode === 'percentage');
+      const isPercentage = (handler && handler.visConfig.get('mode') === 'percentage');
 
       const eventData = {
         value: d.y,
