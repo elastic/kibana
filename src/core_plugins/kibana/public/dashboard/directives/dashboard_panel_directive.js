@@ -20,21 +20,42 @@ uiModules
     };
   });
 
-  const getPanelId = function (panel) {
-    return ['P', panel.panelIndex].join('-');
+  /**
+   * Returns a unique id for storing the panel state in the persistent ui.
+   * @param panel
+   * @returns {string}
+   */
+  const getPersistedStateId = function (panel) {
+    return `P-${panel.panelId}`;
   };
 
   return {
     restrict: 'E',
     template: panelTemplate,
     scope: {
-      chrome: '=',
+      /**
+       * Whether or not the dashboard this panel is contained on is in 'full screen mode'.
+       * @type {boolean}
+       */
+      isFullScreenMode: '=',
+      /**
+       * The parent's persisted state is used to create a child persisted state for the
+       * panel.
+       * @type {PersistedState}
+       */
       parentUiState: '=',
+      /**
+       * Contains information about this panel.
+       * @type {Panel}
+       */
       panel: '=',
+      /**
+       * Handles removing this panel from the grid.
+       * @type {() => void}
+       */
       remove: '&'
     },
-    link: function ($scope) {
-
+    link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
       loadPanel($scope.panel, $scope)
@@ -42,14 +63,16 @@ uiModules
         // These could be done in loadPanel, putting them here to make them more explicit
         $scope.savedObj = panelConfig.savedObj;
         $scope.editUrl = panelConfig.editUrl;
-        $scope.$on('$destroy', function () {
+
+        element.on('$destroy', function () {
           panelConfig.savedObj.destroy();
-          $scope.parentUiState.removeChild(getPanelId(panelConfig.panel));
+          $scope.parentUiState.removeChild(getPersistedStateId(panelConfig.panel));
+          $scope.$destroy();
         });
 
         // create child ui state from the savedObj
         const uiState = panelConfig.uiState || {};
-        $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
+        $scope.uiState = $scope.parentUiState.createChild(getPersistedStateId(panelConfig.panel), uiState, true);
         const panelSavedVis = _.get(panelConfig, 'savedObj.vis');  // Sometimes this will be a search, and undef
         if (panelSavedVis) {
           panelSavedVis.setUiState($scope.uiState);
