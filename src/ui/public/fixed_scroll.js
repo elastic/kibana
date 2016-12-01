@@ -4,6 +4,11 @@ import uiModules from 'ui/modules';
 
 const SCROLLER_HEIGHT = 20;
 
+/**
+ * This directive adds a fixed horizontal scrollbar to the bottom of the window that proxies its scroll events
+ * to the target element's real scrollbar. This is useful when the target element's horizontal scrollbar
+ * might be waaaay down the page, like the doc table on Discover.
+ */
 uiModules
 .get('kibana')
 .directive('fixedScroll', function ($timeout) {
