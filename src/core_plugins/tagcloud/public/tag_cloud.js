@@ -39,7 +39,6 @@ class TagCloud extends EventEmitter {
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
     this._spiral = 'archimedean';//layout shape
-    this._timeInterval = 1000;//time allowed for layout algorithm
     this._padding = 5;
 
     //OPTIONS
@@ -130,7 +129,6 @@ class TagCloud extends EventEmitter {
     const job = this._queue.pop();
     this._inFlight = true;
     this._onLayoutEnd(job);
-
 
   }
 
@@ -282,9 +280,19 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
-    tagCloudLayoutGenerator.timeInterval(this._timeInterval);
-    tagCloudLayoutGenerator.on('end', () =>this._scheduleLayout(job));
+    tagCloudLayoutGenerator.on('end', () => this._scheduleLayout(job));
     tagCloudLayoutGenerator.start();
+  }
+
+  /**
+   * Returns debug info. For debugging only.
+   * @return {*}
+   */
+  getDebugInfo() {
+    const debug = {};
+    debug.positions = this._currentJob ? this._currentJob.words.map(tag => [tag.text, tag.x, tag.y, tag.rotate]) : [];
+    debug.size = this._size.slice();
+    return debug;
   }
 
 }
@@ -292,7 +300,7 @@ class TagCloud extends EventEmitter {
 TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
 
 function seed() {
-  return 0.5;//constant random seed to ensure constant layouts for identical data
+  return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
