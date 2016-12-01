@@ -7,7 +7,6 @@ import AxisLabelsProvider from './axis_labels';
 import AxisScaleProvider from './axis_scale';
 import AxisConfigProvider from './axis_config';
 import errors from 'ui/errors';
-import SCALE_MODES from './scale_modes';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);

@@ -83,7 +83,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
   describe('get Method', function () {
     it('should be a function', function () {
-      expect(_.isFunction(visConfig.set)).to.be(true);
+      expect(typeof visConfig.get).to.be('function');
     });
 
     it('should get the property', function () {
@@ -104,7 +104,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
   describe('set Method', function () {
     it('should be a function', function () {
-      expect(_.isFunction(visConfig.set)).to.be(true);
+      expect(typeof visConfig.set).to.be('function');
     });
 
     it('should set a property', function () {
