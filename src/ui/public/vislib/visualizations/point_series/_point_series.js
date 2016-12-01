@@ -22,14 +22,21 @@ export default function PointSeriesProvider(Private) {
     };
 
     getStackedCount() {
-      return this.baseChart.chartConfig.series.reduce(function (sum, seri) {
-        return seri.mode === 'stacked' ? sum + 1 : sum;
+      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
+        return series.mode === 'stacked' ? sum + 1 : sum;
       }, 0);
     };
 
     getGroupedCount() {
-      return this.baseChart.chartConfig.series.reduce(function (sum, seri) {
-        return seri.mode === 'stacked' ? sum : sum + 1;
+      const stacks = [];
+      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
+        const valueAxis = series.valueAxis;
+        const isStacked = series.mode === 'stacked';
+        const isHistogram = series.type === 'histogram';
+        if (!isHistogram) return sum;
+        if (isStacked && stacks.includes(valueAxis)) return sum;
+        if (isStacked) stacks.push(valueAxis);
+        return sum + 1;
       }, 0);
     };
 
@@ -44,9 +51,17 @@ export default function PointSeriesProvider(Private) {
 
     getGroupedNum(data) {
       let i = 0;
+      const stacks = [];
       for (const seri of this.baseChart.chartConfig.series) {
-        if (seri.data === data) return i;
-        if (seri.mode !== 'stacked') i++;
+        const valueAxis = seri.valueAxis;
+        const isStacked = seri.mode === 'stacked';
+        if (!isStacked) {
+          if (seri.data === data) return i;
+          i++;
+        } else {
+          if (!(valueAxis in stacks)) stacks[valueAxis] = i++;
+          if (seri.data === data) return stacks[valueAxis];
+        }
       }
       return 0;
     };

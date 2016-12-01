@@ -213,6 +213,7 @@ export default function AxisFactory(Private) {
       const margin = this.visConfig.get('style.margin');
       const chartEl = this.visConfig.get('el');
       const position = config.get('position');
+      const axisPadding = 5;
 
       return function (selection) {
         const text = selection.selectAll('.tick text');
@@ -228,6 +229,7 @@ export default function AxisFactory(Private) {
           })());
         });
         let length = lengths.length > 0 ? _.max(lengths) : 0;
+        length += axisPadding;
 
         if (config.isHorizontal()) {
           selection.attr('height', Math.ceil(length));
@@ -243,16 +245,11 @@ export default function AxisFactory(Private) {
             spacerNodes.height(elHeight);
           }
         } else {
-          const axisSpacing = 2;
           const axisWidth = Math.ceil(length);
           selection.attr('width', axisWidth);
           if (position === 'left') {
             selection.select('g')
             .attr('transform', `translate(${axisWidth},0)`);
-          } else if (position === 'right') {
-            const translateWidth = axisSpacing + parseInt(style.lineWidth);
-            selection.select('g')
-              .attr('transform', `translate(${translateWidth},0)`);
           }
         }
       };
