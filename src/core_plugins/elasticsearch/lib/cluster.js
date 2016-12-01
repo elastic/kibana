@@ -7,65 +7,81 @@ import Boom from 'boom';
 import createClient from './create_client';
 import filterHeaders from './filter_headers';
 
-let client;
-let noAuthClient;
-
 export default class Cluster {
   constructor(config) {
-    this.config = config;
+    this.config = Object.assign({}, config);
     this.errors = elasticsearch.errors;
 
-    client = this.createClient();
-    this.callAsKibanaUser = this.callAsKibanaUserFactory(client);
+    this._client = this.createClient();
+    this.callAsKibanaUser = this.callAsKibanaUserFactory(this._client);
 
-    noAuthClient = this.createClient({ auth: false });
-    this.callWithRequest = this.callWithRequestFactory(noAuthClient);
+    this._noAuthClient = this.createClient({ auth: false });
+    this.callWithRequest = this.callWithRequestFactory(this._noAuthClient);
 
     return this;
   }
 
+  /**
+   * callAsKibanaUser
+   *
+   * Makes a call to ES using the credentials in kibana.yml
+   *
+   * @param {string} endpoint
+   * @param {Object} clientParams
+   * @param {Object} options
+   * @param {boolean} options.wrap401Errors
+   * @returns {Promise}
+   */
   callAsKibanaUserFactory(client) {
-    return (endpoint, params = {}) => {
-      const path = toPath(endpoint);
-      const api = get(client, path);
+    return partial(this.callWithRequestFactory(client), undefined);
+  }
 
-      let apiContext = get(client, path.slice(0, -1));
+  callWithRequestFactory(client) {
+    /**
+     * callWithRequest
+     *
+     * Makes a call to ES, passing through whitelisted headers in the request
+     *
+     * The whitelisted headers are defined in the config under _requestHeadersWhitelist_
+     *
+     * @param {Object|undefined} req - The request object
+     * @param {string} endpoint
+     * @param {Object} clientParams
+     * @param {Object} options
+     * @param {boolean} options.wrap401Errors
+     * @returns {Promise}
+     */
+    return (req = {}, endpoint, clientParams = {}, options = {}) => {
+      const wrap401Errors = options.wrap401Errors !== false;
 
+      if (req.headers) {
+        const filteredHeaders = filterHeaders(req.headers, this.config.requestHeadersWhitelist);
+        set(clientParams, 'headers', filteredHeaders);
+      }
+
+      const clientPath = toPath(endpoint);
+      const api = get(client, clientPath);
+
+      let apiContext = get(client, clientPath.slice(0, -1));
       if (isEmpty(apiContext)) {
         apiContext = client;
       }
 
       if (!api) {
-        throw new Error(`callWithRequest called with an invalid endpoint: ${endpoint}`);
+        throw new Error(`called with an invalid endpoint: ${endpoint}`);
       }
 
-      return api.call(apiContext, params);
-    };
-  }
+      return api.call(apiContext, clientParams).catch((err) => {
+        if (!wrap401Errors || err.statusCode !== 401) {
+          return Promise.reject(err);
+        }
 
-  callWithRequestFactory(client) {
-    return (req, endpoint, clientParams = {}, options = {}) => {
-      const wrap401Errors = options.wrap401Errors !== false;
-      const filteredHeaders = filterHeaders(req.headers, this.config.requestHeadersWhitelist);
-      set(clientParams, 'headers', filteredHeaders);
-      const path = toPath(endpoint);
-      const api = get(client, path);
-      let apiContext = get(client, path.slice(0, -1));
-      if (isEmpty(apiContext)) {
-        apiContext = client;
-      }
-      if (!api) throw new Error(`callWithRequest called with an invalid endpoint: ${endpoint}`);
-      return api.call(apiContext, clientParams)
-        .catch((err) => {
-          if (!wrap401Errors || err.statusCode !== 401) {
-            return Promise.reject(err);
-          }
+        const boomError = Boom.wrap(err, err.statusCode);
+        const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
+        boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 
-          const boomError = Boom.wrap(err, err.statusCode);
-          const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
-          boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
-          throw boomError;
-        });
+        throw boomError;
+      });
     };
   }
 
@@ -74,7 +90,7 @@ export default class Cluster {
   }
 
   close() {
-    client.close();
-    noAuthClient.close();
+    this._client.close();
+    this._noAuthClient.close();
   }
 }

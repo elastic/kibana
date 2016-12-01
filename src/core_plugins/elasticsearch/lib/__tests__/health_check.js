@@ -8,7 +8,6 @@ const NoConnections = require('elasticsearch').errors.NoConnections;
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import serverConfig from '../../../../../test/server_config';
-import ClusterFixture from './fixtures/cluster';
 
 const esPort = serverConfig.servers.elasticsearch.port;
 const esUrl = url.format(serverConfig.servers.elasticsearch);
@@ -37,7 +36,7 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      cluster = new ClusterFixture();
+      cluster = { callAsKibanaUser: sinon.stub() };
       cluster.callAsKibanaUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
       cluster.callAsKibanaUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callAsKibanaUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
