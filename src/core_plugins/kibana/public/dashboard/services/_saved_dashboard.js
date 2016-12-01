@@ -47,20 +47,20 @@ module.factory('SavedDashboard', function (courier, config) {
 
   // if type:dashboard has no mapping, we push this mapping into ES
   SavedDashboard.mapping = {
-    title: 'string',
+    title: 'text',
     hits: 'integer',
-    description: 'string',
-    panelsJSON: 'string',
-    optionsJSON: 'string',
-    uiStateJSON: 'string',
+    description: 'text',
+    panelsJSON: 'keyword',
+    optionsJSON: 'keyword',
+    uiStateJSON: 'keyword',
     version: 'integer',
     timeRestore: 'boolean',
-    timeTo: 'string',
-    timeFrom: 'string',
+    timeTo: 'keyword',
+    timeFrom: 'keyword',
     refreshInterval: {
       type: 'object',
       properties: {
-        display: {type: 'string'},
+        display: {type: 'keyword'},
         pause: { type: 'boolean'},
         section: { type: 'integer'},
         value: { type: 'integer'}
