@@ -98,16 +98,28 @@ uiModules
         listen();
       }
 
-      // reset when the width or scrollWidth of the $el changes
-      $scope.$watchMulti([
-        function () { return $el.prop('scrollWidth'); },
-        function () { return $el.width(); }
-      ], setup);
+      let width;
+      let scrollWidth;
+      let widthCheckTimeout = $timeout(checkWidth, 500);
+      function checkWidth() {
+        const newScrollWidth = $el.prop('scrollWidth');
+        const newWidth = $el.width();
+
+        if (scrollWidth !== newScrollWidth || width !== newWidth) {
+          setup();
+        }
+
+        scrollWidth = newScrollWidth;
+        width = newWidth;
+
+        widthCheckTimeout = $timeout(checkWidth, 500);
+      }
 
       // cleanup when the scope is destroyed
       $scope.$on('$destroy', function () {
         cleanUp();
         $scroller = $window = null;
+        $timeout.cancel(widthCheckTimeout);
       });
     }
   };
