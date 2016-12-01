@@ -82,7 +82,7 @@
 #pid.file: /var/run/kibana.pid
 
 # Enables you specify a file where Kibana stores log output.
-#logging.dest: stdout
+logging.dest: stdout
 
 # Set the value of this setting to true to suppress all logging output.
 #logging.silent: false
@@ -93,6 +93,9 @@
 # Set the value of this setting to true to log all events, including system usage information
 # and all requests.
 #logging.verbose: false
+
+# Set the value to true to log all ES requests issued by timelion
+# logging.timelion: true
 
 # Set the interval in milliseconds to sample system and process performance
 # metrics. Minimum is 100ms. Defaults to 5000.
