@@ -38,7 +38,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   });
 
   const mapping = mappingSetup.expandShorthand({
-    title: 'keyword',
+    title: 'text',
     timeFieldName: 'keyword',
     notExpandable: 'boolean',
     intervalName: 'keyword',
