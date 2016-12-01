@@ -76,7 +76,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
       .node();
 
     visConfig = new VisConfig({
-      type: 'histogram',
+      type: 'point_series',
       el: el
     }, data, new PersistedState());
   }));
@@ -88,7 +88,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
     it('should get the property', function () {
       expect(visConfig.get('el')).to.be(el);
-      expect(visConfig.get('type')).to.be('histogram');
+      expect(visConfig.get('type')).to.be('point_series');
     });
 
     it('should return defaults if property does not exist', function () {
@@ -96,7 +96,9 @@ describe('Vislib VisConfig Class Test Suite', function () {
     });
 
     it('should throw an error if property does not exist and defaults were not provided', function () {
-      expect(visConfig.get('this.does.not.exist')).to.throwError();
+      expect(function () {
+        visConfig.get('this.does.not.exist');
+      }).to.throwError();
     });
   });
 

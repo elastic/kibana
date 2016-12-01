@@ -69,12 +69,8 @@ dataTypesArray.forEach(function (dataType, i) {
         });
       });
 
-      it('should not stack values if grouped mode is set', function () {
-        if (mode === 'grouped') {
-          expect(isStacked).to.be(false);
-        } else {
-          expect(isStacked).to.be(true);
-        }
+      it('should stack values', function () {
+        expect(isStacked).to.be(true);
       });
     });
 
