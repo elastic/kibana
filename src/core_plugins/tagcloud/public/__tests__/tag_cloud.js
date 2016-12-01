@@ -77,8 +77,8 @@ describe('tag cloud tests', function () {
     domNode = document.createElement('div');
     domNode.style.top = '0';
     domNode.style.left = '0';
-    domNode.style.width = '512px';
-    domNode.style.height = '512px';
+    domNode.style.width = '1024px';
+    domNode.style.height = '1024px';
     domNode.style.position = 'fixed';
     domNode.style['pointer-events'] = 'none';
     document.body.appendChild(domNode);
@@ -314,8 +314,8 @@ describe('tag cloud tests', function () {
 
 
         setTimeout(() => {//make the container bigger during layout
-          domNode.style.width = '600px';
-          domNode.style.height = '600px';
+          domNode.style.width = '1200px';
+          domNode.style.height = '1200px';
           tagCloud.resize();
           setTimeout(() => {//change the options at the very end too
             tagCloud.setData(baseTest.data);
@@ -401,8 +401,8 @@ describe('tag cloud tests', function () {
           tagCloud.removeListener('renderComplete', onRender);
 
           //make bigger
-          domNode.style.width = '512px';
-          domNode.style.height = '512px';
+          domNode.style.width = '1024px';
+          domNode.style.height = '1024px';
 
           tagCloud.on('renderComplete', _ => {
             console.log('ready');
