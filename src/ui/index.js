@@ -1,13 +1,9 @@
-import { format as formatUrl } from 'url';
-import { readFileSync as readFile } from 'fs';
 import { defaults, _ } from 'lodash';
 import { props } from 'bluebird';
 import Boom from 'boom';
 import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
-import langParser from 'accept-language-parser';
 
-import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
@@ -95,8 +91,7 @@ export default async (kbnServer, server, config) => {
   async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
     try {
       const request = reply.request;
-      const acceptedLanguages = request.headers['accept-language'];
-      const translations = await getTranslations(uiI18n, acceptedLanguages);
+      const translations = await uiI18n.getTranslationsForRequest(request);
 
       return reply.view(app.templateName, {
         app,
@@ -129,19 +124,3 @@ export default async (kbnServer, server, config) => {
     });
   });
 };
-
-function getLanguageTags(acceptLanguages) {
-  if (_.isEmpty(acceptLanguages)) return [];
-  const languages = langParser.parse(acceptLanguages);
-  return _.map(languages, (language) => {
-    return _.compact([language.code, language.region, language.script]).join('-');
-  });
-}
-
-async function getTranslations(uiI18n, acceptLanguages) {
-  const languageTags = getLanguageTags(acceptLanguages);
-  const requestedTranslations = await uiI18n.getTranslations(...languageTags);
-  const defaultTranslations = await uiI18n.getTranslationsForDefaultLocale();
-  const translations = _.defaults({}, requestedTranslations, defaultTranslations);
-  return translations;
-}

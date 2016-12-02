@@ -1,30 +1,44 @@
 import { resolve } from 'path';
 
-import _ from 'lodash';
+import { defaults, compact } from 'lodash';
 import langParser from 'accept-language-parser';
 
 import {
   setDefaultLocale,
   getTranslations,
   getTranslationsForDefaultLocale,
-  getRegisteredTranslationLocales,
   registerTranslations,
 } from './i18n';
+
+function acceptLanguageHeaderToBCP47Tags(header) {
+  return langParser.parse(header).map(lang => (
+    compact([lang.code, lang.region, lang.script]).join('-')
+  ));
+}
 
 export class UiI18n {
   constructor(defaultLocale = 'en') {
     setDefaultLocale(defaultLocale);
     registerTranslations(resolve(__dirname, './locales/en.json'));
-
-    this.getTranslations = getTranslations;
-    this.getTranslationsForDefaultLocale = getTranslationsForDefaultLocale;
-    this.getRegisteredTranslationLocales = getRegisteredTranslationLocales;
-    // we don't export registerTranslations() here to encourage use
-    // of uiExports for defining all translation files
   }
 
-
   /**
+   *  Fetch the language translations as defined by the request.
+   *
+   *  @param {Hapi.Request} request
+   *  @returns {Promise<Object>} translations promise for an object where
+   *                                          keys are translation keys and
+   *                                          values are translations
+   */
+  async getTranslationsForRequest(request) {
+    const header = request.headers['accept-language'];
+    const tags = acceptLanguageHeaderToBCP47Tags(header);
+    const requestedTranslations = await getTranslations(...tags);
+    const defaultTranslations = await getTranslationsForDefaultLocale();
+    return defaults({}, requestedTranslations, defaultTranslations);
+  }
+
+   /**
    *  uiExport consumers help the uiExports module know what to
    *  do with the uiExports defined by each plugin.
    *
