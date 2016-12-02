@@ -36,6 +36,8 @@ module.controller('KbnMetricVisController', function ($scope, $element, Private,
 
   $scope.clickHandler = function (metric) {
     let aggConfigResult = null;
+    // If a metric has a field attached to it (such as unique count, min, or max),
+    // then create an "exists" filter to limit the results to docs with that field
     if (metric.aggConfig.getField() && metric.aggConfig.getField().filterable) {
       const fieldAggConfig = {
         schema: {
@@ -53,8 +55,11 @@ module.controller('KbnMetricVisController', function ($scope, $element, Private,
           };
         }
       };
-      aggConfigResult = new AggConfigResult(fieldAggConfig, aggConfigResult, metric.aggConfig.getField(), 'exists');
+      aggConfigResult = new AggConfigResult(fieldAggConfig, null, metric.aggConfig.getField(), 'exists');
     }
+    // If there are filters attached to this metric, then add them to the main filter list.
+    // For the visualization editor, this doesn't really do anything but in the dashboard, it will add
+    // the filters to the dashboard so that the dashboard is showing just the docs related to this metric.
     if ($scope.vis.getFilters().length > 0) {
       $scope.vis.getFilters().forEach((filter) => {
         const fieldAggConfig = {
@@ -70,6 +75,11 @@ module.controller('KbnMetricVisController', function ($scope, $element, Private,
       });
     }
 
+    // If there is a query attached to this metric, convert it into a query filter and add it to the main
+    // filter list.
+    // For the visualization editor, this will just convert the query into a filter but in the dashboard,
+    // it will add the query as a filter to the dashboard so that the dashboard is showing just the docs
+    // related to this metric.
     if (_.get($scope.vis.getQuery(), 'query_string.query', '*') !== '*') {
       const fieldAggConfig = {
         schema: {
