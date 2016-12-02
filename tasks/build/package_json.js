@@ -1,8 +1,5 @@
 module.exports = function (grunt) {
-  let { defaults } = require('lodash');
-
   let pkg = grunt.config.get('pkg');
-  let deepModules = grunt.config.get('deepModules');
 
   grunt.registerTask('_build:packageJson', function () {
     const { sha, number, version } = grunt.config.get('build');
@@ -22,7 +19,7 @@ module.exports = function (grunt) {
         engines: {
           node: pkg.engines.node
         },
-        dependencies: defaults({}, pkg.dependencies, deepModules)
+        dependencies: pkg.dependencies
       }, null, '  ')
     );
   });
