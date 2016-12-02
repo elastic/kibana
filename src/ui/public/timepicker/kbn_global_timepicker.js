@@ -34,14 +34,6 @@ UiModules
       $scope.back = function () {
         assign(timefilter.time, timeNavigation.stepBackward(timefilter.getBounds()));
       };
-
-      $scope.zoomOut = function () {
-        assign(timefilter.time, timeNavigation.zoomOut(timefilter.getBounds()));
-      };
-
-      $scope.zoomIn = function () {
-        assign(timefilter.time, timeNavigation.zoomIn(timefilter.getBounds()));
-      };
     },
   };
 });
