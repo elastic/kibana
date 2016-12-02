@@ -9,10 +9,12 @@ import Promise from 'bluebird';
 describe('FixedScroll directive', function () {
 
   let compile;
+  let timeout;
   const trash = [];
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($compile, $rootScope) {
+  beforeEach(ngMock.inject(function ($compile, $rootScope, $timeout) {
+    timeout = $timeout;
 
     compile = function (ratioY, ratioX) {
       if (ratioX == null) ratioX = ratioY;
@@ -42,6 +44,7 @@ describe('FixedScroll directive', function () {
 
       $compile($parent)($rootScope);
       $rootScope.$digest();
+      $timeout.flush();
 
       return {
         $container: $el,
@@ -93,6 +96,7 @@ describe('FixedScroll directive', function () {
       expect(off.callCount).to.be(0);
       els.$container.width(els.$container.prop('scrollWidth'));
       els.$container.scope().$digest();
+      timeout.flush();
       expect(off.callCount).to.be(2);
       checkThisVals('$.fn.off', off);
 
