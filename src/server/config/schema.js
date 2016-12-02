@@ -155,4 +155,8 @@ module.exports = () => Joi.object({
     enabled: Joi.boolean().default(true)
   }).default(),
 
+  i18n: Joi.object({
+    locale: Joi.string().default('en'),
+  }).default(),
+
 }).default();

@@ -14,7 +14,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-    require: [ 'i18n' ],
 
     config: function (Joi) {
       return Joi.object({
@@ -88,12 +87,17 @@ module.exports = function (kibana) {
           linkToLastSubUrl: false
         },
       ],
+
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
           kbnBaseUrl
         };
       },
+
+      translations: [
+        fromRoot('/src/core_plugins/kibana/i18n/en.json')
+      ]
     },
 
     preInit: async function (server) {
@@ -117,14 +121,6 @@ module.exports = function (kibana) {
       settings(server);
       scripts(server);
       server.expose('systemApi', systemApi);
-      registerCoreTranslations(server);
     }
   });
-
 };
-
-function registerCoreTranslations(server)
-{
-  const corePluginTranslationFile = fromRoot('/src/core_plugins/kibana/i18n/en.json');
-  server.plugins.i18n.registerTranslations(corePluginTranslationFile);
-}

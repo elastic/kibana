@@ -12,11 +12,15 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
+import { UiI18n } from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
+
+  const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.locale'));
+  uiI18n.addUiExportConsumer(uiExports);
 
   const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));
@@ -92,7 +96,7 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-      const translations = await getTranslations(acceptLanguages, server);
+      const translations = await getTranslations(uiI18n, acceptLanguages);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -135,10 +139,10 @@ function getLanguageTags(acceptLanguages) {
   });
 }
 
-async function getTranslations(acceptLanguages, server) {
+async function getTranslations(uiI18n, acceptLanguages) {
   const languageTags = getLanguageTags(acceptLanguages);
-  const requestedTranslations = await server.plugins.i18n.getTranslations(...languageTags);
-  const defaultTranslations = await server.plugins.i18n.getTranslationsForDefaultLocale();
+  const requestedTranslations = await uiI18n.getTranslations(...languageTags);
+  const defaultTranslations = await uiI18n.getTranslationsForDefaultLocale();
   const translations = _.defaults({}, requestedTranslations, defaultTranslations);
   return translations;
 }

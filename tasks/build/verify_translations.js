@@ -4,7 +4,7 @@ import _ from 'lodash';
 import fromRoot from '../../src/utils/from_root';
 import KbnServer from '../../src/server/kbn_server';
 import * as i18nVerify from '../utils/i18n_verify_keys';
-import * as i18n from '../../src/core_plugins/i18n/server/i18n';
+import * as i18n from '../../src/ui/i18n';
 
 module.exports = function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
@@ -70,4 +70,3 @@ function verifyTranslations(parsePaths)
     });
   });
 }
-

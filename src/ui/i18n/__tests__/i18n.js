@@ -2,11 +2,11 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import { join } from 'path';
 
-import * as i18n from '../i18n/i18n';
+import * as i18n from '../i18n';
 
 const FIXTURES = join(__dirname, 'fixtures');
 
-describe('i18n module', function () {
+describe('ui/i18n module', function () {
 
   describe('one plugin', function () {
 
