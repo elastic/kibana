@@ -1,8 +1,10 @@
+import { resolve } from 'path';
+
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
+
 import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
-import fromRoot from '../../utils/from_root';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
@@ -96,7 +98,7 @@ module.exports = function (kibana) {
       },
 
       translations: [
-        fromRoot('/src/core_plugins/kibana/i18n/en.json')
+        resolve(__dirname, './translations/en.json')
       ]
     },
 

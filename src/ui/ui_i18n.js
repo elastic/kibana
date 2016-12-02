@@ -19,7 +19,7 @@ function acceptLanguageHeaderToBCP47Tags(header) {
 export class UiI18n {
   constructor(defaultLocale = 'en') {
     setDefaultLocale(defaultLocale);
-    registerTranslations(resolve(__dirname, './locales/en.json'));
+    registerTranslations(resolve(__dirname, './translations/en.json'));
   }
 
   /**
@@ -48,7 +48,7 @@ export class UiI18n {
    *    new kibana.Plugin({
    *      uiExports: {
    *        languages: [
-   *          resolve(__dirname, './locales/es.json'),
+   *          resolve(__dirname, './translations/es.json'),
    *        ],
    *      },
    *    });
