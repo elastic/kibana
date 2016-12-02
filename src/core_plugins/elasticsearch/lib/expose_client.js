@@ -81,10 +81,10 @@ module.exports = function (server) {
   }
 
   const client = createClient();
-  server.on('close', _.bindKey(client, 'close'));
+  server.on('stop', _.bindKey(client, 'close'));
 
   const noAuthClient = createClient({ auth: false });
-  server.on('close', _.bindKey(noAuthClient, 'close'));
+  server.on('stop', _.bindKey(noAuthClient, 'close'));
 
   server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
