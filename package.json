@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "5.0.2",
+  "version": "5.0.3",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
