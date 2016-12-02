@@ -1,4 +1,4 @@
-export default function searchLoader(savedSearches, Private) { // Inject services here
+export function searchLoaderProvider(savedSearches, Private) { // Inject services here
   return function (panel, $scope) { // Function parameters here
     return savedSearches.get(panel.id)
       .then(function (savedSearch) {
