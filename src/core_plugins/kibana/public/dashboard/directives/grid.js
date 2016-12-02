@@ -40,6 +40,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         });
       };
 
+      /**
+       * Removes the panel with the given id from the $scope.state.panels array. Does not
+       * remove the ui element from gridster - that is triggered by a watcher that is
+       * triggered on changes made to $scope.state.panels.
+       * @param panelId {number}
+       */
       $scope.getPanelByPanelId = (panelId) => {
         return _.find($scope.state.panels, function (panel) {
           return panel.panelId === panelId;

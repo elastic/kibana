@@ -61,14 +61,17 @@ function Panel(id, type, panelId) {
   this.type = type;
 }
 
-/**
- * Factory function to create a panel object.
- *
- * @param id {string} - The id of the visualization this panel contains
- * @param type {string} - The type of visualization this panel contains
- * @param panelId {number} - A unique identifier for this panel in the grid
- * @returns {Panel}
- */
-export function createNewPanel(id, type, panelId) {
-  return new Panel(id, type, panelId);
+
+export class PanelFactory {
+  /**
+   * Factory function to create a panel object.
+   *
+   * @param id {string} - The id of the visualization this panel contains
+   * @param type {string} - The type of visualization this panel contains
+   * @param panelId {number} - A unique identifier for this panel in the grid
+   * @returns {Panel}
+   */
+   static create(id, type, panelId) {
+     return new Panel(id, type, panelId);
+   }
 }
