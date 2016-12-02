@@ -7,16 +7,7 @@ const asyncReadFile = Promise.promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
-let defaultLocale = 'en';
 let registeredTranslations = {};
-
-/**
- * Return all translations registered for the default locale.
- * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
- */
-export function getTranslationsForDefaultLocale() {
-  return getTranslationsForLocale(defaultLocale);
-};
 
 /**
  * Returns list of all registered locales.
@@ -45,7 +36,7 @@ export function getTranslations(...languageTags) {
 export function registerTranslations(absolutePluginTranslationFilePath) {
   const locale = getLocaleFromFileName(absolutePluginTranslationFilePath);
 
-  registeredTranslations[locale] = _.get(registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath);
+  registeredTranslations[locale] = _.uniq(_.get(registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath));
 };
 
 /**
@@ -54,14 +45,6 @@ export function registerTranslations(absolutePluginTranslationFilePath) {
 export function unregisterTranslations() {
   registeredTranslations = {};
 };
-
-/**
- * Set the default locale
- * @param {String} locale - Locale to set
- */
-export function setDefaultLocale(locale) {
-  defaultLocale = locale;
-}
 
 /**
  * Returns list of all registered translations

@@ -4,9 +4,7 @@ import { defaults, compact } from 'lodash';
 import langParser from 'accept-language-parser';
 
 import {
-  setDefaultLocale,
   getTranslations,
-  getTranslationsForDefaultLocale,
   registerTranslations,
 } from './i18n';
 
@@ -18,7 +16,7 @@ function acceptLanguageHeaderToBCP47Tags(header) {
 
 export class UiI18n {
   constructor(defaultLocale = 'en') {
-    setDefaultLocale(defaultLocale);
+    this.defaultLocale = defaultLocale;
     registerTranslations(resolve(__dirname, './translations/en.json'));
   }
 
@@ -34,7 +32,7 @@ export class UiI18n {
     const header = request.headers['accept-language'];
     const tags = acceptLanguageHeaderToBCP47Tags(header);
     const requestedTranslations = await getTranslations(...tags);
-    const defaultTranslations = await getTranslationsForDefaultLocale();
+    const defaultTranslations = await getTranslations(this.defaultLocale);
     return defaults({}, requestedTranslations, defaultTranslations);
   }
 

@@ -82,30 +82,6 @@ describe('ui/i18n module', function () {
 
     });
 
-    describe('getTranslationsForDefaultLocale', function () {
-
-      it('should return translations for default locale which is set to the en locale' , function () {
-        const expectedTranslations = {
-          'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
-          'test_plugin_1-DEV': 'Run the server with development mode defaults',
-          'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
-          'test_plugin_1-HOME': 'Run along home now!'
-        };
-        i18n.setDefaultLocale('en');
-        return checkTranslationsForDefaultLocale(expectedTranslations);
-      });
-
-      it('should return translations for the default locale which is set to the de locale' , function () {
-        const expectedTranslations = {
-          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
-          'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
-        };
-        i18n.setDefaultLocale('de');
-        return checkTranslationsForDefaultLocale(expectedTranslations);
-      });
-
-    });
-
     describe('getRegisteredTranslationLocales', function () {
 
       it('should return all locales that are registered' , function () {
@@ -204,13 +180,6 @@ describe('ui/i18n module', function () {
   });
 
 });
-
-function checkTranslationsForDefaultLocale(expectedTranslations) {
-  return i18n.getTranslationsForDefaultLocale()
-  .then(function (actualTranslations) {
-    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
-  });
-}
 
 function checkTranslations(expectedTranslations, languageTags) {
   return i18n.getTranslations(...languageTags)
