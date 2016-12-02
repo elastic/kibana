@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
-    "eslint": ">=3, <4",
-    "eslint-plugin-mocha": "4.4.0",
+    "eslint": "3.11.1",
+    "eslint-plugin-mocha": "4.7.0",
     "babel-eslint": "6.1.2"
   },
   "devDependencies": {
