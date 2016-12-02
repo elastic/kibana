@@ -56,11 +56,9 @@ export default async (kbnServer, server, config) => {
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
-      const acceptLanguages = req.headers['accept-language'];
-
       try {
         if (kbnServer.status.isGreen()) {
-          await reply.renderApp(app, acceptLanguages);
+          await reply.renderApp(app);
         } else {
           await reply.renderStatusPage();
         }
@@ -94,14 +92,17 @@ export default async (kbnServer, server, config) => {
     };
   }
 
-  async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
+  async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
     try {
-      const translations = await getTranslations(uiI18n, acceptLanguages);
+      const request = reply.request;
+      const acceptedLanguages = request.headers['accept-language'];
+      const translations = await getTranslations(uiI18n, acceptedLanguages);
+
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
           app,
-          request: reply.request,
+          request,
           includeUserProvidedConfig
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
@@ -112,20 +113,18 @@ export default async (kbnServer, server, config) => {
     }
   }
 
-  server.decorate('reply', 'renderApp', function (app, acceptLanguages) {
+  server.decorate('reply', 'renderApp', function (app) {
     return renderApp({
       app,
       reply: this,
-      acceptLanguages,
       includeUserProvidedConfig: true,
     });
   });
 
-  server.decorate('reply', 'renderAppWithDefaultConfig', function (app, acceptLanguages) {
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
     return renderApp({
       app,
       reply: this,
-      acceptLanguages,
       includeUserProvidedConfig: false,
     });
   });
