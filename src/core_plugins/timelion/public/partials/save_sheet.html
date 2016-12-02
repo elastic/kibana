@@ -14,6 +14,8 @@
         <label for="savedSheet" class="control-label">Save sheet as</label>
         <input id="savedSheet" ng-model="opts.savedSheet.title" input-focus="select" class="form-control" placeholder="Name this sheet...">
       </div>
+
+      <saved-object-save-as-check-box saved-object="opts.savedSheet"></saved-object-save-as-check-box>
       <div class="form-group">
         <button ng-disabled="!opts.savedSheet.title" type="submit" class="btn btn-primary">
           Save
@@ -43,9 +45,7 @@
         <input id="savedExpression" ng-model="panelTitle" input-focus="select" class="form-control" placeholder="Name this panel">
       </div>
       <div class="form-group">
-        <button ng-disabled="!panelTitle" type="submit" class="btn btn-primary">
-          Save
-        </button>
+        <button ng-disabled="!panelTitle" type="submit" class="btn btn-primary">Save</button>
       </div>
     </form>
   </div>
