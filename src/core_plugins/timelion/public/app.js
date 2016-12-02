@@ -163,7 +163,7 @@ app.controller('timelion', function (
     }
   });
 
-  $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
+  $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 
@@ -222,7 +222,6 @@ app.controller('timelion', function (
   $scope.safeSearch = _.debounce($scope.search, 500);
 
   function saveSheet() {
-    savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
     savedSheet.timelion_columns = $scope.state.columns;
@@ -239,7 +238,6 @@ app.controller('timelion', function (
 
   function saveExpression(title) {
     savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
-      savedExpression.id = title;
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval
