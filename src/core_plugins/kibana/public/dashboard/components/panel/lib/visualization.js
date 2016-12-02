@@ -1,7 +1,7 @@
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 
-export default function visualizationLoader(savedVisualizations, Private) { // Inject services here
+export function visualizationLoaderProvider(savedVisualizations, Private) { // Inject services here
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
