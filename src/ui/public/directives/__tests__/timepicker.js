@@ -215,13 +215,14 @@ describe('timepicker directive', function () {
     });
 
     it('has a preview of the "from" input', function (done) {
-      let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
+      let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.from.preview"]');
       expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
       done();
     });
 
-    it('has a disabled "to" field that contains "Now"', function (done) {
-      expect($elem.find('.kbn-timepicker-section input[disabled]').val()).to.be('Now');
+    it('has a preview of the "to" input', function (done) {
+      let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]');
+      expect(preview.text()).to.be(moment().add(1, 'minutes').format($scope.format));
       done();
     });
 
@@ -231,14 +232,14 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('disables the submit button if the form is invalid', function (done) {
+    it('disables the submit button if the "from" input in form is invalid', function (done) {
       let button;
       button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
       // Make the form invalid
-      $scope.relative.count = -3;
-      $scope.formatRelative();
+      $scope.relative.from.count = -3;
+      $scope.formatRelative('from');
       $scope.$digest();
 
       button = $elem.find('button[disabled]');
@@ -246,109 +247,195 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('has a dropdown bound to relative.unit that contains all of the intervals', function (done) {
-      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+    it('disables the submit button if the "to" input in form is invalid', function (done) {
+      let button;
+      button = $elem.find('button[disabled]');
+      expect(button.length).to.be(0);
+
+      // Make the form invalid
+      $scope.relative.to.count = -3;
+      $scope.formatRelative('to');
+      $scope.$digest();
+
+      button = $elem.find('button[disabled]');
+      expect(button.length).to.be(1);
+      done();
+    });
+
+    it('has a dropdown bound to relative.from.unit that contains all of the intervals', function (done) {
+      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.from.unit"]');
       expect(select.length).to.be(1);
       expect(select.find('option').length).to.be(7);
 
       // Check each relative option, make sure it is in the list
-      _.each($scope.relativeOptions, function (unit, i) {
+      _.each($scope.relativeOptions.from, function (unit, i) {
         expect(select.find('option')[i].text).to.be(unit.text);
       });
       done();
     });
 
-    it('has a checkbox that is checked when rounding is enabled', function (done) {
-      let checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.round"]');
+    it('has a dropdown bound to relative.to.unit that contains all of the intervals', function (done) {
+      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.to.unit"]');
+      expect(select.length).to.be(1);
+      expect(select.find('option').length).to.be(7);
+
+      // Check each relative option, make sure it is in the list
+      _.each($scope.relativeOptions.to, function (unit, i) {
+        expect(select.find('option')[i].text).to.be(unit.text);
+      });
+      done();
+    });
+
+    it('has a checkbox that is checked for "from" input when rounding is enabled', function (done) {
+      let checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.from.round"]');
       expect(checkbox.length).to.be(1);
 
       // Rounding is disabled by default
       expect(checkbox.prop('checked')).to.be(false);
 
       // Enable rounding
-      $scope.relative.round = true;
+      $scope.relative.from.round = true;
       $scope.$digest();
       expect(checkbox.prop('checked')).to.be(true);
 
       done();
     });
 
-    it('rounds the preview down to the unit when rounding is enabled', function (done) {
+    it('has a checkbox that is checked for "to" input when rounding is enabled', function (done) {
+      let checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.to.round"]');
+      expect(checkbox.length).to.be(1);
+
+      // Rounding is disabled by default
+      expect(checkbox.prop('checked')).to.be(false);
+
       // Enable rounding
-      $scope.relative.round = true;
-      $scope.relative.count = 0;
+      $scope.relative.to.round = true;
+      $scope.$digest();
+      expect(checkbox.prop('checked')).to.be(true);
+
+      done();
+    });
+
+    it('rounds the previews down to the unit when rounding is enabled', function (done) {
+      // Enable rounding
+      $scope.relative.from.round = true;
+      $scope.relative.from.count = 0;
+      $scope.relative.to.round = true;
+      $scope.relative.to.count = 0;
 
       _.each($scope.units, function (longUnit, shortUnit) {
-        $scope.relative.count = 0;
-        $scope.relative.unit = shortUnit;
-        $scope.formatRelative();
+        $scope.relative.from.count = 0;
+        $scope.relative.from.unit = shortUnit;
+        $scope.relative.to.count = 0;
+        $scope.relative.to.unit = shortUnit;
+
+        $scope.formatRelative('from');
+        $scope.formatRelative('to');
 
         // The preview should match the start of the unit eg, the start of the minute
-        expect($scope.relative.preview).to.be(moment().startOf(longUnit).format($scope.format));
+        expect($scope.relative.from.preview).to.be(moment().startOf(longUnit).format($scope.format));
+        expect($scope.relative.to.preview).to.be(moment().startOf(longUnit).format($scope.format));
       });
 
       done();
     });
 
-    it('does not round the preview down to the unit when rounding is disable', function (done) {
+    it('does not round the previews down to the unit when rounding is disabled', function (done) {
       // Disable rounding
-      $scope.relative.round = false;
-      $scope.relative.count = 0;
+      $scope.relative.from.round = false;
+      $scope.relative.from.count = 0;
+      $scope.relative.to.round = false;
+      $scope.relative.to.count = 0;
 
       _.each($scope.units, function (longUnit, shortUnit) {
-        $scope.relative.unit = shortUnit;
-        $scope.formatRelative();
+        $scope.relative.from.unit = shortUnit;
+        $scope.relative.to.unit = shortUnit;
+        $scope.formatRelative('from');
+        $scope.formatRelative('to');
 
         // The preview should match the start of the unit eg, the start of the minute
-        expect($scope.relative.preview).to.be(moment().format($scope.format));
+        expect($scope.relative.from.preview).to.be(moment().format($scope.format));
+        expect($scope.relative.to.preview).to.be(moment().format($scope.format));
       });
 
       done();
     });
 
     it('has a $scope.applyRelative() that sets from and to based on relative.round, relative.count and relative.unit', function (done) {
+      // From input
       // Disable rounding
-      $scope.relative.round = false;
-      $scope.relative.count = 1;
-      $scope.relative.unit = 's';
-      $scope.applyRelative();
+      $scope.relative.from.round = false;
+      $scope.relative.from.count = 1;
+      $scope.relative.from.unit = 's';
+      $scope.applyRelative('from');
       expect($scope.from).to.be('now-1s');
 
-      $scope.relative.count = 2;
-      $scope.relative.unit = 'm';
-      $scope.applyRelative();
+      $scope.relative.from.count = 2;
+      $scope.relative.from.unit = 'm';
+      $scope.applyRelative('from');
       expect($scope.from).to.be('now-2m');
 
-      $scope.relative.count = 3;
-      $scope.relative.unit = 'h';
-      $scope.applyRelative();
+      $scope.relative.from.count = 3;
+      $scope.relative.from.unit = 'h';
+      $scope.applyRelative('from');
       expect($scope.from).to.be('now-3h');
 
       // Enable rounding
-      $scope.relative.round = true;
-      $scope.relative.count = 7;
-      $scope.relative.unit = 'd';
-      $scope.applyRelative();
+      $scope.relative.from.round = true;
+      $scope.relative.from.count = 7;
+      $scope.relative.from.unit = 'd';
+      $scope.applyRelative('from');
       expect($scope.from).to.be('now-7d/d');
+
+      // To Input
+      // Disable rounding
+      $scope.relative.to.round = false;
+      $scope.relative.to.count = 1;
+      $scope.relative.to.unit = 's';
+      $scope.applyRelative('to');
+      expect($scope.to).to.be('now+1s');
+
+      $scope.relative.to.count = 2;
+      $scope.relative.to.unit = 'm';
+      $scope.applyRelative('to');
+      expect($scope.to).to.be('now+2m');
+
+      $scope.relative.to.count = 3;
+      $scope.relative.to.unit = 'h';
+      $scope.applyRelative('to');
+      expect($scope.to).to.be('now+3h');
+
+      // Enable rounding
+      $scope.relative.to.round = true;
+      $scope.relative.to.count = 7;
+      $scope.relative.to.unit = 'd';
+      $scope.applyRelative('to');
+      expect($scope.to).to.be('now+7d/d');
 
       done();
     });
 
     it('updates the input fields when the scope variables are changed', function (done) {
-      let input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
-      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+      let inputFrom = $elem.find('.kbn-timepicker-section input[ng-model="relative.from.count"]');
+      let selectFrom = $elem.find('.kbn-timepicker-section select[ng-model="relative.from.unit"]');
+      let inputTo = $elem.find('.kbn-timepicker-section input[ng-model="relative.to.count"]');
+      let selectTo = $elem.find('.kbn-timepicker-section select[ng-model="relative.to.unit"]');
 
-      $scope.relative.count = 5;
+      $scope.relative.from.count = 5;
+      $scope.relative.to.count = 5;
       $scope.$digest();
-      expect(input.val()).to.be('5');
+      expect(inputFrom.val()).to.be('5');
+      expect(inputTo.val()).to.be('5');
 
 
       // Should update the selected option
       _.each($scope.units, function (longUnit, shortUnit) {
-        $scope.relative.unit = shortUnit;
+        $scope.relative.from.unit = shortUnit;
+        $scope.relative.to.unit = shortUnit;
         $scope.$digest();
 
-        expect(select.val().split(':')[1]).to.be(shortUnit);
+        expect(selectFrom.val().split(':')[1]).to.be(shortUnit);
+        expect(selectTo.val().split(':')[1]).to.be(shortUnit);
       });
 
       done();
