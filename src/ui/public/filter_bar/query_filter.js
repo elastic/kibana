@@ -272,19 +272,24 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
     let appFilters = aFilters ? _.cloneDeep(aFilters) : [];
     compareOptions = _.defaults(compareOptions || {}, { disabled: true });
 
-    // existing globalFilters should be mutated by appFilters
-    _.each(appFilters, function (filter, i) {
-      let match = _.find(globalFilters, function (globalFilter) {
+    var findFilterInGlobalFilters = function (globalFilters, filter) {
+      return _.find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter, compareOptions);
       });
+    };
+
+    // existing globalFilters should be mutated by appFilters
+    for (let i = appFilters.length - 1; i >= 0; i--) {
+      let filter = appFilters[i];
+      let match = findFilterInGlobalFilters(globalFilters, filter);
 
       // no match, do nothing
-      if (!match) return;
+      if (!match) break;
 
       // matching filter in globalState, update global and remove from appState
       _.assign(match.meta, filter.meta);
       appFilters.splice(i, 1);
-    });
+    }
 
     return [
       uniqFilters(globalFilters, { disabled: true }),
