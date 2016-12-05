@@ -35,9 +35,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     } else if (TagCloud.STATUS.INCOMPLETE === status) {
       incompleteMessage.style.display = 'block';
     }
-    if (typeof $scope.vis.emit === 'function') {
-      $scope.vis.emit('renderComplete');
-    }
+    $element.trigger('renderComplete');
   });
 
   $scope.$watch('esResponse', async function (response) {
