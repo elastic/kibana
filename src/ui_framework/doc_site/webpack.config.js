@@ -4,17 +4,17 @@ module.exports = {
   devtool: 'source-map',
 
   entry: {
-    guide: './src/ui_framework/src/guide/index.js'
+    guide: './src/ui_framework/doc_site/src/index.js'
   },
 
   output: {
-    path: path.resolve(__dirname, 'src/ui_framework/public'),
+    path: path.resolve(__dirname, 'src/ui_framework/doc_site/build'),
     filename: 'bundle.js'
   },
 
   resolve: {
     root: [
-      path.resolve(__dirname, 'src/ui_framework/src')
+      path.resolve(__dirname, 'src/ui_framework/doc_site')
     ]
   },
 

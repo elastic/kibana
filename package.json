@@ -63,7 +63,7 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "./node_modules/.bin/webpack-dev-server --config src/ui_framework/webpack.config.js --hot --inline --content-base src/ui_framework/public/"
+    "uiFramework:start": "webpack-dev-server --config src/ui_framework/doc_site/webpack.config.js --hot --inline --content-base src/ui_framework/doc_site/build"
   },
   "repository": {
     "type": "git",
@@ -92,6 +92,7 @@
     "babel": "5.8.38",
     "babel-core": "5.8.38",
     "babel-loader": "5.3.2",
+    "babel-polyfill": "6.9.1",
     "babel-runtime": "5.8.38",
     "bluebird": "2.9.34",
     "body-parser": "1.12.0",
@@ -218,7 +219,6 @@
     "nock": "8.0.0",
     "node-sass": "3.8.0",
     "npm": "3.10.8",
-    "numeral": "1.5.3",
     "portscanner": "1.0.0",
     "proxyquire": "1.7.10",
     "react": "15.2.0",
