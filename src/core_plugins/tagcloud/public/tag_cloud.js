@@ -129,8 +129,23 @@ class TagCloud extends EventEmitter {
 
     const job = this._queue.pop();
     this._inFlight = true;
-    this._onLayoutEnd(job);
 
+    if (job.words.length) {
+      this._onLayoutEnd(job);
+    } else {
+      this._emptyCloud(job);
+    }
+
+  }
+
+  _emptyCloud(job) {
+    this._svgGroup.selectAll('text').remove();
+    this._cloudWidth = 0;
+    this._cloudHeight = 0;
+    this._allInViewBox = true;
+    this._inFlight = false;
+    this._currentJob = job;
+    this._processQueue();
   }
 
   _onLayoutEnd(job) {
