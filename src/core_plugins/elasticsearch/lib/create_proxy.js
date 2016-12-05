@@ -5,8 +5,8 @@ import { assign } from 'lodash';
 
 function createProxy(server, method, path, config) {
   const proxies = new Map([
-    ['/elasticsearch', server.plugins.elasticsearch.dataClient],
-    ['/es_admin', server.plugins.elasticsearch.adminClient]
+    ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
+    ['/es_admin', server.plugins.elasticsearch.getCluster('admin')]
   ]);
 
   const responseHandler = function (err, upstreamResponse, request, reply) {
@@ -23,7 +23,7 @@ function createProxy(server, method, path, config) {
     reply(null, upstreamResponse);
   };
 
-  for (let [proxyPrefix, esClient] of proxies) {
+  for (let [proxyPrefix, cluster] of proxies) {
     const options = {
       method: method,
       path: createProxy.createPath(proxyPrefix, path),
@@ -34,7 +34,7 @@ function createProxy(server, method, path, config) {
       },
       handler: {
         proxy: {
-          mapUri: mapUri(server, esClient, proxyPrefix),
+          mapUri: mapUri(cluster, proxyPrefix),
           agent: createAgent(server),
           xforward: true,
           timeout: server.config().get('elasticsearch.requestTimeout'),

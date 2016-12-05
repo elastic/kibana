@@ -5,7 +5,7 @@ module.exports = function (server) {
     handler: function (request, reply) {
 
       return server.uiSettings().getAll(request).then((uiSettings) => {
-        var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+        var callWithRequest = server.plugins.elasticsearch.getCluster('data').callWithRequest;
 
         var timefield = uiSettings['timelion:es.timefield'];
 

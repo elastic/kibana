@@ -14,6 +14,7 @@ module.exports = function (grunt) {
         }
       }
     },
+
     dev: {
       options: {
         directory: resolve(directory, 'dev'),
@@ -27,6 +28,7 @@ module.exports = function (grunt) {
         }
       }
     },
+
     tribe: {
       options: {
         directory: resolve(directory, 'tribe'),
@@ -58,7 +60,11 @@ module.exports = function (grunt) {
                 name: 'cluster-02'
               }
             },
-            on_conflict: 'prefer_c1'
+            on_conflict: 'prefer_c1',
+            blocks: {
+              write: true,
+              metadata: true
+            }
           },
           discovery: {
             zen: {
@@ -72,6 +78,7 @@ module.exports = function (grunt) {
         }]
       },
     },
+
     test: {
       options: {
         directory: resolve(directory, 'test'),
@@ -82,10 +89,20 @@ module.exports = function (grunt) {
           },
           cluster: {
             name: 'esvm-test'
+          },
+          discovery: {
+            zen: {
+              ping: {
+                unicast: {
+                  hosts: [ `localhost:${serverConfig.servers.elasticsearch.port}` ]
+                }
+              }
+            }
           }
         }
       }
     },
+
     ui: {
       options: {
         directory: resolve(directory, 'test'),
@@ -96,10 +113,20 @@ module.exports = function (grunt) {
           },
           cluster: {
             name: 'esvm-ui'
+          },
+          discovery: {
+            zen: {
+              ping: {
+                unicast: {
+                  hosts: [ `localhost:${serverConfig.servers.elasticsearch.port}` ]
+                }
+              }
+            }
           }
         }
       }
     },
+
     withPlugins: {
       options: {
         version: '2.1.0',

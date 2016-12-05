@@ -3,7 +3,7 @@
  * that defined in Kibana's package.json.
  */
 
-import _ from 'lodash';
+import { forEach, get } from 'lodash';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
@@ -16,10 +16,10 @@ import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-module.exports = function checkEsVersion(server, kibanaVersion, client) {
+module.exports = function checkEsVersion(server, kibanaVersion, callAsKibanaUser) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
-  return client.nodes.info({
+  return callAsKibanaUser('nodes.info', {
     filterPath: [
       'nodes.*.version',
       'nodes.*.http.publish_address',
@@ -33,7 +33,7 @@ module.exports = function checkEsVersion(server, kibanaVersion, client) {
     // Aggregate ES nodes which should prompt a Kibana upgrade.
     const warningNodes = [];
 
-    _.forEach(info.nodes, esNode => {
+    forEach(info.nodes, esNode => {
       if (!isEsCompatibleWithKibana(esNode.version, kibanaVersion)) {
         // Exit early to avoid collecting ES nodes with newer major versions in the `warningNodes`.
         return incompatibleNodes.push(esNode);
@@ -48,7 +48,7 @@ module.exports = function checkEsVersion(server, kibanaVersion, client) {
 
     function getHumanizedNodeNames(nodes) {
       return nodes.map(node => {
-        const publishAddress =  _.get(node, 'http.publish_address') ? (_.get(node, 'http.publish_address') + ' ') : '';
+        const publishAddress =  get(node, 'http.publish_address') ? (get(node, 'http.publish_address') + ' ') : '';
         return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
       });
     }
@@ -57,7 +57,7 @@ module.exports = function checkEsVersion(server, kibanaVersion, client) {
       const simplifiedNodes = warningNodes.map(node => ({
         version: node.version,
         http: {
-          publish_address: _.get(node, 'http.publish_address')
+          publish_address: get(node, 'http.publish_address')
         },
         ip: node.ip,
       }));

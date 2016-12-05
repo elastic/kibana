@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
-export default function checkForTribe(client) {
-  return client.nodes.info({
+export default function checkForTribe(callAsKibanaUser) {
+  return callAsKibanaUser('nodes.info', {
     nodeId: '_local',
     filterPath: 'nodes.*.settings.tribe'
   })

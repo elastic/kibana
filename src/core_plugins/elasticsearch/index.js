@@ -1,9 +1,11 @@
-import { trim, trimRight } from 'lodash';
+import { trim, trimRight, bindKey } from 'lodash';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
-import exposeDataClient from './lib/expose_data_client';
-import exposeAdminClient from './lib/expose_admin_client';
+import createDataCluster from './lib/create_data_cluster';
+import createAdminCluster from './lib/create_admin_cluster';
+import { getCluster, createCluster } from './lib/clusters';
+import filterHeaders from './lib/filter_headers';
 
 import createProxy, { createPath } from './lib/create_proxy';
 
@@ -35,6 +37,9 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: Joi.string().default('master'),
+        healthCheck: object({
+          delay: number().default(2500)
+        }),
         tribe: object({
           url: string().uri({ scheme: ['http', 'https'] }),
           preserveHost: boolean().default(true),
@@ -71,9 +76,15 @@ module.exports = function ({ Plugin }) {
     init(server, options) {
       const kibanaIndex = server.config().get('kibana.index');
 
-      // Expose the client to the server
-      exposeDataClient(server);
-      exposeAdminClient(server);
+      server.expose('getCluster', getCluster);
+      server.expose('createCluster', createCluster);
+      server.expose('filterHeaders', filterHeaders);
+
+      const dataCluster = createDataCluster(server);
+      server.on('close', bindKey(dataCluster, 'close'));
+
+      const adminCluster = createAdminCluster(server);
+      server.on('close', bindKey(adminCluster, 'close'));
 
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');

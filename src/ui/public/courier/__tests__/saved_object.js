@@ -16,7 +16,8 @@ describe('Saved Object', function () {
 
   let SavedObject;
   let IndexPattern;
-  let esStub;
+  let esAdminStub;
+  let esDataStub;
 
   /**
    * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
@@ -25,7 +26,7 @@ describe('Saved Object', function () {
     // Allows the type 'dashboard' to be used.
     // Unfortunately we need to use bluebird here instead of native promises because there is
     // a call to finally.
-    sinon.stub(esStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
+    sinon.stub(esAdminStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
       '.kibana' : {
         'mappings': {
           'dashboard': {}
@@ -34,7 +35,7 @@ describe('Saved Object', function () {
     }));
 
     // Necessary to avoid a timeout condition.
-    sinon.stub(esStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
+    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
   }
 
   /**
@@ -61,8 +62,10 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
-    sinon.stub(esStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
-    sinon.stub(esStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(esDataStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(esDataStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
   }
 
   /**
@@ -79,10 +82,11 @@ describe('Saved Object', function () {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (es, Private) {
+  beforeEach(ngMock.inject(function (es, esAdmin, Private) {
     SavedObject = Private(SavedObjectFactory);
     IndexPattern = Private(IndexPatternFactory);
-    esStub = es;
+    esAdminStub = esAdmin;
+    esDataStub = es;
 
     mockEsService();
     stubMapper(Private);
