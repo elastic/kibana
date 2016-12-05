@@ -6,7 +6,7 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
-
+import './wizard.less';
 
 const templateStep = function (num, txt) {
   return '<div ng-controller="VisualizeWizardStep' + num + '" class="container-fluid vis-wizard">' + txt + '</div>';

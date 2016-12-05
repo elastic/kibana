@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/courier';
@@ -17,8 +16,8 @@ import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
-
-require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
+import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
+require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -108,26 +107,32 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'new',
         description: 'New Dashboard',
         run: function () { kbnUrl.change('/dashboard', {}); },
+        testId: 'dashboardNewButton',
       }, {
         key: 'add',
         description: 'Add a panel to the dashboard',
-        template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+        template: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
+        testId: 'dashboardAddPanelButton',
       }, {
         key: 'save',
         description: 'Save Dashboard',
-        template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
+        template: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
+        testId: 'dashboardSaveButton',
       }, {
         key: 'open',
         description: 'Open Saved Dashboard',
-        template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+        template: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
+        testId: 'dashboardOpenButton',
       }, {
         key: 'share',
         description: 'Share Dashboard',
-        template: require('plugins/kibana/dashboard/partials/share.html')
+        template: require('plugins/kibana/dashboard/partials/share.html'),
+        testId: 'dashboardShareButton',
       }, {
         key: 'options',
         description: 'Options',
-        template: require('plugins/kibana/dashboard/partials/options.html')
+        template: require('plugins/kibana/dashboard/partials/options.html'),
+        testId: 'dashboardOptionsButton',
       }];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
@@ -138,10 +143,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       courier.setRootSearchSource(dash.searchSource);
 
+      const docTitle = Private(DocTitleProvider);
+
       function init() {
         updateQueryOnRootSource();
 
-        const docTitle = Private(DocTitleProvider);
         if (dash.id) {
           docTitle.change(dash.title);
         }
@@ -222,7 +228,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.save = function () {
-        $state.title = dash.id = dash.title;
         $state.save();
 
         const timeRestoreObj = _.pick(timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
@@ -241,6 +246,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
               kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+            } else {
+              docTitle.change(dash.lastSavedTitle);
             }
           }
         })

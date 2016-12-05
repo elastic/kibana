@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import { buildInlineScriptForPhraseFilter } from './lib/phrase';
+
 // Adds a filter to a passed state
 export default function (Private) {
   let queryFilter = Private(FilterBarQueryFilterProvider);
@@ -54,13 +56,11 @@ export default function (Private) {
           break;
         default:
           if (field.scripted) {
-            // painless expects params.value while groovy and expression languages expect value.
-            const valueClause = field.lang === 'painless' ? 'params.value' : 'value';
             filter = {
               meta: { negate: negate, index: index, field: fieldName },
               script: {
                 script: {
-                  inline: '(' + field.script + ') == ' + valueClause,
+                  inline: buildInlineScriptForPhraseFilter(field),
                   lang: field.lang,
                   params: {
                     value: value

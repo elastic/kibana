@@ -76,6 +76,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:ui:server', [
+    'checkPlugins',
     'esvm:ui',
     'run:testUIDevServer:keepalive'
   ]);

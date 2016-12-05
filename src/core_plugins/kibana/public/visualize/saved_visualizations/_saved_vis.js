@@ -53,11 +53,11 @@ uiModules
   SavedVis.type = 'visualization';
 
   SavedVis.mapping = {
-    title: 'string',
+    title: 'text',
     visState: 'json',
-    uiStateJSON: 'string',
-    description: 'string',
-    savedSearchId: 'string',
+    uiStateJSON: 'keyword',
+    description: 'text',
+    savedSearchId: 'keyword',
     version: 'integer'
   };
 

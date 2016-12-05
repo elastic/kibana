@@ -16,7 +16,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       $el = $('<ul>').appendTo($container);
 
       const $window = $(window);
-      const $body = $(document.body);
       const binder = new Binder($scope);
 
       // appState from controller
@@ -36,20 +35,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
       function init() {
         $el.addClass('gridster');
-
-        // See issue https://github.com/elastic/kibana/issues/2138 and the
-        // subsequent fix for why we need to sort here. Short story is that
-        // gridster can fail to render widgets in the correct order, depending
-        // on the specific order of the panels.
-        // See https://github.com/ducksboard/gridster.js/issues/147
-        // for some additional back story.
-        $state.panels.sort((a, b) => {
-          if (a.row === b.row) {
-            return a.col - b.col;
-          } else {
-            return a.row - b.row;
-          }
-        });
 
         gridster = $el.gridster({
           max_cols: COLS,
@@ -86,7 +71,23 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           const added = _.difference(panels, currentPanels);
 
           if (removed.length) removed.forEach(removePanel);
-          if (added.length) added.forEach(addPanel);
+          if (added.length) {
+            // See issue https://github.com/elastic/kibana/issues/2138 and the
+            // subsequent fix for why we need to sort here. Short story is that
+            // gridster can fail to render widgets in the correct order, depending
+            // on the specific order of the panels.
+            // See https://github.com/ducksboard/gridster.js/issues/147
+            // for some additional back story.
+            added.sort((a, b) => {
+              if (a.row === b.row) {
+                return a.col - b.col;
+              } else {
+                return a.row - b.row;
+              }
+            });
+
+            added.forEach(addPanel);
+          };
 
           // ensure that every panel can be serialized now that we are done
           $state.panels.forEach(makePanelSerializeable);
@@ -221,7 +222,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
         g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
-        // const serializedGrid = g.serialize();
         g.$widgets.each(function (i, widget) {
           g.resize_widget($(widget));
         });

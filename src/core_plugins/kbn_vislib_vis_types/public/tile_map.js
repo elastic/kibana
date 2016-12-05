@@ -81,6 +81,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       }
     },
     responseConverter: geoJsonConverter,
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
