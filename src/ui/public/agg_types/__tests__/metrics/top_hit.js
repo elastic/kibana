@@ -62,6 +62,12 @@ describe('Top hit metric', function () {
     expect(topHitMetric.makeLabel(aggConfig)).to.eql('First bytes');
   });
 
+  it('should request the _source field', function () {
+    init({ field: '_source' });
+    expect(aggDsl.top_hits._source).to.be(true);
+    expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
+  });
+
   it('should request both for the source and doc_values fields', function () {
     init({ field: 'bytes' });
     expect(aggDsl.top_hits._source).to.be('bytes');
@@ -194,7 +200,7 @@ describe('Top hit metric', function () {
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be('linux');
     });
 
-    it('should return null if the field is not in the source nor in the doc_values field', function () {
+    it('should return undefined if the field is not in the source nor in the doc_values field', function () {
       const bucket = {
         '1': {
           hits: {
@@ -213,7 +219,7 @@ describe('Top hit metric', function () {
       };
 
       init({ field: 'machine.os.raw' });
-      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(null);
+      expect(topHitMetric.getValue(aggConfig, bucket)).to.be(undefined);
     });
   });
 });

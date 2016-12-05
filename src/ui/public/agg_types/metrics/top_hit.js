@@ -44,7 +44,7 @@ export default function AggTypeMetricTopProvider(Private) {
             if (field.type !== 'ip' && field.doc_values) {
               output.params.docvalue_fields = [ field.name ];
             }
-            output.params._source = field.name;
+            output.params._source = field.name === '_source' ? true : field.name;
           }
         }
       },
@@ -102,17 +102,7 @@ export default function AggTypeMetricTopProvider(Private) {
         return null;
       }
       const path = agg.params.field.name;
-      let values = agg.vis.indexPattern.flattenHit(hits[0])[path];
-
-      if ((values === '' || values === null || values === undefined) && hits[0].fields) {
-        // no values found in the source, check the doc_values fields
-        values = hits[0].fields[path] || [];
-        if (!values.length) {
-          return null;
-        }
-      }
-
-      return values;
+      return path === '_source' ? hits[0]._source : agg.vis.indexPattern.flattenHit(hits[0])[path];
     }
   });
 };
