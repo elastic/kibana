@@ -13,8 +13,8 @@ function acceptLanguageHeaderToBCP47Tags(header) {
 
 export class UiI18n {
   constructor(defaultLocale = 'en') {
-    this.i18n = new I18n(defaultLocale);
-    this.i18n.registerTranslations(resolve(__dirname, './translations/en.json'));
+    this._i18n = new I18n(defaultLocale);
+    this._i18n.registerTranslations(resolve(__dirname, './translations/en.json'));
   }
 
   /**
@@ -28,8 +28,8 @@ export class UiI18n {
   async getTranslationsForRequest(request) {
     const header = request.headers['accept-language'];
     const tags = acceptLanguageHeaderToBCP47Tags(header);
-    const requestedTranslations = await this.i18n.getTranslations(...tags);
-    const defaultTranslations = await this.i18n.getTranslationsForDefaultLocale();
+    const requestedTranslations = await this._i18n.getTranslations(...tags);
+    const defaultTranslations = await this._i18n.getTranslationsForDefaultLocale();
     return defaults({}, requestedTranslations, defaultTranslations);
   }
 
@@ -52,15 +52,15 @@ export class UiI18n {
   addUiExportConsumer(uiExports) {
     uiExports.addConsumerForType('translations', (plugin, translations) => {
       translations.forEach(path => {
-        this.i18n.registerTranslations(path);
+        this._i18n.registerTranslations(path);
       });
     });
   }
 
   /**
-     Refer to i18n.getAllTranslations()
+     Refer to I18n.getAllTranslations()
    */
   getAllTranslations() {
-    return this.i18n.getAllTranslations();
+    return this._i18n.getAllTranslations();
   }
 }

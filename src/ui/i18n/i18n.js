@@ -31,13 +31,14 @@ function getBestLocaleMatch(languageTag, registeredLocales) {
 
 export class I18n {
 
+  _registeredTranslations = {};
+
   constructor(defaultLocale = 'en') {
-    this.defaultLocale = defaultLocale;
-    this.registeredTranslations = {};
+    this._defaultLocale = defaultLocale;
   }
 
   /**
-   * Return all translations for regsitered locales
+   * Return all translations for registered locales
    * @return {Promise<Object>} translations - A Promise object where keys are
    *                                          the locale and values are Objects
    *                                          of translation keys and translations
@@ -45,9 +46,9 @@ export class I18n {
   getAllTranslations() {
     let localeTranslations = {};
 
-    const locales = this.getRegisteredTranslationLocales();
+    const locales = this._getRegisteredTranslationLocales();
     const translations = _.map(locales, (locale) => {
-      return this.getTranslations(locale)
+      return this._getTranslationsForLocale(locale)
       .then(function (translations) {
         localeTranslations[locale] = translations;
       });
@@ -67,8 +68,8 @@ export class I18n {
    * This object can be empty if no locale in the language tags can be matched against the registered locales.
    */
   getTranslations(...languageTags) {
-    const locale = this.getTranslationLocale(languageTags);
-    return this.getTranslationsForLocale(locale);
+    const locale = this._getTranslationLocale(languageTags);
+    return this._getTranslationsForLocale(locale);
   }
 
   /**
@@ -78,7 +79,7 @@ export class I18n {
    *                                           values are translations
    */
   getTranslationsForDefaultLocale() {
-    return this.getTranslationsForLocale(this.defaultLocale);
+    return this._getTranslationsForLocale(this._defaultLocale);
   }
 
   /**
@@ -88,37 +89,29 @@ export class I18n {
   registerTranslations(absolutePluginTranslationFilePath) {
     const locale = getLocaleFromFileName(absolutePluginTranslationFilePath);
 
-    this.registeredTranslations[locale] = _.uniq(_.get(this.registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath));
+    this._registeredTranslations[locale] =
+      _.uniq(_.get(this._registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath));
   }
 
-  /**
-   * TODO (MH): This should be private method. How do you do this?
-   */
-  getRegisteredTranslationLocales() {
-    return Object.keys(this.registeredTranslations);
+  _getRegisteredTranslationLocales() {
+    return Object.keys(this._registeredTranslations);
   }
 
-  /**
-   * TODO (MH): This should be private method. How do you do this?
-   */
-  getTranslationLocale(languageTags) {
+  _getTranslationLocale(languageTags) {
     let locale = '';
-    const registeredLocales = this.getRegisteredTranslationLocales();
+    const registeredLocales = this._getRegisteredTranslationLocales();
     _.forEach(languageTags, (tag) => {
       locale = locale || getBestLocaleMatch(tag, registeredLocales);
     });
     return locale;
   }
 
-  /**
-   * TODO (MH): This should be private method. How do you do this?
-   */
-  getTranslationsForLocale(locale) {
-    if (!this.registeredTranslations.hasOwnProperty(locale)) {
+  _getTranslationsForLocale(locale) {
+    if (!this._registeredTranslations.hasOwnProperty(locale)) {
       return Promise.resolve({});
     }
 
-    const translationFiles = this.registeredTranslations[locale];
+    const translationFiles = this._registeredTranslations[locale];
     const translations = _.map(translationFiles, (filename) => {
       return asyncReadFile(filename, 'utf8')
       .then(fileContents => JSON.parse(fileContents))
