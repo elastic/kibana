@@ -74,3 +74,4 @@ Markdown.
 `notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
 `notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
 `notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
+`context:defaultSize`:: Specifies the initial number of surrounding entries to display in the context view. The default value is 5.

@@ -24,8 +24,8 @@ uiRoutes
 });
 
 
-function ContextAppRouteController($routeParams, $scope, AppState, indexPattern) {
-  this.state = new AppState(createDefaultAppState());
+function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern) {
+  this.state = new AppState(createDefaultAppState(config));
   $scope.$watchGroup([
     'contextAppRoute.state.columns',
     'contextAppRoute.state.size',
@@ -34,9 +34,9 @@ function ContextAppRouteController($routeParams, $scope, AppState, indexPattern)
   this.indexPattern = indexPattern;
 }
 
-function createDefaultAppState() {
+function createDefaultAppState(config) {
   return {
     columns: ['_source'],
-    size: 5,
+    size: parseInt(config.get('context:defaultSize'), 10),
   };
 }
