@@ -3,10 +3,7 @@ import { resolve } from 'path';
 import { defaults, compact } from 'lodash';
 import langParser from 'accept-language-parser';
 
-import {
-  getTranslations,
-  registerTranslations,
-} from './i18n';
+import { I18n } from './i18n/i18n';
 
 function acceptLanguageHeaderToBCP47Tags(header) {
   return langParser.parse(header).map(lang => (
@@ -16,8 +13,8 @@ function acceptLanguageHeaderToBCP47Tags(header) {
 
 export class UiI18n {
   constructor(defaultLocale = 'en') {
-    this.defaultLocale = defaultLocale;
-    registerTranslations(resolve(__dirname, './translations/en.json'));
+    this.i18n = new I18n(defaultLocale);
+    this.i18n.registerTranslations(resolve(__dirname, './translations/en.json'));
   }
 
   /**
@@ -31,8 +28,8 @@ export class UiI18n {
   async getTranslationsForRequest(request) {
     const header = request.headers['accept-language'];
     const tags = acceptLanguageHeaderToBCP47Tags(header);
-    const requestedTranslations = await getTranslations(...tags);
-    const defaultTranslations = await getTranslations(this.defaultLocale);
+    const requestedTranslations = await this.i18n.getTranslations(...tags);
+    const defaultTranslations = await this.i18n.getTranslationsForDefaultLocale();
     return defaults({}, requestedTranslations, defaultTranslations);
   }
 
@@ -55,8 +52,15 @@ export class UiI18n {
   addUiExportConsumer(uiExports) {
     uiExports.addConsumerForType('translations', (plugin, translations) => {
       translations.forEach(path => {
-        registerTranslations(path);
+        this.i18n.registerTranslations(path);
       });
     });
+  }
+
+  /**
+     Refer to i18n.getAllTranslations()
+   */
+  getAllTranslations() {
+    return this.i18n.getAllTranslations();
   }
 }

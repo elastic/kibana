@@ -4,7 +4,6 @@ import _ from 'lodash';
 import fromRoot from '../../src/utils/from_root';
 import KbnServer from '../../src/server/kbn_server';
 import * as i18nVerify from '../utils/i18n_verify_keys';
-import * as i18n from '../../src/ui/i18n';
 
 module.exports = function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
@@ -36,7 +35,7 @@ module.exports = function (grunt) {
 
     const kbnServer = new KbnServer(serverConfig);
     kbnServer.ready()
-    .then(() => verifyTranslations(parsePaths))
+    .then(() => verifyTranslations(kbnServer.uiI18n, parsePaths))
     .then(() => kbnServer.close())
     .then(done)
     .catch((err) => {
@@ -46,22 +45,13 @@ module.exports = function (grunt) {
   });
 };
 
-function verifyTranslations(parsePaths)
+function verifyTranslations(uiI18nObj, parsePaths)
 {
-  let localeTranslations = {};
-  const locales = i18n.getRegisteredTranslationLocales();
-  const translationPromises = _.map(locales, (locale) => {
-    return i18n.getTranslations(locale)
-    .then(function (translations) {
-      localeTranslations[locale] = translations;
-    });
-  });
-
-  return Promise.all(translationPromises)
-  .then(function () {
+  return uiI18nObj.getAllTranslations()
+  .then(function (translations) {
     return i18nVerify.getTranslationKeys(parsePaths)
     .then(function (translationKeys) {
-      const keysNotTranslatedPerLocale = i18nVerify.getNonTranslatedKeys(translationKeys, localeTranslations);
+      const keysNotTranslatedPerLocale = i18nVerify.getNonTranslatedKeys(translationKeys, translations);
       if (!_.isEmpty(keysNotTranslatedPerLocale)) {
         const str  = JSON.stringify(keysNotTranslatedPerLocale);
         const errMsg = 'The following translation keys per locale are not translated: ' + str;
