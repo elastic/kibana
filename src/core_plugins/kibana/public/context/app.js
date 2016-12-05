@@ -11,7 +11,6 @@ const module = uiModules.get('apps/context', [
   'kibana',
   'ngRoute',
 ]);
-const DEFAULT_SIZE_INCREMENT = 5;
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -30,7 +29,9 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($q, es) {
+function ContextAppController($q, config, es) {
+  const defaultSizeStep = parseInt(config.get('context:step'), 10);
+
   this.anchorRow = null;
   this.rows = [];
   this.initialized = false;
@@ -61,8 +62,8 @@ function ContextAppController($q, es) {
           this.rows = [].concat(this.predecessorRows, [this.anchorRow], this.successorRows)
         ))
     ),
-    increaseSize: (value = DEFAULT_SIZE_INCREMENT) => this.actions.setSize(this.size + value),
-    decreaseSize: (value = DEFAULT_SIZE_INCREMENT) => this.actions.setSize(this.size - value),
+    increaseSize: (value = defaultSizeStep) => this.actions.setSize(this.size + value),
+    decreaseSize: (value = defaultSizeStep) => this.actions.setSize(this.size - value),
     reload: () => {
       this.anchorRowPromise = this.actions.fetchAnchorRow();
       this.contextRowsPromise = this.actions.fetchContextRows();

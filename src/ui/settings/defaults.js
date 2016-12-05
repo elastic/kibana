@@ -306,5 +306,9 @@ export default function defaultSettingsProvider() {
       value: 5,
       description: 'The number of surrounding entries to show in the context view',
     },
+    'context:step': {
+      value: 5,
+      description: 'The step size to increment or decrement the context size by',
+    },
   };
 };
