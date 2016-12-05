@@ -11,6 +11,7 @@ const module = uiModules.get('apps/context', [
   'kibana',
   'ngRoute',
 ]);
+const MIN_CONTEXT_SIZE = 0;
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -74,7 +75,7 @@ function ContextAppController($q, config, es) {
       ]);
     },
     setSize: (size) => {
-      this.size = size;
+      this.size = Math.max(size, MIN_CONTEXT_SIZE);
       return this.actions.fetchContextRows();
     },
   };
