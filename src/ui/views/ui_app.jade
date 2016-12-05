@@ -27,7 +27,6 @@ block content
       margin-top: 130px; /* 1 */
       text-align: center;
       background: #3caed2;
-      box-shadow: 0 0 2em #444444;
     }
 
     .kibanaLoader__logo {
@@ -100,7 +99,7 @@ block content
      */
     .kibanaLoadingMessage {
       font-family: "Open Sans", Helvetica, Arial, sans-serif;
-      color: white;
+      color: #8c8c8c;
       max-width: 540px;
       height: 50px; /* 1 */
       margin-top: 80px; /* 1 */
@@ -116,17 +115,19 @@ block content
         .kibanaWelcomeLogo
       .kibanaLoader__content
         | Loading Kibana
-    .kibanaLoadingMessage.
-      Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
-      good stuff will be cached up for next time!
+    .kibanaLoadingMessage(
+      data-remove-message-when-embedded
+    )
+      | Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
+      | good stuff will be cached up for next time!
 
   script.
     window.onload = function () {
 
-      var hideLoadingMessage = /#.*[?&]embed(&|$)/.test(window.location.href);
+      var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
       if (hideLoadingMessage) {
-        var loading = document.querySelector('.ui-app-loading h1');
-        loading.removeChild(loading.lastChild);
+        var loadingMessage = document.querySelector('[data-remove-message-when-embedded]');
+        loadingMessage.parentNode.removeChild(loadingMessage);
       }
 
       var buildNum = #{kibanaPayload.buildNum};

@@ -1,18 +1,16 @@
-import moment from 'moment';
-import $ from 'jquery';
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
-import PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider from 'plugins/kibana/dashboard/components/panel/lib/load_panel';
+import { loadPanelProvider } from 'plugins/kibana/dashboard/components/panel/lib/load_panel';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
+
 uiModules
 .get('app/dashboard')
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
-  const loadPanel = Private(PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider);
+  const loadPanel = Private(loadPanelProvider);
   const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier();
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
@@ -29,8 +27,7 @@ uiModules
   return {
     restrict: 'E',
     template: panelTemplate,
-    requires: '^dashboardGrid',
-    link: function ($scope, $el) {
+    link: function ($scope) {
       // using $scope inheritance, panels are available in AppState
       const $state = $scope.state;
 

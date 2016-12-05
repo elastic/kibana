@@ -1,5 +1,5 @@
 [[tagcloud-chart]]
-== Cloud Tag Charts
+== Tag Clouds
 
 A tag cloud visualization is a visual representation of text data, typically used to visualize free form text. 
 Tags are usually single words, and the importance of each tag is shown with font size or color.
