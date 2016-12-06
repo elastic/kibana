@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
-import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/components/zero_injection/zero_filled_array';
-import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
+import VislibComponentsZeroInjectionOrderedXKeysProvider from './ordered_x_keys';
+import VislibComponentsZeroInjectionZeroFilledArrayProvider from './zero_filled_array';
+import VislibComponentsZeroInjectionZeroFillDataArrayProvider from './zero_fill_data_array';
 export default function ZeroInjectionUtilService(Private) {
 
   const orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
@@ -19,30 +19,12 @@ export default function ZeroInjectionUtilService(Private) {
    * and injects zeros where needed.
    */
 
-  function getDataArray(obj) {
-    if (obj.rows) {
-      return obj.rows;
-    } else if (obj.columns) {
-      return obj.columns;
-    } else if (obj.series) {
-      return [obj];
-    }
-  }
+  return function (obj, data, orderBucketsBySum = false) {
+    const keys = orderXValues(data, orderBucketsBySum);
 
-  return function (obj, orderBucketsBySum = false) {
-    if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
-      throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
-    }
-
-    const keys = orderXValues(obj, orderBucketsBySum);
-    const arr = getDataArray(obj);
-
-    arr.forEach(function (object) {
-      object.series.forEach(function (series) {
-        const zeroArray = createZeroFilledArray(keys);
-
-        series.values = zeroFillDataArray(zeroArray, series.values);
-      });
+    obj.forEach(function (series) {
+      const zeroArray = createZeroFilledArray(keys, series.label);
+      series.values = zeroFillDataArray(zeroArray, series.values);
     });
 
     return obj;

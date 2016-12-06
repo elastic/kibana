@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
+import VislibComponentsColorSeedColorsProvider from './seed_colors';
 export default function ColorPaletteUtilService(Private) {
 
   const seedColors = Private(VislibComponentsColorSeedColorsProvider);

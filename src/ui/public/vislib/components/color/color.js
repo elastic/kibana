@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/color/mapped_colors';
+import VislibComponentsColorMappedColorsProvider from './mapped_colors';
 export default function ColorUtilService(Private) {
   const mappedColors = Private(VislibComponentsColorMappedColorsProvider);
 

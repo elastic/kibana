@@ -1,8 +1,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
-import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
+import VislibVisualizationsChartProvider from './_chart';
+import VislibVisualizationsMapProvider from './_map';
 export default function TileMapFactory(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
@@ -106,10 +106,10 @@ export default function TileMapFactory(Private) {
         center: params.mapCenter,
         zoom: params.mapZoom,
         events: this.events,
-        markerType: this._attr.mapType,
+        markerType: this.handler.visConfig.get('mapType'),
         tooltipFormatter: this.tooltipFormatter,
         valueFormatter: this.valueFormatter,
-        attr: this._attr
+        attr: this.handler.visConfig._values
       });
 
       // add title for splits
