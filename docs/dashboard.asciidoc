@@ -133,7 +133,7 @@ to open *Management/Kibana/Saved Objects/Dashboards*.
 [[sharing-dashboards]]
 == Sharing a Dashboard
 
-You can can share a direct link to a Kibana dashboard with another user,
+You can either share a direct link to a Kibana dashboard with another user,
 or embed the dashboard in a web page. Users must have Kibana access
 to view embedded dashboards.
 
