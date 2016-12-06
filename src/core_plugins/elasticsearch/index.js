@@ -39,7 +39,7 @@ module.exports = function ({ Plugin }) {
         apiVersion: Joi.string().default('master'),
         healthCheck: object({
           delay: number().default(2500)
-        }),
+        }).default(),
         tribe: object({
           url: string().uri({ scheme: ['http', 'https'] }),
           preserveHost: boolean().default(true),
