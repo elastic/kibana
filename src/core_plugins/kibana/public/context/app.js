@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import 'ui/local_navigation';
+import 'ui/local_navigation/index';
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import {fetchAnchor} from './api/anchor';

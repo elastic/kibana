@@ -5,11 +5,11 @@ import './local_navigation.less';
 
 const module = uiModules.get('kibana');
 
-module.directive('localNavigation', function LocalNavigation() {
+module.directive('localNavigationRowSection', function LocalNavigationRowSection() {
   return {
     replace: true,
     restrict: 'E',
-    template: '<div class="localNav" ng-transclude></div>',
+    template: '<div class="localNavRow__section" ng-transclude></div>',
     transclude: true,
   };
 });
