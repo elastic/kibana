@@ -79,6 +79,13 @@ module.exports = function (plugin, server) {
     });
   }
 
+  function waitForEsVersion() {
+    return checkEsVersion(server, kibanaVersion.get()).catch(err => {
+      plugin.status.red(err);
+      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
+    });
+  }
+
   function setGreenStatus() {
     return plugin.status.green('Kibana index ready');
   }
@@ -86,14 +93,8 @@ module.exports = function (plugin, server) {
   function check() {
     const healthChecks = [
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-      .then(() => {
-        // execute version and tribe checks in parallel
-        // but always report the version check result first
-        const versionPromise = checkEsVersion(server, kibanaVersion.get(), callAdminAsKibanaUser);
-        const tribePromise = checkForTribe(callAdminAsKibanaUser);
-
-        return versionPromise.then(() => tribePromise);
-      })
+      .then(waitForEsVersion)
+      .then(checkForTribe.bind(this, callAdminAsKibanaUser))
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
     ];

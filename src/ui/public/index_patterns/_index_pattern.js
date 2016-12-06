@@ -38,14 +38,14 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   });
 
   const mapping = mappingSetup.expandShorthand({
-    title: 'string',
-    timeFieldName: 'string',
+    title: 'text',
+    timeFieldName: 'keyword',
     notExpandable: 'boolean',
-    intervalName: 'string',
+    intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
-      type: 'string',
+      type: 'keyword',
       _serialize(map = {}) {
         const serialized = _.transform(map, serialize);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);

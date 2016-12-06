@@ -5,11 +5,14 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-
 import BluebirdPromise from 'bluebird';
+
 import SavedObjectFactory from '../saved_object/saved_object';
-import { stubMapper } from 'test_utils/stub_mapper';
 import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
+import DocSourceProvider from '../data_source/doc_source';
+
+import { stubMapper } from 'test_utils/stub_mapper';
+
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -18,6 +21,7 @@ describe('Saved Object', function () {
   let IndexPattern;
   let esAdminStub;
   let esDataStub;
+  let DocSource;
 
   /**
    * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
@@ -36,6 +40,7 @@ describe('Saved Object', function () {
 
     // Necessary to avoid a timeout condition.
     sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
+    sinon.stub(esAdminStub.indices, 'refresh').returns(BluebirdPromise.resolve());
   }
 
   /**
@@ -87,10 +92,111 @@ describe('Saved Object', function () {
     IndexPattern = Private(IndexPatternFactory);
     esAdminStub = esAdmin;
     esDataStub = es;
+    DocSource = Private(DocSourceProvider);
 
     mockEsService();
     stubMapper(Private);
   }));
+
+  describe('save', function () {
+    describe(' with copyOnSave', function () {
+      it('as true creates a copy on save success', function () {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+        let newUniqueId;
+        return createInitializedSavedObject({type: 'dashboard', id: 'myId'}).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doIndex', function () {
+            newUniqueId = savedObject.id;
+            expect(newUniqueId).to.not.be('myId');
+            mockDocResponse._id = newUniqueId;
+            return BluebirdPromise.resolve(newUniqueId);
+          });
+          savedObject.copyOnSave = true;
+          return savedObject.save()
+            .then((id) => {
+              expect(id).to.be(newUniqueId);
+            });
+        });
+      });
+
+      it('as true does not create a copy when save fails', function () {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+        let originalId = 'id1';
+        return createInitializedSavedObject({type: 'dashboard', id: originalId}).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doIndex', function () {
+            return BluebirdPromise.reject('simulated error');
+          });
+          savedObject.copyOnSave = true;
+          return savedObject.save().then(() => {
+            throw new Error('Expected a rejection');
+          }).catch(() => {
+            expect(savedObject.id).to.be(originalId);
+          });
+        });
+      });
+
+      it('as false does not create a copy', function () {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+        const id = 'myId';
+        return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doIndex', function () {
+            expect(savedObject.id).to.be(id);
+            return BluebirdPromise.resolve(id);
+          });
+          savedObject.copyOnSave = false;
+          return savedObject.save()
+            .then((id) => {
+              expect(id).to.be(id);
+            });
+        });
+      });
+    });
+
+    it('returns id from server on success', function () {
+      return createInitializedSavedObject({type: 'dashboard'}).then(savedObject => {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+        return savedObject.save()
+          .then((id) => {
+            expect(id).to.be('myId');
+          });
+      });
+    });
+
+    describe('updates isSaving variable', function () {
+      it('on success', function () {
+        let id = 'id';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doIndex', () => {
+            expect(savedObject.isSaving).to.be(true);
+            return BluebirdPromise.resolve(id);
+          });
+          expect(savedObject.isSaving).to.be(false);
+          return savedObject.save()
+            .then((id) => {
+              expect(savedObject.isSaving).to.be(false);
+            });
+        });
+      });
+
+      it('on failure', function () {
+        return createInitializedSavedObject({type: 'dashboard'}).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doIndex', () => {
+            expect(savedObject.isSaving).to.be(true);
+            return BluebirdPromise.reject();
+          });
+          expect(savedObject.isSaving).to.be(false);
+          return savedObject.save()
+            .catch(() => {
+              expect(savedObject.isSaving).to.be(false);
+            });
+        });
+      });
+    });
+  });
 
   describe('applyESResp', function () {
     it('throws error if not found', function () {

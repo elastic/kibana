@@ -318,7 +318,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.opts.saveDataSource = function () {
     return $scope.updateDataSource()
     .then(function () {
-      savedSearch.id = savedSearch.title;
       savedSearch.columns = $scope.state.columns;
       savedSearch.sort = $scope.state.sort;
 
@@ -334,6 +333,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
           } else {
             // Update defaults so that "reload saved query" functions correctly
             $state.setDefaults(getStateDefaults());
+            docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });
