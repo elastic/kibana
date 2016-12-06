@@ -1,5 +1,4 @@
 {
   "UI-WELCOME_MESSAGE": "Loading Kibana",
-  "UI-LOADING_MESSAGE": "Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!",
   "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information."
 }
