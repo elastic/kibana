@@ -35,7 +35,6 @@ module.exports = function VislibFixtures(Private) {
   return function (visLibParams) {
     let Vis = Private(VislibVisProvider);
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
       defaultYExtents: false,
