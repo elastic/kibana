@@ -84,7 +84,8 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('param update', function () {
-    let params = { one: 'fish', two: 'fish' };
+    let $el = $('<div>testing</div>');
+    let params = { el: $el[0], one: 'fish', two: 'fish' };
     let vis = {
       type: _.defaults({
         params: {
@@ -92,15 +93,11 @@ describe('renderbot', function exportWrapper() {
         }
       }, mockVisType)
     };
-    let $el = $('<div>testing</div>');
     let createVisSpy;
-    let getParamsStub;
     let renderbot;
 
     beforeEach(function () {
       createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
-      // getParamsStub = sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _identity);
-      // getParamsStub.returns(params);
       renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
