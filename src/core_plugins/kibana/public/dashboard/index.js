@@ -7,7 +7,7 @@ import 'ui/notify';
 import 'ui/typeahead';
 import 'ui/share';
 import 'plugins/kibana/dashboard/directives/grid';
-import 'plugins/kibana/dashboard/directives/dashboard_panel_directive';
+import 'plugins/kibana/dashboard/directives/dashboard_panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
@@ -17,7 +17,7 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
-import { PanelFactory } from 'plugins/kibana/dashboard/components/panel/lib/panel';
+import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
@@ -272,12 +272,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
         pendingVis++;
-        $state.panels.push(PanelFactory.create(hit.id, 'visualization', getMaxPanelId()));
+        $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelId()));
       };
 
       $scope.addSearch = function (hit) {
         pendingVis++;
-        $state.panels.push(PanelFactory.create(hit.id, 'search', getMaxPanelId()));
+        $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelId()));
       };
 
       // Setup configurable values for config directive, after objects are initialized

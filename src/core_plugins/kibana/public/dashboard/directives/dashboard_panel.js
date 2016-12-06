@@ -22,7 +22,7 @@ uiModules
 
   /**
    * Returns a unique id for storing the panel state in the persistent ui.
-   * @param panel
+   * @param {PanelState} panel
    * @returns {string}
    */
   const getPersistedStateId = function (panel) {
@@ -46,7 +46,7 @@ uiModules
       parentUiState: '=',
       /**
        * Contains information about this panel.
-       * @type {Panel}
+       * @type {PanelState}
        */
       panel: '=',
       /**

@@ -1,4 +1,4 @@
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/components/panel/lib/panel';
+import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 
 export class PanelUtils {
   /**
