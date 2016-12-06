@@ -14,7 +14,6 @@ export default function HistogramVisType(Private) {
       'Be careful with sparse sets as the connection between points can be misleading.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
@@ -27,8 +26,7 @@ export default function HistogramVisType(Private) {
         times: [],
         addTimeMarker: false,
         defaultYExtents: false,
-        setYExtents: false,
-        yAxis: {}
+        setYExtents: false
       },
       legendPositions: [{
         value: 'left',
