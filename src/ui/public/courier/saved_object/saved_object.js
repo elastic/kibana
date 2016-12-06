@@ -147,7 +147,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
             properties: {
               // setup the searchSource mapping, even if it is not used but this type yet
               searchSourceJSON: {
-                type: 'keyword'
+                type: 'string'
               }
             }
           };
