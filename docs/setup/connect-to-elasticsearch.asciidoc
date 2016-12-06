@@ -32,8 +32,8 @@ sophisticated date parsing APIs that Kibana uses to determine date information, 
 specify dates in the index pattern name.
 +
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default from
-*Settings > Indices*.
+When you have more than one index pattern, you can designate which one to use as the default by clicking 
+on the star icon above the index pattern title from *Management > Index Patterns*.
 
 All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
 configured for the matching index.
