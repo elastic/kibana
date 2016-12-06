@@ -502,7 +502,7 @@ export default class VisualizePage {
         .findByCssSelector('clipPath rect')
         .getAttribute('height')
         .then(function (theHeight) {
-          yAxisHeight = theHeight - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+          yAxisHeight = theHeight;
           PageObjects.common.debug('theHeight = ' + theHeight);
           return theHeight;
         });
@@ -581,7 +581,7 @@ export default class VisualizePage {
       return self
       .setFindTimeout(defaultFindTimeout * 2)
       // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-      .findAllByCssSelector('svg > g > g.series.\\30 > rect') // rect
+      .findAllByCssSelector('svg > g > g.series > rect') // rect
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart
