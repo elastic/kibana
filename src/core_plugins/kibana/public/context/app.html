@@ -42,7 +42,10 @@
   <div class="container-fluid" role="main">
     <div class="row">
       <div class="col-md-12">
-        <div class="discover-table" fixed-scroll>
+        <div class="discover-overlay" ng-if="!contextApp.isInitialized">
+          <h2>Loading...</h2>
+        </div>
+        <div class="discover-table" ng-if="contextApp.isInitialized" fixed-scroll>
           <doc-table
             hits="contextApp.rows"
             index-pattern="contextApp.indexPattern"

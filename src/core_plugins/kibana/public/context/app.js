@@ -35,11 +35,11 @@ function ContextAppController($q, config, es) {
 
   this.anchorRow = null;
   this.rows = [];
-  this.initialized = false;
+  this.isInitialized = false;
 
   this.initialize = () => (
     this.actions.reload()
-      .then(() => this.initialized = true)
+      .then(() => this.isInitialized = true)
   );
 
   this.actions = {
