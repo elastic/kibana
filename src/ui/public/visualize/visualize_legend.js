@@ -40,7 +40,10 @@ uiModules.get('kibana')
       $scope.unhighlight = function (event) {
         let el = event.currentTarget;
         let handler = $scope.renderbot.vislibVis.handler;
-        if (!handler) return;
+        //there is no guarantee that a Chart will set the unhighlight-function on its handler
+        if (!handler || typeof handler.unHighlight !== 'function') {
+          return;
+        }
         handler.unHighlight.call(el, handler.el);
       };
 
@@ -52,7 +55,7 @@ uiModules.get('kibana')
       };
 
       $scope.toggleLegend = function () {
-        let bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
+        let bwcAddLegend = $scope.vis.params.addLegend;
         let bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
         $scope.uiState.set('vis.legendOpen', $scope.open);
@@ -97,11 +100,11 @@ uiModules.get('kibana')
       function refresh() {
         let vislibVis = $scope.renderbot.vislibVis;
 
-        if ($scope.uiState.get('vis.legendOpen') == null && vislibVis._attr.addLegend != null) {
-          $scope.open = vislibVis._attr.addLegend;
+        if ($scope.uiState.get('vis.legendOpen') == null && $scope.vis.params.addLegend != null) {
+          $scope.open = $scope.vis.params.addLegend;
         }
 
-        $scope.labels = getLabels($scope.data, vislibVis._attr.type);
+        $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
         $scope.getColor = colorPalette(_.pluck($scope.labels, 'label'), $scope.uiState.get('vis.colors'));
       }
 

@@ -25,6 +25,7 @@ uiModules
 
   return {
     restrict: 'E',
+    require: '?renderCounter',
     scope : {
       showSpyPanel: '=?',
       vis: '=',
@@ -34,7 +35,7 @@ uiModules
       esResp: '=?',
     },
     template: visualizeTemplate,
-    link: function ($scope, $el, attr) {
+    link: function ($scope, $el, attr, renderCounter) {
       const minVisChartHeight = 180;
 
       if (_.isUndefined($scope.showSpyPanel)) {
@@ -72,14 +73,8 @@ uiModules
         return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
 
-      if ($scope.vis.implementsRenderComplete()) {
-        $el.attr('has-render-count', 'true');
-        let renderCount = 0;
-        $el.on('renderComplete', () => {
-          $el.attr('render-count', ++renderCount);
-        });
-      } else {
-        $el.attr('has-render-count', 'false');
+      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
+        renderCounter.disable();
       }
 
       $scope.spy = {};

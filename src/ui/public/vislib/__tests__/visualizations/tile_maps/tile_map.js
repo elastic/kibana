@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -14,7 +13,13 @@ let TileMap;
 let extentsStub;
 
 function createTileMap(handler, chartEl, chartData) {
-  handler = handler || {};
+  handler = handler || {
+    visConfig: {
+      get: function () {
+        return '';
+      }
+    }
+  };
   chartEl = chartEl || mockChartEl;
   chartData = chartData || geoJsonData;
 

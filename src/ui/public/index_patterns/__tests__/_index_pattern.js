@@ -8,11 +8,11 @@ import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import DocSourceProvider from 'ui/courier/data_source/doc_source';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
+import { stubMapper } from 'test_utils/stub_mapper';
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -40,15 +40,7 @@ describe('index pattern', function () {
     DocSource = Private(DocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
-
-    // stub mapper
-    mapper = Private(IndexPatternsMapperProvider);
-    sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
-      return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
-    });
-    sinon.stub(mapper, 'clearCache', function () {
-      return Promise.resolve();
-    });
+    mapper = stubMapper(Private, mockLogstashFields);
 
     // stub mappingSetup
     mappingSetup = Private(UtilsMappingSetupProvider);

@@ -2,6 +2,7 @@
 # CSS Style Guide
 
 - [CSS Style Guide](#css-style-guide)
+  - [Selecting elements](#selecting-elements)
   - [Using the preprocessor](#using-the-preprocessor)
     - [Don't build concatenated selector names](#dont-build-concatenated-selector-names)
     - [Avoid nested selectors](#avoid-nested-selectors)
@@ -14,6 +15,23 @@
     - [Don't use multiple modifier classes together](#dont-use-multiple-modifier-classes-together)
     - [How to apply DRY](#how-to-apply-dry)
       - [Compelling reasons for using mixins](#compelling-reasons-for-using-mixins)
+
+## Selecting elements
+
+References to CSS selectors within JavaScript are difficult to discover, making it easy to accidentally
+break the UI when refactoring markup or CSS.
+
+Instead, add a `data` attribute with a unique and descriptive name and select the element using that.
+
+```html
+<div data-welcome-message>Hello, world</div>
+```
+
+```javascript
+const welcomeMessage = document.querySelector('[data-welcome-message]');
+```
+
+This uncouples our CSS from our JavaScript, making it easy to change each independently of the other.
 
 ## Using the preprocessor
 
