@@ -139,18 +139,20 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
       // check that the mapping for this type is defined
       return mappingSetup.isDefined(type)
-        // if it is already defined skip this step
-        if (defined) return true;
+        .then((defined) => {
+          // if it is already defined skip this step
+          if (defined) return true;
 
-        mapping.kibanaSavedObjectMeta = {
-          properties: {
-            // setup the searchSource mapping, even if it is not used but this type yet
-            searchSourceJSON: {
-              type: 'string'
+          mapping.kibanaSavedObjectMeta = {
+            properties: {
+              // setup the searchSource mapping, even if it is not used but this type yet
+              searchSourceJSON: {
+                type: 'string'
+              }
             }
-          }
-        };
+          };
 
+            // tell mappingSetup to set type
           return mappingSetup.setup(type, mapping);
         })
         .then(() => {
