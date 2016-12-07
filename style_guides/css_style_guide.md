@@ -43,10 +43,10 @@ This kind of code makes the selector name really difficult to grep for:
 .chart {
   // styles
 
-  &-content {
+  &Content {
     // styles
 
-    &-title {
+    &Title {
       // styles
     }
   }
@@ -61,11 +61,11 @@ This is better:
   // styles
 }
 
-.chart-content {
+.chartContent {
   // styles
 }
 
-.chart-content-title {
+.chartContentTitle {
   // styles
 }
 ```
@@ -95,6 +95,7 @@ This is better:
 .specialMenu__item {
   // styles
 }
+```
 
 ## Naming convention
 
@@ -234,19 +235,19 @@ pretty hairy. Consider a table component:
 // ======================== Bad! ========================
 // These styles are complex and the multiple double-underscores increases noise
 // without providing much useful information.
-.kbTable {
+.kuiTable {
   /* ... */
 }
 
-  .kbTable__body {
+  .kuiTable__body {
     /* ... */
   }
 
-    .kbTable__body__row {
+    .kuiTable__body__row {
       /* ... */
     }
 
-      .kbTable__body__row__cell {
+      .kuiTable__body__row__cell {
         /* ... */
       }
 ```
@@ -257,25 +258,25 @@ indicates their relationship, by incorporating the name of the root base class.
 
 ```less
 // kbTable.less
-.kbTable {
+.kuiTable {
   /* ... */
 }
 ```
 
 ```less
 // kbTableBody.less
-.kbTableBody {
+.kuiTableBody {
   /* ... */
 }
 ```
 
 ```less
 // kbTableRow.less
-.kbTableRow {
+.kuiTableRow {
   /* ... */
 }
 
-  .kbTableRow__cell {
+  .kuiTableRow__cell {
     /* ... */
   }
 ```
