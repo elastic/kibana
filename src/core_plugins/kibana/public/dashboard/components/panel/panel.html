@@ -4,13 +4,13 @@
       {{::savedObj.title}}
     </span>
     <div class="btn-group">
-      <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}">
+      <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
-      <a aria-label="Move" ng-show="chrome.getVisible()" class="panel-move">
+      <a aria-label="Move" ng-show="!isFullScreenMode" class="panel-move">
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
-      <a aria-label="Remove" ng-show="chrome.getVisible()" ng-click="remove()">
+      <a aria-label="Remove" ng-show="!isFullScreenMode" ng-click="remove()">
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
     </div>
@@ -26,7 +26,7 @@
     ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
-    show-spy-panel="chrome.getVisible()"
+    show-spy-panel="!isFullScreenMode"
     ui-state="uiState"
     render-counter
     class="panel-content">
