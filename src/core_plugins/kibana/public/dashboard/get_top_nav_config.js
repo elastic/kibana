@@ -11,20 +11,12 @@ import { createTopNavExecuteConfig, createTopNavTemplateConfig } from 'ui/kbn_to
 export function getTopNavConfig(dashboardMode, kbnUrl, modeChange) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
-      return [getNewConfig(kbnUrl), getOpenConfig(), getShareConfig(), getEditConfig(modeChange), getFullScreenConfig(modeChange)];
+      return [getNewConfig(kbnUrl), getOpenConfig(), getShareConfig(), getEditConfig(modeChange)];
     case DashboardViewMode.EDIT:
       return [getNewConfig(kbnUrl), getOpenConfig(), getAddConfig(), getSaveConfig(), getOptionsConfig(), getViewConfig(modeChange)];
     default:
       return [];
   }
-}
-
-function getFullScreenConfig(modeChange) {
-  return createTopNavExecuteConfig(
-    'full screen',
-    'Switch to full screen mode',
-    'dashboardfullScreenMode',
-    () => { modeChange(DashboardViewMode.FULLSCREEN); });
 }
 
 function getEditConfig(modeChange) {

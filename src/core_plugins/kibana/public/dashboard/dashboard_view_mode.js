@@ -5,10 +5,9 @@
 
 /**
  * Dashboard view modes.
- * @type {{FULLSCREEN: DashboardMode, EDIT: DashboardMode, VIEW: DashboardMode}}
+ * @type {{EDIT: DashboardMode, VIEW: DashboardMode}}
  */
 export const DashboardViewMode = {
-  FULLSCREEN: 'fullscreen',
   EDIT: 'edit',
   VIEW: 'view'
 };

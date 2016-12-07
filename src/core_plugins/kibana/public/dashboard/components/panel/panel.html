@@ -1,16 +1,16 @@
-<div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
+<div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
     <span class="panel-title" title="{{::savedObj.title}}">
       {{::savedObj.title}}
     </span>
     <div class="btn-group">
-      <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
+      <a aria-label="Edit" ng-show="!isViewOnlyMode() && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
-      <a aria-label="Move" ng-show="!isFullScreenMode" class="panel-move">
+      <a aria-label="Move" ng-show="!isViewOnlyMode()" class="panel-move">
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
-      <a aria-label="Remove" ng-show="!isFullScreenMode" ng-click="remove()">
+      <a aria-label="Remove" ng-show="!isViewOnlyMode()" ng-click="remove()">
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
     </div>
@@ -26,7 +26,7 @@
     ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
-    show-spy-panel="!isFullScreenMode"
+    show-spy-panel="!isViewOnlyMode()"
     ui-state="uiState"
     render-counter
     class="panel-content">
