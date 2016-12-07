@@ -17,7 +17,7 @@ export default function mapUri(cluster, proxyPrefix) {
       port: esUrlPort,
       pathname: esUrlBasePath,
       query: esUrlQuery
-    } = parseUrl(cluster.config.url, true);
+    } = parseUrl(cluster.config('url'), true);
 
     // copy most url components directly from the elasticsearch.url
     const mappedUrlComponents = {
@@ -38,8 +38,8 @@ export default function mapUri(cluster, proxyPrefix) {
       mappedUrlComponents.query = mappedQuery;
     }
 
-    const filteredHeaders = filterHeaders(request.headers, cluster.config.requestHeadersWhitelist);
-    const mappedHeaders = setHeaders(filteredHeaders, cluster.config.customHeaders);
+    const filteredHeaders = filterHeaders(request.headers, cluster.config('requestHeadersWhitelist'));
+    const mappedHeaders = setHeaders(filteredHeaders, cluster.config('customHeaders'));
     const mappedUrl = formatUrl(mappedUrlComponents);
     done(null, mappedUrl, mappedHeaders);
   };

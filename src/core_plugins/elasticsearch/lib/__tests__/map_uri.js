@@ -17,7 +17,7 @@ describe('plugins/elasticsearch', function () {
       });
 
       return {
-        config: settings
+        config: (path) => path ? get(settings, path) : settings
       };
     }
 

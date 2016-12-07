@@ -62,8 +62,7 @@ module.exports = function (grunt) {
             },
             on_conflict: 'prefer_c1',
             blocks: {
-              write: true,
-              metadata: true
+              write: true
             }
           },
           discovery: {
