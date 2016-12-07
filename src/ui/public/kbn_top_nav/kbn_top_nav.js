@@ -98,15 +98,24 @@ module.directive('kbnTopNav', function (Private) {
       });
 
       const extensions = getNavbarExtensions($attrs.name);
-      let controls = _.get($scope, $attrs.config, []);
-      if (controls instanceof KbnTopNavController) {
-        controls.addItems(extensions);
-      } else {
-        controls = controls.concat(extensions);
-      }
 
-      $scope.kbnTopNav = new KbnTopNavController(controls);
-      $scope.kbnTopNav._link($scope, $element);
+      /**
+       * Dashboard makes some dynamic changes to the top nav so we need to watch this
+       * variable. Since the scope isn't isolate, I'm watching a variable on the scope. This
+       * is pretty ugly but without isolate scope, I don't see a better way to achieve dynamic
+       * updates.
+       */
+      $scope.$watch('topNavMenu', function () {
+        let controls = _.get($scope, $attrs.config, []);
+        if (controls instanceof KbnTopNavController) {
+          controls.addItems(extensions);
+        } else {
+          controls = controls.concat(extensions);
+        }
+
+        $scope.kbnTopNav = new KbnTopNavController(controls);
+        $scope.kbnTopNav._link($scope, $element);
+      });
 
       return $scope.kbnTopNav;
     },
