@@ -1,6 +1,38 @@
 import _ from 'lodash';
+import errors from 'ui/errors';
+import heatmapColorFunc from 'ui/vislib/components/color/heatmap_color';
 
 export default function ColumnHandler(Private) {
+
+  const getHeatmapLabels = (cfg) => {
+    const colorsNumber = cfg.colorsNumber;
+    const labels = [];
+    for (let i = 0; i < colorsNumber; i++) {
+      let label;
+      const val = Math.ceil(i * (100 / colorsNumber));
+      if (cfg.setColorRange) {
+        const greaterThan = cfg.colorsRange[i].value;
+        label = `> ${greaterThan}`;
+      } else {
+        const nextVal = Math.ceil((i + 1) * (100 / colorsNumber));
+        label = `${val}% - ${nextVal}%`;
+      }
+      labels.push(label);
+    }
+    return labels;
+  };
+
+  const getHeatmapColors = (cfg) => {
+    const colorsNumber = cfg.colorsNumber;
+    const labels = getHeatmapLabels(cfg);
+    const colors = {};
+    for (let i in labels) {
+      if (labels[i]) {
+        colors[labels[i]] = heatmapColorFunc(Math.ceil(i * 10 / colorsNumber), cfg.colorSchema);
+      }
+    }
+    return colors;
+  };
 
   const createSeries = (cfg, series) => {
     const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
@@ -104,6 +136,8 @@ export default function ColumnHandler(Private) {
         config.charts = createCharts(cfg, data.data);
       }
 
+      if (typeof config.enableHover === 'undefined') config.enableHover = true;
+
       return config;
     };
   }
@@ -140,6 +174,28 @@ export default function ColumnHandler(Private) {
           }
         }
       ]
-    })
+    }),
+
+    heatmap: (cfg, data) => {
+      const defaults = create()(cfg, data);
+      defaults.valueAxes[0].show = false;
+      defaults.categoryAxes.push({
+        id: 'CategoryAxis-2',
+        type: 'category',
+        position: 'left',
+        values: data.getLabels(),
+        labels: {
+          axisFormatter: val => val
+        },
+        title: {
+          text: data.get('yAxisLabel')
+        }
+      });
+      defaults.legend = {
+        labels: getHeatmapLabels(cfg),
+        colors: getHeatmapColors(cfg)
+      };
+      return defaults;
+    }
   };
 }

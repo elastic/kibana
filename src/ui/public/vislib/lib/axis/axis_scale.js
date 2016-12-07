@@ -130,8 +130,8 @@ export default function AxisScaleFactory(Private) {
       const max = this.axisConfig.get('scale.max') || this.getYMax();
       const domain = [min, max];
       if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
-      if (this.axisConfig.isYExtents()) return domain;
       if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
+      if (this.axisConfig.isYExtents()) return domain;
       return [Math.min(0, min), Math.max(0, max)];
     }
 

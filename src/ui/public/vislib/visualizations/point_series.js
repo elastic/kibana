@@ -33,6 +33,11 @@ export default function PointSeriesFactory(Private) {
       this.chartEl = chartEl;
       this.chartConfig = this.findChartConfig();
       this.handler.pointSeries = this;
+
+      const seriesLimit = 25;
+      if (this.chartConfig.series.length > seriesLimit) {
+        throw new errors.VislibError('There are too many series defined.');
+      }
     }
 
     findChartConfig() {
