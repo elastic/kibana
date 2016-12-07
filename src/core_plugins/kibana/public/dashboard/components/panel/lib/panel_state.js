@@ -5,7 +5,7 @@ export const DEFAULT_PANEL_HEIGHT = 2;
  * Represents a panel on a grid. Keeps track of position in the grid and what visualization it
  * contains.
  *
- * @typedef PanelState
+ * @typedef {Object} PanelState
  * @property {number} id - Id of the visualization contained in the panel.
  * @property {Element} $el - A reference to the gridster widget holding this panel. Used to
  * update the size and column attributes. TODO: move out of panel state as this couples state to ui.

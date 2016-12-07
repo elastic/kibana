@@ -3,7 +3,7 @@ import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashbo
 export class PanelUtils {
   /**
    * Fills in default parameters where not specified.
-   * @param panel {Panel}
+   * @param {PanelState} panel
    */
   static initializeDefaults(panel) {
     panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
@@ -23,7 +23,7 @@ export class PanelUtils {
 
   /**
    * Ensures that the panel object has the latest size/pos info.
-   * @param panel {Panel}
+   * @param {PanelState} panel
    */
   static refreshSizeAndPosition(panel) {
     const data = panel.$el.coords().grid;
@@ -37,7 +37,7 @@ export class PanelUtils {
    * $el is a circular structure because it contains a reference to it's parent panel,
    * so it needs to be removed before it can be serialized (we also don't
    * want it to show up in the url).
-   * @param panel
+   * @param {PanelState} panel
    */
   static makeSerializeable(panel) {
     delete panel.$el;
