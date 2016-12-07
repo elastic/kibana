@@ -1,0 +1,60 @@
+[[release-notes-5.1.1]]
+== 5.1.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.1.1]]
+=== Enhancements
+Core::
+* Improved rendering performance and responsiveness across the whole product {pull}7929[#7929]
+* Improved CPU usage when the progress indicator is present {pull}8842[#8842]
+* New loading screen {pull}8970[#8970]
+Discover::
+* Improved rendering performance on Discover app with large numbers of fields {pull}9014[#9014]
+Filters::
+* Allow more than match queries in custom filters {pull}8614[#8614]
+Management::
+* Ability to exclude specific source fields for an index pattern {pull}7402[#7402]
+* Conflicting field types of an index pattern are now visually flagged in index pattern management {pull}7990[#7990]
+* Color formatter for string fields {pull}8597[#8597]
+* Histogram interval now supports decimal {pull}8566[#8566]
+* Advanced setting for opacity when for point-series charts  {pull}8448[#8448]
+* Advanced setting to ignore filters if index does not contain field {pull}8181[#8181]
+Visualize::
+* Tag Cloud visualization {pull}8104[#8104]
+* Brush can now be used to select a subsection of a histogram {pull}9039[#9039]
+* Ability to select legend position for tile map visualizations {pull}8176[#8176]
+
+[float]
+[[bug-5.1.1]]
+=== Bug fixes
+CLI::
+* Plugin install will now fire EPERM errors in Windows less frequently {pull}9260[#9260]
+Console::
+* Console now autocompletes indexes {pull}8557[#8557]
+Core::
+* Fix bug where the loading indicator was wider than the screen {pull}8854[#8854]
+Dashboard::
+* Dashboard no longer set to dirty on load in some situations {pull}9307[#9307]
+Discover::
+* Field visualize button no longer loads incorrect URL in some situations {pull}8721[#8721]
+* Sorting on scripted date or boolean fields no longer triggers an error {pull}9261[#9261]
+Management::
+* Painless scripted fields are now wrapped in a lambda so more complex scripts are possible {pull}9171[#9171]
+* Correctly renders error when scripted field languages fail to load {pull}8639[#8639]
+Server::
+* Downgrade EPIPE errors to debug level {pull}9023[#9023]
+Timelion::
+* The "new" action no longer requires two clicks {pull}8815[#8815]
+* Secondary y-axis no longer removes config on first axis {pull}9197[#9197]
+* Correct padding for Timelion title {pull}8919[#8919]
+Visualize::
+* Bar graph order is now correct with double split terms {pull}8397[#8397]
+* Proper handling of small slices in pie chart {pull}8986[#8986]
+* Fix label on scripted field date histograms {pull}8638[#8638]
+* UTF-8 charset when exporting aggregate tables {pull}8662[#8662]
+* Fixed various typos in visualization descriptions {pull}8943[#8943]
+* Toggling spy panel no longer throws an error {pull}8877[#8877]
+* Fullscreen spy panel is no longer cut off {pull}8844[#8844]
+* Remove scripted fields from significant terms since they are unsupported {pull}8734[#8734]
