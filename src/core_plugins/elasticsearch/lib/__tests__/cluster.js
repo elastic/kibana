@@ -20,7 +20,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('persists the config', () => {
-      expect(cluster.getConfig()).to.eql(config);
+      expect(cluster.config()).to.eql(config);
     });
 
     it('exposes error definitions', () => {
@@ -37,7 +37,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('protects the config from changes', () => {
-      const localConfig = cluster.getConfig();
+      const localConfig = cluster.config();
       localConfig.requestHeadersWhitelist.push('123');
       delete localConfig.url;
       expect(localConfig).to.not.equal(config);

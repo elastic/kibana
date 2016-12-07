@@ -55,7 +55,7 @@ export default class Cluster {
       const wrap401Errors = options.wrap401Errors !== false;
 
       if (req.headers) {
-        const filteredHeaders = filterHeaders(req.headers, this.getConfig('requestHeadersWhitelist'));
+        const filteredHeaders = filterHeaders(req.headers, this.config('requestHeadersWhitelist'));
         set(clientParams, 'headers', filteredHeaders);
       }
 
@@ -85,12 +85,12 @@ export default class Cluster {
     };
   }
 
-  getConfig(path) {
+  config(path) {
     return cloneDeep(path ? get(this._config, path) : this._config);
   }
 
   createClient(options = {}) {
-    return createClient(Object.assign({}, this.getConfig(), options));
+    return createClient(Object.assign({}, this.config(), options));
   }
 
   close() {
