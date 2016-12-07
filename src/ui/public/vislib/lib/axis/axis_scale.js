@@ -188,7 +188,7 @@ export default function AxisScaleFactory(Private) {
 
       if (this.canApplyNice()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
-      if (this.visConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      if (this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 

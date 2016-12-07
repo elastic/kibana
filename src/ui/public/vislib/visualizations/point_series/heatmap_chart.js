@@ -29,7 +29,7 @@ export default function HeatmapChartFactory(Private) {
 
     addSquares(svg, data) {
       const xScale = this.getCategoryAxis().getScale();
-      const yScale = this.handler.categoryAxes[1].getScale();
+      const yScale = this.handler.valueAxes[1].getScale();
       const zScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
       const tooltip = this.baseChart.tooltip;

@@ -76,7 +76,8 @@ export default function ColumnHandler(Private) {
 
     return function (cfg, data) {
       const isUserDefinedYAxis = cfg.setYExtents;
-      const config = _.defaults({}, cfg, {
+      const config = _.cloneDeep(cfg);
+      _.defaultsDeep(config, {
         chartTitle: {},
         mode: 'normal'
       }, opts);
@@ -179,11 +180,14 @@ export default function ColumnHandler(Private) {
     heatmap: (cfg, data) => {
       const defaults = create()(cfg, data);
       defaults.valueAxes[0].show = false;
-      defaults.categoryAxes.push({
+      defaults.valueAxes.push({
         id: 'CategoryAxis-2',
         type: 'category',
         position: 'left',
         values: data.getLabels(),
+        scale: {
+          inverted: true
+        },
         labels: {
           axisFormatter: val => val
         },

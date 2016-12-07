@@ -38,6 +38,20 @@
   </div>
 
   <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="axisScale">
+      Z Axis Scale
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="axisScale"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.scale"
+        ng-options="mode for mode in vis.type.params.scales"
+      ></select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="defaultYExtents">
       Scale to Data Bounds
     </label>
