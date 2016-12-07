@@ -61,7 +61,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           min_cols: COLS,
           autogenerate_stylesheet: false,
           resize: {
-            enabled: $scope.dashboardViewMode === DashboardViewMode.EDIT,
+            enabled: true,
             stop: readGridsterChangeHandler
           },
           draggable: {
@@ -84,6 +84,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           gridster.disable().disable_resize();
         });
         binder.jqOn($el, 'mouseup', function enableResize() {
+          gridster.enable();
           setResizeCapability();
         });
 

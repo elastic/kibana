@@ -107,13 +107,33 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.dashboardViewMode = dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT;
+      const viewModeStateKey = 'dash.dashboardViewMode';
+
+      const updateViewEnableState = (topNav) => {
+        if ($scope.dashboardViewMode === DashboardViewMode.EDIT) {
+          const config = topNav.find((config) => {
+            return config.key === 'view mode';
+          });
+          config.disableButton = $state.panels.length === 0;
+        }
+        return topNav;
+      };
 
       const changeViewMode = (newMode) => {
+        $uiState.set(viewModeStateKey, newMode);
         $scope.dashboardViewMode = newMode;
-        $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+        $scope.topNavMenu = updateViewEnableState(getTopNavConfig(newMode, kbnUrl, changeViewMode));
       };
-      changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
+
+      if ($uiState.get(viewModeStateKey)) {
+        changeViewMode($uiState.get(viewModeStateKey));
+      } else {
+        changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
+      }
+
+      $scope.$watchCollection('state.panels', () => {
+        $scope.topNavMenu = updateViewEnableState(getTopNavConfig($scope.dashboardViewMode, kbnUrl, changeViewMode));
+      });
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -195,6 +215,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // update data when filters fire fetch event
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+
+      $scope.getDashTitle = function () {
+        const isEditMode = $scope.dashboardViewMode === DashboardViewMode.EDIT;
+        return isEditMode ? 'Edit ' + dash.lastSavedTitle : dash.lastSavedTitle;
+      };
 
       $scope.newDashboard = function () {
         kbnUrl.change('/dashboard', {});
