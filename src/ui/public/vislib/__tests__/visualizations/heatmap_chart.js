@@ -22,12 +22,14 @@ const dataTypesArray = [
   ['stackedSeries', stackedSeries],
 ];
 
-describe('Vislib Heatmap Cyart Test Suite', function () {
+describe('Vislib Heatmap Chart Test Suite', function () {
   dataTypesArray.forEach(function (dataType, i) {
     const name = dataType[0];
     const data = dataType[1];
 
     describe('for ' + name + ' Data', function () {
+      let PersistedState;
+      let vislibVis;
       let vis;
       let persistedState;
       const visLibParams = {
@@ -36,14 +38,23 @@ describe('Vislib Heatmap Cyart Test Suite', function () {
         addTooltip: true,
         colorsNumber: 4,
         colorSchema: 'yellow to red',
+        setColorRange: false,
+        colorsRange: []
       };
+
+      function generateVis(opts = {}) {
+        const config = _.defaultsDeep({}, opts, visLibParams);
+        vis = vislibVis(config);
+        persistedState = new PersistedState();
+        vis.on('brush', _.noop);
+        vis.render(data, persistedState);
+      }
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
-        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
-        vis.on('brush', _.noop);
-        vis.render(data, persistedState);
+        vislibVis = Private(FixturesVislibVisFixtureProvider);
+        PersistedState = Private(PersistedStatePersistedStateProvider);
+        generateVis();
       }));
 
       afterEach(function () {
@@ -121,6 +132,22 @@ describe('Vislib Heatmap Cyart Test Suite', function () {
             expect(domain[1]).to.not.be(undefined);
           });
         });
+      });
+
+      it('should define default colors', function () {
+        expect(persistedState.get('vis.defaultColors')).to.not.be(undefined);
+      });
+
+      it('should set custom range', function () {
+        generateVis({
+          setColorRange: true,
+          colorsRange: [{ value: 0}, { value: 200 }, { value: 400 }, { value: 500 }]
+        });
+        const labels = vis.getLegendLabels();
+        expect(labels[0]).to.be('> 0');
+        expect(labels[1]).to.be('> 200');
+        expect(labels[2]).to.be('> 400');
+        expect(labels[3]).to.be('> 500');
       });
     });
   });
