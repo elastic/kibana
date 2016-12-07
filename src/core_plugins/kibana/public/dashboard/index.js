@@ -112,7 +112,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const updateViewEnableState = (topNav) => {
         if ($scope.dashboardViewMode === DashboardViewMode.EDIT) {
           const config = topNav.find((config) => {
-            return config.key === 'view mode';
+            return config.key === 'view';
           });
           config.disableButton = $state.panels.length === 0;
         }
