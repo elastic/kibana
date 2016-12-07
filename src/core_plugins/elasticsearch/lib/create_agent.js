@@ -4,24 +4,23 @@ const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 import http from 'http';
 import https from 'https';
 
-module.exports = _.memoize(function (server) {
-  const config = server.config();
-  const target = url.parse(config.get('elasticsearch.url'));
+module.exports = _.memoize(function (cluster) {
+  const target = url.parse(cluster.config('url'));
 
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
   const agentOptions = {
-    rejectUnauthorized: config.get('elasticsearch.ssl.verify')
+    rejectUnauthorized: cluster.config('ssl.verify')
   };
 
-  if (_.size(config.get('elasticsearch.ssl.ca'))) {
-    agentOptions.ca = config.get('elasticsearch.ssl.ca').map(readFile);
+  if (_.size(cluster.config('ssl.ca'))) {
+    agentOptions.ca = cluster.config('ssl.ca').map(readFile);
   }
 
   // Add client certificate and key if required by elasticsearch
-  if (config.get('elasticsearch.ssl.cert') && config.get('elasticsearch.ssl.key')) {
-    agentOptions.cert = readFile(config.get('elasticsearch.ssl.cert'));
-    agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
+  if (cluster.config('ssl.cert') && cluster.config('ssl.key')) {
+    agentOptions.cert = readFile(cluster.config('ssl.cert'));
+    agentOptions.key = readFile(cluster.config('ssl.key'));
   }
 
   return new https.Agent(agentOptions);
