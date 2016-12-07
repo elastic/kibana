@@ -54,6 +54,7 @@ class TagCloud extends EventEmitter {
 
     //UTIL
     this._handle = null;
+    this._layoutUpdating = false;
     this._queue = [];
     this._allInViewBox = false;
     this._inFlight = false;
@@ -119,7 +120,9 @@ class TagCloud extends EventEmitter {
   _processQueue() {
 
     if (!this._queue.length) {
-      this.emit('renderComplete');
+      if (!this._handle && !this._layoutUpdating) { // make sure no new configuration is coming
+        this.emit('renderComplete');
+      }
       return;
     }
 
@@ -203,12 +206,18 @@ class TagCloud extends EventEmitter {
     let moves = 0;
     const resolveWhenDone = () => {
       if (exits === 0 && moves === 0) {
-        const cloudBBox = this._svgGroup[0][0].getBBox();
-        this._cloudWidth = cloudBBox.width;
-        this._cloudHeight = cloudBBox.height;
-        this._allInViewBox = cloudBBox.x >= 0 && cloudBBox.y >= 0 &&
-          cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
-          cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
+        try {
+          const cloudBBox = this._svgGroup[0][0].getBBox();
+          this._cloudWidth = cloudBBox.width;
+          this._cloudHeight = cloudBBox.height;
+          this._allInViewBox = cloudBBox.x >= 0 && cloudBBox.y >= 0 &&
+            cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
+            cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
+        } catch (e) {
+          // Firefox will throw an exception if getBBox is called on an element that is
+          // not part of the DOM. In rare cases (mainly test situations), the tag cloud
+          // has been deleted but jobs are still being worked on.
+        }
 
         this._inFlight = false;
         this._currentJob = job;
@@ -278,6 +287,7 @@ class TagCloud extends EventEmitter {
   }
 
   _updateLayout() {
+    this._layoutUpdating = true;
 
     const job = this._makeJob();
     const mapSizeToFontSize = this._makeTextSizeMapper();
@@ -297,7 +307,10 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
-    tagCloudLayoutGenerator.on('end', () => this._scheduleLayout(job));
+    tagCloudLayoutGenerator.on('end', () => {
+      this._layoutUpdating = false;
+      this._scheduleLayout(job);
+    });
     tagCloudLayoutGenerator.start();
   }
 
