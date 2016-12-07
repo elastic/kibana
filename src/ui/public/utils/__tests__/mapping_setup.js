@@ -23,9 +23,9 @@ describe('ui/utils/mapping_setup', function () {
     });
 
     context('when type is json', function () {
-      it('returned object is type keyword', function () {
+      it('returned object is type text', function () {
         const mapping = mappingSetup.expandShorthand({ foo: 'json' });
-        expect(mapping.foo.type).to.be('keyword');
+        expect(mapping.foo.type).to.be('text');
       });
 
       it('returned object has _serialize function', function () {
