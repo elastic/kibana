@@ -11,6 +11,7 @@
         ng-options="mode for mode in vis.type.params.colorSchemas"
       ></select>
     </div>
+    <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
   </div>
 
   <div class="kuiSideBarFormRow">
@@ -27,20 +28,6 @@
         class="kuiInput kuiSideBarInput"
         ng-model="vis.params.colorsNumber"
       />
-    </div>
-  </div>
-
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="axisScale">
-      Z Axis Scale
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <select
-        id="axisScale"
-        class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.scale"
-        ng-options="mode for mode in vis.type.params.scales"
-      ></select>
     </div>
   </div>
 
@@ -84,6 +71,7 @@
               ng-model="color.value"
               type="number"
               ng-required="vis.params.setColorRange"
+              greater-than="{{getGreaterThan($index)}}"
             >
           </div>
         </div>

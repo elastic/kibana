@@ -1,15 +1,26 @@
 import uiModules from 'ui/modules';
-import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatmap_range_option.html';
+import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatmap_options.html';
 import colorFunc from 'ui/vislib/components/color/heatmap_color';
 const module = uiModules.get('kibana');
 
-module.directive('heatmapOptions', function ($parse, $compile) {
+module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
   return {
     restrict: 'E',
     template: heatmapOptionsTemplate,
     replace: true,
     link: function ($scope) {
       $scope.isColorRangeOpen = false;
+      $scope.customColors = false;
+
+      $scope.resetColors = () => {
+        $scope.uiState.set('vis.colors', null);
+        $scope.customColors = false;
+      };
+
+      $scope.getGreaterThan = function (index) {
+        if (index === 0) return -1;
+        return $scope.vis.params.colorsRange[index - 1].value;
+      };
 
       $scope.getColor = function (index) {
         const colors = $scope.uiState.get('vis.colors');
@@ -31,8 +42,12 @@ module.directive('heatmapOptions', function ($parse, $compile) {
       });
 
       $scope.uiState.on('colorChanged', () => {
+        $scope.customColors = true;
+        /*const appState = getAppState();
         $scope.realVis.params.colorSchema = 'custom';
         $scope.vis.params.colorSchema = 'custom';
+        appState.vis.params.colorSchema = 'custom';
+        appState.save();*/
       });
     }
   };
