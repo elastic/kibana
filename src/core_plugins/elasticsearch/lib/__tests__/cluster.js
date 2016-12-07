@@ -20,7 +20,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('persists the config', () => {
-      expect(cluster.config).to.eql(config);
+      expect(cluster.getConfig()).to.eql(config);
     });
 
     it('exposes error definitions', () => {
@@ -34,6 +34,14 @@ describe('plugins/elasticsearch', function () {
 
       sinon.assert.calledOnce(cluster._client.close);
       sinon.assert.calledOnce(cluster._noAuthClient.close);
+    });
+
+    it('protects the config from changes', () => {
+      const localConfig = cluster.getConfig();
+      localConfig.requestHeadersWhitelist.push('123');
+      delete localConfig.url;
+      expect(localConfig).to.not.equal(config);
+      expect(localConfig.requestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
     });
 
     describe('callAsKibanaUserFactory', () => {

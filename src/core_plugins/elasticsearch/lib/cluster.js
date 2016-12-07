@@ -1,5 +1,5 @@
 import elasticsearch from 'elasticsearch';
-import { bindKey, partial, get, set, isEmpty } from 'lodash';
+import { bindKey, partial, get, set, isEmpty, cloneDeep  } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Promise from 'bluebird';
 import Boom from 'boom';
@@ -9,7 +9,7 @@ import filterHeaders from './filter_headers';
 
 export default class Cluster {
   constructor(config) {
-    this.config = Object.assign({}, config);
+    this._config = Object.assign({}, config);
     this.errors = elasticsearch.errors;
 
     this._client = this.createClient();
@@ -55,7 +55,7 @@ export default class Cluster {
       const wrap401Errors = options.wrap401Errors !== false;
 
       if (req.headers) {
-        const filteredHeaders = filterHeaders(req.headers, this.config.requestHeadersWhitelist);
+        const filteredHeaders = filterHeaders(req.headers, this.getConfig('requestHeadersWhitelist'));
         set(clientParams, 'headers', filteredHeaders);
       }
 
@@ -85,8 +85,12 @@ export default class Cluster {
     };
   }
 
+  getConfig(path) {
+    return cloneDeep(path ? get(this._config, path) : this._config);
+  }
+
   createClient(options = {}) {
-    return createClient(Object.assign({}, this.config, options));
+    return createClient(Object.assign({}, this.getConfig(), options));
   }
 
   close() {
