@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import html from 'ui/visualize/visualize_legend.html';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibComponentsColorColorProvider from 'ui/vis/components/color/color';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import uiModules from 'ui/modules';
 
@@ -9,7 +8,6 @@ import uiModules from 'ui/modules';
 uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
   const Data = Private(VislibLibDataProvider);
-  const colorPalette = Private(VislibComponentsColorColorProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
   return {
@@ -23,6 +21,12 @@ uiModules.get('kibana')
       $scope.$watch('renderbot.chartData', function (data) {
         if (!data) return;
         $scope.data = data;
+        refresh();
+      });
+
+      $scope.uiState.on('change', refresh);
+
+      $scope.$watch('renderbot.vislibParams', () => {
         refresh();
       });
 
@@ -49,9 +53,11 @@ uiModules.get('kibana')
 
       $scope.setColor = function (label, color) {
         const colors = $scope.uiState.get('vis.colors') || {};
-        colors[label] = color;
+        if (colors[label] === color) delete colors[label];
+        else colors[label] = color;
+        $scope.uiState.setSilent('vis.colors', null);
         $scope.uiState.set('vis.colors', colors);
-        refresh();
+        $scope.uiState.emit('colorChanged');
       };
 
       $scope.toggleLegend = function () {
@@ -98,14 +104,28 @@ uiModules.get('kibana')
       ];
 
       function refresh() {
+        if (!$scope.renderbot) return;
         const vislibVis = $scope.renderbot.vislibVis;
 
         if ($scope.uiState.get('vis.legendOpen') == null && $scope.vis.params.addLegend != null) {
           $scope.open = $scope.vis.params.addLegend;
         }
 
-        $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
-        $scope.getColor = colorPalette(_.pluck($scope.labels, 'label'), $scope.uiState.get('vis.colors'));
+        if (vislibVis.visConfigArgs.type === 'heatmap') {
+          const labels = vislibVis.getLegendLabels();
+          if (labels) {
+            $scope.labels = _.map(labels, label => { return { label: label }; });
+          } else {
+            $scope.labels = [{ label: 'loading ...' }];
+            $timeout(refresh, 100);
+          }
+        } else {
+          $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
+        }
+
+        if (vislibVis.visConfig) {
+          $scope.getColor = vislibVis.visConfig.data.getColorFunc();
+        }
       }
 
       // Most of these functions were moved directly from the old Legend class. Not a fan of this.
@@ -125,8 +145,6 @@ uiModules.get('kibana')
         }, []);
         return _.compact(_.uniq(values, 'label'));
       }
-
-
     }
   };
 });

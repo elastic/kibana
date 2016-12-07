@@ -406,7 +406,10 @@ export default function DataFactory(Private) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     getColorFunc() {
-      return color(this.getLabels(), this.uiState.get('vis.colors'));
+      const defaultColors = this.uiState.get('vis.defaultColors');
+      const overwriteColors = this.uiState.get('vis.colors');
+      const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
+      return color(this.getLabels(), colors);
     }
 
     /**
