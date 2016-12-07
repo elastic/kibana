@@ -18,10 +18,15 @@ require('plugins/kibana/management/saved_object_registry').register({
 
 module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
   const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, es, kbnUrl);
+  // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
     noun: 'Saved Search',
     nouns: 'saved searches'
+  };
+
+  savedSearchLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/discover/{{id}}', {id: id});
   };
   return savedSearchLoader;
 });

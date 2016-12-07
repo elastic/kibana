@@ -2,31 +2,34 @@ import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
-// This is the only thing that gets injected into controllers
-//module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl) {
 export function SavedObjectLoader(SavedObjectClass, kbnIndex, es, kbnUrl) {
   this.type = SavedObjectClass.type;
   this.Class = SavedObjectClass;
 
+  const lowercaseType = this.type.toLowerCase();
   const scanner = new Scanner(es, {
     index: kbnIndex,
-    type: this.type.toLowerCase()
+    type: lowercaseType
   });
 
   this.loaderProperties = {
-    name: this.type.toLowerCase() + 's',
+    name: `${lowercaseType}s`,
     noun: StringUtils.upperFirst(this.type),
-    nouns: this.type.toLowerCase() + 's'
+    nouns: `${lowercaseType}s`,
   };
 
-  // Returns a single object by id.
+  /**
+   * Retrieve a saved object by id. Returns a promise that completes when the object finishes
+   * initializing.
+   * @param id
+   * @returns {Promise<SavedObject>}
+   */
   this.get = (id) => {
-    // Returns a promise that contains a dashboard which is a subclass of docSource
     return (new this.Class(id)).init();
   };
 
   this.urlFor = function (id) {
-    return kbnUrl.eval(`#/${this.type.toLowerCase()}/{{id}}`, {id: id});
+    return kbnUrl.eval(`#/${lowercaseType}/{{id}}`, {id: id});
   };
 
   this.delete = function (ids) {
