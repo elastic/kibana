@@ -17,6 +17,7 @@ import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
+import { DashboardConsts } from 'plugins/kibana/dashboard/dashboard_consts';
 
 uiRoutes
 .when('/visualize/create', {
@@ -173,18 +174,25 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+    $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
+
+
+    // Don't save this mode to the uiState, it's a one time flow only, if you break out of the
+    // flow you should no longer be in the mode.
+    $location.search(DashboardConsts.ADD_TO_DASH_PARAM, null);
 
     // Associate PersistedState instance with the Vis instance, so that
     // `uiStateVal` can be called on it. Currently this is only used to extract
     // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
 
+    $scope.isAddToDashMode = () => { return $scope.addToDashMode; };
     $scope.timefilter = timefilter;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -305,10 +313,9 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if ($route.current.params.addToDash) {
+        if ($scope.addToDashMode) {
           const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
-          window.location.href = `${dashboardBaseUrl.lastSubUrl}&addVis=${savedVis.id}`;
-//          kbnUrl.change(`${dashboardBaseUrl.lastSubUrl}&addVis={{id}}`, {id: savedVis.id});
+          window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConsts.ADD_VIS_PARAM}=${savedVis.id}`;
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
