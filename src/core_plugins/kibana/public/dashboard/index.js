@@ -109,7 +109,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       const viewModeStateKey = 'dash.dashboardViewMode';
 
-      const updateViewEnableState = (topNav) => {
+      const updateViewEnabledState = (topNav) => {
         if ($scope.dashboardViewMode === DashboardViewMode.EDIT) {
           const config = topNav.find((config) => {
             return config.key === 'view';
@@ -122,7 +122,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const changeViewMode = (newMode) => {
         $uiState.set(viewModeStateKey, newMode);
         $scope.dashboardViewMode = newMode;
-        $scope.topNavMenu = updateViewEnableState(getTopNavConfig(newMode, kbnUrl, changeViewMode));
+        $scope.topNavMenu = updateViewEnabledState(getTopNavConfig(newMode, kbnUrl, changeViewMode));
       };
 
       if ($uiState.get(viewModeStateKey)) {
@@ -131,8 +131,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
       }
 
+      // TODO: Don't refresh the nav like this, it causes the nav to be rebuilt on every panel add or
+      // remove which forces the add panel closed and breaks tests.
       $scope.$watchCollection('state.panels', () => {
-        $scope.topNavMenu = updateViewEnableState(getTopNavConfig($scope.dashboardViewMode, kbnUrl, changeViewMode));
+        $scope.topNavMenu = updateViewEnabledState(getTopNavConfig($scope.dashboardViewMode, kbnUrl, changeViewMode));
       });
 
       $scope.refresh = _.bindKey(courier, 'fetch');
