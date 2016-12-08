@@ -35,7 +35,7 @@ function createProxy(server, method, path, config) {
       handler: {
         proxy: {
           mapUri: mapUri(cluster, proxyPrefix),
-          agent: createAgent(cluster),
+          agent: createAgent(cluster.config()),
           xforward: true,
           timeout: server.config().get('elasticsearch.requestTimeout'),
           onResponse: responseHandler
