@@ -37,8 +37,10 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         addLegend: true,
         addTooltip: true,
         colorsNumber: 4,
-        colorSchema: 'yellow to red',
+        colorSchema: 'Greens',
         setColorRange: false,
+        percentageMode: true,
+        invertColors: false,
         colorsRange: []
       };
 
@@ -139,6 +141,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
       });
 
       it('should set custom range', function () {
+        vis.destroy();
         generateVis({
           setColorRange: true,
           colorsRange: [{ value: 0}, { value: 200 }, { value: 400 }, { value: 500 }]

@@ -52,10 +52,10 @@ describe('Vislib Heatmap Color Module Test Suite', function () {
   });
 
   it('should return a color for numbers from 0 to 9', function () {
-    const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    const schema = 'reds';
+    const colorRegex = /^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/;
+    const schema = 'Greens';
     for (let i = 0; i < 10; i++) {
-      expect(getColors(i, schema)).to.match(colorRegex);
+      expect(getColors(i / 10, schema)).to.match(colorRegex);
     }
   });
 

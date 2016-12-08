@@ -237,7 +237,7 @@ export default function HeatmapChartFactory(Private) {
         squares.call(tooltip.render());
       }
 
-      return squares;
+      return squares.selectAll('rect');
     };
 
     /**

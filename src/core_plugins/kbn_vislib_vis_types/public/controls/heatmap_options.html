@@ -76,11 +76,11 @@
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
-        ng-click="isColorRangeOpen = !isColorRangeOpen"
+        ng-click="vis.params.setColorRange = !vis.params.setColorRange"
       >
         <span
           aria-hidden="true"
-          ng-class="{ 'fa-caret-down': isColorRangeOpen, 'fa-caret-right': !isColorRangeOpen }"
+          ng-class="{ 'fa-caret-down': vis.params.setColorRange, 'fa-caret-right': !vis.params.setColorRange }"
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
@@ -94,7 +94,7 @@
       >
     </div>
 
-    <div ng-if="vis.params.setColorRange" ng-show="isColorRangeOpen" class="kuiSideBarCollapsibleSection">
+    <div ng-if="vis.params.setColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow" ng-repeat="color in vis.params.colorsRange track by $index">
           <label class="kuiSideBarFormRow__label" for="{{ 'colorRange' + $index }}">
@@ -121,11 +121,14 @@
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
-        ng-click="isLabelsOpen = !isLabelsOpen"
+        ng-click="vis.params.valueAxes[0].labels.show = !vis.params.valueAxes[0].labels.show"
       >
         <span
           aria-hidden="true"
-          ng-class="{ 'fa-caret-down': isLabelsOpen, 'fa-caret-right': !isLabelsOpen }"
+          ng-class="{
+          'fa-caret-down': vis.params.valueAxes[0].labels.show,
+          'fa-caret-right': !vis.params.valueAxes[0].labels.show
+          }"
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
@@ -138,7 +141,7 @@
              class="kuiSideBarSectionTitle__action"
       >
     </div>
-    <div ng-if="vis.params.valueAxes[0].labels.show" ng-show="isLabelsOpen" class="kuiSideBarCollapsibleSection">
+    <div ng-if="vis.params.valueAxes[0].labels.show" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="rotateLabels">

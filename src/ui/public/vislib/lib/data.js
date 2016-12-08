@@ -46,6 +46,7 @@ export default function DataFactory(Private) {
                   newVal.aggConfig = val.aggConfig;
                   newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
+                  newVal.series = val.series || seri.label;
                   return newVal;
                 })
               };
