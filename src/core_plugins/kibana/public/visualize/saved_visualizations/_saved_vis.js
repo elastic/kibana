@@ -55,7 +55,7 @@ uiModules
   SavedVis.mapping = {
     title: 'text',
     visState: 'json',
-    uiStateJSON: 'keyword',
+    uiStateJSON: 'text',
     description: 'text',
     savedSearchId: 'keyword',
     version: 'integer'
