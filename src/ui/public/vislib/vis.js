@@ -68,12 +68,6 @@ export default function VisFactory(Private) {
 
       this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
 
-      const colors = this.getLegendColors();
-      if (colors) {
-        this.uiState.setSilent('vis.defaultColors', null);
-        this.uiState.setSilent('vis.defaultColors', colors);
-      }
-
       this.handler = new Handler(this, this.visConfig);
       this._runWithoutResizeChecker('render');
     }

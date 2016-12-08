@@ -9,7 +9,7 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
     template: heatmapOptionsTemplate,
     replace: true,
     link: function ($scope) {
-      $scope.isColorRangeOpen = false;
+      $scope.isColorRangeOpen = true;
       $scope.customColors = false;
 
       $scope.resetColors = () => {
@@ -43,11 +43,6 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
 
       $scope.uiState.on('colorChanged', () => {
         $scope.customColors = true;
-        /*const appState = getAppState();
-        $scope.realVis.params.colorSchema = 'custom';
-        $scope.vis.params.colorSchema = 'custom';
-        appState.vis.params.colorSchema = 'custom';
-        appState.save();*/
       });
     }
   };

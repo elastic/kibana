@@ -24,9 +24,12 @@ export default function HeatmapVisType(Private) {
         defaultYExtents: false,
         setYExtents: false,
         colorsNumber: 4,
-        colorSchema: 'yellow to red',
+        colorSchema: 'Greens',
         setColorRange: false,
         colorsRange: [],
+        invertColors: false,
+        percentageMode: true,
+        cellLabels: false,
       },
       legendPositions: [{
         value: 'left',
@@ -42,7 +45,8 @@ export default function HeatmapVisType(Private) {
         text: 'bottom',
       }],
       scales: ['linear', 'log', 'square root'],
-      colorSchemas: ['yellow to red', 'reds', 'greens', 'blues', 'custom'],
+      colorSchemas: ['Blues', 'Greens', 'Greys', 'Reds', 'YlOrRd', 'autumn', 'bone',
+        'hot', 'coolwarm', 'Spectral', 'gist_earth', 'terrain', 'gnuplot', 'jet'],
       editor: heatmapTemplate
     },
     schemas: new Schemas([

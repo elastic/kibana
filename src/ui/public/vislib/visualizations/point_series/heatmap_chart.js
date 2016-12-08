@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
-import colorFunc from 'ui/vislib/components/color/heatmap_color';
+import heatmapColorFunc from 'ui/vislib/components/color/heatmap_color';
 
 export default function HeatmapChartFactory(Private) {
 
@@ -25,7 +25,68 @@ export default function HeatmapChartFactory(Private) {
     constructor(handler, chartEl, chartData, seriesConfigArgs) {
       super(handler, chartEl, chartData, seriesConfigArgs);
       this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
+
+      this.handler.visConfig.set('legend', {
+        labels: this.getHeatmapLabels(this.handler.visConfig),
+        colors: this.getHeatmapColors(this.handler.visConfig)
+      });
+
+      const colors = this.handler.visConfig.get('legend.colors', null);
+      if (colors) {
+        this.handler.vis.uiState.setSilent('vis.defaultColors', null);
+        this.handler.vis.uiState.setSilent('vis.defaultColors', colors);
+      }
     }
+
+    getHeatmapLabels(cfg) {
+      const percentageMode = cfg.get('percentageMode');
+      const colorsNumber = cfg.get('colorsNumber');
+      const colorsRange = cfg.get('colorsRange');
+      const zScale = this.getValueAxis().getScale();
+      const [min, max] = zScale.domain();
+      const labels = [];
+      for (let i = 0; i < colorsNumber; i++) {
+        let label;
+
+        if (cfg.get('setColorRange')) {
+          const greaterThan = colorsRange[i].value;
+          label = `> ${greaterThan}`;
+        } else {
+          let val = i / colorsNumber;
+          let nextVal = (i + 1) / colorsNumber;
+          if (percentageMode) {
+            val = Math.ceil(val * 100);
+            nextVal = Math.ceil(nextVal * 100);
+            label = `${val}% - ${nextVal}%`;
+          } else {
+            val = val * (max - min) + min;
+            nextVal = nextVal * (max - min) + min;
+            if (max > 1) {
+              val = Math.ceil(val);
+              nextVal = Math.ceil(nextVal);
+            }
+            label = `${val} - ${nextVal}`;
+          }
+        }
+        labels.push(label);
+      }
+      return labels;
+    };
+
+    getHeatmapColors(cfg) {
+      const colorsNumber = cfg.get('colorsNumber');
+      const invertColors = cfg.get('invertColors');
+      const colorSchema = cfg.get('colorSchema');
+      const labels = this.getHeatmapLabels(cfg);
+      const colors = {};
+      for (let i in labels) {
+        if (labels[i]) {
+          const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
+          colors[labels[i]] = heatmapColorFunc(val, colorSchema);
+        }
+      }
+      return colors;
+    };
 
     addSquares(svg, data) {
       const xScale = this.getCategoryAxis().getScale();
@@ -39,6 +100,7 @@ export default function HeatmapChartFactory(Private) {
       const setColorRange = this.handler.visConfig.get('setColorRange');
       const colorsRange = this.handler.visConfig.get('colorsRange');
       const color = this.handler.data.getColorFunc();
+      const labels = this.handler.visConfig.get('legend.labels');
 
       const layer = svg.append('g')
         .attr('class', 'series');
@@ -89,17 +151,7 @@ export default function HeatmapChartFactory(Private) {
 
       function label(d) {
         const colorBucket = getColorBucket(d);
-        let label;
-        if (colorBucket < 0) return '';
-        const val = Math.ceil(colorBucket * (100 / colorsNumber));
-        if (setColorRange) {
-          const greaterThan = colorsRange[colorBucket].value;
-          label = `> ${greaterThan}`;
-        } else {
-          const nextVal = Math.ceil((colorBucket + 1) * (100 / colorsNumber));
-          label = `${val}% - ${nextVal}%`;
-        }
-        return label;
+        return labels[colorBucket];
       }
 
       function z(d) {
