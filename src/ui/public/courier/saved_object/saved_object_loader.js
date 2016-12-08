@@ -2,21 +2,26 @@ import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
-export function SavedObjectLoader(SavedObjectClass, kbnIndex, es, kbnUrl) {
-  this.type = SavedObjectClass.type;
-  this.Class = SavedObjectClass;
+export class SavedObjectLoader {
+  constructor(SavedObjectClass, kbnIndex, es, kbnUrl) {
+    this.type = SavedObjectClass.type;
+    this.Class = SavedObjectClass;
+    this.lowercaseType = this.type.toLowerCase();
+    this.kbnIndex = kbnIndex;
+    this.kbnUrl = kbnUrl;
+    this.es = es;
 
-  const lowercaseType = this.type.toLowerCase();
-  const scanner = new Scanner(es, {
-    index: kbnIndex,
-    type: lowercaseType
-  });
+    this.scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: this.lowercaseType
+    });
 
-  this.loaderProperties = {
-    name: `${lowercaseType}s`,
-    noun: StringUtils.upperFirst(this.type),
-    nouns: `${lowercaseType}s`,
-  };
+    this.loaderProperties = {
+      name: `${this.lowercaseType}s`,
+      noun: StringUtils.upperFirst(this.type),
+      nouns: `${this.lowercaseType}s`,
+    };
+  }
 
   /**
    * Retrieve a saved object by id. Returns a promise that completes when the object finishes
@@ -24,36 +29,44 @@ export function SavedObjectLoader(SavedObjectClass, kbnIndex, es, kbnUrl) {
    * @param id
    * @returns {Promise<SavedObject>}
    */
-  this.get = (id) => {
+  get(id) {
     return (new this.Class(id)).init();
   };
 
-  this.urlFor = function (id) {
-    return kbnUrl.eval(`#/${lowercaseType}/{{id}}`, {id: id});
+  urlFor(id) {
+    return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, {id: id});
   };
 
-  this.delete = function (ids) {
+  delete(ids) {
     ids = !_.isArray(ids) ? [ids] : ids;
     return Promise.map(ids, (id) => {
       return (new this.Class(id)).delete();
     });
   };
 
-  this.mapHits = (hit) => {
+  mapHits(hit) {
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
     return source;
   };
 
-  this.scanAll = (queryString, pageSize = 1000) => {
-    return scanner.scanAndMap(queryString, {
+  scanAll(queryString, pageSize = 1000) {
+    return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
     }, (hit) => this.mapHits(hit));
   };
 
-  this.find = (searchString, size = 100) => {
+  /**
+   * TODO: Rather than use a hardcoded limit, implement pagination. See
+   * https://github.com/elastic/kibana/issues/8044 for reference.
+   *
+   * @param searchString
+   * @param size
+   * @returns {Promise}
+   */
+  find(searchString, size = 100) {
     let body;
     if (searchString) {
       body = {
@@ -69,8 +82,8 @@ export function SavedObjectLoader(SavedObjectClass, kbnIndex, es, kbnUrl) {
       body = { query: {match_all: {}}};
     }
 
-    return es.search({
-      index: kbnIndex,
+    return this.es.search({
+      index: this.kbnIndex,
       type: this.type.toLowerCase(),
       body: body,
       size: size
@@ -82,4 +95,4 @@ export function SavedObjectLoader(SavedObjectClass, kbnIndex, es, kbnUrl) {
         };
       });
   };
-};
+}
