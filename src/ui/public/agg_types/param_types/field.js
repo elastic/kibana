@@ -20,6 +20,7 @@ export default function FieldAggParamFactory(Private, $filter) {
   FieldAggParam.prototype.filterFieldTypes = '*';
   // retain only the fields with the aggregatable property if the onlyAggregatable option is true
   FieldAggParam.prototype.onlyAggregatable = true;
+  // show a warning about the field being analyzed
   FieldAggParam.prototype.showAnalyzedWarning = true;
 
   /**
