@@ -7,7 +7,7 @@
       <div data-transclude-slot="topLeftCorner" class="localBreadcrumbs">
         <div class="localBreadcrumb">
           <span ng-show="opts.savedSearch.id" class="localBreadcrumb__emphasis">
-            <span data-test-subj="discoverCurrentQuery" ng-bind="::opts.savedSearch.title"></span>
+            <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
             <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
           </span>
           <span data-test-subj="discoverQueryHits" class="localBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
@@ -125,7 +125,8 @@
                 sorting="state.sort"
                 columns="state.columns"
                 infinite-scroll="true"
-                filter="filterQuery">
+                filter="filterQuery"
+                render-counter>
               </doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">

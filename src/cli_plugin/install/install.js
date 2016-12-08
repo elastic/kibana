@@ -2,8 +2,8 @@ import { download } from './download';
 import Promise from 'bluebird';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
+import { renamePlugin } from './rename';
 import { sync as rimrafSync } from 'rimraf';
-import { renameSync } from 'fs';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import mkdirp from 'mkdirp';
 
@@ -27,7 +27,7 @@ export default async function install(settings, logger) {
 
     assertVersion(settings);
 
-    renameSync(settings.workingPath, settings.plugins[0].path);
+    await renamePlugin(settings.workingPath, settings.plugins[0].path);
 
     await rebuildCache(settings, logger);
 

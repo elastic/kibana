@@ -147,16 +147,7 @@
         </p>
 
         <p>
-          Kibana currently imposes one special limitation on the scripts you write. Your scripts must consist of a single expression. Multi-statement scripts with an explicit return statement will not work.
-          In other words, the above example is a valid script, but something like the following is not.
-        </p>
-
-        <p>
-          <strong>Invalid</strong><br/>
-          <code>
-            def myField = doc['some_field'].value;<br/>
-            return myField;
-          </code>
+          Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
         </p>
 
         <p>

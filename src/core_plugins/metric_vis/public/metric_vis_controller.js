@@ -5,7 +5,7 @@ import uiModules from 'ui/modules';
 // didn't already
 const module = uiModules.get('kibana/metric_vis', ['kibana']);
 
-module.controller('KbnMetricVisController', function ($scope, Private) {
+module.controller('KbnMetricVisController', function ($scope, $element, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   const metrics = $scope.metrics = [];
@@ -34,7 +34,7 @@ module.controller('KbnMetricVisController', function ($scope, Private) {
     if (resp) {
       metrics.length = 0;
       $scope.processTableGroups(tabifyAggResponse($scope.vis, resp));
-      $scope.vis.emit('renderComplete');
+      $element.trigger('renderComplete');
     }
   });
 });

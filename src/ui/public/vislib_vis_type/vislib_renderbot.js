@@ -24,10 +24,6 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
       this.vislibVis.on(event, listener);
     });
 
-    this.vislibVis.on('renderComplete', () => {
-      this.vis.emit('renderComplete');
-    });
-
     if (this.chartData) {
       this.vislibVis.render(this.chartData, this.uiState);
     }
