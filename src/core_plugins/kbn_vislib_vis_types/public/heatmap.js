@@ -18,11 +18,7 @@ export default function HeatmapVisType(Private) {
         addLegend: true,
         enableHover: false,
         legendPosition: 'right',
-        scale: 'linear',
         times: [],
-        addTimeMarker: false,
-        defaultYExtents: false,
-        setYExtents: false,
         colorsNumber: 4,
         colorSchema: 'Greens',
         setColorRange: false,
@@ -30,6 +26,18 @@ export default function HeatmapVisType(Private) {
         invertColors: false,
         percentageMode: true,
         cellLabels: false,
+        valueAxes: [{
+          id: 'ValueAxis-1',
+          type: 'value',
+          scale: {
+            type: 'linear',
+            defaultYExtents: false,
+          },
+          labels: {
+            show: false,
+            rotate: 0,
+          }
+        }]
       },
       legendPositions: [{
         value: 'left',

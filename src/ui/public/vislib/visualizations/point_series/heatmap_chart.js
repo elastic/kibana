@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import d3 from 'd3';
+import $ from 'jquery';
 import moment from 'moment';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 import heatmapColorFunc from 'ui/vislib/components/color/heatmap_color';
@@ -101,12 +103,15 @@ export default function HeatmapChartFactory(Private) {
       const colorsRange = this.handler.visConfig.get('colorsRange');
       const color = this.handler.data.getColorFunc();
       const labels = this.handler.visConfig.get('legend.labels');
+      const zAxisConfig = this.getValueAxis().axisConfig;
+      const zAxisFormatter = zAxisConfig.get('labels.axisFormatter');
+      const showLabels = zAxisConfig.get('labels.show');
 
       const layer = svg.append('g')
         .attr('class', 'series');
 
       const squares = layer
-        .selectAll('rect')
+        .selectAll('g.square')
         .data(data.values);
 
       squares
@@ -121,7 +126,6 @@ export default function HeatmapChartFactory(Private) {
 
         barWidth = xScale(end) - xScale(start);
         if (!isHorizontal) barWidth *= -1;
-        barWidth = barWidth - Math.min(barWidth * 0.25, 15);
       }
 
       function x(d) {
@@ -159,24 +163,75 @@ export default function HeatmapChartFactory(Private) {
         return color(label(d));
       }
 
-      function widthFunc() {
-        return barWidth || xScale.rangeBand();
-      }
+      function truncateLabel(text, size) {
+        const node = d3.select(text).node();
+        let str = $(node).text();
+        const width = node.getBBox().width;
+        const chars = str.length;
+        const pxPerChar = width / chars;
+        let endChar = 0;
+        const ellipsesPad = 4;
 
-      function heightFunc() {
-        return yScale.rangeBand();
-      }
+
+        if (width > size) {
+          endChar = Math.floor((size / pxPerChar) - ellipsesPad);
+          while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
+            endChar = endChar - 1;
+          }
+          str = str.substr(0, endChar) + '...';
+        }
+        return str;
+      };
+
+      const squareWidth = barWidth || xScale.rangeBand();
+      const squareHeight = yScale.rangeBand();
 
       squares
         .enter()
-        .append('rect')
-        .attr('x', isHorizontal ? x : y)
-        .attr('width', isHorizontal ? widthFunc : heightFunc)
-        .attr('y', isHorizontal ? y : x)
-        .attr('height', isHorizontal ? heightFunc : widthFunc)
+        .append('g')
+        .attr('class', 'square');
+
+      squares.append('rect')
+        .attr('x', x)
+        .attr('width', squareWidth)
+        .attr('y', y)
+        .attr('height', squareHeight)
         .attr('data-label', label)
         .attr('fill', z)
-        .attr('style', 'cursor: pointer');
+        .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.3px');
+
+      // todo: verify that longest label is not longer than the barwidth
+      // or barwidth is not smaller than textheight (and vice versa)
+      //
+      if (showLabels) {
+        const rotate = zAxisConfig.get('labels.rotate');
+        const rotateRad = rotate * Math.PI / 180;
+        const truncate = Math.min(
+          Math.abs(squareWidth / Math.cos(rotateRad)),
+          Math.abs(squareHeight / Math.sin(rotateRad))
+        ) - 10;
+
+        squares.append('text')
+          .text(d => zAxisFormatter(d.y))
+          .text(function () {
+            return truncateLabel(this, truncate);
+          })
+          .style('dominant-baseline', 'central')
+          .style('text-anchor', 'middle')
+          .attr('x', function (d) {
+            const center = x(d) + squareWidth / 2;
+            return center;
+          })
+          .attr('y', function (d) {
+            const center = y(d) + squareHeight / 2;
+            return center;
+          })
+          .attr('transform', function (d) {
+            const horizontalCenter = x(d) + squareWidth / 2;
+            const verticalCenter = y(d) + squareHeight / 2;
+            return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
+          });
+      }
 
       if (isTooltip) {
         squares.call(tooltip.render());
