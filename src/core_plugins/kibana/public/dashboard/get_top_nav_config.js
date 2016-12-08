@@ -29,8 +29,8 @@ function getEditConfig(modeChange) {
 
 function getViewConfig(modeChange) {
   return createTopNavExecuteConfig(
-    'view',
-    'Switch to view only mode',
+    'preview',
+    'Switch to preview mode',
     'dashboardViewOnlyMode',
     () => { modeChange(DashboardViewMode.VIEW); });
 }
