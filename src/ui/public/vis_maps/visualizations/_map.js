@@ -6,13 +6,25 @@ import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types
 import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
 
-export default function MapFactory(Private, tilemapSettings) {
+
+import uiRoutes from 'ui/routes';
+
+let tilemapUrl = '';
+let tilemapOptions = null;
+uiRoutes.afterSetupWork(async function (tilemapSettings) {
+  await tilemapSettings.whenSettingsReady();
+  tilemapUrl = tilemapSettings.getUrl();
+  tilemapOptions = tilemapSettings.getOptions();
+});
+
+export default function MapFactory(Private) {
+
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
   const mapConfiguration = {
-    url: tilemapSettings.getUrl(),
-    options: tilemapSettings.getOptions()
+    url: tilemapUrl,
+    options: tilemapOptions
   };
 
   const markerTypes = {
@@ -200,7 +212,6 @@ export default function MapFactory(Private, tilemapSettings) {
       const saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
-
       this._tileLayer.on('load', () => {
         if (!self._events) return;
 
