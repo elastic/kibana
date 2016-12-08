@@ -9,7 +9,7 @@ import BluebirdPromise from 'bluebird';
 
 import SavedObjectFactory from '../saved_object/saved_object';
 import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
-import DocSourceProvider from '../data_source/doc_source';
+import DocSourceProvider from '../data_source/admin_doc_source';
 
 import { stubMapper } from 'test_utils/stub_mapper';
 

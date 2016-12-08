@@ -16,7 +16,7 @@ import errors from 'ui/errors';
 import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
-import DocSourceProvider from '../data_source/doc_source';
+import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 
 export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
