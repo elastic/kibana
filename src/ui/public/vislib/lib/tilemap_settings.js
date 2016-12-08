@@ -1,6 +1,7 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
+import url from 'url';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
@@ -22,6 +23,8 @@ uiModules.get('kibana')
     const mapSettings = {
       _licenseUid: '',
       _manifest: null,
+
+      //intiialize settings with the default of the configuration
       _url: tilemap.config.url,
       _options: optionsFromConfig,
 
@@ -45,13 +48,17 @@ uiModules.get('kibana')
           maxZoom: this._manifest.services[0].maxZoom,
           subdomains: []
         };
-        this._url = this._manifest.services[0].url;
 
+        const queryparams = _.assign({license: this._licenseUid}, this._manifest.services[0].query_parameters);
+        const query = url.format({
+          query: queryparams
+        });
+        this._url = this._manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
         return true;
       },
 
       /**
-       * Sets the license id that will be used to contact the manifest service
+       * Sets the license id that will be used when requesting the manifest
        * @param licenseUid
        */
       setLicenseUid: function (licenseUid) {
@@ -93,7 +100,23 @@ uiModules.get('kibana')
         });
       } catch (e) {
         //fake return for now
-        return JSON.parse(`{"version":"0.0.0","expiry":"14d","services":[{"id":"road_map","url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png","minZoom":0,"maxZoom":12,"attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)","query_parameters":{"elastic_tile_service_tos":"agree","my_app_name":"kibana"}}]}`);
+        return JSON.parse(`{
+   "version":"0.0.0",
+   "expiry":"14d",
+   "services":[
+      {
+         "id":"road_map",
+         "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
+         "minZoom":0,
+         "maxZoom":12,
+         "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
+         "query_parameters":{
+            "elastic_tile_service_tos":"agree",
+            "my_app_name":"kibana"
+         }
+      }
+   ]
+}`);
       }
     }
   });
