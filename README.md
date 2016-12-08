@@ -1,4 +1,4 @@
-# Kibana 5.1.1
+# Kibana 5.1.2
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's
 an open source ([Apache Licensed](LICENSE.md)),
@@ -44,10 +44,10 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |
 | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-x86_64.rpm) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-i686.rpm) |
-| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.1-SNAPSHOT-windows-x86.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-x86_64.rpm) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-i686.rpm) |
+| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.1.2-SNAPSHOT-windows-x86.zip) |
 
 ## Documentation
 
