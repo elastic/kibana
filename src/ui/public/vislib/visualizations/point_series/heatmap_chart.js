@@ -163,26 +163,6 @@ export default function HeatmapChartFactory(Private) {
         return color(label(d));
       }
 
-      function truncateLabel(text, size) {
-        const node = d3.select(text).node();
-        let str = $(node).text();
-        const width = node.getBBox().width;
-        const chars = str.length;
-        const pxPerChar = width / chars;
-        let endChar = 0;
-        const ellipsesPad = 4;
-
-
-        if (width > size) {
-          endChar = Math.floor((size / pxPerChar) - ellipsesPad);
-          while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
-            endChar = endChar - 1;
-          }
-          str = str.substr(0, endChar) + '...';
-        }
-        return str;
-      };
-
       const squareWidth = barWidth || xScale.rangeBand();
       const squareHeight = yScale.rangeBand();
 
@@ -206,15 +186,16 @@ export default function HeatmapChartFactory(Private) {
       if (showLabels) {
         const rotate = zAxisConfig.get('labels.rotate');
         const rotateRad = rotate * Math.PI / 180;
-        const truncate = Math.min(
+        const maxLength = Math.min(
           Math.abs(squareWidth / Math.cos(rotateRad)),
           Math.abs(squareHeight / Math.sin(rotateRad))
         ) - 10;
 
         squares.append('text')
           .text(d => zAxisFormatter(d.y))
-          .text(function () {
-            return truncateLabel(this, truncate);
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            return textLength > maxLength ? 'none' : 'initial';
           })
           .style('dominant-baseline', 'central')
           .style('text-anchor', 'middle')
