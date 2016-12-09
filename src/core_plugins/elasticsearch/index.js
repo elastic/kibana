@@ -1,8 +1,13 @@
-import { trim, trimRight } from 'lodash';
+import { trim, trimRight, bindKey } from 'lodash';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
-import exposeClient from './lib/expose_client';
+import createDataCluster from './lib/create_data_cluster';
+import createAdminCluster from './lib/create_admin_cluster';
+import clientLogger from './lib/client_logger';
+import { getCluster, createCluster } from './lib/clusters';
+import filterHeaders from './lib/filter_headers';
+
 import createProxy, { createPath } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
@@ -26,6 +31,7 @@ module.exports = function ({ Plugin }) {
         customHeaders: object().default({}),
         pingTimeout: number().default(ref('requestTimeout')),
         startupTimeout: number().default(5000),
+        logQueries: boolean().default(false),
         ssl: object({
           verify: boolean().default(true),
           ca: array().single().items(string()),
@@ -33,6 +39,29 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: Joi.string().default('master'),
+        healthCheck: object({
+          delay: number().default(2500)
+        }).default(),
+        tribe: object({
+          url: string().uri({ scheme: ['http', 'https'] }),
+          preserveHost: boolean().default(true),
+          username: string(),
+          password: string(),
+          shardTimeout: number().default(0),
+          requestTimeout: number().default(30000),
+          requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
+          customHeaders: object().default({}),
+          pingTimeout: number().default(ref('requestTimeout')),
+          startupTimeout: number().default(5000),
+          logQueries: boolean().default(false),
+          ssl: object({
+            verify: boolean().default(true),
+            ca: array().single().items(string()),
+            cert: string(),
+            key: string()
+          }).default(),
+          apiVersion: Joi.string().default('master'),
+        }).default()
       }).default();
     },
 
@@ -42,6 +71,7 @@ module.exports = function ({ Plugin }) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
+          esDataIsTribe: options.tribe ? true : false,
         };
       }
     },
@@ -49,8 +79,17 @@ module.exports = function ({ Plugin }) {
     init(server, options) {
       const kibanaIndex = server.config().get('kibana.index');
 
-      // Expose the client to the server
-      exposeClient(server);
+      server.expose('getCluster', getCluster);
+      server.expose('createCluster', createCluster);
+      server.expose('filterHeaders', filterHeaders);
+      server.expose('ElasticsearchClientLogging', clientLogger(server));
+
+      const dataCluster = createDataCluster(server);
+      server.on('close', bindKey(dataCluster, 'close'));
+
+      const adminCluster = createAdminCluster(server);
+      server.on('close', bindKey(adminCluster, 'close'));
+
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');
       createProxy(server, 'POST', '/{index}/_search');
@@ -69,7 +108,7 @@ module.exports = function ({ Plugin }) {
 
       function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
-        const matchPath = createPath(kibanaIndex);
+        const matchPath = createPath('/elasticsearch', kibanaIndex);
 
         if (requestPath === matchPath) {
           return reply(methodNotAllowed('You cannot modify the primary kibana index through this interface.'));

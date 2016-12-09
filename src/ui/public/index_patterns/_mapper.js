@@ -6,7 +6,7 @@ import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
-export default function MapperService(Private, Promise, es, config, kbnIndex) {
+export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
 
   let enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   let transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
@@ -37,7 +37,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
       if (cache) return Promise.resolve(cache);
 
       if (!skipIndexPatternCache) {
-        return es.get({
+        return esAdmin.get({
           index: kbnIndex,
           type: 'index-pattern',
           id: id,

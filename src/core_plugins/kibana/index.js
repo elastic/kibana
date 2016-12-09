@@ -22,6 +22,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
+      hacks: ['plugins/kibana/dev_tools/hacks/disable'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -70,6 +71,7 @@ module.exports = function (kibana) {
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
         }, {
+          id: 'kibana:dev_tools',
           title: 'Dev Tools',
           order: 9001,
           url: '/app/kibana#/dev_tools',

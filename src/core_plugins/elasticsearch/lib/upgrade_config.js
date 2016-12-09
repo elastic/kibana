@@ -6,11 +6,11 @@ import { format } from 'util';
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;
 
-  const client = server.plugins.elasticsearch.client;
+  const callAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callAsKibanaUser;
   const config = server.config();
 
   function createNewConfig() {
-    return client.create({
+    return callAsKibanaUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: { buildNum: config.get('pkg.buildNum') },
@@ -31,7 +31,9 @@ module.exports = function (server) {
       return hit._id !== '@@version' && hit._id === config.get('pkg.version');
     });
 
-    if (devConfig) return Promise.resolve();
+    if (devConfig) {
+      return Promise.resolve();
+    }
 
     // Look for upgradeable configs. If none of them are upgradeable
     // then create a new one.
@@ -50,7 +52,7 @@ module.exports = function (server) {
       newVersion: config.get('pkg.version')
     });
 
-    return client.create({
+    return callAsKibanaUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,

@@ -1,9 +1,7 @@
-import DocStrategyProvider from '../strategy/doc';
 import AbstractRequestProvider from './request';
 
 export default function DocRequestProvider(Private) {
 
-  const docStrategy = Private(DocStrategyProvider);
   const AbstractRequest = Private(AbstractRequestProvider);
 
   class DocRequest extends AbstractRequest {
@@ -11,7 +9,6 @@ export default function DocRequestProvider(Private) {
       super(...args);
 
       this.type = 'doc';
-      this.strategy = docStrategy;
     }
 
     canStart() {

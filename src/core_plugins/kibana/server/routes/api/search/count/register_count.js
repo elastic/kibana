@@ -6,7 +6,7 @@ export default function registerCount(server) {
     path: '/api/kibana/{id}/_count',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.getCluster('data').callWithRequest, req);
 
       boundCallWithRequest('count', {
         allowNoIndices: false,

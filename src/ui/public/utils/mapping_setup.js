@@ -1,7 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 define(function () {
-  return function MappingSetupService(kbnIndex, es) {
+  return function MappingSetupService(kbnIndex, esAdmin) {
     let mappingSetup = this;
 
     let json = {
@@ -23,7 +23,7 @@ define(function () {
      * @return {[type]} [description]
      */
     let getKnownKibanaTypes = _.once(function () {
-      return es.indices.getFieldMapping({
+      return esAdmin.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: kbnIndex,
         // check all types
@@ -83,7 +83,7 @@ define(function () {
           properties: mapping
         };
 
-        return es.indices.putMapping({
+        return esAdmin.indices.putMapping({
           index: kbnIndex,
           type: type,
           body: body
