@@ -1,6 +1,6 @@
 import uiModules from 'ui/modules';
 import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatmap_options.html';
-import defaults from 'lodash';
+import _ from 'lodash';
 const module = uiModules.get('kibana');
 
 module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
@@ -26,29 +26,27 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
 
       $scope.getGreaterThan = function (index) {
         if (index === 0) return -1;
-        return $scope.vis.params.colorsRange[index - 1].value;
+        return $scope.vis.params.colorsRange[index - 1].to;
+      };
+
+      $scope.addRange = function () {
+        const from = $scope.vis.params.colorsRange.length ?
+          $scope.vis.params.colorsRange[$scope.vis.params.colorsRange.length - 1].to : 0;
+        $scope.vis.params.colorsRange.push({from: from, to: null});
+        $scope.vis.params.colorsNumber = $scope.vis.params.colorsRange.length;
+      };
+
+      $scope.removeRange = function (index) {
+        $scope.vis.params.colorsRange.splice(index, 1);
+        $scope.vis.params.colorsNumber = $scope.vis.params.colorsRange.length;
       };
 
       $scope.getColor = function (index) {
         const defaultColors = this.uiState.get('vis.defaultColors');
         const overwriteColors = this.uiState.get('vis.colors');
-        const colors = defaultColors ? defaults({}, overwriteColors, defaultColors) : overwriteColors;
+        const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
         return colors ? Object.values(colors)[index] : 'transparent';
       };
-
-      function fillColorsRange() {
-        for (let i = $scope.vis.params.colorsRange.length; i < $scope.vis.params.colorsNumber; i++) {
-          $scope.vis.params.colorsRange.push({ value: 0 });
-        }
-        $scope.vis.params.colorsRange.length = $scope.vis.params.colorsNumber;
-      }
-
-      fillColorsRange();
-      $scope.$watch('vis.params.colorsNumber', newVal => {
-        if (newVal) {
-          fillColorsRange();
-        }
-      });
 
       $scope.uiState.on('colorChanged', () => {
         $scope.customColors = true;

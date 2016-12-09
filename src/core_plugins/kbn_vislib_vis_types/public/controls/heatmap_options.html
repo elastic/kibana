@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow">
+  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
     <label class="kuiSideBarFormRow__label" for="colorsNumber">
       Number of colors
     </label>
@@ -95,27 +95,66 @@
 
     <div ng-if="vis.params.setColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
-        <div class="kuiSideBarFormRow" ng-repeat="color in vis.params.colorsRange track by $index">
-          <label class="kuiSideBarFormRow__label" for="{{ 'colorRange' + $index }}">
-            <div class="kuiSideBarFormRow__label__colorbox" ng-style="{ 'background-color': getColor($index) }"></div>
-            value over
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input
-              id="{{ 'colorRange' + $index }}"
-              class="kuiInput kuiSideBarInput"
-              ng-model="color.value"
-              type="number"
-              ng-required="vis.params.setColorRange"
-              greater-than="{{getGreaterThan($index)}}"
-            >
-          </div>
+        <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
+          <tr>
+            <th></th>
+            <th>
+              <label>From</label>
+            </th>
+            <th colspan="2">
+              <label>To</label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in vis.params.colorsRange track by $index">
+            <td>
+              <div class="kuiSideBarFormRow__label__colorbox" ng-style="{ 'background-color': getColor($index) }" />
+            </td>
+            <td>
+              <input
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-than="{{getGreaterThan($index)}}"
+                step="any" />
+            </td>
+            <td>
+              <input
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-than="range.from"
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                class="btn btn-danger btn-xs">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!vis.params.colorsRange.length">
+          <p>
+            <i class="fa fa-danger text-danger"></i>
+            <strong>Required:</strong> You must specify at least one range.
+          </p>
         </div>
+
+        <div
+          ng-click="addRange()"
+          class="sidebar-item-button primary">
+          Add Range
+        </div>
+        <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
-      <div class="text text-center text-info">note: colors can be changed in the legend</div>
     </div>
   </div>
-
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div

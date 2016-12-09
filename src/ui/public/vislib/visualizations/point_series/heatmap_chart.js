@@ -51,8 +51,9 @@ export default function HeatmapChartFactory(Private) {
         let label;
 
         if (cfg.get('setColorRange')) {
-          const greaterThan = colorsRange[i].value;
-          label = `> ${greaterThan}`;
+          const from = colorsRange[i].from;
+          const to = colorsRange[i].to;
+          label = `${from} - ${to}`;
         } else {
           let val = i / colorsNumber;
           let nextVal = (i + 1) / colorsNumber;
@@ -140,8 +141,10 @@ export default function HeatmapChartFactory(Private) {
       function getColorBucket(d) {
         let val = 0;
         if (setColorRange && colorsRange.length) {
-          if (d.y < colorsRange[0].value) return -1;
-          while (val + 1 < colorsRange.length && d.y > colorsRange[val + 1].value) val++;
+          const bucket = _.find(colorsRange, range => {
+            return range.from <= d.y && range.to > d.y;
+          });
+          return bucket ? colorsRange.indexOf(bucket) : -1;
         } else {
           if (isNaN(min) || isNaN(max)) {
             val = colorsNumber - 1;

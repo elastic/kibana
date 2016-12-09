@@ -144,13 +144,13 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         vis.destroy();
         generateVis({
           setColorRange: true,
-          colorsRange: [{ value: 0}, { value: 200 }, { value: 400 }, { value: 500 }]
+          colorsRange: [{ from: 0, to: 200}, { from: 200, to: 400 }, { from: 400, to: 500 }, { from: 500, to: Infinity }]
         });
         const labels = vis.getLegendLabels();
-        expect(labels[0]).to.be('> 0');
-        expect(labels[1]).to.be('> 200');
-        expect(labels[2]).to.be('> 400');
-        expect(labels[3]).to.be('> 500');
+        expect(labels[0]).to.be('0 - 200');
+        expect(labels[1]).to.be('200 - 400');
+        expect(labels[2]).to.be('400 - 500');
+        expect(labels[3]).to.be('500 - Infinity');
       });
     });
   });
