@@ -3,7 +3,7 @@ import dateMath from '@elastic/datemath';
 export default function () {
 
   const unitsDesc = dateMath.unitsDesc;
-  const largeMax = unitsDesc.indexOf('M');
+  const largeMax = unitsDesc.indexOf('w');
 
   /**
    * Convert a moment.duration into an es
