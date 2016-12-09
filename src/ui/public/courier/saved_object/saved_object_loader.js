@@ -44,6 +44,12 @@ export class SavedObjectLoader {
     });
   };
 
+  /**
+   * Updates hit._source to contain an id and url field, and returns the updated
+   * source object.
+   * @param hit
+   * @returns {hit._source} The modified hit._source object, with an id and url field.
+   */
   mapHits(hit) {
     const source = hit._source;
     source.id = hit._id;
@@ -85,8 +91,8 @@ export class SavedObjectLoader {
     return this.es.search({
       index: this.kbnIndex,
       type: this.type.toLowerCase(),
-      body: body,
-      size: size
+      body,
+      size
     })
       .then((resp) => {
         return {
