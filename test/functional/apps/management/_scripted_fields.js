@@ -54,8 +54,10 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     });
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
-    const rowData = await PageObjects.discover.getDocTableIndex(1);
-    expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+    await PageObjects.common.try(async function() {
+      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+    });
   });
 
   bdd.it('should filter by scripted field value in Discover', async function () {
@@ -121,8 +123,10 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     });
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
-    const rowData = await PageObjects.discover.getDocTableIndex(1);
-    expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+    await PageObjects.common.try(async function() {
+      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+    });
   });
 
   bdd.it('should filter by scripted field value in Discover', async function () {
@@ -188,8 +192,10 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     });
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
-    const rowData = await PageObjects.discover.getDocTableIndex(1);
-    expect(rowData).to.be('September 18th 2015, 16:08:20.320 good');
+    await PageObjects.common.try(async function() {
+      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      expect(rowData).to.be('September 18th 2015, 16:08:20.320 good');
+    });
   });
 
   bdd.it('should filter by expression scripted field value in Discover', async function () {
