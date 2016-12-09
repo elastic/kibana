@@ -236,7 +236,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
                 yaxis.tickFormatter = tickFormatters[yaxis.units.type];
                 const byteModes = ['bytes', 'bytes/s'];
                 if (byteModes.includes(yaxis.units.type)) {
-                  yaxis.tickGenerator = generateTicks(yaxis);
+                  yaxis.tickGenerator = generateTicks;
                 }
               }
             });
