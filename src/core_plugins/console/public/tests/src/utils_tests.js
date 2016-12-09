@@ -31,6 +31,6 @@ _.each(expandingTests.split(/^=+$/m), function (fixture) {
     expanded = fixture[2].trim();
 
   test("Literal expand - " + name, function () {
-    deepEqual(utils.expandScriptsToLiterals(collapsed), expanded);
+    deepEqual(utils.expandLiteralStrings(collapsed), expanded);
   });
 });

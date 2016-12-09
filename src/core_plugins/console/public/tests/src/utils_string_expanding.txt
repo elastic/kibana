@@ -2,8 +2,9 @@
 Scripts in requests
 -------------------------------------
 {
-  "f": { "script" : { "inline": "test\ntest2" } },
+  "f": { "script" : { "inline": "test\ntest\\2" } },
   "g": { "script" : "second + \"\\\";" },
+  "f": "short with \\",
   "h": 1,
   "script": "a + 2"
 }
@@ -11,11 +12,10 @@ Scripts in requests
 {
   "f": { "script" : { "inline": """
 test
-test2
+test\2
 """ } },
-  "g": { "script" : """
-second + "\";
-""" },
+  "g": { "script" : """second + "\";""" },
+  "f": "short with \\",
   "h": 1,
   "script": "a + 2"
 }

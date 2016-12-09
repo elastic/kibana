@@ -4,7 +4,15 @@ String only 1
 """ hello
 to you """
 -------------------------------------
-"hello\nto you"
+" hello\nto you "
+==========
+String only 2
+-------------------------------------
+""" 
+startning with new lines and ending as well
+ """
+-------------------------------------
+"startning with new lines and ending as well"
 ==========
 Strings in requests
 -------------------------------------
@@ -13,7 +21,7 @@ Strings in requests
 test
 test2
 """ },
-  "g": { "script" : """second + "\"; """ },
+  "g": { "script" : """second + "\";""" },
   "h": 1,
   "script": "a + 2"
 }
