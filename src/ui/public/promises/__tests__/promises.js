@@ -22,6 +22,12 @@ describe('Promise service', function () {
     });
   });
 
+  it('Promise.resolve', function (done) {
+    Promise.resolve(true).then(() => { done(); });
+    // Ugly, but necessary for promises to resolve: https://github.com/angular/angular.js/issues/12555
+    $rootScope.$apply();
+  });
+
   describe('Promise.fromNode', function () {
     it('creates a callback that controls a promise', function () {
       let callback;

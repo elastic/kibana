@@ -292,19 +292,13 @@ export default class VisualizePage {
     });
   }
 
-
   clickNewVisualization() {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[aria-label="New Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeNewButton')
     .click();
   }
 
-
   saveVisualization(vizName) {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[aria-label="Save Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -339,9 +333,7 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('[aria-label="Open Saved Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeOpenButton')
       .click();
   }
 
@@ -433,7 +425,6 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
     var self = this.remote;
     var chartData = [];
     var tempArray = [];
@@ -511,7 +502,7 @@ export default class VisualizePage {
         .findByCssSelector('clipPath rect')
         .getAttribute('height')
         .then(function (theHeight) {
-          yAxisHeight = theHeight - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+          yAxisHeight = theHeight;
           PageObjects.common.debug('theHeight = ' + theHeight);
           return theHeight;
         });
@@ -590,7 +581,7 @@ export default class VisualizePage {
       return self
       .setFindTimeout(defaultFindTimeout * 2)
       // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-      .findAllByCssSelector('svg > g > g.series.\\30 > rect') // rect
+      .findAllByCssSelector('svg > g > g.series > rect') // rect
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart

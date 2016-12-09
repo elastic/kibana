@@ -28,7 +28,6 @@ require('ui/saved_objects/saved_object_registry').register(require('plugins/time
 
 // TODO: Expose an api for dismissing notifications
 var unsafeNotifications = require('ui/notify')._notifs;
-//var ConfigTemplate = require('ui/config_template');
 
 require('ui/routes').enable();
 
@@ -47,7 +46,8 @@ require('ui/routes')
   });
 
 app.controller('timelion', function (
-  $scope, $http, timefilter, AppState, courier, $route, $routeParams, kbnUrl, Notifier, config, $timeout, Private, savedVisualizations) {
+    $scope, $http, timefilter, AppState, courier, $route, $routeParams,
+    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, safeConfirm) {
 
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
@@ -62,32 +62,52 @@ app.controller('timelion', function (
 
   var defaultExpression = '.es(*)';
   var savedSheet = $route.current.locals.savedSheet;
-  var blankSheet = [defaultExpression];
 
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Sheet',
-    run: function () { kbnUrl.change('/'); }
+    run: function () { kbnUrl.change('/'); },
+    testId: 'timelionNewButton',
   }, {
     key: 'add',
     description: 'Add a chart',
-    run: function () { $scope.newCell(); }
+    run: function () { $scope.newCell(); },
+    testId: 'timelionAddChartButton',
   }, {
     key: 'save',
     description: 'Save Sheet',
-    template: require('plugins/timelion/partials/save_sheet.html')
+    template: require('plugins/timelion/partials/save_sheet.html'),
+    testId: 'timelionSaveButton',
+  }, {
+    key: 'delete',
+    description: 'Delete current sheet',
+    disableButton: function () {
+      return !savedSheet.id;
+    },
+    run: function () {
+      var title = savedSheet.title;
+      safeConfirm('Are you sure you want to delete the sheet ' + title + ' ?').then(function () {
+        savedSheet.delete().then(() => {
+          notify.info('Deleted ' + title);
+          kbnUrl.change('/');
+        }).catch(notify.fatal);
+      });},
+    testId: 'timelionDeleteButton',
   }, {
     key: 'open',
-    description: 'Load Sheet',
-    template: require('plugins/timelion/partials/load_sheet.html')
+    description: 'Open Sheet',
+    template: require('plugins/timelion/partials/load_sheet.html'),
+    testId: 'timelionOpenButton',
   }, {
     key: 'options',
     description: 'Options',
-    template: require('plugins/timelion/partials/sheet_options.html')
+    template: require('plugins/timelion/partials/sheet_options.html'),
+    testId: 'timelionOptionsButton',
   }, {
     key: 'docs',
     description: 'Documentation',
-    template: '<timelion-docs></timelion-docs>'
+    template: '<timelion-docs></timelion-docs>',
+    testId: 'timelionDocsButton',
   }];
 
 
@@ -143,7 +163,7 @@ app.controller('timelion', function (
     }
   });
 
-  $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
+  $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 
@@ -202,13 +222,11 @@ app.controller('timelion', function (
   $scope.safeSearch = _.debounce($scope.search, 500);
 
   function saveSheet() {
-    savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
     savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
-      //$scope.configTemplate.close('save');
       if (id) {
         notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {
@@ -220,7 +238,6 @@ app.controller('timelion', function (
 
   function saveExpression(title) {
     savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
-      savedExpression.id = title;
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval

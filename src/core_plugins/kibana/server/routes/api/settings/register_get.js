@@ -7,9 +7,9 @@ export default function registerGet(server) {
     handler: function (req, reply) {
       server
         .uiSettings()
-        .getUserProvided()
+        .getUserProvided(req)
         .then(settings => reply({ settings }).type('application/json'))
-        .catch(reason => reply(Boom.wrap(reason)));
+        .catch(err => reply(Boom.wrap(err, err.statusCode)));
     }
   });
 }

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import addWordBreaks from 'ui/utils/add_word_breaks';
 import 'ui/highlight';
 import 'ui/highlight/highlight_tags';
 import 'ui/doc_viewer';
@@ -41,10 +40,6 @@ module.directive('kbnTableRow', function ($compile) {
       $el.after('<tr>');
       $el.empty();
 
-      let init = function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      };
-
       // when we compile the details, we use this $scope
       let $detailsScope;
 
@@ -80,11 +75,11 @@ module.directive('kbnTableRow', function ($compile) {
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchCollection('columns', function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      });
-
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
+      $scope.$watchMulti([
+        'indexPattern.timeFieldName',
+        'row.highlight',
+        '[]columns'
+      ], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
@@ -145,29 +140,24 @@ module.directive('kbnTableRow', function ($compile) {
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
+        $el.trigger('renderComplete');
       }
 
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row, fieldName, breakWords) {
+      function _displayField(row, fieldName, truncate) {
         let indexPattern = $scope.indexPattern;
         let text = indexPattern.formatField(row, fieldName);
 
-        if (breakWords) {
-          text = addWordBreaks(text, MIN_LINE_LENGTH);
-
-          if (text.length > MIN_LINE_LENGTH) {
-            return truncateByHeightTemplate({
-              body: text
-            });
-          }
+        if (truncate && text.length > MIN_LINE_LENGTH) {
+          return truncateByHeightTemplate({
+            body: text
+          });
         }
 
         return text;
       }
-
-      init();
     }
   };
 });
