@@ -86,7 +86,6 @@ uiModules
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
             fields = $aggParamEditorsScope.indexedFields;
-            $aggParamEditorsScope.showAnalyzedWarning = param.showAnalyzedWarning;
           } else if (param.type === 'field') {
             fields = $aggParamEditorsScope[`${param.name}Options`] = param.getFieldOptions($scope.agg);
           }
