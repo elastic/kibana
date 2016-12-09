@@ -58,12 +58,19 @@ describe('Filter Bar pushFilter()', function () {
       expect($state.filters[0].meta.negate).to.be(true);
       expect($state.filters[0].meta.index).to.be('myIndex');
 
-      pushFilter(filter, false, 'myIndex');
-      expect($state.filters[1].meta.negate).to.be(false);
     });
 
-
-
+    it('should modify the existing filters of the same type instead of making another one', function () {
+      pushFilter(filter, false, 'myIndex');
+      expect($state.filters[0].meta).to.be.an(Object);
+      const sameTypeFilter = {query: { query_string: 'rada'}};
+      const diffTypeFilter = {foo: { bar: 'foo'}};
+      pushFilter(diffTypeFilter, false, 'myIndex');
+      expect($state.filters.length).to.be(2);
+      pushFilter(sameTypeFilter, false, 'myIndex');
+      expect($state.filters.length).to.be(2);
+      expect($state.filters[0].query).to.equal(sameTypeFilter.query);
+    });
   });
 
 });
