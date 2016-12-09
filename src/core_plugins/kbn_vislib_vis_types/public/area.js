@@ -19,7 +19,6 @@ export default function HistogramVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        smoothLines: false,
         scale: 'linear',
         interpolate: 'linear',
         mode: 'stacked',
@@ -40,6 +39,16 @@ export default function HistogramVisType(Private) {
       }, {
         value: 'bottom',
         text: 'bottom',
+      }],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'normal',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
       }],
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

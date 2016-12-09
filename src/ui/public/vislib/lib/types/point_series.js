@@ -4,6 +4,9 @@ export default function ColumnHandler(Private) {
 
   const createSeries = (cfg, series) => {
     const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
+    let interpolate = cfg.interpolate;
+    if (cfg.smoothLines) interpolate = 'cardinal';
+
     return {
       type: 'point_series',
       series: _.map(series, (seri) => {
@@ -11,8 +14,7 @@ export default function ColumnHandler(Private) {
           show: true,
           type: cfg.type || 'line',
           mode: stacked ? 'stacked' : 'normal',
-          interpolate: cfg.interpolate,
-          smoothLines: cfg.smoothLines,
+          interpolate: interpolate,
           drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
           showCircles: cfg.showCircles,
           radiusRatio: cfg.radiusRatio,
