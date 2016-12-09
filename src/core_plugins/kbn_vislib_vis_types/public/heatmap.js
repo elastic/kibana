@@ -27,6 +27,7 @@ export default function HeatmapVisType(Private) {
         percentageMode: true,
         cellLabels: false,
         valueAxes: [{
+          show: false,
           id: 'ValueAxis-1',
           type: 'value',
           scale: {

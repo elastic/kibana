@@ -155,6 +155,7 @@ export default function HeatmapChartFactory(Private) {
 
       function label(d) {
         const colorBucket = getColorBucket(d);
+        if (colorBucket === -1) d.hide = true;
         return labels[colorBucket];
       }
 
@@ -178,7 +179,11 @@ export default function HeatmapChartFactory(Private) {
         .attr('height', squareHeight)
         .attr('data-label', label)
         .attr('fill', z)
-        .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.3px');
+        .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.3px')
+        .style('display', d => {
+          return d.hide ? 'none' : 'initial';
+        });
+
 
       // todo: verify that longest label is not longer than the barwidth
       // or barwidth is not smaller than textheight (and vice versa)
@@ -193,9 +198,9 @@ export default function HeatmapChartFactory(Private) {
 
         squares.append('text')
           .text(d => zAxisFormatter(d.y))
-          .style('display', function () {
+          .style('display', function (d) {
             const textLength = this.getBBox().width;
-            return textLength > maxLength ? 'none' : 'initial';
+            return d.hide || textLength > maxLength ? 'none' : 'initial';
           })
           .style('dominant-baseline', 'central')
           .style('text-anchor', 'middle')

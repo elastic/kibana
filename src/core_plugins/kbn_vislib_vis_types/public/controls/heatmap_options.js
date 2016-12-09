@@ -1,6 +1,6 @@
 import uiModules from 'ui/modules';
 import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatmap_options.html';
-import colorFunc from 'ui/vislib/components/color/heatmap_color';
+import defaults from 'lodash';
 const module = uiModules.get('kibana');
 
 module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
@@ -30,7 +30,9 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
       };
 
       $scope.getColor = function (index) {
-        const colors = $scope.uiState.get('vis.colors');
+        const defaultColors = this.uiState.get('vis.defaultColors');
+        const overwriteColors = this.uiState.get('vis.colors');
+        const colors = defaultColors ? defaults({}, overwriteColors, defaultColors) : overwriteColors;
         return colors ? Object.values(colors)[index] : 'transparent';
       };
 
