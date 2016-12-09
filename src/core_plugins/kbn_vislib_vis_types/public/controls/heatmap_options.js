@@ -11,8 +11,11 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
     link: function ($scope) {
       $scope.isColorRangeOpen = true;
       $scope.customColors = false;
+      $scope.options = {
+        labels: false
+      };
 
-      $scope.$watch('rotateLabels', rotate => {
+      $scope.$watch('options.labels', rotate => {
         $scope.vis.params.valueAxes[0].labels.rotate = rotate ? 270 : 0;
       });
 

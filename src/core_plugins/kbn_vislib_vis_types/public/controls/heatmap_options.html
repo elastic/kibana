@@ -62,13 +62,13 @@
     <div class="kuiSideBarFormRow__control">
       <input
         id="colorsNumber"
-        type="range"
-        step="1"
-        min="2"
-        max="10"
         class="kuiInput kuiSideBarInput"
         ng-model="vis.params.colorsNumber"
-      />
+        type="number"
+        ng-required="vis.params.setColorRange"
+        greater-than="1"
+        less-than="11"
+      >
     </div>
   </div>
 
@@ -148,7 +148,7 @@
             Rotate
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="rotateLabels">
+            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="options.labels">
           </div>
         </div>
       </div>
