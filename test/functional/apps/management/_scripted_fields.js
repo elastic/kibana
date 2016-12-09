@@ -25,7 +25,7 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
 
   bdd.it('should create scripted field', async function () {
     // delete .kibana index and then wait for Kibana to re-create it
-    await esClient.deleteAndUpdateConfigDoc();
+    await esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC'});
     await PageObjects.settings.navigateTo();
     await PageObjects.settings.clickKibanaIndicies();
     await PageObjects.settings.createIndexPattern();
@@ -56,7 +56,7 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+      expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
     });
   });
 
@@ -67,13 +67,14 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
-      expect(await PageObjects.discover.getHitCount()).to.be('29');
+      expect(await PageObjects.discover.getHitCount()).to.be('31');
     });
   });
 
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
-    const expectedChartValues = [ '10 29', '14 29', '12 24', '19 23', '7 22', '11 22', '17 20', '30 20',
-      '20 19', '13 18', '18 18', '6 17', '16 16', '5 15', '8 14', '2 13', '3 12', '15 12', '4 9', '9 9'
+    const expectedChartValues = [ '14 31', '10 29', '7 24', '11 24', '12 23',
+      '20 23', '19 21', '6 20', '17 20', '30 20', '13 19', '18 18', '16 17', '5 16',
+      '8 16', '15 14', '3 13', '2 12', '9 10', '4 9'
     ];
     await PageObjects.discover.removeAllFilters();
     await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
@@ -125,7 +126,7 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('September 18th 2015, 16:08:20.320 30');
+      expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
     });
   });
 
@@ -136,13 +137,14 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
-      expect(await PageObjects.discover.getHitCount()).to.be('29');
+      expect(await PageObjects.discover.getHitCount()).to.be('31');
     });
   });
 
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
-    const expectedChartValues = [ '10 29', '14 29', '12 24', '19 23', '7 22', '11 22', '17 20', '30 20',
-      '20 19', '13 18', '18 18', '6 17', '16 16', '5 15', '8 14', '2 13', '3 12', '15 12', '4 9', '9 9'
+    const expectedChartValues = [ '14 31', '10 29', '7 24', '11 24', '12 23',
+      '20 23', '19 21', '6 20', '17 20', '30 20', '13 19', '18 18', '16 17', '5 16',
+      '8 16', '15 14', '3 13', '2 12', '9 10', '4 9'
     ];
     await PageObjects.discover.removeAllFilters();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
@@ -194,7 +196,8 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('September 18th 2015, 16:08:20.320 good');
+      expect(rowData).to.be('September 18th 2015, 18:20:57.916 good');
+
     });
   });
 
@@ -205,13 +208,12 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
-      expect(await PageObjects.discover.getHitCount()).to.be('26');
+      expect(await PageObjects.discover.getHitCount()).to.be('27');
     });
     await PageObjects.discover.removeAllFilters();
   });
 
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
-    const expectedChartValues = [ 'good 341', 'bad 26' ];
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
@@ -222,7 +224,7 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     await PageObjects.common.debug('getDataTableData = ' + data.split('\n'));
     await PageObjects.common.debug('data=' + data);
     await PageObjects.common.debug('data.length=' + data.length);
-    expect(data.trim().split('\n')).to.eql(expectedChartValues);
+    expect(data.trim().split('\n')).to.eql([ 'good 359', 'bad 27' ]);
   });
 
 
