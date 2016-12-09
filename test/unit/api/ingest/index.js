@@ -6,9 +6,6 @@ define(function (require) {
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
   var expect = require('intern/dojo/node!expect.js');
-  var simulate = require('./_simulate');
-  var processors = require('./_processors');
-  var processorTypes = require('./processors/index');
   var fieldCapabilities = require('./_field_capabilities');
 
   bdd.describe('ingest API', function () {
@@ -23,9 +20,6 @@ define(function (require) {
       return scenarioManager.unload('emptyKibana');
     });
 
-    simulate(bdd, scenarioManager, request);
-    processors(bdd, scenarioManager, request);
-    processorTypes(bdd, scenarioManager, request);
     fieldCapabilities(bdd, scenarioManager, request);
   });
 });
