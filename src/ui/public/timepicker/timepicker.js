@@ -21,18 +21,17 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
     restrict: 'E',
     scope: {
       time: '=',
-      mode: '=',
       interval: '=',
-      activeTab: '='
+      activeTab: '=',
+      onSelect: '&'
     },
     template: html,
-    require: '^kbnTopNav',
-    link: function ($scope, element, attributes, kbnTopNav) {
+    link: function ($scope, element, attributes) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
 
-      if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+      if (_.isUndefined($scope.time.mode)) $scope.time.mode = 'quick';
 
       $scope.quickLists = _(quickRanges).groupBy('section').values().value();
       $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
@@ -62,13 +61,13 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       ];
 
       $scope.$watch('time.from', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.time.mode === 'absolute') {
           $scope.absolute.from = date;
         }
       });
 
       $scope.$watch('time.to', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.time.mode === 'absolute') {
           $scope.absolute.to = date;
         }
       });
@@ -120,13 +119,13 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
             break;
         }
 
-        $scope.mode = thisMode;
+        $scope.time.mode = thisMode;
       };
 
       $scope.setQuick = function (from, to) {
         $scope.time.from = from;
         $scope.time.to = to;
-        kbnTopNav.toggle('filter');
+        $scope.onSelect();
       };
 
       $scope.setToNow = function () {
@@ -142,6 +141,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.applyRelative = function () {
         $scope.time.from = getRelativeString();
         $scope.time.to = 'now';
+        $scope.onSelect();
       };
 
       function getRelativeString() {
@@ -151,6 +151,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.applyAbsolute = function () {
         $scope.time.from = moment($scope.absolute.from);
         $scope.time.to = moment($scope.absolute.to);
+        $scope.onSelect();
       };
 
       $scope.setRefreshInterval = function (interval) {
@@ -163,7 +164,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.interval = interval;
       };
 
-      $scope.setMode($scope.mode);
+      $scope.setMode($scope.time.mode);
     }
   };
 });
