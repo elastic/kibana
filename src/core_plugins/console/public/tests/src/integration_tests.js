@@ -1,4 +1,5 @@
-let input = require('../../src/input');
+import { initializeInput } from '../../src/input';
+let input;
 let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let $ = require('jquery');
@@ -7,11 +8,12 @@ var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
 module("Integration", {
   setup: function () {
-    $("#editor_container").show();
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
+    input.$el.show();
     input.autocomplete._test.removeChangeListener();
   },
   teardown: function () {
-    $("#editor_container").hide();
+    input.$el.hide();
     input.autocomplete._test.addChangeListener();
   }
 });

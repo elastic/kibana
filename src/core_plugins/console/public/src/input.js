@@ -16,7 +16,11 @@ let input;
 export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   input = new SenseEditor($el);
 
-  uiModules.get('app/sense').setupResizeCheckerForRootEditors($el, input, output);
+  // this may not exist if running from tests
+  let appSense = uiModules.get('app/sense');
+  if (appSense.setupResizeCheckerForRootEditors) {
+    appSense.setupResizeCheckerForRootEditors($el, input, output);
+  }
 
   input.autocomplete = new Autocomplete(input);
 
@@ -167,7 +171,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
             if (mode === null || mode === "application/json") {
               // assume json - auto pretty
               try {
-                value = JSON.stringify(JSON.parse(value), null, 2);
+                value = utils.expandScriptsToLiterals(JSON.stringify(JSON.parse(value), null, 2));
               }
               catch (e) {
 

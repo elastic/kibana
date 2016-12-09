@@ -136,11 +136,12 @@ function SenseEditor($el) {
           var formatted_data = utils.reformatData(parsed_req.data, indent);
           if (!formatted_data.changed) {
             // toggle.
-            formatted_data = utils.reformatData(parsed_req.data, !indent);
+            indent = !indent;
+            formatted_data = utils.reformatData(parsed_req.data, indent);
           }
           parsed_req.data = formatted_data.data;
 
-          editor.replaceRequestRange(parsed_req, req_range);
+          editor.replaceRequestRange(parsed_req, req_range, indent);
         }
       });
     });
@@ -164,8 +165,8 @@ function SenseEditor($el) {
 
   };
 
-  editor.replaceRequestRange = function (newRequest, requestRange) {
-    var text = utils.textFromRequest(newRequest);
+  editor.replaceRequestRange = function (newRequest, requestRange, autoExpandScripts) {
+    var text = utils.textFromRequest(newRequest, autoExpandScripts);
     if (requestRange) {
       var pos = editor.getCursorPosition();
       editor.getSession().replace(requestRange, text);
@@ -317,7 +318,8 @@ function SenseEditor($el) {
         dataEndPos.row, dataEndPos.column
       );
       var data = editor.getSession().getTextRange(bodyRange);
-      request.data.push(data.trim());
+      data = utils.collapseLiteralStrings(data.trim());
+      request.data.push(data);
       bodyStartRow = dataEndPos.row + 1;
     }
 

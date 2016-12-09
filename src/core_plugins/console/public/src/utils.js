@@ -1,9 +1,12 @@
 var utils = {};
 
-utils.textFromRequest = function (request) {
+utils.textFromRequest = function (request, autoExpandScripts) {
   var data = request.data;
   if (typeof data != "string") {
     data = data.join("\n");
+  }
+  if (autoExpandScripts || typeof autoExpandScripts === "undefined" ) {
+    data = utils.expandScriptsToLiterals(data);
   }
   return request.method + " " + request.url + "\n" + data;
 };
@@ -34,5 +37,16 @@ utils.reformatData = function (data, indent) {
   };
 };
 
+utils.collapseLiteralStrings = function (data) {
+  return data.replace(/"""\n?((?:.|\n)*?)"""/g,function (match, literal) {
+      return JSON.stringify(literal.trim());
+  });
+}
+
+utils.expandScriptsToLiterals = function (data) {
+  return data.replace(/("(?:script|inline)"\s*?:)[\s\n\r]*?(".+?\\.+?[^\\]")/g, function (match, tag, string) {
+    return tag + ' """\n' + JSON.parse(string).trim() + '\n"""';
+  });
+}
 
 module.exports = utils;
