@@ -131,7 +131,7 @@
    <h4>Field Attributes</h4>
  </div>
  
-  <div class="form-group">
+  <div ng-if="editor.field.meta" class="form-group">
       <p><label>
         <input type="checkbox" ng-model="editor.field.aggregatable"/> Aggregatable
       </label></p>
@@ -236,7 +236,7 @@
   <div class="form-group">
     <button
       type="button"
-      ng-if="editor.field.scripted && !editor.creating"
+      ng-if="(editor.field.scripted || editor.field.meta) && !editor.creating"
       ng-click="editor.delete()"
       aria-label="Delete"
       class="kuiButton kuiButton--danger"

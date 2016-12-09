@@ -37,7 +37,7 @@ uiModules.get('apps/management')
       function refreshRows() {
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
-        const fields = filter($scope.indexPattern.getNonScriptedFields(), {
+        const fields = filter($scope.indexPattern.getNonMetaScriptedFields(), {
           name: $scope.fieldFilter,
           type: $scope.indexedFieldTypeFilter
         });
