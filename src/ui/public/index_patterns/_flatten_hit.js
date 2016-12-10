@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 export default function FlattenHitProvider(config) {
@@ -8,23 +9,40 @@ export default function FlattenHitProvider(config) {
     metaFields = value;
   });
 
-  function flattenHit(indexPattern, hit) {
-    let flat = {};
+  function flattenHit(indexPattern, hit, deep) {
+    const flat = {};
 
     // recursively merge _source
-    let fields = indexPattern.fields.byName;
+    const fields = indexPattern.fields.byName;
     (function flatten(obj, keyPrefix) {
       keyPrefix = keyPrefix ? keyPrefix + '.' : '';
       _.forOwn(obj, function (val, key) {
         key = keyPrefix + key;
 
-        if (flat[key] !== void 0) return;
+        if (!deep && flat[key] !== void 0) {
+          return;
+        }
 
-        let hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
-        let isValue = !_.isPlainObject(val);
+        if (deep) {
+          const isNestedField = fields[key] && fields[key].type === 'nested';
+          const isArrayOfObjects = _.isArray(val) && _.isPlainObject(_.first(val));
+          if (isArrayOfObjects && !isNestedField) {
+            _.each(val, v => flatten(v, key));
+            return;
+          }
+        }
+
+        const hasValidMapping = fields[key] && fields[key].type !== 'conflict';
+        const isValue = !_.isPlainObject(val);
 
         if (hasValidMapping || isValue) {
-          flat[key] = val;
+          if (!flat[key]) {
+            flat[key] = val;
+          } else if (_.isArray(flat[key])) {
+            flat[key].push(val);
+          } else {
+            flat[key] = [ flat[key], val ];
+          }
           return;
         }
 
@@ -48,13 +66,8 @@ export default function FlattenHitProvider(config) {
   }
 
   return function flattenHitWrapper(indexPattern) {
-    function cachedFlatten(hit) {
-      return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
-    }
-
-    cachedFlatten.uncached = _.partial(flattenHit, indexPattern);
-
-    return cachedFlatten;
+    return function cachedFlatten(hit, deep = false) {
+      return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit, deep));
+    };
   };
 };
-
