@@ -7,7 +7,7 @@ const OPTION_DEFAULTS = {
 };
 
 module.exports = grunt => {
-  grunt.registerMultiTask('eslint',function () {
+  grunt.registerMultiTask('eslint', function () {
     const options = this.options(OPTION_DEFAULTS);
 
     if (!options.paths) {
