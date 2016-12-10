@@ -21,6 +21,8 @@ module.exports = grunt => {
       cwd: grunt.config.get('root'),
     });
 
+    // report includes an entire list of files checked and the
+    // fixes, errors, and warning for each.
     const report = cli.executeOnFiles(options.paths);
 
     // output fixes to disk
