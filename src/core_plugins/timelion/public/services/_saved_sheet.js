@@ -38,12 +38,12 @@ module.factory('SavedSheet', function (courier, config) {
 
   // if type:sheet has no mapping, we push this mapping into ES
   SavedSheet.mapping = {
-    title: 'string',
+    title: 'text',
     hits: 'integer',
-    description: 'string',
-    timelion_sheet: 'string',
-    timelion_interval: 'string',
-    timelion_other_interval: 'string',
+    description: 'text',
+    timelion_sheet: 'text',
+    timelion_interval: 'keyword',
+    timelion_other_interval: 'keyword',
     timelion_chart_height: 'integer',
     timelion_columns: 'integer',
     timelion_rows: 'integer',
