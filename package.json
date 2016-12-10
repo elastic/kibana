@@ -72,7 +72,7 @@
     "@bigfunger/decompress-zip": "0.2.0-stripfix3",
     "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@elastic/datemath": "2.3.0",
-    "@elastic/kibana-ui-framework": "0.0.11",
+    "@elastic/kibana-ui-framework": "0.0.13",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
     "@spalger/leaflet-heat": "0.1.3",

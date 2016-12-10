@@ -1087,4 +1087,15 @@ fieldset {
   .makeKuiColumns(@n, (@i + 1));
 }
 
+/**
+ * 1. Override Bootstrap styles.
+ */
+.localDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
+  }
+}
+
 @import "~dragula/dist/dragula.css";

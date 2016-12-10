@@ -39,10 +39,14 @@
   <!-- Dropdown content, e.g. time-picker. -->
   <div
     class="localDropdown"
-    id="template_wrapper"
     ng-show="kbnTopNav.rendered"
   >
-    <!-- Content gets dynamically inserted here. -->
+    <button class="localDropdownCloseButton" ng-click="kbnTopNav.close()">
+      <span class="fa fa-times"></span>
+    </button>
+    <div id="template_wrapper">
+      <!-- Content gets dynamically inserted here. -->
+    </div>
   </div>
 
   <div class="localNavRow localNavRow--secondary">
