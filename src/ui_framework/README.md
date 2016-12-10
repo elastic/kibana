@@ -35,7 +35,7 @@ By covering our UI components with great unit tests and having those tests live 
 
 In short: we've outgrown it! Third-party CSS frameworks like Bootstrap and Foundation are designed
 for a general audience, so they offer things we don't need and _don't_ offer things we _do_ need.
-As a result, we've forced to override their styles until the original framework is no longer
+As a result, we've been forced to override their styles until the original framework is no longer
 recognizable. When the CSS reaches that point, it's time to take ownership over it and build
 your own framework.
 
