@@ -149,6 +149,7 @@
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
+    "resize-observer-polyfill": "1.2.1",
     "rimraf": "2.4.3",
     "rison-node": "1.0.0",
     "rjs-repack-loader": "1.0.6",
