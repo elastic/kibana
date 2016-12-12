@@ -440,9 +440,12 @@ describe('tag cloud tests', function () {
 
 
     const centered = (largest[1] === 0 && largest[2] === 0);
+    const halfWidth = debugInfo.size[0] / 2;
+    const halfHeight = debugInfo.size[1] / 2;
     const inside = debugInfo.positions.filter(position => {
-      return debugInfo.size[0] <= position[1] && position[1] <= debugInfo.size[0]
-        && debugInfo.size[1] <= position[2] && position[2] <= debugInfo.size[1];
+      const x = position[1] + halfWidth;
+      const y = position[2] + halfHeight;
+      return 0 <= x && x <= debugInfo.size[0] && 0 <= y && y <= debugInfo.size[1];
     });
 
     return centered && inside.length === count - 1;
@@ -452,7 +455,6 @@ describe('tag cloud tests', function () {
   function handleExpectedBlip(assertion) {
     return function () {
       if (!shouldAssert()) {
-        console.warn('Skipping assertion.');
         return;
       }
       assertion();
