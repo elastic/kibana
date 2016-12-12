@@ -11,6 +11,19 @@
   </a>
 </header>
 
+<div class="hintbox" ng-if="getDeprecatedLanguagesInUse().length !== 0">
+  <h4>
+    <i class="fa fa-warning text-warning"></i> Deprecation Warning
+  </h4>
+  <p>
+    We've detected that the following deprecated languages are in use: {{ getDeprecatedLanguagesInUse().join(', ') }}.
+    Support for these languages will be removed in the next major version of Kibana and Elasticsearch.
+    We recommend converting your scripted fields to
+    <a target="_window" ng-href="{{docLinks.painless}}">Painless <i class="fa-link fa"></i></a>.
+  </p>
+</div>
+
+
 <paginated-table
   columns="columns"
   rows="rows"
