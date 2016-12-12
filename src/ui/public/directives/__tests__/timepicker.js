@@ -50,9 +50,7 @@ let init = function () {
     // Create the element
     $elem = angular.element(
       '<kbn-timepicker' +
-      ' from="timefilter.time.from"' +
-      ' to="timefilter.time.to"' +
-      ' mode="timefilter.time.mode"' +
+      ' time="timefilter.time"' +
       ' active-tab="timefilter.timepickerActiveTab"' +
       ' interval="timefilter.refreshInterval">' +
       '</kbn-timepicker>'
