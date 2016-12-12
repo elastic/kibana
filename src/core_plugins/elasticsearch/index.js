@@ -84,11 +84,8 @@ module.exports = function ({ Plugin }) {
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
 
-      const dataCluster = createDataCluster(server);
-      server.on('close', bindKey(dataCluster, 'close'));
-
-      const adminCluster = createAdminCluster(server);
-      server.on('close', bindKey(adminCluster, 'close'));
+      createDataCluster(server);
+      createAdminCluster(server);
 
       createProxy(server, 'GET', '/{paths*}');
       createProxy(server, 'POST', '/_mget');

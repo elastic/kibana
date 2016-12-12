@@ -6,7 +6,7 @@ import { format } from 'util';
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;
 
-  const callAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callAsKibanaUser;
+  const { callAsKibanaUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
   function createNewConfig() {

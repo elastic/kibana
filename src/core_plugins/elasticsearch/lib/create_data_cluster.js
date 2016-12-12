@@ -1,16 +1,13 @@
+import { bindKey } from 'lodash';
+
 export default function (server) {
   const config = server.config();
   const esPlugins = server.plugins.elasticsearch;
   const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
 
   class DataClientLogging extends Logger {
-    get tags() {
-      return ['data'];
-    }
-
-    get logQueries() {
-      return Boolean(getConfig().logQueries);
-    }
+    tags = ['data'];
+    logQueries = Boolean(getConfig().logQueries);
   }
 
   function getConfig() {
@@ -23,8 +20,10 @@ export default function (server) {
     return esConfig;
   }
 
-  return server.plugins.elasticsearch.createCluster(
+  const dataCluster = server.plugins.elasticsearch.createCluster(
     'data',
     Object.assign({ log: DataClientLogging }, getConfig())
   );
+
+  server.on('close', bindKey(dataCluster, 'close'));
 };

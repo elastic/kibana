@@ -1,13 +1,9 @@
 module.exports = function (server) {
   return class ElasticsearchClientLogging {
     // additional tags to differentiate connection
-    get tags() {
-      return [];
-    }
+    tags = ['admin'];
 
-    get logQueries() {
-      return false;
-    }
+    logQueries = false;
 
     error(err) {
       server.log(['error', 'elasticsearch'].concat(this.tags), err);

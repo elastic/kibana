@@ -65,13 +65,13 @@ describe('plugins/elasticsearch', () => {
 
     it('returns true with single a node that matches', async () => {
       setNodes('5.1.0');
-      const result = await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      const result = await checkEsVersion(server, KIBANA_VERSION);
       expect(result).to.be(true);
     });
 
     it('returns true with multiple nodes that satisfy', async () => {
       setNodes('5.1.0', '5.2.0', '5.1.1-Beta1');
-      const result = await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      const result = await checkEsVersion(server, KIBANA_VERSION);
       expect(result).to.be(true);
     });
 
@@ -79,7 +79,7 @@ describe('plugins/elasticsearch', () => {
       // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
       setNodes('5.1.0', '5.2.0', '5.0.0');
       try {
-        await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+        await checkEsVersion(server, KIBANA_VERSION);
       } catch (e) {
         expect(e).to.be.a(Error);
       }
@@ -92,7 +92,7 @@ describe('plugins/elasticsearch', () => {
         { version: '5.0.0', attributes: { client: 'true' } },
       );
       try {
-        await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+        await checkEsVersion(server, KIBANA_VERSION);
       } catch (e) {
         expect(e).to.be.a(Error);
       }
@@ -100,7 +100,7 @@ describe('plugins/elasticsearch', () => {
 
     it('warns if a node is only off by a patch version', async () => {
       setNodes('5.1.1');
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 2);
       expect(server.log.getCall(0).args[0]).to.contain('debug');
       expect(server.log.getCall(1).args[0]).to.contain('warning');
@@ -108,7 +108,7 @@ describe('plugins/elasticsearch', () => {
 
     it('warns if a node is off by a patch version and without http publish address', async () => {
       setNodeWithoutHTTP('5.1.1');
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 2);
       expect(server.log.getCall(0).args[0]).to.contain('debug');
       expect(server.log.getCall(1).args[0]).to.contain('warning');
@@ -117,7 +117,7 @@ describe('plugins/elasticsearch', () => {
     it('errors if a node incompatible and without http publish address', async () => {
       setNodeWithoutHTTP('6.1.1');
       try {
-        await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+        await checkEsVersion(server, KIBANA_VERSION);
       } catch (e) {
         expect(e.message).to.contain('incompatible nodes');
         expect(e).to.be.a(Error);
@@ -127,12 +127,12 @@ describe('plugins/elasticsearch', () => {
     it('only warns once per node list', async () => {
       setNodes('5.1.1');
 
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 2);
       expect(server.log.getCall(0).args[0]).to.contain('debug');
       expect(server.log.getCall(1).args[0]).to.contain('warning');
 
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 3);
       expect(server.log.getCall(2).args[0]).to.contain('debug');
     });
@@ -140,13 +140,13 @@ describe('plugins/elasticsearch', () => {
     it('warns again if the node list changes', async () => {
       setNodes('5.1.1');
 
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 2);
       expect(server.log.getCall(0).args[0]).to.contain('debug');
       expect(server.log.getCall(1).args[0]).to.contain('warning');
 
       setNodes('5.1.2');
-      await checkEsVersion(server, KIBANA_VERSION, callAsKibanaUser);
+      await checkEsVersion(server, KIBANA_VERSION);
       sinon.assert.callCount(server.log, 4);
       expect(server.log.getCall(2).args[0]).to.contain('debug');
       expect(server.log.getCall(3).args[0]).to.contain('warning');
