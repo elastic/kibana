@@ -54,7 +54,7 @@ class TagCloud extends EventEmitter {
 
     //UTIL
     this._handle = null;
-    this._queue = [];
+    this._pendingJob = null;
     this._allInViewBox = false;
     this._inFlight = false;
 
@@ -118,7 +118,7 @@ class TagCloud extends EventEmitter {
 
   _processQueue() {
 
-    if (!this._queue.length) {
+    if (!this._pendingJob) {
       this.emit('renderComplete');
       return;
     }
@@ -127,7 +127,8 @@ class TagCloud extends EventEmitter {
       return;
     }
 
-    const job = this._queue.pop();
+    const job = this._pendingJob;
+    this._pendingJob = null;
     this._inFlight = true;
 
     if (job.words.length) {
@@ -254,7 +255,7 @@ class TagCloud extends EventEmitter {
     this._handle = setTimeout(() => {
       this._handle = null;
       this._updateContainerSize();
-      if (keepLayout && this._currentJob && this._queue.length === 0) {
+      if (keepLayout && this._currentJob && !this._pendingJob) {
         this._scheduleLayout({
           words: this._currentJob.words.map(tag => {
             return {
@@ -273,7 +274,7 @@ class TagCloud extends EventEmitter {
   }
 
   _scheduleLayout(job) {
-    this._queue.unshift(job);
+    this._pendingJob = job;
     this._processQueue();
   }
 
