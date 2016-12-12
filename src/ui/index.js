@@ -15,7 +15,7 @@ export default async (kbnServer, server, config) => {
     urlBasePath: config.get('server.basePath')
   });
 
-  const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.locale'));
+  const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.defaultLocale'));
   uiI18n.addUiExportConsumer(uiExports);
 
   const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));

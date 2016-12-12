@@ -156,7 +156,7 @@ module.exports = () => Joi.object({
   }).default(),
 
   i18n: Joi.object({
-    locale: Joi.string().default('en'),
+    defaultLocale: Joi.string().default('en'),
   }).default(),
 
 }).default();

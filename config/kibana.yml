@@ -98,6 +98,6 @@
 # metrics. Minimum is 100ms. Defaults to 5000.
 #ops.interval: 5000
 
-# The default locale to use for translations if the locale specified by user
-# is not supported
-#i18n.locale: "en"
+# The default locale. This locale can be used in certain circumstances to substitute any missing
+# translations.
+#i18n.defaultLocale: "en"
