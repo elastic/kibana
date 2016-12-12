@@ -62,7 +62,8 @@
     "makelogs": "makelogs",
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
-    "sterilize": "grunt sterilize"
+    "sterilize": "grunt sterilize",
+    "es-start": "grunt es-start"
   },
   "repository": {
     "type": "git",
