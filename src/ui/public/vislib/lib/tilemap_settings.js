@@ -21,6 +21,8 @@ uiModules.get('kibana')
      * @type {Object}
      */
     const mapSettings = {
+
+      _queryParams: {},
       _licenseUid: '',
       _manifest: null,
 
@@ -33,7 +35,7 @@ uiModules.get('kibana')
        */
       whenSettingsReady: async function () {
 
-        if (!tilemap.isConfiguredWithDefault) {//if not configured with default, we will not contact manifest proxy service
+        if (!tilemap.isConfiguredWithDefault) {//if settings are overridden, we will use those.
           return true;
         }
 
@@ -56,15 +58,13 @@ uiModules.get('kibana')
         this._url = this._manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
         return true;
       },
-
       /**
-       * Sets the license id that will be used when requesting the manifest
-       * @param licenseUid
+       * add optional query-parameter that will be submitted to the tile service
+       * @param additionalQueryParams
        */
-      setLicenseUid: function (licenseUid) {
-        this._licenseUid = licenseUid;
+      addQueryParams: function (additionalQueryParams) {
+        this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
       },
-
 
       /**
        * Get the url of the default TMS
@@ -92,11 +92,8 @@ uiModules.get('kibana')
     async function getTileServiceManifest(licenseId) {
       try {
         return await $http({
-          url: 'https://proxy-tiles.elastic.co/v1/manifest',//todo: will need to be CORS-enabled
-          method: 'GET',
-          data: {
-            license: licenseId
-          }
+          url: 'https://proxy-tiles.elastic.co/v1/manifest?license=' + licenseId,
+          method: 'GET'
         });
       } catch (e) {
         //fake return for now
