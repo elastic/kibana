@@ -4,6 +4,7 @@ import 'ui/bind';
 import 'ui/kbn_top_nav';
 import 'ui/bound_to_config_obj';
 import 'ui/config';
+import 'ui/clipboard';
 import 'ui/courier';
 import 'ui/debounce';
 import 'ui/doc_title';

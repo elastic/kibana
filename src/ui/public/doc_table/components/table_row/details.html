@@ -1,6 +1,8 @@
 <td colspan="{{ columns.length + 2 }}">
-  <a class="pull-right" ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}">
-    <small>Link to /{{row._index}}/{{row._type}}/{{row._id | uriescape}}</small></i>
-  </a>
+  <div class="pull-right">
+    <a ng-href="{{docUrl}}">View</a>
+    <span style="display:inline-block; width:5px"><!--spacer--></span>
+    <a ng-click="copyTextToClipboard(docUrl)">Copy URL</a>
+  </div>
   <doc-viewer hit="row" filter="filter" columns="columns" index-pattern="indexPattern"></doc-viewer>
 </td>
