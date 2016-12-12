@@ -6,7 +6,7 @@ const OPTION_DEFAULTS = {
   fix: false
 };
 
-module.exports = grunt => {
+export default grunt => {
   grunt.registerMultiTask('eslint', function () {
     const options = this.options(OPTION_DEFAULTS);
 

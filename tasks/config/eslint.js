@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-module.exports = grunt => ({
+export default grunt => ({
   options: {
     paths: [
       'Gruntfile.js',
