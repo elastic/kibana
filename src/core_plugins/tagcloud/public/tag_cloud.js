@@ -20,7 +20,6 @@ const D3_SCALING_FUNCTIONS = {
   'square root': () => d3.scale.sqrt()
 };
 
-
 class TagCloud extends EventEmitter {
 
   constructor(domNode) {
@@ -55,12 +54,14 @@ class TagCloud extends EventEmitter {
     //UTIL
     this._handle = null;
     this._pendingJob = null;
+    this._layoutIsUpdating = null;
     this._allInViewBox = false;
-    this._inFlight = false;
+    this._DOMisUpdating = false;
 
   }
 
   setOptions(options) {
+
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
@@ -116,46 +117,57 @@ class TagCloud extends EventEmitter {
     this._svgGroup.attr('height', this._size[1]);
   }
 
-  _processQueue() {
+  _processPendingJob() {
 
+    clearTimeout(this._handle);
     if (!this._pendingJob) {
       this.emit('renderComplete');
       return;
     }
 
-    if (this._inFlight) {
+    if (this._layoutIsUpdating || this._DOMisUpdating) {
       return;
     }
 
     const job = this._pendingJob;
     this._pendingJob = null;
-    this._inFlight = true;
+    this._handle = setTimeout(() => {
+      this._handle = null;
+      if (job.words.length) {
+        if (job.refreshLayout) {
+          this._updateLayout(job);
+        } else {
+          this._updateDOMOnLayoutEnd(job);
+        }
+      } else {
+        this._emptyDOM(job);
+      }
+    }, 0);
 
-    if (job.words.length) {
-      this._onLayoutEnd(job);
-    } else {
-      this._emptyCloud(job);
-    }
 
   }
 
-  _emptyCloud(job) {
+  _emptyDOM(job) {
     this._svgGroup.selectAll('text').remove();
     this._cloudWidth = 0;
     this._cloudHeight = 0;
     this._allInViewBox = true;
-    this._inFlight = false;
+    this._DOMisUpdating = false;
     this._currentJob = job;
-    this._processQueue();
+    this._processPendingJob();
   }
 
-  _onLayoutEnd(job) {
+  _updateDOMOnLayoutEnd(job) {
 
-    if (this._handle !== null) {//a new configuration is coming, no need to update
-      this._processQueue();
+    this._layoutIsUpdating = false;
+
+    if (this._pendingJob || this._handle) {//a new configuration is coming, no need to update the DOM
+      this._DOMisUpdating = false;
+      this._processPendingJob();
       return;
     }
 
+    this._DOMisUpdating = true;
     this._currentJob = null;
     const affineTransform = positionWord.bind(null, this._element.offsetWidth / 2, this._element.offsetHeight / 2);
     const svgTextNodes = this._svgGroup.selectAll('text');
@@ -211,9 +223,9 @@ class TagCloud extends EventEmitter {
           cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
           cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
 
-        this._inFlight = false;
+        this._DOMisUpdating = false;
         this._currentJob = job;
-        this._processQueue();
+        this._processPendingJob();
       }
     };
     exitTransition.each(_ => exits++);
@@ -241,6 +253,7 @@ class TagCloud extends EventEmitter {
 
   _makeJob() {
     return {
+      refreshLayout: true,
       words: this._words.map(toWordTag)
     };
   }
@@ -251,36 +264,34 @@ class TagCloud extends EventEmitter {
       return;
     }
 
-    clearTimeout(this._handle);
-    this._handle = setTimeout(() => {
-      this._handle = null;
-      this._updateContainerSize();
-      if (keepLayout && this._currentJob && !this._pendingJob) {
-        this._scheduleLayout({
-          words: this._currentJob.words.map(tag => {
-            return {
-              x: tag.x,
-              y: tag.y,
-              rotate: tag.rotate,
-              size: tag.size,
-              text: tag.text
-            };
-          })
-        });
-      } else {
-        this._updateLayout();
-      }
-    }, 0);//unhook from callstack. this avoids kicking off multiple layouts if multiple changes come in succession
+    this._updateContainerSize();
+    if (keepLayout && this._currentJob && !this._pendingJob) {
+      //no need to recompute the layout
+      this._scheduleLayout({
+        words: this._currentJob.words.map(tag => {
+          return {
+            refreshLayout: false,
+            x: tag.x,
+            y: tag.y,
+            rotate: tag.rotate,
+            size: tag.size,
+            text: tag.text
+          };
+        })
+      });
+    } else {
+      this._scheduleLayout(this._makeJob());
+    }
   }
 
-  _scheduleLayout(job) {
+  _scheduleLayout(job, refreshLayout) {
     this._pendingJob = job;
-    this._processQueue();
+    this._processPendingJob(refreshLayout);
   }
 
-  _updateLayout() {
 
-    const job = this._makeJob();
+  _updateLayout(job) {
+
     const mapSizeToFontSize = this._makeTextSizeMapper();
 
     const tagCloudLayoutGenerator = d3TagCloud();
@@ -290,15 +301,13 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => {
-      return mapSizeToFontSize(tag.value);
-    });
+    tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
-    tagCloudLayoutGenerator.on('end', () => this._scheduleLayout(job));
+    tagCloudLayoutGenerator.on('end', () => this._updateDOMOnLayoutEnd(job));
     tagCloudLayoutGenerator.start();
   }
 
