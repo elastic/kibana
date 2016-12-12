@@ -87,6 +87,13 @@ export class I18n {
    * @param {String} absolutePluginTranslationFilePath - Absolute path to the translation file to register.
    */
   registerTranslations(absolutePluginTranslationFilePath) {
+    if (!path.isAbsolute(absolutePluginTranslationFilePath)) {
+      throw new TypeError(
+        'Paths to translation files must be absolute. ' +
+        `Got relative path: "${absolutePluginTranslationFilePath}"`
+      );
+    }
+
     const locale = getLocaleFromFileName(absolutePluginTranslationFilePath);
 
     this._registeredTranslations[locale] =

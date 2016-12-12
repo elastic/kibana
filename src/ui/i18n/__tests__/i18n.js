@@ -184,6 +184,10 @@ describe('ui/i18n module', function () {
 
     const i18nObj = new I18n();
 
+    it('should throw error when registering relative path', function () {
+      return expect(i18nObj.registerTranslations).withArgs('./some/path').to.throwError();
+    });
+
     it('should throw error when registering empty filename', function () {
       return expect(i18nObj.registerTranslations).withArgs('').to.throwError();
     });
@@ -220,4 +224,3 @@ function checkTranslationsForDefaultLocale(expectedTranslations, i18nObj) {
     expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
   });
 }
-
