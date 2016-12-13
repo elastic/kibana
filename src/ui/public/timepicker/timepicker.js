@@ -162,6 +162,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         notify.log('after: ' + interval.pause);
 
         $scope.interval = interval;
+        $scope.onSelect();
       };
 
       $scope.setMode($scope.time.mode);
