@@ -1,4 +1,4 @@
-import VisSchemasProvider from 'ui/vis/schemas';
+import VisSchemasProvider from './schemas';
 
 export default function VisTypeFactory(Private) {
   const VisTypeSchemas = Private(VisSchemasProvider);
