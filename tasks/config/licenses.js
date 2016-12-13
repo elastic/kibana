@@ -29,6 +29,7 @@ module.exports = function (grunt) {
         'MIT/X11',
         'OFL-1.1 AND MIT',
         'Public domain',
+        'Unlicense',
         'WTFPL',
         'new BSD, and MIT'
       ],
