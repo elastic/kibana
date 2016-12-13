@@ -4,10 +4,10 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 module.exports = function AggParamWriterHelper(Private) {
-  let Vis = Private(VisProvider);
-  let aggTypes = Private(AggTypesIndexProvider);
-  let visTypes = Private(RegistryVisTypesProvider);
-  let stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const Vis = Private(VisProvider);
+  const aggTypes = Private(AggTypesIndexProvider);
+  const visTypes = Private(RegistryVisTypesProvider);
+  const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and
@@ -29,7 +29,7 @@ module.exports = function AggParamWriterHelper(Private) {
    * @param {string} opts.aggType - the name of the aggType we want to test. ('histogram', 'filter', etc.)
    */
   function AggParamWriter(opts) {
-    let self = this;
+    const self = this;
 
     self.aggType = opts.aggType;
     if (_.isString(self.aggType)) {
@@ -47,7 +47,7 @@ module.exports = function AggParamWriterHelper(Private) {
 
     // find a suitable vis type and schema
     _.find(visTypes, function (visType) {
-      let schema = _.find(visType.schemas.all, function (schema) {
+      const schema = _.find(visType.schemas.all, function (schema) {
         // type, type, type, type, type... :(
         return schema.group === self.aggType.type;
       });
@@ -69,7 +69,7 @@ module.exports = function AggParamWriterHelper(Private) {
   }
 
   AggParamWriter.prototype.write = function (paramValues) {
-    let self = this;
+    const self = this;
     paramValues = _.clone(paramValues);
 
     if (self.aggType.params.byName.field && !paramValues.field) {
@@ -90,7 +90,7 @@ module.exports = function AggParamWriterHelper(Private) {
       }]
     });
 
-    let aggConfig = _.find(self.vis.aggs, function (aggConfig) {
+    const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
       return aggConfig.type === self.aggType;
     });
 

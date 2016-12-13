@@ -1,4 +1,5 @@
 import _, { keys } from 'lodash';
+
 const visualRegression = require('../utilities/visual_regression');
 
 module.exports = function (grunt) {
@@ -21,8 +22,19 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
-  grunt.registerTask('test:browser', ['run:testServer', 'karma:unit']);
+  grunt.registerTask('test:server', [
+    'checkPlugins',
+    'esvm:test',
+    'simplemocha:all',
+    'esvm_shutdown:test',
+  ]);
+
+  grunt.registerTask('test:browser', [
+    'checkPlugins',
+    'run:testServer',
+    'karma:unit',
+  ]);
+
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
       .filter(key => key.startsWith('ciShard-'))
@@ -35,6 +47,7 @@ module.exports = function (grunt) {
       ...ciShardTasks
     ]);
   });
+
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
@@ -45,11 +58,13 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', [
+    'checkPlugins',
     'run:devTestServer',
     'karma:dev'
   ]);
 
   grunt.registerTask('test:ui', [
+    'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
     'run:chromeDriver',
@@ -61,13 +76,15 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:ui:server', [
+    'checkPlugins',
     'esvm:ui',
-    'run:testUIDevServer',
-    'run:devChromeDriver:keepalive'
+    'run:testUIDevServer:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
+    'checkPlugins',
     'clean:screenshots',
+    'run:devChromeDriver',
     'intern:dev'
   ]);
 

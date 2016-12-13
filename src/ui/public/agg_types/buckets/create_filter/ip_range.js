@@ -6,10 +6,10 @@ export default function createIpRangeFilterProvider() {
     if (aggConfig.params.ipRangeType === 'mask') {
       range = new CidrMask(key).getRange();
     } else {
-      let addresses = key.split(/\-/);
+      const [from, to] = key.split(/\s+to\s+/);
       range = {
-        from: addresses[0],
-        to: addresses[1]
+        from: from === '-Infinity' ? -Infinity : from,
+        to: to === 'Infinity' ? Infinity : to
       };
     }
 

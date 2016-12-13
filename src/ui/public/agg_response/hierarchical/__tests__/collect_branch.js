@@ -4,7 +4,7 @@ import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
 import expect from 'expect.js';
 describe('collectBranch()', function () {
   let results;
-  let convert = function (name) {
+  const convert = function (name) {
     return 'converted:' + name;
   };
 
@@ -14,12 +14,12 @@ describe('collectBranch()', function () {
       depth: 3,
       size: 6,
       field: { format: { convert: convert } },
-      aggConfig: { params: { field: { displayName: 'field3' } }, fieldFormatter: _.constant(String) },
+      aggConfig: { getFieldDisplayName: _.constant('field3'), fieldFormatter: _.constant(String) },
       parent: {
         name: 'bucket2',
         depth: 2,
         size: 12,
-        aggConfig: { label: 'field2', fieldFormatter: _.constant(String) },
+        aggConfig: { fieldFormatter: _.constant(String), getFieldDisplayName: _.constant('field2') },
         parent: {
           name: 'bucket1',
           depth: 1,

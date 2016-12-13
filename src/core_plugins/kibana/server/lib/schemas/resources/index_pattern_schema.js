@@ -6,6 +6,7 @@ module.exports = Joi.object({
   time_field_name: Joi.string(),
   interval_name: Joi.string(),
   not_expandable: Joi.boolean(),
+  source_filters: Joi.array(),
   fields: Joi.array().items(
     Joi.object({
       name: Joi.string().required(),

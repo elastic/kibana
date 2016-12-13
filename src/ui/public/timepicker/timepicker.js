@@ -3,6 +3,7 @@ import _ from 'lodash';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import Notifier from 'ui/notify/notifier';
+import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
 import 'ui/timepicker/quick_ranges';
@@ -10,8 +11,8 @@ import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
 import uiModules from 'ui/modules';
-let module = uiModules.get('ui/timepicker');
-let notify = new Notifier({
+const module = uiModules.get('ui/timepicker');
+const notify = new Notifier({
   location: 'timepicker',
 });
 
@@ -85,7 +86,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
           case 'quick':
             break;
           case 'relative':
-            let fromParts = $scope.from.toString().split('-');
+            const fromParts = $scope.from.toString().split('-');
             let relativeParts = [];
 
             // Try to parse the relative time, if we can't use moment duration to guestimate
@@ -96,11 +97,11 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
               $scope.relative.count = parseInt(relativeParts[1], 10);
               $scope.relative.unit = relativeParts[2];
             } else {
-              let duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
-              let units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
+              const duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
+              const units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
               if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
               for (let i = 0; i < units.length; i++) {
-                let as = duration.as(units[i]);
+                const as = duration.as(units[i]);
                 if (as > 1) {
                   $scope.relative.count = Math.round(as);
                   $scope.relative.unit = units[i];
@@ -132,7 +133,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.formatRelative = function () {
-        let parsed = dateMath.parse(getRelativeString());
+        const parsed = dateMath.parse(getRelativeString());
         $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
         return parsed;
       };

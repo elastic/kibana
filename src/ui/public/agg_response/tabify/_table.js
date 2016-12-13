@@ -26,7 +26,7 @@ export default function TableProvider() {
   };
 
   Table.prototype.field = function (col) {
-    return this.aggConfig(col).field();
+    return this.aggConfig(col).getField();
   };
 
   Table.prototype.fieldFormatter = function (col) {

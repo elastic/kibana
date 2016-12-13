@@ -1,6 +1,109 @@
 
 # CSS Style Guide
 
+- [CSS Style Guide](#css-style-guide)
+  - [Selecting elements](#selecting-elements)
+  - [Using the preprocessor](#using-the-preprocessor)
+    - [Don't build concatenated selector names](#dont-build-concatenated-selector-names)
+    - [Avoid nested selectors](#avoid-nested-selectors)
+  - [Rules](#rules)
+    - [Use uniquely-named "base classes" to represent components](#use-uniquely-named-base-classes-to-represent-components)
+    - [Create "descendant classes" to represent child components which can't stand on their own](#create-descendant-classes-to-represent-child-components-which-cant-stand-on-their-own)
+    - [Think of deeply-nested child components as "subcomponents" instead of descendants](#think-of-deeply-nested-child-components-as-subcomponents-instead-of-descendants)
+    - [Represent states with "state classes"](#represent-states-with-state-classes)
+    - [Variations on a component are represented with "modifier classes"](#variations-on-a-component-are-represented-with-modifier-classes)
+    - [Don't use multiple modifier classes together](#dont-use-multiple-modifier-classes-together)
+    - [How to apply DRY](#how-to-apply-dry)
+      - [Compelling reasons for using mixins](#compelling-reasons-for-using-mixins)
+
+## Selecting elements
+
+References to CSS selectors within JavaScript are difficult to discover, making it easy to accidentally
+break the UI when refactoring markup or CSS.
+
+Instead, add a `data` attribute with a unique and descriptive name and select the element using that.
+
+```html
+<div data-welcome-message>Hello, world</div>
+```
+
+```javascript
+const welcomeMessage = document.querySelector('[data-welcome-message]');
+```
+
+This uncouples our CSS from our JavaScript, making it easy to change each independently of the other.
+
+## Using the preprocessor
+
+### Don't build concatenated selector names
+
+This kind of code makes the selector name really difficult to grep for:
+
+```less
+.chart {
+  // styles
+
+  &Content {
+    // styles
+
+    &Title {
+      // styles
+    }
+  }
+}
+
+```
+
+This is better:
+
+```less
+.chart {
+  // styles
+}
+
+.chartContent {
+  // styles
+}
+
+.chartContentTitle {
+  // styles
+}
+```
+
+### Avoid nested selectors
+
+Writing selectors like this makes the markup less readable and the styling less explicit. It also
+results in unnecessarily higher selector specificity:
+
+```less
+.specialMenu {
+  // styles
+
+  > li {
+    // styles
+  }
+}
+```
+
+This is better:
+
+```less
+.specialMenu {
+  // styles
+}
+
+.specialMenu__item {
+  // styles
+}
+```
+
+## Naming convention
+
+Our CSS naming convention is based on BEM:
+
+* [BEM 101 (CSS Tricks)](https://css-tricks.com/bem-101/)
+* [Getting your head around BEM syntax (CSS Wizardry)](http://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/)
+
 ## Concepts
 
 ### Think in terms of components
@@ -32,7 +135,7 @@ rules that underly these examples are below.
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.localNavButton-is-pressed {
+  &.localNavButton-isPressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }
@@ -132,19 +235,19 @@ pretty hairy. Consider a table component:
 // ======================== Bad! ========================
 // These styles are complex and the multiple double-underscores increases noise
 // without providing much useful information.
-.kbTable {
+.kuiTable {
   /* ... */
 }
 
-  .kbTable__body {
+  .kuiTable__body {
     /* ... */
   }
 
-    .kbTable__body__row {
+    .kuiTable__body__row {
       /* ... */
     }
 
-      .kbTable__body__row__cell {
+      .kuiTable__body__row__cell {
         /* ... */
       }
 ```
@@ -155,25 +258,25 @@ indicates their relationship, by incorporating the name of the root base class.
 
 ```less
 // kbTable.less
-.kbTable {
+.kuiTable {
   /* ... */
 }
 ```
 
 ```less
 // kbTableBody.less
-.kbTableBody {
+.kuiTableBody {
   /* ... */
 }
 ```
 
 ```less
 // kbTableRow.less
-.kbTableRow {
+.kuiTableRow {
   /* ... */
 }
 
-  .kbTableRow__cell {
+  .kuiTableRow__cell {
     /* ... */
   }
 ```
@@ -196,7 +299,7 @@ Notice that all states contain a boolean keyword, typically "is".
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.localNavButton-is-pressed {
+  &.localNavButton-isPressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }

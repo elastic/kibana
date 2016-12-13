@@ -7,8 +7,8 @@ describe('getPoint', function () {
 
   let getPoint;
 
-  let truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
-  let identFormatted = { fieldFormatter: _.constant(_.identity) };
+  const truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
+  const identFormatted = { fieldFormatter: _.constant(_.identity) };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -18,32 +18,34 @@ describe('getPoint', function () {
   describe('Without series aspect', function () {
     let seriesAspect;
     let xAspect;
+    let yCol;
     let yAspect;
     let yScale;
 
     beforeEach(function () {
       seriesAspect = null;
       xAspect = { i: 0 };
-      yAspect = { i: 1 };
+      yCol = { title: 'Y', aggConfig: {} };
+      yAspect = { i: 1, col: yCol };
       yScale = 5;
     });
 
     it('properly unwraps and scales values', function () {
-      let row = [ { value: 1 }, { value: 2 }, { value: 3 } ];
-      let zAspect = { i: 2 };
-      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect, zAspect);
+      const row = [ { value: 1 }, { value: 2 }, { value: 3 } ];
+      const zAspect = { i: 2 };
+      const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect, zAspect);
 
       expect(point)
         .to.have.property('x', 1)
         .and.have.property('y', 10)
         .and.have.property('z', 3)
-        .and.have.property('aggConfigResult', row[1])
-        .and.not.have.property('series');
+        .and.have.property('series', yCol.title)
+        .and.have.property('aggConfigResult', row[1]);
     });
 
     it('ignores points with a y value of NaN', function () {
-      let row = [ { value: 1 }, { value: 'NaN' }];
-      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      const row = [ { value: 1 }, { value: 'NaN' }];
+      const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
       expect(point).to.be(void 0);
     });
   });
@@ -62,8 +64,8 @@ describe('getPoint', function () {
     });
 
     it('properly unwraps and scales values', function () {
-      let seriesAspect = { i: 1, agg: identFormatted };
-      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      const seriesAspect = { i: 1, agg: identFormatted };
+      const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point)
         .to.have.property('x', 1)
@@ -73,8 +75,8 @@ describe('getPoint', function () {
     });
 
     it('properly formats series values', function () {
-      let seriesAspect = { i: 1, agg: truthFormatted };
-      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      const seriesAspect = { i: 1, agg: truthFormatted };
+      const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point)
         .to.have.property('x', 1)
@@ -84,8 +86,8 @@ describe('getPoint', function () {
     });
 
     it ('adds the aggConfig to the points', function () {
-      let seriesAspect = { i: 1, agg:  truthFormatted};
-      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      const seriesAspect = { i: 1, agg:  truthFormatted};
+      const point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point).to.have.property('aggConfig', truthFormatted);
     });

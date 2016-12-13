@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export default function normalizeSortRequest(config) {
-  let defaultSortOptions = config.get('sort:options');
+  const defaultSortOptions = config.get('sort:options');
 
   /**
    * Decorate queries with default parameters
@@ -9,7 +9,7 @@ export default function normalizeSortRequest(config) {
    * @returns {object}
    */
   return function (sortObject, indexPattern) {
-    let normalizedSort = [];
+    const normalizedSort = [];
 
     // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
     return [].concat(sortObject).map(function (sortable) {
@@ -22,10 +22,10 @@ export default function normalizeSortRequest(config) {
     { someField: "desc" } into { someField: { "order": "desc"}}
   */
   function normalize(sortable, indexPattern) {
-    let normalized = {};
+    const normalized = {};
     let sortField = _.keys(sortable)[0];
     let sortValue = sortable[sortField];
-    let indexField = indexPattern.fields.byName[sortField];
+    const indexField = indexPattern.fields.byName[sortField];
 
     if (indexField && indexField.scripted && indexField.sortable) {
       let direction;
@@ -38,7 +38,7 @@ export default function normalizeSortRequest(config) {
           inline: indexField.script,
           lang: indexField.lang
         },
-        type: indexField.type,
+        type: castSortType(indexField.type),
         order: direction
       };
     } else {
@@ -56,3 +56,20 @@ export default function normalizeSortRequest(config) {
     return normalized;
   }
 };
+
+// The ES API only supports sort scripts of type 'number' and 'string'
+function castSortType(type) {
+  const typeCastings = {
+    number: 'number',
+    string: 'string',
+    date: 'number',
+    boolean: 'string'
+  };
+
+  const castedType = typeCastings[type];
+  if (!castedType) {
+    throw new Error(`Unsupported script sort type: ${type}`);
+  }
+
+  return castedType;
+}

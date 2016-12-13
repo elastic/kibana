@@ -19,6 +19,7 @@ module.exports = function (grunt) {
         'BSD-2-Clause',
         'BSD-3-Clause',
         'BSD-3-Clause AND MIT',
+        'BSD-3-Clause OR MIT',
         'BSD-like',
         'CC-BY',
         'CC-BY-4.0',

@@ -13,14 +13,12 @@ export default class DashboardPage {
   }
 
   clickNewDashboard() {
-    return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="New Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardNewButton')
     .click();
   }
 
   clickAddVisualization() {
-    return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Add a panel to the dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardAddPanelButton')
     .click();
   }
 
@@ -70,11 +68,10 @@ export default class DashboardPage {
   }
 
   saveDashboard(dashName) {
-    return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardSaveButton')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -86,7 +83,7 @@ export default class DashboardPage {
       .type(dashName);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -101,7 +98,7 @@ export default class DashboardPage {
       });
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -124,9 +121,8 @@ export default class DashboardPage {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
-    var self = this;
-    return this.findTimeout
-    .findByCssSelector('button.ng-scope[aria-label="Load Saved Dashboard"]')
+    const self = this;
+    return PageObjects.common.findTestSubject('dashboardOpenButton')
     .click()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
@@ -136,7 +132,7 @@ export default class DashboardPage {
       .type(dashName.replace('-',' '));
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -146,7 +142,7 @@ export default class DashboardPage {
       .clickDashboardByLinkText(dashName);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -160,7 +156,7 @@ export default class DashboardPage {
         return chart.getAttribute('title');
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }
@@ -172,7 +168,7 @@ export default class DashboardPage {
     .then(function (titleObjects) {
 
       function getTitles(chart) {
-        var obj = {};
+        let obj = {};
         return chart.getAttribute('data-col')
         .then(theData => {
           obj = {dataCol:theData};
@@ -211,7 +207,7 @@ export default class DashboardPage {
         });
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }

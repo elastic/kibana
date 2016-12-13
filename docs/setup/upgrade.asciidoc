@@ -1,0 +1,54 @@
+[[upgrade]]
+== Upgrading Kibana
+
+[IMPORTANT]
+===========================================
+Before upgrading Kibana:
+
+* Consult the <<breaking-changes,breaking changes>> docs.
+* Test upgrades in a dev environment before upgrading your production servers.
+* Backup your data using the Elasticsearch
+  {es-ref}modules-snapshots.html[snapshots] feature.
+  You **cannot roll back** to an earlier version unless you have a backup of
+  your data.
+* If you are using custom plugins, check that a compatible version is
+  available.
+===========================================
+
+Depending on which version of Kibana you're upgrading from, the upgrade process
+will vary. Please consult the following table to determine which process you
+should follow:
+
+[cols="1<m,1<m,3",options="header",]
+|=======================================================================
+|Upgrade From   |Upgrade To     |Supported Upgrade Type
+|3.x            |5.x            |<<upgrade-new-install,New installation>>
+|4.0 or 4.1     |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
+|4.x >= 4.2     |5.x            |<<upgrade-standard,Standard upgrade>>
+|5.0.0 pre GA   |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
+|5.x            |5.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
+|=======================================================================
+
+[IMPORTANT]
+===========================================
+Reindex is required if you ever upgraded from Kibana 4.1 or 4.0
+
+Even if you're running Kibana version 4.2 or higher, if you have previously
+upgraded from Kibana 4.0 or 4.1, you will need to do a
+<<upgrade-standard-reindex,Standard upgrade & reindex>> when upgrading to 5.x.
+
+This is due to the Elasticsearch requirement that any index that was initially
+created before Elasticsearch 2.0 must be reindexed even if it's currently
+working in Elasticsearch 2.x.
+
+You only need to do this once when moving to 5.x.
+===========================================
+
+NOTE: Saved searches, visualizations, and dashboards created in Kibana 4.x are
+generally compatible with 5.x.
+
+include::upgrade/upgrade-standard.asciidoc[]
+
+include::upgrade/upgrade-standard-reindex.asciidoc[]
+
+include::upgrade/upgrade-new-install.asciidoc[]

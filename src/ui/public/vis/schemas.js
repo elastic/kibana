@@ -2,10 +2,10 @@ import _ from 'lodash';
 import IndexedArray from 'ui/indexed_array';
 import AggTypesAggParamsProvider from 'ui/agg_types/agg_params';
 export default function VisTypeSchemasFactory(Private) {
-  let AggParams = Private(AggTypesAggParamsProvider);
+  const AggParams = Private(AggTypesAggParamsProvider);
 
   function Schemas(schemas) {
-    let self = this;
+    const self = this;
 
     _(schemas || [])
     .map(function (schema) {

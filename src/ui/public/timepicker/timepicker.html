@@ -1,29 +1,10 @@
 <div class="kbn-timepicker">
-  <style>
-    .kbn-timepicker [kbn-time-input] {
-      text-align: center;
-    }
-    .kbn-timepicker-modes {
-      text-transform: capitalize;
-    }
-    .kbn-timepicker-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-refresh-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-timepicket-alert {
-      width: 100px;
-    }
-  </style>
 
   <div class="tab-content">
 
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="localDropdownTitle">Time Range</div>
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
@@ -160,7 +141,7 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="localDropdownTitle">Refresh Interval</div>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">

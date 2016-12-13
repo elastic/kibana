@@ -1,18 +1,34 @@
+/**
+ * @name AppState
+ *
+ * @extends State
+ *
+ * @description Inherits State, which inherits Events. This class seems to be
+ * concerned with mapping "props" to PersistedState instances, and surfacing the
+ * ability to destroy those mappings.
+ */
+
 import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-let urlParam = '_a';
+const urlParam = '_a';
 
 function AppStateProvider(Private, $rootScope, $location) {
-  let State = Private(StateManagementStateProvider);
-  let PersistedState = Private(PersistedStatePersistedStateProvider);
+  const State = Private(StateManagementStateProvider);
+  const PersistedState = Private(PersistedStatePersistedStateProvider);
   let persistedStates;
   let eventUnsubscribers;
 
   _.class(AppState).inherits(State);
   function AppState(defaults) {
+    // Initialize persistedStates. This object maps "prop" names to
+    // PersistedState instances. These are used to make properties "stateful".
     persistedStates = {};
+
+    // Initialize eventUnsubscribers. These will be called in `destroy`, to
+    // remove handlers for the 'change' and 'fetch_with_changes' events which
+    // are dispatched via the rootScope.
     eventUnsubscribers = [];
 
     AppState.Super.call(this, urlParam, defaults);
@@ -28,33 +44,36 @@ function AppStateProvider(Private, $rootScope, $location) {
     _.callEach(eventUnsubscribers);
   };
 
+  /**
+   * @returns PersistedState instance.
+   */
   AppState.prototype.makeStateful = function (prop) {
     if (persistedStates[prop]) return persistedStates[prop];
-    let self = this;
+    const self = this;
 
     // set up the ui state
     persistedStates[prop] = new PersistedState();
 
     // update the app state when the stateful instance changes
-    let updateOnChange = function () {
-      let replaceState = false; // TODO: debouncing logic
-
+    const updateOnChange = function () {
+      const replaceState = false; // TODO: debouncing logic
       self[prop] = persistedStates[prop].getChanges();
+      // Save state to the URL.
       self.save(replaceState);
     };
-    let handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
+    const handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
     handlerOnChange('on');
     eventUnsubscribers.push(() => handlerOnChange('off'));
 
     // update the stateful object when the app state changes
-    let persistOnChange = function (changes) {
+    const persistOnChange = function (changes) {
       if (!changes) return;
 
       if (changes.indexOf(prop) !== -1) {
         persistedStates[prop].set(self[prop]);
       }
     };
-    let handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
+    const handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
     handlePersist('on');
     eventUnsubscribers.push(() => handlePersist('off'));
 
@@ -73,7 +92,7 @@ function AppStateProvider(Private, $rootScope, $location) {
 
     // Checks to see if the appState might already exist, even if it hasn't been newed up
     get.previouslyStored = function () {
-      let search = $location.search();
+      const search = $location.search();
       return search[urlParam] ? true : false;
     };
 

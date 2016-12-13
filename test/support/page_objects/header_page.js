@@ -42,12 +42,12 @@ export default class HeaderPage {
   }
 
   clickTimepicker() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findDisplayedByClassName('navbar-timepicker-time-desc').click();
+    return PageObjects.common.findTestSubject('globalTimepickerButton')
+    .click();
   }
 
   isTimepickerOpen() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    return this.remote.setFindTimeout(2000)
     .findDisplayedByCssSelector('.kbn-timepicker')
     .then(() => true)
     .catch(() => false);
@@ -73,12 +73,12 @@ export default class HeaderPage {
   }
 
   clickGoButton() {
-    var self = this;
+    const self = this;
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByClassName('kbn-timepicker-go')
     .click()
     .then(function () {
-      return self.getSpinnerDone();
+      return self.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -101,17 +101,11 @@ export default class HeaderPage {
       return this.clickGoButton();
     })
     .then(() => {
-      return this.getSpinnerDone();
+      return this.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
-      return this.collapseTimepicker();
+      return this.clickTimepicker();
     });
-  }
-
-  collapseTimepicker() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('.fa.fa-chevron-circle-up')
-    .click();
   }
 
   getToastMessage() {
@@ -131,9 +125,9 @@ export default class HeaderPage {
     .click();
   }
 
-  getSpinnerDone() {
+  isGlobalLoadingIndicatorHidden() {
     return this.remote.setFindTimeout(defaultFindTimeout * 10)
-    .findByCssSelector('.spinner.ng-hide');
+    .findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
   }
 
 }

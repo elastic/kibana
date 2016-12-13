@@ -83,7 +83,7 @@ export default class VisualizePage {
       function getChartType(chart) {
         return chart.getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(function (texts) {
@@ -208,7 +208,7 @@ export default class VisualizePage {
           }
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     });
   }
@@ -228,7 +228,7 @@ export default class VisualizePage {
   }
 
   selectField(fieldValue) {
-    var self = this;
+    const self = this;
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(defaultFindTimeout)
@@ -288,23 +288,17 @@ export default class VisualizePage {
     .findByCssSelector('.btn-success')
     .click()
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
-
   clickNewVisualization() {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="New Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeNewButton')
     .click();
   }
 
-
   saveVisualization(vizName) {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[aria-label="Save Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -319,13 +313,11 @@ export default class VisualizePage {
     //   // click save button
     .then(() => {
       PageObjects.common.debug('click submit button');
-      return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.config button[type="submit"]')
+      return PageObjects.common.findTestSubject('saveVisualizationButton')
       .click();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -341,9 +333,7 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
+    return PageObjects.common.findTestSubject('visualizeOpenButton')
       .click();
   }
 
@@ -358,7 +348,7 @@ export default class VisualizePage {
   }
 
   clickVisualizationByLinkText(vizName) {
-    var self = this;
+    const self = this;
     PageObjects.common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
     return PageObjects.common.try(function tryingForTime() {
@@ -372,7 +362,7 @@ export default class VisualizePage {
   // this starts by clicking the Load Saved Viz button, not from the
   // bottom half of the "Create a new visualization      Step 1" page
   loadSavedVisualization(vizName) {
-    var self = this;
+    const self = this;
     return this.clickLoadSavedVisButton()
     .then(function filterVisualization() {
       return self.openSavedVisualization(vizName);
@@ -382,7 +372,7 @@ export default class VisualizePage {
   // this is for starting on the
   // bottom half of the "Create a new visualization      Step 1" page
   openSavedVisualization(vizName) {
-    var self = this;
+    const self = this;
     return self.filterVisByName(vizName)
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -401,7 +391,7 @@ export default class VisualizePage {
         return chart
         .getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(texts => {
@@ -420,7 +410,7 @@ export default class VisualizePage {
         return chart
         .getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(texts => {
@@ -435,14 +425,13 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
-    var self = this.remote;
-    var chartData = [];
-    var tempArray = [];
-    var chartSections = 0;
-    var height = 0;
-    var yAxisLabel = 0;
-    var yAxisHeight = 0;
+    const self = this.remote;
+    const chartData = [];
+    let tempArray = [];
+    let chartSections = 0;
+    const height = 0;
+    let yAxisLabel = 0;
+    let yAxisHeight = 0;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -481,7 +470,7 @@ export default class VisualizePage {
       tempArray = data.replace('M','').split('L');
       chartSections = tempArray.length / 2;
       PageObjects.common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
-      for (var i = 0; i < chartSections; i++) {
+      for (let i = 0; i < chartSections; i++) {
         chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
         PageObjects.common.debug('chartData[i] =' + chartData[i]);
       }
@@ -492,9 +481,9 @@ export default class VisualizePage {
 
   // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
   getLineChartData(cssPart) {
-    var self = this.remote;
-    var yAxisLabel = 0;
-    var yAxisHeight;
+    const self = this.remote;
+    let yAxisLabel = 0;
+    let yAxisHeight;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -513,7 +502,7 @@ export default class VisualizePage {
         .findByCssSelector('clipPath rect')
         .getAttribute('height')
         .then(function (theHeight) {
-          yAxisHeight = theHeight - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+          yAxisHeight = theHeight;
           PageObjects.common.debug('theHeight = ' + theHeight);
           return theHeight;
         });
@@ -542,7 +531,7 @@ export default class VisualizePage {
           }
 
           // 4). pass the chartTypes to the getChartType function
-          var getChartTypesPromises = chartTypes.map(getChartType);
+          const getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         });
       })
@@ -555,9 +544,9 @@ export default class VisualizePage {
 
   // this is ALMOST identical to DiscoverPage.getBarChartData
   getBarChartData() {
-    var self = this.remote;
-    var yAxisLabel = 0;
-    var yAxisHeight;
+    const self = this.remote;
+    let yAxisLabel = 0;
+    let yAxisHeight;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -592,7 +581,7 @@ export default class VisualizePage {
       return self
       .setFindTimeout(defaultFindTimeout * 2)
       // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-      .findAllByCssSelector('svg > g > g.series.\\30 > rect') // rect
+      .findAllByCssSelector('svg > g > g.series > rect') // rect
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart
@@ -608,7 +597,7 @@ export default class VisualizePage {
             }
           });
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (bars) {
@@ -631,7 +620,7 @@ export default class VisualizePage {
           return slice;
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(function (slices) {
@@ -675,7 +664,7 @@ export default class VisualizePage {
   }
 
   waitForToastMessageGone() {
-    var self = this;
+    const self = this;
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(100)
@@ -706,7 +695,7 @@ export default class VisualizePage {
       return PageObjects.common.sleep(1000);
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -747,8 +736,8 @@ export default class VisualizePage {
     .then((chartTypes) => {
 
       function getChartType(chart) {
-        var color;
-        var radius;
+        let color;
+        let radius;
         return chart.getAttribute('stroke')
         .then((stroke) => {
           color = stroke;
@@ -765,7 +754,7 @@ export default class VisualizePage {
           return {color: color, radius: radius};
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then((circles) => {

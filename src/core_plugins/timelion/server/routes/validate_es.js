@@ -4,12 +4,12 @@ module.exports = function (server) {
     path: '/api/timelion/validate/es',
     handler: function (request, reply) {
 
-      return server.uiSettings().getAll().then((uiSettings) => {
-        var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      return server.uiSettings().getAll(request).then((uiSettings) => {
+        const callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
-        var timefield = uiSettings['timelion:es.timefield'];
+        const timefield = uiSettings['timelion:es.timefield'];
 
-        var body = {
+        const body = {
           index: uiSettings['es.default_index'],
           fields:timefield
         };

@@ -27,10 +27,24 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatRadius: 25,
         heatBlur: 15,
         heatNormalizeData: true,
+        legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [15, 5],
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
+      legendPositions: [{
+        value: 'bottomleft',
+        text: 'bottom left',
+      }, {
+        value: 'bottomright',
+        text: 'bottom right',
+      }, {
+        value: 'topleft',
+        text: 'top left',
+      }, {
+        value: 'topright',
+        text: 'top right',
+      }],
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       canDesaturate: !!supports.cssFilters,
       editor: tileMapTemplate
@@ -67,6 +81,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       }
     },
     responseConverter: geoJsonConverter,
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

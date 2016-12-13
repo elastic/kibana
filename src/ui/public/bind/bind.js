@@ -27,19 +27,19 @@ uiModules.get('kibana')
      * @return {undefined}
      */
     $delegate.constructor.prototype.$bind = function (to, from, $sourceScope) {
-      let $source = $sourceScope || this.$parent;
-      let $target = this;
+      const $source = $sourceScope || this.$parent;
+      const $target = this;
 
       // parse expressions
-      let $to = $parse(to);
+      const $to = $parse(to);
       if (!$to.assign) errorNotAssignable(to, from);
-      let $from = $parse(from);
+      const $from = $parse(from);
 
       // bind scopes to expressions
-      let getTarget = function () { return $to($target); };
-      let setTarget = function (v) { return $to.assign($target, v); };
-      let getSource = function () { return $from($source); };
-      let setSource = function (v) { return $from.assignOrFail($source, v); };
+      const getTarget = function () { return $to($target); };
+      const setTarget = function (v) { return $to.assign($target, v); };
+      const getSource = function () { return $from($source); };
+      const setSource = function (v) { return $from.assignOrFail($source, v); };
 
       // to support writing from the child to the parent we need to know
       // which source has changed. Track the source value and anytime it
@@ -55,19 +55,19 @@ uiModules.get('kibana')
       };
 
       // if we are syncing down a literal, then we use loose equality check
-      let strict = !$from.literal;
-      let compare = strict ? strictEquality : angular.equals;
+      const strict = !$from.literal;
+      const compare = strict ? strictEquality : angular.equals;
 
 
       // push the initial value down, start off in sync
       setTarget(lastSourceVal);
 
       $target.$watch(function () {
-        let sourceVal = getSource();
-        let targetVal = getTarget();
+        const sourceVal = getSource();
+        const targetVal = getTarget();
 
-        let outOfSync = !compare(sourceVal, targetVal);
-        let sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
+        const outOfSync = !compare(sourceVal, targetVal);
+        const sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
 
         if (sourceChanged) setTarget(sourceVal);
         else if (outOfSync) setSource(targetVal);

@@ -130,7 +130,7 @@ a {
   cursor: default;
 }
 
-[ng-click], [clip-copy], [href], [confirm-click] {
+.link, [ng-click], [clip-copy], [href], [confirm-click] {
   cursor: pointer;
 }
 
@@ -157,27 +157,7 @@ a {
       .button-group > :last-child {
         border-radius: 0;
       }
-
-      button.is-kbn-top-nav-button-disabled {
-        opacity: 0.5;
-        cursor: default;
-
-        &:active {
-          color: @kibanaGray2;
-          background-color: transparent;
-        }
-      }
     }
-
-    .kibana-nav-info {
-      line-height: 30px;
-      padding: 0 10px;
-    }
-
-      .kibana-nav-info-title {
-        font-weight: bold;
-        margin-right: 10px;
-      }
   }
 
   > config {
@@ -215,23 +195,6 @@ a {
 
 .navbtn-inverse {
   .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
-.navbar-timepicker {
-  > li > a {
-    padding-left: 7px !important;
-    padding-right: 7px !important;
-  }
-
-  .fa {
-    font-size: 16px;
-    vertical-align: middle;
-  }
-
-  button {
-    background-color: transparent;
-    border-radius: 0;
-  }
 }
 
   .navbar-timepicker-time-desc > .fa-clock-o {
@@ -300,38 +263,6 @@ table {
     // cauase problems, but in the table it pushes the icon to the
     // top of the row
     line-height: @line-height-base;
-  }
-}
-
-//== breadCrumbsTemplate
-bread-crumbs {
-  display: block;
-
-  &.bread-crumbs--navbar {
-    background-color: @navbar-default-bg;
-  }
-
-  ul {
-    margin: 0;
-    padding: 8px 10px;
-    list-style-type: none;
-    text-transform: capitalize;
-
-    >li {
-      display: inline;
-      >span {
-        color: @kibanaGray2;
-      }
-      >span:hover {
-        color: @kibanaGray1;
-      }
-    }
-
-    >li:last-child {
-      >span {
-        color: @kibanaGray1;
-      }
-    }
   }
 }
 
@@ -621,6 +552,10 @@ fieldset {
     padding: 7px 10px;
   }
 
+  .panel-heading--clickable {
+    cursor: pointer;
+  }
+
   .panel-heading-elasticsearch,
   .panel-heading-kibana,
   .panel-heading-beats,
@@ -653,6 +588,493 @@ fieldset {
 
   .panel-body {
     padding: 10px;
+  }
+}
+
+// TODO: Extract these styles into the UI Framework.
+
+.page-row {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+
+.page-row-text {
+  color: @kibanaGray2;
+  font-size: 14px;
+}
+
+.kuiPage {
+  padding: 20px 30px 28px;
+  margin: 20px;
+  background-color: white;
+  max-width: 1200px;
+}
+
+/**
+ * 1. Center content.
+ * 2. Expand to fill container.
+ */
+.kuiPageView {
+  display: flex;
+  flex-direction: column;
+  align-items: center; // 1
+  justify-content: center; // 1
+  flex-grow: 1; // 2
+  background-color: #f6f6f6;
+}
+
+  .kuiPageView__content {
+    max-width: 1100px;
+  }
+
+.kuiSubHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.kuiNotice {
+  padding: 40px 60px 48px;
+  margin: 20px;
+  background-color: white;
+}
+
+.kuiNotice__header {
+  margin-bottom: 18px;
+}
+
+/**
+ * 1. Override h1 styles.
+ */
+.kuiNoticeTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+  margin-top: 0; // 1
+}
+
+.kuiNoticeText {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.kuiCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+  .kuiCard__description {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 18px 0;
+  }
+
+    .kuiCard__descriptionTitle {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+    .kuiCard__descriptionText {
+      font-size: 14px;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+  .kuiCard__footer {
+    text-align: center;
+    font-size: 14px;
+    padding: 0 15px 20px;
+  }
+
+.kuiCard--fixedWidth {
+  max-width: 120px;
+}
+
+.kuiCardGroup {
+  display: flex;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+  .kuiCardGroup__card {
+    flex: 1 1 0%;
+    border: none;
+    border-radius: 0;
+
+    & + & {
+      border-left: 1px solid #E0E0E0;
+    }
+  }
+
+  .kuiCardGroup__cardDescription {
+    flex: 1 1 auto;
+  }
+
+/**
+ * 1. Disable for Angular.
+ */
+.kuiButton {
+  display: inline-block;
+  padding: 4px 24px;
+  color: #00a9e5;
+  border: 1px solid;
+  text-decoration: none;
+  border-radius: 3px;
+  background-color: transparent;
+
+  &[disabled] {
+    pointer-events: none; // 1
+    opacity: 0.4;
+  }
+}
+
+.kuiButton--default,
+.kuiButton--default:focus {
+  color: #2D2D2D;
+  border-color: #D4D4D4;
+
+  &:hover,
+  &:active {
+    color: #111111;
+    background-color: #FAFAFA;
+  }
+}
+
+.kuiButton--primary,
+.kuiButton--primary:focus {
+  color: #00a9e5;
+  border-color: #00a9e5;
+
+  &:hover,
+  &:active {
+    color: #00a9e5;
+    background-color: #ECF9FF;
+  }
+}
+
+.kuiButton--danger,
+.kuiButton--danger:focus {
+  color: #d76051;
+  border-color: #d76051;
+
+  &:hover,
+  &:active {
+    color: #d76051;
+    background-color: #ffe4e1;
+  }
+}
+
+.kuiIcon--success {
+  color: #80c383;
+}
+
+.kuiIcon--danger {
+  color: #d76051;
+}
+
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0; // 1
+  font-size: 22px;
+}
+
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.kuiFormSection {
+  margin-bottom: 16px;
+}
+
+.kuiFormSubSection {
+  margin-bottom: 8px;
+}
+
+.kuiFormLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.kuiFormSubLabel {
+  display: block;
+  font-weight: normal;
+}
+
+  .kuiFormSubLabel__note {
+    opacity: 0.5;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+.kuiTextArea,
+.kuiInput,
+.kuiStaticInput {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  color: #2d2d2d;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.kuiStaticInput {
+  padding: 5px 0;
+  border-color: transparent;
+}
+
+.kuiInput,
+.kuiTextArea {
+  padding: 5px 15px;
+  border-color: #D4D4D4;
+}
+
+.kuiTextArea--nonResizable {
+  resize: none;
+}
+
+.kuiInputNote {
+  margin: 5px 0 10px;
+}
+
+.kuiInputNote--danger {
+  color: #E74C3C;
+}
+
+.kuiInputNote--warning {
+  color: #F39C12;
+}
+
+/**
+ * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
+ */
+.ui-select-multiple.ui-select-bootstrap {
+  padding: 3px 5px 2px !important; // 1
+  border: 1px solid #D4D4D4; // 1
+  background-color: #ffffff !important; // 1
+
+  &.kuiInputError {
+    border-color: #E74C3C; // 1
+  }
+}
+
+/**
+ * 1. Override label styles.
+ */
+.kuiOptionLabel {
+  font-weight: normal; // 1
+  cursor: pointer;
+}
+
+/**
+ * 1. Override checkbox styles.
+ */
+.kuiCheckbox {
+  cursor: default;
+}
+
+.kuiFormPanel {
+  border: 1px solid #D4D4D4;
+  padding: 12px;
+}
+
+/**
+ * 1. Stack title and content children. Necessary for scrollable content;
+ */
+.kiuFormPanel--scrollable {
+  display: flex; // 1
+  flex-direction: column; // 1
+}
+
+.kuiFormPanel--verticalLayout {
+  & + & {
+    border-top: 0;
+  }
+}
+
+.kuiFormPanel--horizontalLayout {
+  flex: 1 1 auto;
+
+  & + & {
+    border-left: 0;
+  }
+}
+
+  .kuiFormPanel__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 14px;
+    line-height: 12px;
+    font-weight: 300;
+    color: #2d2d2d;
+    border-bottom: 1px solid #efefef;
+  }
+
+  .kuiFormPanel__label {
+    font-weight: 700;
+  }
+
+  .kuiFormPanel__content {
+    overflow-y: auto;
+  }
+
+.kuiFormPanelLayout {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.kuiList {
+  margin-bottom: 10px;
+}
+
+.kuiListItem {
+  padding: 12px 0;
+
+  & + & {
+    border-top: 2px dashed rgba(212, 212, 212, 0.5);
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.kuiMenuItem {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #2d2d2d;
+  border-bottom: 1px solid #efefef;
+
+  &.kuiMenuItem-isSelected {
+    background-color: #e4e4e4;
+
+    &:hover {
+      background-color: #e4e4e4;
+      cursor: default;
+    }
+  }
+
+  &:hover {
+    background-color: @list-group-menu-item-active-bg;
+    cursor: pointer;
+  }
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.fullWidth {
+  width: 100% !important;
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.noPadding {
+  padding: 0 !important;
+}
+
+/**
+ * TODO: This is a generic pattern that should be replaced by specific components, e.g. inputGroup.
+ */
+.flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+  .flexGroup__filler {
+    flex: 1 1 auto;
+  }
+
+.kuiTableControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+  .kuiTableControls__input {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+  }
+
+  .kuiTableControls__actions {
+    align-items: center;
+    display: flex;
+  }
+
+  .kuiTableControlAction {
+    margin-right: 5px;
+  }
+
+
+.kuiColumn + .kuiColumn {
+  padding-left: 10px;
+}
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+// $numColumns: 12;
+// @for $i from 1 through $numColumns {
+//   .kiuColumn--#{$i} {
+//     display: inline-block; /* 1 */
+//     vertical-align: top; /* 2 */
+//     width: $i / $numColumns * 100%;
+//   }
+// }
+
+.makeKuiColumns(12);
+
+.makeKuiColumns(@n, @i: 1) when (@i =< @n) {
+  .kuiColumn--@{i} {
+    display: inline-block; /* 1 */
+    vertical-align: top; /* 2 */
+    width: (@i * 100% / @n);
+  }
+  .makeKuiColumns(@n, (@i + 1));
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.localDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
   }
 }
 

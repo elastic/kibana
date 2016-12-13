@@ -194,7 +194,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
           };
         }
 
-        return '#/visualize/create?' + $.param(_.assign($location.search(), {
+        return '#/visualize/create?' + $.param(_.assign(_.clone($location.search()), {
           indexPattern: $scope.state.index,
           type: type,
           _a: rison.encode({

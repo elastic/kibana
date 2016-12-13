@@ -17,7 +17,6 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 
-
 uiRoutes
 .when('/visualize/create', {
   template: editorTemplate,
@@ -77,44 +76,64 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   let stateMonitor;
   const $appStatus = this.appStatus = {};
 
+  // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
 
+  // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
+
+  // Clone the _vis instance.
   const editableVis = vis.createEditableVis();
+
+  // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
+  // vis should call it on both.
   vis.requesting = function () {
     const requesting = editableVis.requesting;
+    // Invoking requesting() calls onRequest on each agg's type param. When a vis is marked as being
+    // requested, the bounds of that vis are updated and new data is fetched using the new bounds.
     requesting.call(vis);
+
+    // We need to keep editableVis in sync with vis.
     requesting.call(editableVis);
   };
 
+  // SearchSource is a promise-based stream of search results that can inherit from other search
+  // sources.
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); }
+    run: function () { kbnUrl.change('/visualize', {}); },
+    testId: 'visualizeNewButton',
   }, {
     key: 'save',
+    description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
-    description: 'Save Visualization'
+    testId: 'visualizeSaveButton',
   }, {
-    key: 'load',
+    key: 'open',
+    description: 'Open Saved Visualization',
     template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    description: 'Load Saved Visualization',
+    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
+    description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    description: 'Share Visualization'
+    testId: 'visualizeShareButton',
   }, {
     key: 'refresh',
     description: 'Refresh',
-    run: function () { $scope.fetch(); }
+    run: function () { $scope.fetch(); },
+    testId: 'visualizeRefreshButton',
   }];
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
 
+  // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
+  // Consists of things like aggs, params, listeners, title, type, etc.
   const savedVisState = vis.getState();
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
@@ -124,12 +143,17 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     vis: savedVisState
   };
 
-  let $state = $scope.$state = (function initState() {
-    $state = new AppState(stateDefaults);
+  // Instance of app_state.js.
+  const $state = $scope.$state = (function initState() {
+    // This is used to sync visualization state with the url when `appState.save()` is called.
+    const appState = new AppState(stateDefaults);
 
-    if (!angular.equals($state.vis, savedVisState)) {
+    // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
+    // defaults applied. If the url was from a previous session which included modifications to the
+    // appState then they won't be equal.
+    if (!angular.equals(appState.vis, savedVisState)) {
       Promise.try(function () {
-        editableVis.setState($state.vis);
+        editableVis.setState(appState.vis);
         vis.setState(editableVis.getEnabledState());
       })
       .catch(courier.redirectWhenMissing({
@@ -137,7 +161,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
       }));
     }
 
-    return $state;
+    return appState;
   }());
 
   function init() {
@@ -148,10 +172,16 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+
+    // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
+    // Associate PersistedState instance with the Vis instance, so that
+    // `uiStateVal` can be called on it. Currently this is only used to extract
+    // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
+
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
@@ -162,7 +192,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
-    editableVis.listeners.brush = vis.listeners.brush = brushEvent;
+    editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
 
     // track state of editable vis vs. "actual" vis
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -258,8 +288,10 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     kbnUrl.change('/visualize', {});
   };
 
+  /**
+   * Called when the user clicks "Save" button.
+   */
   $scope.doSave = function () {
-    savedVis.id = savedVis.title;
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
     savedVis.visState = $state.vis;
@@ -272,8 +304,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if (savedVis.id === $route.current.params.id) return;
-        kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        if (savedVis.id === $route.current.params.id) {
+          docTitle.change(savedVis.lastSavedTitle);
+        } else {
+          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        }
       }
     }, notify.fatal);
   };
@@ -281,12 +316,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   $scope.unlink = function () {
     if (!$state.linked) return;
 
+    notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
+
     $state.linked = false;
     const parent = searchSource.getParent(true);
     const parentsParent = parent.getParent(true);
-
-    // display unlinking for 2 seconds, unless it is double clicked
-    $scope.unlinking = $timeout($scope.clearUnlinking, 2000);
 
     delete savedVis.savedSearchId;
     parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
@@ -302,13 +336,6 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $state.query = searchSource.get('query');
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
-  };
-
-  $scope.clearUnlinking = function () {
-    if ($scope.unlinking) {
-      $timeout.cancel($scope.unlinking);
-      $scope.unlinking = null;
-    }
   };
 
   function transferVisState(fromVis, toVis, stage) {

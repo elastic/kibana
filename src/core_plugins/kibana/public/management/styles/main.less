@@ -19,6 +19,10 @@ kbn-management-objects-view {
   min-height: 70px; /* 1 */
 }
 
+.tab-account {
+  background-color: @kibanaGray6;
+}
+
 .tab-management {
   background-color: @kibanaGray6;
 }
@@ -32,10 +36,6 @@ li.kbn-management-tab:first-letter {
 }
 
 kbn-management-app {
-  bread-crumbs ul {
-    height: 36px;
-  }
-
   li.current-page {
     font-size: 1.5em;
     margin: 0 10px;
@@ -43,8 +43,6 @@ kbn-management-app {
 }
 
 kbn-management-landing {
-  padding: 5px;
-
   .management-panel-product {
     margin-bottom: 10px;
 
@@ -52,11 +50,6 @@ kbn-management-landing {
       padding-bottom: 30px;
       position: relative;
     }
-  }
-
-  .management-section {
-    padding-left: 5px;
-    padding-right: 5px;
   }
 
   .management-link {
@@ -76,11 +69,6 @@ kbn-management-landing {
   .panel-heading-icon {
     font-size: 0.9em;
     padding: 5px;
-  }
-
-  .product-overview {
-    color: @kibanaGray2;
-    padding: 5px 0 10px 10px;
   }
 
   .management-section-info {

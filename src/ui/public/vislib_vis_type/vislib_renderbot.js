@@ -2,10 +2,11 @@ import _ from 'lodash';
 import VislibProvider from 'ui/vislib';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
-module.exports = function VislibRenderbotFactory(Private) {
-  let vislib = Private(VislibProvider);
-  let Renderbot = Private(VisRenderbotProvider);
-  let buildChartData = Private(VislibVisTypeBuildChartDataProvider);
+module.exports = function VislibRenderbotFactory(Private, $injector) {
+  const AngularPromise = $injector.get('Promise');
+  const vislib = Private(VislibProvider);
+  const Renderbot = Private(VisRenderbotProvider);
+  const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
 
   _.class(VislibRenderbot).inherits(Renderbot);
   function VislibRenderbot(vis, $el, uiState) {
@@ -14,22 +15,22 @@ module.exports = function VislibRenderbotFactory(Private) {
   }
 
   VislibRenderbot.prototype._createVis = function () {
-    let self = this;
+    if (this.vislibVis) this.destroy();
 
-    if (self.vislibVis) self.destroy();
+    this.vislibParams = this._getVislibParams();
+    this.vislibVis = new vislib.Vis(this.$el[0], this.vislibParams);
 
-    self.vislibParams = self._getVislibParams();
-    self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
-
-    _.each(self.vis.listeners, function (listener, event) {
-      self.vislibVis.on(event, listener);
+    _.each(this.vis.listeners, (listener, event) => {
+      this.vislibVis.on(event, listener);
     });
 
-    if (this.chartData) self.vislibVis.render(this.chartData, this.uiState);
+    if (this.chartData) {
+      this.vislibVis.render(this.chartData, this.uiState);
+    }
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {
-    let self = this;
+    const self = this;
 
     return _.assign(
       {},
@@ -46,18 +47,15 @@ module.exports = function VislibRenderbotFactory(Private) {
   VislibRenderbot.prototype.buildChartData = buildChartData;
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
-    // to allow legend to render first (wait for angular digest cycle to complete)
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(this.vislibVis.render(this.chartData, this.uiState));
-      });
+    return AngularPromise.delay(1).then(() => {
+      this.vislibVis.render(this.chartData, this.uiState);
     });
   };
 
   VislibRenderbot.prototype.destroy = function () {
-    let self = this;
+    const self = this;
 
-    let vislibVis = self.vislibVis;
+    const vislibVis = self.vislibVis;
 
     _.forOwn(self.vis.listeners, function (listener, event) {
       vislibVis.off(event, listener);
@@ -67,10 +65,10 @@ module.exports = function VislibRenderbotFactory(Private) {
   };
 
   VislibRenderbot.prototype.updateParams = function () {
-    let self = this;
+    const self = this;
 
     // get full vislib params object
-    let newParams = self._getVislibParams();
+    const newParams = self._getVislibParams();
 
     // if there's been a change, replace the vis
     if (!_.isEqual(newParams, self.vislibParams)) self._createVis();

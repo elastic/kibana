@@ -6,6 +6,7 @@ import pkg from '../../utils/package_json';
 import { getConfig } from '../../server/path';
 import { parse, parseMilliseconds } from './settings';
 import { find } from 'lodash';
+import logWarnings from '../lib/log_warnings';
 
 function processCommand(command, options) {
   let settings;
@@ -18,6 +19,7 @@ function processCommand(command, options) {
   }
 
   const logger = new Logger(settings);
+  logWarnings(settings, logger);
   install(settings, logger);
 }
 

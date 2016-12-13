@@ -10,8 +10,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
-    var fromTime = '2015-09-19 06:31:44.000';
-    var toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
     return PageObjects.common.navigateToApp('visualize')
@@ -46,18 +46,18 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone(); // only matches the hidden spinner
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   });
 
   bdd.describe('line charts', function indexPatternCreation() {
-    var vizName1 = 'Visualization LineChart';
+    const vizName1 = 'Visualization LineChart';
 
     bdd.it('should show correct chart, take screenshot', function () {
 
       // this test only verifies the numerical part of this data
       // it could also check the legend to verify the extensions
-      var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
+      const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
       // sleep a bit before trying to get the chart data
       return PageObjects.common.sleep(3000)
@@ -66,8 +66,8 @@ bdd.describe('visualize app', function describeIndexTests() {
         .then(function showData(data) {
           PageObjects.common.debug('data=' + data);
           PageObjects.common.saveScreenshot('Visualize-line-chart');
-          var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-          for (var x = 0; x < data.length; x++) {
+          const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+          for (let x = 0; x < data.length; x++) {
             PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
               (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
               ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
@@ -83,7 +83,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
       // this test only verifies the numerical part of this data
       // https://github.com/elastic/kibana/issues/8141
-      var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
+      const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       PageObjects.common.debug('Order By = Term');
       return PageObjects.visualize.selectOrderBy('_term')
@@ -96,8 +96,8 @@ bdd.describe('visualize app', function describeIndexTests() {
           .then(function showData(data) {
             PageObjects.common.debug('data=' + data);
             PageObjects.common.saveScreenshot('Visualize-line-chart');
-            var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-            for (var x = 0; x < data.length; x++) {
+            const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+            for (let x = 0; x < data.length; x++) {
               PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
                 (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
                 ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
@@ -112,7 +112,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should show correct data, ordered by Term', function () {
 
-      var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
+      const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       return PageObjects.visualize.collapseChart()
       .then(function getDataTableData() {

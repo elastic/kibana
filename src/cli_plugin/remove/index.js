@@ -3,6 +3,7 @@ import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';
 import { getConfig } from '../../server/path';
+import logWarnings from '../lib/log_warnings';
 
 function processCommand(command, options) {
   let settings;
@@ -15,6 +16,7 @@ function processCommand(command, options) {
   }
 
   const logger = new Logger(settings);
+  logWarnings(settings, logger);
   remove(settings, logger);
 }
 

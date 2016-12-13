@@ -6,13 +6,13 @@ import { each } from 'bluebird';
 import PluginCollection from './plugin_collection';
 module.exports = async (kbnServer, server, config) => {
 
-  let plugins = kbnServer.plugins = new PluginCollection(kbnServer);
+  const plugins = kbnServer.plugins = new PluginCollection(kbnServer);
 
-  let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
-  let pluginPaths = [].concat(config.get('plugins.paths') || []);
+  const scanDirs = [].concat(config.get('plugins.scanDirs') || []);
+  const pluginPaths = [].concat(config.get('plugins.paths') || []);
 
-  let debug = _.bindKey(server, 'log', ['plugins', 'debug']);
-  let warning = _.bindKey(server, 'log', ['plugins', 'warning']);
+  const debug = _.bindKey(server, 'log', ['plugins', 'debug']);
+  const warning = _.bindKey(server, 'log', ['plugins', 'warning']);
 
   // scan all scanDirs to find pluginPaths
   await each(scanDirs, async dir => {
@@ -36,15 +36,15 @@ module.exports = async (kbnServer, server, config) => {
     await each(filenames, async name => {
       if (name[0] === '.') return;
 
-      let path = resolve(dir, name);
-      let stats = await fromNode(cb => stat(path, cb));
+      const path = resolve(dir, name);
+      const stats = await fromNode(cb => stat(path, cb));
       if (stats.isDirectory()) {
         pluginPaths.push(path);
       }
     });
   });
 
-  for (let path of pluginPaths) {
+  for (const path of pluginPaths) {
     let modulePath;
     try {
       modulePath = require.resolve(path);

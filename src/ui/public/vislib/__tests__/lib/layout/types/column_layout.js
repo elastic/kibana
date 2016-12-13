@@ -11,7 +11,6 @@ describe('Vislib Column Layout Test Suite', function () {
   let el;
   const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -20,6 +19,7 @@ describe('Vislib Column Layout Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
@@ -72,7 +72,7 @@ describe('Vislib Column Layout Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     layoutType = Private(VislibLibLayoutLayoutTypesProvider);
     el = d3.select('body').append('div').attr('class', 'visualization');
-    columnLayout = layoutType.histogram(el, data);
+    columnLayout = layoutType.point_series(el, data);
   }));
 
   afterEach(function () {
@@ -85,6 +85,6 @@ describe('Vislib Column Layout Test Suite', function () {
   });
 
   it('should throw an error when the wrong number or no arguments provided', function () {
-    expect(function () { layoutType.histogram(el); }).to.throwError();
+    expect(function () { layoutType.point_series(el); }).to.throwError();
   });
 });

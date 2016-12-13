@@ -1,22 +1,21 @@
-<h3>Settings</h3>
+<div class="localDropdownTitle">Settings</div>
 
 <form class="form" name="settingsForm" ng-submit="settingsForm.$valid && settings.apply()">
   <div class="form-group">
-    <h4>Editor &amp; Output pane settings</h4>
+    <div class="localDropdownHeader">
+      <div class="localDropdownHeader__label">Font Size</div>
+    </div>
 
-    <div class="form-group">
-      <label>Font Size</label>
-      <div>
-        <input
-          input-focus
-          ng-model="settings.vals.fontSize"
-          name="fontSize"
-          type="number"
-          required
-          class="form-control"
-          data-test-subj="setting-font-size-input"
-          >
-      </div>
+    <div>
+      <input
+        input-focus
+        ng-model="settings.vals.fontSize"
+        name="fontSize"
+        type="number"
+        required
+        class="form-control"
+        data-test-subj="setting-font-size-input"
+      >
     </div>
 
     <div class="checkbox">
@@ -28,7 +27,9 @@
   </div>
 
   <div class="form-group">
-    <h4>Autocomplete</h4>
+    <div class="localDropdownHeader">
+      <div class="localDropdownHeader__label">Autocomplete</div>
+    </div>
 
     <div class="checkbox">
       <label>

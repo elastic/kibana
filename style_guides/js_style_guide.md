@@ -1,4 +1,3 @@
-
 # JavaScript Style Guide
 
 ## Attribution
@@ -37,37 +36,107 @@ cheap syntactic pleasures.
 
 Try to limit your lines to 80 characters. If it feels right, you can go up to 120 characters.
 
-## Use single quotes
+## Use `const` for variables
 
-Use single quotes, unless you are writing JSON.
-
-*Right:*
+Your variable references should rarely be mutable, so use `const` for almost
+everything. If you absolutely *must* mutate a reference, use `let`.
 
 ```js
+// good
+const foo = 'bar';
+
+// if absolutely necessary, OK
+let foo;
+
+// bad
 var foo = 'bar';
 ```
 
-*Wrong:*
+## Use single quotes for fixed strings
+
+Use single quotes, unless you are writing JSON.
 
 ```js
-var foo = "bar";
+// good
+const foo = 'bar';
+
+// bad
+const foo = "bar";
+```
+
+## Use template strings to interpolate variables into strings
+
+```js
+// good
+const foo = `Hello, ${name}`;
+
+// bad
+const foo = 'Hello, ' + name;
+```
+
+## Use template strings to avoid escaping single quotes
+
+Because readability is paramount.
+
+```js
+// good
+const foo = `You won't believe this.`;
+
+// bad
+const foo = 'You won\'t believe this.';
+```
+
+## Use object destructuring
+
+This helps avoid temporary references and helps prevent typo-related bugs.
+
+```js
+// best
+function fullName({ first, last }) {
+  return `${first} ${last}`;
+}
+
+// good
+function fullName(user) {
+  const { first, last } = user;
+  return `${first} ${last}`;
+}
+
+// bad
+function fullName(user) {
+  const first = user.first;
+  const last = user.last;
+  return `${first} ${last}`;
+}
+```
+
+## Use array destructuring
+
+Directly accessing array values via index should be avoided, but if it is
+necessary, use array destructuring:
+
+```js
+const arr = [1, 2, 3];
+
+// good
+const [first, second] = arr;
+
+// bad
+const first = arr[0];
+const second = arr[1];
 ```
 
 ## Opening braces go on the same line
 
 Your opening braces go on the same line as the statement.
 
-*Right:*
-
 ```js
+// good
 if (true) {
   console.log('winning');
 }
-```
 
-*Wrong:*
-
-```js
+// bad
 if (true)
 {
   console.log('losing');
@@ -76,73 +145,36 @@ if (true)
 
 Also, notice the use of whitespace before and after the condition statement.
 
-## Always use braces for multi-line code
-
-*Right:*
+## Always use braces for conditionals and loops
 
 ```js
+// good
 if (err) {
   return cb(err);
 }
-```
 
-*Wrong:*
+// bad
+if (err) cb(err);
 
-```js
+// bad
 if (err)
   return cb(err);
 ```
 
-## Prefer multi-line conditionals
+## Declare one variable per line, wherever it makes the most sense
 
-But single-line conditionals are allowed for short lines
-
-*Preferred:*
-
-```js
-if (err) {
-  return cb(err);
-}
-```
-
-*Allowed:*
+This makes it easier to re-order the lines. However, ignore
+[Crockford][crockfordconvention] when it comes to declaring variables deeper
+inside a function, just put the declarations wherever they make sense.
 
 ```js
-if (err) return cb(err);
-```
+// good
+const keys = ['foo', 'bar'];
+const values = [23, 42];
 
-## Declare one variable per var statement
-
-Declare one variable per var statement, it makes it easier to re-order the
-lines. However, ignore [Crockford][crockfordconvention] when it comes to
-declaring variables deeper inside a function, just put the declarations wherever
-they make sense.
-
-*Right:*
-
-```js
-var keys = ['foo', 'bar'];
-var values = [23, 42];
-
-var object = {};
-while (keys.length) {
-  var key = keys.pop();
-  object[key] = values.pop();
-}
-```
-
-*Wrong:*
-
-```js
-var keys = ['foo', 'bar'],
-    values = [23, 42],
-    object = {},
-    key;
-
-while (keys.length) {
-  key = keys.pop();
-  object[key] = values.pop();
-}
+// bad
+const keys = ['foo', 'bar'],
+      values = [23, 42];
 ```
 
 [crockfordconvention]: http://javascript.crockford.com/code.html
@@ -153,113 +185,216 @@ Variables, properties and function names should use `lowerCamelCase`.  They
 should also be descriptive. Single character variables and uncommon
 abbreviations should generally be avoided.
 
-*Right:*
-
 ```js
-var adminUser = db.query('SELECT * FROM users ...');
+// good
+const adminUser = getAdmin();
+
+// bad
+const admin_user = getAdmin();
 ```
 
-*Wrong:*
-
-```js
-var admin_user = db.query('SELECT * FROM users ...');
-```
-
-## Use UpperCamelCase for class names
+## Use UpperCamelCase for class names (constructors)
 
 Class names should be capitalized using `UpperCamelCase`.
 
-*Right:*
-
 ```js
-function BankAccount() {
-}
+// good
+class BankAccount {}
+
+// bad
+class bank_account {}
+class bankAccount {}
 ```
 
-*Wrong:*
+## Magic numbers/strings
+
+These are numbers (or other values) simply used in line in your code. *Do not
+use these*, give them a variable name so they can be understood and changed
+easily.
 
 ```js
-function bank_Account() {
-}
-```
-
-## Use UPPERCASE for Constants
-
-Constants should be declared as regular variables or static class properties,
-using all uppercase letters.
-
-Node.js / V8 actually supports mozilla's [const][const] extension, but
-unfortunately that cannot be applied to class members, nor is it part of any
-ECMA standard.
-
-*Right:*
-
-```js
-var SECOND = 1 * 1000;
-
-function File() {
-}
-File.FULL_PERMISSIONS = 0777;
-```
-
-*Wrong:*
-
-```js
-const SECOND = 1 * 1000;
-
-function File() {
-}
-File.fullPermissions = 0777;
-```
-
-[const]: https://developer.mozilla.org/en/JavaScript/Reference/Statements/const
-
-## Magic numbers
-
-These are numbers (or other values) simply used in line in your code. **Do not use these**, give them a variable name so they can be understood and changed easily.
-
-*Right:*
-
-```js
-var minWidth = 300;
+// good
+const minWidth = 300;
 
 if (width < minWidth) {
   ...
 }
-```
 
-*Wrong:*
-
-```js
+// bad
 if (width < 300) {
   ...
 }
 ```
 
+## Object properties and functions
+
+Use object method shorthand syntax for functions on objects:
+
+```js
+// good
+const foo = {
+  bar() {
+    ...
+  }
+};
+
+// bad
+const foo = {
+  bar: function () {
+    ...
+  }
+};
+```
+
+Use property value shorthand syntax for properties that share a name with a
+variable. And put them at the beginning:
+
+```js
+const bar = true;
+
+// good
+const foo = {
+  bar
+};
+
+// bad
+const foo = {
+  bar: bar
+};
+
+// also bad (bar should be first)
+const foo = {
+  baz: false,
+  bar
+};
+```
+
+## Modules
+
+Module dependencies should be written using native ES2015 syntax wherever
+possible (which is almost everywhere):
+
+```js
+// good
+import { mapValues } from 'lodash';
+export default mapValues;
+
+// bad
+const _ = require('lodash');
+module.exports = _.mapValues;
+
+// worse
+define(['lodash'], function (_) {
+  ...
+});
+```
+
+In those extremely rare cases where you're writing server-side JavaScript in a
+file that does not pass run through webpack, then use CommonJS modules.
+
+In those even rarer cases where you're writing client-side code that does not
+run through webpack, then do not use a module loader at all.
+
+## Import only top-level modules
+
+The files inside a module are implementation details of that module. They
+should never be imported directly. Instead, you must only import the top-level
+API that's exported by the module itself.
+
+Without a clear mechanism in place in JS to encapsulate protected code, we make
+a broad assumption that anything beyond the root of a module is an
+implementation detail of that module.
+
+On the other hand, a module should be able to import parent and sibling
+modules.
+
+```js
+// good
+import foo from 'foo';
+import child from './child';
+import parent from '../';
+import ancestor from '../../../';
+import sibling from '../foo';
+
+// bad
+import inFoo from 'foo/child';
+import inSibling from '../foo/child';
+```
+
 ## Global definitions
 
-Don't do this. Everything should be wrapped in a module that can be depended on by other modules. Even things as simple as a single value should be a module.
+Don't do this. Everything should be wrapped in a module that can be depended on
+by other modules. Even things as simple as a single value should be a module.
 
 ## Function definitions
 
-Prefer the use of function declarations over function expressions. Function expressions are allowed, but should usually be avoided.
+Use function declarations over function expressions, so that their names will
+show up in stack traces, making errors easier to debug.
 
-Also, keep function definitions above other code instead of relying on function hoisting.
-
-*Preferred:*
+Also, keep function definitions above other code instead of relying on function
+hoisting.
 
 ```js
+// good
 function myFunc() {
   ...
 }
-```
 
-*Allowed:*
-
-```js
-var myFunc = function () {
+// bad
+const myFunc = function () {
   ...
 };
+```
+
+## Arrow functions
+
+If you must use a function expression, then use an arrow function:
+
+```js
+// good
+[1, 2, 3].map((n) => {
+  const m = doSomething(n);
+  return m - n;
+});
+
+// bad
+[1, 2, 3].map(function (n) {
+  const m = doSomething(n);
+  return m - n;
+});
+```
+
+If your function body does not include braces and only accepts one argument,
+then omit the argument paranthesis:
+
+```js
+// good
+[1, 2, 3].map(n => n + 1);
+
+// bad
+[1, 2, 3].map((n) => n + 1);
+
+// bad
+[1, 2, 3].map(n => {
+  return n + 1;
+});
+```
+
+If your arrow function is only returning an object literal, then wrap the
+object in paranthesis rather than using an explicit return:
+
+```js
+// good
+() => ({
+  foo: 'bar'
+})
+
+// bad
+() => {
+  return {
+    foo: 'bar'
+  };
+}
 ```
 
 ## Object / Array creation
@@ -267,53 +402,61 @@ var myFunc = function () {
 Use trailing commas and put *short* declarations on a single line. Only quote
 keys when your interpreter complains:
 
-*Right:*
-
 ```js
-var a = ['hello', 'world'];
-var b = {
+// good
+const a = ['hello', 'world'];
+const b = {
   good: 'code',
   'is generally': 'pretty'
 };
-```
 
-*Wrong:*
-
-```js
-var a = [
+// bad
+const a = [
   'hello', 'world'
 ];
-var b = {"good": 'code'
+const b = {'good': 'code'
         , is generally: 'pretty'
         };
 ```
 
 ## Object / Array iterations, transformations and operations
 
-Use native ES5 methods to iterate and transform arrays and objects where possible. Do not use `for` and `while` loops.
+Use native methods to iterate and transform arrays and objects where possible.
+Avoid `for` and `while` loops as they introduce the possibility of infinite
+loops and break out of our preferred convention of declarative programming.
 
 Use descriptive variable names in the closures.
 
-Use a utility library as needed and where it will make code more comprehensible.
-
-*Right:*
-
-```js
-var userNames = users.map(function (user) {
-  return user.name;
-});
-
-// examples where lodash makes the code more readable
-var userNames = _.pluck(users, 'name');
-```
-
-*Wrong:*
+Use a utility library as needed and where it will make code more
+comprehensible.
 
 ```js
-var userNames = [];
-for (var i = 0; i < users.length; i++) {
+// best
+const userNames = users.map(user => user.name);
+
+// ok
+import { pluck } from 'lodash';
+const userNames = pluck(users, 'name');
+
+// bad
+const userNames = [];
+for (let i = 0; i < users.length; i++) {
   userNames.push(users[i].name);
 }
+```
+
+## Use the spread operator (...) for copying arrays
+
+This helps with expressiveness and readability.
+
+```js
+const arr = [1, 2, 3];
+
+// good
+const arrCopy = [...arr];
+
+// bad
+const arrCopy = arr.slice();
 ```
 
 ## Use the === operator
@@ -321,20 +464,15 @@ for (var i = 0; i < users.length; i++) {
 Programming is not about remembering [stupid rules][comparisonoperators]. Use
 the triple equality operator as it will work just as expected.
 
-*Right:*
-
 ```js
-var a = 0;
+const a = 0;
+
+// good
 if (a !== '') {
   console.log('winning');
 }
 
-```
-
-*Wrong:*
-
-```js
-var a = 0;
+// bad
 if (a == '') {
   console.log('losing');
 }
@@ -344,18 +482,16 @@ if (a == '') {
 
 ## Only use ternary operators for small, simple code
 
-And **never** use multiple ternaries together
-
-*Right:*
-
-```js
-var foo = (a === b) ? 1 : 2;
-```
-
-*Wrong:*
+And *never* use multiple ternaries together, because they make it more
+difficult to reason about how different values flow through the conditions
+involved. Instead, structure the logic for maximum readability.
 
 ```js
-var foo = (a === b) ? 1 : (a === c) ? 2 : 3;
+// good, a situation where only 1 ternary is needed
+const foo = (a === b) ? 1 : 2;
+
+// bad
+const foo = (a === b) ? 1 : (a === c) ? 2 : 3;
 ```
 
 ## Do not extend built-in prototypes
@@ -363,73 +499,57 @@ var foo = (a === b) ? 1 : (a === c) ? 2 : 3;
 Do not extend the prototype of native JavaScript objects. Your future self will
 be forever grateful.
 
-*Right:*
-
 ```js
-var a = [];
-if (!a.length) {
-  console.log('winning');
-}
-```
-
-*Wrong:*
-
-```js
-Array.prototype.empty = function() {
+// bad
+Array.prototype.empty = function () {
   return !this.length;
-}
-
-var a = [];
-if (a.empty()) {
-  console.log('losing');
 }
 ```
 
 ## Use descriptive conditions
 
-Any non-trivial conditions should be assigned to a descriptively named variables, broken into
-several names variables, or converted to be a function:
-
-*Right:*
+Any non-trivial conditions should be converted to functions or assigned to
+descriptively named variables. By breaking up logic into smaller,
+self-contained blocks, it becomes easier to reason about the higher-level
+logic. Additionally, these blocks become good candidates for extraction into
+their own modules, with unit-tests.
 
 ```js
-var thing = ...;
-var isShape = thing instanceof Shape;
-var notSquare = !(thing instanceof Square);
-var largerThan10 = isShape && thing.size > 10;
-
-if (isShape && notSquare && largerThan10) {
-  console.log('some big polygon');
+// best
+function isShape(thing) {
+  return thing instanceof Shape;
 }
-```
+function notSquare(thing) {
+  return !(thing instanceof Square);
+}
+if (isShape(thing) && notSquare(thing)) {
+  ...
+}
 
-*Wrong:*
+// good
+const isShape = thing instanceof Shape;
+const notSquare = !(thing instanceof Square);
+if (isShape && notSquare) {
+  ...
+}
 
-```js
-if (
-  thing instanceof Shape
-  && !(thing instanceof Square)
-  && thing.size > 10
-) {
-  console.log('bigger than ten?? Woah!');
+// bad
+if (thing instanceof Shape && !(thing instanceof Square)) {
+  ...
 }
 ```
 
 ## Name regular expressions
 
-*Right:*
-
 ```js
-var validPasswordRE = /^(?=.*\d).{4,}$/;
+// good
+const validPassword = /^(?=.*\d).{4,}$/;
 
-if (password.length >= 4 && validPasswordRE.test(password)) {
+if (password.length >= 4 && validPassword.test(password)) {
   console.log('password is valid');
 }
-```
 
-*Wrong:*
-
-```js
+// bad
 if (password.length >= 4 && /^(?=.*\d).{4,}$/.test(password)) {
   console.log('losing');
 }
@@ -441,31 +561,82 @@ Keep your functions short. A good function fits on a slide that the people in
 the last row of a big room can comfortably read. So don't count on them having
 perfect vision and limit yourself to ~15 lines of code per function.
 
-## Return early from functions
+## Use "rest" syntax rather than built-in `arguments`
 
-To avoid deep nesting of if-statements, always return a function's value as early
-as possible.
-
-*Right:*
+For expressiveness sake, and so you can be mix dynamic and explicit arguments.
 
 ```js
-function isPercentage(val) {
-  if (val < 0) return false;
-  if (val > 100) return false;
+// good
+function something(foo, ...args) {
+  ...
+}
 
-  return true;
+// bad
+function something(foo) {
+  const args = Array.from(arguments).slice(1);
+  ...
 }
 ```
 
-*Wrong:*
+## Default argument syntax
+
+Always use the default argument syntax for optional arguments.
 
 ```js
-function isPercentage(val) {
+// good
+function foo(options = {}) {
+  ...
+}
+
+// bad
+function foo(options) {
+  if (typeof options === 'undefined') {
+    options = {};
+  }
+  ...
+}
+```
+
+And put your optional arguments at the end.
+
+```js
+// good
+function foo(bar, options = {}) {
+  ...
+}
+
+// bad
+function foo(options = {}, bar) {
+  ...
+}
+```
+
+## Return/throw early from functions
+
+To avoid deep nesting of if-statements, always return a function's value as early
+as possible. And where possible, do any assertions first:
+
+```js
+// good
+function doStuff(val) {
+  if (val > 100) {
+    throw new Error('Too big');
+  }
+
+  if (val < 0) {
+    return false;
+  }
+
+  // ... stuff
+}
+
+// bad
+function doStuff(val) {
   if (val >= 0) {
     if (val < 100) {
-      return true;
+      // ... stuff
     } else {
-      return false;
+      throw new Error('Too big');
     }
   } else {
     return false;
@@ -473,110 +644,68 @@ function isPercentage(val) {
 }
 ```
 
-Or for this particular example it may also be fine to shorten things even
-further:
-
-```js
-function isPercentage(val) {
-  var isInRange = (val >= 0 && val <= 100);
-  return isInRange;
-}
-```
-
 ## Chaining operations
 
-When using a chaining syntax (jquery or promises, for example), do not indent the subsequent chained operations, unless there is a logical grouping in them.
+When using a chaining syntax, indent the subsequent chained operations.
 
 Also, if the chain is long, each method should be on a new line.
 
-*Right:*
-
 ```js
-$('.someClass')
-.addClass('another-class')
-.append(someElement)
-```
+// good
+$http.get('/info')
+  .then(({ data }) => this.transfromInfo(data))
+  .then((transformed) => $http.post('/new-info', transformed))
+  .then(({ data }) => console.log(data));
 
-```js
-d3.selectAll('g.bar')
-.enter()
-  .append('thing')
-  .data(anything)
-  .exit()
-.each(function() ... )
-```
-
-```js
+// bad
 $http.get('/info')
 .then(({ data }) => this.transfromInfo(data))
 .then((transformed) => $http.post('/new-info', transformed))
 .then(({ data }) => console.log(data));
 ```
 
-*Wrong:*
+## Avoid mutability and state
+
+Wherever possible, do not rely on mutable state. This means you should not
+reassign variables, modify object properties, or push values to arrays.
+Instead, create new variables, and shallow copies of objects and arrays:
 
 ```js
-$('.someClass')
-  .addClass('another-class')
-  .append(someElement)
-```
+// good
+function addBar(foos, foo) {
+  const newFoo = {...foo, name: 'bar'};
+  return [...foos, newFoo];
+}
 
-```js
-d3.selectAll('g.bar')
-.enter().append('thing').data(anything).exit()
-.each(function() ... )
-```
-
-```js
-$http.get('/info')
-  .then(({ data }) => this.transfromInfo(data))
-  .then((transformed) => $http.post('/new-info', transformed))
-  .then(({ data }) => console.log(data));
-```
-
-## Name your closures
-
-Feel free to give your closures a descriptive name. It shows that you care about them, and
-will produce better stack traces, heap and cpu profiles.
-
-*Right:*
-
-```js
-req.on('end', function onEnd() {
-  console.log('winning');
-});
-```
-
-*Wrong:*
-
-```js
-req.on('end', function() {
-  console.log('losing');
-});
-```
-
-## No nested closures
-
-Use closures, but don't nest them. Otherwise your code will become a mess.
-
-*Right:*
-
-```js
-setTimeout(function() {
-  client.connect(afterConnect);
-}, 1000);
-
-function afterConnect() {
-  console.log('winning');
+// bad
+function addBar(foos, foo) {
+  foo.name = 'bar';
+  foos.push(foo);
 }
 ```
 
-*Wrong:*
+## Use thunks to create closures, where possible
+
+For trivial examples (like the one that follows), thunks will seem like
+overkill, but they encourage isolating the implementation details of a closure
+from the business logic of the calling code.
 
 ```js
-setTimeout(function() {
-  client.connect(function() {
-    console.log('losing');
+// good
+function connectHandler(client, callback) {
+  return () => client.connect(callback);
+}
+setTimeout(connectHandler(client, afterConnect), 1000);
+
+// not as good
+setTimeout(() => {
+  client.connect(afterConnect);
+}, 1000);
+
+// bad
+setTimeout(() => {
+  client.connect(() => {
+    ...
   });
 }, 1000);
 ```
@@ -585,15 +714,18 @@ setTimeout(function() {
 
 Use slashes for both single line and multi line comments. Try to write
 comments that explain higher level mechanisms or clarify difficult
-segments of your code. **Don't use comments to restate trivial things**.
+segments of your code. *Don't use comments to restate trivial things*.
 
-***Exception:*** Comment blocks describing a function and its arguments (docblock) should start with `/**`, contain a single `*` at the beginning of each line, and end with `*/`.
+*Exception:* Comment blocks describing a function and its arguments
+(docblock) should start with `/**`, contain a single `*` at the beginning of
+each line, and end with `*/`.
 
-*Right:*
 
 ```js
+// good
+
 // 'ID_SOMETHING=VALUE' -> ['ID_SOMETHING=VALUE', 'SOMETHING', 'VALUE']
-var matches = item.match(/ID_([^\n]+)=([^\n]+)/));
+const matches = item.match(/ID_([^\n]+)=([^\n]+)/));
 
 /**
  * Fetches a user from...
@@ -608,17 +740,15 @@ function loadUser(id) {
   ...
 }
 
-var isSessionValid = (session.expires < Date.now());
+const isSessionValid = (session.expires < Date.now());
 if (isSessionValid) {
   ...
 }
-```
 
-*Wrong:*
+// bad
 
-```js
 // Execute a regex
-var matches = item.match(/ID_([^\n]+)=([^\n]+)/));
+const matches = item.match(/ID_([^\n]+)=([^\n]+)/));
 
 // Usage: loadUser(5, function() { ... })
 function loadUser(id, cb) {
@@ -626,140 +756,80 @@ function loadUser(id, cb) {
 }
 
 // Check if the session is valid
-var isSessionValid = (session.expires < Date.now());
+const isSessionValid = (session.expires < Date.now());
 // If the session is valid
 if (isSessionValid) {
-  // ...
+  ...
 }
 ```
 
 ## Do not comment out code
 
-We use a version management system. If a line of code is no longer needed, remove it, don't simply comment it out.
+We use a version management system. If a line of code is no longer needed,
+remove it, don't simply comment it out.
 
 ## Classes/Constructors and Inheritance
 
-While JavaScript it is not always considered an object-oriented language, it does have the building blocks for writing object oriented code. Of course, as with all things JavaScript, there are many ways this can be accomplished. Generally, we try to err on the side of readability.
+If you must use a constructor, then use the native `class` syntax. *Never* use
+third party "class" utilities, and never mutate prototypes.
 
-### Capitalized function definition as Constructors
-
-When Defining a Class/Constructor, use the function definition syntax.
-
-*Right:*
 ```js
-function ClassName() {
-
+// best (no local state at all)
+function addUser(users, user) {
+  return [...users, user];
 }
-```
+const users = addUser([], { name: 'foo' });
 
-*Wrong:*
-```js
-var ClassName = function () {};
-```
-
-### Inheritance should be done with a utility
-
-While you can do it with pure JS, a utility will remove a lot of boilerplate, and be more readable and functional.
-
-*Right:*
-
-```js
-// uses a lodash inherits mixin
-// inheritance is defined first - it's easier to read and the function will be hoisted
-_.class(Square).inherits(Shape);
-
-function Square(width, height) {
-  Square.Super.call(this);
+// good
+class Users {
+  add(user) {
+    ...
+  }
 }
-```
+const users = new Users();
+users.add({ name: 'foo' });
 
-*Wrong:*
-
-```js
-function Square(width, height) {
-  this.width = width;
-  this.height = height;
-}
-
-Square.prototype = Object.create(Shape);
-```
-
-### Keep Constructors Small
-
-It is often the case that there are properties that can't be defined on the prototype, or work that needs to be done to completely create an object (like call its Super class). This is all that should be done within constructors.
-
-Try to follow the [Write small functions](#write-small-functions) rule here too.
-
-### Use the prototype
-
-If a method/property *can* go on the prototype, it probably should.
-
-```js
-function Square() {
+// bad
+function Users() {
   ...
 }
-
-/**
- * method does stuff
- * @return {undefined}
- */
-Square.prototype.method = function () {
+Users.prototype.add = function () {
   ...
-}
+};
+const users = new Users();
+users.add({ name: 'foo' });
 ```
 
-### Handling scope and aliasing `this`
+## Do not alias `this`
 
-When creating a prototyped class, each method should almost always start with:
-
-`var self = this;`
-
-With the exception of very short methods (roughly 3 lines or less), `self` should always be used in place of `this`.
-
-Avoid the use of `bind`
-
-*Right:*
+Try not to rely on `this` at all, but if you must, then use arrow functions
+instead of aliasing it.
 
 ```js
-Square.prototype.doFancyThings = function () {
-  var self = this;
+// good
+class Users {
+  add(user) {
+    return createUser(user)
+      .then(response => this.users.push(response.user));
+  }
+}
 
-  somePromiseUtil()
-  .then(function (result) {
-    self.prop = result.prop;
-  });
+// bad
+class Users {
+  add(user) {
+    const self = this;
+    return createUser(user).then(function (response) {
+      self.users.push(response.user);
+    });
+  }
 }
 ```
-
-*Wrong:*
-
-```js
-Square.prototype.doFancyThings = function () {
-  somePromiseUtil()
-  .then(function (result) {
-    this.prop = result.prop;
-  }).bind(this);
-}
-```
-
-*Allowed:*
-
-```js
-Square.prototype.area = function () {
-  return this.width * this.height;
-}
-```
-
-## Object.freeze, Object.preventExtensions, Object.seal, with, eval
-
-Crazy shit that you will probably never need. Stay away from it.
 
 ## Getters and Setters
 
 Feel free to use getters that are free from [side effects][sideeffect], like
 providing a length property for a collection class.
 
-Do not use setters, they cause more problems for people who try to use your
-software than they can solve.
+Do not use setters, they cause more problems than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)

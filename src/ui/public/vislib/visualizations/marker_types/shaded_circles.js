@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import L from 'leaflet';
-import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from './base_marker';
 export default function ShadedCircleMarkerFactory(Private) {
 
   const BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);

@@ -1,16 +1,16 @@
-var filename = require('path').basename(__filename);
-var fn = require(`../${filename}`);
-var moment = require('moment');
-var expect = require('chai').expect;
-var invoke = require('./helpers/invoke_series_fn.js');
-var getSeriesList = require('./helpers/get_single_series_list');
-var _ = require('lodash');
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
+const moment = require('moment');
+const expect = require('chai').expect;
+const invoke = require('./helpers/invoke_series_fn.js');
+const getSeriesList = require('./helpers/get_single_series_list');
+const _ = require('lodash');
 
 describe(filename, function () {
 
   describe('carry', function () {
     it('should maintain the previous value until it changes', function () {
-      var seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('',[
         [moment.utc('1980-01-01T00:00:00.000Z'), 5],
         [moment.utc('1981-01-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), 3.4],
@@ -27,7 +27,7 @@ describe(filename, function () {
 
   describe('nearest', function () {
     it('should use the closest temporal value to fill the null', function () {
-      var seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('',[
         [moment.utc('1980-01-01T00:00:00.000Z'), 5],
         [moment.utc('1981-01-01T00:00:00.000Z'), null],
         [moment.utc('1981-05-01T00:00:00.000Z'), 3.4],
@@ -46,7 +46,7 @@ describe(filename, function () {
 
   describe('average', function () {
     it('should produce a smooth, straight line between points', function () {
-      var seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('',[
         [moment.utc('1980-01-01T00:00:00.000Z'), 10],
         [moment.utc('1981-07-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), null],
@@ -64,7 +64,7 @@ describe(filename, function () {
 
   describe('scale', function () {
     it('should distribute the next points value across the preceeding nulls', function () {
-      var seriesList = getSeriesList('', [
+      const seriesList = getSeriesList('', [
         [moment.utc('1980-01-01T00:00:00.000Z'), 10],
         [moment.utc('1981-07-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), null],
@@ -80,7 +80,7 @@ describe(filename, function () {
 
   describe('none', function () {
     it('basically just drops the nulls. This is going to screw you', function () {
-      var seriesList = getSeriesList('', [
+      const seriesList = getSeriesList('', [
         [moment.utc('1980-01-01T00:00:00.000Z'), 10],
         [moment.utc('1981-07-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), null],

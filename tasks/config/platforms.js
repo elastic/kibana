@@ -1,12 +1,12 @@
 import { endsWith } from 'lodash';
 
 module.exports = function (grunt) {
-  let { resolve } = require('path');
+  const { resolve } = require('path');
 
-  let { version } = grunt.config.get('build');
-  let nodeVersion = grunt.config.get('nodeVersion');
-  let rootPath = grunt.config.get('root');
-  let baseUri = `https://nodejs.org/dist/v${nodeVersion}`;
+  const { version } = grunt.config.get('build');
+  const nodeVersion = grunt.config.get('nodeVersion');
+  const rootPath = grunt.config.get('root');
+  const baseUri = `https://nodejs.org/dist/v${nodeVersion}`;
 
   return [
     'darwin-x64',
@@ -14,23 +14,25 @@ module.exports = function (grunt) {
     'linux-x86',
     'windows-x86'
   ].map(function (baseName) {
-    let win = baseName === 'windows-x86';
+    const win = baseName === 'windows-x86';
 
-    let nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
-    let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
+    const nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
+    const nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
 
     const name = endsWith(baseName, '-x64')
       ? baseName.replace('-x64', '-x86_64')
       : baseName;
 
-    let buildName = `kibana-${version}-${name}`;
-    let buildDir = resolve(rootPath, `build/${buildName}`);
+    const nodeShaSums = `${baseUri}/SHASUMS256.txt`;
 
-    let tarName = `${buildName}.tar.gz`;
-    let tarPath = resolve(rootPath, `target/${tarName}`);
+    const buildName = `kibana-${version}-${name}`;
+    const buildDir = resolve(rootPath, `build/${buildName}`);
 
-    let zipName = `${buildName}.zip`;
-    let zipPath = resolve(rootPath, `target/${zipName}`);
+    const tarName = `${buildName}.tar.gz`;
+    const tarPath = resolve(rootPath, `target/${tarName}`);
+
+    const zipName = `${buildName}.zip`;
+    const zipPath = resolve(rootPath, `target/${zipName}`);
 
     let debName;
     let debPath;
@@ -49,7 +51,7 @@ module.exports = function (grunt) {
     }
     return {
       name, win,
-      nodeUrl, nodeDir,
+      nodeUrl, nodeDir, nodeShaSums,
       buildName, buildDir,
       tarName, tarPath,
       zipName, zipPath,

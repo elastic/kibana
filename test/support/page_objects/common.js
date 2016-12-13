@@ -26,6 +26,8 @@ import {
   esClient
 } from '../index';
 
+import PageObjects from './index';
+
 import {
   Log,
   Try
@@ -38,7 +40,7 @@ export default class Common {
 
   init(remote) {
     function injectTimestampQuery(func, url) {
-      var formatted = modifyQueryString(url, function (parsed) {
+      const formatted = modifyQueryString(url, function (parsed) {
         parsed.query._t = Date.now();
       });
       return func.call(this, formatted);
@@ -54,7 +56,7 @@ export default class Common {
     }
 
     function modifyQueryString(url, func) {
-      var parsed = parse(url, true);
+      const parsed = parse(url, true);
       if (parsed.query === null) {
         parsed.query = {};
       }
@@ -79,8 +81,8 @@ export default class Common {
   }
 
   navigateToApp(appName, testStatusPage) {
-    var self = this;
-    var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
+    const self = this;
+    const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
     function navigateTo(url) {
@@ -111,30 +113,15 @@ export default class Common {
           return self.remote.refresh();
         })
         .then(function () {
-          self.debug('check testStatusPage');
-          if (testStatusPage !== false) {
-            self.debug('self.checkForKibanaApp()');
-            return self.checkForKibanaApp()
-            .then(function (kibanaLoaded) {
-              self.debug('kibanaLoaded = ' + kibanaLoaded);
-              if (!kibanaLoaded) {
-                var msg = 'Kibana is not loaded, retrying';
-                self.debug(msg);
-                throw new Error(msg);
-              }
-            });
-          }
-        })
-        .then(function () {
           return self.remote.getCurrentUrl();
         })
         .then(function (currentUrl) {
-          var loginPage = new RegExp('login').test(currentUrl);
+          const loginPage = new RegExp('login').test(currentUrl);
           if (loginPage) {
-            self.debug('Found loginPage = ' + loginPage + ', username = '
-              + config.servers.kibana.shield.username);
-            return shieldPage.login(config.servers.kibana.shield.username,
-              config.servers.kibana.shield.password)
+            self.debug('Found loginPage username = '
+              + config.servers.kibana.username);
+            return PageObjects.shield.login(config.servers.kibana.username,
+              config.servers.kibana.password)
             .then(function () {
               return self.remote.getCurrentUrl();
             });
@@ -144,7 +131,7 @@ export default class Common {
         })
         .then(function (currentUrl) {
           currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-          var maxAdditionalLengthOnNavUrl = 230;
+          const maxAdditionalLengthOnNavUrl = 230;
           // On several test failures at the end of the TileMap test we try to navigate back to
           // Visualize so we can create the next Vertical Bar Chart, but we can see from the
           // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
@@ -155,11 +142,15 @@ export default class Common {
           // Navigating to Settings when there is a default index pattern has a URL length of 196
           // (from debug output). Some other tabs may also be long. But a rather simple configured
           // visualization is about 1000 chars long. So at least we catch that case.
-          var navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+
+          // Browsers don't show the ':port' if it's 80 or 443 so we have to
+          // remove that part so we can get a match in the tests.
+          const navSuccessful = new RegExp(appUrl.replace(':80','').replace(':443','')
+           + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
           .test(currentUrl);
 
           if (!navSuccessful) {
-            var msg = 'App failed to load: ' + appName +
+            const msg = 'App failed to load: ' + appName +
             ' in ' + defaultFindTimeout + 'ms' +
             ' appUrl = ' + appUrl +
             ' currentUrl = ' + currentUrl;
@@ -174,7 +165,7 @@ export default class Common {
 
     return navigateTo(appUrl)
     .then(function (currentUrl) {
-      var lastUrl = currentUrl;
+      let lastUrl = currentUrl;
       return self.try(function () {
         // give the app time to update the URL
         return self.sleep(501)
@@ -193,7 +184,7 @@ export default class Common {
   }
 
   runScript(fn, timeout) {
-    var self = this;
+    const self = this;
     // by default, give the app 10 seconds to load
     timeout = timeout || 10000;
 
@@ -201,9 +192,9 @@ export default class Common {
     return self.remote
     .setExecuteAsyncTimeout(timeout)
     .executeAsync(function (done) {
-      var interval = setInterval(function () {
-        var ready = (document.readyState === 'complete');
-        var hasJQuery = !!window.$;
+      const interval = setInterval(function () {
+        const ready = (document.readyState === 'complete');
+        const hasJQuery = !!window.$;
 
         if (ready && hasJQuery) {
           console.log('doc ready, jquery loaded');
@@ -213,37 +204,6 @@ export default class Common {
       }, 10);
     }).then(function () {
       return self.remote.execute(fn);
-    });
-  }
-
-  getApp() {
-    var self = this;
-
-    return self.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('.app-wrapper .application')
-    .then(function () {
-      return self.runScript(function () {
-        var $ = window.$;
-        var $scope = $('.app-wrapper .application').scope();
-        return $scope ? $scope.chrome.getApp() : {};
-      });
-    });
-  }
-
-  checkForKibanaApp() {
-    var self = this;
-
-    return self.getApp()
-    .then(function (app) {
-      var appId = app.id;
-      self.debug('current application: ' + appId);
-      return appId === 'kibana';
-    })
-    .catch(function (err) {
-      self.debug('kibana check failed');
-      self.debug(err);
-      // not on the kibana app...
-      return false;
     });
   }
 
@@ -268,7 +228,7 @@ export default class Common {
   }
 
   sleep(sleepMilliseconds) {
-    var self = this;
+    const self = this;
     self.debug('... sleep(' + sleepMilliseconds + ') start');
 
     return bluebird.resolve().delay(sleepMilliseconds)

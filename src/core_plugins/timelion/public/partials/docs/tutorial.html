@@ -111,7 +111,7 @@
           </tr>
           <tr>
             <td><code>.es(*).color(#f66).lines(fill=3), .es(US).bars(1).points(radius=3, weight=1)</code></td>
-            <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma separated list. We can use named arugments to make expressions easier to read and arguments easier to remember.</td>
+            <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma separated list. We can use named arguments to make expressions easier to read and arguments easier to remember.</td>
           </tr>
             <tr>
             <td><code>(.es(*), .es(GB)).points()</code></td>
@@ -145,42 +145,46 @@
   </div>
 </div>
 
-<div ng-show="section === 'functions'" class="doc-container-functions">
-  <h3>
+<div ng-show="section === 'functions'">
+  <div class="localDropdownTitle">
     Function reference
-    <small>
-      Click a function for details and arguments or <a ng-click="section = 'tutorial'">return to the tutorial.</a>
-    </small>
-  </h3>
-  <table class="table table-condensed table-striped table-bordered">
-    <tr class="function"
-      ng-repeat-start="function in functions.list"
-      ng-class="{active: functions.details === function.name}"
-      ng-click="functions.details = (functions.details === function.name ? null : function.name)">
-      <td><strong>.{{function.name}}()</strong></td>
-      <td>{{function.help}}</td>
-    </tr>
-    <tr ng-if="functions.details === function.name" ng-repeat-end>
-      <td colspan=2>
-        <div class="suggestion-details" >
-          <table class="table table-striped table-condensed table-bordered"
-            ng-show="function.args.length > (function.chainable ? 1: 0)">
-          <thead>
-            <th>Argument Name</th>
-            <th>Accepted Types</th>
-            <th>Information</th>
-          </thead>
-          <tr ng-repeat="arg in function.args" ng-hide="$index < 1 && function.chainable">
-            <td>{{arg.name}}</td>
-            <td><em>{{arg.types.join(', ')}}</em></td>
-            <td>{{arg.help}}</td>
-          </tr>
-          </table>
-          <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
-            <em>This function does not accept any arguments. Well that's simple, isn't it?</em>
+  </div>
+  <div class="localDropdownHelpText">
+    Click a function for details and arguments or <a ng-click="section = 'tutorial'">return to the tutorial.</a>
+  </div>
+  <div class="timelionFunctionsDropdownContent">
+    <table class="table table-condensed table-bordered timelionFunctionsTable">
+      <tr class="timelionFunctionsTableRow"
+        ng-repeat-start="function in functions.list"
+        ng-class="{active: functions.details === function.name}"
+        ng-click="functions.details = (functions.details === function.name ? null : function.name)">
+        <td><strong>.{{function.name}}()</strong></td>
+        <td>{{function.help}}</td>
+      </tr>
+
+      <!-- Function details -->
+      <tr ng-if="functions.details === function.name" ng-repeat-end>
+        <td colspan=2>
+          <div class="suggestion-details" >
+            <table class="table table-condensed table-bordered timelionFunctionDetailsTable"
+              ng-show="function.args.length > (function.chainable ? 1: 0)">
+            <thead>
+              <th>Argument Name</th>
+              <th>Accepted Types</th>
+              <th>Information</th>
+            </thead>
+            <tr ng-repeat="arg in function.args" ng-hide="$index < 1 && function.chainable">
+              <td>{{arg.name}}</td>
+              <td><em>{{arg.types.join(', ')}}</em></td>
+              <td>{{arg.help}}</td>
+            </tr>
+            </table>
+            <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
+              <em>This function does not accept any arguments. Well that's simple, isn't it?</em>
+            </div>
           </div>
-        </div>
-      </td>
-    </tr>
-  </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>

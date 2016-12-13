@@ -22,7 +22,7 @@ If Not Exist "%NODE%" (
 )
 
 TITLE Kibana Server
-"%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
+"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
 
 :finally
 

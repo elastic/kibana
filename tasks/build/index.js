@@ -1,11 +1,12 @@
 module.exports = function (grunt) {
-  let { flatten } = require('lodash');
+  const { flatten } = require('lodash');
 
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
       'clean:build',
       'clean:target',
-      '_build:downloadNodeBuilds:start',
+      '_build:downloadNodeBuilds',
+      '_build:extractNodeBuilds',
       'copy:devSource',
       'babel:build',
       '_build:babelOptions',
@@ -17,11 +18,8 @@ module.exports = function (grunt) {
       '_build:installNpmDeps',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
-      'clean:deepModuleBins',
-      'clean:deepModules',
       'run:optimizeBuild',
       'stop:optimizeBuild',
-      '_build:downloadNodeBuilds:finish',
       '_build:versionedLinks',
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],

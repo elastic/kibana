@@ -6,15 +6,17 @@
       <button ng-if="editor.formatParams.colors.length > 1" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger editor-color-remove">
         <i aria-hidden="true" class="fa fa-times"></i>
       </button>
-      <div class="form-group">
-        <label>Range
-          <small>
-            (min:max)
-          </small>
-      </label>
+      <div class="form-group" ng-if="editor.formatParams.fieldType === 'number'">
+        <label>Range <small>(min:max)</small></label>
         <input
           ng-model="color.range"
           class="form-control">
+      </div>
+      <div class="form-group" ng-if="editor.formatParams.fieldType === 'string'">
+        <label>Pattern <small>(regular expression)</small></label>
+        <input
+            ng-model="color.regex"
+            class="form-control">
       </div>
       <div class="form-group">
         <label>Font Color</label>

@@ -147,6 +147,10 @@
         </p>
 
         <p>
+          Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
+        </p>
+
+        <p>
           Coming from an older version of Kibana? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
         </p>
 
@@ -175,6 +179,25 @@
       </div>
     </div>
 
+  </div>
+
+  <div  ng-if="editor.conflictDescriptionsLength > 0">
+    <p>
+      <i class="fa fa-warning text-warning"></i>
+      <strong>Field Type Conflict:</strong>
+      The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:
+      <table class="table">
+      <thead>
+        <th> Field Type </th>
+        <th> Index Names </th>
+      </thead>
+      <tbody>
+      <tr ng-repeat="(type, indices) in editor.field.conflictDescriptions">
+        <td>{{type}}</td> <td>{{indices.join(', ')}}</td>
+      </tr>
+      </tbody>
+      </table>
+    </p>
   </div>
 
   <div class="form-group">

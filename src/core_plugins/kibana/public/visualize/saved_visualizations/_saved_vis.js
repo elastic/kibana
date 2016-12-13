@@ -1,6 +1,15 @@
+/**
+ * @name SavedVis
+ *
+ * @extends SavedObject.
+ *
+ * NOTE: It's a type of SavedObject, but specific to visualizations.
+ */
+
 import _ from 'lodash';
 import VisProvider from 'ui/vis';
 import uiModules from 'ui/modules';
+
 uiModules
 .get('app/visualize')
 .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
@@ -44,11 +53,11 @@ uiModules
   SavedVis.type = 'visualization';
 
   SavedVis.mapping = {
-    title: 'string',
+    title: 'text',
     visState: 'json',
-    uiStateJSON: 'string',
-    description: 'string',
-    savedSearchId: 'string',
+    uiStateJSON: 'text',
+    description: 'text',
+    savedSearchId: 'keyword',
     version: 'integer'
   };
 

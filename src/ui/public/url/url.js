@@ -9,7 +9,7 @@ uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
 function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
-  let self = this;
+  const self = this;
 
   /**
    * Navigate to a url
@@ -71,10 +71,10 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
 
     return template.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
       // remove filters
-      let key = expr.split('|')[0].trim();
+      const key = expr.split('|')[0].trim();
 
       // verify that the expression can be evaluated
-      let p = $parse(key)(paramObj);
+      const p = $parse(key)(paramObj);
 
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
@@ -110,7 +110,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
    * @return {string} - the computed url
    */
   self.getRouteUrl = function (obj, route) {
-    let template = obj && obj.routes && obj.routes[route];
+    const template = obj && obj.routes && obj.routes[route];
     if (template) return self.eval(template, obj);
   };
 
@@ -144,7 +144,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   let reloading;
 
   self._changeLocation = function (type, url, paramObj, replace, appState) {
-    let prev = {
+    const prev = {
       path: $location.path(),
       search: $location.search()
     };
@@ -157,7 +157,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
       $location.search(appState.getQueryParamName(), appState.toQueryParam());
     }
 
-    let next = {
+    const next = {
       path: $location.path(),
       search: $location.search()
     };
@@ -165,7 +165,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     if ($injector.has('$route')) {
       const $route = $injector.get('$route');
 
-      if (self._shouldAutoReload(next, prev, $route)) {
+      if (self._shouldForceReload(next, prev, $route)) {
         const appState = Private(AppStateProvider).getAppState();
         if (appState) appState.destroy();
 
@@ -180,17 +180,21 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     }
   };
 
-  self._shouldAutoReload = function (next, prev, $route) {
+  // determine if the router will automatically reload the route
+  self._shouldForceReload = function (next, prev, $route) {
     if (reloading) return false;
 
-    let route = $route.current && $route.current.$$route;
+    const route = $route.current && $route.current.$$route;
     if (!route) return false;
 
-    if (next.path !== prev.path) return false;
+    // for the purposes of determining whether the router will
+    // automatically be reloading, '' and '/' are equal
+    const nextPath = next.path || '/';
+    const prevPath = prev.path || '/';
+    if (nextPath !== prevPath) return false;
 
-    let reloadOnSearch = route.reloadOnSearch;
-    let searchSame = _.isEqual(next.search, prev.search);
-
+    const reloadOnSearch = route.reloadOnSearch;
+    const searchSame = _.isEqual(next.search, prev.search);
     return (reloadOnSearch && searchSame) || !reloadOnSearch;
   };
 }

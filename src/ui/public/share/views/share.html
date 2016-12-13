@@ -1,34 +1,34 @@
-<div class="share-dropdown">
+<div class="localDropdownPanels">
   <!-- Left panel -->
-  <div class="share-panel share-panel--left">
+  <div class="localDropdownPanel localDropdownPanel--left">
     <!-- Title -->
     <div
       data-test-subj="shareUiTitle"
-      class="share-panel__title"
+      class="localDropdownTitle"
     >
       Share saved {{share.objectType}}
     </div>
 
     <!-- Help text -->
-    <div ng-if="share.urls.original" class="share-panel-help-text">
+    <div ng-if="share.urls.original" class="localDropdownHelpText">
       You can share this URL with people to let them load the most recent saved version of this {{share.objectType}}.
     </div>
 
-    <div ng-if="!share.urls.original" class="share-panel-warning">
+    <div ng-if="!share.urls.original" class="localDropdownWarning">
       Please save this {{share.objectType}} to enable this sharing option.
     </div>
 
     <div ng-if="share.urls.original">
       <!-- iframe -->
-      <div class="share-panel-section" ng-if="share.allowEmbed">
+      <div class="localDropdownSection" ng-if="share.allowEmbed">
         <!-- Header -->
-        <div class="share-panel-header">
-          <div class="share-panel-header__label">
+        <div class="localDropdownHeader">
+          <div class="localDropdownHeader__label">
             Embedded iframe
           </div>
-          <div class="share-panel-header__actions">
+          <div class="localDropdownHeader__actions">
             <a
-              class="share-panel-header__action"
+              class="localDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalIframeUrl')"
             >
               Copy
@@ -39,28 +39,28 @@
         <!-- Input -->
         <input
           id="originalIframeUrl"
-          class="share-panel-input"
+          class="localDropdownInput"
           type="text"
           readonly
           value="{{share.makeIframeTag(share.urls.original)}}"
         />
 
         <!-- Notes -->
-        <div class="share-panel-form-note">
+        <div class="localDropdownFormNote">
           Add to your HTML source. Note that all clients must be able to access Kibana.
         </div>
       </div>
 
       <!-- Link -->
-      <div class="share-panel-section">
+      <div class="localDropdownSection">
         <!-- Header -->
-        <div class="share-panel-header">
-          <div class="share-panel-header__label">
+        <div class="localDropdownHeader">
+          <div class="localDropdownHeader__label">
             Link
           </div>
-          <div class="share-panel-header__actions">
+          <div class="localDropdownHeader__actions">
             <a
-              class="share-panel-header__action"
+              class="localDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalUrl')"
             >
               Copy
@@ -71,7 +71,7 @@
         <!-- Input -->
         <input
           id="originalUrl"
-          class="share-panel-input"
+          class="localDropdownInput"
           type="text"
           readonly
           value="{{share.urls.original}}"
@@ -81,27 +81,27 @@
   </div>
 
   <!-- Right panel -->
-  <div class="share-panel share-panel--right">
+  <div class="localDropdownPanel localDropdownPanel--right">
     <!-- Title -->
-    <div class="share-panel__title">
+    <div class="localDropdownTitle">
       Share Snapshot
     </div>
 
     <!-- Help text -->
-    <div class="share-panel-help-text">
+    <div class="localDropdownHelpText">
       Snapshot URLs encode the current state of the {{share.objectType}} in the URL itself. Edits to the saved {{share.objectType}} won't be visible via this URL.
     </div>
 
     <!-- iframe -->
-    <div class="share-panel-section" ng-if="share.allowEmbed">
+    <div class="localDropdownSection" ng-if="share.allowEmbed">
       <!-- Header -->
-      <div class="share-panel-header">
-        <div class="share-panel-header__label">
+      <div class="localDropdownHeader">
+        <div class="localDropdownHeader__label">
           Embedded iframe
         </div>
-        <div class="share-panel-header__actions">
+        <div class="localDropdownHeader__actions">
           <a
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
           >
@@ -109,7 +109,7 @@
           </a>
 
           <a
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
           >
@@ -117,7 +117,7 @@
           </a>
 
           <a
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotIframeUrl')"
           >
             Copy
@@ -128,29 +128,29 @@
       <!-- Input -->
       <input
         id="snapshotIframeUrl"
-        class="share-panel-input"
+        class="localDropdownInput"
         type="text"
         readonly
         value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshotIframe) : share.makeIframeTag(share.urls.snapshot)}}"
       />
 
       <!-- Notes -->
-      <div class="share-panel-form-note">
+      <div class="localDropdownFormNote">
         Add to your HTML source. Note that all clients must be able to access Kibana.
       </div>
     </div>
 
     <!-- Link -->
-    <div class="share-panel-section">
+    <div class="localDropdownSection">
       <!-- Header -->
-      <div class="share-panel-header">
-        <div class="share-panel-header__label">
+      <div class="localDropdownHeader">
+        <div class="localDropdownHeader__label">
           Link
         </div>
-        <div class="share-panel-header__actions">
+        <div class="localDropdownHeader__actions">
           <a
             data-test-subj="sharedSnapshotShortUrlButton"
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
           >
@@ -158,7 +158,7 @@
           </a>
 
           <a
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
           >
@@ -167,7 +167,7 @@
 
           <a
             data-test-subj="sharedSnapshotCopyButton"
-            class="share-panel-header__action"
+            class="localDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotUrl')"
           >
             Copy
@@ -179,14 +179,14 @@
       <input
         data-test-subj="sharedSnapshotUrl"
         id="snapshotUrl"
-        class="share-panel-input"
+        class="localDropdownInput"
         type="text"
         readonly
         value="{{share.urlFlags.shortSnapshot ? share.urls.shortSnapshot : share.urls.snapshot}}"
       />
 
       <!-- Notes -->
-      <div class="share-panel-form-note">
+      <div class="localDropdownFormNote">
         We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great.
       </div>
     </div>

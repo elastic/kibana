@@ -1,6 +1,5 @@
-<ul>
-  <li ng-repeat="crumb in crumbs">
-    <span>{{crumb}}</span>
-    <span ng-hide="$last"> / </span>
-  </li>
-</ul>
+<div class="localBreadcrumbs">
+  <div class="localBreadcrumb" ng-repeat="breadcrumb in breadcrumbs">
+    {{breadcrumb}}
+  </div>
+</div>

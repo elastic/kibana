@@ -15,17 +15,19 @@ export function registerFieldCapabilities(server) {
         index: indices,
         allowNoIndices: false
       })
-      .catch((error) => {
-        reply(handleESError(error));
-      })
-      .then((res) => {
-        const fields = _.get(res, 'indices._all.fields', {});
-        const fieldsFilteredValues = _.mapValues(fields, (value) => {
-          return _.pick(value, ['searchable', 'aggregatable']);
-        });
+      .then(
+        (res) => {
+          const fields = _.get(res, 'indices._all.fields', {});
+          const fieldsFilteredValues = _.mapValues(fields, (value) => {
+            return _.pick(value, ['searchable', 'aggregatable']);
+          });
 
-        reply({fields: fieldsFilteredValues});
-      });
+          reply({fields: fieldsFilteredValues});
+        },
+        (error) => {
+          reply(handleESError(error));
+        }
+      );
     }
   });
 }

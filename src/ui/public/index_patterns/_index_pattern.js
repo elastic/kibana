@@ -33,17 +33,19 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     edit: '/management/kibana/indices/{{id}}',
     addField: '/management/kibana/indices/{{id}}/create-field',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)'
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
   });
 
   const mapping = mappingSetup.expandShorthand({
-    title: 'string',
-    timeFieldName: 'string',
+    title: 'text',
+    timeFieldName: 'keyword',
     notExpandable: 'boolean',
-    intervalName: 'string',
+    intervalName: 'keyword',
     fields: 'json',
+    sourceFilters: 'json',
     fieldFormatMap: {
-      type: 'string',
+      type: 'text',
       _serialize(map = {}) {
         const serialized = _.transform(map, serialize);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
@@ -196,6 +198,13 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         .then(response => updateFromElasticSearch(this, response));
       })
       .then(() => this);
+    }
+
+    // Get the source filtering configuration for that index.
+    getSourceFiltering() {
+      return {
+        excludes: this.sourceFilters && this.sourceFilters.map(filter => filter.value) || []
+      };
     }
 
     addScriptedField(name, script, type = 'string', lang) {

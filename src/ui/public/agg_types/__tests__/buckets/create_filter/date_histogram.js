@@ -25,10 +25,10 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      let Vis = Private(VisProvider);
-      let indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      let createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
-      let TimeBuckets = Private(TimeBucketsProvider);
+      const Vis = Private(VisProvider);
+      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+      const TimeBuckets = Private(TimeBucketsProvider);
       intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {
@@ -51,7 +51,7 @@ describe('AggConfig Filters', function () {
         bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
         bucketStart = moment(bucketKey);
 
-        let timePad = moment.duration(duration / 2);
+        const timePad = moment.duration(duration / 2);
         agg.buckets.setBounds({
           min: bucketStart.clone().subtract(timePad),
           max: bucketStart.clone().add(timePad),
@@ -68,7 +68,7 @@ describe('AggConfig Filters', function () {
       expect(filter).to.have.property('range');
       expect(filter.range).to.have.property(field.name);
 
-      let fieldParams = filter.range[field.name];
+      const fieldParams = filter.range[field.name];
       expect(fieldParams).to.have.property('gte');
       expect(fieldParams.gte).to.be.a('number');
 
@@ -98,8 +98,8 @@ describe('AggConfig Filters', function () {
 
         init(option.val, duration);
 
-        let interval = agg.buckets.getInterval();
-        let params = filter.range[field.name];
+        const interval = agg.buckets.getInterval();
+        const params = filter.range[field.name];
 
         expect(params.gte).to.be(+bucketStart);
         expect(params.lt).to.be(+bucketStart.clone().add(interval));

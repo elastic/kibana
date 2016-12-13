@@ -1,8 +1,15 @@
 import { defaultsDeep, partial } from 'lodash';
 import defaultsProvider from './defaults';
+import Bluebird from 'bluebird';
 
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
+
+  if (!config.get('uiSettings.enabled')) {
+    status.disabled('uiSettings.enabled config is set to `false`');
+    return;
+  }
+
   const uiSettings = {
     // returns a Promise for the value of the requested setting
     get,
@@ -28,12 +35,14 @@ export default function setupSettings(kbnServer, server, config) {
   server.decorate('server', 'uiSettings', () => uiSettings);
   kbnServer.ready().then(mirrorEsStatus);
 
-  function get(key) {
-    return getAll().then(all => all[key]);
+  async function get(req, key) {
+    assertRequest(req);
+    return getAll(req).then(all => all[key]);
   }
 
-  function getAll() {
-    return getRaw()
+  async function getAll(req) {
+    assertRequest(req);
+    return getRaw(req)
     .then(raw => Object.keys(raw)
       .reduce((all, key) => {
         const item = raw[key];
@@ -44,9 +53,10 @@ export default function setupSettings(kbnServer, server, config) {
     );
   }
 
-  function getRaw() {
+  async function getRaw(req) {
+    assertRequest(req);
     return Promise
-      .all([getDefaults(), getUserProvided()])
+      .all([getDefaults(), getUserProvided(req)])
       .then(([defaults, user]) => defaultsDeep(user, defaults));
   }
 
@@ -54,50 +64,64 @@ export default function setupSettings(kbnServer, server, config) {
     return Promise.resolve(defaultsProvider());
   }
 
-  function userSettingsNotFound(kibanaVersion) {
-    status.red(`Could not find user-provided settings for Kibana ${kibanaVersion}`);
-    return {};
+  async function getUserProvided(req, { ignore401Errors = false } = {}) {
+    assertRequest(req);
+    const { callWithRequest, errors } = server.plugins.elasticsearch;
+
+    // If the ui settings status isn't green, we shouldn't be attempting to get
+    // user settings, since we can't be sure that all the necessary conditions
+    // (e.g. elasticsearch being available) are met.
+    if (status.state !== 'green') {
+      return hydrateUserSettings({});
+    }
+
+    const params = getClientSettings(config);
+    const allowedErrors = [errors[404], errors[403], errors.NoConnections];
+    if (ignore401Errors) allowedErrors.push(errors[401]);
+
+    return Bluebird.resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
+      .catch(...allowedErrors, err => ({}))
+      .then(resp => resp._source || {})
+      .then(source => hydrateUserSettings(source));
   }
 
-  function getUserProvided() {
-    const { client } = server.plugins.elasticsearch;
-    const clientSettings = getClientSettings(config);
-    return client
-      .get({ ...clientSettings })
-      .then(res => res._source)
-      .catch(partial(userSettingsNotFound, clientSettings.id))
-      .then(user => hydrateUserSettings(user));
-  }
-
-  function setMany(changes) {
-    const { client } = server.plugins.elasticsearch;
-    const clientSettings = getClientSettings(config);
-    return client
-      .update({
-        ...clientSettings,
-        body: { doc: changes }
-      })
+  async function setMany(req, changes) {
+    assertRequest(req);
+    const { callWithRequest } = server.plugins.elasticsearch;
+    const clientParams = {
+      ...getClientSettings(config),
+      body: { doc: changes }
+    };
+    return callWithRequest(req, 'update', clientParams)
       .then(() => ({}));
   }
 
-  function set(key, value) {
-    return setMany({ [key]: value });
+  async function set(req, key, value) {
+    assertRequest(req);
+    return setMany(req, { [key]: value });
   }
 
-  function remove(key) {
-    return set(key, null);
+  async function remove(req, key) {
+    assertRequest(req);
+    return set(req, key, null);
   }
 
-  function removeMany(keys) {
+  async function removeMany(req, keys) {
+    assertRequest(req);
     const changes = {};
     keys.forEach(key => {
       changes[key] = null;
     });
-    return setMany(changes);
+    return setMany(req, changes);
   }
 
   function mirrorEsStatus() {
     const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+
+    if (!esStatus) {
+      status.red('UI Settings requires the elasticsearch plugin');
+      return;
+    }
 
     copyStatus();
     esStatus.on('change', copyStatus);
@@ -126,4 +150,14 @@ function getClientSettings(config) {
   const id = config.get('pkg.version');
   const type = 'config';
   return { index, type, id };
+}
+
+function assertRequest(req) {
+  if (
+    typeof req === 'object' &&
+    typeof req.path === 'string' &&
+    typeof req.headers === 'object'
+  ) return;
+
+  throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
 }

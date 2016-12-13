@@ -32,17 +32,17 @@ export default class SettingsPage {
 
   getAdvancedSettings(propertyName) {
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
   setAdvancedSettings(propertyName, propertyValue) {
-    var self = this;
+    const self = this;
 
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -53,21 +53,21 @@ export default class SettingsPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(function setAdvancedSettingsClickSaveButton() {
-      return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+      return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton')
       .click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
   getAdvancedSettings(propertyName) {
-    var self = this;
+    const self = this;
     PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
   }
 
@@ -105,7 +105,7 @@ export default class SettingsPage {
       return this.getTimeFieldNameField().click();
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.try(() => {
@@ -134,7 +134,7 @@ export default class SettingsPage {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-scope').click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -167,13 +167,13 @@ export default class SettingsPage {
           if (chartString === columnName) {
             return chart.click()
             .then(function () {
-              return PageObjects.header.getSpinnerDone();
+              return PageObjects.header.isGlobalLoadingIndicatorHidden();
             });
           }
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -188,8 +188,8 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    var self = this;
-    var selector = 'li.kbn-management-tab.active a small';
+    const self = this;
+    const selector = 'li.kbn-management-tab.active a small';
 
     return PageObjects.common.try(function () {
       return self.remote.setFindTimeout(defaultFindTimeout / 10)
@@ -202,12 +202,12 @@ export default class SettingsPage {
   }
 
   getPageSize() {
-    var selectedItemLabel = '';
+    let selectedItemLabel = '';
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        var thisChart = chart;
+        const thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -219,7 +219,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {
@@ -240,7 +240,7 @@ export default class SettingsPage {
       (pageNum + 1) + ') a.ng-binding')
     .click()
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -262,7 +262,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -279,7 +279,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -288,7 +288,7 @@ export default class SettingsPage {
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -297,7 +297,7 @@ export default class SettingsPage {
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
     .click()
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
@@ -315,7 +315,7 @@ export default class SettingsPage {
         });
     })
     .then(() => {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     })
     .then(() => {
       return PageObjects.common.try(() => {
@@ -334,7 +334,7 @@ export default class SettingsPage {
   }
 
   removeIndexPattern() {
-    var alertText;
+    let alertText;
 
     return PageObjects.common.try(() => {
       PageObjects.common.debug('click delete index pattern button');

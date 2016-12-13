@@ -117,86 +117,8 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return an object', function () {
-      const rowIn = new Data(rowsData, {}, persistedState);
+      const rowIn = new Data(rowsData, persistedState);
       expect(_.isObject(rowIn)).to.be(true);
-    });
-
-    it('should update label in series data', function () {
-      const seriesDataWithoutLabelInSeries = {
-        'label': '',
-        'series': [
-          {
-            'label': '',
-            'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-          }
-        ],
-        'yAxisLabel': 'customLabel'
-      };
-      const modifiedData = new Data(seriesDataWithoutLabelInSeries, {}, persistedState);
-      expect(modifiedData.data.series[0].label).to.be('customLabel');
-    });
-
-    it('should update label in row data', function () {
-      const seriesDataWithoutLabelInRow = {
-        'rows': [
-          {
-            'label': '',
-            'series': [
-              {
-                'label': '',
-                'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-              }
-            ],
-            'yAxisLabel': 'customLabel'
-          },
-          {
-            'label': '',
-            'series': [
-              {
-                'label': '',
-                'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-              }
-            ],
-            'yAxisLabel': 'customLabel'
-          }
-        ],
-      };
-
-      const modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
-      expect(modifiedData.data.rows[0].series[0].label).to.be('customLabel');
-      expect(modifiedData.data.rows[1].series[0].label).to.be('customLabel');
-    });
-
-    it('should update label in column data', function () {
-      const seriesDataWithoutLabelInRow = {
-        'columns': [
-          {
-            'label': '',
-            'series': [
-              {
-                'label': '',
-                'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-              }
-            ],
-            'yAxisLabel': 'customLabel'
-          },
-          {
-            'label': '',
-            'series': [
-              {
-                'label': '',
-                'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-              }
-            ],
-            'yAxisLabel': 'customLabel'
-          }
-        ],
-        'yAxisLabel': 'customLabel'
-      };
-
-      const modifiedData = new Data(seriesDataWithoutLabelInRow, {}, persistedState);
-      expect(modifiedData.data.columns[0].series[0].label).to.be('customLabel');
-      expect(modifiedData.data.columns[1].series[0].label).to.be('customLabel');
     });
   });
 
@@ -214,7 +136,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(pieData, {}, persistedState);
+      data = new Data(pieData, persistedState);
     });
 
     it('should remove zero values', function () {
@@ -232,9 +154,9 @@ describe('Vislib Data Class Test Suite', function () {
     let colOut;
 
     beforeEach(function () {
-      serIn = new Data(seriesData, {}, persistedState);
-      rowIn = new Data(rowsData, {}, persistedState);
-      colIn = new Data(colsData, {}, persistedState);
+      serIn = new Data(seriesData, persistedState);
+      rowIn = new Data(rowsData, persistedState);
+      colIn = new Data(colsData, persistedState);
       serOut = serIn.flatten();
       rowOut = rowIn.flatten();
       colOut = colIn.flatten();
@@ -250,7 +172,7 @@ describe('Vislib Data Class Test Suite', function () {
 
     function testLength(inputData) {
       return function () {
-        const data = new Data(inputData, {}, persistedState);
+        const data = new Data(inputData, persistedState);
         const len = _.reduce(data.chartData(), function (sum, chart) {
           return sum + chart.series.reduce(function (sum, series) {
             return sum + series.values.length;
@@ -260,80 +182,6 @@ describe('Vislib Data Class Test Suite', function () {
         expect(data.flatten()).to.have.length(len);
       };
     }
-  });
-
-  describe('getYMin method', function () {
-    let visData;
-    let visDataNeg;
-    let visDataStacked;
-    const minValue = 4;
-    const minValueNeg = -41;
-    const minValueStacked = 15;
-
-    beforeEach(function () {
-      visData = new Data(dataSeries, {}, persistedState);
-      visDataNeg = new Data(dataSeriesNeg, {}, persistedState);
-      visDataStacked = new Data(dataStacked, { type: 'histogram' }, persistedState);
-    });
-
-    // The first value in the time series is less than the min date in the
-    // date range. It also has the largest y value. This value should be excluded
-    // when calculating the Y max value since it falls outside of the range.
-    it('should return the Y domain min value', function () {
-      expect(visData.getYMin()).to.be(minValue);
-      expect(visDataNeg.getYMin()).to.be(minValueNeg);
-      expect(visDataStacked.getYMin()).to.be(minValueStacked);
-    });
-
-    it('should have a minimum date value that is greater than the max value within the date range', function () {
-      const series = _.pluck(visData.chartData(), 'series');
-      const stackedSeries = _.pluck(visDataStacked.chartData(), 'series');
-      expect(_.min(series.values, function (d) { return d.x; })).to.be.greaterThan(minValue);
-      expect(_.min(stackedSeries.values, function (d) { return d.x; })).to.be.greaterThan(minValueStacked);
-    });
-
-    it('allows passing a value getter for manipulating the values considered', function () {
-      const realMin = visData.getYMin();
-      const multiplier = 13.2;
-      expect(visData.getYMin(function (d) { return d.y * multiplier; })).to.be(realMin * multiplier);
-    });
-  });
-
-  describe('getYMax method', function () {
-    let visData;
-    let visDataNeg;
-    let visDataStacked;
-    const maxValue = 41;
-    const maxValueNeg = -4;
-    const maxValueStacked = 115;
-
-    beforeEach(function () {
-      visData = new Data(dataSeries, {}, persistedState);
-      visDataNeg = new Data(dataSeriesNeg, {}, persistedState);
-      visDataStacked = new Data(dataStacked, { type: 'histogram' }, persistedState);
-    });
-
-    // The first value in the time series is less than the min date in the
-    // date range. It also has the largest y value. This value should be excluded
-    // when calculating the Y max value since it falls outside of the range.
-    it('should return the Y domain min value', function () {
-      expect(visData.getYMax()).to.be(maxValue);
-      expect(visDataNeg.getYMax()).to.be(maxValueNeg);
-      expect(visDataStacked.getYMax()).to.be(maxValueStacked);
-    });
-
-    it('should have a minimum date value that is greater than the max value within the date range', function () {
-      const series = _.pluck(visData.chartData(), 'series');
-      const stackedSeries = _.pluck(visDataStacked.chartData(), 'series');
-      expect(_.min(series, function (d) { return d.x; })).to.be.greaterThan(maxValue);
-      expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(maxValueStacked);
-    });
-
-    it('allows passing a value getter for manipulating the values considered', function () {
-      const realMax = visData.getYMax();
-      const multiplier = 13.2;
-      expect(visData.getYMax(function (d) { return d.y * multiplier; })).to.be(realMax * multiplier);
-    });
   });
 
   describe('geohashGrid methods', function () {
@@ -376,7 +224,7 @@ describe('Vislib Data Class Test Suite', function () {
     };
 
     beforeEach(function () {
-      data = new Data(geohashGridData, {}, persistedState);
+      data = new Data(geohashGridData, persistedState);
     });
 
     describe('getVisData', function () {
@@ -397,7 +245,7 @@ describe('Vislib Data Class Test Suite', function () {
 
   describe('null value check', function () {
     it('should return false', function () {
-      const data = new Data(rowsData, {}, persistedState);
+      const data = new Data(rowsData, persistedState);
       expect(data.hasNullValues()).to.be(false);
     });
 
@@ -413,7 +261,7 @@ describe('Vislib Data Class Test Suite', function () {
         ]
       });
 
-      const data = new Data(nullRowData, {}, persistedState);
+      const data = new Data(nullRowData, persistedState);
       expect(data.hasNullValues()).to.be(true);
     });
   });

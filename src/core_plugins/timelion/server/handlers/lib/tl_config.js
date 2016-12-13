@@ -1,11 +1,11 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-var buildTarget = require('../../lib/build_target.js');
+const buildTarget = require('../../lib/build_target.js');
 
 module.exports = function (setup) {
-  var targetSeries;
+  let targetSeries;
 
-  var tlConfig = {
+  let tlConfig = {
     getTargetSeries: function () {
       return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
         return [bucket, null];

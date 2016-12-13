@@ -9,6 +9,8 @@ import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 import AggResponseIndexProvider from 'ui/agg_response/index';
+import noDigestPromises from 'test_utils/no_digest_promises';
+
 describe('renderbot', function exportWrapper() {
   let vislib;
   let Vis;
@@ -16,7 +18,7 @@ describe('renderbot', function exportWrapper() {
   let VislibRenderbot;
   let persistedState;
   let normalizeChartData;
-  let mockVisType = {
+  const mockVisType = {
     name: 'test'
   };
 
@@ -36,8 +38,8 @@ describe('renderbot', function exportWrapper() {
   beforeEach(init);
 
   describe('creation', function () {
-    let vis = { type: mockVisType };
-    let $el = 'element';
+    const vis = { type: mockVisType };
+    const $el = 'element';
     let createVisStub;
     let renderbot;
 
@@ -56,7 +58,7 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('_createVis', function () {
-    let vis = {
+    const vis = {
       type: mockVisType,
       listeners: {
         'test': _.noop,
@@ -64,7 +66,7 @@ describe('renderbot', function exportWrapper() {
         'test3': _.noop
       }
     };
-    let $el = $('<div>testing</div>');
+    const $el = $('<div>testing</div>');
     let listenerSpy;
     let renderbot;
 
@@ -82,23 +84,20 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('param update', function () {
-    let params = { one: 'fish', two: 'fish' };
-    let vis = {
+    const $el = $('<div>testing</div>');
+    const params = { el: $el[0], one: 'fish', two: 'fish' };
+    const vis = {
       type: _.defaults({
         params: {
           defaults: params
         }
       }, mockVisType)
     };
-    let $el = $('<div>testing</div>');
     let createVisSpy;
-    let getParamsStub;
     let renderbot;
 
     beforeEach(function () {
       createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
-      // getParamsStub = sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _identity);
-      // getParamsStub.returns(params);
       renderbot = new VislibRenderbot(vis, $el, persistedState);
     });
 
@@ -119,20 +118,22 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('render', function () {
-    let vis = { type: mockVisType, isHierarchical: _.constant(false) };
-    let $el = $('<div>testing</div>');
-    let stubs = {};
+    noDigestPromises.activateForSuite();
+
+    const vis = { type: mockVisType, isHierarchical: _.constant(false) };
+    const $el = $('<div>testing</div>');
+    const stubs = {};
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
     });
 
     it('should use #buildChartData', function () {
-      let renderbot = new VislibRenderbot(vis, $el, persistedState);
+      const renderbot = new VislibRenderbot(vis, $el, persistedState);
 
-      let football = {};
-      let buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
-      let renderStub = sinon.stub(renderbot.vislibVis, 'render');
+      const football = {};
+      const buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
+      const renderStub = sinon.stub(renderbot.vislibVis, 'render');
 
       return renderbot.render('flat data', persistedState).then(() => {
         expect(renderStub.callCount).to.be(1);
@@ -143,7 +144,7 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('destroy', function () {
-    let vis = {
+    const vis = {
       type: mockVisType,
       listeners: {
         'test': _.noop,
@@ -151,7 +152,7 @@ describe('renderbot', function exportWrapper() {
         'test3': _.noop
       }
     };
-    let $el = $('<div>testing</div>');
+    const $el = $('<div>testing</div>');
     let listenerSpy;
     let renderbot;
 
@@ -168,7 +169,7 @@ describe('renderbot', function exportWrapper() {
     });
 
     it('should destroy the vis', function () {
-      let spy = sinon.spy(renderbot.vislibVis, 'destroy');
+      const spy = sinon.spy(renderbot.vislibVis, 'destroy');
       renderbot.destroy();
       expect(spy.callCount).to.be(1);
     });

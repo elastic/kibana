@@ -9,8 +9,8 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
-  var fromTime = '2015-09-19 06:31:44.000';
-  var toTime = '2015-09-23 18:31:44.000';
+  const fromTime = '2015-09-19 06:31:44.000';
+  const toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
     PageObjects.common.debug('navigateToApp visualize');
@@ -47,12 +47,12 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.getSpinnerDone();
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   });
 
   bdd.describe('data table', function indexPatternCreation() {
-    var vizName1 = 'Visualization DataTable';
+    const vizName1 = 'Visualization DataTable';
 
     bdd.it('should be able to save and load', function () {
       return PageObjects.visualize.saveVisualization(vizName1)
@@ -72,16 +72,19 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data, take screenshot', function () {
-      var chartHeight = 0;
-      var expectedChartData = [ '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
-      '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
+      const chartHeight = 0;
+      const expectedChartData = [
+        '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
+        '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
       ];
 
-      return PageObjects.visualize.getDataTableData()
-      .then(function showData(data) {
-        PageObjects.common.debug(data.split('\n'));
-        PageObjects.common.saveScreenshot('Visualize-data-table');
-        expect(data.split('\n')).to.eql(expectedChartData);
+      return PageObjects.common.try(function () {
+        return PageObjects.visualize.getDataTableData()
+        .then(function showData(data) {
+          PageObjects.common.debug(data.split('\n'));
+          PageObjects.common.saveScreenshot('Visualize-data-table');
+          expect(data.split('\n')).to.eql(expectedChartData);
+        });
       });
     });
 

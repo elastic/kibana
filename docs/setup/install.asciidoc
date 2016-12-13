@@ -1,0 +1,52 @@
+[[install]]
+== Installing Kibana
+
+Kibana is provided in the following package formats:
+
+[horizontal]
+`tar.gz`/`zip`::
+
+The `tar.gz` packages are provided for installation on Linux and Darwin and are
+the easiest choice for getting started with Kibana.
++
+The `zip` package is the only supported package for Windows.
++
+<<targz>> or <<windows>>
+
+`deb`::
+
+The `deb` package is suitable for Debian, Ubuntu, and other Debian-based
+systems.  Debian packages may be downloaded from the Elastic website or from
+our Debian repository.
++
+<<deb>>
+
+`rpm`::
+
+The `rpm` package is suitable for installation on Red Hat, Centos, SLES,
+OpenSuSE and other RPM-based systems.  RPMs may be downloaded from the
+Elastic website or from our RPM repository.
++
+<<rpm>>
+
+`docker`::
+
+An image is available for running Kibana as a Docker container. It ships
+with https://www.elastic.co/products/x-pack[X-Pack] pre-installed and is
+available from the Elastic
+Docker registry.
++
+<<docker>>
+
+IMPORTANT: If your Elasticsearch installation is protected by {xpack-ref}xpack-security.html[X-Pack Security]
+see {xpack-ref}kibana.html[Using Kibana with X-Pack Security] for additional setup
+instructions.
+
+
+include::install/targz.asciidoc[]
+
+include::install/deb.asciidoc[]
+
+include::install/rpm.asciidoc[]
+
+include::install/windows.asciidoc[]

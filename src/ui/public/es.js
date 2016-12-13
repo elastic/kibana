@@ -1,3 +1,10 @@
+/**
+ * @name es
+ *
+ * @description This is the result of calling esFactory. esFactory is exposed by the
+ * elasticsearch.angular.js client.
+ */
+
 import 'elasticsearch-browser';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
