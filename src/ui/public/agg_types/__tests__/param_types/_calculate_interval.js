@@ -21,15 +21,15 @@ describe('calculateInterval()', function () {
     calculateInterval = Private(AggTypesParamTypesCalculateIntervalProvider);
   }));
 
-  let testInterval = function (option, expected) {
-    let msg = 'should return ' + JSON.stringify(expected) + ' for ' + option;
+  const testInterval = function (option, expected) {
+    const msg = 'should return ' + JSON.stringify(expected) + ' for ' + option;
     it(msg, function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: option } } ]
       });
-      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
-      let interval = calculateInterval(aggConfig);
+      const aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      const interval = calculateInterval(aggConfig);
       _.each(expected, function (val, key) {
         expect(interval).to.have.property(key, val);
       });

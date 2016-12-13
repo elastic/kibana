@@ -1,8 +1,8 @@
-var reduce = require('../lib/reduce.js');
-var alter = require('../lib/alter.js');
+const reduce = require('../lib/reduce.js');
+const alter = require('../lib/alter.js');
 
 
-var Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('precision', {
   args: [
     {

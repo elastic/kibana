@@ -8,15 +8,15 @@ uiModules
 .get('kibana')
 .directive('collapsibleSidebar', function () {
   // simply a list of all of all of angulars .col-md-* classes except 12
-  let listOfWidthClasses = _.times(11, function (i) { return 'col-md-' + i; });
+  const listOfWidthClasses = _.times(11, function (i) { return 'col-md-' + i; });
 
   return {
     restrict: 'C',
     link: function ($scope, $elem) {
-      let $collapser = $('<div class="sidebar-collapser"><div class="chevron-cont"></div></div>');
-      let $siblings = $elem.siblings();
+      const $collapser = $('<div class="sidebar-collapser"><div class="chevron-cont"></div></div>');
+      const $siblings = $elem.siblings();
 
-      let siblingsClass = listOfWidthClasses.reduce(function (prev, className) {
+      const siblingsClass = listOfWidthClasses.reduce(function (prev, className) {
         if (prev) return prev;
         return $siblings.hasClass(className) && className;
       }, false);

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 export default function GetQueryFromUser(es, Private) {
-  let decorateQuery = Private(DecorateQueryProvider);
+  const decorateQuery = Private(DecorateQueryProvider);
 
   /**
    * Take text from the user and make it into a query object
@@ -13,7 +13,7 @@ export default function GetQueryFromUser(es, Private) {
       return decorateQuery({query_string: {query: text}});
     }
 
-    let matchAll = getQueryStringQuery('*');
+    const matchAll = getQueryStringQuery('*');
 
     // If we get an empty object, treat it as a *
     if (_.isObject(text)) {

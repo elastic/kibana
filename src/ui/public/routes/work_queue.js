@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
 function WorkQueue() {
-  let q = this;
+  const q = this;
 
-  let work = [];
-  let fullDefers = [];
+  const work = [];
+  const fullDefers = [];
 
   q.limit = 0;
   Object.defineProperty(q, 'length', {
@@ -13,13 +13,13 @@ function WorkQueue() {
     }
   });
 
-  let resolve = function (defers) {
+  const resolve = function (defers) {
     return defers.splice(0).map(function (defer) {
       return defer.resolve();
     });
   };
 
-  let checkIfFull = function () {
+  const checkIfFull = function () {
     if (work.length >= q.limit && fullDefers.length) {
       resolve(fullDefers);
     }
@@ -31,7 +31,7 @@ function WorkQueue() {
   };
 
   q.doWork = function () {
-    let resps = resolve(work);
+    const resps = resolve(work);
     checkIfFull();
     return resps;
   };

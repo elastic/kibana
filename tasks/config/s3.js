@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  var { config } = grunt;
+  const { config } = grunt;
 
   return {
     release: {

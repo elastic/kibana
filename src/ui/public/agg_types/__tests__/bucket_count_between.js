@@ -32,7 +32,7 @@ describe('bucketCountBetween util', function () {
   }));
 
   it('returns a positive number when a is before b', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -46,14 +46,14 @@ describe('bucketCountBetween util', function () {
       ]
     });
 
-    let a = vis.aggs.byTypeName.date_histogram[0];
-    let b = vis.aggs.byTypeName.terms[0];
-    let count = bucketCountBetween(a, b);
+    const a = vis.aggs.byTypeName.date_histogram[0];
+    const b = vis.aggs.byTypeName.terms[0];
+    const count = bucketCountBetween(a, b);
     expect(isNegative(count)).to.be(false);
   });
 
   it('returns a negative number when a is after b', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -67,14 +67,14 @@ describe('bucketCountBetween util', function () {
       ]
     });
 
-    let a = vis.aggs.byTypeName.terms[0];
-    let b = vis.aggs.byTypeName.date_histogram[0];
-    let count = bucketCountBetween(a, b);
+    const a = vis.aggs.byTypeName.terms[0];
+    const b = vis.aggs.byTypeName.date_histogram[0];
+    const count = bucketCountBetween(a, b);
     expect(isNegative(count)).to.be(true);
   });
 
   it('returns 0 when there are no buckets between a and b', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -88,13 +88,13 @@ describe('bucketCountBetween util', function () {
       ]
     });
 
-    let a = vis.aggs.byTypeName.date_histogram[0];
-    let b = vis.aggs.byTypeName.terms[0];
+    const a = vis.aggs.byTypeName.date_histogram[0];
+    const b = vis.aggs.byTypeName.terms[0];
     expect(bucketCountBetween(a, b)).to.be(0);
   });
 
   it('returns null when b is not in the aggs', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -104,8 +104,8 @@ describe('bucketCountBetween util', function () {
       ]
     });
 
-    let a = vis.aggs.byTypeName.date_histogram[0];
-    let b = new AggConfig(vis, {
+    const a = vis.aggs.byTypeName.date_histogram[0];
+    const b = new AggConfig(vis, {
       type: 'terms',
       schema: 'segment'
     });
@@ -114,7 +114,7 @@ describe('bucketCountBetween util', function () {
   });
 
   it('returns null when a is not in the aggs', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -124,27 +124,27 @@ describe('bucketCountBetween util', function () {
       ]
     });
 
-    let a = new AggConfig(vis, {
+    const a = new AggConfig(vis, {
       type: 'terms',
       schema: 'segment'
     });
-    let b = vis.aggs.byTypeName.date_histogram[0];
+    const b = vis.aggs.byTypeName.date_histogram[0];
 
     expect(bucketCountBetween(a, b)).to.be(null);
   });
 
   it('returns null when a and b are not in the aggs', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: []
     });
 
-    let a = new AggConfig(vis, {
+    const a = new AggConfig(vis, {
       type: 'terms',
       schema: 'segment'
     });
 
-    let b = new AggConfig(vis, {
+    const b = new AggConfig(vis, {
       type: 'date_histogram',
       schema: 'segment'
     });
@@ -154,14 +154,14 @@ describe('bucketCountBetween util', function () {
 
   function countTest(pre, post) {
     return function () {
-      let schemas = visTypes.byName.histogram.schemas.buckets;
+      const schemas = visTypes.byName.histogram.schemas.buckets;
 
       // slow for this test is actually somewhere around 1/2 a sec
       this.slow(500);
 
       function randBucketAggForVis(vis) {
-        let schema = _.sample(schemas);
-        let aggType = _.sample(aggTypes.byType.buckets);
+        const schema = _.sample(schemas);
+        const aggType = _.sample(aggTypes.byType.buckets);
 
         return new AggConfig(vis, {
           schema: schema,
@@ -170,18 +170,18 @@ describe('bucketCountBetween util', function () {
       }
 
       _.times(50, function (n) {
-        let vis = new Vis(indexPattern, {
+        const vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: []
         });
 
-        let randBucketAgg = _.partial(randBucketAggForVis, vis);
+        const randBucketAgg = _.partial(randBucketAggForVis, vis);
 
-        let a = randBucketAgg();
-        let b = randBucketAgg();
+        const a = randBucketAgg();
+        const b = randBucketAgg();
 
         // create n aggs between a and b
-        let aggs = [];
+        const aggs = [];
         aggs.fill = function (n) {
           for (let i = 0; i < n; i++) {
             aggs.push(randBucketAgg());

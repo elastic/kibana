@@ -71,7 +71,7 @@ dateHistogramArray.forEach(function (data, i) {
 
     describe('layout Method', function () {
       beforeEach(function () {
-        let visConfig = new VisConfig({
+        const visConfig = new VisConfig({
           el: vis.el,
           type: 'histogram'
         }, data, persistedState);

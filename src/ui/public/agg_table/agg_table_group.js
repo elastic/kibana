@@ -28,10 +28,10 @@ uiModules
 
             if (!group || !group.tables.length) return;
 
-            let firstTable = group.tables[0];
-            let params = firstTable.aggConfig && firstTable.aggConfig.params;
+            const firstTable = group.tables[0];
+            const params = firstTable.aggConfig && firstTable.aggConfig.params;
             // render groups that have Table children as if they were rows, because iteration is cleaner
-            let childLayout = (params && !params.row) ? 'columns' : 'rows';
+            const childLayout = (params && !params.row) ? 'columns' : 'rows';
 
             $scope[childLayout] = group.tables;
           });

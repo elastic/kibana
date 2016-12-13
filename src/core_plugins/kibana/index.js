@@ -39,7 +39,7 @@ module.exports = function (kibana) {
         ],
 
         injectVars: function (server, options) {
-          let config = server.config();
+          const config = server.config();
           return {
             kbnDefaultAppId: config.get('kibana.defaultAppId'),
             tilemap: config.get('tilemap')

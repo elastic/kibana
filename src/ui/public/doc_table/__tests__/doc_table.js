@@ -23,7 +23,7 @@ let $timeout;
 
 let searchSource;
 
-let init = function ($elem, props) {
+const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
@@ -41,7 +41,7 @@ let init = function ($elem, props) {
   });
 };
 
-let destroy = function () {
+const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };

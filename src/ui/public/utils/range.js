@@ -13,7 +13,7 @@ import _ from 'lodash';
  *
  * @type {String}
  */
-let _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
+const _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
 
 /**
  * Regexp for the interval notation
@@ -25,11 +25,11 @@ let _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
  *
  * @type {RegExp}
  */
-let RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
+const RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
 
 function parse(input) {
 
-  let match = String(input).match(RANGE_RE);
+  const match = String(input).match(RANGE_RE);
   if (!match) {
     throw new TypeError('expected input to be in interval notation eg. (100, 200]');
   }
@@ -43,7 +43,7 @@ function parse(input) {
 }
 
 function Range(/* minIncl, min, max, maxIncl */) {
-  let args = _.toArray(arguments);
+  const args = _.toArray(arguments);
   if (args[1] > args[2]) args.reverse();
 
   this.minInclusive = args[0];
