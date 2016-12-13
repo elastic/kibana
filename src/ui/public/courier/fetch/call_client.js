@@ -95,7 +95,7 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
       }
 
       const id = strategy.id;
-      const client = (id && ~id.indexOf('admin')) ? esAdmin : es;
+      const client = (id && id.includes('admin')) ? esAdmin : es;
       return (esPromise = client[strategy.clientMethod]({ body }));
     })
     .then(function (clientResp) {
