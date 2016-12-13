@@ -15,7 +15,7 @@ import 'ui/storage';
 
 import DocSendToEsProvider from './_doc_send_to_es';
 import AbstractDataSourceProvider from './_abstract';
-import DocRequestProvider from '../fetch/request/doc';
+import DocRequestProvider from '../fetch/request/_abstract_doc';
 
 export default function AbstractDocSourceFactory(Private, Promise, es, sessionStorage) {
   let sendToEs = Private(DocSendToEsProvider);

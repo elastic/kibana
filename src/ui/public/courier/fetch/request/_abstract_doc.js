@@ -4,7 +4,7 @@ export default function DocRequestProvider(Private) {
 
   const AbstractRequest = Private(AbstractRequestProvider);
 
-  class DocRequest extends AbstractRequest {
+  class AbstractDocRequest extends AbstractRequest {
     constructor(...args) {
       super(...args);
 
@@ -36,5 +36,5 @@ export default function DocRequestProvider(Private) {
     }
   }
 
-  return DocRequest;
+  return AbstractDocRequest;
 };
