@@ -4,11 +4,11 @@ import {
 } from './';
 
 export default (function () {
-  let util = require('util');
-  let path = require('path');
-  let url = require('url');
-  let resolve = require('path').resolve;
-  let Elasticdump = require('elasticdump').elasticdump;
+  const util = require('util');
+  const path = require('path');
+  const url = require('url');
+  const resolve = require('path').resolve;
+  const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {
   }
@@ -22,7 +22,7 @@ export default (function () {
     */
     elasticdumpModule: function elasticdumpModule(myinput, myoutput, index, mytype) {
 
-      let options = {
+      const options = {
         limit:           100,
         offset:          0,
         debug:           false,
@@ -46,12 +46,12 @@ export default (function () {
         skip:            null,
         toLog:           null,
       };
-      let dumper = new Elasticdump(options.input, options.output, options);
+      const dumper = new Elasticdump(options.input, options.output, options);
 
       dumper.on('log',   function (message) { Log.debug(message); });
       dumper.on('error', function (error)   { Log.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
-      let promise = new Promise(function (resolve, reject) {
+      const promise = new Promise(function (resolve, reject) {
         dumper.dump(function (error, totalWrites) {
           if (error) {
             Log.debug('THERE WAS AN ERROR :-(');
@@ -72,7 +72,7 @@ export default (function () {
     ** Fails if the files already exist, so consider appending a timestamp to filename.
     */
     elasticDump: function elasticDump(index, file) {
-      let self = this;
+      const self = this;
       Log.debug('Dumping mapping from ' + url.format(config.servers.elasticsearch) + '/' + index
         + ' to (' + file + '.mapping.json)');
       return this.elasticdumpModule(url.format(config.servers.elasticsearch),
@@ -94,7 +94,7 @@ export default (function () {
     elasticLoad: function elasticLoad(file, index) {
       // TODO: should we have a flag to delete the index first?
       // or use scenarioManager.unload(index) ? <<- currently this
-      let self = this;
+      const self = this;
       Log.debug('Loading mapping (test/fixtures/dump_data/' + file + '.mapping.json) into '
         + url.format(config.servers.elasticsearch) + '/' + index);
       return this.elasticdumpModule('test/fixtures/dump_data/' + file + '.mapping.json',

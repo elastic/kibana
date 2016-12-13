@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 // Upsampling and down sampling of non-cummulative sets
 // Good: min, max, average
@@ -9,12 +9,12 @@ module.exports = function (dataTuples, targetTuples) {
   // Phase 1: Downsample
   // We nessecarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
-  let resultTimes = _.pluck(targetTuples, 0);
-  let dataTuplesQueue = _.clone(dataTuples);
-  let resultValues = _.map(targetTuples, function (bucket) {
-    let time = bucket[0];
+  const resultTimes = _.pluck(targetTuples, 0);
+  const dataTuplesQueue = _.clone(dataTuples);
+  const resultValues = _.map(targetTuples, function (bucket) {
+    const time = bucket[0];
     let i = 0;
-    let avgSet = [];
+    const avgSet = [];
 
     // This is naive, it doesn't consider where the line is going next,
     // It simply writes the point and moves on once it hits <= time.
@@ -27,7 +27,7 @@ module.exports = function (dataTuples, targetTuples) {
 
     dataTuplesQueue.splice(0, i);
 
-    let sum = _.reduce(avgSet, function (sum, num) { return sum + num; }, 0);
+    const sum = _.reduce(avgSet, function (sum, num) { return sum + num; }, 0);
 
     return avgSet.length ? (sum / avgSet.length) : NaN;
   });
@@ -35,14 +35,14 @@ module.exports = function (dataTuples, targetTuples) {
   // Phase 2: Upsample if needed
   // If we have any NaNs we are probably resampling from a big interval to a small one (eg, 1M as 1d)
   // So look for the missing stuff in the array, and smooth it out
-  let naNIndex = _.findIndex(resultValues, function (val) {
+  const naNIndex = _.findIndex(resultValues, function (val) {
     return isNaN(val);
   });
 
   if (naNIndex > -1) {
     let i = 0;
     let naNCount = 0;
-    let filledValues = [];
+    const filledValues = [];
     let previousRealNumber;
     let stepSize;
     while (i < resultValues.length) {
@@ -70,6 +70,6 @@ module.exports = function (dataTuples, targetTuples) {
 
   }
 
-  let resultTuples = _.zip(resultTimes, resultValues);
+  const resultTuples = _.zip(resultTimes, resultValues);
   return resultTuples;
 };

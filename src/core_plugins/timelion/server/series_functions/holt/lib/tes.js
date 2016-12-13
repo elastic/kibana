@@ -8,13 +8,13 @@ Hourly data might have:
  - Annual seasonality (frequency=24×365.25=8766)
 */
 
-let _ = require('lodash');
+const _ = require('lodash');
 
 // Uh, I don't think this will work when you have nulls in the initial seasonal components
 function initSeasonalComponents(samplePoints, seasonLength) {
-  let sampledSeasonCount = samplePoints.length / seasonLength;
+  const sampledSeasonCount = samplePoints.length / seasonLength;
   let currentSeason = [];
-  let seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
+  const seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
     currentSeason.push(point);
       // If this is the end of the season, add it to the result;
     if (i % seasonLength === seasonLength - 1) {
@@ -25,7 +25,7 @@ function initSeasonalComponents(samplePoints, seasonLength) {
     return result;
   }, []);
 
-  let seasonals = _.times(seasonLength, (i) => {
+  const seasonals = _.times(seasonLength, (i) => {
     let sumOfValsOverAvg = 0;
     _.times(sampledSeasonCount, (j) => {
       sumOfValsOverAvg += samplePoints[seasonLength * j + i] - seasonalAverages[j];
@@ -49,15 +49,15 @@ function initTrend(samplePoints, seasonLength) {
 
 module.exports = function tes(points, alpha, beta, gamma, seasonLength, seasonsToSample) {
 
-  let samplePoints = points.slice(0, seasonLength * seasonsToSample);
-  let seasonals = initSeasonalComponents(samplePoints, seasonLength);
+  const samplePoints = points.slice(0, seasonLength * seasonsToSample);
+  const seasonals = initSeasonalComponents(samplePoints, seasonLength);
   let level;
   let prevLevel;
   let trend;
   let prevTrend;
   let unknownCount = 0;
 
-  let result = _.map(points, (point, i) => {
+  const result = _.map(points, (point, i) => {
     const seasonalPosition = i % seasonLength;
     // For the first samplePoints.length we use the actual points
     // After that we switch to the forecast

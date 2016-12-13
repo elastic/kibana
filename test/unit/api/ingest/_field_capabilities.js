@@ -1,7 +1,7 @@
 define(function (require) {
-  let Promise = require('bluebird');
-  let _ = require('intern/dojo/node!lodash');
-  let expect = require('intern/dojo/node!expect.js');
+  const Promise = require('bluebird');
+  const _ = require('intern/dojo/node!lodash');
+  const expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
     bdd.describe('field_capabilities API', function postIngest() {
@@ -45,7 +45,7 @@ define(function (require) {
         return request.get('/kibana/foo-1/field_capabilities')
         .expect(200)
         .then(function (response) {
-          let fields = response.body.fields;
+          const fields = response.body.fields;
           expect(fields.foo).to.eql({searchable: true, aggregatable: false});
           expect(fields['foo.keyword']).to.eql({searchable: true, aggregatable: true});
           expect(fields).to.not.have.property('baz');
@@ -56,7 +56,7 @@ define(function (require) {
         return request.get('/kibana/foo-*/field_capabilities')
         .expect(200)
         .then(function (response) {
-          let fields = response.body.fields;
+          const fields = response.body.fields;
           expect(fields.foo).to.eql({searchable: true, aggregatable: false});
           expect(fields.baz).to.eql({searchable: true, aggregatable: false});
         });
@@ -66,7 +66,7 @@ define(function (require) {
         return request.get('/kibana/foo-1,foo-2/field_capabilities')
         .expect(200)
         .then(function (response) {
-          let fields = response.body.fields;
+          const fields = response.body.fields;
           expect(fields.foo).to.eql({searchable: true, aggregatable: false});
           expect(fields.baz).to.eql({searchable: true, aggregatable: false});
         });

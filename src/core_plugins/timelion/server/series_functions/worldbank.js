@@ -1,7 +1,7 @@
-let _ = require('lodash');
-let fetch = require('node-fetch');
-let moment = require('moment');
-let Datasource = require('../lib/classes/datasource');
+const _ = require('lodash');
+const fetch = require('node-fetch');
+const moment = require('moment');
+const Datasource = require('../lib/classes/datasource');
 
 module.exports = new Datasource ('worldbank', {
   args: [
@@ -22,16 +22,16 @@ module.exports = new Datasource ('worldbank', {
   fn: function worldbank(args, tlConfig) {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
-    let config = _.defaults(args.byName, {
+    const config = _.defaults(args.byName, {
       code: 'countries/wld/indicators/SP.POP.TOTL'
     });
 
-    let time = {
+    const time = {
       min: moment(tlConfig.time.from).format('YYYY'),
       max:  moment(tlConfig.time.to).format('YYYY')
     };
 
-    let URL = 'http://api.worldbank.org/' + config.code +
+    const URL = 'http://api.worldbank.org/' + config.code +
       '?date=' + time.min + ':' + time.max +
       '&format=json' +
       '&per_page=1000';
@@ -39,9 +39,9 @@ module.exports = new Datasource ('worldbank', {
     return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
       let hasData = false;
 
-      let respSeries = resp[1];
+      const respSeries = resp[1];
 
-      let deduped = {};
+      const deduped = {};
       let description;
       _.each (respSeries, function (bucket) {
         if (bucket.value != null) hasData = true;
@@ -49,7 +49,7 @@ module.exports = new Datasource ('worldbank', {
         deduped[bucket.date] = bucket.value;
       });
 
-      let data = _.compact(_.map(deduped, function (val, date) {
+      const data = _.compact(_.map(deduped, function (val, date) {
         // Discard nulls
         if (val == null) return;
         return [moment(date, 'YYYY').valueOf(), Number(val)];

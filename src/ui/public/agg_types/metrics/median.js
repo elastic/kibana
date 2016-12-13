@@ -2,8 +2,8 @@ import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_ag
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 export default function AggTypeMetricMedianProvider(Private) {
 
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let percentiles = Private(AggTypesMetricsPercentilesProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const percentiles = Private(AggTypesMetricsPercentilesProvider);
 
   return new MetricAggType({
     name: 'median',

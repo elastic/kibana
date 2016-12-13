@@ -16,12 +16,12 @@ import PersistedStateProvider from 'ui/persisted_state/persisted_state';
 import EventsProvider from 'ui/events';
 
 export default function VisFactory(Notifier, Private) {
-  let aggTypes = Private(AggTypesIndexProvider);
-  let visTypes = Private(RegistryVisTypesProvider);
-  let AggConfigs = Private(VisAggConfigsProvider);
+  const aggTypes = Private(AggTypesIndexProvider);
+  const visTypes = Private(RegistryVisTypesProvider);
+  const AggConfigs = Private(VisAggConfigsProvider);
   const PersistedState = Private(PersistedStateProvider);
 
-  let notify = new Notifier({
+  const notify = new Notifier({
     location: 'Vis'
   });
 
@@ -45,12 +45,12 @@ export default function VisFactory(Notifier, Private) {
       type = visTypes.byName[type || 'histogram'];
     }
 
-    let schemas = type.schemas;
+    const schemas = type.schemas;
 
     // This was put in place to do migrations at runtime. It's used to support people who had saved
     // visualizations during the 4.0 betas.
-    let aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
-      let schema = schemas.all.byName[oldGroupName];
+    const aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
+      const schema = schemas.all.byName[oldGroupName];
 
       if (!schema) {
         notify.log('unable to match old schema', oldGroupName, 'to a new schema');
@@ -58,12 +58,12 @@ export default function VisFactory(Notifier, Private) {
       }
 
       oldConfigs.forEach(function (oldConfig) {
-        let agg = {
+        const agg = {
           schema: schema.name,
           type: oldConfig.agg
         };
 
-        let aggType = aggTypes.byName[agg.type];
+        const aggType = aggTypes.byName[agg.type];
         if (!aggType) {
           notify.log('unable to find an agg type for old confg', oldConfig);
           return;
@@ -145,7 +145,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
-    let aggs = this.aggs.bySchemaName[schemaName] || [];
+    const aggs = this.aggs.bySchemaName[schemaName] || [];
     return aggs.some(function (agg) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;

@@ -1,4 +1,4 @@
-let panelRegistryProvider = require('plugins/timelion/lib/panel_registry');
+const panelRegistryProvider = require('plugins/timelion/lib/panel_registry');
 
 require('ui/modules')
 .get('apps/timelion', [])
@@ -12,7 +12,7 @@ require('ui/modules')
     },
     link: function ($scope, $elem) {
 
-      let panelRegistry = Private(panelRegistryProvider);
+      const panelRegistry = Private(panelRegistryProvider);
       let panelScope = $scope.$new(true);
 
       function render(seriesList) {
@@ -24,7 +24,7 @@ require('ui/modules')
           type: 'timechart'
         };
 
-        let panelSchema = panelRegistry.byName[seriesList.render.type];
+        const panelSchema = panelRegistry.byName[seriesList.render.type];
 
         if (!panelSchema) {
           $elem.text('No such panel type: ' + seriesList.render.type);

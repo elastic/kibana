@@ -5,11 +5,11 @@ module.exports = function (server) {
     handler: function (request, reply) {
 
       return server.uiSettings().getAll(request).then((uiSettings) => {
-        let callWithRequest = server.plugins.elasticsearch.callWithRequest;
+        const callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
-        let timefield = uiSettings['timelion:es.timefield'];
+        const timefield = uiSettings['timelion:es.timefield'];
 
-        let body = {
+        const body = {
           index: uiSettings['es.default_index'],
           fields:timefield
         };

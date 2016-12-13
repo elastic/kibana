@@ -37,7 +37,7 @@ export default class SettingsPage {
   }
 
   setAdvancedSettings(propertyName, propertyValue) {
-    let self = this;
+    const self = this;
 
     return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
     .click()
@@ -65,7 +65,7 @@ export default class SettingsPage {
   }
 
   getAdvancedSettings(propertyName) {
-    let self = this;
+    const self = this;
     PageObjects.common.debug('in setAdvancedSettings');
     return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
     .getVisibleText();
@@ -173,7 +173,7 @@ export default class SettingsPage {
         });
       }
 
-      let getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -188,8 +188,8 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    let self = this;
-    let selector = 'li.kbn-management-tab.active a small';
+    const self = this;
+    const selector = 'li.kbn-management-tab.active a small';
 
     return PageObjects.common.try(function () {
       return self.remote.setFindTimeout(defaultFindTimeout / 10)
@@ -207,7 +207,7 @@ export default class SettingsPage {
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        let thisChart = chart;
+        const thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -219,7 +219,7 @@ export default class SettingsPage {
         });
       }
 
-      let getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {

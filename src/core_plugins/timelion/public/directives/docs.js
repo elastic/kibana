@@ -1,8 +1,8 @@
 define(function (require) {
-  let html = require('../partials/docs/tutorial.html');
-  let app = require('ui/modules').get('apps/timelion', []);
-  let _ = require('lodash');
-  let moment = require('moment');
+  const html = require('../partials/docs/tutorial.html');
+  const app = require('ui/modules').get('apps/timelion', []);
+  const _ = require('lodash');
+  const moment = require('moment');
 
   app.directive('timelionDocs', function (config, $http) {
     return {
@@ -50,7 +50,7 @@ define(function (require) {
               $scope.es.valid = false;
               $scope.es.invalidReason = (function () {
                 try {
-                  let esResp = JSON.parse(resp.data.resp.response);
+                  const esResp = JSON.parse(resp.data.resp.response);
                   return _.get(esResp, 'error.root_cause[0].reason');
                 } catch (e) {
                   if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');

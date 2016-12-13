@@ -1,8 +1,8 @@
-let Promise = require('bluebird');
-let _ = require('lodash');
-let Boom = require('boom');
-let chainRunnerFn = require('../handlers/chain_runner.js');
-let timelionDefaults = require('../lib/get_namespaced_settings')();
+const Promise = require('bluebird');
+const _ = require('lodash');
+const Boom = require('boom');
+const chainRunnerFn = require('../handlers/chain_runner.js');
+const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
   reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);

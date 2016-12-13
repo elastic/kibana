@@ -65,8 +65,8 @@ states.all.forEach(function (state) {
   Status.prototype[state.id] = function (message) {
     if (this.state === 'disabled') return;
 
-    let previous = this.state;
-    let previousMsg = this.message;
+    const previous = this.state;
+    const previousMsg = this.message;
 
     this.error = null;
     this.message = message || state.title;

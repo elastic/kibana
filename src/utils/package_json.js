@@ -5,7 +5,7 @@ let packageDir;
 let packagePath;
 
 while (!packagePath || !existsSync(packagePath)) {
-  let prev = packageDir;
+  const prev = packageDir;
   packageDir = prev ? join(prev, '..') : __dirname;
   packagePath = join(packageDir, 'package.json');
 

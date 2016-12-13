@@ -1,9 +1,9 @@
-let _ = require('lodash');
-let $ = require('jquery');
-let moment = require('moment');
+const _ = require('lodash');
+const $ = require('jquery');
+const moment = require('moment');
 
-let app = require('ui/modules').get('apps/timelion', []);
-let html = require('./interval.html');
+const app = require('ui/modules').get('apps/timelion', []);
+const html = require('./interval.html');
 
 app.directive('timelionInterval', function ($compile, $timeout, timefilter) {
   return {

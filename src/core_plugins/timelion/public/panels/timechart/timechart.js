@@ -1,5 +1,5 @@
-let Panel = require('plugins/timelion/panels/panel');
-let panelRegistry = require('plugins/timelion/lib/panel_registry');
+const Panel = require('plugins/timelion/panels/panel');
+const panelRegistry = require('plugins/timelion/lib/panel_registry');
 
 panelRegistry.register(function timeChartProvider(Private) {
   // Schema is broken out so that it may be extended for use in other plugins
