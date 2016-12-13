@@ -57,20 +57,17 @@ export default class DiscoverPage {
   }
 
   clickNewSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="New Search"]')
+    return PageObjects.common.findTestSubject('discoverNewButton')
     .click();
   }
 
   clickSaveSearchButton() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Save Search"]')
+    return PageObjects.common.findTestSubject('discoverSaveButton')
     .click();
   }
 
   clickLoadSavedSearchButton() {
-    return this.findTimeout
-    .findDisplayedByCssSelector('[aria-label="Load Saved Search"]')
+    return PageObjects.common.findTestSubject('discoverOpenButton')
     .click();
   }
 
@@ -80,23 +77,59 @@ export default class DiscoverPage {
   }
 
   getBarChartData() {
+    const self = this;
+    let yAxisLabel = 0;
+    let yAxisHeight;
+
     return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
       return this.findTimeout
-      .findAllByCssSelector('rect[data-label="Count"]');
+        .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
     })
-    .then(function (chartData) {
-
-      function getChartData(chart) {
-        return chart
-        .getAttribute('height');
-      }
-
-      var getChartDataPromises = chartData.map(getChartData);
-      return Promise.all(getChartDataPromises);
+    .then(function setYAxisLabel(y) {
+      return y
+        .getVisibleText()
+        .then(function (yLabel) {
+          yAxisLabel = yLabel.replace(',', '');
+          PageObjects.common.debug('yAxisLabel = ' + yAxisLabel);
+          return yLabel;
+        });
     })
-    .then(function (bars) {
-      return bars;
+    // 2). find and save the y-axis pixel size (the chart height)
+    .then(function getRect() {
+      return self
+        .findTimeout
+        .findByCssSelector('rect.background')
+        .then(function getRectHeight(chartAreaObj) {
+          return chartAreaObj
+            .getAttribute('height')
+            .then(function (theHeight) {
+              yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+              PageObjects.common.debug('theHeight = ' + theHeight);
+              return theHeight;
+            });
+        });
+    })
+    // 3). get the chart-wrapper elements
+    .then(function () {
+      return self
+        .findTimeout
+        // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+        .findAllByCssSelector('svg > g > g.series > rect') // rect
+        .then(function (chartTypes) {
+          function getChartType(chart) {
+            return chart
+              .getAttribute('height')
+              .then(function (barHeight) {
+                return Math.round(barHeight / yAxisHeight * yAxisLabel);
+              });
+          }
+          const getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then(function (bars) {
+          return bars;
+        });
     });
   }
 
@@ -192,8 +225,7 @@ export default class DiscoverPage {
   }
 
   clickShare() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Share Search"]')
+    return PageObjects.common.findTestSubject('discoverShareButton')
     .click();
   }
 

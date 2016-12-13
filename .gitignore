@@ -26,10 +26,12 @@ target
 data
 disabledPlugins
 webpackstats.json
-config/kibana.dev.yml
+config/*
+!config/kibana.yml
 coverage
 selenium
 .babelcache.json
 *.swp
 *.swo
 *.out
+src/ui_framework/doc_site/build/*.js*

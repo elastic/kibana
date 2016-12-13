@@ -4,19 +4,28 @@ define(function (require) {
   require('plugins/timelion/directives/refresh_hack');
   require('ui/state_management/app_state');
 
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-  module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter, getAppState) {
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var timezone = Private(require('plugins/timelion/services/timezone'))();
-    var dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
+  const _ = require('lodash');
+  const module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
+  module.controller('TimelionVisController', function (
+    $scope,
+    $element,
+    Private,
+    Notifier,
+    $http,
+    $rootScope,
+    timefilter,
+    getAppState
+  ) {
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const timezone = Private(require('plugins/timelion/services/timezone'))();
+    const dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'Timelion'
     });
 
     $scope.search = function run() {
-      var expression = $scope.vis.params.expression;
+      const expression = $scope.vis.params.expression;
       if (!expression) return;
 
       $http.post('../api/timelion/run', {
@@ -37,7 +46,7 @@ define(function (require) {
       })
       .error(function (resp) {
         $scope.sheet = [];
-        var err = new Error(resp.message);
+        const err = new Error(resp.message);
         err.stack = resp.stack;
         notify.error(err);
       });
@@ -58,6 +67,11 @@ define(function (require) {
     $scope.$on('courier:searchRefresh', $scope.search);
 
     $scope.$on('fetch', $scope.search);
+
+    $scope.$on('renderComplete', event => {
+      event.stopPropagation();
+      $element.trigger('renderComplete');
+    });
 
   });
 });

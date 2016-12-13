@@ -43,6 +43,16 @@ describe('Filter Manager', function () {
       expect(fn(indexPattern.fields.byName['script number'], {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
     });
 
+    it('should wrap painless scripts in comparator lambdas', function () {
+      const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
+              `boolean lte(Supplier s, def v) {return s.get() <= v}` +
+              `gte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.gte) && ` +
+              `lte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.lte)`;
+
+      const inlineScript = fn(indexPattern.fields.byName['script date'], {gte: 1, lte: 3}, indexPattern).script.script.inline;
+      expect(inlineScript).to.be(expected);
+    });
+
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
       expect(function () {
         fn(indexPattern.fields.byName['script number'], {gte: 1, gt: 3}, indexPattern);
@@ -54,9 +64,9 @@ describe('Filter Manager', function () {
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
       _.each({gte: '>=', gt: '>', lte: '<=', lt: '<'}, function (operator, key) {
-        let params = {};
+        const params = {};
         params[key] = 5;
-        let filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
 
         expect(filter.script.script.inline).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);

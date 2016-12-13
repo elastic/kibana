@@ -7,14 +7,14 @@ describe('buildHierarchicalData()', function () {
 
     it('should normalize a bucket object into an array', function () {
 
-      let bucket = {
+      const bucket = {
         buckets: {
           foo: { doc_count: 1 },
           bar: { doc_count: 2 }
         }
       };
 
-      let buckets = extractBuckets(bucket);
+      const buckets = extractBuckets(bucket);
       expect(buckets).to.be.an(Array);
       expect(buckets).to.have.length(2);
       expect(buckets[0]).to.have.property('key', 'foo');
@@ -24,19 +24,19 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('should return an empty array for undefined buckets', function () {
-      let buckets = extractBuckets();
+      const buckets = extractBuckets();
       expect(buckets).to.be.an(Array);
       expect(buckets).to.have.length(0);
     });
 
     it('should return the bucket array', function () {
-      let bucket =  {
+      const bucket =  {
         buckets: [
           { key: 'foo', doc_count: 1 },
           { key: 'bar', doc_count: 2 }
         ]
       };
-      let buckets = extractBuckets(bucket);
+      const buckets = extractBuckets(bucket);
       expect(buckets).to.be.an(Array);
       expect(buckets).to.be(bucket.buckets);
     });

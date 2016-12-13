@@ -40,15 +40,15 @@ Command.prototype.unknownArgv = function (argv) {
  * @return {[type]} [description]
  */
 Command.prototype.collectUnknownOptions = function () {
-  let title = `Extra ${this._name} options`;
+  const title = `Extra ${this._name} options`;
 
   this.allowUnknownOption();
   this.getUnknownOptions = function () {
-    let opts = {};
-    let unknowns = this.unknownArgv();
+    const opts = {};
+    const unknowns = this.unknownArgv();
 
     while (unknowns.length) {
-      let opt = unknowns.shift().split('=');
+      const opt = unknowns.shift().split('=');
       if (opt[0].slice(0, 2) !== '--') {
         this.error(`${title} "${opt[0]}" must start with "--"`);
       }
@@ -75,14 +75,14 @@ Command.prototype.collectUnknownOptions = function () {
 };
 
 Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function (parse, argv) {
-  let opts = parse.call(this, argv);
+  const opts = parse.call(this, argv);
   this.unknownArgv(opts.unknown);
   return opts;
 });
 
 Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
   return action.call(this, function (...args) {
-    let ret = fn.apply(this, args);
+    const ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
       ret.then(null, function (e) {
         console.log('FATAL CLI ERROR', e.stack);

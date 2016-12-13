@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  let { flatten } = require('lodash');
+  const { flatten } = require('lodash');
 
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
@@ -18,8 +18,6 @@ module.exports = function (grunt) {
       '_build:installNpmDeps',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
-      'clean:deepModuleBins',
-      'clean:deepModules',
       'run:optimizeBuild',
       'stop:optimizeBuild',
       '_build:versionedLinks',

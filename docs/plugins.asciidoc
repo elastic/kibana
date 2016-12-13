@@ -6,6 +6,14 @@
 Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin`
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `plugins` directory and unpacking the plugin files into a new directory.
+
+[IMPORTANT]
+.Plugin compatibility
+==============================================
+
+The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
+
+==============================================
 --
 
 == Installing Plugins
@@ -43,6 +51,20 @@ example:
 $ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
 
 NOTE: This command creates the specified directory if it does not already exist.
+
+[float]
+=== Installing Plugins with Linux packages
+
+The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
+
+[source,shell]
+$ sudo -u kibana bin/kibana-plugin install x-pack
+
+If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
+
+[source,shell]
+$ chown -R kibana:kibana /path/to/kibana/optimize
 
 == Updating & Removing Plugins
 

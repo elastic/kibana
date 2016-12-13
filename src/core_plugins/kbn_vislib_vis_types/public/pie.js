@@ -14,16 +14,29 @@ export default function HistogramVisType(Private) {
      'Pro Tip: Pie charts are best used sparingly, and with no more than 7 slices per pie.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
         isDonut: false
       },
+      legendPositions: [{
+        value: 'left',
+        text: 'left',
+      }, {
+        value: 'right',
+        text: 'right',
+      }, {
+        value: 'top',
+        text: 'top',
+      }, {
+        value: 'bottom',
+        text: 'bottom',
+      }],
       editor: pieTemplate
     },
     responseConverter: false,
     hierarchicalData: true,
+    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',

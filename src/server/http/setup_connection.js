@@ -48,7 +48,9 @@ export default function (kbnServer, server, config) {
   });
 
   server.ext('onRequest', function (req, reply) {
-    if (req.raw.req.socket.encrypted) {
+    // A request sent through a HapiJS .inject() doesn't have a socket associated with the request
+    // which causes a failure.
+    if (!req.raw.req.socket || req.raw.req.socket.encrypted) {
       reply.continue();
     } else {
       reply.redirect(formatUrl({

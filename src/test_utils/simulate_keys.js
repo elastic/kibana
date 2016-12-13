@@ -2,8 +2,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import keyMap from 'ui/utils/key_map';
-let reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
-let KeyboardEvent = window.KeyboardEvent;
+const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
+const KeyboardEvent = window.KeyboardEvent;
 
 /**
  * Simulate keyboard events in an element. This allows testing the way that
@@ -35,7 +35,7 @@ let KeyboardEvent = window.KeyboardEvent;
  * @async
  */
 export default function ($el, sequence) {
-  let modifierState = {
+  const modifierState = {
     ctrlKey: false,
     shiftKey: false,
     altKey: false,
@@ -45,7 +45,7 @@ export default function ($el, sequence) {
   return doList(_.clone(sequence));
 
   function setModifier(key, state) {
-    let name = key + 'Key';
+    const name = key + 'Key';
     if (modifierState.hasOwnProperty(name)) {
       modifierState[name] = !!state;
     }
@@ -91,14 +91,14 @@ export default function ($el, sequence) {
   }
 
   function fire(type, key, repeat) {
-    let keyCode = reverseKeyMap[key];
+    const keyCode = reverseKeyMap[key];
     if (!keyCode) throw new TypeError('invalid key "' + key + '"');
 
     if (type === 'keydown') setModifier(key, true);
     if (type === 'keyup') setModifier(key, false);
 
-    let $target = _.isFunction($el) ? $el() : $el;
-    let $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
+    const $target = _.isFunction($el) ? $el() : $el;
+    const $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
     $target.trigger($event);
   }
 };

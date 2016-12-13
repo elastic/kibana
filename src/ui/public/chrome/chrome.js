@@ -1,11 +1,8 @@
-
 import _ from 'lodash';
 import angular from 'angular';
 
-
 import metadata from 'ui/metadata';
 import 'babel/polyfill';
-import $ from 'jquery';
 import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';
@@ -30,61 +27,6 @@ const internals = _.defaults(
     applicationClasses: []
   }
 );
-
-// These favicons were generated from http://realfavicongenerator.net/.
-const favicons = [{
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/favicon.ico'),
-    rel: 'shortcut icon',
-  },
-}, {
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/apple-touch-icon.png'),
-    sizes: '180x180',
-    rel: 'apple-touch-icon',
-  },
-}, {
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/favicon-32x32.png'),
-    type: 'image/png',
-    sizes: '32x32',
-    rel: 'icon',
-  },
-}, {
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/favicon-16x16.png'),
-    type: 'image/png',
-    sizes: '16x16',
-    rel: 'icon',
-  },
-}, {
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/manifest.json'),
-    rel: 'manifest',
-  },
-}, {
-  tag: '<link>',
-  attrs: {
-    href: require('ui/favicons/safari-pinned-tab.svg'),
-    color: '#e8488b',
-    rel: 'mask-icon',
-  },
-}, {
-  tag: '<meta>',
-  attrs: {
-    name: 'theme-color',
-    content: '#e8488b',
-  },
-}];
-
-favicons.forEach(favicon => {
-  $(favicon.tag).attr(favicon.attrs).appendTo('head');
-});
 
 require('./api/apps')(chrome, internals);
 require('./api/xsrf')(chrome, internals);

@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import LogFormat from './log_format';
 
-let statuses = [
+const statuses = [
   'err',
   'info',
   'error',
@@ -14,7 +14,7 @@ let statuses = [
   'debug'
 ];
 
-let typeColors = {
+const typeColors = {
   log: 'blue',
   req: 'green',
   res: 'green',
@@ -34,22 +34,22 @@ let typeColors = {
   listening: 'magenta'
 };
 
-let color = _.memoize(function (name) {
+const color = _.memoize(function (name) {
   return ansicolors[typeColors[name]] || _.identity;
 });
 
-let type = _.memoize(function (t) {
+const type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
-let workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
+const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
 
 module.exports = class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
-    let time = color('time')(moment(data.timestamp).utc().format('HH:mm:ss.SSS'));
-    let msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
+    const time = color('time')(moment(data.timestamp).utc().format('HH:mm:ss.SSS'));
+    const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
-    let tags = _(data.tags)
+    const tags = _(data.tags)
     .sortBy(function (tag) {
       if (color(tag) === _.identity) return `2${tag}`;
       if (_.includes(statuses, tag)) return `0${tag}`;

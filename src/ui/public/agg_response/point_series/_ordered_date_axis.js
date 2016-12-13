@@ -2,9 +2,9 @@ import moment from 'moment';
 export default function PointSeriesOrderedDateAxis(timefilter) {
 
   return function orderedDateAxis(vis, chart) {
-    let xAgg = chart.aspects.x.agg;
-    let buckets = xAgg.buckets;
-    let format = buckets.getScaledDateFormat();
+    const xAgg = chart.aspects.x.agg;
+    const buckets = xAgg.buckets;
+    const format = buckets.getScaledDateFormat();
 
     chart.xAxisFormatter = function (val) {
       return moment(val).format(format);
@@ -15,8 +15,8 @@ export default function PointSeriesOrderedDateAxis(timefilter) {
       interval: buckets.getInterval(),
     };
 
-    let axisOnTimeField = xAgg.fieldIsTimeField();
-    let bounds = buckets.getBounds();
+    const axisOnTimeField = xAgg.fieldIsTimeField();
+    const bounds = buckets.getBounds();
     if (bounds && axisOnTimeField) {
       chart.ordered.min = bounds.min;
       chart.ordered.max = bounds.max;

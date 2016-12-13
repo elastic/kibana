@@ -33,6 +33,7 @@ different series.
 instructions.
 <<metric-chart,Metric>>:: Display a single number.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
 Timeseries:: Compute and combine data from multiple time series
@@ -118,3 +119,5 @@ include::visualize/pie.asciidoc[]
 include::visualize/tilemap.asciidoc[]
 
 include::visualize/vertbar.asciidoc[]
+
+include::visualize/tagcloud.asciidoc[]

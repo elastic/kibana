@@ -11,7 +11,7 @@ import AggTypesParamTypesScriptingLangProvider from 'ui/agg_types/param_types/sc
 export default function AggParamsFactory(Private) {
 
 
-  let paramTypeMap = {
+  const paramTypeMap = {
     field: Private(AggTypesParamTypesFieldProvider),
     optioned: Private(AggTypesParamTypesOptionedProvider),
     regex: Private(AggTypesParamTypesRegexProvider),
@@ -39,8 +39,8 @@ export default function AggParamsFactory(Private) {
     AggParams.Super.call(this, {
       index: ['name'],
       initialSet: params.map(function (config) {
-        let type = config.name === 'field' ? config.name : config.type;
-        let Class = paramTypeMap[type] || paramTypeMap._default;
+        const type = config.name === 'field' ? config.name : config.type;
+        const Class = paramTypeMap[type] || paramTypeMap._default;
         return new Class(config);
       })
     });
@@ -61,7 +61,7 @@ export default function AggParamsFactory(Private) {
    *         are dependent on the AggParam#write methods which should be studied for each AggType.
    */
   AggParams.prototype.write = function (aggConfig, locals) {
-    let output = { params: {} };
+    const output = { params: {} };
     locals = locals || {};
 
     this.forEach(function (param) {

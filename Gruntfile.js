@@ -38,34 +38,6 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
-
-    lintThese: [
-      'Gruntfile.js',
-      '<%= root %>/tasks/**/*.js',
-      '<%= root %>/test/**/*.js',
-      '<%= src %>/**/*.js',
-      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
-      '!<%= src %>/core_plugins/timelion/bower_components/**/*.js',
-      '!<%= src %>/core_plugins/timelion/vendor_components/**/*.js',
-      '!<%= src %>/fixtures/**/*.js',
-      '!<%= root %>/test/fixtures/scenarios/**/*.js'
-    ],
-    deepModules: {
-      'caniuse-db': '1.0.30000265',
-      'chalk': '1.1.0',
-      'glob': '4.5.3',
-      'har-validator': '1.8.0',
-      'json5': '0.4.0',
-      'loader-utils': '0.2.11',
-      'micromatch': '2.2.0',
-      'postcss-normalize-url': '2.1.1',
-      'postcss-reduce-idents': '1.0.2',
-      'postcss-unique-selectors': '1.0.0',
-      'postcss-minify-selectors': '1.4.6',
-      'postcss-single-charset': '0.3.0',
-      'regenerator': '0.8.36',
-      'readable-stream': '2.1.0'
-    }
   };
 
   grunt.config.merge(config);

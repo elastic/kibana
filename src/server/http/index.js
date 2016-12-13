@@ -1,14 +1,12 @@
-import { parse } from 'url';
 import { format } from 'url';
+import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
+import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
 module.exports = async function (kbnServer, server, config) {
@@ -71,7 +69,7 @@ module.exports = async function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    const response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -99,14 +97,14 @@ module.exports = async function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      let path = req.path;
+      const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-
+      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
+        pathname: pathPrefix + path.slice(0, -1),
       }))
       .permanent(true);
     }
@@ -117,11 +115,11 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
+        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
-        reply(err);
+        reply(handleShortUrlError(err));
       }
     }
   });
@@ -132,13 +130,17 @@ module.exports = async function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
         reply(urlId);
       } catch (err) {
-        reply(err);
+        reply(handleShortUrlError(err));
       }
     }
   });
+
+  // Expose static assets (fonts, favicons).
+  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
+  server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
 
   kbnServer.mixin(versionCheckMixin);
 

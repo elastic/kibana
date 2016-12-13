@@ -24,7 +24,8 @@ function MarkdownVisProvider(Private) {
     params: {
       editor: markdownVisParamsTemplate
     },
-    requiresSearch: false
+    requiresSearch: false,
+    implementsRenderComplete: true,
   });
 }
 

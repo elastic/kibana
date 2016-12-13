@@ -1,0 +1,34 @@
+
+/**
+ * 1. Match height of logo in side bar, but allow it to expand to accommodate
+ *    dropdown.
+ */
+.localNav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 70px; /* 1 */
+  color: $localNavTextColor;
+  background-color: $localNavBackgroundColor;
+
+  @include darkTheme {
+    color: $localNavTextColor--darkTheme;
+    background-color: $localNavBackgroundColor--darkTheme;
+  }
+}
+
+.localNavRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+}
+
+  .localNavRow__section {
+    height: 100%;
+  }
+
+.localNavRow--secondary {
+  height: 38px;
+  padding: 0 $localNavSideSpacing;
+}

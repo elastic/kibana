@@ -16,7 +16,7 @@ import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 //   ['rows', require('fixtures/vislib/mock_data/geohash/_rows')],
 // ];
 
-// // TODO: Test the specific behavior of each these
+// TODO: Test the specific behavior of each these
 // const mapTypes = [
 //   'Scaled Circle Markers',
 //   'Shaded Circle Markers',
