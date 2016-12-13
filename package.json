@@ -1,6 +1,6 @@
 {
   "name": "@elastic/eslint-config-kibana",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.json",
   "scripts": {
