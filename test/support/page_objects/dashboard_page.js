@@ -13,14 +13,12 @@ export default class DashboardPage {
   }
 
   clickNewDashboard() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="New Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardNewButton')
     .click();
   }
 
   clickAddVisualization() {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Add a panel to the dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardAddPanelButton')
     .click();
   }
 
@@ -70,8 +68,7 @@ export default class DashboardPage {
   }
 
   saveDashboard(dashName) {
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Save Dashboard"]')
+    return PageObjects.common.findTestSubject('dashboardSaveButton')
     .click()
     .then(() => {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
@@ -124,9 +121,8 @@ export default class DashboardPage {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
-    var self = this;
-    return this.findTimeout
-    .findByCssSelector('[aria-label="Open Saved Dashboard"]')
+    const self = this;
+    return PageObjects.common.findTestSubject('dashboardOpenButton')
     .click()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
@@ -160,7 +156,7 @@ export default class DashboardPage {
         return chart.getAttribute('title');
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }
@@ -172,7 +168,7 @@ export default class DashboardPage {
     .then(function (titleObjects) {
 
       function getTitles(chart) {
-        var obj = {};
+        let obj = {};
         return chart.getAttribute('data-col')
         .then(theData => {
           obj = {dataCol:theData};
@@ -211,7 +207,7 @@ export default class DashboardPage {
         });
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }

@@ -104,23 +104,28 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); }
+    run: function () { kbnUrl.change('/visualize', {}); },
+    testId: 'visualizeNewButton',
   }, {
     key: 'save',
+    description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
-    description: 'Save Visualization'
+    testId: 'visualizeSaveButton',
   }, {
     key: 'open',
-    template: require('plugins/kibana/visualize/editor/panels/load.html'),
     description: 'Open Saved Visualization',
+    template: require('plugins/kibana/visualize/editor/panels/load.html'),
+    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
+    description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    description: 'Share Visualization'
+    testId: 'visualizeShareButton',
   }, {
     key: 'refresh',
     description: 'Refresh',
-    run: function () { $scope.fetch(); }
+    run: function () { $scope.fetch(); },
+    testId: 'visualizeRefreshButton',
   }];
 
   if (savedVis.id) {
@@ -139,7 +144,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   };
 
   // Instance of app_state.js.
-  let $state = $scope.$state = (function initState() {
+  const $state = $scope.$state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
@@ -187,7 +192,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
-    editableVis.listeners.brush = vis.listeners.brush = brushEvent;
+    editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
 
     // track state of editable vis vs. "actual" vis
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -287,7 +292,6 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
    * Called when the user clicks "Save" button.
    */
   $scope.doSave = function () {
-    savedVis.id = savedVis.title;
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
     savedVis.visState = $state.vis;
@@ -300,8 +304,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if (savedVis.id === $route.current.params.id) return;
-        kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        if (savedVis.id === $route.current.params.id) {
+          docTitle.change(savedVis.lastSavedTitle);
+        } else {
+          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+        }
       }
     }, notify.fatal);
   };

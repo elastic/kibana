@@ -6,11 +6,13 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
   let Data;
+  let VisConfig;
   let persistedState;
   let chartTitle;
   let el;
@@ -78,6 +80,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     ChartTitle = Private(VislibLibChartTitleProvider);
     Data = Private(VislibLibDataProvider);
+    VisConfig = Private(VislibLibVisConfigProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
 
     el = d3.select('body').append('div')
@@ -88,8 +91,15 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, {}, persistedState);
-    chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
+    dataObj = new Data(data, persistedState);
+    const visConfig = new VisConfig({
+      type: 'histogram',
+      title: {
+        'text': 'rows'
+      },
+      el: el.node()
+    }, data, persistedState);
+    chartTitle = new ChartTitle(visConfig);
   }));
 
   afterEach(function () {

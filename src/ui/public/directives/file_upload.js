@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
-let html = '<span class="dropzone" ng-transclude></span>';
+const html = '<span class="dropzone" ng-transclude></span>';
 
 module.directive('fileUpload', function () {
   return {
@@ -16,14 +16,14 @@ module.directive('fileUpload', function () {
     },
     template: html,
     link: function ($scope, $elem, attrs) {
-      let $button = $elem.find($scope.uploadSelector);
-      let $dropzone = $elem.find('.dropzone');
+      const $button = $elem.find($scope.uploadSelector);
+      const $dropzone = $elem.find('.dropzone');
 
       const handleFile = (file) => {
         if (_.isUndefined(file)) return;
 
         if (_.has(attrs, 'onRead')) {
-          let reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = function (e) {
             $scope.$apply(function () {
               $scope.onRead({fileContents: e.target.result});
@@ -66,7 +66,7 @@ module.directive('fileUpload', function () {
         $elem.append($fileInput);
 
         $fileInput.on('change', function (e) {
-          let target = e.srcElement || e.target;
+          const target = e.srcElement || e.target;
           if (_.get(target, 'files.length')) {
             handleFile(target.files[0]);
           }

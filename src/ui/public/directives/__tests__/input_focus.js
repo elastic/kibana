@@ -12,7 +12,7 @@ describe('Input focus directive', function () {
   let $el;
   let selectedEl;
   let selectedText;
-  let inputValue = 'Input Text Value';
+  const inputValue = 'Input Text Value';
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {

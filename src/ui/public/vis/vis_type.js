@@ -1,7 +1,7 @@
 import VisSchemasProvider from 'ui/vis/schemas';
 
 export default function VisTypeFactory(Private) {
-  let VisTypeSchemas = Private(VisSchemasProvider);
+  const VisTypeSchemas = Private(VisSchemasProvider);
 
   function VisType(opts) {
     opts = opts || {};
@@ -15,7 +15,12 @@ export default function VisTypeFactory(Private) {
     this.schemas = opts.schemas || new VisTypeSchemas();
     this.params = opts.params || {};
     this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
+    this.implementsRenderComplete = opts.implementsRenderComplete || false;
   }
+
+  VisType.prototype.createRenderbot = function (vis, $el, uiState) {
+    throw new Error('not implemented');
+  };
 
   return VisType;
 };

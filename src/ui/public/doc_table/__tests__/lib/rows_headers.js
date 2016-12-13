@@ -28,7 +28,7 @@ describe('Doc Table', function () {
   }));
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-  let init = function ($elem, props) {
+  const init = function ($elem, props) {
     ngMock.inject(function ($compile) {
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
@@ -37,17 +37,17 @@ describe('Doc Table', function () {
     });
   };
 
-  let destroy = function () {
+  const destroy = function () {
     $scope.$destroy();
     $parentScope.$destroy();
   };
 
   // For testing column removing/adding for the header and the rows
   //
-  let columnTests = function (elemType, parentElem) {
+  const columnTests = function (elemType, parentElem) {
 
     it('should create a time column if the timefield is defined', function (done) {
-      let childElems = parentElem.find(elemType);
+      const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(2);
       done();
     });
@@ -79,7 +79,7 @@ describe('Doc Table', function () {
       delete parentElem.scope().indexPattern.timeFieldName;
       parentElem.scope().$digest();
 
-      let childElems = parentElem.find(elemType);
+      const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(1);
       done();
     });
@@ -89,7 +89,7 @@ describe('Doc Table', function () {
 
   describe('kbnTableHeader', function () {
 
-    let $elem = angular.element(
+    const $elem = angular.element(
       '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort"></thead>'
     );
 
@@ -120,7 +120,7 @@ describe('Doc Table', function () {
       });
 
       it('should sort asc by default, then by desc if already sorting', function (done) {
-        let fields = ['bytes', '@timestamp'];
+        const fields = ['bytes', '@timestamp'];
 
         // Should not be sorted at first
         expect($scope.sorting).to.eql(undefined);
@@ -201,7 +201,7 @@ describe('Doc Table', function () {
   });
 
   describe('kbnTableRow', function () {
-    let $elem = angular.element(
+    const $elem = angular.element(
       '<tr kbn-table-row="row" ' +
       'columns="columns" ' +
       'sorting="sorting"' +
@@ -270,7 +270,7 @@ describe('Doc Table', function () {
 
   describe('kbnTableRow meta', function () {
 
-    let $elem = angular.element(
+    const $elem = angular.element(
         '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
         'sorting="sorting"' +
@@ -281,7 +281,7 @@ describe('Doc Table', function () {
     let $details;
 
     beforeEach(function () {
-      let row = getFakeRow(0, mapping);
+      const row = getFakeRow(0, mapping);
       mapping._id = {indexed: true, type: 'string'};
       row._source._id = 'foo';
 
@@ -354,7 +354,7 @@ describe('Doc Table', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -367,7 +367,7 @@ describe('Doc Table', function () {
       $root.columns.push('request_body');
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(5);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -385,7 +385,7 @@ describe('Doc Table', function () {
       ];
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -400,7 +400,7 @@ describe('Doc Table', function () {
       _.pull($root.columns, '_source');
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(2);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -411,14 +411,14 @@ describe('Doc Table', function () {
       $root.columns.push('@timestamp');
       $root.$apply();
 
-      let $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(4);
 
       $root.columns.pop();
       $root.columns.pop();
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(2);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -429,7 +429,7 @@ describe('Doc Table', function () {
       $root.columns.push('@timestamp', 'bytes');
       $root.$apply();
 
-      let $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(5);
 
       $root.columns[0] = false; // _source
@@ -437,7 +437,7 @@ describe('Doc Table', function () {
       $root.columns = $root.columns.filter(Boolean);
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(3);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -451,7 +451,7 @@ describe('Doc Table', function () {
       $root.columns.push('request_body');
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
       expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
@@ -461,13 +461,13 @@ describe('Doc Table', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
-      let $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(4);
 
       $root.columns.reverse();
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -479,13 +479,13 @@ describe('Doc Table', function () {
       $root.columns.push('bytes', 'response', '@timestamp');
       $root.$apply();
 
-      let $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(6);
 
       $root.columns.reverse();
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -499,7 +499,7 @@ describe('Doc Table', function () {
       $root.columns.push('bytes', 'bytes', 'bytes');
       $root.$apply();
 
-      let $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);

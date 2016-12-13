@@ -11,15 +11,25 @@ define(function () {
     return function (selection) {
       selection.each(function () {
         const div = d3.select(this);
-
+        let columns;
         div.selectAll('.x-axis-div')
         .append('div')
         .data(function (d) {
+          columns = d.columns ? d.columns.length : 1;
           return d.columns ? d.columns : [d];
         })
         .enter()
           .append('div')
-          .attr('class', 'x-axis-div');
+          .attr('class', (d, i) => {
+            let divClass = '';
+            if (i === 0) {
+              divClass += ' chart-first';
+            }
+            if (i === columns - 1) {
+              divClass += ' chart-last';
+            }
+            return 'x-axis-div axis-div' + divClass;
+          });
       });
     };
   };

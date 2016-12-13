@@ -3,7 +3,7 @@ import expect from 'expect.js';
 
 describe('applyFiltersToKeys(obj, actionsByKey)', function () {
   it('applies for each key+prop in actionsByKey', function () {
-    let data = applyFiltersToKeys({
+    const data = applyFiltersToKeys({
       a: {
         b: {
           c: 1

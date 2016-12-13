@@ -3,11 +3,11 @@ import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
 import uiModules from 'ui/modules';
-let typeahead = uiModules.get('kibana/typeahead');
+const typeahead = uiModules.get('kibana/typeahead');
 
 
 typeahead.directive('kbnTypeahead', function () {
-  let keyMap = {
+  const keyMap = {
     ESC: 27,
     UP: 38,
     DOWN: 40,
@@ -23,7 +23,7 @@ typeahead.directive('kbnTypeahead', function () {
     controllerAs: 'typeahead',
 
     controller: function ($scope, $element, $timeout, PersistedLog, config) {
-      let self = this;
+      const self = this;
       self.form = $element.closest('form');
       self.query = '';
       self.hidden = true;
@@ -138,7 +138,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       self.keypressHandler = function (ev) {
-        let keyCode = ev.which || ev.keyCode;
+        const keyCode = ev.which || ev.keyCode;
 
         if (self.focused) {
           self.hidden = false;
@@ -194,11 +194,11 @@ typeahead.directive('kbnTypeahead', function () {
         }
 
         // update the filteredItems using the query
-        let beginningMatches = $scope.items.filter(function (item) {
+        const beginningMatches = $scope.items.filter(function (item) {
           return item.indexOf(query) === 0;
         });
 
-        let otherMatches = $scope.items.filter(function (item) {
+        const otherMatches = $scope.items.filter(function (item) {
           return item.indexOf(query) > 0;
         });
 

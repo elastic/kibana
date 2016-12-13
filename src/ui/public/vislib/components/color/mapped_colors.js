@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
+import VislibComponentsColorColorPaletteProvider from './color_palette';
 define((require) => (Private, config, $rootScope) => {
   const createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
 

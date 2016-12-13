@@ -1,34 +1,36 @@
 ---
 
 root: true
-extends: '@elastic/kibana'
+extends: '../../../.eslintrc'
 
 rules:
-  block-scoped-var: [0]
-  camelcase: [0]
-  curly: [0]
-  dot-location: [0]
-  dot-notation: [0]
-  eqeqeq: [0]
-  guard-for-in: [0]
-  indent: [0]
-  max-len: [0]
-  new-cap: [0]
-  no-caller: [0]
-  no-empty: [0]
-  no-extend-native: [0]
-  no-loop-func: [0]
-  no-multi-str: [0]
-  no-nested-ternary: [0]
-  no-proto: [0]
-  no-sequences: [0]
-  no-undef: [0]
-  no-use-before-define: [0]
-  one-var: [0]
-  quotes: [0]
-  space-before-blocks: [0]
-  space-in-parens: [0]
-  space-infix-ops: [0]
-  semi: [0]
-  strict: [0]
-  wrap-iife: [0]
+  block-scoped-var: off
+  camelcase: off
+  curly: off
+  dot-location: off
+  dot-notation: off
+  eqeqeq: off
+  guard-for-in: off
+  indent: off
+  max-len: off
+  new-cap: off
+  no-caller: off
+  no-empty: off
+  no-extend-native: off
+  no-loop-func: off
+  no-multi-str: off
+  no-nested-ternary: off
+  no-proto: off
+  no-sequences: off
+  no-undef: off
+  no-use-before-define: off
+  one-var: off
+  quotes: off
+  space-before-blocks: off
+  space-in-parens: off
+  space-infix-ops: off
+  semi: off
+  strict: off
+  wrap-iife: off
+  no-var: off
+  prefer-const: off

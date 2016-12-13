@@ -5,12 +5,12 @@ export default function addOrdinalSuffix(num) {
 };
 
 function suffix(num) {
-  let int = Math.floor(parseFloat(num));
+  const int = Math.floor(parseFloat(num));
 
-  let hunth = int % 100;
+  const hunth = int % 100;
   if (hunth >= 11 && hunth <= 13) return 'th';
 
-  let tenth = int % 10;
+  const tenth = int % 10;
   if (tenth === 1) return 'st';
   if (tenth === 2) return 'nd';
   if (tenth === 3) return 'rd';

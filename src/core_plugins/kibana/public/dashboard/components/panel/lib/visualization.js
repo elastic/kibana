@@ -1,7 +1,7 @@
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 
-export default function visualizationLoader(savedVisualizations, Private) { // Inject services here
+export function visualizationLoaderProvider(savedVisualizations, Private) { // Inject services here
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
@@ -10,7 +10,7 @@ export default function visualizationLoader(savedVisualizations, Private) { // I
     .then(function (savedVis) {
       // $scope.state comes via $scope inheritence from the dashboard app. Don't love this.
       savedVis.vis.listeners.click = filterBarClickHandler($scope.state);
-      savedVis.vis.listeners.brush = brushEvent;
+      savedVis.vis.listeners.brush = brushEvent($scope.state);
 
       return {
         savedObj: savedVis,
