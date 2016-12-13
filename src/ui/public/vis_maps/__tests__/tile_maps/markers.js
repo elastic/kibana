@@ -7,10 +7,10 @@ import L from 'leaflet';
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import $ from 'jquery';
-import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
-import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
-import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
-import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vis_maps/visualizations/marker_types/base_marker';
+import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vis_maps/visualizations/marker_types/shaded_circles';
+import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vis_maps/visualizations/marker_types/scaled_circles';
+import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vis_maps/visualizations/marker_types/heatmap';
 // defaults to roughly the lower 48 US states
 const defaultSWCoords = [13.496, -143.789];
 const defaultNECoords = [55.526, -57.919];
