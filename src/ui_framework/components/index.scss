@@ -18,10 +18,55 @@ $inputTextColor--darkTheme: $textColor--darkTheme;
 $inputBackgroundColor--darkTheme: #444444;
 $inputBorderColor--darkTheme: $inputBackgroundColor--darkTheme;
 
+// Font
+$fontSize: 14px;
+$lineHeight: 1.5;
+
+// Button
+$buttonBorderRadius: 4px;
+
+// Colors
+$successColor: #417505;
+$warningColor: #ffac15;
+$errorColor: #D86051;
+$fontColor: #191E23;
+$panelColor: #E4E4E4;
+$selectedBorderColor: #6EADC1;
+$errorBorderColor: $errorColor;
+
+// Borders
+$tableBorder: 2px solid $panelColor;
+
+// Timing
+$formTransitionTiming: 0.1s linear;
+
 @mixin darkTheme() {
   .theme-dark & {
     @content;
   }
 }
 
+/**
+ * 1. Make sure outline doesn't get hidden beneath adjacent elements.
+ */
+@mixin focus($color: #6EADC1) {
+  z-index: 1; /* 1 */
+  outline: 1px solid $color;
+  outline-offset: 2px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+}
+
+@import "button/index";
+@import "form/index";
+@import "icon/index";
+@import "link/index";
 @import "local_nav/index";
+@import "table/index";
+@import "tool_bar/index";
