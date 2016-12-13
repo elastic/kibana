@@ -24,7 +24,7 @@ export default function (first, second, comparatorOptions) {
 };
 
 function mapFilter(filter) {
-  let cleaned = _.omit(filter, excludedAttributes);
+  const cleaned = _.omit(filter, excludedAttributes);
   if (comparators.negate) cleaned.negate = filter.meta && !!filter.meta.negate;
   if (comparators.disabled) cleaned.disabled = filter.meta && !!filter.meta.disabled;
   return cleaned;

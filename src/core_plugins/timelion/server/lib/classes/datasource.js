@@ -1,10 +1,10 @@
-var loadFunctions = require('../load_functions.js');
-var fitFunctions  = loadFunctions('fit_functions');
-var TimelionFunction = require('./timelion_function');
-var offsetTime = require('../offset_time');
+const loadFunctions = require('../load_functions.js');
+const fitFunctions  = loadFunctions('fit_functions');
+const TimelionFunction = require('./timelion_function');
+const offsetTime = require('../offset_time');
 
-var _ = require('lodash');
-var moment = require('moment');
+const _ = require('lodash');
+const moment = require('moment');
 
 
 function offsetSeries(response, offset) {
@@ -33,9 +33,9 @@ module.exports = class Datasource extends TimelionFunction {
     });
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit
-    var originalFunction = config.fn;
+    const originalFunction = config.fn;
     config.fn = function (args, tlConfig) {
-      var config = _.clone(tlConfig);
+      const config = _.clone(tlConfig);
       if (args.byName.offset) {
         config.time = _.cloneDeep(tlConfig.time);
         config.time.from = offsetTime(config.time.from, args.byName.offset);

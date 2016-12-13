@@ -88,7 +88,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
         it('returns a function that binds ' + event + ' events to a selection', function () {
           const chart = _.first(vis.handler.charts);
-          const apply = chart.events[name](d3.select(document.createElement('svg')));
+          const apply = chart.events[name](chart.series[0].chartEl);
           expect(apply).to.be.a('function');
 
           const els = getEls(vis.el, 3, 'div');

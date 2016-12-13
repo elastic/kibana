@@ -19,7 +19,7 @@ bdd.describe('visualize app', function () {
     remote.setWindowSize(1280,800);
 
     PageObjects.common.debug('Starting visualize before method');
-    var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {

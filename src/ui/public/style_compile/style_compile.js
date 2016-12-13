@@ -2,15 +2,15 @@ import _ from 'lodash';
 import $ from 'jquery';
 import 'ui/config';
 import uiModules from 'ui/modules';
-let $style = $('<style>').appendTo('head').attr('id', 'style-compile');
+const $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
 
 uiModules
 .get('kibana')
 .run(function ($rootScope, $compile, config) {
-  let truncateGradientHeight = 15;
-  let template = _.template(require('./style_compile.css.tmpl'));
-  let locals = {};
+  const truncateGradientHeight = 15;
+  const template = _.template(require('./style_compile.css.tmpl'));
+  const locals = {};
 
   // watch the value of the truncate:maxHeight config param
   $rootScope.$watch(function () {

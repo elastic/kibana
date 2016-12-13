@@ -33,3 +33,4 @@ import 'ui/typeahead';
 import 'ui/url';
 import 'ui/validate_date_interval';
 import 'ui/watch_multi';
+import 'ui/courier/saved_object/ui/saved_object_save_as_checkbox';

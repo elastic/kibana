@@ -9,12 +9,12 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import uiModules from 'ui/modules';
-let module = uiModules.get('app/discover');
+const module = uiModules.get('app/discover');
 
 
 
 // guesstimate at the minimum number of chars wide cells in the table should be
-let MIN_LINE_LENGTH = 20;
+const MIN_LINE_LENGTH = 20;
 
 /**
  * kbnTableRow directive
@@ -25,8 +25,8 @@ let MIN_LINE_LENGTH = 20;
  * ```
  */
 module.directive('kbnTableRow', function ($compile) {
-  let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
-  let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
+  const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
   return {
     restrict: 'A',
@@ -48,7 +48,7 @@ module.directive('kbnTableRow', function ($compile) {
 
       // toggle display of the rows details, a full list of the fields from each row
       $scope.toggleRow = function () {
-        let $detailsTr = $el.next();
+        const $detailsTr = $el.next();
 
         $scope.open = !$scope.open;
 
@@ -85,10 +85,10 @@ module.directive('kbnTableRow', function ($compile) {
 
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
-        let indexPattern = $scope.indexPattern;
+        const indexPattern = $scope.indexPattern;
 
         // We just create a string here because its faster.
-        let newHtmls = [
+        const newHtmls = [
           openRowHtml
         ];
 
@@ -109,16 +109,16 @@ module.directive('kbnTableRow', function ($compile) {
 
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {
-          let $cell = $cells.eq(i);
+          const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          let reuse = _.find($cells.slice(i + 1), function (cell) {
+          const reuse = _.find($cells.slice(i + 1), function (cell) {
             return $.data(cell, 'discover:html') === html;
           });
 
-          let $target = reuse ? $(reuse).detach() : $(html);
+          const $target = reuse ? $(reuse).detach() : $(html);
           $target.data('discover:html', html);
-          let $before = $cells.eq(i - 1);
+          const $before = $cells.eq(i - 1);
           if ($before.size()) {
             $before.after($target);
           } else {
@@ -147,8 +147,8 @@ module.directive('kbnTableRow', function ($compile) {
        * Fill an element with the value of a field
        */
       function _displayField(row, fieldName, truncate) {
-        let indexPattern = $scope.indexPattern;
-        let text = indexPattern.formatField(row, fieldName);
+        const indexPattern = $scope.indexPattern;
+        const text = indexPattern.formatField(row, fieldName);
 
         if (truncate && text.length > MIN_LINE_LENGTH) {
           return truncateByHeightTemplate({

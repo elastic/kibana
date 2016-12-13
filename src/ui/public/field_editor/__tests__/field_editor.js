@@ -50,7 +50,7 @@ describe('FieldEditor directive', function () {
 
     it('exposes $scope.editor, a controller for the editor', function () {
       compile();
-      let editor = $scope.editor;
+      const editor = $scope.editor;
       expect(editor).to.be.an('object');
     });
   });
@@ -90,8 +90,8 @@ describe('FieldEditor directive', function () {
       });
 
       it('reflects changes to the index patterns field', function () {
-        let a = {};
-        let b = {};
+        const a = {};
+        const b = {};
 
         actual.script = a;
         expect(field.script).to.be(a);
@@ -101,7 +101,7 @@ describe('FieldEditor directive', function () {
       });
 
       it('is fully mutable, unlike the index patterns field', function () {
-        let origName = actual.name;
+        const origName = actual.name;
         actual.name = 'john';
         expect(actual.name).to.not.be('john');
         expect(actual.name).to.be(origName);

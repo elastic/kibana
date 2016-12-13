@@ -2,8 +2,8 @@ import _ from 'lodash';
 import AggTypesAggParamsProvider from 'ui/agg_types/agg_params';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function AggTypeFactory(Private) {
-  let AggParams = Private(AggTypesAggParamsProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const AggParams = Private(AggTypesAggParamsProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   /**
    * Generic AggType Constructor
@@ -142,7 +142,7 @@ export default function AggTypeFactory(Private) {
    * @return {FieldFromat}
    */
   AggType.prototype.getFormat = function (agg) {
-    let field = agg.getField();
+    const field = agg.getField();
     return field ? field.format : fieldFormats.getDefaultInstance('string');
   };
 

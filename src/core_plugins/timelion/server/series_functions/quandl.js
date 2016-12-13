@@ -1,11 +1,11 @@
-var _ = require('lodash');
-var fetch = require('node-fetch');
-var moment = require('moment');
+const _ = require('lodash');
+const fetch = require('node-fetch');
+const moment = require('moment');
 fetch.Promise = require('bluebird');
 //var parseDateMath = require('../utils/date_math.js');
 
 
-var Datasource = require('../lib/classes/datasource');
+const Datasource = require('../lib/classes/datasource');
 
 
 module.exports = new Datasource ('quandl', {
@@ -27,14 +27,14 @@ module.exports = new Datasource ('quandl', {
     Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana's
     Advanced Settings. The API has a really low rate limit without a key.`,
   fn: function quandlFn(args, tlConfig) {
-    var intervalMap = {
+    const intervalMap = {
       '1d': 'daily',
       '1w': 'weekly',
       '1M': 'monthly',
       '1y': 'annual',
     };
 
-    var config = _.defaults(args.byName, {
+    const config = _.defaults(args.byName, {
       code: 'WIKI/AAPL',
       position: 1,
       interval: intervalMap[tlConfig.time.interval],
@@ -46,7 +46,7 @@ module.exports = new Datasource ('quandl', {
       '. quandl() supports: ' + _.keys(intervalMap).join(', '));
     }
 
-    var time = {
+    const time = {
       min: moment.utc(tlConfig.time.from).format('YYYY-MM-DD'),
       max:  moment.utc(tlConfig.time.to).format('YYYY-MM-DD')
     };
@@ -58,7 +58,7 @@ module.exports = new Datasource ('quandl', {
     // 4. close
     // 5. volume
 
-    var URL = 'https://www.quandl.com/api/v1/datasets/' + config.code + '.json' +
+    const URL = 'https://www.quandl.com/api/v1/datasets/' + config.code + '.json' +
       '?sort_order=asc' +
       '&trim_start=' + time.min +
       '&trim_end=' + time.max +
@@ -66,7 +66,7 @@ module.exports = new Datasource ('quandl', {
       '&auth_token=' + config.apikey;
 
     return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
-      var data = _.map(resp.data, function (bucket) {
+      const data = _.map(resp.data, function (bucket) {
         return [moment(bucket[0]).valueOf(), bucket[config.position]];
       });
 

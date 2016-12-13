@@ -17,9 +17,9 @@ uiModules
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
 
-  let visTypes = Private(RegistryVisTypesProvider);
+  const visTypes = Private(RegistryVisTypesProvider);
 
-  let notify = new Notifier({
+  const notify = new Notifier({
     location: 'Visualize'
   });
 
@@ -44,20 +44,20 @@ uiModules
 
       function getter(selector) {
         return function () {
-          let $sel = $el.find(selector);
+          const $sel = $el.find(selector);
           if ($sel.size()) return $sel;
         };
       }
 
-      let getVisEl = getter('.visualize-chart');
-      let getVisContainer = getter('.vis-container');
-      let getSpyContainer = getter('.visualize-spy-container');
+      const getVisEl = getter('.visualize-chart');
+      const getVisContainer = getter('.vis-container');
+      const getSpyContainer = getter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
-        let requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-        let isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-        let shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
+        const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+        const isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+        const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
         return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
       };
@@ -80,12 +80,12 @@ uiModules
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
-      let applyClassNames = function () {
+      const applyClassNames = function () {
         const $visEl = getVisContainer();
         const $spyEl = getSpyContainer();
         if (!$spyEl) return;
 
-        let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
+        const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
         $visEl.toggleClass('spy-only', Boolean(fullSpy));
         $spyEl.toggleClass('only', Boolean(fullSpy));
@@ -100,8 +100,8 @@ uiModules
 
       // we need to wait for some watchers to fire at least once
       // before we are "ready", this manages that
-      let prereq = (function () {
-        let fns = [];
+      const prereq = (function () {
+        const fns = [];
 
         return function register(fn) {
           fns.push(fn);
@@ -119,14 +119,14 @@ uiModules
         };
       }());
 
-      let loadingDelay = config.get('visualization:loadingDelay');
+      const loadingDelay = config.get('visualization:loadingDelay');
       $scope.loadingStyle = {
         '-webkit-transition-delay': loadingDelay,
         'transition-delay': loadingDelay
       };
 
       function shouldHaveFullSpy() {
-        let $visEl = getVisEl();
+        const $visEl = getVisEl();
         if (!$visEl) return;
 
         return ($visEl.height() < minVisChartHeight)
@@ -143,7 +143,7 @@ uiModules
       });
 
       $scope.$watch('vis', prereq(function (vis, oldVis) {
-        let $visEl = getVisEl();
+        const $visEl = getVisEl();
         if (!$visEl) return;
 
         if (!attr.editableVis) {

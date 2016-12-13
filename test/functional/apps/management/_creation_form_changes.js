@@ -22,7 +22,7 @@ bdd.describe('user input reactions', function () {
   });
 
   bdd.it('should hide time-based index pattern when time-based option is unchecked', function () {
-    var self = this;
+    const self = this;
     return PageObjects.settings.getTimeBasedEventsCheckbox()
     .then(function (selected) {
       // uncheck the 'time-based events' checkbox
@@ -30,14 +30,14 @@ bdd.describe('user input reactions', function () {
     })
     // try to find the checkbox (this shouldn fail)
     .then(function () {
-      var waitTime = 10000;
+      const waitTime = 10000;
       return PageObjects.settings.getTimeBasedIndexPatternCheckbox(waitTime);
     })
     .then(function () {
       PageObjects.common.saveScreenshot('Settings-indices-hide-time-based-index-pattern');
       // we expect the promise above to fail
-      var handler = PageObjects.common.createErrorHandler(self);
-      var msg = 'Found time based index pattern checkbox';
+      const handler = PageObjects.common.createErrorHandler(self);
+      const msg = 'Found time based index pattern checkbox';
       handler(msg);
     })
     .catch(function () {

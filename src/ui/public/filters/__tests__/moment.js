@@ -9,10 +9,10 @@ import 'ui/filters/moment';
 let filter;
 
 let config;
-let anchor = '2014-01-01T06:06:06.666';
+const anchor = '2014-01-01T06:06:06.666';
 let clock;
 
-let init = function (expandable) {
+const init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

@@ -5,14 +5,14 @@ import _ from 'lodash';
  */
 export default {
   cssFilters: (function () {
-    let e = document.createElement('img');
-    let rules = ['webkitFilter', 'mozFilter', 'msFilter', 'filter'];
-    let test = 'grayscale(1)';
+    const e = document.createElement('img');
+    const rules = ['webkitFilter', 'mozFilter', 'msFilter', 'filter'];
+    const test = 'grayscale(1)';
     rules.forEach(function (rule) { e.style[rule] = test; });
 
     document.body.appendChild(e);
-    let styles = window.getComputedStyle(e);
-    let can = _(styles).pick(rules).includes(test);
+    const styles = window.getComputedStyle(e);
+    const can = _(styles).pick(rules).includes(test);
     document.body.removeChild(e);
 
     return can;
