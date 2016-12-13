@@ -1,11 +1,34 @@
 
 .localDropdown {
+  position: relative;
   padding: 10px $localNavSideSpacing 14px;
   background-color: $localDropdownBackgroundColor;
   line-height: 20px;
 
   @include darkTheme {
     background-color: $localDropdownBackgroundColor--darkTheme;
+  }
+}
+
+.localDropdownCloseButton {
+  appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  position: absolute;
+  top: 1px;
+  right: 5px;
+  font-size: 16px;
+  color: $localNavTextColor;
+  cursor: pointer;
+  opacity: 0.35;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @include darkTheme {
+    color: $localNavTextColor--darkTheme;
   }
 }
 

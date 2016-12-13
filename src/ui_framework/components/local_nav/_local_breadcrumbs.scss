@@ -28,8 +28,12 @@
 
     &:last-child {
       .localBreadcrumb__link {
-        pointer-events: none;
         color: $localNavTextColor;
+        cursor: default;
+
+        &:hover {
+          text-decoration: none;
+        }
 
         @include darkTheme {
           color: $localNavTextColor--darkTheme;
