@@ -17,10 +17,10 @@ let $parentScope;
 let $scope;
 
 let $elem;
-let anchor = '2014-01-01T06:06:06.666Z';
+const anchor = '2014-01-01T06:06:06.666Z';
 let clock;
 
-let init = function () {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -34,7 +34,7 @@ let init = function () {
     $parentScope = $rootScope;
 
     // Add some parameters to it
-    let timefilter = {
+    const timefilter = {
       time : {
         from: moment().subtract(15, 'minutes'),
         to: moment(),
@@ -172,7 +172,7 @@ describe('timepicker directive', function () {
       expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('quick');
 
       // Each of the 3 modes
-      let modes = ['absolute', 'relative', 'quick'];
+      const modes = ['absolute', 'relative', 'quick'];
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
@@ -213,7 +213,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a preview of the "from" input', function (done) {
-      let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
+      const preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
       expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
       done();
     });
@@ -224,7 +224,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a submit handler', function (done) {
-      let form = $elem.find('form[ng-submit="applyRelative()"]');
+      const form = $elem.find('form[ng-submit="applyRelative()"]');
       expect(form.length).to.be(1);
       done();
     });
@@ -245,7 +245,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a dropdown bound to relative.unit that contains all of the intervals', function (done) {
-      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+      const select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
       expect(select.length).to.be(1);
       expect(select.find('option').length).to.be(7);
 
@@ -257,7 +257,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a checkbox that is checked when rounding is enabled', function (done) {
-      let checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.round"]');
+      const checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.round"]');
       expect(checkbox.length).to.be(1);
 
       // Rounding is disabled by default
@@ -333,8 +333,8 @@ describe('timepicker directive', function () {
     });
 
     it('updates the input fields when the scope variables are changed', function (done) {
-      let input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
-      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+      const input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
+      const select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
 
       $scope.relative.count = 5;
       $scope.$digest();

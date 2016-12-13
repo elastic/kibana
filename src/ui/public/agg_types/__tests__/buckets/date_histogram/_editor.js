@@ -17,7 +17,7 @@ describe('editor', function () {
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    let Vis = Private(VisProvider);
+    const Vis = Private(VisProvider);
 
     /**
      * Render the AggParams editor for the date histogram aggregation
@@ -38,8 +38,8 @@ describe('editor', function () {
         ]
       });
 
-      let $el = $('<vis-editor-agg-params agg="agg" group-name="groupName"></vis-editor-agg-params>');
-      let $parentScope = $injector.get('$rootScope').$new();
+      const $el = $('<vis-editor-agg-params agg="agg" group-name="groupName"></vis-editor-agg-params>');
+      const $parentScope = $injector.get('$rootScope').$new();
 
       agg = $parentScope.agg = vis.aggs.bySchemaName.segment[0];
       $parentScope.groupName = 'buckets';
@@ -48,10 +48,10 @@ describe('editor', function () {
       $scope = $el.scope();
       $scope.$digest();
 
-      let $inputs = $('vis-agg-param-editor', $el);
+      const $inputs = $('vis-agg-param-editor', $el);
       return _.transform($inputs.toArray(), function (inputs, e) {
-        let $el = $(e);
-        let $scope = $el.scope();
+        const $el = $(e);
+        const $scope = $el.scope();
 
         inputs[$scope.aggParam.name] = {
           $el: $el,
@@ -107,7 +107,7 @@ describe('editor', function () {
       expect(params.interval.modelValue().val).to.be('auto');
       expect(params.field.modelValue().name).to.be(indexPattern.timeFieldName);
 
-      let field = _.find(indexPattern.fields, function (f) {
+      const field = _.find(indexPattern.fields, function (f) {
         return f.type === 'date' && f.name !== indexPattern.timeFieldName;
       });
 

@@ -1,6 +1,6 @@
-var reduce = require('../lib/reduce.js');
+const reduce = require('../lib/reduce.js');
 
-var Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('max', {
   args: [
     {

@@ -13,19 +13,19 @@ export default function BucketCountBetweenProvider() {
    * @return {null|number}
    */
   function bucketCountBetween(aggConfigA, aggConfigB) {
-    let aggs = aggConfigA.vis.aggs.getRequestAggs();
+    const aggs = aggConfigA.vis.aggs.getRequestAggs();
 
-    let aIndex = aggs.indexOf(aggConfigA);
-    let bIndex = aggs.indexOf(aggConfigB);
+    const aIndex = aggs.indexOf(aggConfigA);
+    const bIndex = aggs.indexOf(aggConfigB);
 
     if (aIndex === -1 || bIndex === -1) {
       return null;
     }
 
     // return a negative distance, if b is before a
-    let negative = (aIndex > bIndex);
+    const negative = (aIndex > bIndex);
 
-    let count = aggs
+    const count = aggs
       .slice(Math.min(aIndex, bIndex), Math.max(aIndex, bIndex))
       .reduce(function (count, cfg) {
         if (cfg === aggConfigA || cfg === aggConfigB || cfg.schema.group !== 'buckets') {

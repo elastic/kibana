@@ -186,16 +186,16 @@ export default function PointSeriesFactory(Private) {
     }
 
     draw() {
-      let self = this;
-      let $elem = $(this.chartEl);
-      let margin = this.handler.visConfig.get('style.margin');
+      const self = this;
+      const $elem = $(this.chartEl);
+      const margin = this.handler.visConfig.get('style.margin');
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
-      let xScale = this.handler.categoryAxes[0].getScale();
-      let minWidth = 50;
-      let minHeight = 50;
-      let addTimeMarker = this.chartConfig.addTimeMarker;
-      let times = this.chartConfig.times || [];
+      const xScale = this.handler.categoryAxes[0].getScale();
+      const minWidth = 50;
+      const minHeight = 50;
+      const addTimeMarker = this.chartConfig.addTimeMarker;
+      const times = this.chartConfig.times || [];
       let timeMarker;
       let div;
       let svg;

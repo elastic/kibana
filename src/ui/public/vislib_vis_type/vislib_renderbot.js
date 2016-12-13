@@ -4,9 +4,9 @@ import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
 module.exports = function VislibRenderbotFactory(Private, $injector) {
   const AngularPromise = $injector.get('Promise');
-  let vislib = Private(VislibProvider);
-  let Renderbot = Private(VisRenderbotProvider);
-  let buildChartData = Private(VislibVisTypeBuildChartDataProvider);
+  const vislib = Private(VislibProvider);
+  const Renderbot = Private(VisRenderbotProvider);
+  const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
 
   _.class(VislibRenderbot).inherits(Renderbot);
   function VislibRenderbot(vis, $el, uiState) {
@@ -30,7 +30,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {
-    let self = this;
+    const self = this;
 
     return _.assign(
       {},
@@ -53,9 +53,9 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   };
 
   VislibRenderbot.prototype.destroy = function () {
-    let self = this;
+    const self = this;
 
-    let vislibVis = self.vislibVis;
+    const vislibVis = self.vislibVis;
 
     _.forOwn(self.vis.listeners, function (listener, event) {
       vislibVis.off(event, listener);
@@ -65,10 +65,10 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   };
 
   VislibRenderbot.prototype.updateParams = function () {
-    let self = this;
+    const self = this;
 
     // get full vislib params object
-    let newParams = self._getVislibParams();
+    const newParams = self._getVislibParams();
 
     // if there's been a change, replace the vis
     if (!_.isEqual(newParams, self.vislibParams)) self._createVis();
