@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var fetch = require('node-fetch');
-var moment = require('moment');
-var Datasource = require('../lib/classes/datasource');
-var Promise = require('bluebird');
+const _ = require('lodash');
+const fetch = require('node-fetch');
+const moment = require('moment');
+const Datasource = require('../lib/classes/datasource');
+const Promise = require('bluebird');
 
 
 module.exports = new Datasource ('static', {
@@ -23,13 +23,13 @@ module.exports = new Datasource ('static', {
   help: 'Draws a single value across the chart',
   fn: function staticFn(args, tlConfig) {
 
-    var data;
-    var target = tlConfig.getTargetSeries();
+    let data;
+    const target = tlConfig.getTargetSeries();
     if (typeof args.byName.value === 'string') {
-      var points = args.byName.value.split(':');
-      var begin = _.first(target)[0];
-      var end = _.last(target)[0];
-      var step = (end - begin) / (points.length - 1);
+      const points = args.byName.value.split(':');
+      const begin = _.first(target)[0];
+      const end = _.last(target)[0];
+      const step = (end - begin) / (points.length - 1);
       data = _.map(points, function (point, i) {
         return [begin + (i * step), parseFloat(point)];
       });

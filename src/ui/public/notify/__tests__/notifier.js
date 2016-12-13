@@ -70,7 +70,7 @@ describe('Notifier', function () {
     });
 
     it('sets timeRemaining and decrements', function () {
-      let notif = notify('error');
+      const notif = notify('error');
 
       expect(notif.timeRemaining).to.equal(300);
       $interval.flush(1000);
@@ -78,8 +78,8 @@ describe('Notifier', function () {
     });
 
     it('closes notification on lifetime expiry', function () {
-      let expectation = sinon.mock();
-      let notif = notifier.error(message, expectation);
+      const expectation = sinon.mock();
+      const notif = notifier.error(message, expectation);
 
       expectation.once();
       expectation.withExactArgs('ignore');
@@ -90,7 +90,7 @@ describe('Notifier', function () {
     });
 
     it('allows canceling of timer', function () {
-      let notif = notify('error');
+      const notif = notify('error');
 
       expect(notif.timerId).to.not.be(undefined);
       notif.cancelTimer();
@@ -99,7 +99,7 @@ describe('Notifier', function () {
     });
 
     it('resets timer on addition to stack', function () {
-      let notif = notify('error');
+      const notif = notify('error');
 
       $interval.flush(100000);
       expect(notif.timeRemaining).to.equal(200);
@@ -109,12 +109,12 @@ describe('Notifier', function () {
     });
 
     it('allows reporting', function () {
-      let includesReport = _.includes(notify('error').actions, 'report');
+      const includesReport = _.includes(notify('error').actions, 'report');
       expect(includesReport).to.true;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('error').actions, 'accept');
+      const includesAccept = _.includes(notify('error').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -156,12 +156,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      let includesReport = _.includes(notify('warning').actions, 'report');
+      const includesReport = _.includes(notify('warning').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('warning').actions, 'accept');
+      const includesAccept = _.includes(notify('warning').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -203,12 +203,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      let includesReport = _.includes(notify('info').actions, 'report');
+      const includesReport = _.includes(notify('info').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('info').actions, 'accept');
+      const includesAccept = _.includes(notify('info').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -387,12 +387,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      let includesReport = _.includes(notify('banner').actions, 'report');
+      const includesReport = _.includes(notify('banner').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('banner').actions, 'accept');
+      const includesAccept = _.includes(notify('banner').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -422,13 +422,13 @@ describe('Notifier', function () {
   function testVersionInfo(fnName) {
     context('when version is configured', function () {
       it('adds version to notification', function () {
-        let notification = notify(fnName);
+        const notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
     context('when build number is configured', function () {
       it('adds buildNum to notification', function () {
-        let notification = notify(fnName);
+        const notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);
       });
     });

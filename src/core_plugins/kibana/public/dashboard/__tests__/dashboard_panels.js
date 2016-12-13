@@ -41,7 +41,7 @@ describe('dashboard panels', function () {
 
   it('loads with no vizualizations', function () {
     ngMock.inject((SavedDashboard) => {
-      let dash = new SavedDashboard();
+      const dash = new SavedDashboard();
       dash.init();
       compile(dash);
     });
@@ -50,7 +50,7 @@ describe('dashboard panels', function () {
 
   it('loads one vizualization', function () {
     ngMock.inject((SavedDashboard) => {
-      let dash = new SavedDashboard();
+      const dash = new SavedDashboard();
       dash.init();
       dash.panelsJSON = `[{"col":3,"id":"foo1","row":1,"size_x":2,"size_y":2,"type":"visualization"}]`;
       compile(dash);
@@ -60,7 +60,7 @@ describe('dashboard panels', function () {
 
   it('loads vizualizations in correct order', function () {
     ngMock.inject((SavedDashboard) => {
-      let dash = new SavedDashboard();
+      const dash = new SavedDashboard();
       dash.init();
       dash.panelsJSON = `[
         {"col":3,"id":"foo1","row":1,"size_x":2,"size_y":2,"type":"visualization"},
@@ -90,7 +90,7 @@ describe('dashboard panels', function () {
 
   it('initializes visualizations with the default size', function () {
     ngMock.inject((SavedDashboard) => {
-      let dash = new SavedDashboard();
+      const dash = new SavedDashboard();
       dash.init();
       dash.panelsJSON = `[
         {"col":3,"id":"foo1","row":1,"type":"visualization"},

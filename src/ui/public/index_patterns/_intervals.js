@@ -3,7 +3,7 @@ import moment from 'moment';
 import IndexedArray from 'ui/indexed_array';
 export default function IndexNameIntervalsService(timefilter) {
 
-  let intervals = new IndexedArray({
+  const intervals = new IndexedArray({
     index: ['name'],
     initialSet: [
       {
@@ -40,10 +40,10 @@ export default function IndexNameIntervalsService(timefilter) {
     // setup the range that the list will span, return two moment objects that
     // are in proper order. a and b can be numbers to specify to go before or after now (respectively)
     // a certain number of times, based on the interval
-    let range = [[a, 'min', 'startOf'], [b, 'max', 'startOf']].map(function (v) {
+    const range = [[a, 'min', 'startOf'], [b, 'max', 'startOf']].map(function (v) {
       let val = v[0];
-      let bound = v[1];
-      let extend = v[2];
+      const bound = v[1];
+      const extend = v[2];
 
       // grab a bound from the time filter
       if (val == null) {
@@ -64,12 +64,12 @@ export default function IndexNameIntervalsService(timefilter) {
       if (!interval) throw new Error('Interval must be one of ' + _.pluck(intervals, 'name'));
     }
 
-    let indexList = [];
+    const indexList = [];
     let start = range.shift();
     // turn stop into milliseconds to that it's not constantly converted by the while condition
-    let stop = range.shift().valueOf();
+    const stop = range.shift().valueOf();
 
-    let add = sortDirection === 'desc' ? 'unshift' : 'push';
+    const add = sortDirection === 'desc' ? 'unshift' : 'push';
 
     while (start <= stop) {
       const index = start.format(format);

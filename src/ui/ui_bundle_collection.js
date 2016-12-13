@@ -61,7 +61,7 @@ class UiBundleCollection {
   async writeEntryFiles() {
     await this.ensureDir();
 
-    for (let bundle of this.each) {
+    for (const bundle of this.each) {
       const existing = await bundle.readEntryFile();
       const expected = bundle.renderContent();
 
@@ -75,7 +75,7 @@ class UiBundleCollection {
   async getInvalidBundles() {
     const invalids = new UiBundleCollection(this.env);
 
-    for (let bundle of this.each) {
+    for (const bundle of this.each) {
       const exists = await bundle.checkForExistingOutput();
       if (!exists) {
         invalids.add(bundle);

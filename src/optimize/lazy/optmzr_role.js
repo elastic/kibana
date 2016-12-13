@@ -3,7 +3,7 @@ import LazyOptimizer from './lazy_optimizer';
 import { fromRoot } from '../../utils';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
-  let server = new LazyServer(
+  const server = new LazyServer(
     config.get('optimize.lazyHost'),
     config.get('optimize.lazyPort'),
     new LazyOptimizer({
@@ -20,7 +20,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
 
   let ready = false;
 
-  let sendReady = () => {
+  const sendReady = () => {
     if (!process.connected) return;
     process.send(['WORKER_BROADCAST', { optimizeReady: ready }]);
   };

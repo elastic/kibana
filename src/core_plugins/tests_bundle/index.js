@@ -16,7 +16,7 @@ export default (kibana) => {
     uiExports: {
       bundle: async (UiBundle, env, apps, plugins) => {
         let modules = [];
-        let config = kibana.config;
+        const config = kibana.config;
 
         const testGlobs = ['src/ui/public/**/*.js'];
         const testingPluginIds = config.get('tests_bundle.pluginId');
@@ -28,7 +28,7 @@ export default (kibana) => {
             if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
 
             // add the modules from all of this plugins apps
-            for (let app of plugin.apps) {
+            for (const app of plugin.apps) {
               modules = union(modules, app.getModules());
             }
 
@@ -37,7 +37,7 @@ export default (kibana) => {
         } else {
 
           // add the modules from all of the apps
-          for (let app of apps) {
+          for (const app of apps) {
             modules = union(modules, app.getModules());
           }
 
@@ -47,7 +47,7 @@ export default (kibana) => {
         }
 
         const testFiles = await findSourceFiles(testGlobs);
-        for (let f of testFiles) modules.push(f);
+        for (const f of testFiles) modules.push(f);
 
         if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({

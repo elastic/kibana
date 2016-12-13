@@ -84,7 +84,7 @@ export default function AxisLabelsFactory(Private) {
       const self = this;
       const config = this.axisConfig;
       let startPos = 0;
-      let padding = 1.1;
+      const padding = 1.1;
 
       return function (selection) {
         if (!config.get('labels.filter')) return;
