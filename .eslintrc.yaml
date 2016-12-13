@@ -58,7 +58,7 @@ rules:
   no-use-before-define: [ error, nofunc ]
   no-with: error
   one-var: [ error, never ]
-  quotes: [ error, single ]
+  quotes: [ error, single, { allowTemplateLiterals: true } ]
   semi-spacing: [ error, { before: false, after: true } ]
   semi: [ error, always ]
   no-extra-semi: [ error ]
