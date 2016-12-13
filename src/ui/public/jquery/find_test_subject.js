@@ -52,6 +52,6 @@ module.exports = function bindToJquery($) {
     });
 
     return $els;
-  };
+  }
 
 };

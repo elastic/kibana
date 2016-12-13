@@ -28,4 +28,4 @@ export default function ColorUtilService(Private) {
       return colorMapping[value] || mappedColors.get(value);
     };
   };
-};
+}

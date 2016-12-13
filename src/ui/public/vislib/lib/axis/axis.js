@@ -54,21 +54,21 @@ export default function AxisFactory(Private) {
      */
     _isPositive(num) {
       return num >= 0;
-    };
+    }
 
     /**
      * Returns true for negative numbers
      */
     _isNegative(num) {
       return num < 0;
-    };
+    }
 
     /**
      * Adds two input values
      */
     _addVals(a, b) {
       return a + b;
-    };
+    }
 
     /**
      * Returns the results of the addition of numbers in a filtered array.
@@ -77,7 +77,7 @@ export default function AxisFactory(Private) {
       const filteredArray = arr.filter(callback);
 
       return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
-    };
+    }
 
     /**
      * Calculates the d.y0 value for stacked data in D3.
@@ -86,7 +86,7 @@ export default function AxisFactory(Private) {
       if (y === 0 && this._lastY0) return this._sumYs(arr, this._lastY0 > 0 ? this._isPositive : this._isNegative);
       if (y >= 0) return this._sumYs(arr, this._isPositive);
       return this._sumYs(arr, this._isNegative);
-    };
+    }
 
     _getCounts(i, j) {
       const data = this.visConfig.data.chartData();
@@ -97,7 +97,7 @@ export default function AxisFactory(Private) {
       dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
 
       return dataLengths;
-    };
+    }
 
     _createCache() {
       const cache = {
@@ -112,7 +112,7 @@ export default function AxisFactory(Private) {
       cache.count = this._getCounts(cache.index.chart, cache.index.stack);
 
       return cache;
-    };
+    }
     /**
      * Stacking function passed to the D3 Stack Layout `.out` API.
      * See: https://github.com/mbostock/d3/wiki/Stack-Layout
@@ -161,7 +161,7 @@ export default function AxisFactory(Private) {
         this._cache.count.stacks = chartSeries.length;
         this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
       }
-    };
+    }
 
     render() {
       const elSelector = this.axisConfig.get('elSelector');
@@ -321,4 +321,4 @@ export default function AxisFactory(Private) {
   }
 
   return Axis;
-};
+}

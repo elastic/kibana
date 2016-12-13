@@ -17,4 +17,4 @@ export default function VisTypeFactory(Private) {
     tile_map: Private(VislibVisualizationsTileMapProvider),
     point_series: Private(VislibVisualizationsPointSeriesProvider)
   };
-};
+}

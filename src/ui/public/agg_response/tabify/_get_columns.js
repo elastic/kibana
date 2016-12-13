@@ -47,4 +47,4 @@ export default function GetColumnsProvider(Private) {
 
     return columns;
   };
-};
+}

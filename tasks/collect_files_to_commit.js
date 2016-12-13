@@ -12,4 +12,4 @@ export default function registerCollectFilesToCommit(grunt) {
     })
     .nodeify(this.async());
   });
-};
+}

@@ -113,4 +113,4 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       }
     ])
   });
-};
+}

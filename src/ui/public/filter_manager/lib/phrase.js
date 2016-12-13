@@ -32,7 +32,7 @@ export default function buildPhraseFilter(field, value, indexPattern) {
     };
   }
   return filter;
-};
+}
 
 
 /**

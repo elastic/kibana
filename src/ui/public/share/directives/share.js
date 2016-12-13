@@ -65,7 +65,7 @@ app.directive('share', function (Private) {
             },
           }),
         });
-      };
+      }
 
       function getSnapshotUrl() {
         const url = $location.absUrl();

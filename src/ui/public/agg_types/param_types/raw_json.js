@@ -74,4 +74,4 @@ export default function RawJSONAggParamFactory(Private) {
   };
 
   return RawJSONAggParam;
-};
+}
