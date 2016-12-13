@@ -3,15 +3,33 @@ import _ from 'lodash';
 import 'ui/local_navigation/index';
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
-import {fetchAnchor} from './api/anchor';
-import {fetchContext} from './api/context';
+import {
+  bindActionCreators,
+  createDispatchProvider,
+  createPipeline,
+  createScopedUpdater,
+} from './dispatch';
+import {
+  QueryParameterActionCreatorsProvider,
+  selectPredecessorCount,
+  selectSuccessorCount,
+  updateQueryParameters,
+} from './query_parameters';
+import {
+  QueryActionCreatorsProvider,
+  selectIsLoadingAnchorRow,
+  selectIsLoadingPredecessorRows,
+  selectIsLoadingSuccessorRows,
+  selectRows,
+  updateLoadingStatus,
+  updateQueryResults
+} from './query';
 
 
 const module = uiModules.get('apps/context', [
   'kibana',
   'ngRoute',
 ]);
-const MIN_CONTEXT_SIZE = 0;
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -30,55 +48,72 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($q, config, es) {
-  const defaultSizeStep = parseInt(config.get('context:step'), 10);
+function ContextAppController(Private) {
+  const createDispatch = Private(createDispatchProvider);
+  const queryParameterActionCreators = Private(QueryParameterActionCreatorsProvider);
+  const queryActionCreators = Private(QueryActionCreatorsProvider);
 
-  this.anchorRow = null;
-  this.rows = [];
-  this.isInitialized = false;
-
-  this.initialize = () => (
-    this.actions.reload()
-      .then(() => this.isInitialized = true)
+  this.state = createInitialState(
+    this.anchorUid,
+    this.columns,
+    this.indexPattern,
+    this.size,
+    this.sort,
   );
 
-  this.actions = {
-    fetchAnchorRow: () => (
-      $q.resolve()
-        .then(() => (
-          fetchAnchor(es, this.indexPattern, this.anchorUid, _.zipObject([this.sort]))
-        ))
-        .then(anchorRow => this.anchorRow = anchorRow)
-    ),
-    fetchContextRows: () => (
-      $q.resolve(this.anchorRowPromise)
-        .then(anchorRow => (
-          fetchContext(es, this.indexPattern, anchorRow, _.zipObject([this.sort]), this.size)
-        ))
-        .then(({predecessors, successors}) => {
-          this.predecessorRows = predecessors;
-          this.successorRows = successors;
-        })
-        .then(() => (
-          this.rows = [].concat(this.predecessorRows, [this.anchorRow], this.successorRows)
-        ))
-    ),
-    increaseSize: (value = defaultSizeStep) => this.actions.setSize(this.size + value),
-    decreaseSize: (value = defaultSizeStep) => this.actions.setSize(this.size - value),
-    reload: () => {
-      this.anchorRowPromise = this.actions.fetchAnchorRow();
-      this.contextRowsPromise = this.actions.fetchContextRows();
+  this.update = createPipeline(
+    createScopedUpdater('queryParameters', updateQueryParameters),
+    createScopedUpdater('rows', updateQueryResults),
+    createScopedUpdater('loadingStatus', updateLoadingStatus),
+  );
 
-      return $q.all([
-        this.anchorRowPromise,
-        this.contextRowsPromise,
-      ]);
-    },
-    setSize: (size) => {
-      this.size = Math.max(size, MIN_CONTEXT_SIZE);
-      return this.actions.fetchContextRows();
-    },
+  this.dispatch = createDispatch(
+    () => this.state,
+    (state) => this.state = state,
+    this.update,
+  );
+
+  this.actions = bindActionCreators({
+    ...queryParameterActionCreators,
+    ...queryActionCreators,
+  }, this.dispatch);
+
+  this.selectors = {
+    rows: () => selectRows(this.state),
+    isLoadingAnchorRow: () => selectIsLoadingAnchorRow(this.state),
+    isLoadingPredecessorRows: () => selectIsLoadingPredecessorRows(this.state),
+    isLoadingSuccessorRows: () => selectIsLoadingSuccessorRows(this.state),
+    predecessorCount: (value) => (
+      value ? this.actions.fetchGivenPredecessorRows(value) : selectPredecessorCount(this.state)
+    ),
+    successorCount: (value) => (
+      value ? this.actions.fetchGivenSuccessorRows(value) : selectSuccessorCount(this.state)
+    ),
   };
 
-  this.initialize();
+  this.actions.fetchAllRows();
+}
+
+function createInitialState(anchorUid, columns, indexPattern, size, sort) {
+  return {
+    queryParameters: {
+      anchorUid,
+      columns,
+      indexPattern,
+      predecessorCount: size,
+      successorCount: size,
+      sort,
+    },
+    rows: {
+      anchor: null,
+      predecessors: [],
+      successors: [],
+    },
+    loadingStatus: {
+      anchor: 'uninitialized',
+      predecessors: 'uninitialized',
+      successors: 'uninitialized',
+    },
+    isInitialized: false,
+  };
 }

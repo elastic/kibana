@@ -2,9 +2,10 @@ import _ from 'lodash';
 
 
 function reverseQuerySort(query) {
-  return _.assign({}, query, {
+  return {
+    ...query,
     sort: _.get(query, 'sort', []).map(reverseSortDirective),
-  });
+  };
 }
 
 function reverseSortDirective(sortDirective) {

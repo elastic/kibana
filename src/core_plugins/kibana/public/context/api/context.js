@@ -6,36 +6,48 @@ import {createSuccessorsQuery} from './utils/queries.js';
 import {reverseQuerySort} from './utils/sorting';
 
 
-async function fetchContext(es, indexPattern, anchorDocument, sort, size) {
-  const indices = await indexPattern.toIndexList();
+async function fetchSuccessors(es, indexPattern, anchorDocument, sort, size) {
+  const successorsQuery = prepareQuery(indexPattern, anchorDocument, sort, size);
+  const results = await performQuery(es, indexPattern, successorsQuery);
+  return results;
+}
+
+async function fetchPredecessors(es, indexPattern, anchorDocument, sort, size) {
+  const successorsQuery = prepareQuery(indexPattern, anchorDocument, sort, size);
+  const predecessorsQuery = reverseQuerySort(successorsQuery);
+  const reversedResults = await performQuery(es, indexPattern, predecessorsQuery);
+  const results = reverseResults(reversedResults);
+  return results;
+}
+
+
+function prepareQuery(indexPattern, anchorDocument, sort, size) {
   const anchorUid = getDocumentUid(anchorDocument._type, anchorDocument._id);
   const successorsQuery = addComputedFields(
     indexPattern,
     createSuccessorsQuery(anchorUid, anchorDocument.sort, sort, size)
   );
-  const predecessorsQuery = reverseQuerySort(successorsQuery);
+  return successorsQuery;
+}
 
-  const response = await es.msearch({
-    body: [
-      {index: indices},
-      predecessorsQuery,
-      {index: indices},
-      successorsQuery,
-    ],
+async function performQuery(es, indexPattern, query) {
+  const indices = await indexPattern.toIndexList();
+
+  const response = await es.search({
+    index: indices,
+    body: query,
   });
 
-  const predecessors = _.get(response, ['responses', 0, 'hits', 'hits'], []);
-  const successors = _.get(response, ['responses', 1, 'hits', 'hits'], []);
+  return _.get(response, ['hits', 'hits'], []);
+}
 
-  predecessors.reverse();
-
-  return {
-    predecessors,
-    successors,
-  };
+function reverseResults(results) {
+  results.reverse();
+  return results;
 }
 
 
 export {
-  fetchContext,
+  fetchPredecessors,
+  fetchSuccessors,
 };

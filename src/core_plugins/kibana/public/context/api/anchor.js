@@ -15,9 +15,10 @@ async function fetchAnchor(es, indexPattern, uid, sort) {
     throw new Error('Failed to load anchor row.');
   }
 
-  return _.assign({}, response.hits.hits[0], {
+  return {
+    ...response.hits.hits[0],
     $$_isAnchor: true,
-  });
+  };
 }
 
 

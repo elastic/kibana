@@ -9,30 +9,30 @@
           </div>
           <div class="localBreadcrumb">
             <span>Context of </span>
-            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.anchorUid"></span>
+            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.anchorUid"></span>
             <span> in </span>
-            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.indexPattern.id"></span>
+            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.indexPattern.id"></span>
           </div>
         </div>
       </local-navigation-row-section>
 
       <local-navigation-row-section>
         <div class="localMenu">
-          <div class="localMenuItem" ng-click="contextApp.actions.increaseSize()">
-            <div class="fa fa-plus"></div>
-          </div>
           <div class="localMenuItem">
             <input
               class="localMenuItem__input--inPlace"
-              ng-change="contextApp.actions.setSize(contextApp.size)"
-              ng-model-options="{updateOn: 'change'}"
-              ng-model="contextApp.size"
+              ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
+              ng-model="contextApp.selectors.predecessorCount"
               type="number"
             />
-            <div>surrounding entries</div>
-          </div>
-          <div class="localMenuItem" ng-click="contextApp.actions.decreaseSize()">
-            <div class="fa fa-minus"></div>
+            <div>newer and</div>
+            <input
+              class="localMenuItem__input--inPlace"
+              ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
+              ng-model="contextApp.selectors.successorCount"
+              type="number"
+            />
+            <div>older entries</div>
           </div>
         </div>
       </local-navigation-row-section>
@@ -42,19 +42,37 @@
   <div class="container-fluid" role="main">
     <div class="row">
       <div class="col-md-12">
-        <div class="discover-overlay" ng-if="!contextApp.isInitialized">
+        <button
+          class="btn btn-block btn-lg btn-link"
+          ng-click="contextApp.actions.fetchMorePredecessorRows()"
+          ng-if="!contextApp.selectors.isLoadingAnchorRow()"
+          ng-disabled="contextApp.selectors.isLoadingPredecessorRows()"
+        >
+          <i class="fa" ng-class="contextApp.selectors.isLoadingPredecessorRows() ? 'fa-spinner fa-spin' : 'fa-plus'"></i>
+          <span>Load newer entries</span>
+        </button>
+        <div class="discover-overlay" ng-if="contextApp.selectors.isLoadingAnchorRow()">
           <h2>Loading...</h2>
         </div>
-        <div class="discover-table" ng-if="contextApp.isInitialized" fixed-scroll>
+        <div class="discover-table" ng-if="!contextApp.selectors.isLoadingAnchorRow()" fixed-scroll>
           <doc-table
-            hits="contextApp.rows"
-            index-pattern="contextApp.indexPattern"
-            sorting="contextApp.sort"
-            columns="contextApp.columns"
+            hits="contextApp.selectors.rows()"
+            index-pattern="contextApp.state.queryParameters.indexPattern"
+            sorting="contextApp.state.queryParameters.sort"
+            columns="contextApp.state.queryParameters.columns"
             infinite-scroll="true"
           >
           </doc-table>
         </div>
+        <button
+          class="btn btn-block btn-lg btn-link"
+          ng-click="contextApp.actions.fetchMoreSuccessorRows()"
+          ng-if="!contextApp.selectors.isLoadingAnchorRow()"
+          ng-disabled="contextApp.selectors.isLoadingSuccessorRows()"
+        >
+          <i class="fa" ng-class="contextApp.selectors.isLoadingSuccessorRows() ? 'fa-spinner fa-spin' : 'fa-plus'"></i>
+          <span>Load older entries</span>
+        </button>
       </div>
     </div>
   </div>

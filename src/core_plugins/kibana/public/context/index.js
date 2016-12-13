@@ -26,6 +26,8 @@ uiRoutes
 
 function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern) {
   this.state = new AppState(createDefaultAppState(config));
+  this.state.save(true);
+
   $scope.$watchGroup([
     'contextAppRoute.state.columns',
     'contextAppRoute.state.size',
