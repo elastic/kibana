@@ -158,6 +158,14 @@ describe('ui settings', function () {
       })).to.equal(true);
     });
 
+    it('returns an empty object when status is not green', async function () {
+      const { uiSettings, req } = instantiate({
+        settingsStatusOverrides: { state: 'yellow' }
+      });
+
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
+    });
+
     it('returns an empty object on 404 responses', async function () {
       const { uiSettings, req } = instantiate({
         async callWithRequest() {
@@ -361,7 +369,7 @@ function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
   });
 }
 
-function instantiate({ getResult, callWithRequest } = {}) {
+function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {}) {
   const esStatus = {
     state: 'green',
     on: sinon.spy()
@@ -370,7 +378,8 @@ function instantiate({ getResult, callWithRequest } = {}) {
     state: 'green',
     red: sinon.spy(),
     yellow: sinon.spy(),
-    green: sinon.spy()
+    green: sinon.spy(),
+    ...settingsStatusOverrides
   };
   const kbnServer = {
     status: {

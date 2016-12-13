@@ -15,7 +15,7 @@ export default function AggResponseBucketsProvider() {
   }
 
   Buckets.prototype.forEach = function (fn) {
-    let buckets = this.buckets;
+    const buckets = this.buckets;
 
     if (this.objectMode) {
       this._keys.forEach(function (key) {

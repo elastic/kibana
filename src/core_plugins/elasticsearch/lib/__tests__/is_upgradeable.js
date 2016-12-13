@@ -8,7 +8,7 @@ let version = pkg.version;
 
 describe('plugins/elasticsearch', function () {
   describe('lib/is_upgradeable', function () {
-    let server = {
+    const server = {
       config: _.constant({
         get: function (key) {
           switch (key) {
@@ -44,7 +44,7 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('5.0.0-alpha1', '5.0.0', false);
 
     it('should handle missing _id field', function () {
-      let doc = {
+      const doc = {
         '_index': '.kibana',
         '_type': 'config',
         '_score': 1,
@@ -58,7 +58,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should handle _id of @@version', function () {
-      let doc = {
+      const doc = {
         '_index': '.kibana',
         '_type': 'config',
         '_id': '@@version',

@@ -1,10 +1,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
+import $ from 'jquery';
+import VislibLibLayoutLayoutTypesProvider from './layout_types';
+import AxisProvider from 'ui/vislib/lib/axis';
 export default function LayoutFactory(Private) {
 
   const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-
+  const Axis = Private(AxisProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -22,11 +24,11 @@ export default function LayoutFactory(Private) {
    * @param chartType {Object} Reference to chart functions, i.e. Pie
    */
   class Layout {
-    constructor(el, data, chartType, opts) {
-      this.el = el;
-      this.data = data;
-      this.opts = opts;
-      this.layoutType = layoutType[chartType](this.el, this.data);
+    constructor(config) {
+      this.el = config.get('el');
+      this.data = config.data.data;
+      this.opts = config;
+      this.layoutType = layoutType[config.get('type')](this.el, this.data);
     }
 
     // Render the layout
@@ -39,6 +41,10 @@ export default function LayoutFactory(Private) {
     render() {
       this.removeAll(this.el);
       this.createLayout(this.layoutType);
+      // update y-axis-spacer height based on precalculated horizontal axis heights
+      if (this.opts.get('type') === 'point_series') {
+        this.updateCategoryAxisSize();
+      }
     };
 
     /**
@@ -50,12 +56,35 @@ export default function LayoutFactory(Private) {
      * @returns {*} Creates the visualization layout
      */
     createLayout(arr) {
-      const self = this;
-
-      return _.each(arr, function (obj) {
-        self.layout(obj);
+      return _.each(arr, (obj) => {
+        this.layout(obj);
       });
     };
+
+    updateCategoryAxisSize() {
+      const visConfig = this.opts;
+      const axisConfig = visConfig.get('categoryAxes[0]');
+      const axis = new Axis(visConfig, axisConfig);
+      const position = axis.axisConfig.get('position');
+
+      const el = $(this.el).find(`.axis-wrapper-${position}`);
+
+      el.css('visibility', 'hidden');
+      axis.render();
+      const width = el.width();
+      const height = el.height();
+      axis.destroy();
+      el.css('visibility', '');
+
+      if (axis.axisConfig.isHorizontal()) {
+        const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
+        el.height(`${height}px`);
+        spacerNodes.height(el.height());
+      } else {
+        el.find('.y-axis-div-wrapper').width(`${width}px`);
+      }
+    };
+
 
     /**
      * Appends a DOM element based on the object keys

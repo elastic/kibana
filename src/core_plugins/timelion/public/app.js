@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var logoUrl = require('./logo.png');
-var moment = require('moment-timezone');
+const _ = require('lodash');
+const logoUrl = require('./logo.png');
+const moment = require('moment-timezone');
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -15,7 +15,7 @@ document.title = 'Timelion - Kibana';
 
 require('ui/chrome');
 
-var app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
@@ -27,7 +27,7 @@ require('./vis');
 require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
-var unsafeNotifications = require('ui/notify')._notifs;
+const unsafeNotifications = require('ui/notify')._notifs;
 
 require('ui/routes').enable();
 
@@ -53,15 +53,15 @@ app.controller('timelion', function (
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
   timefilter.enabled = true;
-  var notify = new Notifier({
+  const notify = new Notifier({
     location: 'Timelion'
   });
 
-  var timezone = Private(require('plugins/timelion/services/timezone'))();
-  var docTitle = Private(require('ui/doc_title'));
+  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const docTitle = Private(require('ui/doc_title'));
 
-  var defaultExpression = '.es(*)';
-  var savedSheet = $route.current.locals.savedSheet;
+  const defaultExpression = '.es(*)';
+  const savedSheet = $route.current.locals.savedSheet;
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -85,7 +85,7 @@ app.controller('timelion', function (
       return !savedSheet.id;
     },
     run: function () {
-      var title = savedSheet.title;
+      const title = savedSheet.title;
       safeConfirm('Are you sure you want to delete the sheet ' + title + ' ?').then(function () {
         savedSheet.delete().then(() => {
           notify.info('Deleted ' + title);
@@ -129,7 +129,7 @@ app.controller('timelion', function (
     };
   }
 
-  var init = function () {
+  const init = function () {
     $scope.running = false;
     $scope.search();
 
@@ -149,7 +149,7 @@ app.controller('timelion', function (
     };
   };
 
-  var refresher;
+  let refresher;
   $scope.$watchCollection('timefilter.refreshInterval', function (interval) {
     if (refresher) $timeout.cancel(refresher);
     if (interval.value > 0 && !interval.pause) {
@@ -163,7 +163,7 @@ app.controller('timelion', function (
     }
   });
 
-  $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
+  $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 
@@ -212,7 +212,7 @@ app.controller('timelion', function (
       $scope.sheet = [];
       $scope.running = false;
 
-      var err = new Error(resp.message);
+      const err = new Error(resp.message);
       err.stack = resp.stack;
       notify.error(err);
 
@@ -222,7 +222,6 @@ app.controller('timelion', function (
   $scope.safeSearch = _.debounce($scope.search, 500);
 
   function saveSheet() {
-    savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
     savedSheet.timelion_columns = $scope.state.columns;
@@ -239,7 +238,6 @@ app.controller('timelion', function (
 
   function saveExpression(title) {
     savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
-      savedExpression.id = title;
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval

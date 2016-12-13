@@ -1,7 +1,7 @@
-var alter = require('../lib/alter.js');
-var util = require('util');
+const alter = require('../lib/alter.js');
+const util = require('util');
 
-var Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('label', {
   args: [
     {
@@ -21,7 +21,7 @@ module.exports = new Chainable('label', {
   ],
   help: 'Change the label of the series. Use %s reference the existing label',
   fn:  function labelFn(args) {
-    var config = args.byName;
+    const config = args.byName;
     return alter(args, function (eachSeries) {
       if (config.regex) {
         eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);

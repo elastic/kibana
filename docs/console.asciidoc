@@ -83,4 +83,4 @@ include::console/history.asciidoc[]
 
 include::console/settings.asciidoc[]
 
-include::console/disabling-console.asciidoc[]
+include::console/configuring-console.asciidoc[]

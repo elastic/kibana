@@ -11,7 +11,7 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  for (let key of getUnusedSettings(kbnServer.settings, config.get())) {
+  for (const key of getUnusedSettings(kbnServer.settings, config.get())) {
     server.log(['warning', 'config'], `Settings for "${key}" were not applied, check for spelling errors and ensure the plugin is loaded.`);
   }
 };

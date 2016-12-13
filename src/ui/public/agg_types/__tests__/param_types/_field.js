@@ -17,7 +17,7 @@ describe('Field', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      let aggParam = new FieldAggParam({
+      const aggParam = new FieldAggParam({
         name: 'field'
       });
 
