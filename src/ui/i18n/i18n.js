@@ -60,7 +60,7 @@ export class I18n {
 
   /**
    * Return translations for a suitable locale from a user side locale list
-   * @param {Array<Sring>} languageTags -  BCP 47 language tags. The tags are listed in priority order as set in the Accept-Language header.
+   * @param {...string} languageTags -  BCP 47 language tags. The tags are listed in priority order as set in the Accept-Language header.
    * @returns {Promise<Object>} translations - promise for an object where
    *                                           keys are translation keys and
    *                                           values are translations

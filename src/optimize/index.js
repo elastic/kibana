@@ -46,15 +46,9 @@ module.exports = async (kbnServer, server, config) => {
     `Optimizing and caching ${bundles.desc()}. This may take a few minutes`
   );
 
-<<<<<<< HEAD
   const start = Date.now();
   await optimizer.run();
   const seconds = ((Date.now() - start) / 1000).toFixed(2);
-=======
-  let start = Date.now();
-  await optimizer.run();
-  let seconds = ((Date.now() - start) / 1000).toFixed(2);
->>>>>>> Replace registering of translations at plugin install time to the plugin init phase
 
   server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds`);
 };

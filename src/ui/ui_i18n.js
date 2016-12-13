@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { defaults, compact } from 'lodash';
 import langParser from 'accept-language-parser';
 
-import { I18n } from './i18n/i18n';
+import { I18n } from './i18n';
 
 function acceptLanguageHeaderToBCP47Tags(header) {
   return langParser.parse(header).map(lang => (
