@@ -164,7 +164,7 @@ describe('timepicker directive', function () {
     });
 
     it('should be in quick mode by default', function (done) {
-      expect($scope.mode).to.be('quick');
+      expect($scope.time.mode).to.be('quick');
       done();
     });
 
@@ -198,8 +198,8 @@ describe('timepicker directive', function () {
 
     it('should have a $scope.setQuick() that sets the to and from variables to strings', function (done) {
       $scope.setQuick('now', 'now');
-      expect($scope.from).to.be('now');
-      expect($scope.to).to.be('now');
+      expect($scope.time.from).to.be('now');
+      expect($scope.time.to).to.be('now');
       done();
     });
   });
@@ -310,24 +310,24 @@ describe('timepicker directive', function () {
       $scope.relative.count = 1;
       $scope.relative.unit = 's';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-1s');
+      expect($scope.time.from).to.be('now-1s');
 
       $scope.relative.count = 2;
       $scope.relative.unit = 'm';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-2m');
+      expect($scope.time.from).to.be('now-2m');
 
       $scope.relative.count = 3;
       $scope.relative.unit = 'h';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-3h');
+      expect($scope.time.from).to.be('now-3h');
 
       // Enable rounding
       $scope.relative.round = true;
       $scope.relative.count = 7;
       $scope.relative.unit = 'd';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-7d/d');
+      expect($scope.time.from).to.be('now-7d/d');
 
       done();
     });
@@ -386,8 +386,8 @@ describe('timepicker directive', function () {
     });
 
     it('should present a timeframe of 15 minutes ago to now if scope.from and scope.to are not set', function (done) {
-      delete $scope.from;
-      delete $scope.to;
+      delete $scope.time.from;
+      delete $scope.time.to;
       $scope.setMode('absolute');
       $scope.$digest();
 
@@ -437,17 +437,17 @@ describe('timepicker directive', function () {
 
     it('should only copy its input to scope.from and scope.to when scope.applyAbsolute() is called', function (done) {
       $scope.setQuick('now-30m', 'now');
-      expect($scope.from).to.be('now-30m');
-      expect($scope.to).to.be('now');
+      expect($scope.time.from).to.be('now-30m');
+      expect($scope.time.to).to.be('now');
 
       $scope.absolute.from = moment('2012-02-01');
       $scope.absolute.to = moment('2012-02-11');
-      expect($scope.from).to.be('now-30m');
-      expect($scope.to).to.be('now');
+      expect($scope.time.from).to.be('now-30m');
+      expect($scope.time.to).to.be('now');
 
       $scope.applyAbsolute();
-      expect($scope.from.valueOf()).to.be(moment('2012-02-01').valueOf());
-      expect($scope.to.valueOf()).to.be(moment('2012-02-11').valueOf());
+      expect($scope.time.from.valueOf()).to.be(moment('2012-02-01').valueOf());
+      expect($scope.time.to.valueOf()).to.be(moment('2012-02-11').valueOf());
 
       $scope.$digest();
 
