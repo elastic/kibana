@@ -10,4 +10,4 @@ export default {
   },
   on: _.noop,
   off: _.noop
-}
+};
