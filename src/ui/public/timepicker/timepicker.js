@@ -26,7 +26,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       onSelect: '&'
     },
     template: html,
-    link: function ($scope) {
+    controller: function ($scope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
