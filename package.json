@@ -163,7 +163,7 @@
     "url-loader": "0.5.6",
     "validate-npm-package-name": "2.2.2",
     "vision": "4.1.0",
-    "webpack": "1.12.15",
+    "webpack": "github:spalger/webpack#fix/query-params-for-aliased-loaders",
     "webpack-directory-name-as-main": "1.0.0",
     "whatwg-fetch": "0.9.0",
     "wreck": "6.2.0"
