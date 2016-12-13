@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var url = require('url');
+let _ = require('lodash');
+let url = require('url');
 
 /**
 * Converts a config and a pathname to a url

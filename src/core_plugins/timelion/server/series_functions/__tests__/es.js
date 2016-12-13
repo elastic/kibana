@@ -25,7 +25,7 @@ function stubResponse(response) {
 }
 
 describe(filename, () => {
-  var tlConfig;
+  let tlConfig;
 
   describe('seriesList processor', () => {
     it('throws an error then the index is missing', () => {

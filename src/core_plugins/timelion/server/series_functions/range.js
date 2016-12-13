@@ -1,6 +1,6 @@
-var alter = require('../lib/alter.js');
-var _ = require('lodash');
-var Chainable = require('../lib/classes/chainable');
+let alter = require('../lib/alter.js');
+let _ = require('lodash');
+let Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('range', {
   args: [
     {
@@ -21,13 +21,13 @@ module.exports = new Chainable('range', {
   help: 'Changes the max and min of a series while keeping the same shape',
   fn: function range(args) {
     return alter(args, function (eachSeries) {
-      var values = _.map(eachSeries.data, 1);
-      var min = _.min(values);
-      var max = _.max(values);
+      let values = _.map(eachSeries.data, 1);
+      let min = _.min(values);
+      let max = _.max(values);
 
       // newvalue= (max'-min')/(max-min)*(value-min)+min'.
-      var data = _.map(eachSeries.data, function (point) {
-        var val = (args.byName.max - args.byName.min) /
+      let data = _.map(eachSeries.data, function (point) {
+        let val = (args.byName.max - args.byName.min) /
           (max - min) * (point[1] - min) + args.byName.min;
         return [point[0], val];
       });

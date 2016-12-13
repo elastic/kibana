@@ -11,12 +11,12 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('shared links', function describeIndexTests() {
-  var baseUrl;
+  let baseUrl;
   // The message changes for Firefox < 41 and Firefox >= 41
   // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
   // var expectedToastMessage = 'Share search: URL copied to clipboard.';
   // Pass either one.
-  var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
+  let expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
   bdd.before(function () {
     baseUrl = PageObjects.common.getHostPort();
@@ -26,8 +26,8 @@ bdd.describe('shared links', function describeIndexTests() {
     baseUrl = baseUrl.replace(':80','').replace(':443','');
     PageObjects.common.debug('New baseUrl = ' + baseUrl);
 
-    var fromTime = '2015-09-19 06:31:44.000';
-    var toTime = '2015-09-23 18:31:44.000';
+    let fromTime = '2015-09-19 06:31:44.000';
+    let toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
@@ -57,7 +57,7 @@ bdd.describe('shared links', function describeIndexTests() {
 
   bdd.describe('shared link', function () {
     bdd.it('should show "Share a link" caption', function () {
-      var expectedCaption = 'Share saved';
+      let expectedCaption = 'Share saved';
       return PageObjects.discover.clickShare()
       .then(function () {
         PageObjects.common.saveScreenshot('Discover-share-link');
@@ -69,7 +69,7 @@ bdd.describe('shared links', function describeIndexTests() {
     });
 
     bdd.it('should show the correct formatted URL', function () {
-      var expectedUrl = baseUrl
+      let expectedUrl = baseUrl
         + '/app/kibana?_t=1453775307251#'
         + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
         + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
@@ -100,7 +100,7 @@ bdd.describe('shared links', function describeIndexTests() {
 
     // TODO: verify clipboard contents
     bdd.it('shorten URL button should produce a short URL', function () {
-      var re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+      let re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
       return PageObjects.discover.clickShortenUrl()
       .then(function () {
         return PageObjects.common.try(function tryingForTime() {

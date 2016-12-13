@@ -1,4 +1,4 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = function (list, overrides) {
   return _.merge({

@@ -1,11 +1,11 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = function preProcessChainFn(tlConfig) {
   return function preProcessChain(chain, queries) {
     queries = queries || {};
     function validateAndStore(item) {
       if (_.isObject(item) && item.type === 'function') {
-        var functionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
+        let functionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
 
         if (functionDef.datasource) {
           queries[functionDef.cacheKey(item)] = item;

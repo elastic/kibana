@@ -9,8 +9,8 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
-  var fromTime = '2015-09-19 06:31:44.000';
-  var toTime = '2015-09-23 18:31:44.000';
+  let fromTime = '2015-09-19 06:31:44.000';
+  let toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
     PageObjects.common.debug('navigateToApp visualize');
@@ -31,7 +31,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('metric chart', function indexPatternCreation() {
 
     bdd.it('should show Count', function () {
-      var expectedCount = ['14,004', 'Count'];
+      let expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
       return PageObjects.common.try(function tryingForTime() {
@@ -44,7 +44,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Average', function () {
-      var avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
+      let avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
       return PageObjects.visualize.clickMetricEditor()
       .then(function () {
         PageObjects.common.debug('Aggregation = Average');
@@ -68,7 +68,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Sum', function () {
-      var sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
+      let sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
       PageObjects.common.debug('Aggregation = Sum');
       return PageObjects.visualize.selectAggregation('Sum')
       .then(function selectField() {
@@ -89,7 +89,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Median', function () {
-      var medianBytes = ['5,565.263', '50th percentile of bytes'];
+      let medianBytes = ['5,565.263', '50th percentile of bytes'];
       //  For now, only comparing the text label part of the metric
       PageObjects.common.debug('Aggregation = Median');
       return PageObjects.visualize.selectAggregation('Median')
@@ -112,7 +112,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Min', function () {
-      var minTimestamp = ['September 20th 2015, 00:00:00.000', 'Min @timestamp'];
+      let minTimestamp = ['September 20th 2015, 00:00:00.000', 'Min @timestamp'];
       PageObjects.common.debug('Aggregation = Min');
       return PageObjects.visualize.selectAggregation('Min')
       .then(function selectField() {
@@ -133,7 +133,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Max', function () {
-      var maxRelatedContentArticleModifiedTime = ['April 4th 2015, 00:54:41.000', 'Max relatedContent.article:modified_time'];
+      let maxRelatedContentArticleModifiedTime = ['April 4th 2015, 00:54:41.000', 'Max relatedContent.article:modified_time'];
       PageObjects.common.debug('Aggregation = Max');
       return PageObjects.visualize.selectAggregation('Max')
       .then(function selectField() {
@@ -154,7 +154,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Standard Deviation', function () {
-      var standardDeviationBytes = [
+      let standardDeviationBytes = [
         '-1,435.138', 'Lower Standard Deviation of bytes',
         '12,889.766', 'Upper Standard Deviation of bytes'
       ];
@@ -178,7 +178,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Unique Count', function () {
-      var uniqueCountClientip = ['1,000', 'Unique count of clientip'];
+      let uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       PageObjects.common.debug('Aggregation = Unique Count');
       return PageObjects.visualize.selectAggregation('Unique Count')
       .then(function selectField() {
@@ -206,7 +206,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Percentiles', function () {
-      var percentileMachineRam = [
+      let percentileMachineRam = [
         '2,147,483,648', '1st percentile of machine.ram',
         '3,221,225,472', '5th percentile of machine.ram',
         '7,516,192,768', '25th percentile of machine.ram',
@@ -236,7 +236,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Percentile Ranks', function () {
-      var percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
+      let percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
       PageObjects.common.debug('Aggregation = Percentile Ranks');
       return PageObjects.visualize.selectAggregation('Percentile Ranks')
       .then(function selectField() {

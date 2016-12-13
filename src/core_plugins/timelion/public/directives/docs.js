@@ -1,8 +1,8 @@
 define(function (require) {
-  var html = require('../partials/docs/tutorial.html');
-  var app = require('ui/modules').get('apps/timelion', []);
-  var _ = require('lodash');
-  var moment = require('moment');
+  let html = require('../partials/docs/tutorial.html');
+  let app = require('ui/modules').get('apps/timelion', []);
+  let _ = require('lodash');
+  let moment = require('moment');
 
   app.directive('timelionDocs', function (config, $http) {
     return {
@@ -50,7 +50,7 @@ define(function (require) {
               $scope.es.valid = false;
               $scope.es.invalidReason = (function () {
                 try {
-                  var esResp = JSON.parse(resp.data.resp.response);
+                  let esResp = JSON.parse(resp.data.resp.response);
                   return _.get(esResp, 'error.root_cause[0].reason');
                 } catch (e) {
                   if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');

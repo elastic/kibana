@@ -1,8 +1,8 @@
-var moment = require('moment');
-var timelionDefaults = require('../../../lib/get_namespaced_settings');
+let moment = require('moment');
+let timelionDefaults = require('../../../lib/get_namespaced_settings');
 
 module.exports = function () {
-  var tlConfig = require('../../../handlers/lib/tl_config.js')({
+  let tlConfig = require('../../../handlers/lib/tl_config.js')({
     server: {},
     request: {}
   });

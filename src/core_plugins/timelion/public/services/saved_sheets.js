@@ -1,6 +1,6 @@
 define(function (require) {
-  var module = require('ui/modules').get('app/sheet');
-  var _ = require('lodash');
+  let module = require('ui/modules').get('app/sheet');
+  let _ = require('lodash');
   // bring in the factory
   require('./_saved_sheet.js');
 
@@ -41,8 +41,8 @@ define(function (require) {
     };
 
     this.find = function (searchString) {
-      var self = this;
-      var body;
+      let self = this;
+      let body;
       if (searchString) {
         body = {
           query: {
@@ -67,7 +67,7 @@ define(function (require) {
         return {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
-            var source = hit._source;
+            let source = hit._source;
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
             return source;

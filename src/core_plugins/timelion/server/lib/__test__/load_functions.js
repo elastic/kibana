@@ -10,14 +10,14 @@ describe(filename, () => {
   });
 
   it('returns an object with keys named for the javascript files in the directory', () => {
-    var fnList = fn('series_functions');
+    let fnList = fn('series_functions');
 
     expect(fnList).to.be.an('object');
     expect(fnList.sum).to.be.a('object');
   });
 
   it('also includes index.js files in direct subdirectories, and names the keys for the directory', () => {
-    var fnList = fn('series_functions');
+    let fnList = fn('series_functions');
 
     expect(fnList).to.be.an('object');
     expect(fnList.es).to.be.a('object');

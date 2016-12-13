@@ -5,7 +5,7 @@ import {
   consolePage
 } from '../../support';
 
-var expect = require('expect.js');
+let expect = require('expect.js');
 
 bdd.describe('Loading', function coverLoadingUi() {
   bdd.it('should show loading feebdack', async function () {

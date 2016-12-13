@@ -1,4 +1,4 @@
-var moment = require('moment');
+let moment = require('moment');
 
 module.exports = [
   moment('1980-01-01T00:00:00.000Z'),

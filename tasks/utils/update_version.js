@@ -1,8 +1,8 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = updateVersion;
 
-var versions = [
+let versions = [
   'major',
   'minor',
   'patch',
@@ -44,7 +44,7 @@ var versions = [
 function updateVersion(version, expr) {
   expr = String(expr).split('=');
 
-  var change = {
+  let change = {
     name: expr[0],
     val: expr[1] || null
   };
@@ -58,7 +58,7 @@ function updateVersion(version, expr) {
   }
 
   // parse the current version
-  var parts = _.chain(version.split('.'))
+  let parts = _.chain(version.split('.'))
 
   // ensure that their are three pieces, either x.x.x or x.x.x-y
   .tap(function (versionNumbers) {
@@ -70,7 +70,7 @@ function updateVersion(version, expr) {
   // describe all of the version parts with a name, parse
   // the numbers, and extract tag from patch
   .transform(function (parts, v, i) {
-    var name = versions[i];
+    let name = versions[i];
 
     if (name !== 'patch') {
       parts[name] = _.parseInt(v);
@@ -86,7 +86,7 @@ function updateVersion(version, expr) {
   // sanity check
   .tap(function (parts) {
 
-    var valid = true;
+    let valid = true;
     valid = valid && _.isNumber(parts.major);
     valid = valid && _.isNumber(parts.minor);
     valid = valid && _.isNumber(parts.patch);
@@ -121,7 +121,7 @@ function updateVersion(version, expr) {
     }
 
     // properties that are zero-d by the previous update
-    var emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
+    let emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
     while (emptyUpdates.length) {
       parts[emptyUpdates.shift()] = '';
     }

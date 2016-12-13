@@ -10,7 +10,7 @@ export default class ShieldPage {
   }
 
   login(user, pwd) {
-    var remote = this.remote;
+    let remote = this.remote;
     return remote.setFindTimeout(defaultFindTimeout)
     .findById('username')
     .type(user)

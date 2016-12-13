@@ -73,7 +73,7 @@ export default class HeaderPage {
   }
 
   clickGoButton() {
-    var self = this;
+    let self = this;
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByClassName('kbn-timepicker-go')
     .click()

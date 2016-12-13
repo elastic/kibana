@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var $ = require('jquery');
+let _ = require('lodash');
+let $ = require('jquery');
 
-var app = require('ui/modules').get('apps/timelion', []);
+let app = require('ui/modules').get('apps/timelion', []);
 
 app.directive('refreshHack', function ($rootScope) {
   return {

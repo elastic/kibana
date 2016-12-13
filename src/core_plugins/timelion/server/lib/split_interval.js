@@ -2,7 +2,7 @@ module.exports = function splitInterval(interval) {
   if (!interval.match(/[0-9]+[mshdwMy]+/g)) {
     throw new Error ('Malformed `interval`: ' + interval);
   }
-  var parts = interval.match(/[0-9]+|[mshdwMy]+/g);
+  let parts = interval.match(/[0-9]+|[mshdwMy]+/g);
 
   return {
     count: parts[0],
