@@ -1,16 +1,16 @@
-var _ = require('lodash');
-var $ = require('jquery');
+const _ = require('lodash');
+const $ = require('jquery');
 
-var app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', []);
 app.directive('fixedElementRoot', function ($timeout) {
   return {
     restrict: 'A',
     link: function ($scope, $elem, attrs) {
-      var fixedAt;
+      let fixedAt;
       $(window).bind('scroll', function () {
-        var fixed = $('[fixed-element]', $elem);
-        var body = $('[fixed-element-body]', $elem);
-        var top = fixed.offset().top;
+        const fixed = $('[fixed-element]', $elem);
+        const body = $('[fixed-element-body]', $elem);
+        const top = fixed.offset().top;
 
         if ($(window).scrollTop() > top) {
           // This is a gross hack, but its better than it was. I guess

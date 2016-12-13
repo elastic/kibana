@@ -5,12 +5,12 @@ module.exports = function (command, spaces) {
     return command.outputHelp();
   }
 
-  let defCmd = _.find(command.commands, function (cmd) {
+  const defCmd = _.find(command.commands, function (cmd) {
     return cmd._name === 'serve';
   });
 
-  let desc = !command.description() ? '' : command.description();
-  let cmdDef = !defCmd ? '' : `=${defCmd._name}`;
+  const desc = !command.description() ? '' : command.description();
+  const cmdDef = !defCmd ? '' : `=${defCmd._name}`;
 
   return (
 `
@@ -31,11 +31,11 @@ function indent(str, n) {
 }
 
 function commandsSummary(program) {
-  let cmds = _.compact(program.commands.map(function (cmd) {
-    let name = cmd._name;
+  const cmds = _.compact(program.commands.map(function (cmd) {
+    const name = cmd._name;
     if (name === '*') return;
-    let opts = cmd.options.length ? ' [options]' : '';
-    let args = cmd._args.map(function (arg) {
+    const opts = cmd.options.length ? ' [options]' : '';
+    const args = cmd._args.map(function (arg) {
       return humanReadableArgName(arg);
     }).join(' ');
 
@@ -45,7 +45,7 @@ function commandsSummary(program) {
     ];
   }));
 
-  let cmdLColWidth = cmds.reduce(function (width, cmd) {
+  const cmdLColWidth = cmds.reduce(function (width, cmd) {
     return Math.max(width, cmd[0].length);
   }, 0);
 
@@ -69,6 +69,6 @@ ${indent(cmd.optionHelp(), 2)}
 }
 
 function humanReadableArgName(arg) {
-  let nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+  const nameOutput = arg.name + (arg.variadic === true ? '...' : '');
   return arg.required ? '<' + nameOutput + '>' : '[' + nameOutput + ']';
 }

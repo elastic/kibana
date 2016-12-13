@@ -6,7 +6,7 @@ uiModules
   .get('kibana')
   .filter('unique', function () {
     return function (arr) {
-      let list = _.unique(arr);
+      const list = _.unique(arr);
       return list;
     };
   });

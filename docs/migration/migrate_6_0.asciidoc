@@ -1,4 +1,13 @@
 [[breaking-changes-6.0]]
 == Breaking changes in 6.0
 
-There are not yet any breaking changes in Kibana 6.0
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 6.0.
+
+[float]
+=== Removed option to use unsupported scripting languages
+*Details:* Kibana 5.x allowed users to create scripted fields using any scripting language enabled in Elasticsearch.
+Kibana 6.0 will only support Painless and Lucene expression based scripts.
+
+
+*Impact:* You will need to migrate your groovy, python, javascript, etc. scripted fields to Painless or Lucene expressions.

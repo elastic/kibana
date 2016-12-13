@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 export default function MapFieldFn(Private, config) {
-  let castMappingType = Private(IndexPatternsCastMappingTypeProvider);
+  const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
 
   /**
    * Accepts a field object and its name, and tries to give it a mapping
@@ -10,11 +10,11 @@ export default function MapFieldFn(Private, config) {
    * @return {Object} - the resulting field after overrides and tweaking
    */
   return function mapField(field, name) {
-    let keys = Object.keys(field.mapping);
+    const keys = Object.keys(field.mapping);
     if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
     // Override the mapping, even if elasticsearch says otherwise
-    let mappingOverrides = {
+    const mappingOverrides = {
       _source: { type: '_source' },
       _index: { type: 'string' },
       _type: { type: 'string' },
@@ -29,7 +29,7 @@ export default function MapFieldFn(Private, config) {
       }
     };
 
-    let mapping = _.cloneDeep(field.mapping[keys.shift()]);
+    const mapping = _.cloneDeep(field.mapping[keys.shift()]);
 
     if (!mapping.index || mapping.index === 'no') {
       // elasticsearch responds with false sometimes and 'no' others

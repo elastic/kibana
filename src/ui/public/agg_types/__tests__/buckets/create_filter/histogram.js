@@ -23,7 +23,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return an range filter for histogram', function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -34,8 +34,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.histogram[0];
-      let filter = createFilter(aggConfig, 2048);
+      const aggConfig = vis.aggs.byTypeName.histogram[0];
+      const filter = createFilter(aggConfig, 2048);
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
       expect(filter).to.have.property('range');

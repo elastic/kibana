@@ -1,0 +1,28 @@
+
+@import "../../variables";
+
+.guideHome {
+  display: flex;
+  justify-content: center;
+}
+
+  .guideHome__panel {
+    width: 100%;
+    max-width: 600px;
+    max-height: 500px;
+    padding: 60px;
+    margin-bottom: 20px;
+    border-radius: 3px;
+    background-color: #e8e8e8;
+    line-height: $guideLineHeight;
+  }
+
+  .guideHome__panelTitle {
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .guideHome__panelText {
+    font-size: 18px;
+  }

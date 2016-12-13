@@ -11,7 +11,7 @@ import SimpleEmitter from 'ui/utils/simple_emitter';
 import EventsProvider from 'ui/events';
 
 export default function (Private) {
-  let Events = Private(EventsProvider);
+  const Events = Private(EventsProvider);
 
   function validateParent(parent, path) {
     if (path.length <= 0) {
@@ -23,7 +23,7 @@ export default function (Private) {
   }
 
   function validateValue(value) {
-    let msg = 'State value must be a plain object';
+    const msg = 'State value must be a plain object';
     if (!value) return;
     if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
   }
@@ -79,21 +79,21 @@ export default function (Private) {
   };
 
   PersistedState.prototype.set = function (key, value) {
-    let params = prepSetParams(key, value, this._path);
-    let val = this._set(params.key, params.value);
+    const params = prepSetParams(key, value, this._path);
+    const val = this._set(params.key, params.value);
     this.emit('set');
     return val;
   };
 
   PersistedState.prototype.setSilent = function (key, value) {
-    let params = prepSetParams(key, value, this._path);
+    const params = prepSetParams(key, value, this._path);
     return this._set(params.key, params.value, true);
   };
 
   PersistedState.prototype.reset = function (path) {
-    let keyPath = this._getIndex(path);
-    let origValue = _.get(this._defaultState, keyPath);
-    let currentValue = _.get(this._mergedState, keyPath);
+    const keyPath = this._getIndex(path);
+    const origValue = _.get(this._defaultState, keyPath);
+    const currentValue = _.get(this._mergedState, keyPath);
 
     if (_.isUndefined(origValue)) {
       this._cleanPath(path, this._mergedState);
@@ -114,7 +114,7 @@ export default function (Private) {
   };
 
   PersistedState.prototype.removeChild = function (path) {
-    let origValue = _.get(this._defaultState, this._getIndex(path));
+    const origValue = _.get(this._defaultState, this._getIndex(path));
 
     if (_.isUndefined(origValue)) {
       this.reset(path);
@@ -145,19 +145,19 @@ export default function (Private) {
   };
 
   PersistedState.prototype._getPartialIndex = function (key) {
-    let keyPath = this._getIndex(key);
+    const keyPath = this._getIndex(key);
     return keyPath.slice(this._path.length);
   };
 
   PersistedState.prototype._cleanPath = function (path, stateTree) {
-    let partialPath = this._getPartialIndex(path);
+    const partialPath = this._getPartialIndex(path);
     let remove = true;
 
     // recursively delete value tree, when no other keys exist
     while (partialPath.length > 0) {
-      let lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
-      let statePath = this._path.concat(partialPath);
-      let stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
+      const lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+      const statePath = this._path.concat(partialPath);
+      const stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
 
       // if stateVal isn't an object, do nothing
       if (!_.isPlainObject(stateVal)) return;
@@ -168,13 +168,13 @@ export default function (Private) {
   };
 
   PersistedState.prototype._getDefault = function () {
-    let def = (this._hasPath()) ? undefined : {};
+    const def = (this._hasPath()) ? undefined : {};
     return (this._parent ? this.get() : def);
   };
 
   PersistedState.prototype._setPath = function (path) {
-    let isString = _.isString(path);
-    let isArray = _.isArray(path);
+    const isString = _.isString(path);
+    const isArray = _.isArray(path);
 
     if (!isString && !isArray) return [];
     return (isString) ? [this._getIndex(path)] : path;
@@ -202,11 +202,11 @@ export default function (Private) {
   };
 
   PersistedState.prototype._set = function (key, value, silent, initialChildState) {
-    let self = this;
+    const self = this;
     let stateChanged = false;
-    let initialState = !this._initialized;
-    let keyPath = this._getIndex(key);
-    let hasKeyPath = keyPath.length > 0;
+    const initialState = !this._initialized;
+    const keyPath = this._getIndex(key);
+    const hasKeyPath = keyPath.length > 0;
 
     // if this is the initial state value, save value as the default
     if (initialState) {
@@ -232,7 +232,7 @@ export default function (Private) {
         }
       } else {
         // check for changes at path, emit an event when different
-        let curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
+        const curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
         stateChanged = !_.isEqual(curVal, value);
 
         if (!initialChildState) {
@@ -249,11 +249,11 @@ export default function (Private) {
     }
 
     // update the merged state value
-    let targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-    let sourceObj = _.merge({}, this._defaultChildState, this._changedState);
+    const targetObj = this._mergedState || _.cloneDeep(this._defaultState);
+    const sourceObj = _.merge({}, this._defaultChildState, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    let mergeMethod = function (targetValue, sourceValue, mergeKey) {
+    const mergeMethod = function (targetValue, sourceValue, mergeKey) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue

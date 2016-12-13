@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  let pkg = grunt.config.get('pkg');
+  const pkg = grunt.config.get('pkg');
 
   grunt.registerTask('_build:packageJson', function () {
     const { sha, number, version } = grunt.config.get('build');

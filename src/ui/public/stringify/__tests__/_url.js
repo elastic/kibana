@@ -19,9 +19,9 @@ describe('Url Format', function () {
     });
 
     it('ouputs a simple <a> tab by default', function () {
-      let url = new Url();
+      const url = new Url();
 
-      let $a = $(url.convert('http://elastic.co', 'html'));
+      const $a = $(url.convert('http://elastic.co', 'html'));
       expect($a.is('a')).to.be(true);
       expect($a.size()).to.be(1);
       expect($a.attr('href')).to.be('http://elastic.co');
@@ -30,17 +30,17 @@ describe('Url Format', function () {
     });
 
     it('outputs an <image> if type === "img"', function () {
-      let url = new Url({ type: 'img' });
+      const url = new Url({ type: 'img' });
 
-      let $img = $(url.convert('http://elastic.co', 'html'));
+      const $img = $(url.convert('http://elastic.co', 'html'));
       expect($img.is('img')).to.be(true);
       expect($img.attr('src')).to.be('http://elastic.co');
     });
 
     describe('url template', function () {
       it('accepts a template', function () {
-        let url = new Url({ urlTemplate: 'url: {{ value }}' });
-        let $a = $(url.convert('url', 'html'));
+        const url = new Url({ urlTemplate: 'url: {{ value }}' });
+        const $a = $(url.convert('url', 'html'));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
         expect($a.attr('href')).to.be('url: url');
@@ -49,15 +49,15 @@ describe('Url Format', function () {
       });
 
       it('only outputs the url if the contentType === "text"', function () {
-        let url = new Url();
+        const url = new Url();
         expect(url.convert('url', 'text')).to.be('url');
       });
     });
 
     describe('label template', function () {
       it('accepts a template', function () {
-        let url = new Url({ labelTemplate: 'extension: {{ value }}' });
-        let $a = $(url.convert('php', 'html'));
+        const url = new Url({ labelTemplate: 'extension: {{ value }}' });
+        const $a = $(url.convert('php', 'html'));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
         expect($a.attr('href')).to.be('php');
@@ -65,19 +65,19 @@ describe('Url Format', function () {
       });
 
       it('uses the label template for text formating', function () {
-        let url = new Url({ labelTemplate: 'external {{value }}'});
+        const url = new Url({ labelTemplate: 'external {{value }}'});
         expect(url.convert('url', 'text')).to.be('external url');
       });
 
       it('can use the raw value', function () {
-        let url = new Url({
+        const url = new Url({
           labelTemplate: 'external {{value}}'
         });
         expect(url.convert('url?', 'text')).to.be('external url?');
       });
 
       it('can use the url', function () {
-        let url = new Url({
+        const url = new Url({
           urlTemplate: 'http://google.com/{{value}}',
           labelTemplate: 'external {{url}}'
         });
@@ -87,19 +87,19 @@ describe('Url Format', function () {
 
     describe('templating', function () {
       it('ignores unknown variables', function () {
-        let url = new Url({ urlTemplate: '{{ not really a var }}' });
+        const url = new Url({ urlTemplate: '{{ not really a var }}' });
         expect(url.convert('url', 'text')).to.be('');
       });
 
       it('does not allow executing code in variable expressions', function () {
         window.SHOULD_NOT_BE_TRUE = false;
-        let url = new Url({ urlTemplate: '{{ (window.SHOULD_NOT_BE_TRUE = true) && value }}' });
+        const url = new Url({ urlTemplate: '{{ (window.SHOULD_NOT_BE_TRUE = true) && value }}' });
         expect(url.convert('url', 'text')).to.be('');
       });
 
       describe('', function () {
         it('does not get values from the prototype chain', function () {
-          let url = new Url({ urlTemplate: '{{ toString }}' });
+          const url = new Url({ urlTemplate: '{{ toString }}' });
           expect(url.convert('url', 'text')).to.be('');
         });
       });

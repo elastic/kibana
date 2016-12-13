@@ -64,9 +64,9 @@ describe('Filter Manager', function () {
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
       _.each({gte: '>=', gt: '>', lte: '<=', lt: '<'}, function (operator, key) {
-        let params = {};
+        const params = {};
         params[key] = 5;
-        let filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
 
         expect(filter.script.script.inline).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);

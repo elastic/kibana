@@ -1,0 +1,39 @@
+
+$guideLineHeight: 24px;
+$guideNavHeight: 60px;
+$guideSideNavWidth: 400px;
+$guideSideNavSmallWidth: 220px;
+$guideCodeViewerWidth: 700px;
+$guideCodeViewerSmallWidth: 580px;
+$guideCodeViewerTransition: 0.2s ease;
+
+$normalBreakpoint: 1900px;
+
+@mixin whenNarrowerThan($browserWidth) {
+  @media only screen and (max-width: #{$browserWidth}) {
+    @content;
+  }
+}
+
+@mixin whenWiderThan($browserWidth) {
+  @media only screen and (min-width: #{$browserWidth}) {
+    @content;
+  }
+}
+
+@mixin scrollbar($color: rgba(#454D58, 0.4)) {
+  &::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color;
+    border: 6px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}

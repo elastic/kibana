@@ -5,7 +5,7 @@ import { fromRoot, pkg } from '../utils';
 import Config from './config/config';
 import loggingConfiguration from './logging/configuration';
 
-let rootDir = fromRoot('.');
+const rootDir = fromRoot('.');
 
 module.exports = class KbnServer {
   constructor(settings) {
@@ -72,7 +72,7 @@ module.exports = class KbnServer {
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
   async mixin(...fns) {
-    for (let fn of compact(flatten(fns))) {
+    for (const fn of compact(flatten(fns))) {
       await fn.call(this, this, this.server, this.config);
     }
   }
@@ -84,7 +84,7 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    let { server, config } = this;
+    const { server, config } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));
