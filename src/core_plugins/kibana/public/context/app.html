@@ -48,8 +48,8 @@
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
           ng-disabled="contextApp.selectors.isLoadingPredecessorRows()"
         >
-          <i class="fa" ng-class="contextApp.selectors.isLoadingPredecessorRows() ? 'fa-spinner fa-spin' : 'fa-plus'"></i>
-          <span>Load newer entries</span>
+          <i class="fa fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingPredecessorRows()"></i>
+          <span ng-if="!contextApp.selectors.isLoadingPredecessorRows()">Load newer entries</span>
         </button>
         <div class="discover-overlay" ng-if="contextApp.selectors.isLoadingAnchorRow()">
           <h2>Loading...</h2>
@@ -70,8 +70,8 @@
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
           ng-disabled="contextApp.selectors.isLoadingSuccessorRows()"
         >
-          <i class="fa" ng-class="contextApp.selectors.isLoadingSuccessorRows() ? 'fa-spinner fa-spin' : 'fa-plus'"></i>
-          <span>Load older entries</span>
+          <i class="fa fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingSuccessorRows()"></i>
+          <span ng-if="!contextApp.selectors.isLoadingSuccessorRows()">Load older entries</span>
         </button>
       </div>
     </div>
