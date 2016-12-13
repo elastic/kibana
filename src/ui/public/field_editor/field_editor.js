@@ -15,9 +15,9 @@ import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } 
 uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
-  let Field = Private(IndexPatternsFieldProvider);
-  let getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const Field = Private(IndexPatternsFieldProvider);
+  const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -34,8 +34,8 @@ uiModules
     },
     controllerAs: 'editor',
     controller: function ($scope, Notifier, kbnUrl, $http, $q) {
-      let self = this;
-      let notify = new Notifier({ location: 'Field Editor' });
+      const self = this;
+      const notify = new Notifier({ location: 'Field Editor' });
 
       self.docLinks = docLinks;
       getScriptingLangs().then((langs) => {
@@ -57,9 +57,9 @@ uiModules
 
       self.cancel = redirectAway;
       self.save = function () {
-        let indexPattern = self.indexPattern;
-        let fields = indexPattern.fields;
-        let field = self.field.toActualField();
+        const indexPattern = self.indexPattern;
+        const fields = indexPattern.fields;
+        const field = self.field.toActualField();
 
         fields.remove({ name: field.name });
         fields.push(field);
@@ -78,8 +78,8 @@ uiModules
       };
 
       self.delete = function () {
-        let indexPattern = self.indexPattern;
-        let field = self.field;
+        const indexPattern = self.indexPattern;
+        const field = self.field;
 
         indexPattern.fields.remove({ name: field.name });
         return indexPattern.save()
@@ -90,9 +90,9 @@ uiModules
       };
 
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {
-        let format = self.field.format;
-        let changedFormat = cur !== prev;
-        let missingFormat = cur && (!format || format.type.id !== cur);
+        const format = self.field.format;
+        const changedFormat = cur !== prev;
+        const missingFormat = cur && (!format || format.type.id !== cur);
 
         if (!changedFormat || !missingFormat) return;
 
@@ -101,7 +101,7 @@ uiModules
       });
 
       $scope.$watch('editor.formatParams', function () {
-        let FieldFormat = getFieldFormatType();
+        const FieldFormat = getFieldFormatType();
         self.field.format = new FieldFormat(self.formatParams);
       }, true);
 
@@ -125,8 +125,8 @@ uiModules
       // copy the defined properties of the field to a plain object
       // which is mutable, and capture the changed seperately.
       function shadowCopy(field) {
-        let changes = {};
-        let shadowProps = {
+        const changes = {};
+        const shadowProps = {
           toActualField: {
             // bring the shadow copy out of the shadows
             value: function toActualField() {
@@ -136,7 +136,7 @@ uiModules
         };
 
         Object.getOwnPropertyNames(field).forEach(function (prop) {
-          let desc = Object.getOwnPropertyDescriptor(field, prop);
+          const desc = Object.getOwnPropertyDescriptor(field, prop);
           shadowProps[prop] = {
             enumerable: desc.enumerable,
             get: function () {
@@ -168,7 +168,7 @@ uiModules
       }
 
       function initDefaultFormat() {
-        let def = Object.create(fieldFormats.getDefaultType(self.field.type));
+        const def = Object.create(fieldFormats.getDefaultType(self.field.type));
 
         // explicitly set to undefined to prevent inheritting the prototypes id
         def.id = undefined;

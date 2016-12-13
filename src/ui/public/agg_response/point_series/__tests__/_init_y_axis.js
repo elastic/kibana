@@ -19,7 +19,7 @@ describe('initYAxis', function () {
     };
   }
 
-  let baseChart = {
+  const baseChart = {
     aspects: {
       y: [
         { agg: agg(), col: { title: 'y1' } },
@@ -33,17 +33,17 @@ describe('initYAxis', function () {
   };
 
   describe('with a single y aspect', function () {
-    let singleYBaseChart = _.cloneDeep(baseChart);
+    const singleYBaseChart = _.cloneDeep(baseChart);
     singleYBaseChart.aspects.y = singleYBaseChart.aspects.y[0];
 
     it('sets the yAxisFormatter the the field formats convert fn', function () {
-      let chart = _.cloneDeep(singleYBaseChart);
+      const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
       expect(chart).to.have.property('yAxisFormatter', chart.aspects.y.agg.fieldFormatter());
     });
 
     it('sets the yAxisLabel', function () {
-      let chart = _.cloneDeep(singleYBaseChart);
+      const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
       expect(chart).to.have.property('yAxisLabel', 'y1');
     });
@@ -51,7 +51,7 @@ describe('initYAxis', function () {
 
   describe('with mutliple y aspects', function () {
     it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function () {
-      let chart = _.cloneDeep(baseChart);
+      const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
       expect(chart).to.have.property('yAxisFormatter');
@@ -61,7 +61,7 @@ describe('initYAxis', function () {
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {
-      let chart = _.cloneDeep(baseChart);
+      const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
       expect(chart).to.have.property('yAxisLabel', '');
     });

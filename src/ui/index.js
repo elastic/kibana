@@ -24,17 +24,17 @@ export default async (kbnServer, server, config) => {
   bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
   uiExports.addConsumer(bundlerEnv);
 
-  for (let plugin of kbnServer.plugins) {
+  for (const plugin of kbnServer.plugins) {
     uiExports.consumePlugin(plugin);
   }
 
   const bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
 
-  for (let app of uiExports.getAllApps()) {
+  for (const app of uiExports.getAllApps()) {
     bundles.addApp(app);
   }
 
-  for (let gen of uiExports.getBundleProviders()) {
+  for (const gen of uiExports.getBundleProviders()) {
     const bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps(), kbnServer.plugins);
     if (bundle) bundles.add(bundle);
   }

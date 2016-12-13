@@ -2,7 +2,7 @@ import buildRangeFilter from 'ui/filter_manager/lib/range';
 
 export default function createHistogramFilterProvider(Private) {
   return function (aggConfig, key) {
-    let value = parseInt(key, 10);
+    const value = parseInt(key, 10);
 
     return buildRangeFilter(
       aggConfig.params.field,

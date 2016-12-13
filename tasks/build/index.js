@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  let { flatten } = require('lodash');
+  const { flatten } = require('lodash');
 
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([

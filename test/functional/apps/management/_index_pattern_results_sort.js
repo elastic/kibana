@@ -16,7 +16,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc();
   });
 
-  var columns = [{
+  const columns = [{
     heading: 'name',
     first: '@message',
     last: 'xss.raw',

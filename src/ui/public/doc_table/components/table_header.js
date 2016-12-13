@@ -2,7 +2,7 @@ import _ from 'lodash';
 import 'ui/filters/short_dots';
 import headerHtml from 'ui/doc_table/components/table_header.html';
 import uiModules from 'ui/modules';
-let module = uiModules.get('app/discover');
+const module = uiModules.get('app/discover');
 
 
 module.directive('kbnTableHeader', function (shortDotsFilter) {
@@ -16,9 +16,9 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
     template: headerHtml,
     controller: function ($scope) {
 
-      let sortableField = function (field) {
+      const sortableField = function (field) {
         if (!$scope.indexPattern) return;
-        let sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
+        const sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
         return sortable;
       };
 
@@ -34,8 +34,8 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       $scope.headerClass = function (column) {
         if (!sortableField(column)) return;
 
-        let sorting = $scope.sorting;
-        let defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+        const sorting = $scope.sorting;
+        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
 
         if (!sorting || column !== sorting[0]) return defaultClass;
         return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
@@ -62,7 +62,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       $scope.sort = function (column) {
         if (!column || !sortableField(column)) return;
 
-        let sorting = $scope.sorting = $scope.sorting || [];
+        const sorting = $scope.sorting = $scope.sorting || [];
 
         let direction = sorting[1] || 'asc';
         if (sorting[0] !== column) {

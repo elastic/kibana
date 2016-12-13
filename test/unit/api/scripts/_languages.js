@@ -1,5 +1,5 @@
 define(function (require) {
-  var expect = require('intern/dojo/node!expect.js');
+  const expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, request) {
     bdd.describe('Languages API', function getLanguages() {
