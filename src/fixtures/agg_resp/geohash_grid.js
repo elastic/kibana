@@ -17,7 +17,7 @@ export default function GeoHashGridAggResponseFixture() {
   //   },
   // });
 
-  let geoHashCharts = _.union(
+  const geoHashCharts = _.union(
     _.range(48, 57), // 0-9
     _.range(65, 90), // A-Z
     _.range(97, 122) // a-z
@@ -25,15 +25,15 @@ export default function GeoHashGridAggResponseFixture() {
 
   let totalDocCount = 0;
 
-  let tags = _.times(_.random(4, 20), function (i) {
+  const tags = _.times(_.random(4, 20), function (i) {
     // random number of tags
     let docCount = 0;
-    let buckets = _.times(_.random(40, 200), function () {
+    const buckets = _.times(_.random(40, 200), function () {
       return _.sample(geoHashCharts, 3).join('');
     })
     .sort()
     .map(function (geoHash) {
-      let count = _.random(1, 5000);
+      const count = _.random(1, 5000);
 
       totalDocCount += count;
       docCount += count;

@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('pin filters', function () {
-  let storeNames = {
+  const storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -87,7 +87,7 @@ describe('pin filters', function () {
     });
 
     it('should move filter from appState to globalState', function () {
-      let filter = appState.filters[1];
+      const filter = appState.filters[1];
 
       queryFilter.pinFilter(filter);
       expect(globalState.filters).to.contain(filter);
@@ -96,7 +96,7 @@ describe('pin filters', function () {
     });
 
     it('should move filter from globalState to appState', function () {
-      let filter = globalState.filters[1];
+      const filter = globalState.filters[1];
 
       queryFilter.pinFilter(filter);
       expect(appState.filters).to.contain(filter);
@@ -106,8 +106,8 @@ describe('pin filters', function () {
 
 
     it('should only fire the update event', function () {
-      let emitSpy = sinon.spy(queryFilter, 'emit');
-      let filter = appState.filters[1];
+      const emitSpy = sinon.spy(queryFilter, 'emit');
+      const filter = appState.filters[1];
       $rootScope.$digest();
 
       queryFilter.pinFilter(filter);
@@ -131,8 +131,8 @@ describe('pin filters', function () {
     });
 
     it('should swap the filters in both states', function () {
-      let appSample = _.sample(appState.filters);
-      let globalSample = _.sample(globalState.filters);
+      const appSample = _.sample(appState.filters);
+      const globalSample = _.sample(globalState.filters);
 
       queryFilter.pinAll();
       expect(globalState.filters).to.have.length(5);

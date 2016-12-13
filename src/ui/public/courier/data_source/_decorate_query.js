@@ -7,7 +7,7 @@ export default function DecorateQuery(config) {
    * @returns {object}
    */
   return function (query) {
-    let queryOptions = config.get('query:queryString:options');
+    const queryOptions = config.get('query:queryString:options');
 
     if (_.has(query, 'query_string.query')) {
       _.extend(query.query_string, queryOptions);

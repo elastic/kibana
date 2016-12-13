@@ -8,11 +8,11 @@ import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
 
-  let $body = $(document.body);
-  let $window = $(window);
-  let expectStubbedEventAndEl = function (stub, event, $el) {
+  const $body = $(document.body);
+  const $window = $(window);
+  const expectStubbedEventAndEl = function (stub, event, $el) {
     expect(stub.getCalls().some(function (call) {
-      let events = call.args[0].split(' ');
+      const events = call.args[0].split(' ');
       return _.contains(events, event) && $el.is(call.thisValue);
     })).to.be(true);
   };
@@ -70,7 +70,7 @@ describe('Reflow watcher', function () {
   });
 
   it('triggers the "reflow" event within a new angular tick', function () {
-    let stub = sinon.stub();
+    const stub = sinon.stub();
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 

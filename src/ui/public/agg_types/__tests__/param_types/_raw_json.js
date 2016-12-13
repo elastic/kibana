@@ -6,7 +6,7 @@ import AggTypesParamTypesRawJsonProvider from 'ui/agg_types/param_types/raw_json
 
 
 module.exports = describe('JSON', function () {
-  let paramName = 'json_test';
+  const paramName = 'json_test';
   let BaseAggParam;
   let JsonAggParam;
   let aggParam;
@@ -15,7 +15,7 @@ module.exports = describe('JSON', function () {
 
   function initAggParam(config) {
     config = config || {};
-    let defaults = {
+    const defaults = {
       name: paramName,
       type: 'json'
     };
@@ -59,7 +59,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should append param when valid JSON', function () {
-      let jsonData = JSON.stringify({
+      const jsonData = JSON.stringify({
         new_param: 'should exist in output'
       });
 
@@ -75,7 +75,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should not overwrite existing params', function () {
-      let jsonData = JSON.stringify({
+      const jsonData = JSON.stringify({
         new_param: 'should exist in output',
         existing: 'should be used'
       });
@@ -88,7 +88,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should drop nulled params', function () {
-      let jsonData = JSON.stringify({
+      const jsonData = JSON.stringify({
         new_param: 'should exist in output',
         field: null
       });

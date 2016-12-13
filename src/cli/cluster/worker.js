@@ -5,16 +5,16 @@ import { EventEmitter } from 'events';
 
 import { BinderFor, fromRoot } from '../../utils';
 
-let cliPath = fromRoot('src/cli');
-let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
-let baseArgv = [process.execPath, cliPath].concat(baseArgs);
+const cliPath = fromRoot('src/cli');
+const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
+const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
 cluster.setupMaster({
   exec: cliPath,
   silent: false
 });
 
-let dead = fork => {
+const dead = fork => {
   return fork.isDead() || fork.killed;
 };
 
@@ -40,7 +40,7 @@ module.exports = class Worker extends EventEmitter {
     this.clusterBinder = new BinderFor(cluster);
     this.processBinder = new BinderFor(process);
 
-    let argv = _.union(baseArgv, opts.argv || []);
+    const argv = _.union(baseArgv, opts.argv || []);
     this.env = {
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify(argv)
@@ -124,8 +124,8 @@ module.exports = class Worker extends EventEmitter {
   }
 
   flushChangeBuffer() {
-    let files = _.unique(this.changes.splice(0));
-    let prefix = files.length > 1 ? '\n - ' : '';
+    const files = _.unique(this.changes.splice(0));
+    const prefix = files.length > 1 ? '\n - ' : '';
     return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;
     }, '');

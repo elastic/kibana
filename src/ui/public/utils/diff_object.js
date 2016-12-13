@@ -3,14 +3,14 @@ import angular from 'angular';
 
 export default function (target, source) {
 
-  let diff = {};
+  const diff = {};
 
   /**
    * Filter the private vars
    * @param {string} key The keys
    * @returns {boolean}
    */
-  let filterPrivateAndMethods = function (obj) {
+  const filterPrivateAndMethods = function (obj) {
     return function (key) {
       if (_.isFunction(obj[key])) return false;
       if (key.charAt(0) === '$') return false;
@@ -18,8 +18,8 @@ export default function (target, source) {
     };
   };
 
-  let targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
-  let sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
+  const targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
+  const sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
 
   // Find the keys to be removed
   diff.removed = _.difference(targetKeys, sourceKeys);

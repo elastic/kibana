@@ -10,16 +10,16 @@ describe('String Format', function () {
   }));
 
   it('decode a base64 string', function () {
-    let StringFormat = fieldFormats.getType('string');
-    let string = new StringFormat({
+    const StringFormat = fieldFormats.getType('string');
+    const string = new StringFormat({
       transform: 'base64'
     });
     expect(string.convert('Zm9vYmFy')).to.be('foobar');
   });
 
   it('convert a string to title case', function () {
-    let StringFormat = fieldFormats.getType('string');
-    let string = new StringFormat({
+    const StringFormat = fieldFormats.getType('string');
+    const string = new StringFormat({
       transform: 'title'
     });
     expect(string.convert('PLEASE DO NOT SHOUT')).to.be('Please Do Not Shout');
