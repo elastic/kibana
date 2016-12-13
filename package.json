@@ -62,7 +62,8 @@
     "makelogs": "makelogs",
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
-    "sterilize": "grunt sterilize"
+    "sterilize": "grunt sterilize",
+    "esIndexDump": "node test/support/es_index_dump/cli_setup.js"
   },
   "repository": {
     "type": "git",
@@ -173,6 +174,7 @@
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
     "chromedriver": "2.24.1",
+    "del": "2.2.2",
     "elasticdump": "2.1.1",
     "eslint": "3.11.1",
     "eslint-plugin-mocha": "4.7.0",

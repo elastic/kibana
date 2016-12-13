@@ -9,80 +9,56 @@ import ShieldPage from './shield_page';
 import VisualizePage from './visualize_page';
 import MonitoringPage from './monitoring_page';
 
-const common = new Common();
-const consolePage = new ConsolePage();
-const dashboardPage = new DashboardPage();
-const discoverPage = new DiscoverPage();
-const headerPage = new HeaderPage();
-const settingsPage = new SettingsPage();
-const shieldPage = new ShieldPage();
-const visualizePage = new VisualizePage();
-const monitoringPage = new MonitoringPage();
-
 class PageObjects {
-
   constructor() {
-    this.isInitialized = false;
-    this.remote = undefined;
+    this._onInitialization = [];
+
+    // define all of the page objects that need to be exposed
+    this.addPageObject('common', new Common());
+    this.addPageObject('console', new ConsolePage());
+    this.addPageObject('dashboard', new DashboardPage());
+    this.addPageObject('discover', new DiscoverPage());
+    this.addPageObject('header', new HeaderPage());
+    this.addPageObject('settings', new SettingsPage());
+    this.addPageObject('shield', new ShieldPage());
+    this.addPageObject('visualize', new VisualizePage());
+    this.addPageObject('monitoring', new MonitoringPage());
   }
 
   init(remote) {
     this.isInitialized = true;
     this.remote = remote;
-    common.init(remote);
-    consolePage.init(remote);
-    dashboardPage.init(remote);
-    discoverPage.init(remote);
-    headerPage.init(remote);
-    settingsPage.init(remote);
-    shieldPage.init(remote);
-    visualizePage.init(remote);
-    monitoringPage.init(remote);
+    this._onInitialization.forEach(fn => fn());
+    this._onInitialization = null;
   }
 
-  assertInitialized() {
-    if (this.isInitialized) {
-      return true;
-    }
-    throw new TypeError('Please call init and provide a reference to `remote` before trying to access a page object.');
-  }
+  /**
+   *  Add a page object to be used in the functional tests. If the page object
+   *  is accessed before initialization a Error will be thrown. This needs to
+   *  be a function so plugins can expose their PageObjects.
+   *
+   *  @param {string} name - the property name for the page object
+   *  @param {PageObject} pageObject - the page object to expose
+   */
+  addPageObject(name, pageObject) {
+    let initialized = false;
 
-  get common() {
-    return this.assertInitialized() && common;
-  }
+    this._onInitialization.push(() => {
+      pageObject.init(this.remote);
+      initialized = true;
+    });
 
-  get console() {
-    return this.assertInitialized() && consolePage;
-  }
+    Object.defineProperty(this, name, {
+      configurable: true,
+      get() {
+        if (initialized) return pageObject;
 
-  get dashboard() {
-    return this.assertInitialized() && dashboardPage;
+        throw new TypeError(
+          `Please call init and provide a reference to \`remote\` before trying to access the ${name} page object.`
+        );
+      }
+    });
   }
-
-  get discover() {
-    return this.assertInitialized() && discoverPage;
-  }
-
-  get header() {
-    return this.assertInitialized() && headerPage;
-  }
-
-  get settings() {
-    return this.assertInitialized() && settingsPage;
-  }
-
-  get shield() {
-    return this.assertInitialized() && shieldPage;
-  }
-
-  get visualize() {
-    return this.assertInitialized() && visualizePage;
-  }
-
-  get monitoring() {
-    return this.assertInitialized() && monitoringPage;
-  }
-
 }
 
 export default new PageObjects();

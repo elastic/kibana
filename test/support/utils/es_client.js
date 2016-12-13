@@ -120,6 +120,7 @@ export default (function () {
           index: '.kibana',
           type: 'config',
           id: configId,
+          refresh: 'wait_for',
           body: {
             'doc':
               docMap

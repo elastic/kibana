@@ -1,4 +1,5 @@
 var shield = require('./shield');
+var { resolve } = require('path');
 
 var kibanaURL = '/app/kibana';
 
@@ -50,5 +51,11 @@ module.exports = {
       pathname: kibanaURL,
       hash: '/dev_tools/console',
     }
+  },
+  screenshots: {
+    directory: resolve(__dirname, 'screenshots')
+  },
+  esIndexDump: {
+    dataDir: resolve(__dirname, 'fixtures/dump_data')
   }
 };

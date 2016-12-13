@@ -7,7 +7,7 @@ import {
   defaultTimeout,
   scenarioManager,
   esClient,
-  elasticDump
+  esIndexDump
  } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -24,7 +24,7 @@ bdd.describe('visualize app', function () {
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
+      return esIndexDump.load('visualize','.kibana');
     })
     // wait for the logstash data load to finish if it hasn't already
     .then(function () {

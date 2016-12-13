@@ -3,9 +3,12 @@ import url from 'url';
 
 import {
   BddWrapper,
-  ElasticDump,
+  EsIndexDump,
   EsClient,
+  Log,
 } from './utils';
+
+import { EsIndexDump } from './es_index_dump';
 import ScenarioManager from '../fixtures/scenario_manager';
 import PageObjects from './page_objects';
 
@@ -19,11 +22,18 @@ const config = exports.config = kbnInternVars.intern.config;
 exports.defaultTimeout = config.defaultTimeout;
 exports.defaultTryTimeout = config.defaultTryTimeout;
 exports.defaultFindTimeout = config.defaultFindTimeout;
+exports.screenshotsConfig = config.screenshots;
 
 // Helper instances
 exports.scenarioManager =
   new ScenarioManager(url.format(config.servers.elasticsearch));
-exports.elasticDump = new ElasticDump();
+
+exports.esIndexDump = new EsIndexDump({
+  esUrl: url.format(config.servers.elasticsearch),
+  log: (...args) => Log.debug(...args),
+  ...config.esIndexDump
+});
+
 exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
 
 // TODO: We're using this facade to avoid breaking existing functionality as

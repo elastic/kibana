@@ -5,7 +5,7 @@ import {
   bdd,
   scenarioManager,
   esClient,
-  elasticDump
+  esIndexDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -33,7 +33,7 @@ bdd.describe('shared links', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
+      return esIndexDump.load('visualize','.kibana');
     })
     // and load a set of makelogs data
     .then(function loadIfEmptyMakelogs() {
