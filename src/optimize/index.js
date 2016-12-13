@@ -20,7 +20,7 @@ module.exports = async (kbnServer, server, config) => {
   await bundles.writeEntryFiles();
 
   // in prod, only bundle when someing is missing or invalid
-  let invalidBundles = config.get('optimize.useBundleCache') ? await bundles.getInvalidBundles() : bundles;
+  const invalidBundles = config.get('optimize.useBundleCache') ? await bundles.getInvalidBundles() : bundles;
 
   // we might not have any work to do
   if (!invalidBundles.getIds().length) {
