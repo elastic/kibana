@@ -50,7 +50,6 @@ function parseDateMath(mathString, time, roundUp) {
     const c = mathString.charAt(i++);
     let type;
     let num;
-    let unit;
 
     if (c === '/') {
       type = 0;
@@ -83,7 +82,7 @@ function parseDateMath(mathString, time, roundUp) {
         return undefined;
       }
     }
-    unit = mathString.charAt(i++);
+    const unit = mathString.charAt(i++);
 
     if (!_.contains(units, unit)) {
       return undefined;

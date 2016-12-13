@@ -6,6 +6,8 @@ const moment = require('moment-timezone');
 const observeResize = require('plugins/timelion/lib/observe_resize');
 const calculateInterval = require('plugins/timelion/lib/calculate_interval');
 
+const SET_LEGEND_NUMBERS_DELAY = 50;
+
 module.exports = function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
     return {
@@ -26,7 +28,12 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
         $scope.search = $scope.search || _.noop;
 
         let legendValueNumbers;
-        let debouncedSetLegendNumbers;
+        const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, SET_LEGEND_NUMBERS_DELAY, {
+          maxWait: SET_LEGEND_NUMBERS_DELAY,
+          leading: true,
+          trailing: false
+        });
+
         const defaultOptions = {
           xaxis: {
             mode: 'time',
@@ -106,13 +113,6 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           if (!$scope.plot) return;
           $scope.plot.clearCrosshair();
           clearLegendNumbers();
-        });
-
-        const debounceDelay = 50;
-        debouncedSetLegendNumbers = _.debounce(setLegendNumbers, debounceDelay, {
-          maxWait: debounceDelay,
-          leading: true,
-          trailing: false
         });
 
         // Shamelessly borrowed from the flotCrosshairs example
