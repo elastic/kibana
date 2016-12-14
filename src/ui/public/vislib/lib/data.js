@@ -42,7 +42,6 @@ export default function DataFactory(Private) {
 
       this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
-      this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
         stack: d3.layout.stack()
@@ -63,6 +62,8 @@ export default function DataFactory(Private) {
           return self._stackNegAndPosVals(d, y0, y);
         });
       }
+
+      this._normalizeOrdered();
     }
 
     _getLabels(data) {
