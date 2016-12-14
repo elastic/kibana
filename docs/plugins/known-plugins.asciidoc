@@ -38,4 +38,4 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 === Other
 * https://github.com/nreese/kibana-time-plugin[Time picker as a dashboard panel] Widget to view and edit the time range from within dashboards.
 
-NOTE: If you want your plugin to be added to this page, open a {repo}tree/{version}/docs/plugins/known-plugins.asciidoc[pull request].
+NOTE: If you want your plugin to be added to this page, open a {repo}tree/{branch}/docs/plugins/known-plugins.asciidoc[pull request].

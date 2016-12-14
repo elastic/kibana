@@ -24,5 +24,5 @@ Check out the https://github.com/elastic/generator-kibana-plugin[plugin generato
 
 [float]
 ==== References in the code
- - {repo}/blob/master/src/server/plugins/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+ - {repo}blob/{branch}/src/server/plugins/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
  - <<development-uiexports>>: What type of exports are available?
