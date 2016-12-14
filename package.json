@@ -168,7 +168,7 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.2.1",
+    "@elastic/eslint-config-kibana": "0.3.0",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "6.1.2",
@@ -180,6 +180,7 @@
     "del": "1.2.1",
     "elasticdump": "2.1.1",
     "eslint": "3.11.1",
+    "eslint-plugin-babel": "4.0.0",
     "eslint-plugin-mocha": "4.7.0",
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
