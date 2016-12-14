@@ -74,7 +74,7 @@ export default function VisFactory(Private) {
 
     getLegendLabels() {
       return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
-    };
+    }
 
     getLegendColors() {
       return this.visConfig ? this.visConfig.get('legend.colors', null) : null;

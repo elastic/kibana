@@ -74,7 +74,7 @@ export default function HeatmapChartFactory(Private) {
         labels.push(label);
       }
       return labels;
-    };
+    }
 
     getHeatmapColors(cfg) {
       const colorsNumber = cfg.get('colorsNumber');
@@ -82,14 +82,14 @@ export default function HeatmapChartFactory(Private) {
       const colorSchema = cfg.get('colorSchema');
       const labels = this.getHeatmapLabels(cfg);
       const colors = {};
-      for (let i in labels) {
+      for (const i in labels) {
         if (labels[i]) {
           const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
           colors[labels[i]] = getColor(val, colorSchema);
         }
       }
       return colors;
-    };
+    }
 
     addSquares(svg, data) {
       const xScale = this.getCategoryAxis().getScale();
@@ -235,7 +235,7 @@ export default function HeatmapChartFactory(Private) {
       }
 
       return squares.selectAll('rect');
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -261,8 +261,8 @@ export default function HeatmapChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return HeatmapChart;
-};
+}
