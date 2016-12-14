@@ -44,7 +44,7 @@ export class I18n {
    *                                          of translation keys and translations
    */
   getAllTranslations() {
-    let localeTranslations = {};
+    const localeTranslations = {};
 
     const locales = this._getRegisteredTranslationLocales();
     const translations = _.map(locales, (locale) => {

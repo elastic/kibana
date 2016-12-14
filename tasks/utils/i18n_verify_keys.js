@@ -29,7 +29,7 @@ export function getTranslationKeys(filesPatterns) {
  * not translated then the Object will contain all non translated translation keys per localem
  */
 export function getNonTranslatedKeys(translationKeys, localeTranslations) {
-  let keysNotTranslatedPerLocale = {};
+  const keysNotTranslatedPerLocale = {};
   _.forEach(localeTranslations, (translations, locale) => {
     const keysNotTranslated = _.difference(translationKeys, Object.keys(translations));
     if (!_.isEmpty(keysNotTranslated)) {
@@ -40,14 +40,14 @@ export function getNonTranslatedKeys(translationKeys, localeTranslations) {
 };
 
 function getFilesToVerify(verifyFilesPatterns) {
-  let filesToVerify = [];
+  const filesToVerify = [];
 
   return Promise.map(verifyFilesPatterns, (verifyFilesPattern) => {
     const baseSearchDir = path.dirname(verifyFilesPattern);
     const pattern = path.basename(verifyFilesPattern);
     return globProm(pattern, {cwd: baseSearchDir, matchBase: true})
     .then(function (files) {
-      for (let file of files) {
+      for (const file of files) {
         filesToVerify.push(path.join(baseSearchDir, file));
       }
     });
@@ -58,7 +58,7 @@ function getFilesToVerify(verifyFilesPatterns) {
 }
 
 function getKeys(filesToVerify) {
-  let translationKeys = [];
+  const translationKeys = [];
   const translationPattern = 'i18n\\(\'(.*)\'\\)';
   const translationRegEx = new RegExp(translationPattern, 'g');
 
