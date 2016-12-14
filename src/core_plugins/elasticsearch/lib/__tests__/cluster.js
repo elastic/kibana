@@ -8,7 +8,6 @@ import Boom from 'boom';
 describe('plugins/elasticsearch', function () {
   describe('cluster', function () {
     let cluster;
-    let client;
     let config = {
       url: 'http://localhost:9200',
       ssl: { verify: false },
@@ -44,56 +43,90 @@ describe('plugins/elasticsearch', function () {
       expect(localConfig.requestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
     });
 
-    describe('callAsKibanaUserFactory', () => {
-      let callAsKibanaUser;
+    describe('adding a plugin', () => {
+      const plugin = (Client, config, components) => {
+        Client.prototype.marco = () => {
+          return Promise.resolve('polo');
+        };
+      };
 
       beforeEach(() => {
-        client = sinon.stub();
-        set(client, 'nodes.info', sinon.stub().returns(Promise.resolve()));
+        cluster.addClientPlugins([plugin]);
+      });
 
-        callAsKibanaUser = cluster.callAsKibanaUserFactory(client);
+      it('persists previous plugins', () => {
+        const pluginTwo = (Client, config, components) => {
+          Client.prototype.foo = () => {
+            return Promise.resolve('bar');
+          };
+        };
+
+        expect(cluster.config().plugins).to.have.length(1);
+        expect(cluster.config().plugins[0]).to.be(plugin);
+
+        cluster.addClientPlugins([pluginTwo]);
+
+        expect(cluster.config().plugins).to.have.length(2);
+        expect(cluster.config().plugins).to.eql([plugin, pluginTwo]);
+      });
+
+      it('is available for callAsKibanUser', async () => {
+        const marco = await cluster.callAsKibanaUser('marco');
+        expect(marco).to.eql('polo');
+      });
+
+      it('is available for callWithRequest', async () => {
+        const marco = await cluster.callWithRequest({}, 'marco');
+        expect(marco).to.eql('polo');
+      });
+    });
+
+    describe('callAsKibanaUser', () => {
+      let client;
+
+      beforeEach(() => {
+        client = cluster._client = sinon.stub();
+        set(client, 'nodes.info', sinon.stub().returns(Promise.resolve()));
       });
 
       it('should return a function', () => {
-        expect(callAsKibanaUser).to.be.a('function');
+        expect(cluster.callAsKibanaUser).to.be.a('function');
       });
 
       it('throws an error for an invalid endpoint', () => {
-        const fn = partial(callAsKibanaUser, 'foo');
+        const fn = partial(cluster.callAsKibanaUser, 'foo');
         expect(fn).to.throwException(/called with an invalid endpoint: foo/);
       });
 
       it('calls the client with params', () => {
         const params = { foo: 'Foo' };
-        callAsKibanaUser('nodes.info', params);
+        cluster.callAsKibanaUser('nodes.info', params);
 
         sinon.assert.calledOnce(client.nodes.info);
         expect(client.nodes.info.getCall(0).args[0]).to.eql(params);
       });
     });
 
-    describe('callWithRequestFactory', () => {
-      let callWithRequest;
+    describe('callWithRequest', () => {
+      let client;
 
       beforeEach(() => {
-        client = sinon.stub();
+        client = cluster._noAuthClient = sinon.stub();
         set(client, 'nodes.info', sinon.stub().returns(Promise.resolve()));
-
-        callWithRequest = cluster.callWithRequestFactory(client);
       });
 
       it('should return a function', () => {
-        expect(callWithRequest).to.be.a('function');
+        expect(cluster.callWithRequest).to.be.a('function');
       });
 
       it('throws an error for an invalid endpoint', () => {
-        const fn = partial(callWithRequest, {}, 'foo');
+        const fn = partial(cluster.callWithRequest, {}, 'foo');
         expect(fn).to.throwException(/called with an invalid endpoint: foo/);
       });
 
       it('calls the client with params', () => {
         const params = { foo: 'Foo' };
-        callWithRequest({}, 'nodes.info', params);
+        cluster.callWithRequest({}, 'nodes.info', params);
 
         sinon.assert.calledOnce(client.nodes.info);
         expect(client.nodes.info.getCall(0).args[0]).to.eql(params);
@@ -103,7 +136,7 @@ describe('plugins/elasticsearch', function () {
         const headers = { authorization: 'Basic TEST' };
         const request = { headers: Object.assign({}, headers, { foo: 'Foo' }) };
 
-        callWithRequest(request, 'nodes.info');
+        cluster.callWithRequest(request, 'nodes.info');
 
         sinon.assert.calledOnce(client.nodes.info);
         expect(client.nodes.info.getCall(0).args[0]).to.eql({
@@ -122,7 +155,7 @@ describe('plugins/elasticsearch', function () {
 
         it('ensures WWW-Authenticate header', async () => {
           set(client, 'mock.401', sinon.stub().returns(Promise.reject(error)));
-          await callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
+          await cluster.callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
 
           sinon.assert.calledOnce(handler);
           expect(handler.getCall(0).args[0].output.headers['WWW-Authenticate']).to.eql('Basic realm="Authorization Required"');
@@ -131,7 +164,7 @@ describe('plugins/elasticsearch', function () {
         it('persists WWW-Authenticate header', async () => {
           set(error, 'body.error.header[WWW-Authenticate]', 'Basic realm="Test"');
           set(client, 'mock.401', sinon.stub().returns(Promise.reject(error)));
-          await callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
+          await cluster.callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
 
           sinon.assert.calledOnce(handler);
           expect(handler.getCall(0).args[0].output.headers['WWW-Authenticate']).to.eql('Basic realm="Test"');
