@@ -18,7 +18,7 @@ export default function MapsConfigFactory(Private) {
   class MapsConfig {
     constructor(mapsConfigArgs) {
       this._values = _.defaultsDeep({}, mapsConfigArgs, DEFAULT_VIS_CONFIG);
-    };
+    }
 
     get(property, defaults) {
       if (_.has(this._values, property) || typeof defaults !== 'undefined') {
@@ -27,11 +27,11 @@ export default function MapsConfigFactory(Private) {
         throw new Error(`Accessing invalid config property: ${property}`);
         return defaults;
       }
-    };
+    }
 
     set(property, value) {
       return _.set(this._values, property, value);
-    };
+    }
   }
 
   return MapsConfig;

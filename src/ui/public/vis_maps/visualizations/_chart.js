@@ -38,7 +38,7 @@ export default function ChartBaseClass(Private) {
       const selection = d3.select(this.chartEl);
       selection.selectAll('*').remove();
       selection.call(this.draw());
-    };
+    }
 
 
     /**
@@ -53,8 +53,8 @@ export default function ChartBaseClass(Private) {
         tooltip.destroy();
       });
       selection.remove();
-    };
+    }
   }
 
   return Chart;
-};
+}

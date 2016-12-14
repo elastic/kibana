@@ -54,7 +54,7 @@ export default function MapsFactory(Private) {
       if (first && added && this.handler) this.handler.enable(event);
 
       return ret;
-    };
+    }
 
     off(event, listener) {
       const last = this.listenerCount(event) === 1;
@@ -64,7 +64,7 @@ export default function MapsFactory(Private) {
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
-    };
+    }
 
     render(data, uiState) {
       if (!data) {
@@ -76,12 +76,12 @@ export default function MapsFactory(Private) {
       this.visConfig = new MapsConfig(this.mapsConfigArgs, this.data, this.uiState);
       this.layout = new Layout(this.el, this.visConfig, this.data);
       this.draw();
-    };
+    }
 
     destroy() {
       this.charts.forEach(chart => chart.destroy());
       d3.select(this.el).selectAll('*').remove();
-    };
+    }
 
     draw() {
       this.layout.render();
@@ -103,4 +103,4 @@ export default function MapsFactory(Private) {
   }
 
   return Maps;
-};
+}

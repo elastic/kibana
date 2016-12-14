@@ -4,8 +4,8 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import MapsVisTypeMapsRenderbotProvider from 'ui/vis_maps/maps_renderbot';
 export default function MapsVisTypeFactory(Private) {
-  let VisType = Private(VisVisTypeProvider);
-  let MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
 
 
   _.class(MapsVisType).inherits(VisType);
@@ -19,4 +19,4 @@ export default function MapsVisTypeFactory(Private) {
   };
 
   return MapsVisType;
-};
+}

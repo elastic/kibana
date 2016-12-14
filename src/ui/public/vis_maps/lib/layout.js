@@ -13,7 +13,7 @@ export default function LayoutFactory(Private) {
     render() {
       this.removeAll();
       this.createLayout();
-    };
+    }
 
     createLayout() {
       const wrapper = this.appendElem(this.el, 'div', 'vis-wrapper');
@@ -21,7 +21,7 @@ export default function LayoutFactory(Private) {
       const colWrapper = this.appendElem(wrapper.node(), 'div', 'vis-col-wrapper');
       const chartWrapper = this.appendElem(colWrapper.node(), 'div', 'chart-wrapper');
       chartWrapper.call(mapSplit, colWrapper.node(), this.config);
-    };
+    }
 
     appendElem(el, type, className) {
       if (!el || !type || !className) {
@@ -39,12 +39,12 @@ export default function LayoutFactory(Private) {
       return d3.select(el)
       .append(type)
       .attr('class', className);
-    };
+    }
 
     removeAll() {
       return d3.select(this.el).selectAll('*').remove();
-    };
+    }
   }
 
   return Layout;
-};
+}

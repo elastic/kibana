@@ -4,9 +4,9 @@ import VisRenderbotProvider from 'ui/vis/renderbot';
 import MapsVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
 module.exports = function MapsRenderbotFactory(Private, $injector) {
   const AngularPromise = $injector.get('Promise');
-  let Maps = Private(MapsProvider);
-  let Renderbot = Private(VisRenderbotProvider);
-  let buildChartData = Private(MapsVisTypeBuildChartDataProvider);
+  const Maps = Private(MapsProvider);
+  const Renderbot = Private(VisRenderbotProvider);
+  const buildChartData = Private(MapsVisTypeBuildChartDataProvider);
 
   _.class(MapsRenderbot).inherits(Renderbot);
   function MapsRenderbot(vis, $el, uiState) {
@@ -29,7 +29,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector) {
   };
 
   MapsRenderbot.prototype._getMapsParams = function () {
-    let self = this;
+    const self = this;
 
     return _.assign(
       {},
@@ -52,9 +52,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector) {
   };
 
   MapsRenderbot.prototype.destroy = function () {
-    let self = this;
+    const self = this;
 
-    let mapsVis = self.mapsVis;
+    const mapsVis = self.mapsVis;
 
     _.forOwn(self.vis.listeners, function (listener, event) {
       mapsVis.off(event, listener);
@@ -64,10 +64,10 @@ module.exports = function MapsRenderbotFactory(Private, $injector) {
   };
 
   MapsRenderbot.prototype.updateParams = function () {
-    let self = this;
+    const self = this;
 
     // get full maps params object
-    let newParams = self._getMapsParams();
+    const newParams = self._getMapsParams();
 
     // if there's been a change, replace the vis
     if (!_.isEqual(newParams, self.mapsParams)) self._createVis();

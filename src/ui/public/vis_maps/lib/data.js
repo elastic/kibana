@@ -71,7 +71,7 @@ export default function DataFactory(Private) {
         return _.toArray(arr);
       }
       return [this.data];
-    };
+    }
 
     /**
      * Returns an array of chart data objects
@@ -91,7 +91,7 @@ export default function DataFactory(Private) {
       }
 
       return visData;
-    };
+    }
 
     /**
      * get min and max for all cols, rows of data
@@ -107,8 +107,8 @@ export default function DataFactory(Private) {
           min: Math.min(props.min, minMax.min),
           max: Math.max(props.max, minMax.max)
         };
-      }, {min: Infinity, max: -Infinity});
-    };
+      }, { min: Infinity, max: -Infinity });
+    }
 
     /**
      * Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
@@ -123,7 +123,7 @@ export default function DataFactory(Private) {
     get(thing, def) {
       const source = (this.data.rows || this.data.columns || [this.data])[0];
       return _.get(source, thing, def);
-    };
+    }
 
     /**
      * Return an array of all value objects
@@ -140,7 +140,7 @@ export default function DataFactory(Private) {
         .pluck('values')
         .flattenDeep()
         .value();
-    };
+    }
 
     /**
      * ensure that the datas ordered property has a min and max
@@ -164,7 +164,7 @@ export default function DataFactory(Private) {
           if (missingMax) d.ordered.max = extent[1];
         }
       });
-    };
+    }
 
     /**
      * Calculates min and max values for all map data
@@ -177,12 +177,11 @@ export default function DataFactory(Private) {
      * @returns {Array} min and max values
      */
     mapDataExtents(series) {
-      let values;
-      values = _.map(series.rows, function (row) {
+      const values = _.map(series.rows, function (row) {
         return row[row.length - 1];
       });
       return [_.min(values), _.max(values)];
-    };
+    }
 
     /**
      * Get the maximum number of series, considering each chart
@@ -194,8 +193,8 @@ export default function DataFactory(Private) {
       return this.chartData().reduce(function (max, chart) {
         return Math.max(max, chart.series.length);
       }, 0);
-    };
+    }
   }
 
   return Data;
-};
+}
