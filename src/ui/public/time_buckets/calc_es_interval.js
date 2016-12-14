@@ -3,7 +3,8 @@ import dateMath from '@elastic/datemath';
 export default function () {
 
   const unitsDesc = dateMath.unitsDesc;
-  const largeMax = unitsDesc.indexOf('w');
+  const weekUnitDesc = 'w';
+  const largeMax = unitsDesc.indexOf(weekUnitDesc);
 
   /**
    * Convert a moment.duration into an es
