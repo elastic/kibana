@@ -12,6 +12,7 @@ module.exports = function (grunt) {
       '_build:babelOptions',
       '_build:plugins',
       '_build:data',
+      '_build:verifyTranslations',
       '_build:packageJson',
       '_build:readme',
       '_build:babelCache',
