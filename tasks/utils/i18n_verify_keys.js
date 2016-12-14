@@ -19,7 +19,7 @@ export function getTranslationKeys(filesPatterns) {
   .then(function (filesToVerify) {
     return getKeys(filesToVerify);
   });
-};
+}
 
 /**
  * Return translation keys that are not translated
@@ -37,7 +37,7 @@ export function getNonTranslatedKeys(translationKeys, localeTranslations) {
     }
   });
   return keysNotTranslatedPerLocale;
-};
+}
 
 function getFilesToVerify(verifyFilesPatterns) {
   const filesToVerify = [];
