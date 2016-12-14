@@ -25,6 +25,12 @@ program
   .action(run('build'));
 
 program
+  .command('test')
+  .description('Run the server and browser tests')
+  .on('--help', docs('test/all'))
+  .action(run('test/all'));
+
+program
   .command('test:browser')
   .description('Run the browser tests in a real web browser')
   .on('--help', docs('test/browser'))
