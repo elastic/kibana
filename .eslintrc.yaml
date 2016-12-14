@@ -3,6 +3,7 @@ parser: babel-eslint
 
 plugins:
   - mocha
+  - babel
 
 env:
   es6: true
@@ -35,6 +36,7 @@ rules:
   no-eval: error
   no-extend-native: error
   no-extra-parens: off
+  no-global-assign: error
   no-irregular-whitespace: error
   no-iterator: error
   no-loop-func: error
@@ -57,6 +59,7 @@ rules:
   no-unused-vars: [ error ]
   no-use-before-define: [ error, nofunc ]
   no-with: error
+  object-curly-spacing: off # overriden with babel/object-curly-spacing
   one-var: [ error, never ]
   quotes: [ error, single, { allowTemplateLiterals: true } ]
   semi-spacing: [ error, { before: false, after: true } ]
@@ -75,3 +78,5 @@ rules:
   mocha/handle-done-callback: error
   no-var: error
   prefer-const: error
+  
+  babel/object-curly-spacing: [ error, always ]
