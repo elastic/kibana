@@ -1,4 +1,4 @@
-module.exports = function (plugin) {
+module.exports = function (plugin, opts = {}) {
   var execFileSync = require('child_process').execFileSync;
 
   var kbnServerArgs = [
@@ -7,7 +7,8 @@ module.exports = function (plugin) {
   ];
 
   var cmd = 'npm';
-  var args = ['run', 'test:dev', '--'].concat(kbnServerArgs);
+  var task = (opts.runOnce) ? 'test:browser' : 'test:dev';
+  var args = ['run', task, '--'].concat(kbnServerArgs);
   execFileSync(cmd, args, {
     cwd: plugin.kibanaRoot,
     stdio: ['ignore', 1, 2]
