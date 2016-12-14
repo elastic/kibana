@@ -22,7 +22,7 @@ export default function AxisScaleFactory(Private) {
     validateUserExtents(domain) {
       const config = this.axisConfig;
       return domain.map((val) => {
-        val = parseInt(val, 10);
+        val = parseFloat(val);
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
         if (config.isPercentage() && config.isUserDefined()) return val / 100;
         return val;
