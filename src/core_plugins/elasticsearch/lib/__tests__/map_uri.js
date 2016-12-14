@@ -50,7 +50,7 @@ describe('plugins/elasticsearch', function () {
     it('sends configured custom headers even if the same named header exists in request', function () {
       const settings = {
         requestHeadersWhitelist: ['x-my-custom-header'],
-        customHeaders: {'x-my-custom-header': 'asconfigured'}
+        customHeaders: { 'x-my-custom-header': 'asconfigured' }
       };
 
       mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
