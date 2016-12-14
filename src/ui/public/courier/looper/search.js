@@ -35,4 +35,4 @@ export default function SearchLooperService(Private, Promise, Notifier, $rootSco
   };
 
   return searchLooper;
-};
+}

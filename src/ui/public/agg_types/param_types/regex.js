@@ -49,4 +49,4 @@ export default function RegexAggParamFactory(Private) {
   };
 
   return RegexAggParam;
-};
+}

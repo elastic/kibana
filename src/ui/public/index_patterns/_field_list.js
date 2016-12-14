@@ -16,4 +16,4 @@ export default function FieldListProvider(Private) {
   }
 
   return FieldList;
-};
+}

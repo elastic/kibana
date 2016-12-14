@@ -26,7 +26,7 @@ export default function VisConfigFactory(Private) {
       const visType = visTypes[visConfigArgs.type];
       const typeDefaults = visType(visConfigArgs, this.data);
       this._values = _.defaultsDeep({}, typeDefaults, DEFAULT_VIS_CONFIG);
-    };
+    }
 
     get(property, defaults) {
       if (_.has(this._values, property) || typeof defaults !== 'undefined') {
@@ -35,11 +35,11 @@ export default function VisConfigFactory(Private) {
         throw new Error(`Accessing invalid config property: ${property}`);
         return defaults;
       }
-    };
+    }
 
     set(property, value) {
       return _.set(this._values, property, value);
-    };
+    }
   }
 
   return VisConfig;

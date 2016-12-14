@@ -47,4 +47,4 @@ export default function RenderbotFactory(Private) {
   Renderbot.prototype.updateParams = _.noop;
 
   return Renderbot;
-};
+}

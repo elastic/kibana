@@ -37,4 +37,4 @@ export default function TileMapTooltipFormatter($compile, $rootScope, Private) {
 
     return $el.html();
   };
-};
+}

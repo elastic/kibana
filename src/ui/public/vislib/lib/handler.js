@@ -103,7 +103,7 @@ export default function HandlerBaseClass(Private) {
       if (!dataType) {
         throw new errors.NoResults();
       }
-    };
+    }
 
     /**
      * Renders the constructors that create the visualization,
@@ -147,7 +147,7 @@ export default function HandlerBaseClass(Private) {
         charts.push(chart);
         chart.render();
       });
-    };
+    }
 
     chartEventProxyToggle(method) {
       return function (event, chart) {
@@ -170,7 +170,7 @@ export default function HandlerBaseClass(Private) {
      */
     removeAll(el) {
       return d3.select(el).selectAll('*').remove();
-    };
+    }
 
     /**
      * Displays an error message in the DOM
@@ -203,7 +203,7 @@ export default function HandlerBaseClass(Private) {
 
       $(this.el).trigger('renderComplete');
       return div;
-    };
+    }
 
     /**
      * Destroys all the charts in the visualization
@@ -224,8 +224,8 @@ export default function HandlerBaseClass(Private) {
           chart.destroy();
         }
       });
-    };
+    }
   }
 
   return Handler;
-};
+}

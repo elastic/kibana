@@ -134,4 +134,4 @@ export default function (chrome, internals) {
   // simulate a possible change in url to initialize the
   // link.active and link.lastUrl properties
   internals.trackPossibleSubUrl(document.location.href);
-};
+}

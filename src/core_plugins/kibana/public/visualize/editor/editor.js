@@ -363,4 +363,4 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   }
 
   init();
-};
+}

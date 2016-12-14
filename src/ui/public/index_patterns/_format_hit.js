@@ -42,5 +42,5 @@ export default function (indexPattern, defaultFormat) {
   };
 
   return formatHit;
-};
+}
 

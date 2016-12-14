@@ -61,4 +61,4 @@ export default function RootSearchSource(Private, $rootScope, timefilter, Notifi
       return globalSource;
     }
   };
-};
+}

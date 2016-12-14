@@ -29,4 +29,4 @@ export default function FieldAggParamFactory(Private) {
   };
 
   return ScriptAggParam;
-};
+}

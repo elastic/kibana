@@ -226,7 +226,7 @@ class TagCloud extends EventEmitter {
       resolveWhenDone();
     });
 
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();

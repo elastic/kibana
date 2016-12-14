@@ -9,4 +9,4 @@ export default function mapQueryStringProvider(Promise) {
     }
     return Promise.reject(filter);
   };
-};
+}

@@ -41,4 +41,4 @@ export default function HierarchicalTooltipFormaterProvider($rootScope, $compile
 
   };
 
-};
+}

@@ -2,7 +2,7 @@ import _ from 'lodash';
 // adopted from http://stackoverflow.com/questions/3109978/php-display-number-with-ordinal-suffix
 export default function addOrdinalSuffix(num) {
   return num + '' + suffix(num);
-};
+}
 
 function suffix(num) {
   const int = Math.floor(parseFloat(num));

@@ -167,4 +167,4 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
   };
 
   return DocSource;
-};
+}

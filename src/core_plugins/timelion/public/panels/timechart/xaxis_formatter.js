@@ -19,7 +19,7 @@ module.exports = function xaxisFormatterProvider(config, timefilter) {
     }
 
     return config.get('dateFormat');
-  };
+  }
 
   return function (esInterval) {
     return getFormat(esInterval);

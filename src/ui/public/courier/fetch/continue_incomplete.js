@@ -24,4 +24,4 @@ export default function CourierFetchContinueIncompleteRequests(Private) {
   }
 
   return continueIncompleteRequests;
-};
+}
