@@ -21,7 +21,7 @@ export function parseMilliseconds(val) {
   }
 
   return result;
-};
+}
 
 export function parse(command, options, kbnPackage) {
   const settings = {
@@ -44,4 +44,4 @@ export function parse(command, options, kbnPackage) {
   };
 
   return settings;
-};
+}

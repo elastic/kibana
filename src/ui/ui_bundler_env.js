@@ -73,22 +73,22 @@ module.exports = class UiBundlerEnv {
     switch (type) {
       case 'loaders':
         return (plugin, spec) => {
-          for (let loader of arr(spec)) this.addLoader(loader);
+          for (const loader of arr(spec)) this.addLoader(loader);
         };
 
       case 'postLoaders':
         return (plugin, spec) => {
-          for (let loader of arr(spec)) this.addPostLoader(loader);
+          for (const loader of arr(spec)) this.addPostLoader(loader);
         };
 
       case 'noParse':
         return (plugin, spec) => {
-          for (let re of arr(spec)) this.addNoParse(re);
+          for (const re of arr(spec)) this.addNoParse(re);
         };
 
       case 'modules':
         return (plugin, spec) => {
-          for (let id of keys(spec)) this.addModule(id, spec[id], plugin.id);
+          for (const id of keys(spec)) this.addModule(id, spec[id], plugin.id);
         };
     }
   }

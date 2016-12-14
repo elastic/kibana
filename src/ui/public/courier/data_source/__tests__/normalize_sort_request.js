@@ -24,8 +24,8 @@ describe('SearchSource#normalizeSortRequest', function () {
   }));
 
   it('should return an array', function () {
-    let sortable = { someField: 'desc'};
-    let result = normalizeSortRequest(sortable, indexPattern);
+    const sortable = { someField: 'desc'};
+    const result = normalizeSortRequest(sortable, indexPattern);
     expect(result).to.be.an(Array);
     expect(result).to.eql(normalizedSort);
     // ensure object passed in is not mutated
@@ -34,27 +34,27 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should make plain string sort into the more verbose format', function () {
-    let result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
+    const result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
   it('should append default sort options', function () {
-    let sortState = [{
+    const sortState = [{
       someField: {
         order: 'desc',
         unmapped_type: 'boolean'
       }
     }];
-    let result = normalizeSortRequest(sortState, indexPattern);
+    const result = normalizeSortRequest(sortState, indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
   it('should enable script based sorting', function () {
-    let fieldName = 'script string';
-    let direction = 'desc';
-    let indexField = indexPattern.fields.byName[fieldName];
+    const fieldName = 'script string';
+    const direction = 'desc';
+    const indexField = indexPattern.fields.byName[fieldName];
 
-    let sortState = {};
+    const sortState = {};
     sortState[fieldName] = direction;
     normalizedSort = {
       _script: {
@@ -76,31 +76,31 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should use script based sorting only on sortable types', function () {
-    let fieldName = 'script murmur3';
-    let direction = 'asc';
-    let indexField = indexPattern.fields.byName[fieldName];
+    const fieldName = 'script murmur3';
+    const direction = 'asc';
+    const indexField = indexPattern.fields.byName[fieldName];
 
-    let sortState = {};
+    const sortState = {};
     sortState[fieldName] = direction;
     normalizedSort = {};
     normalizedSort[fieldName] = {
       order: direction,
       unmapped_type: 'boolean'
     };
-    let result = normalizeSortRequest([sortState], indexPattern);
+    const result = normalizeSortRequest([sortState], indexPattern);
 
     expect(result).to.eql([normalizedSort]);
   });
 
   it('should remove unmapped_type parameter from _score sorting', function () {
-    let sortable = { _score: 'desc'};
-    let expected = [{
+    const sortable = { _score: 'desc'};
+    const expected = [{
       _score: {
         order: 'desc'
       }
     }];
 
-    let result = normalizeSortRequest(sortable, indexPattern);
+    const result = normalizeSortRequest(sortable, indexPattern);
     expect(_.isEqual(result, expected)).to.be.ok();
 
   });

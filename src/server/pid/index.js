@@ -2,19 +2,19 @@ import _ from 'lodash';
 import Boom from 'boom';
 import Promise from 'bluebird';
 import { unlinkSync as unlink } from 'fs';
-let writeFile = Promise.promisify(require('fs').writeFile);
+const writeFile = Promise.promisify(require('fs').writeFile);
 
 module.exports = Promise.method(function (kbnServer, server, config) {
-  let path = config.get('pid.file');
+  const path = config.get('pid.file');
   if (!path) return;
 
-  let pid = String(process.pid);
+  const pid = String(process.pid);
 
   return writeFile(path, pid, { flag: 'wx' })
   .catch(function (err) {
     if (err.code !== 'EEXIST') throw err;
 
-    let log = {
+    const log = {
       tmpl: 'pid file already exists at <%= path %>',
       path: path,
       pid: pid
@@ -36,7 +36,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    let clean = _.once(function (code) {
+    const clean = _.once(function (code) {
       unlink(path);
     });
 

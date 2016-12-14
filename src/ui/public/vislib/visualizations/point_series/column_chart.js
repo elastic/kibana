@@ -61,7 +61,7 @@ export default function ColumnChartFactory(Private) {
       }
 
       return bars;
-    };
+    }
 
     /**
      * Determines whether bars are grouped or stacked and updates the D3
@@ -77,7 +77,7 @@ export default function ColumnChartFactory(Private) {
       }
       return this.addGroupedBars(bars);
 
-    };
+    }
 
     /**
      * Adds stacked bars to column chart visualization
@@ -142,7 +142,7 @@ export default function ColumnChartFactory(Private) {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
-    };
+    }
 
     /**
      * Adds grouped bars to column chart visualization
@@ -212,7 +212,7 @@ export default function ColumnChartFactory(Private) {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -238,8 +238,8 @@ export default function ColumnChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return ColumnChart;
-};
+}

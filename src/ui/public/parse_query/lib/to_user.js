@@ -13,4 +13,4 @@ export default function toUser(text) {
     return angular.toJson(text);
   }
   return '' + text;
-};
+}

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-let longString = Array(200).join('_');
+const longString = Array(200).join('_');
 
 export default function (id, mapping) {
   function fakeVals(type) {
@@ -17,4 +17,4 @@ export default function (id, mapping) {
     $$_partialFormatted: fakeVals('formatted'),
     $$_flattened: fakeVals('_flattened')
   };
-};
+}

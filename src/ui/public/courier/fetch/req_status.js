@@ -4,4 +4,4 @@ export default function CourierFetchRequestStatus() {
     DUPLICATE: { CourierFetchRequestStatus: 'duplicate' },
     INCOMPLETE: { CourierFetchRequestStatus: 'incomplete' }
   };
-};
+}

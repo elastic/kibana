@@ -13,7 +13,7 @@ let appState;
 
 function checkAddFilters(length, comps, idx) {
   idx = idx || 0;
-  let filters = queryFilter.addFilters.getCall(idx).args[0];
+  const filters = queryFilter.addFilters.getCall(idx).args[0];
 
   expect(filters.length).to.be(length);
   if (!_.isArray(comps)) return;
@@ -115,7 +115,7 @@ describe('Filter Manager', function () {
     checkAddFilters(0, null, 3);
     expect(appState.filters).to.have.length(2);
 
-    let scriptedField = {name: 'scriptedField', scripted: true, script: 1, lang: 'painless'};
+    const scriptedField = {name: 'scriptedField', scripted: true, script: 1, lang: 'painless'};
     filterManager.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: {index: 'myIndex', negate: false, field: 'scriptedField'},

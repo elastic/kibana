@@ -9,4 +9,4 @@ export default function mapMissingProvider(Promise) {
     }
     return Promise.reject(filter);
   };
-};
+}

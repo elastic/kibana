@@ -10,7 +10,7 @@ export default (grunt) => {
   async function exec(cmd, args) {
     log.writeln(` > ${cmd} ${args.join(' ')}`);
     await fromNode(cb => execFile(cmd, args, { cwd }, cb));
-  };
+  }
 
   async function archives({ name, buildName, zipPath, tarPath }) {
     if (/windows/.test(name)) {
@@ -18,7 +18,7 @@ export default (grunt) => {
     } else {
       await exec('tar', ['-zchf', tarPath, buildName]);
     }
-  };
+  }
 
   grunt.registerTask('_build:archives', function () {
     grunt.file.mkdir(targetDir);

@@ -242,8 +242,8 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   require('./input_resize')(input, output);
 
   return input;
-};
+}
 
 export default function getInput() {
   return input;
-};
+}

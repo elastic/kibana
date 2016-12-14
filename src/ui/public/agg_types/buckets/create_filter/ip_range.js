@@ -6,7 +6,7 @@ export default function createIpRangeFilterProvider() {
     if (aggConfig.params.ipRangeType === 'mask') {
       range = new CidrMask(key).getRange();
     } else {
-      let [from, to] = key.split(/\s+to\s+/);
+      const [from, to] = key.split(/\s+to\s+/);
       range = {
         from: from === '-Infinity' ? -Infinity : from,
         to: to === 'Infinity' ? Infinity : to
@@ -15,4 +15,4 @@ export default function createIpRangeFilterProvider() {
 
     return buildRangeFilter(aggConfig.params.field, {gte: range.from, lte: range.to}, aggConfig.vis.indexPattern);
   };
-};
+}

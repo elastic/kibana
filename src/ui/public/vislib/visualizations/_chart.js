@@ -49,7 +49,7 @@ export default function ChartBaseClass(Private) {
 
       selection.selectAll('*').remove();
       selection.call(this.draw());
-    };
+    }
 
     /**
      * Append the data label to the element
@@ -71,7 +71,7 @@ export default function ChartBaseClass(Private) {
         const label = resolveLabel(datum);
         if (label != null) dataLabel(this, label);
       });
-    };
+    }
 
     /**
      * Removes all DOM elements from the root element
@@ -85,8 +85,8 @@ export default function ChartBaseClass(Private) {
         tooltip.destroy();
       });
       selection.remove();
-    };
+    }
   }
 
   return Chart;
-};
+}

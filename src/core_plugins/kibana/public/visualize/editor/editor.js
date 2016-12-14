@@ -144,7 +144,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   };
 
   // Instance of app_state.js.
-  let $state = $scope.$state = (function initState() {
+  const $state = $scope.$state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
@@ -363,4 +363,4 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   }
 
   init();
-};
+}

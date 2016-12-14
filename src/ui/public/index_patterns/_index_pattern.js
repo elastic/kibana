@@ -45,7 +45,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
-      type: 'keyword',
+      type: 'text',
       _serialize(map = {}) {
         const serialized = _.transform(map, serialize);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
@@ -383,4 +383,4 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   }
 
   return IndexPattern;
-};
+}

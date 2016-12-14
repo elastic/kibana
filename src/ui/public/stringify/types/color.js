@@ -81,4 +81,4 @@ export default function ColorFormatProvider(Private) {
 
 
   return _Color;
-};
+}

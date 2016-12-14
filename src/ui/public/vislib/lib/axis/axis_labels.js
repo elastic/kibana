@@ -10,7 +10,7 @@ export default function AxisLabelsFactory(Private) {
 
     render(selection) {
       selection.call(this.draw());
-    };
+    }
 
     rotateAxisLabels() {
       const config = this.axisConfig;
@@ -46,7 +46,7 @@ export default function AxisLabelsFactory(Private) {
           });
         }
       };
-    };
+    }
 
     truncateLabel(text, size) {
       const node = d3.select(text).node();
@@ -65,7 +65,7 @@ export default function AxisLabelsFactory(Private) {
         str = str.substr(0, endChar) + '...';
       }
       return str;
-    };
+    }
 
     truncateLabels() {
       const self = this;
@@ -78,13 +78,13 @@ export default function AxisLabelsFactory(Private) {
           return self.truncateLabel(this, config.get('labels.truncate'));
         });
       };
-    };
+    }
 
     filterAxisLabels() {
       const self = this;
       const config = this.axisConfig;
       let startPos = 0;
-      let padding = 1.1;
+      const padding = 1.1;
 
       return function (selection) {
         if (!config.get('labels.filter')) return;
@@ -106,7 +106,7 @@ export default function AxisLabelsFactory(Private) {
           }
         });
       };
-    };
+    }
 
     draw() {
       const self = this;
@@ -126,8 +126,8 @@ export default function AxisLabelsFactory(Private) {
           selection.call(self.filterAxisLabels());
         });
       };
-    };
+    }
   }
 
   return AxisLabels;
-};
+}

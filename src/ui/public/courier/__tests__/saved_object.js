@@ -79,7 +79,7 @@ describe('Saved Object', function () {
    * SavedObject
    */
   function createInitializedSavedObject(config = {}) {
-    let savedObject = new SavedObject(config);
+    const savedObject = new SavedObject(config);
     return savedObject.init();
   }
 
@@ -118,7 +118,7 @@ describe('Saved Object', function () {
       it('as true does not create a copy when save fails', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
-        let originalId = 'id1';
+        const originalId = 'id1';
         return createInitializedSavedObject({type: 'dashboard', id: originalId}).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', function () {
             return BluebirdPromise.reject('simulated error');
@@ -163,7 +163,7 @@ describe('Saved Object', function () {
 
     describe('updates isSaving variable', function () {
       it('on success', function () {
-        let id = 'id';
+        const id = 'id';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', () => {
@@ -279,7 +279,7 @@ describe('Saved Object', function () {
       stubESResponse(mockDocResponse);
 
 
-      let savedObject = new SavedObject(config);
+      const savedObject = new SavedObject(config);
       return savedObject.init()
         .then(() => {
           const response = {

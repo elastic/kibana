@@ -41,6 +41,6 @@ export default class Logger {
     }
     process.stderr.write(`${data}\n`);
     this.previousLineEnded = true;
-  };
+  }
 
 }
