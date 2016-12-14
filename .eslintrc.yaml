@@ -13,6 +13,7 @@ env:
   browser: true
 
 rules:
+  babel/object-curly-spacing: [ error, always ]
   block-scoped-var: error
   camelcase: [ error, { properties: never } ]
   comma-dangle: off
@@ -26,6 +27,8 @@ rules:
   indent: [ error, 2, { SwitchCase: 1 } ]
   key-spacing: [ off, { align: value } ]
   max-len: [ error, 140, 2, { ignoreComments: true, ignoreUrls: true } ]
+  mocha/handle-done-callback: error
+  mocha/no-exclusive-tests: error
   new-cap: [ error, { capIsNewExceptions: [ Private ] } ]
   no-bitwise: off
   no-caller: error
@@ -36,6 +39,7 @@ rules:
   no-eval: error
   no-extend-native: error
   no-extra-parens: off
+  no-extra-semi: [ error ]
   no-global-assign: error
   no-irregular-whitespace: error
   no-iterator: error
@@ -55,16 +59,16 @@ rules:
   no-undef: error
   no-underscore-dangle: off
   no-unused-expressions: off
-  # Disallow declaration of variables that are not used in the code.
   no-unused-vars: [ error ]
   no-use-before-define: [ error, nofunc ]
+  no-var: error
   no-with: error
   object-curly-spacing: off # overriden with babel/object-curly-spacing
   one-var: [ error, never ]
+  prefer-const: error
   quotes: [ error, single, { allowTemplateLiterals: true } ]
   semi-spacing: [ error, { before: false, after: true } ]
   semi: [ error, always ]
-  no-extra-semi: [ error ]
   space-before-blocks: [ error, always ]
   space-before-function-paren: [ error, { anonymous: always, named: never } ]
   space-in-parens: [ error, never ]
@@ -74,9 +78,3 @@ rules:
   valid-typeof: error
   wrap-iife: [ error, outside ]
   yoda: off
-  mocha/no-exclusive-tests: error
-  mocha/handle-done-callback: error
-  no-var: error
-  prefer-const: error
-  
-  babel/object-curly-spacing: [ error, always ]
