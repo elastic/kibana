@@ -8,7 +8,7 @@ import Boom from 'boom';
 describe('plugins/elasticsearch', function () {
   describe('cluster', function () {
     let cluster;
-    let config = {
+    const config = {
       url: 'http://localhost:9200',
       ssl: { verify: false },
       requestHeadersWhitelist: [ 'authorization' ]

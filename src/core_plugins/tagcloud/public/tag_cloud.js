@@ -226,7 +226,7 @@ class TagCloud extends EventEmitter {
       resolveWhenDone();
     });
 
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
@@ -364,7 +364,7 @@ function hashCode(string) {
     return hash;
   }
   for (let i = 0; i < string.length; i++) {
-    let char = string.charCodeAt(i);
+    const char = string.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32bit integer
   }

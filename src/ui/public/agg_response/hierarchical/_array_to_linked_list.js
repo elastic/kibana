@@ -9,4 +9,4 @@ export default function (buckets) {
     previous = bucket;
   });
   return buckets;
-};
+}

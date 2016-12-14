@@ -4,7 +4,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 export default function stubSearchSource(Private, $q, Promise) {
   let deferedResult = $q.defer();
-  let indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
   return {
     sort: sinon.spy(),
@@ -35,4 +35,4 @@ export default function stubSearchSource(Private, $q, Promise) {
     }
   };
 
-};
+}

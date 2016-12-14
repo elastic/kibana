@@ -23,4 +23,4 @@ export default function FetchStrategyForDoc(Promise) {
       return resp.docs;
     }
   };
-};
+}

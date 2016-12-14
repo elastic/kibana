@@ -15,4 +15,4 @@ export function loadPanelProvider(Private) { // Inject services here
     }
 
   };
-};
+}

@@ -18,7 +18,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should change the timefilter to match the range gt/lt', function () {
-      let filter = { range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } };
+      const filter = { range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } };
       changeTimeFilter(filter);
       expect(timefilter.time.mode).to.be('absolute');
       expect(moment.isMoment(timefilter.time.to)).to.be(true);
@@ -28,7 +28,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should change the timefilter to match the range gte/lte', function () {
-      let filter = { range: { '@timestamp': { gte: 1388559600000, lte: 1388646000000 } } };
+      const filter = { range: { '@timestamp': { gte: 1388559600000, lte: 1388646000000 } } };
       changeTimeFilter(filter);
       expect(timefilter.time.mode).to.be('absolute');
       expect(moment.isMoment(timefilter.time.to)).to.be(true);

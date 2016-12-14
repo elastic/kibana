@@ -8,4 +8,4 @@ function cloneBuffersCustomizer(val) {
 
 export default function (vals) {
   return cloneDeep(vals, cloneBuffersCustomizer);
-};
+}

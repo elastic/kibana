@@ -18,9 +18,9 @@ import AbstractDataSourceProvider from './_abstract';
 import DocRequestProvider from '../fetch/request/_abstract_doc';
 
 export default function AbstractDocSourceFactory(Private, Promise, es, sessionStorage) {
-  let sendToEs = Private(DocSendToEsProvider);
-  let SourceAbstract = Private(AbstractDataSourceProvider);
-  let DocRequest = Private(DocRequestProvider);
+  const sendToEs = Private(DocSendToEsProvider);
+  const SourceAbstract = Private(AbstractDataSourceProvider);
+  const DocRequest = Private(DocRequestProvider);
 
   _.class(AbstractDocSource).inherits(SourceAbstract);
   function AbstractDocSource(initialState, strategy) {
@@ -107,7 +107,7 @@ export default function AbstractDocSourceFactory(Private, Promise, es, sessionSt
    * @return {string}
    */
   AbstractDocSource.prototype._versionKey = function () {
-    let state = this._state;
+    const state = this._state;
 
     if (!state.index || !state.type || !state.id) return;
     return 'DocVersion:' + (
@@ -133,10 +133,10 @@ export default function AbstractDocSourceFactory(Private, Promise, es, sessionSt
    * @return {[type]} [description]
    */
   AbstractDocSource.prototype._getStoredVersion = function () {
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
 
-    let v = sessionStorage.get(key);
+    const v = sessionStorage.get(key);
     this._version = v ? _.parseInt(v) : void 0;
     return this._version;
   };
@@ -149,7 +149,7 @@ export default function AbstractDocSourceFactory(Private, Promise, es, sessionSt
   AbstractDocSource.prototype._storeVersion = function (version) {
     if (!version) return this._clearVersion();
 
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
     this._version = version;
     sessionStorage.set(key, version);
@@ -159,10 +159,10 @@ export default function AbstractDocSourceFactory(Private, Promise, es, sessionSt
    * Clears the stored version for a AbstractDocSource
    */
   AbstractDocSource.prototype._clearVersion = function () {
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
     sessionStorage.remove(key);
   };
 
   return AbstractDocSource;
-};
+}

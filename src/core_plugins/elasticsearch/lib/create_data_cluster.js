@@ -26,4 +26,4 @@ export default function (server) {
   );
 
   server.on('close', bindKey(dataCluster, 'close'));
-};
+}

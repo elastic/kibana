@@ -44,7 +44,7 @@ describe(filename, () => {
   });
 
   describe('symbol', () => {
-    var symbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
+    const symbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
     _.each(symbols, (symbol) => {
       it(`is ${symbol}`, () => {
         return invoke(fn, [seriesList, null, null, null, null, symbol]).then((r) => {

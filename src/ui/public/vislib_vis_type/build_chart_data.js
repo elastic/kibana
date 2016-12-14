@@ -2,18 +2,18 @@ import AggResponseIndexProvider from 'ui/agg_response/index';
 import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
 
 export default function VislibVisBuildChartData(Private) {
-  let aggResponse = Private(AggResponseIndexProvider);
-  let Table = Private(AggResponseTabifyTableProvider);
+  const aggResponse = Private(AggResponseIndexProvider);
+  const Table = Private(AggResponseTabifyTableProvider);
 
   return function (esResponse) {
-    let vis = this.vis;
+    const vis = this.vis;
 
     if (vis.isHierarchical()) {
       // the hierarchical converter is very self-contained (woot!)
       return aggResponse.hierarchical(vis, esResponse);
     }
 
-    let tableGroup = aggResponse.tabify(vis, esResponse, {
+    const tableGroup = aggResponse.tabify(vis, esResponse, {
       canSplit: true,
       asAggConfigResults: true
     });
@@ -31,11 +31,11 @@ export default function VislibVisBuildChartData(Private) {
   };
 
   function convertTableGroup(vis, tableGroup) {
-    let tables = tableGroup.tables;
-    let firstChild = tables[0];
+    const tables = tableGroup.tables;
+    const firstChild = tables[0];
     if (firstChild instanceof Table) {
 
-      let chart = convertTable(vis, firstChild);
+      const chart = convertTable(vis, firstChild);
       // if chart is within a split, assign group title to its label
       if (tableGroup.$parent) {
         chart.label = tableGroup.title;
@@ -44,13 +44,13 @@ export default function VislibVisBuildChartData(Private) {
     }
 
     if (!tables.length) return;
-    let out = {};
+    const out = {};
     let outList;
 
     tables.forEach(function (table) {
       if (!outList) {
-        let aggConfig = table.aggConfig;
-        let direction = aggConfig.params.row ? 'rows' : 'columns';
+        const aggConfig = table.aggConfig;
+        const direction = aggConfig.params.row ? 'rows' : 'columns';
         outList = out[direction] = [];
       }
 
@@ -66,4 +66,4 @@ export default function VislibVisBuildChartData(Private) {
   function convertTable(vis, table) {
     return vis.type.responseConverter(vis, table);
   }
-};
+}

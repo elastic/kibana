@@ -54,4 +54,4 @@ export default function CourierFetchCallResponseHandlers(Private, Promise) {
   }
 
   return callResponseHandlers;
-};
+}

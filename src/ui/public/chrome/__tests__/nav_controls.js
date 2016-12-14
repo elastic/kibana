@@ -36,7 +36,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    let $el = compile();
+    const $el = compile();
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
@@ -63,7 +63,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    let $el = compile();
+    const $el = compile();
     expect(
       $el.find('.testControl')
       .toArray()

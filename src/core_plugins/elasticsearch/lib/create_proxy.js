@@ -23,7 +23,7 @@ function createProxy(server, method, path, config) {
     reply(null, upstreamResponse);
   };
 
-  for (let [proxyPrefix, cluster] of proxies) {
+  for (const [proxyPrefix, cluster] of proxies) {
     const options = {
       method: method,
       path: createProxy.createPath(proxyPrefix, path),
@@ -47,7 +47,7 @@ function createProxy(server, method, path, config) {
 
     server.route(options);
   }
-};
+}
 
 createProxy.createPath = function createPath(prefix, path) {
   path = path[0] === '/' ? path : `/${path}`;

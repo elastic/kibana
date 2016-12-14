@@ -4,7 +4,7 @@ import expect from 'expect.js';
 describe('flatten_with(dot, nestedObj)', function () {
 
   it('should flatten object with dot', function () {
-    let nestedObj = {
+    const nestedObj = {
       test: {
         enable: true,
         hosts: ['host-01', 'host-02'],

@@ -1,4 +1,4 @@
-let results = {};
+const results = {};
 
 results.timeSeries = {
   data: {

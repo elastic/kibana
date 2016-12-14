@@ -4,4 +4,4 @@ export default function RefreshKibanaIndexFn(esAdmin, kbnIndex) {
       index: kbnIndex
     });
   };
-};
+}

@@ -10,8 +10,8 @@ export default function brushEventProvider(timefilter) {
 
       switch (event.data.xAxisField.type) {
         case 'date':
-          let from = moment(event.range[0]);
-          let to = moment(event.range[1]);
+          const from = moment(event.range[0]);
+          const to = moment(event.range[1]);
 
           if (to - from === 0) return;
 
@@ -48,4 +48,4 @@ export default function brushEventProvider(timefilter) {
       }
     };
   };
-};
+}

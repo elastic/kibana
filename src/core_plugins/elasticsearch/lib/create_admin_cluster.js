@@ -15,4 +15,4 @@ export default function (server) {
   );
 
   server.on('close', bindKey(adminCluster, 'close'));
-};
+}

@@ -148,4 +148,4 @@ export default function downloadNodeBuilds(grunt) {
     map(platforms, extract).nodeify(this.async());
   });
 
-};
+}

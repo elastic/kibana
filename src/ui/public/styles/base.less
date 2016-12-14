@@ -3,9 +3,6 @@
 @import (reference) "./variables";
 @import (reference) "~ui/styles/bootstrap/bootstrap";
 
-// Kibana UI Framework
-@import (less) "~@elastic/kibana-ui-framework/dist/framework.css";
-
 html,
 body {
   .flex-parent();
@@ -1068,6 +1065,17 @@ fieldset {
     width: (@i * 100% / @n);
   }
   .makeKuiColumns(@n, (@i + 1));
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.localDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
+  }
 }
 
 @import "~dragula/dist/dragula.css";

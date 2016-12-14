@@ -9,9 +9,9 @@ import DocStrategyProvider from '../fetch/strategy/doc_admin';
 import DocRequestProvider from '../fetch/request/doc_admin';
 
 export default function DocSourceFactory(Private) {
-  let AbstractDocSource = Private(AbstractDocSourceProvider);
-  let docStrategy = Private(DocStrategyProvider);
-  let DocRequest = Private(DocRequestProvider);
+  const AbstractDocSource = Private(AbstractDocSourceProvider);
+  const docStrategy = Private(DocStrategyProvider);
+  const DocRequest = Private(DocRequestProvider);
 
   class AdminDocSource extends AbstractDocSource {
     constructor(initialState) {
@@ -20,8 +20,8 @@ export default function DocSourceFactory(Private) {
 
     _createRequest(defer) {
       return new DocRequest(this, defer);
-    };
+    }
   }
 
   return AdminDocSource;
-};
+}

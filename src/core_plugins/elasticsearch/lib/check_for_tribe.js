@@ -15,4 +15,4 @@ export default function checkForTribe(callAsKibanaUser) {
 
     return true;
   });
-};
+}

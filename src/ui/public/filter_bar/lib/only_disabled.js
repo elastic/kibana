@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-let pluckDisabled = function (filter) {
+const pluckDisabled = function (filter) {
   return _.get(filter, 'meta.disabled');
 };
 
@@ -12,4 +12,4 @@ export default function (newFilters, oldFilters) {
   return _.every(newFilters.concat(oldFilters), function (newFilter) {
     return pluckDisabled(newFilter);
   });
-};
+}

@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var moment = require('moment');
-var toMS = require('../../lib/to_milliseconds.js');
-var Datasource = require('../../lib/classes/datasource');
-var buildRequest = require('./lib/build_request');
+const _ = require('lodash');
+const moment = require('moment');
+const toMS = require('../../lib/to_milliseconds.js');
+const Datasource = require('../../lib/classes/datasource');
+const buildRequest = require('./lib/build_request');
 import toSeriesList from './lib/agg_response_to_series_list';
 
 module.exports = new Datasource('es', {

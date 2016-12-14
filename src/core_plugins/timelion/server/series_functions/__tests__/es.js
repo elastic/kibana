@@ -30,7 +30,7 @@ function stubResponse(response) {
 }
 
 describe(filename, () => {
-  var tlConfig;
+  let tlConfig;
 
   describe('seriesList processor', () => {
     it('throws an error then the index is missing', () => {
@@ -171,16 +171,16 @@ describe(filename, () => {
 
       it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
-        let request = fn(config, tlConfig);
-        let filter = request.body.query.bool.filter.bool;
+        const request = fn(config, tlConfig);
+        const filter = request.body.query.bool.filter.bool;
         expect(filter.must.length).to.eql(1);
         expect(filter.must_not.length).to.eql(2);
       });
 
       it('does not include filters if config.kibana = false', () => {
         config.kibana = false;
-        let request = fn(config, tlConfig);
-        let filter = request.body.query.bool.filter;
+        const request = fn(config, tlConfig);
+        const filter = request.body.query.bool.filter;
         expect(request.body.query.bool.filter).to.eql(undefined);
       });
 

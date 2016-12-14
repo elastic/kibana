@@ -24,4 +24,4 @@ export default function (config) {
   }
 
   return new https.Agent(agentOptions);
-};
+}
