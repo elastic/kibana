@@ -42,7 +42,7 @@ export default function HistogramVisType(Private) {
       }],
       interpolationModes: [{
         value: 'linear',
-        text: 'normal',
+        text: 'straight',
       }, {
         value: 'cardinal',
         text: 'smoothed',

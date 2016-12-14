@@ -5,6 +5,7 @@ export default function ColumnHandler(Private) {
   const createSeries = (cfg, series) => {
     const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
     let interpolate = cfg.interpolate;
+    // for backward compatibility when loading URLs or configs we need to check smoothLines
     if (cfg.smoothLines) interpolate = 'cardinal';
 
     return {
