@@ -2,7 +2,7 @@ module.exports = function generateTicksProvider() {
 
   function floorInBase(n, base) {
     return base * Math.floor(n / base);
-  };
+  }
 
   function generateTicks(axis) {
     const returnTicks = [];
@@ -35,7 +35,7 @@ module.exports = function generateTicksProvider() {
     } while (tickVal < axis.max);
 
     return returnTicks;
-  };
+  }
 
   return function (axis) {
     return generateTicks(axis);

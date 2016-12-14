@@ -3,7 +3,7 @@ import ngMock from 'ng_mock';
 describe('Tick Generator', function () {
 
   let generateTicks;
-  let axes = [
+  const axes = [
     {
       min: 0,
       max: 5000,

@@ -73,7 +73,7 @@ module.exports = new Chainable('yaxis', {
       myAxis.axisLabelUseCanvas = true;
 
       if (units) {
-        var unitTokens = units.split(':');
+        const unitTokens = units.split(':');
         if (!tickFormatters[unitTokens[0]]) {
           throw new Error (`${units} is not a supported unit type.`);
         }
