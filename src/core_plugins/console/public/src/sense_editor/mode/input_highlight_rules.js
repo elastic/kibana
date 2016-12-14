@@ -14,8 +14,8 @@ var InputHighlightRules = function () {
       reg = reg.source;
     }
     return [
-      {token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL},
-      {token: tokens, regex: reg, next: normalNext}
+      { token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL },
+      { token: tokens, regex: reg, next: normalNext }
     ];
   }
 
@@ -24,8 +24,8 @@ var InputHighlightRules = function () {
   /*jshint -W015 */
   this.$rules = {
     "start": mergeTokens([
-        {token: "comment", regex: /^#.*$/},
-        {token: "paren.lparen", regex: "{", next: "json", push: true}
+        { token: "comment", regex: /^#.*$/ },
+        { token: "paren.lparen", regex: "{", next: "json", push: true }
       ],
       addEOL(["method"], /([a-zA-Z]+)/, "start", "method_sep")
       ,

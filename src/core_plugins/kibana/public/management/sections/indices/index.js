@@ -39,7 +39,7 @@ uiModules.get('apps/management')
         $scope.indexPatternList = ids.map(function (id) {
           return {
             id: id,
-            url: kbnUrl.eval('#/management/kibana/indices/{{id}}', {id: id}),
+            url: kbnUrl.eval('#/management/kibana/indices/{{id}}', { id: id }),
             class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };

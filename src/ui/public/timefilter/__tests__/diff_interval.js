@@ -31,47 +31,47 @@ describe('Timefilter service', function () {
     }));
 
     it('not emit anything if nothing has changed', function () {
-      timefilter.refreshInterval = {pause: false, value: 0};
+      timefilter.refreshInterval = { pause: false, value: 0 };
       fn();
       expect(update.called).to.be(false);
       expect(fetch.called).to.be(false);
     });
 
     it('emit only an update when paused', function () {
-      timefilter.refreshInterval = {pause: true, value: 5000};
+      timefilter.refreshInterval = { pause: true, value: 5000 };
       fn();
       expect(update.called).to.be(true);
       expect(fetch.called).to.be(false);
     });
 
     it('emit update, not fetch, when switching to value: 0', function () {
-      timefilter.refreshInterval = {pause: false, value: 5000};
+      timefilter.refreshInterval = { pause: false, value: 5000 };
       fn();
       expect(update.calledOnce).to.be(true);
       expect(fetch.calledOnce).to.be(true);
-      timefilter.refreshInterval = {pause: false, value: 0};
+      timefilter.refreshInterval = { pause: false, value: 0 };
       fn();
       expect(update.calledTwice).to.be(true);
       expect(fetch.calledTwice).to.be(false);
     });
 
     it('should emit update, not fetch, when moving from unpaused to paused', function () {
-      timefilter.refreshInterval = {pause: false, value: 5000};
+      timefilter.refreshInterval = { pause: false, value: 5000 };
       fn();
       expect(update.calledOnce).to.be(true);
       expect(fetch.calledOnce).to.be(true);
-      timefilter.refreshInterval = {pause: true, value: 5000};
+      timefilter.refreshInterval = { pause: true, value: 5000 };
       fn();
       expect(update.calledTwice).to.be(true);
       expect(fetch.calledTwice).to.be(false);
     });
 
     it('should emit update and fetch when unpaused', function () {
-      timefilter.refreshInterval = {pause: true, value: 5000};
+      timefilter.refreshInterval = { pause: true, value: 5000 };
       fn();
       expect(update.calledOnce).to.be(true);
       expect(fetch.calledOnce).to.be(false);
-      timefilter.refreshInterval = {pause: false, value: 5000};
+      timefilter.refreshInterval = { pause: false, value: 5000 };
       fn();
       expect(update.calledTwice).to.be(true);
       expect(fetch.calledOnce).to.be(true);

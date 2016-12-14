@@ -38,11 +38,11 @@ module.exports = function (api) {
       persistent: {
         cluster: {
           routing: {
-            'allocation.enable': {__one_of: ["all", "primaries", "new_primaries", "none"]},
-            'allocation.disk.threshold_enabled': {__one_of: [false, true]},
+            'allocation.enable': { __one_of: ["all", "primaries", "new_primaries", "none"] },
+            'allocation.disk.threshold_enabled': { __one_of: [false, true] },
             'allocation.disk.watermark.low': '85%',
             'allocation.disk.watermark.high': '90%',
-            'allocation.disk.include_relocations': {__one_of: [true, false]},
+            'allocation.disk.include_relocations': { __one_of: [true, false] },
             'allocation.disk.reroute_interval': '60s',
             'allocation.exclude': {
               '_ip': "",
@@ -68,11 +68,11 @@ module.exports = function (api) {
                 'values': []
               }
             },
-            'allocation.allow_rebalance': {__one_of: ['always', 'indices_primaries_active', 'indices_all_active']},
+            'allocation.allow_rebalance': { __one_of: ['always', 'indices_primaries_active', 'indices_all_active'] },
             'allocation.cluster_concurrent_rebalance': 2,
             'allocation.node_initial_primaries_recoveries': 4,
             'allocation.node_concurrent_recoveries': 2,
-            'allocation.same_shard.host': {__one_of: [false, true]}
+            'allocation.same_shard.host': { __one_of: [false, true] }
           }
         },
         indices: {
@@ -121,7 +121,7 @@ module.exports = function (api) {
             index: "{index}",
             shard: 0,
             node: "{node}",
-            allow_primary: {__one_of: [true, false]}
+            allow_primary: { __one_of: [true, false] }
           },
           allocate: {
             __template: {
@@ -132,11 +132,11 @@ module.exports = function (api) {
             index: "{index}",
             shard: 0,
             node: "{node}",
-            allow_primary: {__one_of: [true, false]}
+            allow_primary: { __one_of: [true, false] }
           }
         }
       ],
-      dry_run: {__one_of: [true, false]}
+      dry_run: { __one_of: [true, false] }
     }
   });
 };

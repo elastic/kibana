@@ -751,7 +751,7 @@ export default class VisualizePage {
           radius = Math.round(radius);
         })
         .then(() => {
-          return {color: color, radius: radius};
+          return { color: color, radius: radius };
         });
       }
       const getChartTypesPromises = chartTypes.map(getChartType);

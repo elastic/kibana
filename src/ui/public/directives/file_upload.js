@@ -26,7 +26,7 @@ module.directive('fileUpload', function () {
           const reader = new FileReader();
           reader.onload = function (e) {
             $scope.$apply(function () {
-              $scope.onRead({fileContents: e.target.result});
+              $scope.onRead({ fileContents: e.target.result });
             });
           };
           reader.readAsText(file);

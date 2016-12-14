@@ -108,7 +108,7 @@ export default class BasePathProxy {
       method: '*',
       path: `/{oldBasePath}/{kbnPath*}`,
       handler(req, reply) {
-        const {oldBasePath, kbnPath = ''} = req.params;
+        const { oldBasePath, kbnPath = '' } = req.params;
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;
