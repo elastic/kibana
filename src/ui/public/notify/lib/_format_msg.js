@@ -29,7 +29,7 @@ function formatMsg(err, from) {
   }
 
   return rtn;
-};
+}
 
 formatMsg.describeError = function (err) {
   if (!err) return undefined;

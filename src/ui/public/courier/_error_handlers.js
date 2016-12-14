@@ -5,4 +5,4 @@ export default function ErrorHandlerList() {
    * @type {Array}
    */
   return [];
-};
+}

@@ -35,7 +35,7 @@ function initSeasonalComponents(samplePoints, seasonLength) {
   });
 
   return seasonals;
-};
+}
 
 // This is different from the DES method of establishing trend because it looks for
 // the difference in points between seasons

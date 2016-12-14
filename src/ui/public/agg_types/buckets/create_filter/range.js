@@ -8,4 +8,4 @@ export default function createRangeFilterProvider(Private) {
       aggConfig.fieldFormatter()(key)
     );
   };
-};
+}

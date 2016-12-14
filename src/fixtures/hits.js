@@ -19,4 +19,4 @@ export default function fitsFixture() {
       _index: 'test-index'
     });
   });
-};
+}

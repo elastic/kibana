@@ -13,11 +13,11 @@ export default function AxisScaleFactory(Private) {
         this.values = this.axisConfig.values;
         this.ordered = this.axisConfig.ordered;
       }
-    };
+    }
 
     getScaleType() {
       return this.axisConfig.getScaleType();
-    };
+    }
 
     validateUserExtents(domain) {
       const config = this.axisConfig;
@@ -27,19 +27,19 @@ export default function AxisScaleFactory(Private) {
         if (config.isPercentage() && config.isUserDefined()) return val / 100;
         return val;
       });
-    };
+    }
 
     getTimeDomain(data) {
       return [this.minExtent(data), this.maxExtent(data)];
-    };
+    }
 
     minExtent(data) {
       return this.calculateExtent(data || this.values, 'min');
-    };
+    }
 
     maxExtent(data) {
       return this.calculateExtent(data || this.values, 'max');
-    };
+    }
 
     calculateExtent(data, extent) {
       const ordered = this.ordered;
@@ -56,15 +56,15 @@ export default function AxisScaleFactory(Private) {
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, []));
-    };
+    }
 
     addInterval(x) {
       return this.modByInterval(x, +1);
-    };
+    }
 
     subtractInterval(x) {
       return this.modByInterval(x, -1);
-    };
+    }
 
     modByInterval(x, n) {
       const ordered = this.ordered;
@@ -84,7 +84,7 @@ export default function AxisScaleFactory(Private) {
       });
 
       return y.valueOf();
-    };
+    }
 
     getAllPoints() {
       const config = this.axisConfig;
@@ -110,15 +110,15 @@ export default function AxisScaleFactory(Private) {
       }, []);
 
       return chartPoints;
-    };
+    }
 
     getYMin() {
       return d3.min(this.getAllPoints());
-    };
+    }
 
     getYMax() {
       return d3.max(this.getAllPoints());
-    };
+    }
 
     getExtents() {
       if (this.axisConfig.get('type') === 'category') {
@@ -133,7 +133,7 @@ export default function AxisScaleFactory(Private) {
       if (this.axisConfig.isYExtents()) return domain;
       if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
       return [Math.min(0, min), Math.max(0, max)];
-    };
+    }
 
     getRange(length) {
       if (this.axisConfig.isHorizontal()) {
@@ -141,20 +141,20 @@ export default function AxisScaleFactory(Private) {
       } else {
         return this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
       }
-    };
+    }
 
     throwCustomError(message) {
       throw new Error(message);
-    };
+    }
 
     throwLogScaleValuesError() {
       throw new errors.InvalidLogScaleValues();
-    };
+    }
 
     logDomain(min, max) {
       if (min < 0 || max < 0) return this.throwLogScaleValuesError();
       return [1, max];
-    };
+    }
 
     getD3Scale(scaleTypeArg) {
       let scaleType = scaleTypeArg || 'linear';
@@ -167,7 +167,7 @@ export default function AxisScaleFactory(Private) {
       }
 
       return d3.scale[scaleType]();
-    };
+    }
 
     canApplyNice() {
       const config = this.axisConfig;
@@ -193,11 +193,11 @@ export default function AxisScaleFactory(Private) {
       this.validateScale(this.scale);
 
       return this.scale;
-    };
+    }
 
     validateScale(scale) {
       if (!scale || _.isNaN(scale)) throw new Error('scale is ' + scale);
-    };
+    }
   }
   return AxisScale;
-};
+}

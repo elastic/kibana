@@ -10,4 +10,4 @@ export default function (bucket, agg) {
   } else {
     return bucket && bucket.buckets || [];
   }
-};
+}

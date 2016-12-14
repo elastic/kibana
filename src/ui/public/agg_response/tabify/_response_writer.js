@@ -280,4 +280,4 @@ export default function TabbedAggResponseWriterProvider(Private) {
   };
 
   return TabbedAggResponseWriter;
-};
+}

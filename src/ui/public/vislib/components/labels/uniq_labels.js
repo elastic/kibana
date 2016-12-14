@@ -15,4 +15,4 @@ export default function UniqLabelUtilService() {
     .unique()
     .value();
   };
-};
+}

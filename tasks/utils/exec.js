@@ -3,7 +3,7 @@ const { execFileSync } = require('child_process');
 function exec(cmd, args, opts) {
   console.log(' >', cmd, args.join(' '));
   exec.silent(cmd, args, opts);
-};
+}
 
 exec.silent = function (cmd, args, opts) {
   opts = opts || {};

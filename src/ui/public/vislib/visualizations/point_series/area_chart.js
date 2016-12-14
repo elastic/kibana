@@ -130,7 +130,7 @@ export default function AreaChartFactory(Private) {
       });
 
       return path;
-    };
+    }
 
     /**
      * Adds SVG circles to area chart
@@ -204,7 +204,7 @@ export default function AreaChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -231,8 +231,8 @@ export default function AreaChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return AreaChart;
-};
+}
