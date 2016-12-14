@@ -483,13 +483,20 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .set('filter', queryFilter.getFilters());
 
     if (config.get('doc_table:highlight')) {
-      $scope.searchSource.highlight({
+      const highlightOptions = {
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
         fields: {'*': {}},
-        require_field_match: false,
         fragment_size: 2147483647 // Limit of an integer.
-      });
+      };
+
+      // Only highlight all matching fields when the user is entering a simple query (not querying specific fields)
+      const query = _.get($state.query, 'query_string.query');
+      if (query != null && query.indexOf(':') < 0) {
+        highlightOptions.require_field_match = false;
+      }
+
+      $scope.searchSource.highlight(highlightOptions);
     }
   });
 
