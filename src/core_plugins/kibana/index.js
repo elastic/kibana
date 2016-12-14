@@ -43,23 +43,27 @@ module.exports = function (kibana) {
         ],
 
         injectVars: function (server, options) {
-          
-          let config = server.config();
+          let serverConfig = server.config();
 
-          //is URL the default? if setting to undefined has no effect, it means it reverted back to the default
+          //DEPRECATED SETTINGS
+          //: is URL the default? if setting to undefined has no effect, it means it reverted back to the default
           //keeping this logic for backward compatibilty.
           const configuredUrl = server.config().get('tilemap.url');
           server.config().set('tilemap.url', undefined);
           const isConfiguredWithDefault = (configuredUrl === server.config().get('tilemap.url'));
           server.config().set('tilemap.url', configuredUrl);
 
-          let tilemapConfig = config.get('tilemap');
+          let tilemapConfig = serverConfig.get('tilemap');
+
           return {
-            kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            tilemap: {
-              isConfiguredWithDefault: isConfiguredWithDefault,
-              config: tilemapConfig
-            }
+            kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            mapsConfig: {
+              deprecated: {
+                isConfiguredWithDefault: isConfiguredWithDefault,
+                config: tilemapConfig,
+              },
+              config: serverConfig.get('maps')
+            },
           };
         },
       },

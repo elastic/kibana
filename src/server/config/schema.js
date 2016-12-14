@@ -131,7 +131,6 @@ module.exports = () => Joi.object({
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
-
   tilemap: Joi.object({
     url: Joi.string().default(`https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=${pkg.version}&elastic_tile_service_tos=agree`),
     options: Joi.object({
@@ -146,7 +145,9 @@ module.exports = () => Joi.object({
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
   }).default(),
-
+  maps: Joi.object({
+    manifest: Joi.string().default('https://proxy-tiles.elastic.co/v1/manifest')
+  }).default(),
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they
     // require the elasticsearch plugin in order to function we need to turn

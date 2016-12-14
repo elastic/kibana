@@ -10,10 +10,10 @@ marked.setOptions({
 
 
 uiModules.get('kibana')
-  .service('tilemapSettings', function ($http, tilemap, $sanitize) {
+  .service('tilemapSettings', function ($http, mapsConfig, $sanitize) {
 
-    const attributionFromConfig = $sanitize(marked(tilemap.config.options.attribution));
-    const optionsFromConfig = _.assign({}, tilemap.config.options, {attribution: attributionFromConfig});
+    const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution));
+    const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, {attribution: attributionFromConfig});
 
     /**
      * Object to read out the map-service configuration
@@ -23,11 +23,10 @@ uiModules.get('kibana')
     const mapSettings = {
 
       _queryParams: {},
-      _licenseUid: '',
-      _manifest: null,
+      _settingsInitialized: false,
 
       //intiialize settings with the default of the configuration
-      _url: tilemap.config.url,
+      _url: mapsConfig.deprecated.config.url,
       _options: optionsFromConfig,
 
       /**
@@ -35,27 +34,35 @@ uiModules.get('kibana')
        */
       whenSettingsReady: async function () {
 
-        if (!tilemap.isConfiguredWithDefault) {//if settings are overridden, we will use those.
+        if (!mapsConfig.deprecated.isConfiguredWithDefault) {//if settings are overridden, we will use those.
           return true;
         }
 
-        if (this._manifest) {
+        if (this._settingsInitialized) {
           return true;
         }
 
-        this._manifest = await getTileServiceManifest(this._licenseUid);
+        let manifest;
+        try {
+          manifest = await getTileServiceManifest(mapsConfig.config.manifest, this._queryParams, attributionFromConfig, optionsFromConfig);
+        } catch (e) {
+          //request failed. Continue to use old settings.
+          this._settingsInitialized = true;
+          return true;
+        }
+
         this._options = {
-          attribution: $sanitize(marked(this._manifest.services[0].attribution)),
-          minZoom: this._manifest.services[0].minZoom,
-          maxZoom: this._manifest.services[0].maxZoom,
+          attribution: $sanitize(marked(manifest.services[0].attribution)),
+          minZoom: manifest.services[0].minZoom,
+          maxZoom: manifest.services[0].maxZoom,
           subdomains: []
         };
 
-        const queryparams = _.assign({license: this._licenseUid}, this._manifest.services[0].query_parameters);
-        const query = url.format({
-          query: queryparams
-        });
-        this._url = this._manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
+        const queryparams = _.assign({license: this._licenseUid}, manifest.services[0].query_parameters);
+        const query = url.format({query: queryparams});
+        this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
+
+        this._settingsInitialized = true;
         return true;
       },
       /**
@@ -88,16 +95,9 @@ uiModules.get('kibana')
     /**
      * mocks call to manifest
      * will be replaced with AJAX-call to the service when available.
-     */
-    async function getTileServiceManifest(licenseId) {
-      try {
-        return await $http({
-          url: 'https://proxy-tiles.elastic.co/v1/manifest?license=' + licenseId,
-          method: 'GET'
-        });
-      } catch (e) {
-        //fake return for now
-        return JSON.parse(`{
+     *       A sample response would look something like;
+     *
+     {
    "version":"0.0.0",
    "expiry":"14d",
    "services":[
@@ -113,8 +113,20 @@ uiModules.get('kibana')
          }
       }
    ]
-}`);
-      }
+    }
+     *
+     */
+    async function getTileServiceManifest(manifestUrl, additionalQueryParams) {
+
+      const manifestServiceTokens = url.parse(manifestUrl);
+      manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
+      const requestUrl = url.format(manifestServiceTokens);
+
+      return await $http({
+        url: requestUrl,
+        method: 'GET'
+      });
+
     }
   });
 
