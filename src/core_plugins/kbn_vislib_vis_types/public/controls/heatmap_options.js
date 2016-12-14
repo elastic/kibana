@@ -30,8 +30,8 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
       };
 
       $scope.addRange = function () {
-        const from = $scope.vis.params.colorsRange.length ?
-          $scope.vis.params.colorsRange[$scope.vis.params.colorsRange.length - 1].to : 0;
+        const previousRange = _.last($scope.vis.params.colorsRange);
+        const from = previousRange ? previousRange.to : 0;
         $scope.vis.params.colorsRange.push({from: from, to: null});
         $scope.vis.params.colorsNumber = $scope.vis.params.colorsRange.length;
       };

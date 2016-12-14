@@ -24,7 +24,7 @@ export default function HeatmapVisType(Private) {
         setColorRange: false,
         colorsRange: [],
         invertColors: false,
-        percentageMode: true,
+        percentageMode: false,
         cellLabels: false,
         valueAxes: [{
           show: false,

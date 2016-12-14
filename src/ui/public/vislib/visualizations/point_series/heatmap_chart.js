@@ -3,7 +3,7 @@ import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
-import heatmapColorFunc from 'ui/vislib/components/color/heatmap_color';
+import getColor from 'ui/vislib/components/color/heatmap_color';
 
 export default function HeatmapChartFactory(Private) {
 
@@ -85,7 +85,7 @@ export default function HeatmapChartFactory(Private) {
       for (let i in labels) {
         if (labels[i]) {
           const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
-          colors[labels[i]] = heatmapColorFunc(val, colorSchema);
+          colors[labels[i]] = getColor(val, colorSchema);
         }
       }
       return colors;
@@ -182,7 +182,7 @@ export default function HeatmapChartFactory(Private) {
         .attr('height', squareHeight)
         .attr('data-label', label)
         .attr('fill', z)
-        .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.3px')
+        .attr('style', 'opacity: 1; cursor: pointer; stroke: black; stroke-width: 0.3px')
         .style('display', d => {
           return d.hide ? 'none' : 'initial';
         });
@@ -194,16 +194,24 @@ export default function HeatmapChartFactory(Private) {
       if (showLabels) {
         const rotate = zAxisConfig.get('labels.rotate');
         const rotateRad = rotate * Math.PI / 180;
+        const cellPadding = 5;
         const maxLength = Math.min(
           Math.abs(squareWidth / Math.cos(rotateRad)),
           Math.abs(squareHeight / Math.sin(rotateRad))
-        ) - 10;
+        ) - cellPadding;
+        const maxHeight = Math.min(
+            Math.abs(squareWidth / Math.sin(rotateRad)),
+            Math.abs(squareHeight / Math.cos(rotateRad))
+        ) - cellPadding;
 
         squares.append('text')
           .text(d => zAxisFormatter(d.y))
           .style('display', function (d) {
             const textLength = this.getBBox().width;
-            return d.hide || textLength > maxLength ? 'none' : 'initial';
+            const textHeight = this.getBBox().height;
+            const textTooLong = textLength > maxLength;
+            const textTooWide = textHeight > maxHeight;
+            return d.hide || textTooLong || textTooWide ? 'none' : 'initial';
           })
           .style('dominant-baseline', 'central')
           .style('text-anchor', 'middle')
