@@ -6,7 +6,7 @@ const _ = require('lodash');
 module.exports = (function () {
   const functionArray = _.map(functions, function (val, key) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
-    return _.extend({}, val, {name: key});
+    return _.extend({}, val, { name: key });
   });
 
   function toDocBlock(fn) {

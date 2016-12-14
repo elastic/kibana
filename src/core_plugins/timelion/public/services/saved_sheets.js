@@ -30,7 +30,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return kbnUrl.eval('#/{{id}}', {id: id});
+      return kbnUrl.eval('#/{{id}}', { id: id });
     };
 
     this.delete = function (ids) {
@@ -54,7 +54,7 @@ define(function (require) {
           }
         };
       } else {
-        body = { query: {match_all: {}}};
+        body = { query: { match_all: {} } };
       }
 
       return esAdmin.search({

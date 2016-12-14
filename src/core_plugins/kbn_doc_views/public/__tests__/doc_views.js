@@ -16,9 +16,9 @@ const hit = {
   '_source': {
     'extension': 'html',
     'bytes': 100,
-    'area': [{lat: 7, lon: 7}],
+    'area': [{ lat: 7, lon: 7 }],
     'noMapping': 'hasNoMapping',
-    'objectArray': [{foo: true}, {bar: false}],
+    'objectArray': [{ foo: true }, { bar: false }],
     '_underscore': 1
   }
 };

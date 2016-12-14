@@ -217,7 +217,7 @@ describe('index pattern', function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        const expected = _.filter(indexPattern.fields, {scripted: true});
+        const expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(['script number']);
       });
     });

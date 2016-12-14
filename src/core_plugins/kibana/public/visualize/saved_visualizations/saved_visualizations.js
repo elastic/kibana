@@ -39,7 +39,7 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
   };
 
   this.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', {id: id});
+    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
 
   this.delete = function (ids) {
@@ -70,7 +70,7 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
     if (!typeName || !visTypes.byName[typeName]) {
       if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
       else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
-      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', {id: source.id});
+      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', { id: source.id });
     }
 
     source.type = visTypes.byName[typeName];
@@ -92,7 +92,7 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
         }
       };
     } else {
-      body = { query: {match_all: {}}};
+      body = { query: { match_all: {} } };
     }
 
     return esAdmin.search({

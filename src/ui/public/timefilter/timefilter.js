@@ -78,11 +78,11 @@ uiModules
 
   Timefilter.prototype.get = function (indexPattern) {
     let filter;
-    const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
+    const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
     if (timefield) {
       const bounds = this.getBounds();
-      filter = {range : {}};
+      filter = { range : {} };
       filter.range[timefield.name] = {
         gte: bounds.min.valueOf(),
         lte: bounds.max.valueOf(),

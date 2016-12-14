@@ -120,7 +120,7 @@ module.exports = function (api) {
         __one_of: [true, false]
       },
       tie_breaker: 0.0,
-      type: {__one_of: ['best_fields', 'most_fields', 'cross_fields', 'phrase', 'phrase_prefix']}
+      type: { __one_of: ['best_fields', 'most_fields', 'cross_fields', 'phrase', 'phrase_prefix'] }
     },
     bool: {
       must: [
@@ -321,12 +321,12 @@ module.exports = function (api) {
       },
       query: "",
       fields: ["{field}"],
-      default_operator: {__one_of: ["OR", "AND"]},
+      default_operator: { __one_of: ["OR", "AND"] },
       analyzer: "",
       flags: "OR|AND|PREFIX",
-      lowercase_expanded_terms: {__one_of: [true, false]},
+      lowercase_expanded_terms: { __one_of: [true, false] },
       locale: "ROOT",
-      lenient: {__one_of: [true, false]}
+      lenient: { __one_of: [true, false] }
     },
     range: {
       __template: {
@@ -606,8 +606,8 @@ module.exports = function (api) {
           )
         ],
         boost: 1.0,
-        boost_mode: {__one_of: ["multiply", "replace", "sum", "avg", "max", "min"]},
-        score_mode: {__one_of: ["multiply", "sum", "first", "avg", "max", "min"]},
+        boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"] },
+        score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"] },
         max_boost: 10,
         min_score: 1.0
       },
