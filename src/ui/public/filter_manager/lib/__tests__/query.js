@@ -22,7 +22,7 @@ describe('Filter Manager', function () {
       expected.query = {
         foo: 'bar'
       };
-      expect(fn({foo: 'bar'}, indexPattern.id)).to.eql(expected);
+      expect(fn({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
     });
 
   });

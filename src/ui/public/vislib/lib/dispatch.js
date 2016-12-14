@@ -59,7 +59,7 @@ export default function DispatchClass(Private, config) {
 
       if (isSeries) {
         // Find object with the actual d value and add it to the point object
-        const object = _.find(series, {'label': label});
+        const object = _.find(series, { 'label': label });
         if (object) {
           eventData.value = +object.values[i].y;
 
@@ -263,7 +263,7 @@ export default function DispatchClass(Private, config) {
     createBrush(xScale, svg) {
       const self = this;
       const visConfig = self.handler.visConfig;
-      const {width, height} = svg.node().getBBox();
+      const { width, height } = svg.node().getBBox();
       const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
 
       // Brush scale

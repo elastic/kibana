@@ -6,12 +6,12 @@ function ParamComponent(name, parent, description) {
   this.description = description;
 }
 
-ParamComponent.prototype = _.create(engine.ConstantComponent.prototype, {"constructor": ParamComponent});
+ParamComponent.prototype = _.create(engine.ConstantComponent.prototype, { "constructor": ParamComponent });
 module.exports.ParamComponent = ParamComponent;
 
 (function (cls) {
   cls.getTerms = function () {
-    var t = {name: this.name};
+    var t = { name: this.name };
     if (this.description === "__flag__") {
       t.meta = "flag"
     }
