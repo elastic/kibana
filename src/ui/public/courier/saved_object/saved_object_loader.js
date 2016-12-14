@@ -31,18 +31,18 @@ export class SavedObjectLoader {
    */
   get(id) {
     return (new this.Class(id)).init();
-  };
+  }
 
   urlFor(id) {
     return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, {id: id});
-  };
+  }
 
   delete(ids) {
     ids = !_.isArray(ids) ? [ids] : ids;
     return Promise.map(ids, (id) => {
       return (new this.Class(id)).delete();
     });
-  };
+  }
 
   /**
    * Updates hit._source to contain an id and url field, and returns the updated
@@ -55,14 +55,14 @@ export class SavedObjectLoader {
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
     return source;
-  };
+  }
 
   scanAll(queryString, pageSize = 1000) {
     return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
     }, (hit) => this.mapHits(hit));
-  };
+  }
 
   /**
    * TODO: Rather than use a hardcoded limit, implement pagination. See
@@ -100,5 +100,5 @@ export class SavedObjectLoader {
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
       });
-  };
+  }
 }
