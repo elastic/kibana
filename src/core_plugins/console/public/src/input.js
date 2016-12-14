@@ -24,21 +24,21 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   input.commands.addCommand({
     name: 'auto indent request',
-    bindKey: {win: 'Ctrl-I', mac: 'Command-I'},
+    bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
     exec: function () {
       input.autoIndent();
     }
   });
   input.commands.addCommand({
     name: 'move to previous request start or end',
-    bindKey: {win: 'Ctrl-Up', mac: 'Command-Up'},
+    bindKey: { win: 'Ctrl-Up', mac: 'Command-Up' },
     exec: function () {
       input.moveToPreviousRequestEdge()
     }
   });
   input.commands.addCommand({
     name: 'move to next request start or end',
-    bindKey: {win: 'Ctrl-Down', mac: 'Command-Down'},
+    bindKey: { win: 'Ctrl-Down', mac: 'Command-Down' },
     exec: function () {
       input.moveToNextRequestEdge()
     }
@@ -224,7 +224,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   input.commands.addCommand({
     name: 'send to elasticsearch',
-    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+    bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     exec: sendCurrentRequestToES
   });
 

@@ -19,7 +19,7 @@ export default function FiltersAggDefinition(Private, Notifier) {
       {
         name: 'filters',
         editor: filtersTemplate,
-        default: [ {input: {}, label: ''} ],
+        default: [ { input: {}, label: '' } ],
         write: function (aggConfig, output) {
           const inFilters = aggConfig.params.filters;
           if (!_.size(inFilters)) return;

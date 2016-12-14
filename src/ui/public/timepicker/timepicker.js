@@ -52,13 +52,13 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.units = timeUnits;
 
       $scope.relativeOptions = [
-        {text: 'Seconds ago', value: 's'},
-        {text: 'Minutes ago', value: 'm'},
-        {text: 'Hours ago', value: 'h'},
-        {text: 'Days ago', value: 'd'},
-        {text: 'Weeks ago', value: 'w'},
-        {text: 'Months ago', value: 'M'},
-        {text: 'Years ago', value: 'y'},
+        { text: 'Seconds ago', value: 's' },
+        { text: 'Minutes ago', value: 'm' },
+        { text: 'Hours ago', value: 'h' },
+        { text: 'Days ago', value: 'd' },
+        { text: 'Weeks ago', value: 'w' },
+        { text: 'Months ago', value: 'M' },
+        { text: 'Years ago', value: 'y' },
       ];
 
       $scope.$watch('from', function (date) {

@@ -37,7 +37,7 @@ describe(filename, function () {
         }
       });
     };
-    fn = proxyquire(`../${filename}`, {'node-fetch': response});
+    fn = proxyquire(`../${filename}`, { 'node-fetch': response });
   });
 
   it('should wrap the quandl response up in a seriesList', function () {
@@ -67,7 +67,7 @@ describe(filename, function () {
   });
 
   it('should throw an error is passed an unsupported interval', function () {
-    return invoke(fn, [], {time:{interval:'2d'}})
+    return invoke(fn, [], { time:{ interval:'2d' } })
     .then(expect.fail)
     .catch(function (r) {
       expect(r).to.be.an('error');
@@ -75,7 +75,7 @@ describe(filename, function () {
   });
 
   it('should use the configured API key when talking to quandl', function () {
-    return invoke(fn, [], {settings:{'timelion:quandl.key': 'bEeR'}}).then(function () {
+    return invoke(fn, [], { settings:{ 'timelion:quandl.key': 'bEeR' } }).then(function () {
       expect(calledWith.params.auth_token).to.eql('bEeR');
     });
   });
