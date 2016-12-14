@@ -7,9 +7,10 @@ release-state can be: released | prerelease | unreleased
 :release-state:  released
 :version:        5.0.2
 :major-version:  5.x
+:branch:         5.0
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
-:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/5.0/
+:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
 :xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
 :repo:           https://github.com/elastic/kibana/
 :issue:          {repo}issues/
