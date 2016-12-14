@@ -94,4 +94,4 @@ export default function buildHierarchicalDataProvider(Private, Notifier) {
 
     return result;
   };
-};
+}

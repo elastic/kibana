@@ -1,0 +1,12 @@
+[[core-development]]
+== Core Development
+
+* <<development-basepath>>
+* <<development-dependencies>>
+* <<development-modules>>
+
+include::core/development-basepath.asciidoc[]
+
+include::core/development-dependencies.asciidoc[]
+
+include::core/development-modules.asciidoc[]

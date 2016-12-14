@@ -55,4 +55,4 @@ export default function AbstractNumeralFormatProvider(Private) {
   };
 
   return Numeral;
-};
+}

@@ -81,6 +81,7 @@
     "@spalger/test-subj-selector": "0.2.1",
     "@spalger/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
+    "accept-language-parser": "1.2.0",
     "angular": "1.4.7",
     "angular-bootstrap-colorpicker": "3.0.19",
     "angular-elastic": "2.5.0",
@@ -168,7 +169,7 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.2.1",
+    "@elastic/eslint-config-kibana": "0.2.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "6.1.2",

@@ -33,4 +33,4 @@ export default function PointSeriesProvider(Private) {
     delete chart.aspects;
     return chart;
   };
-};
+}

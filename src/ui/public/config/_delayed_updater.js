@@ -65,4 +65,4 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
       data
     });
   }
-};
+}

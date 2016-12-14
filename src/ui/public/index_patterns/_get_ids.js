@@ -37,4 +37,4 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
   };
 
   return getIds;
-};
+}

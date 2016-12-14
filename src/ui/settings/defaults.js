@@ -311,4 +311,4 @@ export default function defaultSettingsProvider() {
       description: 'The step size to increment or decrement the context size by',
     },
   };
-};
+}

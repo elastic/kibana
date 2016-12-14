@@ -89,4 +89,4 @@ export default function HistogramVisType(Private) {
       }
     ])
   });
-};
+}

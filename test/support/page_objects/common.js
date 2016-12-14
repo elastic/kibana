@@ -161,7 +161,7 @@ export default class Common {
           return currentUrl;
         });
       });
-    };
+    }
 
     return navigateTo(appUrl)
     .then(function (currentUrl) {

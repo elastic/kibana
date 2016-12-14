@@ -104,4 +104,4 @@ export default function FieldFormatClassProvider(config, $rootScope, Private) {
   };
 
   return FieldFormat;
-};
+}

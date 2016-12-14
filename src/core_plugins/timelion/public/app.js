@@ -158,7 +158,7 @@ app.controller('timelion', function (
           if (!$scope.running) $scope.search();
           startRefresh();
         }, interval.value);
-      };
+      }
       startRefresh();
     }
   });
@@ -234,7 +234,7 @@ app.controller('timelion', function (
         }
       }
     });
-  };
+  }
 
   function saveExpression(title) {
     savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
@@ -248,7 +248,7 @@ app.controller('timelion', function (
         if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
       });
     });
-  };
+  }
 
   function dismissNotifications() {
     unsafeNotifications.splice(0, unsafeNotifications.length);

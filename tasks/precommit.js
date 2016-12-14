@@ -4,4 +4,4 @@ export default function (grunt) {
     'checkAddedFilenames',
     'lintStagedFiles'
   ]);
-};
+}
