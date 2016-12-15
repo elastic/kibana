@@ -6,6 +6,6 @@ module.exports = function run(name) {
     // call the action function with the plugin, then all
     // renaining arguments from commander
     var plugin = pluginConfig();
-    action.apply(null, [plugin].concat([].slice.apply(arguments)));
+    action.apply(null, [plugin, run].concat([].slice.apply(arguments)));
   };
 };
