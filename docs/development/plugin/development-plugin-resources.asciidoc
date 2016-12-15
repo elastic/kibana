@@ -1,0 +1,28 @@
+[[development-plugin-resources]]
+=== Plugin Resources
+
+Here are some resources that will be helpful for getting started with plugin development
+
+[float]
+==== Our IRC channel
+Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. We *want* to help you with plugin development. Even more than that, we *want your help* in understanding your plugin goals so we can build a great plugin system for you! If you've never used IRC, welcome to the fun. You can get started with the http://webchat.freenode.net/?channels=kibana[Freenode Web Client].
+
+[float]
+==== Some light reading
+- Our {repo}blob/master/CONTRIBUTING.md[contributing guide] can help you get a development environment going
+- Tim Roes' excellent blog series https://www.timroes.de/2016/02/21/writing-kibana-plugins-custom-applications/[Writing Kibana Plugins]
+
+[float]
+==== Videos
+- https://www.elastic.co/elasticon/2015/sf/contributors-guide-to-the-kibana-galaxy[Contributors Guide to the Kibana Galaxy]
+- https://www.elastic.co/elasticon/conf/2016/sf/how-to-build-your-own-kibana-plugins[Kibana Plugin Dev - Elasticon 2016]
+
+[float]
+==== Plugin Generator
+
+Check out the https://github.com/elastic/generator-kibana-plugin[plugin generator] to kick-start your plugin.
+
+[float]
+==== References in the code
+ - {repo}blob/{branch}/src/server/plugins/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+ - <<development-uiexports>>: What type of exports are available?

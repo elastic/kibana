@@ -49,7 +49,7 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
   };
 
   this.urlFor = function (id) {
-    return kbnUrl.eval('#/discover/{{id}}', {id: id});
+    return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };
 
   this.delete = function (ids) {
@@ -79,7 +79,7 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
         }
       };
     } else {
-      body = { query: {match_all: {}}};
+      body = { query: { match_all: {} } };
     }
 
     return es.search({

@@ -1,13 +1,13 @@
 
 $localSearchHeight: 30px;
 
-.localSearch {
+.kuiLocalSearch {
   display: flex;
   width: 100%;
   height: $localSearchHeight;
 }
 
-.localSearchInput {
+.kuiLocalSearchInput {
   flex: 1 1 100%;
   padding: 5px 15px;
   font-size: $localNavFontSizeNormal;
@@ -19,7 +19,7 @@ $localSearchHeight: 30px;
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
 
-  &.localSearchInput-isInvalid {
+  &.kuiLocalSearchInput-isInvalid {
     border-color: $localSearchBorderColor-isInvalid;
   }
 
@@ -28,13 +28,13 @@ $localSearchHeight: 30px;
     background-color: $localSearchBackgroundColor--darkTheme;
     border-color: $localSearchBackgroundColor--darkTheme;
 
-    &.localSearchInput-isInvalid {
+    &.kuiLocalSearchInput-isInvalid {
       border-color: $localSearchBorderColor-isInvalid--darkTheme;
     }
   }
 }
 
-.localSearchButton {
+.kuiLocalSearchButton {
   width: 43px;
   height: $localSearchHeight;
   font-size: $localNavFontSizeNormal;

@@ -86,5 +86,5 @@ export default function createRegistry(spec) {
   };
 
   return registry;
-};
+}
 

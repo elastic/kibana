@@ -53,10 +53,10 @@ export default function PointSeriesFactory(Private) {
       .attr('height', height)
       .attr('fill', 'transparent')
       .attr('class', 'background');
-    };
+    }
 
     addClipPath(svg) {
-      const {width, height} = svg.node().getBBox();
+      const { width, height } = svg.node().getBBox();
       const startX = 0;
       const startY = 0;
       this.clipPathId = 'chart-area' + _.uniqueId();
@@ -70,7 +70,7 @@ export default function PointSeriesFactory(Private) {
       .attr('y', startY)
       .attr('width', width)
       .attr('height', height);
-    };
+    }
 
     addEvents(svg) {
       const isBrushable = this.events.isBrushable();
@@ -78,7 +78,7 @@ export default function PointSeriesFactory(Private) {
         const brush = this.events.addBrushEvent(svg);
         return svg.call(brush);
       }
-    };
+    }
 
     createEndZones(svg) {
       const self = this;
@@ -90,7 +90,7 @@ export default function PointSeriesFactory(Private) {
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      const {width, height} = svg.node().getBBox();
+      const { width, height } = svg.node().getBBox();
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just
@@ -167,7 +167,7 @@ export default function PointSeriesFactory(Private) {
         return callPlay(d3.event).touchdown;
       };
       endzoneTT.render()(svg);
-    };
+    }
 
     calculateRadiusLimits(data) {
       this.radii = _(data.series)
@@ -241,8 +241,8 @@ export default function PointSeriesFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return PointSeries;
-};
+}

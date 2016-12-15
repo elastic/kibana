@@ -151,7 +151,7 @@ module.exports = function (kibana) {
         method: ['GET', 'POST'],
         handler: function (req, reply) {
           let server = require('./api_server/server');
-          let {sense_version, apis} = req.query;
+          let { sense_version, apis } = req.query;
           if (!apis) {
             reply(Boom.badRequest('"apis" is a required param.'));
             return;

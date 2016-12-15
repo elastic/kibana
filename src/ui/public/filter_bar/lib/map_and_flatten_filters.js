@@ -10,4 +10,4 @@ export default function mapAndFlattenFiltersProvider(Private, Promise) {
     .thru(Promise.all)
     .value();
   };
-};
+}

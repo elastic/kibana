@@ -19,4 +19,4 @@ export default function AggTypeMetricCountProvider(Private) {
       return bucket.doc_count;
     }
   });
-};
+}

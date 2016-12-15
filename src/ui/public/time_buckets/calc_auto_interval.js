@@ -67,4 +67,4 @@ export default function DateIntervalRoundingRulesProvider() {
       if (interval <= target) return interval;
     }),
   };
-};
+}

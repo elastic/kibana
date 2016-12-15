@@ -1,0 +1,39 @@
+/**
+ * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
+ *    ugly default appearance which we can't customize, so our best option is to give Firefox
+ *    control over the checkbox's appearance.
+ */
+.kuiCheckBox {
+  -webkit-appearance: none; /* 1 */
+  background-color: #FFFFFF;
+  border: 1px solid #BEBEBE;
+  border-radius: $buttonBorderRadius;
+  width: 16px;
+  height: 16px;
+  line-height: $lineHeight;
+  transition: background-color $formTransitionTiming;
+
+  &:before {
+    position: relative;
+    top: -0.05em;
+    left: 0.15em;
+    font-family: FontAwesome;
+    content: "\F00C";
+    font-size: 1em;
+    opacity: 0;
+    color: #ffffff;
+    transition: opacity $formTransitionTiming;
+  }
+
+  &:checked {
+    border-color: #328CAA;
+    background-color: #328CAA;
+    &:before {
+      opacity: 1;
+    }
+  }
+
+  &:focus {
+    @include focus;
+  }
+}

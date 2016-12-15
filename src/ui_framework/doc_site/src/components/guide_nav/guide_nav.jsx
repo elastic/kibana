@@ -47,8 +47,10 @@ const GuideNav = props => {
         </Link>
       </div>
 
-      <div className="guideNavItems">
-        {navItems}
+      <div className="guideNavItemsContainer">
+        <div className="guideNavItems">
+          {navItems}
+        </div>
       </div>
     </div>
   );

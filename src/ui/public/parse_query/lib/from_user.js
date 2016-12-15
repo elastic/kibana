@@ -10,7 +10,7 @@ export default function GetQueryFromUser(es, Private) {
    */
   return function (text) {
     function getQueryStringQuery(text) {
-      return decorateQuery({query_string: {query: text}});
+      return decorateQuery({ query_string: { query: text } });
     }
 
     const matchAll = getQueryStringQuery('*');
@@ -38,5 +38,5 @@ export default function GetQueryFromUser(es, Private) {
       return getQueryStringQuery(text);
     }
   };
-};
+}
 

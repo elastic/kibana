@@ -1,4 +1,4 @@
-var path = require('path');
+const path = require('path');
 
 module.exports = {
   devtool: 'source-map',
@@ -25,7 +25,7 @@ module.exports = {
       exclude: /node_modules/
     }, {
       test: /\.scss$/,
-      loaders: ['style', 'css', 'sass'],
+      loaders: ['style', 'css', 'postcss', 'sass'],
       exclude: /node_modules/
     }, {
       test: /\.html$/,

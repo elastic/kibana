@@ -126,3 +126,5 @@ you must specify the path to that configuration file each time you use the `bin/
 64:: Unknown command or incorrect option parameter
 74:: I/O error
 70:: Other error
+
+include::plugins/known-plugins.asciidoc[]

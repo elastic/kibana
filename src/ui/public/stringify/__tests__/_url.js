@@ -65,7 +65,7 @@ describe('Url Format', function () {
       });
 
       it('uses the label template for text formating', function () {
-        const url = new Url({ labelTemplate: 'external {{value }}'});
+        const url = new Url({ labelTemplate: 'external {{value }}' });
         expect(url.convert('url', 'text')).to.be('external url');
       });
 

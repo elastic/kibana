@@ -323,4 +323,4 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
   }
 
   return SavedObject;
-};
+}

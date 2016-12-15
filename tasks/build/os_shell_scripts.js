@@ -1,6 +1,6 @@
-import {join, extname} from 'path';
-import {promisify} from 'bluebird';
-import {ncp} from 'ncp';
+import { join, extname } from 'path';
+import { promisify } from 'bluebird';
+import { ncp } from 'ncp';
 import rimraf from 'rimraf';
 const pncp = promisify(ncp);
 const primraf = promisify(rimraf);
@@ -21,7 +21,7 @@ export default function (grunt) {
       done(err);
     }
   });
-};
+}
 
 function invokeAllAsync(all, fn) {
   return Promise.all(all.map(fn));

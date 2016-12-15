@@ -7,4 +7,4 @@ export default function collectKeys(children) {
   .flattenDeep()
   .union(keys)
   .value();
-};
+}

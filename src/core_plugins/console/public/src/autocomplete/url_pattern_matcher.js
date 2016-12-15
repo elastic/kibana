@@ -9,7 +9,7 @@ function AcceptEndpointComponent(endpoint, parent) {
   this.endpoint = endpoint
 }
 
-AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {"constructor": AcceptEndpointComponent});
+AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, { "constructor": AcceptEndpointComponent });
 
 (function (cls) {
 

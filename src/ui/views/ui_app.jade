@@ -93,7 +93,7 @@ block content
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
-        | Loading Kibana
+        | #{i18n('UI-WELCOME_MESSAGE')}
 
   script.
     window.onload = function () {
@@ -125,7 +125,7 @@ block content
           err.style['text-align'] = 'center';
           err.style['background'] = '#F44336';
           err.style['padding'] = '25px';
-          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+          err.innerText = '#{i18n('UI-WELCOME_ERROR')}';
 
           document.body.innerHTML = err.outerHTML;
         }

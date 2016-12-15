@@ -38,7 +38,7 @@ module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, e
   };
 
   this.urlFor = function (id) {
-    return kbnUrl.eval('#/dashboard/{{id}}', {id: id});
+    return kbnUrl.eval('#/dashboard/{{id}}', { id: id });
   };
 
   this.delete = function (ids) {
@@ -75,7 +75,7 @@ module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, e
         }
       };
     } else {
-      body = { query: {match_all: {}}};
+      body = { query: { match_all: {} } };
     }
 
     return es.search({

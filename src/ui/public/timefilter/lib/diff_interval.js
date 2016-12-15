@@ -17,4 +17,4 @@ export default function diffTimeProvider(Private) {
       oldRefreshInterval = _.clone(self.refreshInterval);
     };
   };
-};
+}
