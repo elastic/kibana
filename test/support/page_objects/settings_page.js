@@ -201,7 +201,7 @@ export default class SettingsPage {
   }
 
   getScriptedFieldsTabCount() {
-    var selector = 'a[data-test-subj="tab-scriptedFields"] small';
+    const selector = 'a[data-test-subj="tab-scriptedFields"] small';
 
     return PageObjects.common.try(() => {
       return this.remote.setFindTimeout(defaultFindTimeout / 10)
@@ -405,7 +405,26 @@ export default class SettingsPage {
     await this.setScriptedFieldName(name);
     if (language) await this.setScriptedFieldLanguage(language);
     if (type) await this.setScriptedFieldType(type);
-    if (format) await this.setScriptedFieldFormat(format);
+    if (format) {
+      await this.setScriptedFieldFormat(format.format);
+      // null means leave - default - which has no other settings
+      // Url adds Type, Url Template, and Label Template
+      // Date adds moment.js format pattern (Default: "MMMM Do YYYY, HH:mm:ss.SSS")
+      // String adds Transform
+      switch(format.format) {
+        case 'Url':
+          await this.setScriptedFieldUrlType(format.type);
+          await this.setScriptedFieldUrlTemplate(format.template);
+          await this.setScriptedFieldUrlLabelTemplate(format.labelTemplate);
+          break;
+        case 'Date':
+          await this.setScriptedFieldDatePattern(format.datePattern);
+          break;
+        case 'String':
+          await this.setScriptedFieldStringTransform(format.stringTransform);
+          break;
+      }
+    }
     if (popularity) await this.setScriptedFieldPopularity(popularity);
     await this.setScriptedFieldScript(script);
     await this.clickSaveScriptedField();
@@ -450,6 +469,41 @@ export default class SettingsPage {
     PageObjects.common.debug('set scripted field format = ' + format);
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('select[ng-model="editor.selectedFormatId"] > option[label="' + format + '"]')
+    .click();
+  }
+
+  setScriptedFieldUrlType(type) {
+    PageObjects.common.debug('set scripted field Url type = ' + type);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.formatParams.type"] > option[label="' + type + '"]')
+    .click();
+  }
+
+  setScriptedFieldUrlTemplate(template) {
+    PageObjects.common.debug('set scripted field Url Template = ' + template);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+    .type(template);
+  }
+
+  setScriptedFieldUrlLabelTemplate(labelTemplate) {
+    PageObjects.common.debug('set scripted field Url Label Template = ' + labelTemplate);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+    .type(labelTemplate);
+  }
+
+  setScriptedFieldDatePattern(datePattern) {
+    PageObjects.common.debug('set scripted field Date Pattern = ' + datePattern);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="model"]')
+    .clearValue().type(datePattern);
+  }
+
+  setScriptedFieldStringTransform(stringTransform) {
+    PageObjects.common.debug('set scripted field string Transform = ' + stringTransform);
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.formatParams.transform"] > option[label="' + stringTransform + '"]')
     .click();
   }
 

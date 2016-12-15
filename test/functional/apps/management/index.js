@@ -5,15 +5,14 @@ bdd.describe('settings app', function () {
 
   // on setup, we create an settingsPage instance
   // that we will use for all the tests
-  bdd.before(function () {
-    return scenarioManager.loadIfEmpty('makelogs');
+  bdd.before(async function () {
+    await scenarioManager.unload('logstashFunctional');
+    await scenarioManager.loadIfEmpty('makelogs');
   });
 
-  bdd.after(function () {
-    return scenarioManager.unload('makelogs')
-    .then(function () {
-      return esClient.delete('.kibana');
-    });
+  bdd.after(async function () {
+    await scenarioManager.unload('makelogs');
+    await esClient.delete('.kibana');
   });
 
   require('./_initial_state');
