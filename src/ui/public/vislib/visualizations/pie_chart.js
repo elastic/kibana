@@ -2,11 +2,19 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
+import VislibVisualizationsChartProvider from './_chart';
 export default function PieChartFactory(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
 
+  const defaults = {
+    isDonut: false,
+    showTooltip: true,
+    color: undefined,
+    fillColor: undefined,
+    xValue: d => d.x,
+    yValue: d => d.y
+  };
   /**
    * Pie Chart Visualization
    *
@@ -24,10 +32,9 @@ export default function PieChartFactory(Private) {
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
 
-      this._attr = _.defaults(handler._attr || {}, {
-        isDonut: handler._attr.isDonut || false
-      });
+      this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
+
 
     /**
      * Checks whether pie slices have all zero values.
@@ -41,7 +48,7 @@ export default function PieChartFactory(Private) {
       if (isAllZeros) {
         throw new errors.PieContainsAllZeros();
       }
-    };
+    }
 
     /**
      * Adds Events to SVG paths
@@ -57,7 +64,7 @@ export default function PieChartFactory(Private) {
       .call(events.addHoverEvent())
       .call(events.addMouseoutEvent())
       .call(events.addClickEvent());
-    };
+    }
 
     convertToPercentage(slices) {
       (function assignPercentages(slices) {
@@ -84,7 +91,7 @@ export default function PieChartFactory(Private) {
           }
         });
       }(slices));
-    };
+    }
 
     /**
      * Adds pie paths to SVG
@@ -162,7 +169,7 @@ export default function PieChartFactory(Private) {
       }
 
       return path;
-    };
+    }
 
     _validateContainerSize(width, height) {
       const minWidth = 20;
@@ -171,7 +178,7 @@ export default function PieChartFactory(Private) {
       if (width <= minWidth || height <= minHeight) {
         throw new errors.ContainerTooSmall();
       }
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -210,8 +217,8 @@ export default function PieChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return PieChart;
-};
+}

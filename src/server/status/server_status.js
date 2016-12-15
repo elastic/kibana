@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
-import {version} from '../../../package.json';
+import { version } from '../../../package.json';
 
 module.exports = class ServerStatus {
   constructor(server) {
@@ -24,7 +24,7 @@ module.exports = class ServerStatus {
   }
 
   each(fn) {
-    let self = this;
+    const self = this;
     _.forOwn(self._created, function (status, i, list) {
       if (status.state !== 'disabled') {
         fn.call(self, status, i, list);
@@ -55,15 +55,15 @@ module.exports = class ServerStatus {
   }
 
   overall() {
-    let state = _(this._created)
+    const state = _(this._created)
     .map(function (status) {
       return states.get(status.state);
     })
     .sortBy('severity')
     .pop();
 
-    let statuses = _.where(this._created, { state: state.id });
-    let since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
+    const statuses = _.where(this._created, { state: state.id });
+    const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
@@ -83,7 +83,7 @@ module.exports = class ServerStatus {
   }
 
   toString() {
-    let overall = this.overall();
+    const overall = this.overall();
     return `${overall.title} – ${overall.nickname}`;
   }
 

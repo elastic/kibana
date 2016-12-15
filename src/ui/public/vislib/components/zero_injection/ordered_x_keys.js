@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import VislibComponentsZeroInjectionUniqKeysProvider from 'ui/vislib/components/zero_injection/uniq_keys';
+import VislibComponentsZeroInjectionUniqKeysProvider from './uniq_keys';
 export default function OrderedXKeysUtilService(Private) {
   const getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
 
@@ -59,4 +59,4 @@ export default function OrderedXKeysUtilService(Private) {
     .flatten()
     .value();
   };
-};
+}

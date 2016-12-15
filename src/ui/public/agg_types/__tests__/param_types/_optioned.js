@@ -17,7 +17,7 @@ describe('Optioned', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      let aggParam = new OptionedAggParam({
+      const aggParam = new OptionedAggParam({
         name: 'some_param',
         type: 'optioned'
       });

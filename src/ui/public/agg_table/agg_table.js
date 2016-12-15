@@ -27,7 +27,7 @@ uiModules
       return compileRecursiveDirective.compile($el);
     },
     controller: function ($scope) {
-      let self = this;
+      const self = this;
 
       self._saveAs = require('@spalger/filesaver').saveAs;
       self.csv = {
@@ -36,15 +36,15 @@ uiModules
       };
 
       self.exportAsCsv = function (formatted) {
-        let csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
+        const csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
       self.toCsv = function (formatted) {
-        let rows = $scope.table.rows;
-        let columns = formatted ? $scope.formattedColumns : $scope.table.columns;
-        let nonAlphaNumRE = /[^a-zA-Z0-9]/;
-        let allDoubleQuoteRE = /"/g;
+        const rows = $scope.table.rows;
+        const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
+        const nonAlphaNumRE = /[^a-zA-Z0-9]/;
+        const allDoubleQuoteRE = /"/g;
 
         function escape(val) {
           if (!formatted && _.isObject(val)) val = val.valueOf();
@@ -56,7 +56,7 @@ uiModules
         }
 
         // escape each cell in each row
-        let csvRows = rows.map(function (row) {
+        const csvRows = rows.map(function (row) {
           return row.map(escape);
         });
 
@@ -71,7 +71,7 @@ uiModules
       };
 
       $scope.$watch('table', function () {
-        let table = $scope.table;
+        const table = $scope.table;
 
         if (!table) {
           $scope.rows = null;
@@ -82,14 +82,14 @@ uiModules
         self.csv.filename = ($scope.exportTitle || table.title() || 'table') + '.csv';
         $scope.rows = table.rows;
         $scope.formattedColumns = table.columns.map(function (col, i) {
-          let agg = $scope.table.aggConfig(col);
-          let field = agg.getField();
-          let formattedColumn = {
+          const agg = $scope.table.aggConfig(col);
+          const field = agg.getField();
+          const formattedColumn = {
             title: col.title,
             filterable: field && field.filterable && agg.schema.group === 'buckets'
           };
 
-          let last = i === (table.columns.length - 1);
+          const last = i === (table.columns.length - 1);
 
           if (last || (agg.schema.group === 'metrics')) {
             formattedColumn.class = 'visualize-table-right';

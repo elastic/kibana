@@ -1,5 +1,5 @@
-var alter = require('../lib/alter.js');
-var Chainable = require('../lib/classes/chainable');
+const alter = require('../lib/alter.js');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('bars', {
   args: [
     {

@@ -53,10 +53,10 @@ const init = function (index, type, id) {
             });
             break;
           case 'missingIndex':
-            deferred.reject({status: 404});
+            deferred.reject({ status: 404 });
             break;
           case 'badRequest':
-            deferred.reject({status: 500});
+            deferred.reject({ status: 500 });
             break;
         }
 

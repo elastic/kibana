@@ -7,7 +7,7 @@ function replacer(match, group) {
 }
 
 function apply(obj, key, action) {
-  for (let k in obj)  {
+  for (const k in obj)  {
     if (obj.hasOwnProperty(k)) {
       let val = obj[k];
       if (k === key) {
@@ -21,9 +21,9 @@ function apply(obj, key, action) {
           obj[k] = ('' + val).replace(/./g, 'X');
         }
         else if (/\/.+\//.test(action)) {
-          let matches = action.match(/\/(.+)\//);
+          const matches = action.match(/\/(.+)\//);
           if (matches) {
-            let regex = new RegExp(matches[1]);
+            const regex = new RegExp(matches[1]);
             obj[k] = ('' + val).replace(regex, replacer);
           }
         }

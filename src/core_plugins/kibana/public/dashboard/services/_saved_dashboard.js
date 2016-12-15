@@ -49,9 +49,9 @@ module.factory('SavedDashboard', function (courier, config) {
     title: 'text',
     hits: 'integer',
     description: 'text',
-    panelsJSON: 'keyword',
-    optionsJSON: 'keyword',
-    uiStateJSON: 'keyword',
+    panelsJSON: 'text',
+    optionsJSON: 'text',
+    uiStateJSON: 'text',
     version: 'integer',
     timeRestore: 'boolean',
     timeTo: 'keyword',
@@ -59,10 +59,10 @@ module.factory('SavedDashboard', function (courier, config) {
     refreshInterval: {
       type: 'object',
       properties: {
-        display: {type: 'keyword'},
-        pause: { type: 'boolean'},
-        section: { type: 'integer'},
-        value: { type: 'integer'}
+        display: { type: 'keyword' },
+        pause: { type: 'boolean' },
+        section: { type: 'integer' },
+        value: { type: 'integer' }
       }
     }
   };

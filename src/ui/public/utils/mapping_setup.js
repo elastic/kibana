@@ -2,9 +2,9 @@ import angular from 'angular';
 import _ from 'lodash';
 define(function () {
   return function MappingSetupService(kbnIndex, es) {
-    let mappingSetup = this;
+    const mappingSetup = this;
 
-    let json = {
+    const json = {
       _serialize: function (val) {
         if (val != null) return angular.toJson(val);
       },
@@ -16,13 +16,13 @@ define(function () {
     /**
      * Use to create the mappings, but that should only happen one at a time
      */
-    let activeTypeCreations = {};
+    const activeTypeCreations = {};
 
     /**
      * Get the list of type's mapped in elasticsearch
      * @return {[type]} [description]
      */
-    let getKnownKibanaTypes = _.once(function () {
+    const getKnownKibanaTypes = _.once(function () {
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: kbnIndex,
@@ -45,7 +45,7 @@ define(function () {
         if (typeof val === 'string') val = { type: val };
 
         if (val.type === 'json') {
-          val.type = 'keyword';
+          val.type = 'text';
           val._serialize = json._serialize;
           val._deserialize = json._deserialize;
         }
@@ -72,13 +72,13 @@ define(function () {
         });
       }
 
-      let prom = getKnownKibanaTypes()
+      const prom = getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
 
         // we need to create the mapping
-        let body = {};
+        const body = {};
         body[type] = {
           properties: mapping
         };

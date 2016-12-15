@@ -336,4 +336,4 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   SegmentedReq.prototype.mergedSegment = notify.timed('merge response segment', SegmentedReq.prototype.mergedSegment);
 
   return SegmentedReq;
-};
+}

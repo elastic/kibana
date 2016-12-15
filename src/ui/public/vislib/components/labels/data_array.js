@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VislibComponentsLabelsFlattenSeriesProvider from 'ui/vislib/components/labels/flatten_series';
+import VislibComponentsLabelsFlattenSeriesProvider from './flatten_series';
 export default function GetArrayUtilService(Private) {
   const flattenSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
 
@@ -14,4 +14,4 @@ export default function GetArrayUtilService(Private) {
     if (!obj.series) return flattenSeries(obj);
     return obj.series;
   };
-};
+}

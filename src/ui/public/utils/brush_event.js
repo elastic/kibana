@@ -10,8 +10,8 @@ export default function brushEventProvider(timefilter) {
 
       switch (event.data.xAxisField.type) {
         case 'date':
-          let from = moment(event.range[0]);
-          let to = moment(event.range[1]);
+          const from = moment(event.range[0]);
+          const to = moment(event.range[1]);
 
           if (to - from === 0) return;
 
@@ -29,7 +29,7 @@ export default function brushEventProvider(timefilter) {
 
           const min = event.range[0];
           const max = event.range[event.range.length - 1];
-          const range = {gte: min, lt: max};
+          const range = { gte: min, lt: max };
           if (_.has(existingFilter, 'range')) {
             existingFilter.range[event.data.xAxisField.name] = range;
           } else if (_.has(existingFilter, 'script.script.params.gte')
@@ -48,4 +48,4 @@ export default function brushEventProvider(timefilter) {
       }
     };
   };
-};
+}

@@ -1,8 +1,8 @@
 import _ from 'lodash';
-let errors = {};
+const errors = {};
 
-let canStack = (function () {
-  let err = new Error();
+const canStack = (function () {
+  const err = new Error();
   return !!err.stack;
 }());
 

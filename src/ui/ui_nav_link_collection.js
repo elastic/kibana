@@ -31,4 +31,4 @@ export default class UiNavLinkCollection extends Collection {
     return super.delete(value);
   }
 
-};
+}

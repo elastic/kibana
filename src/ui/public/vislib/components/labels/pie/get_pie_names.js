@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VislibComponentsLabelsPieReturnPieNamesProvider from 'ui/vislib/components/labels/pie/return_pie_names';
+import VislibComponentsLabelsPieReturnPieNamesProvider from './return_pie_names';
 
 export default function GetPieNames(Private) {
   const returnNames = Private(VislibComponentsLabelsPieReturnPieNamesProvider);
@@ -17,4 +17,4 @@ export default function GetPieNames(Private) {
       .value();
     }
   };
-};
+}

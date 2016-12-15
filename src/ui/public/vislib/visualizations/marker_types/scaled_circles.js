@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import L from 'leaflet';
-import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from './base_marker';
 export default function ScaledCircleMarkerFactory(Private) {
 
   const BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
@@ -51,9 +51,9 @@ export default function ScaledCircleMarkerFactory(Private) {
 
       // square root value percentage
       return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
-    };
+    }
   }
 
 
   return ScaledCircleMarker;
-};
+}

@@ -1,20 +1,20 @@
-var proxyquire =  require('proxyquire');
-var Promise = require('bluebird');
-var _ = require('lodash');
+const proxyquire =  require('proxyquire');
+const Promise = require('bluebird');
+const _ = require('lodash');
 const assert = require('chai');
 const expect = assert.expect;
 
-var parseURL = require('url').parse;
-var parseQueryString = require('querystring').parse;
-var tlConfig = require('./fixtures/tlConfig')();
-var moment = require('moment');
+const parseURL = require('url').parse;
+const parseQueryString = require('querystring').parse;
+const tlConfig = require('./fixtures/tlConfig')();
+const moment = require('moment');
 
-var filename = require('path').basename(__filename);
-var invoke = require('./helpers/invoke_series_fn.js');
+const filename = require('path').basename(__filename);
+const invoke = require('./helpers/invoke_series_fn.js');
 
-var fn;
-var response;
-var calledWith;
+let fn;
+let response;
+let calledWith;
 describe(filename, function () {
 
   beforeEach(function () {
@@ -37,7 +37,7 @@ describe(filename, function () {
         }
       });
     };
-    fn = proxyquire(`../${filename}`, {'node-fetch': response});
+    fn = proxyquire(`../${filename}`, { 'node-fetch': response });
   });
 
   it('should wrap the quandl response up in a seriesList', function () {
@@ -67,7 +67,7 @@ describe(filename, function () {
   });
 
   it('should throw an error is passed an unsupported interval', function () {
-    return invoke(fn, [], {time:{interval:'2d'}})
+    return invoke(fn, [], { time:{ interval:'2d' } })
     .then(expect.fail)
     .catch(function (r) {
       expect(r).to.be.an('error');
@@ -75,7 +75,7 @@ describe(filename, function () {
   });
 
   it('should use the configured API key when talking to quandl', function () {
-    return invoke(fn, [], {settings:{'timelion:quandl.key': 'bEeR'}}).then(function () {
+    return invoke(fn, [], { settings:{ 'timelion:quandl.key': 'bEeR' } }).then(function () {
       expect(calledWith.params.auth_token).to.eql('bEeR');
     });
   });

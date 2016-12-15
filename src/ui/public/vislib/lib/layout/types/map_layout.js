@@ -1,4 +1,4 @@
-import VislibLibLayoutSplitsTileMapMapSplitProvider from 'ui/vislib/lib/layout/splits/tile_map/map_split';
+import VislibLibLayoutSplitsTileMapMapSplitProvider from '../splits/tile_map/map_split';
 export default function ColumnLayoutFactory(Private) {
   const mapSplit = Private(VislibLibLayoutSplitsTileMapMapSplitProvider);
 
@@ -46,4 +46,4 @@ export default function ColumnLayoutFactory(Private) {
       }
     ];
   };
-};
+}

@@ -14,7 +14,6 @@ export default function HistogramVisType(Private) {
      'Pro Tip: Pie charts are best used sparingly, and with no more than 7 slices per pie.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
@@ -71,4 +70,4 @@ export default function HistogramVisType(Private) {
       }
     ])
   });
-};
+}

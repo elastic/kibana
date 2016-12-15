@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VislibComponentsZeroInjectionFlattenDataProvider from 'ui/vislib/components/zero_injection/flatten_data';
+import VislibComponentsZeroInjectionFlattenDataProvider from './flatten_data';
 export default function UniqueXValuesUtilService(Private) {
 
   const flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
@@ -58,4 +58,4 @@ export default function UniqueXValuesUtilService(Private) {
 
     return uniqueXValues;
   };
-};
+}

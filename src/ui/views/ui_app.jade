@@ -12,10 +12,6 @@ block content
       margin: 0;
     }
 
-    /**
-     * 1. The kibanaLoadingMessage will push the loader up. This top margin pushes it back down so
-     *    it's in the same position as the login form.
-     */
     .kibanaLoader {
       display: -webkit-box;
       display: -webkit-flex;
@@ -24,7 +20,6 @@ block content
       width: 620px;
       height: 185px;
       padding: 0;
-      margin-top: 130px; /* 1 */
       text-align: center;
       background: #3caed2;
     }
@@ -60,7 +55,7 @@ block content
       font-size: 38px;
       font-weight: 300;
       font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-      padding-bottom: 16px;
+      padding-bottom: 12px;
     }
 
     @-webkit-keyframes colorShift {
@@ -93,43 +88,15 @@ block content
       }
     }
 
-    /**
-     * 1. If we change the height or top margin, we'll need to increase the top margin on
-     *    kibanaLoader too.
-     */
-    .kibanaLoadingMessage {
-      font-family: "Open Sans", Helvetica, Arial, sans-serif;
-      color: #8c8c8c;
-      max-width: 540px;
-      height: 50px; /* 1 */
-      margin-top: 80px; /* 1 */
-      text-align: center;
-      font-size: 18px;
-      line-height: 1.4;
-      opacity: 0.8;
-    }
-
   .kibanaWelcomeView
     .kibanaLoader
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
-        | Loading Kibana
-    .kibanaLoadingMessage(
-      data-remove-message-when-embedded
-    )
-      | Give me a moment here. I&rsquo;m loading a whole bunch of code. Don&rsquo;t worry, all this
-      | good stuff will be cached up for next time!
+        | #{i18n('UI-WELCOME_MESSAGE')}
 
   script.
     window.onload = function () {
-
-      var hideLoadingMessage = /#.*[?&]embed(&|$|=true)/.test(window.location.href);
-      if (hideLoadingMessage) {
-        var loadingMessage = document.querySelector('[data-remove-message-when-embedded]');
-        loadingMessage.parentNode.removeChild(loadingMessage);
-      }
-
       var buildNum = #{kibanaPayload.buildNum};
       var cacheParam = buildNum ? '?v=' + buildNum : '';
       function bundleFile(filename) {
@@ -158,7 +125,7 @@ block content
           err.style['text-align'] = 'center';
           err.style['background'] = '#F44336';
           err.style['padding'] = '25px';
-          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+          err.innerText = '#{i18n('UI-WELCOME_ERROR')}';
 
           document.body.innerHTML = err.outerHTML;
         }

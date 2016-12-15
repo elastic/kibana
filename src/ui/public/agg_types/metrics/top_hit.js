@@ -102,7 +102,7 @@ export default function AggTypeMetricTopProvider(Private) {
         return null;
       }
       const path = agg.params.field.name;
-      return path === '_source' ? hits[0]._source : agg.vis.indexPattern.flattenHit(hits[0])[path];
+      return path === '_source' ? hits[0]._source : agg.vis.indexPattern.flattenHit(hits[0], true)[path];
     }
   });
 };

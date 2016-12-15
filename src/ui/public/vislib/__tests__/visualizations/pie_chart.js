@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -13,22 +12,22 @@ import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_respons
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const aggArray = [
@@ -140,16 +139,16 @@ describe('No global chart settings', function () {
 
     it('should throw an error when all charts contain zeros', function () {
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(allZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(allZeros);
       }).to.throwError();
     });
 
     it('should not throw an error when only some or no charts contain zeros', function () {
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(someZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(someZeros);
       }).to.not.throwError();
       expect(function () {
-        chart1.ChartClass.prototype._validatePieData(noZeros);
+        chart1.handler.ChartClass.prototype._validatePieData(noZeros);
       }).to.not.throwError();
     });
   });

@@ -14,4 +14,4 @@ export default function SearchReqProvider(Private) {
       this.strategy = searchStrategy;
     }
   };
-};
+}

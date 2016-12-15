@@ -8,16 +8,16 @@ import uiModules from 'ui/modules';
 
 uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
-  let Data = Private(VislibLibDataProvider);
-  let colorPalette = Private(VislibComponentsColorColorProvider);
-  let filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const Data = Private(VislibLibDataProvider);
+  const colorPalette = Private(VislibComponentsColorColorProvider);
+  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     template: html,
     link: function ($scope) {
-      let $state = getAppState();
-      let clickHandler = filterBarClickHandler($state);
+      const $state = getAppState();
+      const clickHandler = filterBarClickHandler($state);
       $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
       $scope.$watch('renderbot.chartData', function (data) {
@@ -27,8 +27,8 @@ uiModules.get('kibana')
       });
 
       $scope.highlight = function (event) {
-        let el = event.currentTarget;
-        let handler = $scope.renderbot.vislibVis.handler;
+        const el = event.currentTarget;
+        const handler = $scope.renderbot.vislibVis.handler;
 
         //there is no guarantee that a Chart will set the highlight-function on its handler
         if (!handler || typeof handler.highlight !== 'function') {
@@ -38,8 +38,8 @@ uiModules.get('kibana')
       };
 
       $scope.unhighlight = function (event) {
-        let el = event.currentTarget;
-        let handler = $scope.renderbot.vislibVis.handler;
+        const el = event.currentTarget;
+        const handler = $scope.renderbot.vislibVis.handler;
         //there is no guarantee that a Chart will set the unhighlight-function on its handler
         if (!handler || typeof handler.unHighlight !== 'function') {
           return;
@@ -48,15 +48,15 @@ uiModules.get('kibana')
       };
 
       $scope.setColor = function (label, color) {
-        let colors = $scope.uiState.get('vis.colors') || {};
+        const colors = $scope.uiState.get('vis.colors') || {};
         colors[label] = color;
         $scope.uiState.set('vis.colors', colors);
         refresh();
       };
 
       $scope.toggleLegend = function () {
-        let bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
-        let bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
+        const bwcAddLegend = $scope.vis.params.addLegend;
+        const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
         $scope.uiState.set('vis.legendOpen', $scope.open);
       };
@@ -79,11 +79,11 @@ uiModules.get('kibana')
       };
 
       $scope.filter = function (legendData, negate) {
-        clickHandler({point: legendData, negate: negate});
+        clickHandler({ point: legendData, negate: negate });
       };
 
       $scope.canFilter = function (legendData) {
-        let filters = clickHandler({point: legendData}, true) || [];
+        const filters = clickHandler({ point: legendData }, true) || [];
         return filters.length;
       };
 
@@ -98,13 +98,13 @@ uiModules.get('kibana')
       ];
 
       function refresh() {
-        let vislibVis = $scope.renderbot.vislibVis;
+        const vislibVis = $scope.renderbot.vislibVis;
 
-        if ($scope.uiState.get('vis.legendOpen') == null && vislibVis._attr.addLegend != null) {
-          $scope.open = vislibVis._attr.addLegend;
+        if ($scope.uiState.get('vis.legendOpen') == null && $scope.vis.params.addLegend != null) {
+          $scope.open = $scope.vis.params.addLegend;
         }
 
-        $scope.labels = getLabels($scope.data, vislibVis._attr.type);
+        $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
         $scope.getColor = colorPalette(_.pluck($scope.labels, 'label'), $scope.uiState.get('vis.colors'));
       }
 
@@ -117,7 +117,7 @@ uiModules.get('kibana')
       }
 
       function getSeriesLabels(data) {
-        let values = data.map(function (chart) {
+        const values = data.map(function (chart) {
           return chart.series;
         })
         .reduce(function (a, b) {

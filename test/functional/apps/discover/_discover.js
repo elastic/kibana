@@ -18,7 +18,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
   bdd.before(async function () {
     // delete .kibana index and update configDoc
-    await esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+    await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
     PageObjects.common.debug('load kibana index with default index pattern');
     await elasticDump.elasticLoad('visualize','.kibana');
 
@@ -71,12 +71,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show the correct bar chart', async function () {
-      const expectedBarChartData = [ '3.237',
-        '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
-        '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
-        '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
-        '118.562', '63.524', '17.587', '2.537'
-      ];
+      const expectedBarChartData = [ 35, 189, 694, 1347, 1285, 704, 176, 29, 39, 189, 640,
+        1276, 1327, 663, 166, 25, 30, 164, 663, 1320, 1270, 681, 188, 27 ];
       await verifyChartData(expectedBarChartData);
     });
 
@@ -97,27 +93,16 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('should show correct data for chart interval Hourly', async function () {
       await PageObjects.discover.setChartInterval('Hourly');
 
-      const expectedBarChartData = [ '1.527', '2.290',
-        '5.599', '7.890', '13.236', '30.290', '46.072', '55.490', '86.8',
-        '112', '122.181', '131.6', '132.872', '113.527', '102.581',
-        '81.709', '65.672', '43.781', '24.181', '14', '9.672', '6.109',
-        '0.763', '1.018', '2.800', '3.563', '4.327', '9.672', '12.472',
-        '29.272', '38.690', '54.981', '80.181', '102.327', '113.527',
-        '130.581', '132.363', '120.654', '107.163', '78.145', '58.545',
-        '43.272', '25.199', '12.218', '7.636', '3.818', '2.545', '0.509',
-        '2.036', '1.781', '4.327', '8.654', '9.418', '26.472', '38.945',
-        '61.345', '79.672', '102.836', '125.236', '130.327', '128.036',
-        '120.4', '96.472', '74.581', '70.509', '39.709', '25.199', '13.490',
-        '12.472', '4.072', '2.290', '1.018'
-      ];
+      const expectedBarChartData = [ 4, 7, 16, 23, 38, 87, 132, 159, 248, 320, 349, 376, 380,
+        324, 293, 233, 188, 125, 69, 40, 28, 17, 2, 3, 8, 10, 12, 28, 36, 84, 111, 157, 229, 292,
+        324, 373, 378, 345, 306, 223, 167, 124, 72, 35, 22, 11, 7, 1, 6, 5, 12, 25, 27, 76, 111, 175,
+        228, 294, 358, 372, 366, 344, 276, 213, 201, 113, 72, 39, 36, 12, 7, 3 ];
       await verifyChartData(expectedBarChartData);
     });
 
     bdd.it('should show correct data for chart interval Daily', async function () {
       const chartInterval = 'Daily';
-      const expectedBarChartData = [
-        '133.196', '129.192', '129.724'
-      ];
+      const expectedBarChartData = [ 4757, 4614, 4633 ];
       await PageObjects.discover.setChartInterval(chartInterval);
       await PageObjects.common.try(async () => {
         await verifyChartData(expectedBarChartData);
@@ -126,7 +111,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show correct data for chart interval Weekly', async function () {
       const chartInterval = 'Weekly';
-      const expectedBarChartData = [ '66.598', '129.458'];
+      const expectedBarChartData = [ 4757, 9247 ];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await PageObjects.common.try(async () => {
@@ -136,9 +121,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('browser back button should show previous interval Daily', async function () {
       const expectedChartInterval = 'Daily';
-      const expectedBarChartData = [
-        '133.196', '129.192', '129.724'
-      ];
+      const expectedBarChartData = [ 4757, 4614, 4633 ];
 
       await this.remote.goBack();
       await PageObjects.common.try(async function tryingForTime() {
@@ -150,7 +133,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show correct data for chart interval Monthly', async function () {
       const chartInterval = 'Monthly';
-      const expectedBarChartData = [ '122.535'];
+      const expectedBarChartData = [ 13129 ];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await verifyChartData(expectedBarChartData);
@@ -158,7 +141,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show correct data for chart interval Yearly', async function () {
       const chartInterval = 'Yearly';
-      const expectedBarChartData = [ '122.535'];
+      const expectedBarChartData = [ 13129 ];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await verifyChartData(expectedBarChartData);
@@ -166,12 +149,8 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show correct data for chart interval Auto', async function () {
       const chartInterval = 'Auto';
-      const expectedBarChartData = [ '3.237',
-        '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
-        '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
-        '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
-        '118.562', '63.524', '17.587', '2.537'
-      ];
+      const expectedBarChartData = [ 35, 189, 694, 1347, 1285, 704, 176, 29, 39, 189,
+        640, 1276, 1327, 663, 166, 25, 30, 164, 663, 1320, 1270, 681, 188, 27 ];
 
       await PageObjects.discover.setChartInterval(chartInterval);
       await verifyChartData(expectedBarChartData);
@@ -201,8 +180,8 @@ bdd.describe('discover app', function describeIndexTests() {
            ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
           if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
             hasFailure = true;
-          };
-        };
+          }
+        }
         if (hasFailure) {
           PageObjects.common.log(stringResults);
           PageObjects.common.log(paths);

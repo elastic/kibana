@@ -20,4 +20,4 @@ export default function IndexPatternFieldTypes() {
       { name: '_source',    sortable: false,  filterable: false },
     ]
   });
-};
+}

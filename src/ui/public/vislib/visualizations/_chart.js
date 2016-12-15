@@ -1,8 +1,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import dataLabel from 'ui/vislib/lib/_data_label';
-import VislibLibDispatchProvider from 'ui/vislib/lib/dispatch';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
+import VislibLibDispatchProvider from '../lib/dispatch';
+import VislibComponentsTooltipProvider from '../components/tooltip';
 export default function ChartBaseClass(Private) {
 
   const Dispatch = Private(VislibLibDispatchProvider);
@@ -26,7 +26,7 @@ export default function ChartBaseClass(Private) {
 
       const events = this.events = new Dispatch(handler);
 
-      if (_.get(this.handler, '_attr.addTooltip')) {
+      if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {
         const $el = this.handler.el;
         const formatter = this.handler.data.get('tooltipFormatter');
 
@@ -35,7 +35,6 @@ export default function ChartBaseClass(Private) {
         this.tooltips.push(this.tooltip);
       }
 
-      this._attr = _.defaults(this.handler._attr || {}, {});
       this._addIdentifier = _.bind(this._addIdentifier, this);
     }
 
@@ -50,7 +49,7 @@ export default function ChartBaseClass(Private) {
 
       selection.selectAll('*').remove();
       selection.call(this.draw());
-    };
+    }
 
     /**
      * Append the data label to the element
@@ -72,7 +71,7 @@ export default function ChartBaseClass(Private) {
         const label = resolveLabel(datum);
         if (label != null) dataLabel(this, label);
       });
-    };
+    }
 
     /**
      * Removes all DOM elements from the root element
@@ -86,8 +85,8 @@ export default function ChartBaseClass(Private) {
         tooltip.destroy();
       });
       selection.remove();
-    };
+    }
   }
 
   return Chart;
-};
+}

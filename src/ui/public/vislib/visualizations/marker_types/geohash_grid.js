@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from './base_marker';
 export default function GeohashGridMarkerFactory(Private) {
 
   const BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
@@ -31,4 +31,4 @@ export default function GeohashGridMarkerFactory(Private) {
   }
 
   return GeohashGridMarker;
-};
+}

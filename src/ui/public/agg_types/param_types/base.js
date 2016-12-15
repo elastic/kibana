@@ -6,4 +6,4 @@ export default function BaseAggParamFactory() {
   }
 
   return BaseAggParam;
-};
+}
