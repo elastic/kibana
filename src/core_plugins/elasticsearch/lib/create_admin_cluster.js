@@ -5,8 +5,12 @@ export default function (server) {
   const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
 
   class AdminClientLogging extends Logger {
-    tags = ['admin'];
-    logQueries = Boolean(config.get('elasticsearch.logQueries'));
+    constructor() {
+      super();
+
+      this.tags = ['admin'];
+      this.logQueries = config.get('elasticsearch.logQueries');
+    }
   }
 
   const adminCluster = server.plugins.elasticsearch.createCluster(

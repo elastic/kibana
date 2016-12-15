@@ -6,8 +6,12 @@ export default function (server) {
   const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
 
   class DataClientLogging extends Logger {
-    tags = ['data'];
-    logQueries = Boolean(getConfig().logQueries);
+    constructor() {
+      super();
+
+      this.tags = ['data'];
+      this.logQueries = getConfig().logQueries;
+    }
   }
 
   function getConfig() {
