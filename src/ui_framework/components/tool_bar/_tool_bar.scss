@@ -1,0 +1,37 @@
+.kuiToolBar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  height: 50px;
+  background-color: $panelColor;
+
+  .kuiButton--basic {
+    background-color: #FFFFFF;
+
+    &:hover:enabled {
+      background-color: #FFFFFF;
+    }
+
+    &:active:enabled {
+      background-color: #FAFAFA;
+    }
+  }
+}
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiToolBarSection {
+  display: flex;
+  align-items: center;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & > * + * {
+    margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+}
