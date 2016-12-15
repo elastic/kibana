@@ -302,13 +302,17 @@ export default class DiscoverPage {
 
   clickFieldListPlusFilter(field, value) {
     // this method requires the field details to be open from clickFieldListItem()
-    return PageObjects.common.findTestSubject('plus-' + field + '-' + value)
+    // findTestSubject doesn't handle spaces in the data-test-subj value
+    return this.findTimeout
+    .findByCssSelector('i[data-test-subj="plus-' + field + '-' + value + '"]')
     .click();
   }
 
   clickFieldListMinusFilter(field, value) {
     // this method requires the field details to be open from clickFieldListItem()
-    return PageObjects.common.findTestSubject('minus-' + field + '-' + value)
+    // findTestSubject doesn't handle spaces in the data-test-subj value
+    return this.findTimeout
+    .findByCssSelector('i[data-test-subj="minus-' + field + '-' + value + '"]')
     .click();
   }
 
