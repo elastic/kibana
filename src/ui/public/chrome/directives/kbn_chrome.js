@@ -37,6 +37,9 @@ export default function (chrome, internals) {
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
+        if ($location.search().embed) {
+          chrome.setShowSearch($location.search().showSearch);
+        }
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {

@@ -74,7 +74,8 @@ app.directive('share', function (Private) {
       }
 
       this.makeUrlEmbeddable = url => {
-        const embedQueryParam = '?embed=true';
+        let embedQueryParam = '?embed=true';
+        if (this.showSearch) embedQueryParam += '&showSearch=true';
         const urlHasQueryString = url.indexOf('?') !== -1;
         if (urlHasQueryString) {
           return url.replace('?', `${embedQueryParam}&`);
@@ -115,6 +116,7 @@ app.directive('share', function (Private) {
           shortSnapshotIframe: false,
         };
       };
+      this.updateUrls = updateUrls;
 
       // When the URL changes, update the links in the UI.
       $scope.$watch(() => $location.absUrl(), () => {

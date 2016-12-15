@@ -29,4 +29,21 @@ module.exports = function (chrome, internals) {
     if (_.isUndefined(internals.visible)) return def;
     return internals.visible;
   };
+
+  /**
+   * @param {boolean} showSearch - should the chrome Search Bar be displayed
+   * @return {chrome}
+   */
+  chrome.setShowSearch = function (showSearch) {
+    internals.showSearch = Boolean(showSearch);
+    return chrome;
+  };
+
+  /**
+   * @return {boolean} - Show Search Bar state of the chrome
+   */
+  chrome.getShowSearch = function () {
+    if (_.isUndefined(internals.showSearch)) return true;
+    return internals.showSearch;
+  };
 };
