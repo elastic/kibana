@@ -32,6 +32,7 @@ program
 
 program
   .command('test:browser')
+  .option('--dev', 'Enable dev mode, keeps the test server running')
   .description('Run the browser tests in a real web browser')
   .on('--help', docs('test/browser'))
   .action(run('test/browser'));
