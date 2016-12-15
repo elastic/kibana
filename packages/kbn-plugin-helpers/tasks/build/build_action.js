@@ -1,11 +1,12 @@
+var vfs = require('vinyl-fs');
+var zip = require('gulp-zip');
+var map = require('through2-map').obj;
+var rename = require('gulp-rename');
+var join = require('path').join;
+var inquirer = require('inquirer');
+
 module.exports = function (plugin) {
   return new Promise(function (resolve, reject) {
-    var vfs = require('vinyl-fs');
-    var zip = require('gulp-zip');
-    var map = require('through2-map').obj;
-    var rename = require('gulp-rename');
-    var join = require('path').join;
-    var inquirer = require('inquirer');
 
     function main() {
       var kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;

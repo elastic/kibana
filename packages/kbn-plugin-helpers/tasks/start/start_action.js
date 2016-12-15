@@ -1,5 +1,7 @@
+var execFileSync = require('child_process').execFileSync;
+
 module.exports = function (plugin, run, command) {
-  var execFileSync = require('child_process').execFileSync;
+  command = command || {};
 
   var cmd = (process.platform === 'win32') ? 'bin\\kibana.bat' : 'bin/kibana';
   var args = ['--dev', '--plugin-path', plugin.root];
