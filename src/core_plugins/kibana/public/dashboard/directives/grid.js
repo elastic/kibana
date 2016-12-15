@@ -120,7 +120,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             });
 
             added.forEach(addPanel);
-          };
+          }
 
           // ensure that every panel can be serialized now that we are done
           $state.panels.forEach(PanelUtils.makeSerializeable);

@@ -12,4 +12,4 @@ export default function (filters, comparatorOptions) {
     results = _.union(results, dedupFilters(results, [filter], comparatorOptions));
   });
   return results;
-};
+}

@@ -39,7 +39,7 @@ function SharedComponent(name, parent) {
 
 SharedComponent.prototype = _.create(
   module.exports.AutocompleteComponent.prototype,
-  {'constructor': SharedComponent});
+  { 'constructor': SharedComponent });
 
 module.exports.SharedComponent = SharedComponent;
 
@@ -68,7 +68,7 @@ function ListComponent(name, list, parent, multi_valued, allow_non_valid_values)
   this.allow_non_valid_values = _.isUndefined(allow_non_valid_values) ? false : allow_non_valid_values;
 }
 
-ListComponent.prototype = _.create(SharedComponent.prototype, {"constructor": ListComponent});
+ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ListComponent });
 module.exports.ListComponent = ListComponent;
 
 
@@ -88,9 +88,9 @@ module.exports.ListComponent = ListComponent;
       var meta = this.getDefaultTermMeta();
       ret = _.map(ret, function (term) {
         if (_.isString(term)) {
-          term = {"name": term};
+          term = { "name": term };
         }
-        return _.defaults(term, {meta: meta});
+        return _.defaults(term, { meta: meta });
       });
     }
 
@@ -141,7 +141,7 @@ function SimpleParamComponent(name, parent) {
   SharedComponent.call(this, name, parent);
 }
 
-SimpleParamComponent.prototype = _.create(SharedComponent.prototype, {"constructor": SimpleParamComponent});
+SimpleParamComponent.prototype = _.create(SharedComponent.prototype, { "constructor": SimpleParamComponent });
 module.exports.SimpleParamComponent = SimpleParamComponent;
 
 (function (cls) {
@@ -162,7 +162,7 @@ function ConstantComponent(name, parent, options) {
   this.options = options || [name];
 }
 
-ConstantComponent.prototype = _.create(SharedComponent.prototype, {"constructor": ConstantComponent});
+ConstantComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ConstantComponent });
 module.exports.ConstantComponent = ConstantComponent;
 
 (function (cls) {
@@ -207,7 +207,7 @@ module.exports.wrapComponentWithDefaults = function (component, defaults) {
     }
     result = _.map(result, function (term) {
       if (!_.isObject(term)) {
-        term = {name: term};
+        term = { name: term };
       }
       return _.defaults(term, defaults);
     }, this);
@@ -320,7 +320,7 @@ module.exports.populateContext = function (tokenPath, context, editor, includeAu
       _.each(ws.components, function (component) {
         _.each(component.getTerms(contextForState, editor), function (term) {
           if (!_.isObject(term)) {
-            term = {name: term};
+            term = { name: term };
           }
           autoCompleteSet.push(term);
         });

@@ -9,20 +9,20 @@ let filter;
 
 let types;
 
-let init = function (expandable) {
+const init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 
   types = [
-    {name: 's1', type: 'string'},
-    {name: 's2', type: 'string'},
-    {name: 's3', type: 'string'},
+    { name: 's1', type: 'string' },
+    { name: 's2', type: 'string' },
+    { name: 's3', type: 'string' },
 
-    {name: 'n1', type: 'number'},
-    {name: 'n2', type: 'number'},
+    { name: 'n1', type: 'number' },
+    { name: 'n2', type: 'number' },
 
-    {name: 'i1', type: 'ip'},
-    {name: 'd1', type: 'date'},
+    { name: 'i1', type: 'ip' },
+    { name: 'd1', type: 'date' },
   ];
 
   // Create the scope
@@ -59,7 +59,7 @@ describe('fieldType array filter', function () {
   });
 
   it('should allow negation', function () {
-    let resultNames = _.pluck(filter(types, '!string'), 'name');
+    const resultNames = _.pluck(filter(types, '!string'), 'name');
     expect(resultNames).to.eql(['n1', 'n2', 'i1', 'd1']);
   });
 });

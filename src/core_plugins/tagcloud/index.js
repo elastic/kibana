@@ -5,4 +5,4 @@ export default function (kibana) {
       visTypes: ['plugins/tagcloud/tag_cloud_vis']
     }
   });
-};
+}

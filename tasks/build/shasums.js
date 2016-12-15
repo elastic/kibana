@@ -1,12 +1,12 @@
-var { promisify } = require('bluebird');
-var readdir = promisify(require('fs').readdir);
-var exec = promisify(require('child_process').exec);
-var platform = require('os').platform();
-var cmd = /^win/.test(platform) ? 'sha1sum ' : 'shasum ';
+const { promisify } = require('bluebird');
+const readdir = promisify(require('fs').readdir);
+const exec = promisify(require('child_process').exec);
+const platform = require('os').platform();
+const cmd = /^win/.test(platform) ? 'sha1sum ' : 'shasum ';
 
 module.exports = function (grunt) {
   grunt.registerTask('_build:shasums', function () {
-    var targetDir = grunt.config.get('target');
+    const targetDir = grunt.config.get('target');
 
     // for when shasums is run but archives and ospackages was not
     grunt.file.mkdir(targetDir);

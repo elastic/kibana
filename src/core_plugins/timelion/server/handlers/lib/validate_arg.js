@@ -1,12 +1,12 @@
-var argType = require('./arg_type');
-var _ = require('lodash');
+const argType = require('./arg_type');
+const _ = require('lodash');
 
 module.exports = function (functionDef) {
   return function validateArg(value, name, argDef) {
-    var type = argType(value);
-    var required = argDef.types;
-    var multi = argDef.multi;
-    var isCorrectType = (function () {
+    const type = argType(value);
+    const required = argDef.types;
+    const multi = argDef.multi;
+    const isCorrectType = (function () {
       // If argument is not allow to be specified multiple times, we're dealing with a plain value for type
       if (!multi) return _.contains(required, type);
       // If it is, we'll get an array for type

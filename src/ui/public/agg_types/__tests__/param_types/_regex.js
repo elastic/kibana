@@ -23,7 +23,7 @@ describe('Regex', function () {
 
   describe('constructor', function () {
     it('should be an instance of BaseAggParam', function () {
-      let aggParam = new RegexAggParam({
+      const aggParam = new RegexAggParam({
         name: 'some_param',
         type: 'regex'
       });
@@ -36,14 +36,14 @@ describe('Regex', function () {
   describe('write results', function () {
     let aggParam;
     let aggConfig;
-    let output = { params: {} };
-    let paramName = 'exclude';
+    const output = { params: {} };
+    const paramName = 'exclude';
 
     beforeEach(function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
         ]
       });
       aggConfig = vis.aggs[0];

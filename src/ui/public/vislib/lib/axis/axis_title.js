@@ -10,7 +10,7 @@ export default function AxisTitleFactory(Private) {
 
     render() {
       d3.select(this.axisConfig.get('rootEl')).selectAll(this.elSelector).call(this.draw());
-    };
+    }
 
     draw() {
       const config = this.axisConfig;
@@ -47,7 +47,7 @@ export default function AxisTitleFactory(Private) {
           }
         });
       };
-    };
+    }
   }
   return AxisTitle;
-};
+}

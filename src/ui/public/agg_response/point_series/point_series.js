@@ -7,23 +7,23 @@ import AggResponsePointSeriesOrderedDateAxisProvider from 'ui/agg_response/point
 import AggResponsePointSeriesTooltipFormatterProvider from 'ui/agg_response/point_series/_tooltip_formatter';
 export default function PointSeriesProvider(Private) {
 
-  let getSeries = Private(AggResponsePointSeriesGetSeriesProvider);
-  let getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
-  let initYAxis = Private(AggResponsePointSeriesInitYAxisProvider);
-  let initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
-  let setupOrderedDateXAxis = Private(AggResponsePointSeriesOrderedDateAxisProvider);
-  let tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
+  const getSeries = Private(AggResponsePointSeriesGetSeriesProvider);
+  const getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
+  const initYAxis = Private(AggResponsePointSeriesInitYAxisProvider);
+  const initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
+  const setupOrderedDateXAxis = Private(AggResponsePointSeriesOrderedDateAxisProvider);
+  const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
 
   return function pointSeriesChartDataFromTable(vis, table) {
-    let chart = {};
-    let aspects = chart.aspects = getAspects(vis, table);
+    const chart = {};
+    const aspects = chart.aspects = getAspects(vis, table);
 
     chart.tooltipFormatter = tooltipFormatter;
 
     initXAxis(chart);
     initYAxis(chart);
 
-    let datedX = aspects.x.agg.type.ordered && aspects.x.agg.type.ordered.date;
+    const datedX = aspects.x.agg.type.ordered && aspects.x.agg.type.ordered.date;
     if (datedX) {
       setupOrderedDateXAxis(vis, chart);
     }
@@ -33,4 +33,4 @@ export default function PointSeriesProvider(Private) {
     delete chart.aspects;
     return chart;
   };
-};
+}

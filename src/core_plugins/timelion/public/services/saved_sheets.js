@@ -1,6 +1,6 @@
 define(function (require) {
-  var module = require('ui/modules').get('app/sheet');
-  var _ = require('lodash');
+  const module = require('ui/modules').get('app/sheet');
+  const _ = require('lodash');
   // bring in the factory
   require('./_saved_sheet.js');
 
@@ -30,7 +30,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return kbnUrl.eval('#/{{id}}', {id: id});
+      return kbnUrl.eval('#/{{id}}', { id: id });
     };
 
     this.delete = function (ids) {
@@ -41,8 +41,8 @@ define(function (require) {
     };
 
     this.find = function (searchString) {
-      var self = this;
-      var body;
+      const self = this;
+      let body;
       if (searchString) {
         body = {
           query: {
@@ -54,7 +54,7 @@ define(function (require) {
           }
         };
       } else {
-        body = { query: {match_all: {}}};
+        body = { query: { match_all: {} } };
       }
 
       return es.search({
@@ -67,7 +67,7 @@ define(function (require) {
         return {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
-            var source = hit._source;
+            const source = hit._source;
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
             return source;

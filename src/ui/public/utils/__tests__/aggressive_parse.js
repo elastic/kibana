@@ -58,11 +58,11 @@ describe('aggressiveParse', () => {
 
     context('with arity of 3', () => {
       beforeEach(() => {
-        result = aggressiveParse.toJson({foo: 'bar'}, undefined, 2);
+        result = aggressiveParse.toJson({ foo: 'bar' }, undefined, 2);
       });
 
       it('formats the json string with the number of spaces given', () => {
-        const formattedJson = JSON.stringify({foo: 'bar'}, null, 2);
+        const formattedJson = JSON.stringify({ foo: 'bar' }, null, 2);
         expect(result).to.be(formattedJson);
       });
     });

@@ -20,4 +20,4 @@ export function visualizationLoaderProvider(savedVisualizations, Private) { // I
       };
     });
   };
-};
+}

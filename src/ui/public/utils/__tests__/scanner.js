@@ -41,8 +41,8 @@ describe('Scanner', function () {
     let search;
     let scroll;
     let scanner;
-    let mockSearch = {'_scroll_id':'abc','took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':[]}}; // eslint-disable-line max-len
-    let mockScroll = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one', 'two']}}; // eslint-disable-line max-len
+    const mockSearch = { '_scroll_id':'abc','took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':[] } }; // eslint-disable-line max-len
+    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one', 'two'] } }; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(es, {
@@ -85,7 +85,7 @@ describe('Scanner', function () {
     });
 
     it('should only return the requested number of documents', function () {
-      return scanner.scanAndMap(null, {docCount: 1}, function (hit) {
+      return scanner.scanAndMap(null, { docCount: 1 }, function (hit) {
         return hit.toUpperCase();
       })
       .then(function (response) {
@@ -96,9 +96,9 @@ describe('Scanner', function () {
 
     it('should scroll across multiple pages', function () {
       scroll.restore();
-      let oneResult = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one']}}; // eslint-disable-line max-len
+      const oneResult = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one'] } }; // eslint-disable-line max-len
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, oneResult));
-      return scanner.scanAndMap(null, {pageSize: 1})
+      return scanner.scanAndMap(null, { pageSize: 1 })
       .then(function (response) {
         expect(scroll.calledTwice);
         expect(response.hits.length).to.be(2);

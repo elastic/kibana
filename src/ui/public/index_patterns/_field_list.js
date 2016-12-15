@@ -2,7 +2,7 @@ import IndexedArray from 'ui/indexed_array';
 import _ from 'lodash';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 export default function FieldListProvider(Private) {
-  let Field = Private(IndexPatternsFieldProvider);
+  const Field = Private(IndexPatternsFieldProvider);
 
   _.class(FieldList).inherits(IndexedArray);
   function FieldList(indexPattern, specs) {
@@ -16,4 +16,4 @@ export default function FieldListProvider(Private) {
   }
 
   return FieldList;
-};
+}

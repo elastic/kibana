@@ -5,7 +5,7 @@
 @global-nav-logo-height: 70px;
 
 .global-nav {
-  width: @as-closed-width;
+  width: @global-nav-closed-width;
   position: fixed;
   left: 0;
   top: 0;
@@ -15,21 +15,21 @@
   overflow: hidden;
 
   &.is-global-nav-open {
-    width: @as-open-width;
+    width: @global-nav-open-width;
 
     .app-title {
       display: inline-block;
     }
 
     + .app-wrapper {
-      left: @as-open-width;
+      left: @global-nav-open-width;
     }
   }
 
   .logo-small,
   .logo {
     height: @global-nav-logo-height;
-    width: @as-open-width;
+    width: @global-nav-open-width;
     list-style-type: none;
     &.kibana {
       background-image: url("~ui/images/kibana.svg");

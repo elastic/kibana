@@ -7,16 +7,16 @@ import 'ui/directives/auto_select_if_only_one';
 describe('Auto-select if only one directive', function () {
   let $compile;
   let $rootScope;
-  let zeroOptions = [];
-  let oneOption = [{label: 'foo'}];
-  let multiOptions = [{label: 'foo'}, {label: 'bar'}];
+  const zeroOptions = [];
+  const oneOption = [{ label: 'foo' }];
+  const multiOptions = [{ label: 'foo' }, { label: 'bar' }];
 
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
     $compile = _$compile_;
     $rootScope = _$rootScope_;
-    let html = '<select ng-model="value" ng-options="option.name for option in options" auto-select-if-only-one="options"></select>';
+    const html = '<select ng-model="value" ng-options="option.name for option in options" auto-select-if-only-one="options"></select>';
     $compile(html)($rootScope);
     $rootScope.value = null;
   }));
@@ -41,7 +41,7 @@ describe('Auto-select if only one directive', function () {
 
   it('should still auto select if the collection contains 2 items but is filtered to 1', function () {
     $rootScope.options = multiOptions;
-    let html = '<select ng-model="value" ng-options="option.name for option in options | filter:{label:\'bar\'}" ' +
+    const html = '<select ng-model="value" ng-options="option.name for option in options | filter:{label:\'bar\'}" ' +
     'auto-select-if-only-one="options | filter:{label:\'bar\'}"></select>';
     $compile(html)($rootScope);
     $rootScope.value = null;

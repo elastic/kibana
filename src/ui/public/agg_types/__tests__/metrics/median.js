@@ -17,7 +17,7 @@ describe('AggTypeMetricMedianProvider class', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     aggTypeMetricMedian = Private(AggTypeMetricMedianProvider);
 
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       'title': 'New Visualization',
       'type': 'metric',
       'params': {
@@ -42,7 +42,7 @@ describe('AggTypeMetricMedianProvider class', function () {
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
-    let aggConfig = vis.aggs[0];
+    const aggConfig = vis.aggs[0];
     aggDsl = aggConfig.toDsl();
   }));
 

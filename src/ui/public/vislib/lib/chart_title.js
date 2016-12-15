@@ -21,7 +21,7 @@ export default function ChartTitleFactory(Private) {
       const height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
-    };
+    }
 
     truncate(size) {
       const self = this;
@@ -49,13 +49,13 @@ export default function ChartTitleFactory(Private) {
           return text.text();
         });
       };
-    };
+    }
 
     addMouseEvents(target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
-    };
+    }
 
     draw(width, height) {
       const self = this;
@@ -88,8 +88,8 @@ export default function ChartTitleFactory(Private) {
           div.selectAll('text').call(self.truncate(size));
         });
       };
-    };
+    }
   }
 
   return ChartTitle;
-};
+}

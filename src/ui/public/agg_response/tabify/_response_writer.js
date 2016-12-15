@@ -4,9 +4,9 @@ import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import AggResponseTabifyGetColumnsProvider from 'ui/agg_response/tabify/_get_columns';
 export default function TabbedAggResponseWriterProvider(Private) {
-  let Table = Private(AggResponseTabifyTableProvider);
-  let TableGroup = Private(AggResponseTabifyTableGroupProvider);
-  let getColumns = Private(AggResponseTabifyGetColumnsProvider);
+  const Table = Private(AggResponseTabifyTableProvider);
+  const TableGroup = Private(AggResponseTabifyTableGroupProvider);
+  const getColumns = Private(AggResponseTabifyGetColumnsProvider);
 
 
   _.class(SplitAcr).inherits(AggConfigResult);
@@ -25,7 +25,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
     this.opts = opts || {};
     this.rowBuffer = [];
 
-    let visIsHier = vis.isHierarchical();
+    const visIsHier = vis.isHierarchical();
 
     // do the options allow for splitting? we will only split if true and
     // tabify calls the split method.
@@ -67,9 +67,9 @@ export default function TabbedAggResponseWriterProvider(Private) {
    * @return {Table/TableGroup} table - the created table
    */
   TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
-    let Class = (group) ? TableGroup : Table;
-    let table = new Class();
-    let parent = this.splitStack[0];
+    const Class = (group) ? TableGroup : Table;
+    const table = new Class();
+    const parent = this.splitStack[0];
 
     if (group) {
       table.aggConfig = agg;
@@ -95,7 +95,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
    * @param  {function} block - a function to execute for each sub bucket
    */
   TabbedAggResponseWriter.prototype.split = function (agg, buckets, block) {
-    let self = this;
+    const self = this;
 
     if (!self.canSplit) {
       throw new Error('attempted to split when splitting is disabled');
@@ -127,7 +127,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
   };
 
   TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
-    let i = _.findIndex(this.columns, function (col) {
+    const i = _.findIndex(this.columns, function (col) {
       return col.aggConfig === agg;
     });
 
@@ -140,8 +140,8 @@ export default function TabbedAggResponseWriterProvider(Private) {
 
     // hierarchical vis creats additional columns for each bucket
     // we will remove those too
-    let mCol = this.columns.splice(i, 1).pop();
-    let mI = _.findIndex(this.aggStack, function (agg) {
+    const mCol = this.columns.splice(i, 1).pop();
+    const mI = _.findIndex(this.aggStack, function (agg) {
       return agg === mCol.aggConfig;
     });
 
@@ -160,8 +160,8 @@ export default function TabbedAggResponseWriterProvider(Private) {
    * @return {SplitAcr} - the AggConfigResult created for the split bucket
    */
   TabbedAggResponseWriter.prototype._injectParentSplit = function (agg, key) {
-    let oldList = this.acrStack;
-    let newList = this.acrStack = [];
+    const oldList = this.acrStack;
+    const newList = this.acrStack = [];
 
     // walk from right to left through the old stack
     // and move things to the new stack
@@ -175,7 +175,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
 
     // walk from right to left, emptying the previous list
     while (oldList.length) {
-      let acr = oldList.pop();
+      const acr = oldList.pop();
 
       // ignore other splits
       if (acr instanceof SplitAcr) {
@@ -189,11 +189,11 @@ export default function TabbedAggResponseWriterProvider(Private) {
         newList.unshift(injected);
       }
 
-      let newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
+      const newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
       newList.unshift(newAcr);
 
       // and replace the acr in the row buffer if its there
-      let rowI = this.rowBuffer.indexOf(acr);
+      const rowI = this.rowBuffer.indexOf(acr);
       if (rowI > -1) {
         this.rowBuffer[rowI] = newAcr;
       }
@@ -215,7 +215,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
       value = new AggConfigResult(agg, this.acrStack[0], value, value);
     }
 
-    let staskResult = this.asAggConfigResults && value.type === 'bucket';
+    const staskResult = this.asAggConfigResults && value.type === 'bucket';
 
     this.rowBuffer.push(value);
     if (staskResult) this.acrStack.unshift(value);
@@ -237,14 +237,14 @@ export default function TabbedAggResponseWriterProvider(Private) {
    * @return {undefined}
    */
   TabbedAggResponseWriter.prototype.row = function (buffer) {
-    let cells = buffer || this.rowBuffer.slice(0);
+    const cells = buffer || this.rowBuffer.slice(0);
 
     if (!this.partialRows && cells.length < this.columns.length) {
       return;
     }
 
-    let split = this.splitStack[0];
-    let table = split.tables[0] || this._table(false);
+    const split = this.splitStack[0];
+    const table = split.tables[0] || this._table(false);
 
     while (cells.length < this.columns.length) cells.push('');
     table.rows.push(cells);
@@ -257,7 +257,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
    * @return {object} - the final table-tree
    */
   TabbedAggResponseWriter.prototype.response = function () {
-    let columns = this.columns;
+    const columns = this.columns;
 
     // give the columns some metadata
     columns.map(function (col) {
@@ -272,7 +272,7 @@ export default function TabbedAggResponseWriterProvider(Private) {
 
     if (this.canSplit) return this.root;
 
-    let table = this.root.tables[0];
+    const table = this.root.tables[0];
     if (!table) return;
 
     delete table.$parent;
@@ -280,4 +280,4 @@ export default function TabbedAggResponseWriterProvider(Private) {
   };
 
   return TabbedAggResponseWriter;
-};
+}

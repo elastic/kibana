@@ -26,4 +26,4 @@ export class ConflictTracker {
       return indices;
     });
   }
-};
+}
