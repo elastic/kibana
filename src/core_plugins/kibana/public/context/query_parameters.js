@@ -1,4 +1,15 @@
+import _ from 'lodash';
+
+
 const MIN_CONTEXT_SIZE = 0;
+const QUERY_PARAMETER_KEYS = [
+  'anchorUid',
+  'columns',
+  'indexPattern',
+  'predecessorCount',
+  'successorCount',
+  'sort',
+];
 
 function QueryParameterActionCreatorsProvider(config) {
   const defaultSizeStep = parseInt(config.get('context:step'), 10);
@@ -7,6 +18,7 @@ function QueryParameterActionCreatorsProvider(config) {
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,
+    setQueryParameters,
     setSuccessorCount,
   };
 
@@ -37,10 +49,21 @@ function QueryParameterActionCreatorsProvider(config) {
       payload: value,
     };
   }
+
+  function setQueryParameters(queryParameters) {
+    return {
+      type: 'context/set_query_parameters',
+      payload: queryParameters,
+    };
+  }
 }
 
 function selectPredecessorCount(state) {
   return state.queryParameters.predecessorCount;
+}
+
+function selectQueryParameters(state) {
+  return state.queryParameters;
 }
 
 function selectSuccessorCount(state) {
@@ -57,6 +80,8 @@ function updateQueryParameters(state, action) {
       return { ...state, predecessorCount: Math.max(MIN_CONTEXT_SIZE, action.payload) };
     case 'context/set_successor_count':
       return { ...state, successorCount: Math.max(MIN_CONTEXT_SIZE, action.payload) };
+    case 'context/set_query_parameters':
+      return { ...state, ...(_.pick(action.payload, QUERY_PARAMETER_KEYS)) };
     default:
       return state;
   }
@@ -65,7 +90,9 @@ function updateQueryParameters(state, action) {
 
 export {
   QueryParameterActionCreatorsProvider,
+  QUERY_PARAMETER_KEYS,
   selectPredecessorCount,
+  selectQueryParameters,
   selectSuccessorCount,
   updateQueryParameters,
 };

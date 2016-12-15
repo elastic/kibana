@@ -15,11 +15,13 @@ function QueryActionCreatorsProvider($q, es, Private) {
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,
+    setQueryParameters,
     setSuccessorCount,
   } = Private(QueryParameterActionCreatorsProvider);
 
   return {
     fetchAllRows,
+    fetchAllRowsWithNewQueryParameters,
     fetchAnchorRow,
     fetchGivenPredecessorRows,
     fetchGivenSuccessorRows,
@@ -38,6 +40,13 @@ function QueryActionCreatorsProvider($q, es, Private) {
           dispatch(fetchSuccessorRows()),
         ])),
     });
+  }
+
+  function fetchAllRowsWithNewQueryParameters(queryParameters) {
+    return (dispatch) => {
+      dispatch(setQueryParameters(queryParameters));
+      return dispatch(fetchAllRows());
+    };
   }
 
   function fetchAnchorRow() {

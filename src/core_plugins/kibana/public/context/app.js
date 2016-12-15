@@ -11,7 +11,9 @@ import {
 } from './dispatch';
 import {
   QueryParameterActionCreatorsProvider,
+  QUERY_PARAMETER_KEYS,
   selectPredecessorCount,
+  selectQueryParameters,
   selectSuccessorCount,
   updateQueryParameters,
 } from './query_parameters';
@@ -41,25 +43,20 @@ module.directive('contextApp', function ContextApp() {
       anchorUid: '=',
       columns: '=',
       indexPattern: '=',
-      size: '=',
+      predecessorCount: '=',
+      successorCount: '=',
       sort: '=',
     },
     template: contextAppTemplate,
   };
 });
 
-function ContextAppController(Private) {
+function ContextAppController($scope, Private) {
   const createDispatch = Private(createDispatchProvider);
   const queryParameterActionCreators = Private(QueryParameterActionCreatorsProvider);
   const queryActionCreators = Private(QueryActionCreatorsProvider);
 
-  this.state = createInitialState(
-    this.anchorUid,
-    this.columns,
-    this.indexPattern,
-    this.size,
-    this.sort,
-  );
+  this.state = createInitialState();
 
   this.update = createPipeline(
     createScopedUpdater('queryParameters', updateQueryParameters),
@@ -91,18 +88,36 @@ function ContextAppController(Private) {
     ),
   };
 
-  this.actions.fetchAllRows();
+  /**
+   * Sync query parameters to arguments
+   */
+  $scope.$watchCollection(
+    () => _.pick(this, QUERY_PARAMETER_KEYS),
+    (newValues) => {
+      // break the watch cycle
+      if (!_.isEqual(newValues, selectQueryParameters(this.state))) {
+        this.dispatch(queryActionCreators.fetchAllRowsWithNewQueryParameters(newValues));
+      }
+    },
+  );
+
+  $scope.$watchCollection(
+    () => selectQueryParameters(this.state),
+    (newValues) => {
+      _.assign(this, newValues);
+    },
+  );
 }
 
-function createInitialState(anchorUid, columns, indexPattern, size, sort) {
+function createInitialState() {
   return {
     queryParameters: {
-      anchorUid,
-      columns,
-      indexPattern,
-      predecessorCount: size,
-      successorCount: size,
-      sort,
+      anchorUid: null,
+      columns: [],
+      indexPattern: null,
+      predecessorCount: 0,
+      successorCount: 0,
+      sort: [],
     },
     rows: {
       anchor: null,
