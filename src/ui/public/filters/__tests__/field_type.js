@@ -14,15 +14,15 @@ const init = function (expandable) {
   ngMock.module('kibana');
 
   types = [
-    {name: 's1', type: 'string'},
-    {name: 's2', type: 'string'},
-    {name: 's3', type: 'string'},
+    { name: 's1', type: 'string' },
+    { name: 's2', type: 'string' },
+    { name: 's3', type: 'string' },
 
-    {name: 'n1', type: 'number'},
-    {name: 'n2', type: 'number'},
+    { name: 'n1', type: 'number' },
+    { name: 'n2', type: 'number' },
 
-    {name: 'i1', type: 'ip'},
-    {name: 'd1', type: 'date'},
+    { name: 'i1', type: 'ip' },
+    { name: 'd1', type: 'date' },
   ];
 
   // Create the scope

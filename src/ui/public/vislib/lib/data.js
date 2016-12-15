@@ -184,7 +184,7 @@ export default function DataFactory(Private) {
           min: Math.min(props.min, minMax.min),
           max: Math.max(props.max, minMax.max)
         };
-      }, {min: Infinity, max: -Infinity});
+      }, { min: Infinity, max: -Infinity });
     }
 
     /**

@@ -79,11 +79,11 @@ uiModules.get('kibana')
       };
 
       $scope.filter = function (legendData, negate) {
-        clickHandler({point: legendData, negate: negate});
+        clickHandler({ point: legendData, negate: negate });
       };
 
       $scope.canFilter = function (legendData) {
-        const filters = clickHandler({point: legendData}, true) || [];
+        const filters = clickHandler({ point: legendData }, true) || [];
         return filters.length;
       };
 

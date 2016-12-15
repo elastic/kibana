@@ -45,7 +45,7 @@ function getFilesToVerify(verifyFilesPatterns) {
   return Promise.map(verifyFilesPatterns, (verifyFilesPattern) => {
     const baseSearchDir = path.dirname(verifyFilesPattern);
     const pattern = path.basename(verifyFilesPattern);
-    return globProm(pattern, {cwd: baseSearchDir, matchBase: true})
+    return globProm(pattern, { cwd: baseSearchDir, matchBase: true })
     .then(function (files) {
       for (const file of files) {
         filesToVerify.push(path.join(baseSearchDir, file));

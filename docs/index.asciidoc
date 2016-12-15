@@ -1,16 +1,16 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:version:        6.0.0-alpha1
-:major-version:  6.x
-:docker-image:   docker.elastic.co/kibana/kibana:{version}
-
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-
 :release-state:  unreleased
-:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/master/
+:version:        6.0.0-alpha1
+:major-version:  6.x
+:branch:         master
+
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
+:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
 :xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
 :repo:           https://github.com/elastic/kibana/
 :issue:          {repo}issues/
