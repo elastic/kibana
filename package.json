@@ -87,6 +87,7 @@
     "angular-elastic": "2.5.0",
     "angular-route": "1.4.7",
     "angular-sanitize": "1.5.7",
+    "angular-sortable-view": "0.0.15",
     "ansicolors": "0.3.2",
     "autoprefixer": "6.5.4",
     "autoprefixer-loader": "2.0.0",
