@@ -17,6 +17,7 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
+import { DashboardViewMode } from './dashboard_view_mode';
 import { getTopNavConfig } from './get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 import { DashboardConstants } from './dashboard_constants';
@@ -56,7 +57,7 @@ uiRoutes
   }
 });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, safeConfirm) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
@@ -107,7 +108,21 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.topNavMenu = getTopNavConfig(kbnUrl);
+      const changeViewMode = (newMode) => {
+        if ($appStatus.dirty && newMode === DashboardViewMode.VIEW) {
+          safeConfirm('You have unsaved changes to your dashboard that will be lost if you continue without saving.' +
+                      '\n\nDo you wish to continue?')
+            .then(() => {
+              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
+            }).catch();
+        } else {
+          $scope.dashboardViewMode = newMode;
+          $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+        }
+      };
+
+      // Brand new dashboards are defaulted to edit mode, existing ones default to view mode.
+      changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -202,7 +217,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
       $scope.getDashTitle = function () {
-        return dash.lastSavedTitle || `${dash.title} (unsaved)`;
+        const displayTitle = dash.lastSavedTitle || `${dash.title} (unsaved)`;
+        const isEditMode = $scope.dashboardViewMode === DashboardViewMode.EDIT;
+        return isEditMode ? 'Editing ' + displayTitle : displayTitle;
       };
 
       $scope.newDashboard = function () {
@@ -292,7 +309,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       init();
 
       $scope.showEditHelpText = () => {
-        return !$scope.state.panels.length;
+        return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.EDIT;
       };
     }
   };

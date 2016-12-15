@@ -4,6 +4,7 @@ import Binder from 'ui/binder';
 import 'gridster';
 import uiModules from 'ui/modules';
 import { PanelUtils } from 'plugins/kibana/dashboard/components/panel/lib/panel_utils';
+import { DashboardViewMode } from 'plugins/kibana/dashboard/dashboard_view_mode';
 
 const app = uiModules.get('app/dashboard');
 
@@ -69,13 +70,26 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           }
         }).data('gridster');
 
+        function setResizeCapability() {
+          if ($scope.dashboardViewMode === DashboardViewMode.VIEW) {
+            gridster.disable_resize();
+          } else {
+            gridster.enable_resize();
+          }
+        }
+
         // This is necessary to enable text selection within gridster elements
         // http://stackoverflow.com/questions/21561027/text-not-selectable-from-editable-div-which-is-draggable
         binder.jqOn($el, 'mousedown', function () {
           gridster.disable().disable_resize();
         });
         binder.jqOn($el, 'mouseup', function enableResize() {
-          gridster.enable().enable_resize();
+          gridster.enable();
+          setResizeCapability();
+        });
+
+        $scope.$watch('dashboardViewMode', () => {
+          setResizeCapability();
         });
 
         $scope.$watchCollection('state.panels', function (panels) {
@@ -168,6 +182,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   is-full-screen-mode="!chrome.getVisible()"
                   state="state"
                   is-expanded="false"
+                  dashboard-view-mode="dashboardViewMode"
                   toggle-expand="toggleExpandPanel(${panel.panelIndex})"
                   parent-ui-state="uiState">
             </li>`;

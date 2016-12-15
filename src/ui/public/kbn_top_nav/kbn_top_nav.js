@@ -101,15 +101,21 @@ module.directive('kbnTopNav', function (Private) {
 
       const extensions = getNavbarExtensions($attrs.name);
 
-      let controls = _.get($scope, $attrs.config, []);
-      if (controls instanceof KbnTopNavController) {
-        controls.addItems(extensions);
-      } else {
-        controls = controls.concat(extensions);
-      }
+      let initialized = false;
+      $scope.$watch(() => _.get($scope, $attrs.config, []), function (newValue, oldValue) {
+        if (initialized && _.isEqual(oldValue, newValue)) return;
 
-      $scope.kbnTopNav = new KbnTopNavController(controls);
-      $scope.kbnTopNav._link($scope, $element);
+        initialized = true;
+        let controls = newValue;
+        if (controls instanceof KbnTopNavController) {
+          controls.addItems(extensions);
+        } else {
+          controls = controls.concat(extensions);
+        }
+
+        $scope.kbnTopNav = new KbnTopNavController(controls);
+        $scope.kbnTopNav._link($scope, $element);
+      });
 
       return $scope.kbnTopNav;
     },

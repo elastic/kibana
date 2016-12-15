@@ -34,14 +34,16 @@ dashboard-grid {
   }
 
   .gs-w {
-    border: 2px dashed transparent;
+
+    .panel {
+      border: 2px dashed transparent;
+    }
 
     .panel .panel-heading .btn-group {
       display: none;
     }
 
     &:hover {
-      border-color: @kibanaGray4;
 
       dashboard-panel {
         .visualize-show-spy {
@@ -49,6 +51,9 @@ dashboard-grid {
         }
         .panel .panel-heading .btn-group {
           display: block !important;
+        }
+        .panel--edit-mode {
+          border-color: @kibanaGray4;
         }
       }
 

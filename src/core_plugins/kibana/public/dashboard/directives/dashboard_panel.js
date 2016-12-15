@@ -5,6 +5,7 @@ import { loadPanelProvider } from 'plugins/kibana/dashboard/components/panel/lib
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
+import { DashboardViewMode } from 'plugins/kibana/dashboard/dashboard_view_mode';
 
 uiModules
 .get('app/dashboard')
@@ -33,6 +34,11 @@ uiModules
     restrict: 'E',
     template: panelTemplate,
     scope: {
+      /**
+       * What view mode the dashboard is currently in - edit or view only.
+       * @type {DashboardViewMode}
+       */
+      dashboardViewMode: '=',
       /**
        * Whether or not the dashboard this panel is contained on is in 'full screen mode'.
        * @type {boolean}
@@ -115,6 +121,14 @@ uiModules
 
         $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
       });
+
+      /**
+       * Determines whether or not to show edit controls.
+       * @returns {boolean}
+       */
+      $scope.isViewOnlyMode = () => {
+        return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
+      };
     }
   };
 });
