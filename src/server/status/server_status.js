@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
+import {version} from '../../../package.json';
 
 module.exports = class ServerStatus {
   constructor(server) {
@@ -9,12 +10,21 @@ module.exports = class ServerStatus {
     this._created = {};
   }
 
-  create(name) {
-    return (this._created[name] = new Status(name, this.server));
+  create(id) {
+    const status = new Status(id, this.server);
+    this._created[status.id] = status;
+    return status;
+  }
+
+  createForPlugin(plugin) {
+    if (plugin.version === 'kibana') plugin.version = version;
+    const status = this.create(`plugin:${plugin.id}@${plugin.version}`);
+    status.plugin = plugin;
+    return status;
   }
 
   each(fn) {
-    let self = this;
+    const self = this;
     _.forOwn(self._created, function (status, i, list) {
       if (status.state !== 'disabled') {
         fn.call(self, status, i, list);
@@ -22,24 +32,38 @@ module.exports = class ServerStatus {
     });
   }
 
-  get(name) {
-    return this._created[name];
+  get(id) {
+    return this._created[id];
   }
 
-  getState(name) {
-    return _.get(this._created, [name, 'state'], 'uninitialized');
+  getForPluginId(pluginId) {
+    return _.find(this._created, s =>
+      s.plugin && s.plugin.id === pluginId
+    );
+  }
+
+  getState(id) {
+    const status = this.get(id);
+    if (!status) return undefined;
+    return status.state || 'uninitialized';
+  }
+
+  getStateForPluginId(pluginId) {
+    const status = this.getForPluginId(pluginId);
+    if (!status) return undefined;
+    return status.state || 'uninitialized';
   }
 
   overall() {
-    let state = _(this._created)
+    const state = _(this._created)
     .map(function (status) {
       return states.get(status.state);
     })
     .sortBy('severity')
     .pop();
 
-    let statuses = _.where(this._created, { state: state.id });
-    let since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
+    const statuses = _.where(this._created, { state: state.id });
+    const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
@@ -59,7 +83,7 @@ module.exports = class ServerStatus {
   }
 
   toString() {
-    let overall = this.overall();
+    const overall = this.overall();
     return `${overall.title} – ${overall.nickname}`;
   }
 

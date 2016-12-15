@@ -1,0 +1,38 @@
+@import "~ui/styles/variables.less";
+
+.suggestions {
+  left: 0;
+  width: 100% !important;
+  background-color: @body-bg;
+  color: @text-color;
+  border: 1px solid @input-border;
+  border-top: 2px solid @input-border;
+  border-radius: 0px 0px @border-radius-base @border-radius-base !important;
+  z-index: 10000;
+  max-height: 378px; // 5 suggestions
+  overflow-y: auto;
+
+  .suggestion {
+    border-bottom: 1px solid @gray-lighter;
+    padding: 5px 20px;
+
+    &:hover {
+      background-color: @gray-lighter;
+    }
+
+    &.active {
+      background-color: @gray-lighter;
+    }
+  }
+
+  .suggestion-details {
+    background-color: @body-bg;
+    padding: 10px;
+    border-radius: @border-radius-base;
+
+    > table {
+      color: @text-color;
+      margin-bottom: 0px;
+    }
+  }
+}

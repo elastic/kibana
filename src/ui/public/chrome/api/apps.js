@@ -8,6 +8,17 @@ module.exports = function (chrome, internals) {
   }
 
   internals.appUrlStore = internals.appUrlStore || window.sessionStorage;
+  try {
+    const verifySessionStorage = 'verify sessionStorage';
+    internals.appUrlStore.setItem(verifySessionStorage, 1);
+    internals.appUrlStore.removeItem(verifySessionStorage);
+  } catch (error) {
+    throw new Error(
+      'Kibana requires access to sessionStorage, and it looks like ' +
+      'your browser is restricting it. If you\'re ' +
+      'using Safari with private browsing enabled, you can solve this ' +
+      'problem by disabling private browsing, or by using another browser.');
+  }
 
   /**
    * ui/chrome apps API
@@ -50,6 +61,4 @@ module.exports = function (chrome, internals) {
   chrome.setLastUrlFor = function (appId, url) {
     internals.appUrlStore.setItem(`appLastUrl:${appId}`, url);
   };
-
-
 };

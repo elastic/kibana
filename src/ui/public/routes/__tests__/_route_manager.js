@@ -5,7 +5,7 @@ import RouteManager from 'ui/routes/route_manager';
 import expect from 'expect.js';
 
 let routes; // will contain an new instance of RouteManager for each test
-let chainableMethods = [
+const chainableMethods = [
   { name: 'when', args: ['', {}] },
   { name: 'otherwise', args: [{}] },
   { name: 'defaults', args: [/regexp/, {}] }
@@ -31,7 +31,7 @@ describe('routes/route_manager', function () {
 
   describe('#otherwise', function () {
     it('should forward the last otherwise route', function () {
-      let otherRoute = {};
+      const otherRoute = {};
       routes.otherwise({});
       routes.otherwise(otherRoute);
 
@@ -68,7 +68,7 @@ describe('routes/route_manager', function () {
 
   describe('#config', function () {
     it('should add defined routes to the global $routeProvider service in order', function () {
-      let args = [
+      const args = [
         ['/one', {}],
         ['/two', {}]
       ];
@@ -81,8 +81,8 @@ describe('routes/route_manager', function () {
 
       expect($rp.when.callCount).to.be(args.length);
       _.times(args.length, function (i) {
-        let call = $rp.when.getCall(i);
-        let a = args.shift();
+        const call = $rp.when.getCall(i);
+        const a = args.shift();
 
         expect(call.args[0]).to.be(a[0]);
         expect(call.args[1]).to.be(a[1]);
@@ -99,6 +99,18 @@ describe('routes/route_manager', function () {
       expect($rp.when.firstCall.args[1]).to.have.property('reloadOnSearch', false);
       expect($rp.when.secondCall.args[1]).to.have.property('reloadOnSearch', false);
       expect($rp.when.lastCall.args[1]).to.have.property('reloadOnSearch', true);
+    });
+
+    it('sets route.requireDefaultIndex to false by default', function () {
+      routes.when('/nothing-set');
+      routes.when('/no-index-required', { requireDefaultIndex: false });
+      routes.when('/index-required', { requireDefaultIndex: true });
+      routes.config($rp);
+
+      expect($rp.when.callCount).to.be(3);
+      expect($rp.when.firstCall.args[1]).to.have.property('requireDefaultIndex', false);
+      expect($rp.when.secondCall.args[1]).to.have.property('requireDefaultIndex', false);
+      expect($rp.when.lastCall.args[1]).to.have.property('requireDefaultIndex', true);
     });
   });
 });

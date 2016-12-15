@@ -1,37 +1,17 @@
-let marked = require('marked');
-let Promise = require('bluebird');
-let { join } = require('path');
-let TextRenderer = require('marked-text-renderer');
-let _ = require('lodash');
-let fs = require('fs');
-let { AllHtmlEntities } = require('html-entities');
-let entities = new AllHtmlEntities();
-
-TextRenderer.prototype.heading = function (text, level, raw) {
-  return '\n\n' + text + '\n' + _.map(text, function () { return '='; }).join('') + '\n';
-};
+const marked = require('marked');
+const Promise = require('bluebird');
+const { join } = require('path');
+const _ = require('lodash');
+const fs = require('fs');
 
 module.exports = function (grunt) {
-
   grunt.registerTask('_build:readme', function () {
-    let transform = function (input) {
-      let output = input.replace(/<\!\-\- [^\-]+ \-\->/g, '\n');
-      output = marked(output);
-      return entities.decode(output);
-    };
+    function transformReadme(readme) {
+      return readme.replace(/\s##\sSnapshot\sBuilds[\s\S]*/, '');
+    }
 
-    marked.setOptions({
-      renderer: new TextRenderer(),
-      tables: true,
-      breaks: false,
-      pedantic: false,
-      sanitize: false,
-      smartLists: true,
-      smartypants: false
-    });
-
-    grunt.file.write('build/kibana/README.txt', transform(grunt.file.read('README.md')));
-    grunt.file.write('build/kibana/LICENSE.txt', transform(grunt.file.read('LICENSE.md')));
+    grunt.file.copy('LICENSE.md', 'build/kibana/LICENSE.txt');
+    grunt.file.write('build/kibana/README.txt', transformReadme(grunt.file.read('README.md')));
   });
 
 };

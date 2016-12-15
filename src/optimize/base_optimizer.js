@@ -12,7 +12,7 @@ import { inherits } from 'util';
 import { defaults, transform } from 'lodash';
 import { resolve } from 'path';
 import { writeFile } from 'fs';
-let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 import pkg from '../../package.json';
 
 class BaseOptimizer {
@@ -47,14 +47,14 @@ class BaseOptimizer {
   async initCompiler() {
     if (this.compiler) return this.compiler;
 
-    let compilerConfig = this.getConfig();
+    const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
     this.compiler.plugin('done', stats => {
       if (!this.profile) return;
 
-      let path = resolve(this.env.workingDir, 'stats.json');
-      let content = JSON.stringify(stats.toJson());
+      const path = resolve(this.env.workingDir, 'stats.json');
+      const content = JSON.stringify(stats.toJson());
       writeFile(path, content, function (err) {
         if (err) throw err;
       });
@@ -64,8 +64,8 @@ class BaseOptimizer {
   }
 
   getConfig() {
-    let mapQ = this.sourceMaps ? '?sourceMap' : '';
-    let mapQPre = mapQ ? mapQ + '&' : '?';
+    const mapQ = this.sourceMaps ? '?sourceMap' : '';
+    const mapQPre = mapQ ? mapQ + '&' : '?';
 
     return {
       context: fromRoot('.'),
@@ -108,13 +108,20 @@ class BaseOptimizer {
               `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
             )
           },
+          {
+            test: /\.scss$/,
+            loader: ExtractTextPlugin.extract(
+              'style',
+              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!sass${mapQPre}`
+            )
+          },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
           { test: /\.jade$/, loader: 'jade' },
           { test: /\.json$/, loader: 'json' },
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
-          { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
+          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
           {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
@@ -177,7 +184,7 @@ class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    let statFormatOpts = {
+    const statFormatOpts = {
       hash: false,  // add the hash of the compilation
       version: false,  // add webpack version information
       timings: false,  // add timing information
@@ -196,7 +203,7 @@ class BaseOptimizer {
       children: false,
     };
 
-    let details = stats.toString(defaults({ colors: true }, statFormatOpts));
+    const details = stats.toString(defaults({ colors: true }, statFormatOpts));
 
     return Boom.create(
       500,

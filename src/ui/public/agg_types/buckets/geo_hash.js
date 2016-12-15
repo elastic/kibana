@@ -1,13 +1,32 @@
 import _ from 'lodash';
-import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
+import {geohashColumns} from 'ui/utils/decode_geo_hash';
+
 export default function GeoHashAggDefinition(Private, config) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let defaultPrecision = 2;
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const defaultPrecision = 2;
+  const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
+  /**
+   * Map Leaflet zoom levels to geohash precision levels.
+   * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
+   */
+  const zoomPrecision = {};
+  const minGeohashPixels = 16;
+  for (let zoom = 0; zoom <= 21; zoom += 1) {
+    const worldPixels = 256 * Math.pow(2, zoom);
+    zoomPrecision[zoom] = 1;
+    for (let precision = 2; precision <= maxPrecision; precision += 1) {
+      const columns = geohashColumns(precision);
+      if ((worldPixels / columns) >= minGeohashPixels) {
+        zoomPrecision[zoom] = precision;
+      } else {
+        break;
+      }
+    }
+  }
 
   function getPrecision(precision) {
-    let maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
 
     precision = parseInt(precision, 10);
 
@@ -45,19 +64,18 @@ export default function GeoHashAggDefinition(Private, config) {
       },
       {
         name: 'precision',
-        default: defaultPrecision,
         editor: precisionTemplate,
-        controller: function ($scope) {
-          $scope.$watchMulti([
-            'agg.params.autoPrecision',
-            'outputAgg.params.precision'
-          ], function (cur, prev) {
-            if (cur[1]) $scope.agg.params.precision = cur[1];
-          });
-        },
         deserialize: getPrecision,
+        controller: function ($scope) {
+        },
         write: function (aggConfig, output) {
-          output.params.precision = getPrecision(aggConfig.params.precision);
+          const vis = aggConfig.vis;
+          let currZoom;
+          if (vis.hasUiState()) {
+            currZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
+          }
+          const autoPrecisionVal = zoomPrecision[currZoom >= 0 ? currZoom : parseInt(vis.params.mapZoom)];
+          output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
       }
     ]

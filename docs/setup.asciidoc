@@ -1,106 +1,61 @@
 [[setup]]
-== Getting Kibana Up and Running
-You can set up Kibana and start exploring your Elasticsearch indices in minutes.
-All you need is:
+= Set Up Kibana
 
-* Elasticsearch {esversion}
-* A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
-* Information about your Elasticsearch installation:
-** URL of the Elasticsearch instance you want to connect to.
-** Which Elasticsearch indices you want to search.
+[partintro]
+--
+This section includes information on how to setup Kibana and get it running,
+including:
 
-NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[{scyld}], see
-{shield}/kibana.html#using-kibana4-with-shield[{scyld} with Kibana] for additional setup instructions.
+* Downloading
+* Installing
+* Starting
+* Configuring
+* Upgrading
+
+[[supported-platforms]]
+[float]
+== Supported platforms
+
+Packages of Kibana are provided for and tested against Linux, Darwin, and
+Windows. Since Kibana runs on Node.js, we include the necessary Node.js
+binaries for these platforms. Running Kibana against a separately maintained
+version of Node.js is not supported.
 
 [float]
-[[install]]
-=== Install and Start Kibana
+[[elasticsearch-version]]
+== Elasticsearch version
 
-To get Kibana up and running:
+Kibana should be configured to run against an Elasticsearch node of the same
+version. This is the officially supported configuration.
 
-. Download the https://www.elastic.co/downloads/kibana[Kibana {version} binary package] for your platform.
-. Extract the `.zip` or `tar.gz` archive file.
-. After installing, run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
+Running different major version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.x and Elasticsearch 2.x) is not supported, nor is running a minor
+version of Kibana that is newer than the version of Elasticsearch (e.g. Kibana
+5.1 and Elasticsearch 5.0).
 
-On Unix, you can instead run the package manager suited for your distribution.
+Running a minor version of Elasticsearch that is higher than Kibana will
+generally work in order to faciliate an upgrade process where Elasticsearch
+is upgraded first (e.g. Kibana 5.0 and Elasticsearch 5.1). In this
+configuration, a warning will be logged on Kibana server startup, so it's only
+meant to be temporary until Kibana is upgraded to the same version as
+Elasticsearch.
 
-////
-[float]
-include::kibana-repositories.asciidoc[]
-////
+Running different patch version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.0.0 and Elasticsearch 5.0.1) is generally supported, though we
+encourage users to run the same versions of Kibana and Elasticsearch down to
+the patch version.
+--
 
-That's it! Kibana is now running on port 5601.
+include::setup/install.asciidoc[]
 
-[float]
-[[kibana-dynamic-mapping]]
-==== Kibana and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {ref}dynamic-mapping.html[dynamic mapping] for fields. Kibana needs dynamic mapping
-to use fields in visualizations correctly, as well as to manage the `.kibana` index where saved searches,
-visualizations, and dashboards are stored.
+include::setup/settings.asciidoc[]
 
-If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide mappings for
-fields that Kibana uses to create visualizations. You also need to manually enable dynamic mapping for the `.kibana`
-index.
+include::setup/docker.asciidoc[]
 
-The following procedure assumes that the `.kibana` index does not already exist in Elasticsearch and that the
-`index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
+include::setup/access.asciidoc[]
 
-. Start Elasticsearch.
-. Create the `.kibana` index with dynamic mapping enabled just for that index:
-+
-[source,shell]
-PUT .kibana
-{
-	"index.mapper.dynamic": true
-}
-+
-. Start Kibana and navigate to the web UI and verify that there are no error messages related to dynamic mapping.
+include::setup/connect-to-elasticsearch.asciidoc[]
 
-[float]
-[[connect]]
-=== Connect Kibana with Elasticsearch
-Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore. The first time
-you access Kibana, you are prompted to define an _index pattern_ that matches the name of one or more of your indices.
-That's it. That's all you need to configure to start using Kibana. You can add index patterns at any time from the
-<<settings-create-pattern,Settings tab>>.
+include::setup/production.asciidoc[]
 
-TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a different
-Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibana. For
-information about using Kibana with your production nodes, see <<production>>.
-
-To configure the Elasticsearch indices you want to access with Kibana:
-
-. Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
-+
-image:images/Start-Page.png[Kibana start page]
-+
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
-guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case, you can use the
-default `logstash-*` as your index pattern. The asterisk (*) matches zero or more characters in an index's name. If
-your Elasticsearch indices follow some other naming convention, enter an appropriate pattern. The "pattern" can also
-simply be the name of a single index.
-. Select the index field that contains the timestamp that you want to use to perform time-based comparisons. Kibana
-reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data,
-disable the *Index contains time-based events* option.
-+
-WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Starting in the 2.1 
-release, Elasticsearch includes sophisticated date parsing APIs that Kibana uses to determine date information, 
-removing the need to specify dates in the index pattern name.
-+
-. Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default from *Settings > Indices*.
-
-All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for
-the matching index.
-
-[float]
-[[explore]]
-=== Start Exploring your Data!
-You're ready to dive in to your data:
-
-* Search and browse your data interactively from the <<discover, Discover>> page.
-* Chart and map your data from the <<visualize, Visualize>> page.
-* Create and view custom dashboards from the <<dashboard, Dashboard>> page.
-
-For a tutorial that explores these core Kibana concepts, take a look at the <<getting-started, Getting
-Started>> page.
+include::setup/upgrade.asciidoc[]

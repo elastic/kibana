@@ -27,6 +27,11 @@
         </tr>
       </thead>
       <tbody kbn-rows="page" kbn-rows-min="perPage"></tbody>
+      <tfoot ng-if="showTotal">
+        <tr>
+          <th ng-repeat="col in columns" class="numeric-value">{{col.total | number}}</th>
+        </tr>
+      </tfoot>
     </table>
   </div>
 

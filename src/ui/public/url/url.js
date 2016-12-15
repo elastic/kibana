@@ -2,13 +2,14 @@ import _ from 'lodash';
 import 'ui/filters/uriescape';
 import 'ui/filters/rison';
 import uiModules from 'ui/modules';
-
+import rison from 'rison-node';
+import AppStateProvider from 'ui/state_management/app_state';
 
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {
-  let self = this;
+function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
+  const self = this;
 
   /**
    * Navigate to a url
@@ -17,8 +18,8 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.change = function (url, paramObj) {
-    self._changeLocation('url', url, paramObj);
+  self.change = function (url, paramObj, appState) {
+    self._changeLocation('url', url, paramObj, false, appState);
   };
 
   /**
@@ -40,8 +41,8 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.redirect = function (url, paramObj) {
-    self._changeLocation('url', url, paramObj, true);
+  self.redirect = function (url, paramObj, appState) {
+    self._changeLocation('url', url, paramObj, true, appState);
   };
 
   /**
@@ -70,10 +71,10 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
 
     return template.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
       // remove filters
-      let key = expr.split('|')[0].trim();
+      const key = expr.split('|')[0].trim();
 
       // verify that the expression can be evaluated
-      let p = $parse(key)(paramObj);
+      const p = $parse(key)(paramObj);
 
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
@@ -109,7 +110,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @return {string} - the computed url
    */
   self.getRouteUrl = function (obj, route) {
-    let template = obj && obj.routes && obj.routes[route];
+    const template = obj && obj.routes && obj.routes[route];
     if (template) return self.eval(template, obj);
   };
 
@@ -142,8 +143,8 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
   /////
   let reloading;
 
-  self._changeLocation = function (type, url, paramObj, replace) {
-    let prev = {
+  self._changeLocation = function (type, url, paramObj, replace, appState) {
+    const prev = {
       path: $location.path(),
       search: $location.search()
     };
@@ -152,36 +153,48 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
     $location[type](url);
     if (replace) $location.replace();
 
-    let next = {
+    if (appState) {
+      $location.search(appState.getQueryParamName(), appState.toQueryParam());
+    }
+
+    const next = {
       path: $location.path(),
       search: $location.search()
     };
 
-    if (self._shouldAutoReload(next, prev)) {
-      let appState = getAppState();
-      if (appState) appState.destroy();
+    if ($injector.has('$route')) {
+      const $route = $injector.get('$route');
 
-      reloading = $rootScope.$on('$locationChangeSuccess', function () {
-        // call the "unlisten" function returned by $on
-        reloading();
-        reloading = false;
+      if (self._shouldForceReload(next, prev, $route)) {
+        const appState = Private(AppStateProvider).getAppState();
+        if (appState) appState.destroy();
 
-        $route.reload();
-      });
+        reloading = $rootScope.$on('$locationChangeSuccess', function () {
+          // call the "unlisten" function returned by $on
+          reloading();
+          reloading = false;
+
+          $route.reload();
+        });
+      }
     }
   };
 
-  self._shouldAutoReload = function (next, prev) {
+  // determine if the router will automatically reload the route
+  self._shouldForceReload = function (next, prev, $route) {
     if (reloading) return false;
 
-    let route = $route.current && $route.current.$$route;
+    const route = $route.current && $route.current.$$route;
     if (!route) return false;
 
-    if (next.path !== prev.path) return false;
+    // for the purposes of determining whether the router will
+    // automatically be reloading, '' and '/' are equal
+    const nextPath = next.path || '/';
+    const prevPath = prev.path || '/';
+    if (nextPath !== prevPath) return false;
 
-    let reloadOnSearch = route.reloadOnSearch;
-    let searchSame = _.isEqual(next.search, prev.search);
-
+    const reloadOnSearch = route.reloadOnSearch;
+    const searchSame = _.isEqual(next.search, prev.search);
     return (reloadOnSearch && searchSame) || !reloadOnSearch;
   };
 }

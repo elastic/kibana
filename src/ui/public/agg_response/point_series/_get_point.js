@@ -5,10 +5,10 @@ export default function PointSeriesGetPoint() {
   }
 
   return function getPoint(x, series, yScale, row, y, z) {
-    let zRow = z && row[z.i];
-    let xRow = row[x.i];
+    const zRow = z && row[z.i];
+    const xRow = row[x.i];
 
-    let point = {
+    const point = {
       x: unwrap(xRow, '_all'),
       xi: xRow && xRow.$order,
       y: unwrap(row[y.i]),
@@ -27,6 +27,11 @@ export default function PointSeriesGetPoint() {
     if (series) {
       point.aggConfig = series.agg;
       point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
+    } else if (y) {
+      // If the data is not split up with a series aspect, then
+      // each point's "series" becomes the y-agg that produced it
+      point.aggConfig = y.col.aggConfig;
+      point.series = y.col.title;
     }
 
     if (yScale) {

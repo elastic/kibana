@@ -1,0 +1,145 @@
+<discover-app class="app-container">
+  <!-- Local nav. -->
+  <kbn-top-nav name="discover" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <div data-transclude-slot="topLeftCorner" class="localBreadcrumbs">
+        <div class="localBreadcrumb">
+          <span ng-show="opts.savedSearch.id" class="localBreadcrumb__emphasis">
+            <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
+            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
+          </span>
+          <span data-test-subj="discoverQueryHits" class="localBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
+          <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
+        </div>
+      </div>
+
+      <!-- Search. -->
+      <form
+        data-transclude-slot="bottomRow"
+        class="fullWidth"
+        role="form"
+        name="discoverSearch"
+        ng-submit="fetch()"
+      >
+        <div class="typeahead" kbn-typeahead="discover">
+          <div class="localSearch">
+            <input
+              parse-query
+              input-focus
+              kbn-typeahead-input
+              ng-model="state.query"
+              placeholder="Search..."
+              aria-label="Search input"
+              type="text"
+              class="localSearchInput"
+              ng-class="{'localSearchInput-isInvalid': discoverSearch.$invalid}"
+            >
+            <button
+              type="submit"
+              aria-label="Search"
+              class="localSearchButton"
+              ng-disabled="discoverSearch.$invalid"
+            >
+              <span class="fa fa-search" aria-hidden="true"></span>
+            </button>
+          </div>
+          <kbn-typeahead-items></kbn-typeahead-items>
+        </div>
+      </form>
+    </div>
+  </kbn-top-nav>
+
+  <div class="container-fluid" role="main">
+    <div class="row">
+      <filter-bar state="state"></filter-bar>
+    </div>
+    <div class="row">
+      <div class="col-md-2 sidebar-container collapsible-sidebar">
+        <disc-field-chooser
+          columns="state.columns"
+          refresh="refreshFieldList"
+          hits="rows"
+          field-counts="fieldCounts"
+          filter="filterQuery"
+          index-pattern="searchSource.get('index')"
+          index-pattern-list="opts.indexPatternList"
+          state="state">
+        </disc-field-chooser>
+      </div>
+
+      <div class="discover-wrapper col-md-10">
+        <div class="discover-content">
+          <discover-no-results ng-show="resultState === 'none'"></discover-no-results>
+
+          <!-- loading -->
+          <div ng-show="resultState === 'loading'">
+            <div class="discover-overlay">
+              <h2>Searching</h2>
+              <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+            </div>
+          </div>
+
+          <!-- result -->
+          <div class="results" ng-show="resultState === 'ready'">
+            <div class="discover-timechart" ng-if="opts.timefield">
+              <header>
+                <center class="small">
+                  <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
+
+                  &mdash;
+
+                  <span class="results-interval" ng-hide="showInterval">
+                    <a
+                      ng-click="toggleInterval()">
+                      {{ intervalName }}
+                    </a>
+                  </span>
+
+                  <span ng-show="showInterval" class="results-interval form-inline">
+                    <select
+                      class="form-control"
+                      ng-model="state.interval"
+                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                      >
+                    </select>
+                  </span>
+                </center>
+
+              </header>
+
+              <visualize
+                 ng-if="vis && rows.length != 0"
+                 vis="vis"
+                 ui-state="uiState"
+                 es-resp="mergedEsResp"
+                 search-source="searchSource">
+               </visualize>
+            </div>
+
+            <div class="discover-table" fixed-scroll>
+              <doc-table
+                hits="rows"
+                index-pattern="indexPattern"
+                sorting="state.sort"
+                columns="state.columns"
+                infinite-scroll="true"
+                filter="filterQuery"
+                render-counter>
+              </doc-table>
+
+              <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
+                <center>
+                  These are the first {{opts.sampleSize}} documents matching
+                  your search, refine your search to see others.
+                  <a ng-click="toTop()" title="Back to top">Back to top.</a>
+                </center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</discover-app>

@@ -64,25 +64,62 @@ describe('KbnTopNavController', function () {
     });
 
     describe('hideButton:', function () {
-      it('defaults to false', function () {
+      it('defaults to a function that returns false', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        expect(pluck(controller.opts, 'hideButton')).to.eql([
-          false,
-          false
-        ]);
+        pluck(controller.opts, 'hideButton').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(false);
+        });
       });
 
-      it('excludes opts from opts when true', function () {
+      it('excludes opts from opts when set to true', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234', hideButton: true },
         ]);
 
         expect(controller.menuItems).to.have.length(1);
+      });
+
+      it('excludes opts from opts when set to a function that returns true', function () {
+        const controller = new KbnTopNavController([
+          { key: 'foo' },
+          { key: '1234', hideButton: () => true },
+        ]);
+
+        expect(controller.menuItems).to.have.length(1);
+      });
+    });
+
+    describe('disableButton:', function () {
+      it('defaults to a function that returns false', function () {
+        const controller = new KbnTopNavController([
+          { key: 'foo' },
+          { key: '1234' },
+        ]);
+
+        pluck(controller.opts, 'disableButton').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(false);
+        });
+      });
+    });
+
+    describe('tooltip:', function () {
+      it('defaults to a function that returns undefined', function () {
+        const controller = new KbnTopNavController([
+          { key: 'foo' },
+          { key: '1234' },
+        ]);
+
+        pluck(controller.opts, 'tooltip').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(undefined);
+        });
       });
     });
 
@@ -94,11 +131,11 @@ describe('KbnTopNavController', function () {
 
         const opt = controller.opts[0];
         expect(opt.run).to.be.a('function');
-        expect(controller.which()).to.not.be(opt.key);
+        expect(controller.getCurrent()).to.not.be(opt.key);
         opt.run(opt);
-        expect(controller.which()).to.be(opt.key);
+        expect(controller.getCurrent()).to.be(opt.key);
         opt.run(opt);
-        expect(controller.which()).to.not.be(opt.key);
+        expect(controller.getCurrent()).to.not.be(opt.key);
       });
 
       it('uses the supplied run function otherwise', function (done) { // eslint-disable-line mocha/handle-done-callback
@@ -112,82 +149,82 @@ describe('KbnTopNavController', function () {
     });
   });
 
-  describe('', function () {
+  describe('methods', function () {
     const init = function () {
       const controller = new KbnTopNavController([
         { key: 'foo', template: 'Say Foo!' },
         { key: 'bar', template: 'Whisper Bar' },
       ]);
       const render = sinon.spy(controller, '_render');
-      const set = sinon.spy(controller, 'set');
-      const is = sinon.spy(controller, 'is');
+      const setCurrent = sinon.spy(controller, 'setCurrent');
+      const getCurrent = sinon.spy(controller, 'getCurrent');
 
-      return { controller, render, set };
+      return { controller, render, setCurrent, getCurrent };
     };
 
-    describe('#set([key])', function () {
+    describe('#setCurrent([key])', function () {
       it('assigns the passed key to the current key', function () {
         const { controller } = init();
-        expect(controller.which()).to.not.be('foo');
-        controller.set('foo');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.not.be('foo');
+        controller.setCurrent('foo');
+        expect(controller.getCurrent()).to.be('foo');
       });
 
       it('throws if the key does not match a known template', function () {
         const { controller } = init();
         expect(function () {
-          controller.set('june');
+          controller.setCurrent('june');
         }).to.throwError(/unknown template key/);
       });
 
       it('sets to "null" for falsy values', function () {
         const { controller } = init();
 
-        controller.set();
-        expect(controller.which()).to.be(null);
+        controller.setCurrent();
+        expect(controller.getCurrent()).to.be(null);
 
-        controller.set(false);
-        expect(controller.which()).to.be(null);
+        controller.setCurrent(false);
+        expect(controller.getCurrent()).to.be(null);
 
-        controller.set(null);
-        expect(controller.which()).to.be(null);
+        controller.setCurrent(null);
+        expect(controller.getCurrent()).to.be(null);
 
-        controller.set('');
-        expect(controller.which()).to.be(null);
+        controller.setCurrent('');
+        expect(controller.getCurrent()).to.be(null);
       });
 
       it('rerenders after setting', function () {
         const { controller, render } = init();
 
         sinon.assert.notCalled(render);
-        controller.set('bar');
+        controller.setCurrent('bar');
         sinon.assert.calledOnce(render);
-        controller.set('bar');
+        controller.setCurrent('bar');
         sinon.assert.calledTwice(render);
       });
     });
 
-    describe('#is(key)', function () {
+    describe('#isCurrent(key)', function () {
       it('returns true when key matches', function () {
         const { controller } = init();
 
-        controller.set('foo');
-        expect(controller.is('foo')).to.be(true);
-        expect(controller.is('bar')).to.be(false);
+        controller.setCurrent('foo');
+        expect(controller.isCurrent('foo')).to.be(true);
+        expect(controller.isCurrent('bar')).to.be(false);
 
-        controller.set('bar');
-        expect(controller.is('bar')).to.be(true);
-        expect(controller.is('foo')).to.be(false);
+        controller.setCurrent('bar');
+        expect(controller.isCurrent('bar')).to.be(true);
+        expect(controller.isCurrent('foo')).to.be(false);
       });
     });
 
     describe('#open(key)', function () {
       it('alias for set', function () {
-        const { controller, set } = init();
+        const { controller, setCurrent } = init();
 
         controller.open('foo');
-        sinon.assert.calledOnce(set);
-        sinon.assert.calledWithExactly(set, 'foo');
+        sinon.assert.calledOnce(setCurrent);
+        sinon.assert.calledWithExactly(setCurrent, 'foo');
       });
     });
 
@@ -197,7 +234,7 @@ describe('KbnTopNavController', function () {
 
         controller.open('foo');
         controller.close();
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
       });
     });
 
@@ -205,23 +242,23 @@ describe('KbnTopNavController', function () {
       it('sets to null if key is open', function () {
         const { controller } = init();
 
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
         controller.close('foo');
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
         controller.open('foo');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.be('foo');
         controller.close('foo');
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
       });
 
       it('ignores if other key is open', function () {
         const { controller } = init();
 
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
         controller.open('foo');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.be('foo');
         controller.close('bar');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.be('foo');
       });
     });
 
@@ -229,28 +266,70 @@ describe('KbnTopNavController', function () {
       it('opens if closed', function () {
         const { controller } = init();
 
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
         controller.toggle('foo');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.be('foo');
       });
 
       it('opens if other is open', function () {
         const { controller } = init();
 
         controller.open('bar');
-        expect(controller.which()).to.be('bar');
+        expect(controller.getCurrent()).to.be('bar');
         controller.toggle('foo');
-        expect(controller.which()).to.be('foo');
+        expect(controller.getCurrent()).to.be('foo');
       });
 
       it('closes if open', function () {
         const { controller } = init();
 
         controller.open('bar');
-        expect(controller.which()).to.be('bar');
+        expect(controller.getCurrent()).to.be('bar');
         controller.toggle('bar');
-        expect(controller.which()).to.be(null);
+        expect(controller.getCurrent()).to.be(null);
       });
     });
+
+    describe('#addItems(opts)', function () {
+      it('should append to existing menu items', function () {
+        const { controller } = init();
+        const newItems = [
+          { key: 'green', template: 'Green means go' },
+          { key: 'red', template: 'Red means stop' },
+        ];
+
+        expect(controller.menuItems).to.have.length(2);
+        controller.addItems(newItems);
+        expect(controller.menuItems).to.have.length(4);
+
+        // check that the items were added
+        const matches = controller.menuItems.reduce((acc, item) => {
+          if (item.key === 'green' || item.key === 'red') {
+            acc[item.key] = item;
+          }
+          return acc;
+        }, {});
+        expect(matches).to.have.property('green');
+        expect(matches.green).to.have.property('run');
+        expect(matches).to.have.property('red');
+        expect(matches.red).to.have.property('run');
+      });
+
+      it('should take a single menu item object', function () {
+        const { controller } = init();
+        const newItem = { key: 'green', template: 'Green means go' };
+
+        expect(controller.menuItems).to.have.length(2);
+        controller.addItems(newItem);
+        expect(controller.menuItems).to.have.length(3);
+
+        // check that the items were added
+        const match = controller.menuItems.filter((item) => {
+          return item.key === 'green';
+        });
+        expect(match[0]).to.have.property('run');
+      });
+    });
+
   });
 });

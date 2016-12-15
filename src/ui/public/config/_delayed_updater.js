@@ -1,87 +1,68 @@
-import _ from 'lodash';
-import angular from 'angular';
-import ConfigValsProvider from 'ui/config/_vals';
-import Notifier from 'ui/notify/notifier';
+export default function DelayedUpdaterFactory($http, chrome, Promise) {
+  let unsavedChanges = {};
+  let unresolvedPromises = [];
+  let saveTimeout = null;
 
-export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
-  let notify = new Notifier();
+  return function delayedUpdate(key, value) {
+    unsavedChanges[key] = value;
 
-  let vals = Private(ConfigValsProvider);
-
-  return function DelayedUpdater(doc) {
-    let updater = this;
-    let queue = [];
-    let log = {};
-    let timer;
-
-    updater.fire = function () {
-      clearTimeout(timer);
-
-      // only fire once
-      if (updater.fired) return;
-      updater.fired = true;
-
-      let method;
-      let body;
-      let updated = [];
-      let deleted = [];
-
-      // seperate the log into lists
-      Object.keys(log).forEach(function (key) {
-        if (log[key] === 'updated') updated.push(key);
-        else deleted.push(key);
-      });
-
-      if (deleted.length) {
-        method = 'doIndex';
-        body = _.clone(vals);
-      } else {
-        method = 'doUpdate';
-        body = _.pick(vals, updated);
-      }
-
-      doc[method](vals)
-      .then(
-        function (resp) {
-          queue.forEach(function (q) { q.resolve(resp); });
-        },
-        function (err) {
-          queue.forEach(function (q) { q.reject(err); });
-        }
-      )
-      .finally(function () {
-        $rootScope.$broadcast('change:config', updated.concat(deleted));
-      });
-    };
-
-    updater.update = function (key, val, silentAndLocal) {
-      let newVal = val;
-      let oldVal = vals[key];
-
-      if (angular.equals(newVal, oldVal)) {
-        return Promise.resolve();
-      }
-      else if (newVal == null) {
-        delete vals[key];
-        log[key] = 'deleted';
-      }
-      else {
-        vals[key] = newVal;
-        log[key] = 'updated';
-      }
-
-      if (silentAndLocal) return Promise.resolve();
-
-      let defer = Promise.defer();
-      queue.push(defer);
-      notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
-      $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
-
-      // reset the fire timer
-      clearTimeout(timer);
-      timer = setTimeout(updater.fire, 200);
-      return defer.promise;
-    };
+    return new Promise(saveSoon)
+      .then(res => res.data.settings);
   };
 
+  function saveSoon(resolve, reject) {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    saveTimeout = setTimeout(fire, 200);
+    unresolvedPromises.push({ resolve, reject });
+  }
+
+  function fire() {
+    const changes = unsavedChanges;
+    const promises = unresolvedPromises;
+
+    unresolvedPromises = [];
+    unsavedChanges = {};
+
+    persist(changes)
+      .then(result => settle(promises, `resolve`, result))
+      .catch(reason => settle(promises, `reject`, reason));
+  }
+
+  function settle(listeners, decision, data) {
+    listeners.forEach(listener => listener[decision](data));
+  }
+
+  function persist(changes) {
+    const keys = Object.keys(changes);
+    if (keys.length === 1) {
+      const [key] = keys;
+      const value = changes[key];
+      const update = value === null ? remove : edit;
+      return update(key, value);
+    }
+    return editMany(changes);
+  }
+
+  function remove(key) {
+    return sync(`delete`, { postfix: `/${key}` });
+  }
+
+  function edit(key, value) {
+    return sync(`post`, { postfix: `/${key}`, data: { value } });
+  }
+
+  function editMany(changes) {
+    return sync(`post`, { data: { changes } });
+  }
+
+  function sync(method, { postfix = '', data } = {}) {
+    return $http({
+      method,
+      url: chrome.addBasePath(`/api/kibana/settings${postfix}`),
+      data
+    });
+  }
 };

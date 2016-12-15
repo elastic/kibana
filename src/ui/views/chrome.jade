@@ -1,5 +1,5 @@
-- var j = function (o) { return JSON.stringify(o); }
-- var appName = 'kibana';
+-
+  var appName = 'kibana';
 
 block vars
 
@@ -10,7 +10,100 @@ html(lang='en')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     meta(name='viewport', content='width=device-width')
     title Kibana
+    style.
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 300;
+        src: local('Open Sans Light'), local('OpenSans-Light'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_300.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Open Sans'), local('OpenSans'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_regular.svg#OpenSans') format('svg');
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 700;
+        src: local('Open Sans Bold'), local('OpenSans-Bold'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.woff2') format('woff2'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.woff') format('woff'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.ttf') format('truetype'),
+             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v13_latin_700.svg#OpenSans') format('svg');
+      }
+
+    //- Favicons (generated from http://realfavicongenerator.net/)
+    link(
+      rel='apple-touch-icon' sizes='180x180' href='#{kibanaPayload.basePath}/ui/favicons/apple-touch-icon.png'
+    )
+    link(
+      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-32x32.png' sizes='32x32'
+    )
+    link(
+      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-16x16.png' sizes='16x16'
+    )
+    link(
+      rel='manifest' href='#{kibanaPayload.basePath}/ui/favicons/manifest.json'
+    )
+    link(
+      rel='mask-icon' href='#{kibanaPayload.basePath}/ui/favicons/safari-pinned-tab.svg' color='#e8488b'
+    )
+    link(
+      rel='shortcut icon' href='#{kibanaPayload.basePath}/ui/favicons/favicon.ico'
+    )
+    meta(
+      name='msapplication-config' content='#{kibanaPayload.basePath}/ui/favicons/browserconfig.xml'
+    )
+    meta(
+      name='theme-color' content='#ffffff'
+    )
+
+    style.
+      .kibanaWelcomeView {
+        height: 100%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1 0 auto;
+            -ms-flex: 1 0 auto;
+                flex: 1 0 auto;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+            -ms-flex-pack: center;
+                justify-content: center;
+        background: #FFFFFF;
+      }
+
+      .kibanaWelcomeLogo {
+        width: 100%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 154.03 200.11"><title>Logo-KibanaIcon</title><path opacity="0.7" fill="%23fff" d="M479.29,273.54L557,179.94H403v75c1,0,1.92-.07,2.89-0.07A152.78,152.78,0,0,1,479.29,273.54Z" transform="translate(-402.99 -179.94)"/><polygon opacity="0.7" fill="%23fff" points="0 185.5 0 185.5 76.31 93.6 0 185.5"/><path opacity="0.7" fill="%23fff" d="M499.17,286.52l2.14,1.66C500.61,287.62,499.89,287.07,499.17,286.52Z" transform="translate(-402.99 -179.94)"/><path opacity="0.7" fill="%23fff" d="M493.27,282.19l1.22,0.87Z" transform="translate(-402.99 -179.94)"/><path opacity="0.7" fill="%23fff" d="M504.4,290.74l-74,89.32H556.81A153.4,153.4,0,0,0,504.4,290.74Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M492.54,281.67c-5.34-3.8-13.25-8.13-13.25-8.13a153.77,153.77,0,0,1,14,8.64Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M504.43,290.7s-1.16-1-3.11-2.51c1,0.83,2.06,1.69,3.08,2.55Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M494.49,283.06c1.59,1.12,3.15,2.29,4.69,3.47C497.81,285.49,496.23,284.31,494.49,283.06Z" transform="translate(-402.99 -179.94)"/><path opacity="0.5" fill="%23fff" d="M501.32,288.19l-2.14-1.66c-1.54-1.18-3.1-2.34-4.69-3.47l-1.22-.87a153.77,153.77,0,0,0-14-8.64L403,365.44v14.62h27.39l74-89.32C503.38,289.88,502.36,289,501.32,288.19Z" transform="translate(-402.99 -179.94)"/><path fill="%23fff" d="M405.87,254.85c-1,0-1.92.06-2.89,0.07V365.44l76.31-91.9A152.78,152.78,0,0,0,405.87,254.85Z" transform="translate(-402.99 -179.94)"/></svg>');
+      }
+
     block head
   body(kbn-chrome, id='#{appName}-body')
-    script window.__KBN__ = !{j(kibanaPayload)};
+    kbn-initial-state(data=JSON.stringify(kibanaPayload))
     block content

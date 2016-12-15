@@ -1,50 +1,63 @@
 module.exports = function (grunt) {
-  var readline = require('readline');
+  const readline = require('readline');
+  const url = require('url');
+  const fs = require('fs');
+  const path = require('path');
+  const _ = require('lodash');
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
     '_release:confirmUpload',
-    '_release:loadS3Config',
     'build',
-    's3:release',
+    '_release:loadS3Config',
+    'aws_s3:staging',
     '_release:complete'
   ]);
 
   grunt.registerTask('_release:confirmUpload', function () {
-    var rl = readline.createInterface({
+    const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });
 
     rl.on('close', this.async());
     rl.question('Do you want to actually upload the files to s3 after building?, [N/y] ', function (resp) {
-      var debug = resp.toLowerCase().trim()[0] !== 'y';
-      grunt.config.set('s3.release.debug', debug);
+      const debug = resp.toLowerCase().trim()[0] !== 'y';
+
+      grunt.config.set('aws_s3.staging.options.debug', debug);
+
       rl.close();
     });
   });
 
   // collect the key and secret from the .aws-config.json file, finish configuring the s3 task
   grunt.registerTask('_release:loadS3Config', function () {
-    var config = grunt.file.readJSON('.aws-config.json');
-    grunt.config('s3.options', {
-      key: config.key,
-      secret: config.secret
+    const config = grunt.file.readJSON('.aws-config.json');
+
+    grunt.config('aws_s3.options', {
+      accessKeyId: config.key,
+      secretAccessKey: config.secret,
+      bucket: config.bucket || grunt.config.get('aws_s3.config.bucket'),
+      region: config.region
     });
   });
 
   grunt.registerTask('_release:complete', function () {
-    grunt.log.ok('Builds released');
-    grunt.log.write(
-`
-${grunt.config.get('platforms').reduce((t, p) => {
-  return (
-`${t}https://download.elastic.co/kibana/kibana/${p.buildName}.tar.gz
-https://download.elastic.co/kibana/kibana/${p.buildName}.zip
-`
-  );
-}, '')}
-`
-);
+    const { sha, version } = grunt.config.get('build');
+    const config = grunt.config.get('aws_s3.staging.files');
+
+    grunt.log.ok('Builds uploaded');
+
+    fs.readdirSync('./target').forEach((file) => {
+      if (path.extname(file) !== '.txt') {
+        const link = url.format({
+          protocol: 'https',
+          hostname: 'download.elastic.co',
+          pathname: config[0].dest + file
+        });
+
+        grunt.log.writeln(link);
+      }
+    });
   });
 };

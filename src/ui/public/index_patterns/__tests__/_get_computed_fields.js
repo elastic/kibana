@@ -23,17 +23,16 @@ describe('get computed fields', function () {
   });
 
   it('should request all stored fields', function () {
-    expect(fn().fields).to.contain('*');
+    expect(fn().storedFields).to.contain('*');
   });
 
-  it('should request _source seperately', function () {
-    expect(fn().fields).to.contain('_source');
+  it('should request date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.contain('@timestamp');
+    expect(fn().docvalueFields).to.not.contain('bytes');
   });
 
-  it('should request date fields as fielddata_fields', function () {
-    expect(fn().fielddataFields).to.contain('@timestamp');
-    expect(fn().fielddataFields).to.not.include.keys('bytes');
+  it('should not request scripted date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.not.contain('script date');
   });
-
 
 });

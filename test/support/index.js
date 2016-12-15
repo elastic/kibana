@@ -1,48 +1,34 @@
+
 import url from 'url';
+
+import {
+  BddWrapper,
+  ElasticDump,
+  EsClient,
+} from './utils';
 import ScenarioManager from '../fixtures/scenario_manager';
-import Common from './pages/common';
-import DiscoverPage from './pages/discover_page';
-import SettingsPage from './pages/settings_page';
-import HeaderPage from './pages/header_page';
-import VisualizePage from './pages/visualize_page';
-import ShieldPage from './pages/shield_page';
+import PageObjects from './page_objects';
 
+// Intern values provided via the root index file of the test suite.
 const kbnInternVars = global.__kibana__intern__;
-
-exports.bdd = kbnInternVars.bdd;
 exports.intern = kbnInternVars.intern;
-exports.config = exports.intern.config;
-exports.defaultTimeout = exports.config.defaultTimeout;
-exports.defaultFindTimeout = exports.config.defaultFindTimeout;
-exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
+exports.bdd = new BddWrapper(kbnInternVars.bdd);
 
-defineDelayedExport('remote', (suite) => suite.remote);
-defineDelayedExport('common', () => new Common());
-defineDelayedExport('discoverPage', () => new DiscoverPage());
-defineDelayedExport('headerPage', () => new HeaderPage());
-defineDelayedExport('settingsPage', () => new SettingsPage());
-defineDelayedExport('visualizePage', () => new VisualizePage());
-defineDelayedExport('shieldPage', () => new ShieldPage());
+// Config options
+const config = exports.config = kbnInternVars.intern.config;
+exports.defaultTimeout = config.defaultTimeout;
+exports.defaultTryTimeout = config.defaultTryTimeout;
+exports.defaultFindTimeout = config.defaultFindTimeout;
 
-// creates an export for values that aren't actually avaialable until
-// until tests start to run. These getters will throw errors if the export
-// is accessed before it's available, hopefully making debugging easier.
-// Once the first before() handler is called the onEarliestBefore() handlers
-// will fire and rewrite all of these exports to be their correct value.
-function defineDelayedExport(name, define) {
-  Object.defineProperty(exports, name, {
-    configurable: true,
-    get() {
-      throw new TypeError(
-        'remote is not available until tests start to run. Move your ' +
-        'usage of the import inside a test setup hook or a test itself.'
-      );
-    }
-  });
+// Helper instances
+exports.scenarioManager =
+  new ScenarioManager(url.format(config.servers.elasticsearch));
+exports.elasticDump = new ElasticDump();
+exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
 
-  kbnInternVars.onEarliestBefore(function () {
-    Object.defineProperty(exports, name, {
-      value: define(this),
-    });
-  });
-}
+// TODO: We're using this facade to avoid breaking existing functionality as
+// we migrate test suites to the PageObject service. Once they're all migrated
+// over, we can delete this facade code.
+exports.init = function init(remote) {
+  exports.remote = remote;
+};

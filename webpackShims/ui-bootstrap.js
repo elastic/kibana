@@ -1,6 +1,6 @@
 define(function (require) {
   require('angular');
-  require('node_modules/@spalger/angular-bootstrap/ui-bootstrap-tpls');
+  require('ui/angular-bootstrap/index');
 
   return require('ui/modules')
   .get('kibana', ['ui.bootstrap'])

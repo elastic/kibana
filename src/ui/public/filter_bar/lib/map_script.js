@@ -14,7 +14,7 @@ define(function () {
           if (filter.meta.formattedValue) {
             value = filter.meta.formattedValue;
           } else {
-            value = filter.script.params.value;
+            value = filter.script.script.params.value;
             value = field.format.convert(value);
           }
 

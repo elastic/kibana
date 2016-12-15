@@ -8,7 +8,9 @@ import { readFileSync } from 'fs';
 
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
+import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
+import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -24,9 +26,13 @@ export default class BasePathProxy {
 
     const { cert } = config.get('server.ssl');
     if (cert) {
-      this.proxyAgent = new HttpsAgent({
-        ca: readFileSync(cert)
-      });
+      const httpsAgentConfig = {};
+      if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
+        httpsAgentConfig.rejectUnauthorized = false;
+      } else {
+        httpsAgentConfig.ca = readFileSync(cert);
+      }
+      this.proxyAgent = new HttpsAgent(httpsAgentConfig);
     }
 
     if (!this.basePath) {
@@ -34,8 +40,13 @@ export default class BasePathProxy {
       config.set('server.basePath', this.basePath);
     }
 
+    const ONE_GIGABYTE = 1024 * 1024 * 1024;
+    config.set('server.maxPayloadBytes', ONE_GIGABYTE);
+
     setupLogging(null, this.server, config);
     setupConnection(null, this.server, config);
+    registerHapiPlugins(null, this.server, config);
+
     this.setupRoutes();
   }
 
@@ -101,9 +112,10 @@ export default class BasePathProxy {
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;
-        const isApp = kbnPath.slice(0, 4) === 'app/';
+        const isApp = kbnPath.startsWith('app/');
+        const isKnownShortPath = ['login', 'logout', 'status'].includes(kbnPath);
 
-        if (isGet && isBasePath && isApp) {
+        if (isGet && isBasePath && (isApp || isKnownShortPath)) {
           return reply.redirect(`${basePath}/${kbnPath}`);
         }
 

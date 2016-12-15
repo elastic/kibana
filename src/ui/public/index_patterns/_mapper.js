@@ -1,25 +1,27 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
+import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
 import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 export default function MapperService(Private, Promise, es, config, kbnIndex) {
 
-  let transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
-  let intervals = Private(IndexPatternsIntervalsProvider);
-  let patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
+  const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
+  const intervals = Private(IndexPatternsIntervalsProvider);
+  const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
-  let LocalCache = Private(IndexPatternsLocalCacheProvider);
+  const LocalCache = Private(IndexPatternsLocalCacheProvider);
 
   function Mapper() {
 
     // Save a reference to mapper
-    let self = this;
+    const self = this;
 
     // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-    let fieldCache = self.cache = new LocalCache();
+    const fieldCache = self.cache = new LocalCache();
 
     /**
      * Gets an object containing all fields with their mappings
@@ -29,9 +31,9 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
      * @async
      */
     self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-      let id = indexPattern.id;
+      const id = indexPattern.id;
 
-      let cache = fieldCache.get(id);
+      const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
       if (!skipIndexPatternCache) {
@@ -49,16 +51,17 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         });
       }
 
-      let promise = Promise.resolve(id);
+      let indexList = id;
+      let promise = Promise.resolve();
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
           if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
         });
       }
 
-      return promise.then(function (indexList) {
+      return promise.then(function () {
         return es.indices.getFieldMapping({
           index: indexList,
           fields: '*',
@@ -69,6 +72,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
       })
       .catch(handleMissingIndexPattern)
       .then(transformMappingIntoFields)
+      .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
       .then(function (fields) {
         fieldCache.set(id, fields);
         return fieldCache.get(id);
@@ -81,7 +85,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
       })
       .then(function (resp) {
         // let all = Object.keys(resp).sort();
-        let all = _(resp)
+        const all = _(resp)
         .map(function (index, key) {
           if (index.aliases) {
             return [Object.keys(index.aliases), key];
@@ -94,8 +98,8 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         .uniq(true)
         .value();
 
-        let matches = all.filter(function (existingIndex) {
-          let parsed = moment(existingIndex, indexPattern.id);
+        const matches = all.filter(function (existingIndex) {
+          const parsed = moment(existingIndex, indexPattern.id);
           return existingIndex === parsed.format(indexPattern.id);
         });
 

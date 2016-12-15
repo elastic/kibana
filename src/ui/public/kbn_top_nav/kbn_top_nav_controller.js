@@ -1,6 +1,6 @@
-import { defaults, capitalize } from 'lodash';
+import { capitalize, isArray, isFunction } from 'lodash';
 
-import uiModules from 'ui/modules';
+import chrome from 'ui/chrome';
 import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
 
@@ -19,17 +19,27 @@ export default function ($compile) {
         filter: filterTemplate,
       };
 
-      opts.forEach(rawOpt => {
+      this.addItems(opts);
+    }
+
+    isVisible() {
+      return chrome.getVisible();
+    }
+
+    addItems(rawOpts) {
+      if (!isArray(rawOpts)) rawOpts = [rawOpts];
+
+      rawOpts.forEach((rawOpt) => {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
-        if (!opt.hideButton) this.menuItems.push(opt);
+        if (!opt.hideButton()) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
       });
     }
 
     // change the current key and rerender
-    set(key) {
+    setCurrent(key) {
       if (key && !this.templates.hasOwnProperty(key)) {
         throw new TypeError(`KbnTopNav: unknown template key "${key}"`);
       }
@@ -39,21 +49,31 @@ export default function ($compile) {
     }
 
     // little usability helpers
-    which() { return this.currentKey; }
-    is(key) { return this.which() === key; }
-    open(key) { this.set(key); }
-    close(key) { (!key || this.is(key)) && this.set(null); }
-    toggle(key) { this.set(this.is(key) ? null : key); }
-
+    getCurrent() { return this.currentKey; }
+    isCurrent(key) { return this.getCurrent() === key; }
+    open(key) { this.setCurrent(key); }
+    close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
+    toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
+    handleClick(menuItem) {
+      if (menuItem.disableButton()) {
+        return false;
+      }
+      menuItem.run(menuItem, this);
+    }
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
-      return defaults({}, opt, {
+      const defaultedOpt = Object.assign({
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        hideButton: !!opt.hideButton,
         run: (item) => this.toggle(item.key)
-      });
+      }, opt);
+
+      defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => !!opt.hideButton;
+      defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => !!opt.disableButton;
+      defaultedOpt.tooltip = isFunction(opt.tooltip) ? opt.tooltip : () => opt.tooltip;
+
+      return defaultedOpt;
     }
 
     // enable actual rendering

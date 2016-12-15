@@ -5,7 +5,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
   // didn't incorportate with the indexPattern cache to prevent id collisions.
   let cachedPromise;
 
-  let getIds = function () {
+  const getIds = function () {
     if (cachedPromise) {
       // retrun a clone of the cached response
       return cachedPromise.then(function (cachedResp) {
@@ -16,7 +16,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
     cachedPromise = es.search({
       index: kbnIndex,
       type: 'index-pattern',
-      fields: [],
+      storedFields: [],
       body: {
         query: { match_all: {} },
         size: 10000

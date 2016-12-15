@@ -106,20 +106,39 @@
 
 // AppSwitcher =================================================================
 @app-switcher-application-bg: @gray-lighter;
-@app-switcher-app-link-color: @white;
 @app-switcher-app-title-color: @text-color;
 @app-switcher-app-description-color: @gray;
 
 
-// Settings ====================================================================
-@settings-objects-list-border: @gray-lighter;
-@settings-objects-empty-color: @gray-light;
-@settings-objects-action-bar-bg: @gray-lighter;
+// Management ==================================================================
+@management-objects-list-border: @gray-lighter;
+@management-objects-empty-color: @gray-light;
+@management-objects-action-bar-bg: @gray-lighter;
 
-@settings-advanced-table-default-color: @input-color-placeholder;
+@management-advanced-table-default-color: @input-color-placeholder;
 
-@settings-indices-active-color: @btn-success-bg;
+@management-indices-active-color: @btn-success-bg;
 
+// Settings - Add Data Wizard
+@settings-add-data-wizard-step-heading-active-bg: @kibanaYellow2;
+@settings-add-data-wizard-step-heading-complete-bg: @kibanaBlue5;
+@settings-add-data-wizard-step-heading-incomplete-bg: @kibanaGray5;
+
+@settings-add-data-wizard-step-heading-active-color: @kibanaGray1;
+@settings-add-data-wizard-step-heading-complete-color: @kibanaBlue2;
+@settings-add-data-wizard-step-heading-incomplete-color: @kibanaGray2;
+
+@settings-add-data-wizard-form-control-bg: @kibanaBlue6;
+@settings-add-data-wizard-form-control-border: @kibanaBlue3;
+
+// Settings - Add Data Wizard - Pipeline Setup =================================
+@settings-filebeat-wizard-panel-bg: @kibanaGray6;
+@settings-filebeat-wizard-processor-select-bg: @kibanaBlue5;
+
+@settings-filebeat-wizard-processor-container-overlay-bg: fade(#000, 10%);
+
+// Settings - Add Data Wizard - Parse CSV
+@settings-add-data-wizard-parse-csv-container-border: @kibanaBlue3;
 
 // Visualize ===================================================================
 @visualize-show-spy-border: @gray-lighter;
@@ -323,11 +342,5 @@
 @as-closed-width: 53px;
 @app-icon-height: 38px;
 @app-line-height: 24px;
-@transition-time: .35s;
-@transition-delay: .25s;
 @app-links-wrapper-background: #3caed2;
-@app-links-active-background: lighten(@app-links-wrapper-background, 7.5%);
-
-@firstLinkColor: #E4BB51;
-@secondLinkColor: #8AC336;
-@thirdLinkColor: #59C6C5;
+@app-links-active-background: #2f99c1;

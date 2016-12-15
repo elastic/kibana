@@ -6,15 +6,21 @@ import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/cre
 import ipRangesTemplate from 'ui/agg_types/controls/ip_ranges.html';
 
 export default function RangeAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
 
   return new BucketAggType({
     name: 'ip_range',
     title: 'IPv4 Range',
     createFilter: createFilter,
+    getKey: function (bucket, key, agg) {
+      if (key) return key;
+      const from = _.get(bucket, 'from', '-Infinity');
+      const to = _.get(bucket, 'to', 'Infinity');
+      return `${from} to ${to}`;
+    },
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName + ' IP ranges';
+      return aggConfig.getFieldDisplayName() + ' IP ranges';
     },
     params: [
       {
@@ -38,8 +44,16 @@ export default function RangeAggDefinition(Private) {
         },
         editor: ipRangesTemplate,
         write: function (aggConfig, output) {
-          let ipRangeType = aggConfig.params.ipRangeType;
-          output.params.ranges = aggConfig.params.ranges[ipRangeType];
+          const ipRangeType = aggConfig.params.ipRangeType;
+          let ranges = aggConfig.params.ranges[ipRangeType];
+
+          if (ipRangeType === 'fromTo') {
+            ranges = _.map(ranges, (range) => {
+              return _.omit(range, _.isNull);
+            });
+          }
+
+          output.params.ranges = ranges;
         }
       }
     ]

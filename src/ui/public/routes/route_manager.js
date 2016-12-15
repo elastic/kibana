@@ -4,16 +4,16 @@ import wrapRouteWithPrep from './wrap_route_with_prep';
 import RouteSetupManager from './route_setup_manager';
 
 function RouteManager() {
-  let self = this;
-  let setup = new RouteSetupManager();
-  let when = [];
-  let defaults = [];
+  const self = this;
+  const setup = new RouteSetupManager();
+  const when = [];
+  const defaults = [];
   let otherwise;
 
   self.config = function ($routeProvider) {
     when.forEach(function (args) {
-      let path = args[0];
-      let route = args[1] || {};
+      const path = args[0];
+      const route = args[1] || {};
 
       // merge in any defaults
       defaults.forEach(function (args) {
@@ -26,6 +26,10 @@ function RouteManager() {
         route.reloadOnSearch = false;
       }
 
+      if (route.requireDefaultIndex === void 0) {
+        route.requireDefaultIndex = false;
+      }
+
       wrapRouteWithPrep(route, setup);
       $routeProvider.when(path, route);
     });
@@ -36,7 +40,7 @@ function RouteManager() {
     }
   };
 
-  let wrapSetupAndChain = (fn, ...args) => {
+  const wrapSetupAndChain = (fn, ...args) => {
     fn.apply(setup, args);
     return this;
   };

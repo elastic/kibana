@@ -1,30 +1,30 @@
-module.exports = function createServices(grunt) {
-  const { resolve } = require('path');
-  const { appendFileSync } = require('fs');
-  const exec = require('../utils/exec');
+import { resolve } from 'path';
+import { appendFileSync } from 'fs';
+import exec from '../utils/exec';
+import { capitalize } from 'lodash';
+
+export default (grunt) => {
   const userScriptsDir = grunt.config.get('userScriptsDir');
+  const { path, user, group, name } = grunt.config.get('packages');
 
   grunt.registerTask('_build:pleaseRun', function () {
-    // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
-    // to the user if it is missing.
-
-    grunt.config.get('services').forEach(function (service) {
+    grunt.config.get('services').forEach((service) => {
       grunt.file.mkdir(service.outputDir);
       exec('pleaserun', [
         '--install',
         '--no-install-actions',
         '--install-prefix', service.outputDir,
         '--overwrite',
-        '--user', 'kibana',
-        '--sysv-log-path', '/var/log/kibana/',
+        '--name', name,
+        '--description', capitalize(name),
+        '--user', user,
+        '--group', group,
+        '--sysv-log-path', `${path.logs}/`,
         '-p', service.name,
         '-v', service.version,
-        '/opt/kibana/bin/kibana'
+        path.kibanaBin,
+        `-c ${path.kibanaConfig}`
       ]);
     });
-
-    grunt.file.mkdir(userScriptsDir);
-    exec('please-manage-user', ['--output', userScriptsDir, 'kibana']);
-    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown kibana /opt/kibana/optimize');
   });
 };

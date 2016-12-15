@@ -2,9 +2,13 @@ import { SavedObjectNotFound } from 'ui/errors';
 import _ from 'lodash';
 import editorHtml from 'ui/agg_types/controls/field.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-export default function FieldAggParamFactory(Private) {
+import 'ui/filters/field_type';
+import IndexedArray from 'ui/indexed_array';
+import Notifier from 'ui/notify/notifier';
 
-  let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+export default function FieldAggParamFactory(Private, $filter) {
+  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const notifier = new Notifier();
 
   _.class(FieldAggParam).inherits(BaseAggParam);
   function FieldAggParam(config) {
@@ -12,7 +16,7 @@ export default function FieldAggParamFactory(Private) {
   }
 
   FieldAggParam.prototype.editor = editorHtml;
-  FieldAggParam.prototype.scriptable = false;
+  FieldAggParam.prototype.scriptable = true;
   FieldAggParam.prototype.filterFieldTypes = '*';
 
   /**
@@ -26,6 +30,32 @@ export default function FieldAggParamFactory(Private) {
   };
 
   /**
+   * Get the options for this field from the indexPattern
+   */
+  FieldAggParam.prototype.getFieldOptions = function (aggConfig) {
+    const indexPattern = aggConfig.getIndexPattern();
+    let fields = indexPattern.fields.raw;
+
+    fields = fields.filter(f => f.aggregatable);
+
+    if (!this.scriptable) {
+      fields = fields.filter(field => !field.scripted);
+    }
+
+    if (this.filterFieldTypes) {
+      fields = $filter('fieldType')(fields, this.filterFieldTypes);
+      fields = $filter('orderBy')(fields, ['type', 'name']);
+    }
+
+
+    return new IndexedArray({
+      index: ['name'],
+      group: ['type'],
+      initialSet: fields
+    });
+  };
+
+  /**
    * Called to read values from a database record into the
    * aggConfig object
    *
@@ -33,13 +63,18 @@ export default function FieldAggParamFactory(Private) {
    * @return {field}
    */
   FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-    let field = aggConfig.vis.indexPattern.fields.byName[fieldName];
+    const field = aggConfig.getIndexPattern().fields.byName[fieldName];
 
     if (!field) {
       throw new SavedObjectNotFound('index-pattern-field', fieldName);
     }
 
-    return field;
+    const validField = this.getFieldOptions(aggConfig).byName[fieldName];
+    if (!validField) {
+      notifier.error(`Saved "field" parameter is now invalid. Please select a new field.`);
+    }
+
+    return validField;
   };
 
   /**
@@ -53,11 +88,15 @@ export default function FieldAggParamFactory(Private) {
    * @return {undefined}
    */
   FieldAggParam.prototype.write = function (aggConfig, output) {
-    let field = aggConfig.params.field;
+    const field = aggConfig.getField();
+
+    if (!field) {
+      throw new TypeError('"field" is a required parameter');
+    }
 
     if (field.scripted) {
       output.params.script = {
-        script: field.script,
+        inline: field.script,
         lang: field.lang,
       };
     } else {

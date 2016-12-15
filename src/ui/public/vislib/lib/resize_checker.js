@@ -3,12 +3,12 @@ import _ from 'lodash';
 import sequencer from 'ui/utils/sequencer';
 import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
-export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
+export default function ResizeCheckerFactory(Private, Notifier) {
 
-  let EventEmitter = Private(EventsProvider);
-  let reflowWatcher = Private(ReflowWatcherProvider);
+  const EventEmitter = Private(EventsProvider);
+  const reflowWatcher = Private(ReflowWatcherProvider);
 
-  let SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
+  const SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
     100,      // shortest delay
     10000,  // longest delay
     50     // tick count
@@ -16,7 +16,7 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
 
   // maximum ms that we can delay emitting 'resize'. This is only used
   // to debounce resizes when the size of the element is constantly changing
-  let MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 500;
+  const MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 500;
 
   /**
    * Checks the size of an element on a regular basis. Provides
@@ -88,7 +88,7 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
    * @return {boolean} - true if the passed in value matches the saved size
    */
   ResizeChecker.prototype._equalsSavedSize = function (a) {
-    let b = this._savedSize || {};
+    const b = this._savedSize || {};
     return a.w === b.w && a.h === b.h;
   };
 
@@ -129,12 +129,12 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
    * @return {void}
    */
   ResizeChecker.prototype.check = function () {
-    let newSize = this.read();
-    let dirty = this.saveSize(newSize);
-    let dirtyChanged = this.saveDirty(dirty);
+    const newSize = this.read();
+    const dirty = this.saveSize(newSize);
+    const dirtyChanged = this.saveDirty(dirty);
 
-    let doneDirty = !dirty && dirtyChanged;
-    let muchDirty = dirty && (this.lastDirtyChange() - Date.now() > MS_MAX_RESIZE_DELAY);
+    const doneDirty = !dirty && dirtyChanged;
+    const muchDirty = dirty && (this.lastDirtyChange() - Date.now() > MS_MAX_RESIZE_DELAY);
     if (doneDirty || muchDirty) {
       this.emit('resize', newSize);
     }
@@ -175,13 +175,15 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
       this._tick += 1;
     }
 
-    let check = this.check; // already bound
-    let tick = this._tick;
-    let notify = this.notify;
-    let ms = this._currentSchedule[this._tick];
+    const check = this.check; // already bound
+    const ms = this._currentSchedule[this._tick];
     return (this._timerId = setTimeout(function () {
       check();
     }, ms));
+  };
+
+  ResizeChecker.prototype.stopSchedule = function () {
+    clearTimeout(this._timerId);
   };
 
   /**

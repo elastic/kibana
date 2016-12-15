@@ -1,0 +1,78 @@
+[[vertical-bar-chart]]
+== Vertical Bar Charts
+
+This chart's Y axis is the _metrics_ axis. The following aggregations are available for this axis:
+
+*Count*:: The {es-ref}search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
+the elements in the selected index pattern.
+*Average*:: This aggregation returns the {es-ref}search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
+field. Select a field from the drop-down.
+*Sum*:: The {es-ref}search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
+field. Select a field from the drop-down.
+*Min*:: The {es-ref}search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
+numeric field. Select a field from the drop-down.
+*Max*:: The {es-ref}search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
+numeric field. Select a field from the drop-down.
+*Unique Count*:: The {es-ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
+the number of unique values in a field. Select a field from the drop-down.
+*Percentiles*:: The {es-ref}search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
+values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
+or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a
+percentile field.
+*Percentile Rank*:: The {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_]
+aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field
+from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
+values field. Click *+Add* to add a values field.
+
+You can add an aggregation by clicking the *+ Add Aggregation* button.
+
+Enter a string in the *Custom Label* field to change the display label.
+
+The _buckets_ aggregations determine what information is being retrieved from your data set.
+
+Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
+multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
+if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
+
+include::x-axis-aggs.asciidoc[]
+
+include::color-picker.asciidoc[]
+
+Enter a string in the *Custom Label* field to change the display label.
+
+You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
+
+*Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
+*Include Pattern*:: Specify a pattern in this field to include in the results.
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
+definition, as in the following example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
+{es-ref}modules-scripting.html[dynamic Groovy scripting].
+
+The availability of these options varies depending on the aggregation you choose.
+
+Select the *Options* to change the following aspects of the table:
+
+*Bar Mode*:: When you have multiple Y-axis aggregations defined for your chart, you can use this drop-down to affect
+how the aggregations display on the chart:
+
+_stacked_:: Stacks the aggregations on top of each other.
+_percentage_:: Displays each aggregation as a proportion of the total.
+_grouped_:: Groups the results horizontally by the lowest-priority sub-aggregation.
+
+Checkboxes are available to enable and disable the following behaviors:
+
+*Show Tooltip*:: Check this box to enable the display of tooltips.
+*Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check
+this box to change both upper and lower bounds to match the values returned in the data.
+*Order buckets by descending sum*:: Check this box to enforce sorting of buckets by descending sum in the visualization
+
+[float]
+[[vertbar-viewing-detailed-information]]
+==== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]

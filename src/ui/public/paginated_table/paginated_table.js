@@ -17,7 +17,9 @@ uiModules
       perPage: '=?',
       sortHandler: '=?',
       sort: '=?',
-      showSelector: '=?'
+      showSelector: '=?',
+      showTotal: '=',
+      totalFunc: '='
     },
     controllerAs: 'paginatedTable',
     controller: function ($scope) {

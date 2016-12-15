@@ -1,0 +1,134 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+.wizard-container {
+  padding: 0 10px;
+
+  .btn-primary.collapser {
+    background-color: transparent;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  button.collapser {
+    i {
+      color: @kibanaBlue3;
+      font-size: 1.5em;
+    }
+
+    &:hover {
+      i {
+        color: @kibanaBlue1;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+
+    em {
+      font-style: normal;
+      color: @kibanaPink1;
+    }
+  }
+
+  .btn-primary {
+    &:hover {
+      background-color: @kibanaBlue1;
+    }
+  }
+
+  .btn-secondary {
+    background-color: white;
+    border-color: @kibanaBlue3;
+    color: @kibanaBlue3;
+
+    &:hover {
+      background-color: @kibanaBlue1;
+    }
+  }
+
+  .btn-lg {
+    padding: 6px 35px;
+    font-size: 1.2em;
+  }
+
+  .form-group {
+    margin-bottom: 5px;
+  }
+
+  .form-control {
+    background-color: @settings-add-data-wizard-form-control-bg;
+    border-color: @settings-add-data-wizard-form-control-border;
+    border-width: 1px;
+    border-radius: 4px;
+  }
+}
+
+.wizard-step-headings{
+  padding-top: 14px;
+
+  .wizard-step-heading {
+    font-size: 1.3em;
+    padding: 6px 18px;
+    margin: 0 2px;
+    background-color: @settings-add-data-wizard-step-heading-complete-bg;
+    color: @settings-add-data-wizard-step-heading-complete-color;
+
+    &.active {
+      cursor: default;
+      background-color: @settings-add-data-wizard-step-heading-active-bg;
+      color: @settings-add-data-wizard-step-heading-active-color;
+    }
+    &.aheadActive {
+      cursor: default;
+      background-color: @settings-add-data-wizard-step-heading-incomplete-bg;
+      color: @settings-add-data-wizard-step-heading-incomplete-color;
+    }
+  }
+
+  &.complete {
+    .wizard-step-heading:not(.active) {
+      cursor: default;
+    }
+  }
+}
+
+.wizard-step-title {
+  padding-bottom: 14px;
+}
+
+.wizard-nav-buttons {
+  display: flex;
+  float: none;
+  margin-top: 14px;
+
+  div {
+    width:100px;
+    flex: 1 1 auto;
+    display: flex;
+  }
+
+  :nth-child(1) {
+    justify-content: flex-start;
+  }
+  :nth-child(2) {
+    justify-content: center;
+  }
+  :nth-child(3) {
+    justify-content: flex-end;
+  }
+}
+
+pre {
+  border: none;
+  background-color: @settings-filebeat-wizard-panel-bg;
+  border-radius: 0px;
+  white-space: pre-wrap;
+  margin: 0px;
+}
+

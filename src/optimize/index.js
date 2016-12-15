@@ -10,22 +10,20 @@ module.exports = async (kbnServer, server, config) => {
   // on the watch setup managed by the cli. It proxies all bundles/* requests to
   // the other server. The server on 5602 is long running, in order to prevent
   // complete rebuilds of the optimize content.
-  let lazy = config.get('optimize.lazy');
+  const lazy = config.get('optimize.lazy');
   if (lazy) {
     return await kbnServer.mixin(require('./lazy/lazy'));
   }
 
-  let bundles = kbnServer.bundles;
+  const bundles = kbnServer.bundles;
   server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
   await bundles.writeEntryFiles();
 
-  // in prod, only bundle what looks invalid or missing
-  if (config.get('optimize.useBundleCache')) {
-    bundles = await bundles.getInvalidBundles();
-  }
+  // in prod, only bundle when someing is missing or invalid
+  const invalidBundles = config.get('optimize.useBundleCache') ? await bundles.getInvalidBundles() : bundles;
 
   // we might not have any work to do
-  if (!bundles.getIds().length) {
+  if (!invalidBundles.getIds().length) {
     server.log(
       ['debug', 'optimize'],
       `All bundles are cached and ready to go!`
@@ -34,7 +32,7 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   // only require the FsOptimizer when we need to
-  let optimizer = new FsOptimizer({
+  const optimizer = new FsOptimizer({
     env: bundles.env,
     bundles: bundles,
     profile: config.get('optimize.profile'),
@@ -48,9 +46,9 @@ module.exports = async (kbnServer, server, config) => {
     `Optimizing and caching ${bundles.desc()}. This may take a few minutes`
   );
 
-  let start = Date.now();
+  const start = Date.now();
   await optimizer.run();
-  let seconds = ((Date.now() - start) / 1000).toFixed(2);
+  const seconds = ((Date.now() - start) / 1000).toFixed(2);
 
   server.log(['info', 'optimize'], `Optimization of ${bundles.desc()} complete in ${seconds} seconds`);
 };

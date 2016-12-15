@@ -7,8 +7,8 @@ import intervalTemplate from 'ui/agg_types/controls/interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 export default function HistogramAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
 
 
   return new BucketAggType({
@@ -16,7 +16,7 @@ export default function HistogramAggDefinition(Private) {
     title: 'Histogram',
     ordered: {},
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName;
+      return aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
     params: [
@@ -29,7 +29,7 @@ export default function HistogramAggDefinition(Private) {
         name: 'interval',
         editor: intervalTemplate,
         write: function (aggConfig, output) {
-          output.params.interval = parseInt(aggConfig.params.interval, 10);
+          output.params.interval = parseFloat(aggConfig.params.interval);
         }
       },
 
@@ -40,6 +40,8 @@ export default function HistogramAggDefinition(Private) {
         write: function (aggConfig, output) {
           if (aggConfig.params.min_doc_count) {
             output.params.min_doc_count = 0;
+          } else {
+            output.params.min_doc_count = 1;
           }
         }
       },
@@ -49,7 +51,7 @@ export default function HistogramAggDefinition(Private) {
         default: {},
         editor: extendedBoundsTemplate,
         write: function (aggConfig, output) {
-          let val = aggConfig.params.extended_bounds;
+          const val = aggConfig.params.extended_bounds;
 
           if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
             output.params.extended_bounds = {
@@ -61,7 +63,7 @@ export default function HistogramAggDefinition(Private) {
 
         // called from the editor
         shouldShow: function (aggConfig) {
-          let field = aggConfig.params.field;
+          const field = aggConfig.params.field;
           if (
             field
             && (field.type === 'number' || field.type === 'date')

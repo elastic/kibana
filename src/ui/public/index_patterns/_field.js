@@ -3,10 +3,10 @@ import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_fiel
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
-  let notify = new Notifier({ location: 'IndexPattern Field' });
-  let FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
-  let fieldTypes = Private(IndexPatternsFieldTypesProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const notify = new Notifier({ location: 'IndexPattern Field' });
+  const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+  const fieldTypes = Private(IndexPatternsFieldTypesProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function Field(indexPattern, spec) {
     // unwrap old instances of Field
@@ -15,7 +15,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // constuct this object using ObjDefine class, which
     // extends the Field.prototype but gets it's properties
     // defined using the logic below
-    let obj = new ObjDefine(spec, Field.prototype);
+    const obj = new ObjDefine(spec, Field.prototype);
 
     if (spec.name === '_source') {
       spec.type = '_source';
@@ -38,10 +38,13 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
       format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
     }
 
-    let indexed = !!spec.indexed;
-    let scripted = !!spec.scripted;
-    let sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
-    let filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
+    const indexed = !!spec.indexed;
+    const scripted = !!spec.scripted;
+    const sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
+    const filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
+    const searchable = !!spec.searchable || scripted;
+    const aggregatable = !!spec.aggregatable || scripted;
+    const visualizable = aggregatable;
 
     obj.fact('name');
     obj.fact('type');
@@ -50,28 +53,36 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // scripted objs
     obj.fact('scripted', scripted);
     obj.writ('script', scripted ? spec.script : null);
-    obj.writ('lang', scripted ? (spec.lang || 'expression') : null);
+    obj.writ('lang', scripted ? (spec.lang || 'painless') : null);
 
     // mapping info
     obj.fact('indexed', indexed);
     obj.fact('analyzed', !!spec.analyzed);
     obj.fact('doc_values', !!spec.doc_values);
 
+    // stats
+    obj.fact('searchable', searchable);
+    obj.fact('aggregatable', aggregatable);
+
     // usage flags, read-only and won't be saved
     obj.comp('format', format);
     obj.comp('sortable', sortable);
     obj.comp('filterable', filterable);
+    obj.comp('visualizable', visualizable);
 
     // computed values
     obj.comp('indexPattern', indexPattern);
     obj.comp('displayName', shortDotsFilter(spec.name));
     obj.comp('$$spec', spec);
 
+    // conflict info
+    obj.writ('conflictDescriptions');
+
     return obj.create();
   }
 
   Field.prototype.routes = {
-    edit: '/settings/indices/{{indexPattern.id}}/field/{{name}}'
+    edit: '/management/kibana/indices/{{indexPattern.id}}/field/{{name}}'
   };
 
   return Field;

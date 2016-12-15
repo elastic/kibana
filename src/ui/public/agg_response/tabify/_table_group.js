@@ -13,7 +13,7 @@ export default function TableGroupProvider() {
   }
 
   TableGroup.prototype.field = function () {
-    if (this.aggConfig) return this.aggConfig.field();
+    if (this.aggConfig) return this.aggConfig.getField();
   };
 
   TableGroup.prototype.fieldFormatter = function () {

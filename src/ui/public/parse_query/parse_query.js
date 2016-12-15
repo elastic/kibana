@@ -4,7 +4,7 @@ import uiModules from 'ui/modules';
 uiModules
   .get('kibana')
   .directive('parseQuery', function (Private) {
-    let fromUser = Private(ParseQueryLibFromUserProvider);
+    const fromUser = Private(ParseQueryLibFromUserProvider);
 
     return {
       restrict: 'A',
@@ -13,7 +13,7 @@ uiModules
         'ngModel': '='
       },
       link: function ($scope, elem, attr, ngModel) {
-        let init = function () {
+        const init = function () {
           $scope.ngModel = fromUser($scope.ngModel);
         };
 

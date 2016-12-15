@@ -1,7 +1,6 @@
-import d3 from 'd3';
-import VislibLibLayoutSplitsTileMapMapSplitProvider from 'ui/vislib/lib/layout/splits/tile_map/map_split';
+import VislibLibLayoutSplitsTileMapMapSplitProvider from '../splits/tile_map/map_split';
 export default function ColumnLayoutFactory(Private) {
-  let mapSplit = Private(VislibLibLayoutSplitsTileMapMapSplitProvider);
+  const mapSplit = Private(VislibLibLayoutSplitsTileMapMapSplitProvider);
 
   /*
    * Specifies the visualization layout for tile maps.

@@ -13,6 +13,7 @@ class UiApp {
 
     this.main = this.spec.main;
     this.title = this.spec.title;
+    this.order = this.spec.order || 0;
     this.description = this.spec.description;
     this.icon = this.spec.icon;
     this.hidden = !!this.spec.hidden;
@@ -22,7 +23,9 @@ class UiApp {
     if (!this.hidden) {
       // any non-hidden app has a url, so it gets a "navLink"
       this.navLink = this.uiExports.navLinks.new({
+        id: this.id,
         title: this.title,
+        order: this.order,
         description: this.description,
         icon: this.icon,
         url: this.spec.url || `/app/${this.id}`

@@ -13,7 +13,7 @@ describe('styleCompile directive', function () {
   }));
 
   it('exports a few config values as css', function () {
-    let $style = $('#style-compile');
+    const $style = $('#style-compile');
 
     config.set('truncate:maxHeight', 0);
     $rootScope.$apply();

@@ -1,10 +1,12 @@
 module.exports = function (grunt) {
-  let platform = require('os').platform();
-  let {format} = require('url');
-  let {resolve} = require('path');
-  let root = p => resolve(__dirname, '../../', p);
-  let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
-  let uiConfig = require(root('test/server_config'));
+  const platform = require('os').platform();
+  const {format} = require('url');
+  const {resolve} = require('path');
+  const root = p => resolve(__dirname, '../../', p);
+  const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
+  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  const uiConfig = require(root('test/server_config'));
+  const chromedriver = require('chromedriver');
 
   const stdDevArgs = [
     '--env.name=development',
@@ -75,6 +77,28 @@ module.exports = function (grunt) {
       ]
     },
 
+    testUIDevServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testUiServer',
+        ...kbnServerFlags,
+      ]
+    },
+
     testCoverageServer: {
       options: {
         wait: false,
@@ -108,39 +132,36 @@ module.exports = function (grunt) {
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testdev',
         ...kbnServerFlags,
       ]
     },
 
-    seleniumServer: {
+    chromeDriver: {
       options: {
         wait: false,
-        ready: /Selenium Server is up and running/,
-        quiet: true,
-        failOnError: false
-      },
-      cmd: 'java',
-      args: [
-        '-jar',
-        '<%= downloadSelenium.options.selenium.path %>',
-        '-port',
-        uiConfig.servers.webdriver.port,
-      ]
-    },
-
-    devSeleniumServer: {
-      options: {
-        wait: false,
-        ready: /Selenium Server is up and running/,
+        ready: /Starting ChromeDriver/,
         quiet: false,
         failOnError: false
       },
-      cmd: 'java',
+      cmd: chromedriver.path,
       args: [
-        '-jar',
-        '<%= downloadSelenium.options.selenium.path %>',
-        '-port',
-        uiConfig.servers.webdriver.port,
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
+      ]
+    },
+
+    devChromeDriver: {
+      options: {
+        wait: false,
+        ready: /Starting ChromeDriver/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: chromedriver.path,
+      args: [
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
       ]
     },
 
@@ -150,7 +171,7 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: './build/kibana/bin/kibana',
+      cmd: buildScript,
       args: [
         '--env.name=production',
         '--logging.json=false',

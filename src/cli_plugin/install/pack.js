@@ -55,10 +55,10 @@ function assertValidPackageName(plugin) {
   }
 }
 
-
 /**
  * Examine each package.json file to determine the plugin name,
- *  version, and platform. Mutates the package objects in the packages array
+ *  version, kibanaVersion, and platform. Mutates the package objects
+ *  in the packages array
  * @param {object} settings - a plugin installer settings object
  * @param {array} packages - array of package objects from listPackages()
  */
@@ -70,6 +70,12 @@ async function mergePackageData(settings, packages) {
     pkg.version = _.get(packageInfo, 'version');
     pkg.name = _.get(packageInfo, 'name');
     pkg.path =  resolve(settings.pluginDir, pkg.name);
+
+    // Plugins must specify their version, and by default that version should match
+    // the version of kibana down to the patch level. If these two versions need
+    // to diverge, they can specify a kibana.version to indicate the version of
+    // kibana the plugin is intended to work with.
+    pkg.kibanaVersion = _.get(packageInfo, 'kibana.version', pkg.version);
 
     const regExp = new RegExp(`${pkg.name}-(.+)`, 'i');
     const matches = pkg.folder.match(regExp);

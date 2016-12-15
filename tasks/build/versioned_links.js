@@ -1,21 +1,18 @@
 module.exports = function (grunt) {
-  let { basename, resolve } = require('path');
-  let { forOwn } = require('lodash');
+  const { basename, resolve } = require('path');
+  const { forOwn } = require('lodash');
 
-  let exec = require('../utils/exec').silent;
+  const exec = require('../utils/exec').silent;
 
   grunt.registerTask('_build:versionedLinks', function () {
-    let rootPath = grunt.config.get('root');
+    const rootPath = grunt.config.get('root');
 
-    let buildFiles = grunt.file.expand('build/kibana/{*,.*}')
+    const buildFiles = grunt.file.expand('build/kibana/{*,.*}')
     .map(function (file) {
       return resolve(rootPath, file);
     });
 
-    //We don't want to build os packages with symlinks
-    let transferFiles = (source, link) => grunt.option('os-packages')
-      ? exec('cp', ['-r', source, link])
-      : exec('ln', ['-s', source, link]);
+    const transferFiles = (source, link) => exec('cp', ['-r', source, link]);
 
     grunt.config.get('platforms').forEach(function (platform) {
       grunt.file.mkdir(platform.buildDir);

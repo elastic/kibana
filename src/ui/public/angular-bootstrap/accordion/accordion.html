@@ -1,0 +1,1 @@
+<div class="panel-group" ng-transclude></div>

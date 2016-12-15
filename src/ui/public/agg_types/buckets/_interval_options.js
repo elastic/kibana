@@ -1,9 +1,9 @@
 import moment from 'moment';
-import 'ui/directives/input_whole_number';
+
 export default function IntervalOptionsService(Private) {
 
   // shorthand
-  let ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
+  const ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
 
   return [
     {

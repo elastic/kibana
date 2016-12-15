@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import VislibComponentsZeroInjectionFlattenDataProvider from 'ui/vislib/components/zero_injection/flatten_data';
+import VislibComponentsZeroInjectionFlattenDataProvider from './flatten_data';
 export default function UniqueXValuesUtilService(Private) {
 
-  let flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
+  const flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
 
   /*
    * Accepts a Kibana data object.
@@ -16,8 +16,8 @@ export default function UniqueXValuesUtilService(Private) {
       throw new TypeError('UniqueXValuesUtilService expects an object');
     }
 
-    let flattenedData = flattenDataArray(obj);
-    let uniqueXValues = new Map();
+    const flattenedData = flattenDataArray(obj);
+    const uniqueXValues = new Map();
 
     let charts;
     if (!obj.series) {
@@ -26,31 +26,33 @@ export default function UniqueXValuesUtilService(Private) {
       charts = [obj];
     }
 
-    let isDate = charts.every(function (chart) {
+    const isDate = charts.every(function (chart) {
       return chart.ordered && chart.ordered.date;
     });
 
-    let isOrdered = charts.every(function (chart) {
+    const isOrdered = charts.every(function (chart) {
       return chart.ordered;
     });
 
     flattenedData.forEach(function (d, i) {
-      let key = d.x;
-      let prev = uniqueXValues.get(key);
-
+      const key = d.x;
+      const prev = uniqueXValues.get(key);
+      let sum = d.y;
       if (d.xi != null) {
         i = d.xi;
       }
 
       if (prev) {
         i = Math.min(i, prev.index);
+        sum += prev.sum;
       }
 
       uniqueXValues.set(key, {
         index: i,
         isDate: isDate,
         isOrdered: isOrdered,
-        isNumber: _.isNumber(key)
+        isNumber: _.isNumber(key),
+        sum: sum
       });
     });
 

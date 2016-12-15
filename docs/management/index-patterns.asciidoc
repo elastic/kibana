@@ -1,0 +1,146 @@
+[[index-patterns]]
+== Index Patterns
+
+To use Kibana, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more
+index patterns. You can also:
+
+* Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but
+you cannot search them.
+* Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show.
+Use caution when modifying advanced options, as it's possible to set values that are incompatible with one another.
+* Configure Kibana for a production environment
+
+[float]
+[[settings-create-pattern]]
+== Creating an Index Pattern to Connect to Elasticsearch
+An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for
+index names that match the specified pattern.
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
+indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
+
+An index pattern can also simply be the name of a single index.
+
+To create an index pattern to connect to Elasticsearch:
+
+. Go to the *Settings > Indices* tab.
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
+guesses that you're you're working with log data being fed into Elasticsearch by Logstash.
++
+NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular
+index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays
+the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns
+list.
+
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
+contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index
+mapping to list all of the fields that contain a timestamp.
+
+. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently
+selected time range. Click *Do not expand index pattern when search* to disable this behavior.
+
+. Click *Create* to add the index pattern.
+
+. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
+button.
+
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
+contain data.
+
+To use an event time in an index name, enclose the static text in the pattern and specify the date format using the
+tokens described in the following table.
+
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended
+to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
+
+[float]
+[[date-format-tokens]]
+.Date Format Tokens
+[horizontal]
+`M`:: Month - cardinal: 1 2 3 ... 12
+`Mo`:: Month - ordinal: 1st 2nd 3rd ... 12th
+`MM`:: Month - two digit:   01 02 03 ... 12
+`MMM`:: Month - abbreviation: Jan Feb Mar ... Dec
+`MMMM`:: Month - full: January February March ... December
+`Q`:: Quarter: 1 2 3 4
+`D`:: Day of Month - cardinal: 1 2 3 ... 31
+`Do`:: Day of Month - ordinal: 1st 2nd 3rd ... 31st
+`DD`:: Day of Month - two digit:  01 02 03 ... 31
+`DDD`:: Day of Year - cardinal: 1 2 3 ... 365
+`DDDo`:: Day of Year - ordinal: 1st 2nd 3rd ... 365th
+`DDDD`:: Day of Year - three digit: 001 002 ... 364 365
+`d`:: Day of Week - cardinal: 0 1 3 ... 6
+`do`:: Day of Week - ordinal: 0th 1st 2nd ... 6th
+`dd`:: Day of Week - 2-letter abbreviation: Su Mo Tu ... Sa
+`ddd`:: Day of Week - 3-letter abbreviation: Sun Mon Tue ... Sat
+`dddd`:: Day of Week - full: Sunday Monday Tuesday ... Saturday
+`e`:: Day of Week (locale): 0 1 2 ... 6
+`E`:: Day of Week (ISO): 1 2 3 ... 7
+`w`:: Week of Year - cardinal (locale): 1 2 3 ... 53
+`wo`:: Week of Year - ordinal (locale): 1st 2nd 3rd ... 53rd
+`ww`:: Week of Year - 2-digit (locale): 01 02 03 ... 53
+`W`:: Week of Year - cardinal (ISO): 1 2 3 ... 53
+`Wo`:: Week of Year - ordinal (ISO): 1st 2nd 3rd ... 53rd
+`WW`:: Week of Year - two-digit (ISO): 01 02 03 ... 53
+`YY`:: Year - two digit:  70 71 72 ... 30
+`YYYY`:: Year - four digit: 1970 1971 1972 ... 2030
+`gg`:: Week Year - two digit (locale):  70 71 72 ... 30
+`gggg`:: Week Year - four digit (locale): 1970 1971 1972 ... 2030
+`GG`:: Week Year - two digit (ISO): 70 71 72 ... 30
+`GGGG`::  Week Year - four digit (ISO): 1970 1971 1972 ... 2030
+`A`:: AM/PM: AM PM
+`a`:: am/pm: am pm
+`H`:: Hour: 0 1 2 ... 23
+`HH`:: Hour - two digit: 00 01 02 ... 23
+`h`:: Hour - 12-hour clock: 1 2 3 ... 12
+`hh`:: Hour - 12-hour clock, 2 digit: 01 02 03 ... 12
+`m`:: Minute: 0 1 2 ... 59
+`mm`:: Minute - two-digit:  00 01 02 ... 59
+`s`:: Second: 0 1 2 ...  59
+`ss`:: Second - two-digit: 00 01 02 ... 59
+`S`:: Fractional Second - 10ths: 0 1 2 ... 9
+`SS`:: Fractional Second - 100ths:  0 1 ... 98 99
+`SSS`:: Fractional Seconds - 1000ths: 0 1 ... 998 999
+`Z`:: Timezone - zero UTC offset (hh:mm format): -07:00 -06:00 -05:00 .. +07:00
+`ZZ`:: Timezone - zero UTC offset (hhmm format):  -0700 -0600 -0500 ... +0700
+`X`:: Unix Timestamp: 1360013296
+`x`:: Unix Millisecond Timestamp: 1360013296123
+
+[float]
+[[set-default-pattern]]
+== Setting the Default Index Pattern
+The default index pattern is loaded by automatically when you view the *Discover* tab. Kibana displays a star to the
+left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern
+you create is automatically designated as the default pattern.
+
+To set a different pattern as the default index pattern:
+
+. Go to the *Settings > Indices* tab.
+. Select the pattern you want to set as the default in the Index Patterns list.
+. Click the pattern's *Favorite* button.
+
+NOTE: You can also manually set the default index pattern in *Advanced > Settings*.
+
+[float]
+[[reload-fields]]
+== Reloading the Index Fields List
+When you add an index mapping, Kibana automatically scans the indices that match the pattern to display a list of the
+index fields. You can reload the index fields list to pick up any newly-added fields.
+
+Reloading the index fields list also resets Kibana's popularity counters for the fields. The popularity counters keep
+track of the fields you've used most often within Kibana and are used to sort fields within lists.
+
+To reload the index fields list:
+
+. Go to the *Settings > Indices* tab.
+. Select an index pattern from the Index Patterns list.
+. Click the pattern's *Reload* button.
+
+[float]
+[[delete-pattern]]
+== Deleting an Index Pattern
+To delete an index pattern:
+
+. Go to the *Settings > Indices* tab.
+. Select the pattern you want to remove in the Index Patterns list.
+. Click the pattern's *Delete* button.
+. Confirm that you want to remove the index pattern.

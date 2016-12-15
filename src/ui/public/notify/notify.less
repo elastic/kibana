@@ -8,24 +8,23 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
 
-    &-countdown {
-      .badge {
-        color: @white;
-      }
-
-      &:hover {
-        .badge {
-          font-size: 0;
-        }
-
-        .badge:after {
-          font-size: @font-size-small;
-          content: attr(hover-text);
-        }
-      }
+  .toaster-countdown {
+    .badge {
+      color: @white;
     }
 
+    &:hover {
+      .badge {
+        font-size: 0;
+      }
+
+      .badge:after {
+        font-size: @font-size-small;
+        content: attr(hover-text);
+      }
+    }
   }
 
   .alert {
@@ -45,35 +44,36 @@
         margin-right: 4px;
       }
     }
+  }
 
-    &-message {
-      flex: 1 1 auto;
-      .ellipsis();
-      line-height: normal;
+  .toast-message {
+    flex: 1 1 auto;
+    margin-top: 10px;
+    .ellipsis();
+    line-height: normal;
+  }
+
+  .toast-stack {
+    padding-bottom: 10px;
+
+    pre {
+      display: inline-block;
+      width: 100%;
+      margin: 10px 0;
+      word-break: normal;
+      word-wrap: normal;
+      white-space: pre-wrap;
     }
+  }
 
-    &-stack {
-      padding-bottom: 10px;
+  .toast-controls {
+    display: flex;
 
-      pre {
-        display: inline-block;
-        width: 100%;
-        margin: 10px 0;
-        word-break: normal;
-        word-wrap: normal;
-        white-space: pre-wrap;
-      }
-    }
-
-    &-controls {
-      display: flex;
-
-      button {
-        flex: 0 0 auto;
-        border: 0;
-        border-radius: 0;
-        padding: 10px 15px;
-      }
+    button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 0;
+      padding: 10px 15px;
     }
   }
 
@@ -90,4 +90,30 @@
   .alert-danger .badge {
     background: darken(@alert-danger-bg, 25%);
   }
+  .alert-banner {
+    background-color: white;
+    padding: 10px 15px;
+
+    a {
+      color: #328caa;
+    }
+
+    .toaster-countdown {
+      background-color: white;
+    }
+
+    .badge {
+      background-color: #328caa;
+    }
+  }
+
+  .toast-message {
+    white-space: normal;
+  }
+}
+
+// toast message class for banner needs to be display:block because banner does
+// not have a flex layout, and the styled element could be any kind of element
+.toast-message-banner {
+  display: block;
 }

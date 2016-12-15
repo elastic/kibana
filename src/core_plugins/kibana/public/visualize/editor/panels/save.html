@@ -1,0 +1,24 @@
+<form
+  role="form"
+  ng-submit="opts.doSave()"
+>
+  <div class="localDropdownTitle">Save Visualization</div>
+  <input
+    class="localDropdownInput"
+    input-focus="select"
+    type="text"
+    name="visTitle"
+    ng-model="opts.savedVis.title"
+    required
+  >
+
+  <saved-object-save-as-check-box saved-object="opts.savedVis"></saved-object-save-as-check-box>
+
+  <button
+    data-test-subj="saveVisualizationButton"
+    type="submit"
+    class="btn btn-primary"
+  >
+    Save
+  </button>
+</form>

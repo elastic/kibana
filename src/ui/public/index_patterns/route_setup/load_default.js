@@ -4,38 +4,33 @@ import { NoDefaultIndexPattern, NoDefinedIndexPatterns } from 'ui/errors';
 import GetIdsProvider from '../_get_ids';
 import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
 import uiRoutes from 'ui/routes';
-let notify = new Notifier({
+const notify = new Notifier({
   location: 'Index Patterns'
 });
 
 module.exports = function (opts) {
   opts = opts || {};
-  let notRequiredRe = opts.notRequiredRe || null;
-  let whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
+  const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
 
   uiRoutes
   .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, indexPatterns) {
-    let getIds = Private(GetIdsProvider);
-    let rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
-    let path = _.get($route, 'current.$$route.originalPath');
+    const getIds = Private(GetIdsProvider);
+    const rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
+    const route = _.get($route, 'current.$$route');
 
-    return config.init()
-    .then(function () {
-      return getIds();
-    })
+    return getIds()
     .then(function (patterns) {
       let defaultId = config.get('defaultIndex');
       let defined = !!defaultId;
-      let exists = _.contains(patterns, defaultId);
-      let required = !notRequiredRe || !path.match(notRequiredRe);
+      const exists = _.contains(patterns, defaultId);
 
       if (defined && !exists) {
-        config.clear('defaultIndex');
+        config.remove('defaultIndex');
         defaultId = defined = false;
       }
 
-      if (!defined && required) {
+      if (!defined && route.requireDefaultIndex) {
         throw new NoDefaultIndexPattern();
       }
 
@@ -53,7 +48,7 @@ module.exports = function (opts) {
 
     // failure
     function (err, kbnUrl) {
-      let hasDefault = !(err instanceof NoDefaultIndexPattern);
+      const hasDefault = !(err instanceof NoDefaultIndexPattern);
       if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
 
       kbnUrl.change(whenMissingRedirectTo);

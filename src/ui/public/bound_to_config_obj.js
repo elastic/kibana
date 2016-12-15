@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default function BoundToConfigObjProvider($rootScope, config) {
+export default function BoundToConfigObjProvider(config) {
 
   /**
    * Create an object with properties that may be bound to config values.
@@ -18,21 +18,17 @@ export default function BoundToConfigObjProvider($rootScope, config) {
   function BoundToConfigObj(input) {
     const self = this;
 
-    _.forOwn(input, function (val, prop) {
-      if (!_.isString(val) || val.charAt(0) !== '=') {
-        self[prop] = val;
+    _.forOwn(input, function (value, prop) {
+      if (!_.isString(value) || value.charAt(0) !== '=') {
+        self[prop] = value;
         return;
       }
 
-      const configKey = val.substr(1);
+      const configKey = value.substr(1);
 
-      update();
-      $rootScope.$on('init:config', update);
-      $rootScope.$on('change:config.' + configKey, update);
-      function update() {
-        self[prop] = config.get(configKey);
-      }
-
+      config.watch(configKey, function update(value) {
+        self[prop] = value;
+      });
     });
   }
 

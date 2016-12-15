@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 
 import setup from '../apps';
-import StubBrowserStorage from '../../__tests__/fixtures/stub_browser_storage';
+import StubBrowserStorage from 'test_utils/stub_browser_storage';
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
@@ -149,11 +149,11 @@ describe('Chrome API :: apps', function () {
         const chrome = {};
         const store = new StubBrowserStorage();
         setup(chrome, { appUrlStore: store });
-        expect(chrome.getLastUrlFor('app')).to.equal(undefined);
+        expect(chrome.getLastUrlFor('app')).to.equal(null);
         chrome.setLastUrlFor('app', 'url');
         expect(chrome.getLastUrlFor('app')).to.equal('url');
-        expect(store.getKeys().length).to.equal(1);
-        expect(store.getValues().shift()).to.equal('url');
+        expect(store.getStubbedKeys().length).to.equal(1);
+        expect(store.getStubbedValues().shift()).to.equal('url');
       });
     });
   });

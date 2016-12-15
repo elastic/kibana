@@ -1,12 +1,7 @@
+import $ from 'jquery';
 import _ from 'lodash';
-// singleton for immutable copy of window.__KBN__
 
-if (!_.has(window, '__KBN__')) {
-  throw new Error('window.__KBN__ must be set for metadata');
-}
-
-const kbn = _.cloneDeep(window.__KBN__ || {});
-export default deepFreeze(kbn);
+export default deepFreeze(getState());
 
 function deepFreeze(object) {
   // for any properties that reference an object, makes sure that object is
@@ -19,4 +14,13 @@ function deepFreeze(object) {
   });
 
   return Object.freeze(object);
+}
+
+function getState() {
+  const stateKey = '__KBN__';
+  if (!(stateKey in window)) {
+    const state = $('kbn-initial-state').attr('data');
+    window[stateKey] = JSON.parse(state);
+  }
+  return window[stateKey];
 }

@@ -30,17 +30,27 @@ describe('Filter Manager', function () {
 
     it('should return a script filter when passed a scripted field', function () {
       expected.meta.field = 'script number';
-      expected.script = {
+      _.set(expected, 'script.script', {
         lang: 'expression',
-        script: '(' + indexPattern.fields.byName['script number'].script + ')>=gte && (' +
-          indexPattern.fields.byName['script number'].script + ')<=lte',
+        inline: '(' + indexPattern.fields.byName['script number'].script + ')>=gte && (' +
+        indexPattern.fields.byName['script number'].script + ')<=lte',
         params: {
           value: '>=1 <=3',
           gte: 1,
           lte: 3
         }
-      };
+      });
       expect(fn(indexPattern.fields.byName['script number'], {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
+    });
+
+    it('should wrap painless scripts in comparator lambdas', function () {
+      const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
+              `boolean lte(Supplier s, def v) {return s.get() <= v}` +
+              `gte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.gte) && ` +
+              `lte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.lte)`;
+
+      const inlineScript = fn(indexPattern.fields.byName['script date'], {gte: 1, lte: 3}, indexPattern).script.script.inline;
+      expect(inlineScript).to.be(expected);
     });
 
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
@@ -54,13 +64,13 @@ describe('Filter Manager', function () {
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
       _.each({gte: '>=', gt: '>', lte: '<=', lt: '<'}, function (operator, key) {
-        let params = {};
+        const params = {};
         params[key] = 5;
-        let filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
 
-        expect(filter.script.script).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
-        expect(filter.script.params[key]).to.be(5);
-        expect(filter.script.params.value).to.be(operator + 5);
+        expect(filter.script.script.inline).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
+        expect(filter.script.script.params[key]).to.be(5);
+        expect(filter.script.script.params.value).to.be(operator + 5);
 
       });
     });
@@ -77,16 +87,16 @@ describe('Filter Manager', function () {
         });
 
         it('contain a param for the finite side', function () {
-          expect(filter.script.params).to.have.property('gte', 0);
+          expect(filter.script.script.params).to.have.property('gte', 0);
         });
 
         it('does not contain a param for the infinite side', function () {
-          expect(filter.script.params).not.to.have.property('lt');
+          expect(filter.script.script.params).not.to.have.property('lt');
         });
 
         it('does not contain a script condition for the infinite side', function () {
           const script = indexPattern.fields.byName['script number'].script;
-          expect(filter.script.script).to.equal(`(${script})>=gte`);
+          expect(filter.script.script.inline).to.equal(`(${script})>=gte`);
         });
       });
     });

@@ -22,6 +22,12 @@ describe('Promise service', function () {
     });
   });
 
+  it('Promise.resolve', function (done) {
+    Promise.resolve(true).then(() => { done(); });
+    // Ugly, but necessary for promises to resolve: https://github.com/angular/angular.js/issues/12555
+    $rootScope.$apply();
+  });
+
   describe('Promise.fromNode', function () {
     it('creates a callback that controls a promise', function () {
       let callback;
@@ -31,8 +37,8 @@ describe('Promise service', function () {
     });
 
     it('rejects if the callback receives an error', function () {
-      let errback = sinon.stub();
-      let err = new Error();
+      const errback = sinon.stub();
+      const err = new Error();
       Promise.fromNode(cb => cb(err)).catch(errback);
       $rootScope.$apply();
 
@@ -41,8 +47,8 @@ describe('Promise service', function () {
     });
 
     it('resolves with the second argument', function () {
-      let thenback = sinon.stub();
-      let result = {};
+      const thenback = sinon.stub();
+      const result = {};
       Promise.fromNode(cb => cb(null, result)).then(thenback);
       $rootScope.$apply();
 
@@ -51,9 +57,9 @@ describe('Promise service', function () {
     });
 
     it('resolves with an array if multiple arguments are received', function () {
-      let thenback = sinon.stub();
-      let result1 = {};
-      let result2 = {};
+      const thenback = sinon.stub();
+      const result1 = {};
+      const result2 = {};
       Promise.fromNode(cb => cb(null, result1, result2)).then(thenback);
       $rootScope.$apply();
 
@@ -63,7 +69,7 @@ describe('Promise service', function () {
     });
 
     it('resolves with an array if multiple undefined are received', function () {
-      let thenback = sinon.stub();
+      const thenback = sinon.stub();
       Promise.fromNode(cb => cb(null, undefined, undefined)).then(thenback);
       $rootScope.$apply();
 

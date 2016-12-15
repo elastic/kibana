@@ -26,4 +26,9 @@ export default class UiNavLinkCollection extends Collection {
     return this[inOrderCache];
   }
 
+  delete(value) {
+    this[inOrderCache] = null;
+    return super.delete(value);
+  }
+
 };

@@ -1,10 +1,11 @@
-import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
+import Config from './config/config';
+import loggingConfiguration from './logging/configuration';
 
-let rootDir = fromRoot('.');
+const rootDir = fromRoot('.');
 
 module.exports = class KbnServer {
   constructor(settings) {
@@ -18,6 +19,7 @@ module.exports = class KbnServer {
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
+      require('./warnings'),
       require('./status'),
 
       // writes pid file
@@ -26,11 +28,20 @@ module.exports = class KbnServer {
       // find plugins and set this.plugins
       require('./plugins/scan'),
 
+      // disable the plugins that are disabled through configuration
+      require('./plugins/check_enabled'),
+
+      // disable the plugins that are incompatible with the current version of Kibana
+      require('./plugins/check_version'),
+
       // tell the config we are done loading plugins
       require('./config/complete'),
 
       // setup this.uiExports and this.bundles
       require('../ui'),
+
+      // setup server.uiSettings
+      require('../ui/settings'),
 
       // ensure that all bundles are built, or that the
       // lazy bundle server is running
@@ -61,7 +72,7 @@ module.exports = class KbnServer {
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */
   async mixin(...fns) {
-    for (let fn of compact(flatten(fns))) {
+    for (const fn of compact(flatten(fns))) {
       await fn.call(this, this, this.server, this.config);
     }
   }
@@ -73,7 +84,7 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    let { server, config } = this;
+    const { server, config } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));
@@ -103,5 +114,17 @@ module.exports = class KbnServer {
         cb(err);
       }
     });
+  }
+
+  applyLoggingConfiguration(settings) {
+    const config = Config.withDefaultSchema(settings);
+    const loggingOptions = loggingConfiguration(config);
+    const subset = {
+      ops: config.get('ops'),
+      logging: config.get('logging')
+    };
+    const plain = JSON.stringify(subset, null, 2);
+    this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
+    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
 };

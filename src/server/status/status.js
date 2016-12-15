@@ -3,22 +3,29 @@ import states from './states';
 import { EventEmitter } from 'events';
 
 class Status extends EventEmitter {
-  constructor(name, server) {
+  constructor(id, server) {
     super();
 
-    this.name = name;
+    if (!id || typeof id !== 'string') {
+      throw new TypeError('Status constructor requires an `id` string');
+    }
+
+    this.id = id;
     this.since = new Date();
     this.state = 'uninitialized';
     this.message = 'uninitialized';
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      let tags = ['status', name];
-      tags.push(this.state === 'red' ? 'error' : 'info');
+
+      const tags = [
+        'status',
+        this.id,
+        this.state === 'red' ? 'error' : 'info'
+      ];
 
       server.log(tags, {
         tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
-        name: name,
         state: this.state,
         message: this.message,
         prevState: previous,
@@ -29,7 +36,7 @@ class Status extends EventEmitter {
 
   toJSON() {
     return {
-      name: this.name,
+      id: this.id,
       state: this.state,
       icon: states.get(this.state).icon,
       message: this.message,
@@ -58,8 +65,8 @@ states.all.forEach(function (state) {
   Status.prototype[state.id] = function (message) {
     if (this.state === 'disabled') return;
 
-    let previous = this.state;
-    let previousMsg = this.message;
+    const previous = this.state;
+    const previousMsg = this.message;
 
     this.error = null;
     this.message = message || state.title;
@@ -75,8 +82,8 @@ states.all.forEach(function (state) {
       return;
     }
 
-    this.emit(state.id, previous, previousMsg);
-    this.emit('change', previous, previousMsg);
+    this.emit(state.id, previous, previousMsg, this.state, this.message);
+    this.emit('change', previous, previousMsg, this.state, this.message);
   };
 });
 

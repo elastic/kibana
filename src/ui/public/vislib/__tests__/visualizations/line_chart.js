@@ -15,7 +15,7 @@ import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-let dataTypes = [
+const dataTypes = [
   ['series pos', seriesPos],
   ['series pos neg', seriesPosNeg],
   ['series neg', seriesNeg],
@@ -26,8 +26,8 @@ let dataTypes = [
 
 describe('Vislib Line Chart', function () {
   dataTypes.forEach(function (type, i) {
-    let name = type[0];
-    let data = type[1];
+    const name = type[0];
+    const data = type[1];
 
     describe(name + ' Data', function () {
       let vis;
@@ -35,7 +35,7 @@ describe('Vislib Line Chart', function () {
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
-        let visLibParams = {
+        const visLibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
@@ -49,8 +49,7 @@ describe('Vislib Line Chart', function () {
       }));
 
       afterEach(function () {
-        $(vis.el).remove();
-        vis = null;
+        vis.destroy();
       });
 
       describe('addCircleEvents method', function () {
@@ -133,16 +132,16 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-
-            expect(yAxis.domain[0]).to.not.be(undefined);
-            expect(yAxis.domain[1]).to.not.be(undefined);
+            const yAxis = chart.handler.valueAxes[0];
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.not.be(undefined);
+            expect(domain[1]).to.not.be(undefined);
           });
         });
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.valueAxes[0];
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -168,17 +167,18 @@ describe('Vislib Line Chart', function () {
 
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
-          vis._attr.defaultYExtents = true;
+          vis.visConfigArgs.defaultYExtents = true;
           vis.render(data, persistedState);
         });
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-            let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
-
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            const yAxis = chart.handler.valueAxes[0];
+            const min = vis.handler.valueAxes[0].axisScale.getYMin();
+            const max = vis.handler.valueAxes[0].axisScale.getYMax();
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.equal(min);
+            expect(domain[1]).to.equal(max);
           });
         });
       });

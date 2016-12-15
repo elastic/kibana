@@ -14,8 +14,9 @@ paginate {
       flex: 1 0 auto;
       display: flex;
       justify-content: center;
+    }
 
-      &-list {
+      .pagination-other-pages-list {
         flex: 0 0 auto;
         display: flex;
         justify-content: center;
@@ -29,7 +30,7 @@ paginate {
 
           a {
             text-decoration: none;
-            background-color: @white;
+            background-color: @kibanaGray6;
             margin-left: 2px;
             padding: 8px 11px;
           }
@@ -42,10 +43,10 @@ paginate {
             text-decoration: none !important;
             font-weight: bold;
             color: @paginate-page-link-active-color;
+            cursor: default;
           }
         }
       }
-    }
 
     .pagination-size {
       flex: 0 0 auto;

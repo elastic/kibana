@@ -13,8 +13,7 @@ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_s
 describe('Vislib Dispatch Class Test Suite', function () {
 
   function destroyVis(vis) {
-    $(vis.el).remove();
-    vis = null;
+    vis.destroy();
   }
 
   function getEls(el, n, type) {
@@ -39,7 +38,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('extends the SimpleEmitter class', function () {
-      let events = _.pluck(vis.handler.charts, 'events');
+      const events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function (dispatch) {
         expect(dispatch).to.be.a(SimpleEmitter);
@@ -65,11 +64,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     describe('addEvent method', function () {
       it('returns a function that binds the passed event to a selection', function () {
-        let chart = _.first(vis.handler.charts);
-        let apply = chart.events.addEvent('event', _.noop);
+        const chart = _.first(vis.handler.charts);
+        const apply = chart.events.addEvent('event', _.noop);
         expect(apply).to.be.a('function');
 
-        let els = getEls(vis.el, 3, 'div');
+        const els = getEls(vis.el, 3, 'div');
         apply(els);
         els.each(function () {
           expect(d3.select(this).on('event')).to.be(_.noop);
@@ -88,11 +87,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
         });
 
         it('returns a function that binds ' + event + ' events to a selection', function () {
-          let chart = _.first(vis.handler.charts);
-          let apply = chart.events[name](d3.select(document.createElement('svg')));
+          const chart = _.first(vis.handler.charts);
+          const apply = chart.events[name](chart.series[0].chartEl);
           expect(apply).to.be.a('function');
 
-          let els = getEls(vis.el, 3, 'div');
+          const els = getEls(vis.el, 3, 'div');
           apply(els);
           els.each(function () {
             expect(d3.select(this).on(event)).to.be.a('function');
@@ -109,7 +108,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     describe('addMousePointer method', function () {
       it('should be a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          let pointer = chart.events.addMousePointer;
+          const pointer = chart.events.addMousePointer;
 
           expect(_.isFunction(pointer)).to.be(true);
         });
@@ -121,7 +120,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
       let vis;
       let persistedState;
-      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
@@ -141,7 +139,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     it('can be added after rendering', function () {
       let vis;
       let persistedState;
-      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();

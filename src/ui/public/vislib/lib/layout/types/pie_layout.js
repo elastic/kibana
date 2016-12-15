@@ -1,9 +1,8 @@
-import d3 from 'd3';
-import VislibLibLayoutSplitsPieChartChartSplitProvider from 'ui/vislib/lib/layout/splits/pie_chart/chart_split';
-import VislibLibLayoutSplitsPieChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/pie_chart/chart_title_split';
+import VislibLibLayoutSplitsPieChartChartSplitProvider from '../splits/pie_chart/chart_split';
+import VislibLibLayoutSplitsPieChartChartTitleSplitProvider from '../splits/pie_chart/chart_title_split';
 export default function ColumnLayoutFactory(Private) {
-  let chartSplit = Private(VislibLibLayoutSplitsPieChartChartSplitProvider);
-  let chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
+  const chartSplit = Private(VislibLibLayoutSplitsPieChartChartSplitProvider);
+  const chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
 
   /**
    * Specifies the visualization layout for column charts.
@@ -54,10 +53,6 @@ export default function ColumnLayoutFactory(Private) {
                 splits: chartTitleSplit
               }
             ]
-          },
-          {
-            type: 'div',
-            class: 'legend-col-wrapper'
           }
         ]
       }

@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import VislibComponentsLabelsDataArrayProvider from 'ui/vislib/components/labels/data_array';
-import VislibComponentsLabelsUniqLabelsProvider from 'ui/vislib/components/labels/uniq_labels';
-import VislibComponentsLabelsPiePieLabelsProvider from 'ui/vislib/components/labels/pie/pie_labels';
+import VislibComponentsLabelsDataArrayProvider from './data_array';
+import VislibComponentsLabelsUniqLabelsProvider from './uniq_labels';
+import VislibComponentsLabelsPiePieLabelsProvider from './pie/pie_labels';
 export default function LabelUtilService(Private) {
 
-  let createArr = Private(VislibComponentsLabelsDataArrayProvider);
-  let getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
-  let getPieLabels = Private(VislibComponentsLabelsPiePieLabelsProvider);
+  const createArr = Private(VislibComponentsLabelsDataArrayProvider);
+  const getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
+  const getPieLabels = Private(VislibComponentsLabelsPiePieLabelsProvider);
 
   /*
    * Accepts a Kibana data object and returns an array of unique labels (strings).

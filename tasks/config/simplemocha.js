@@ -5,7 +5,8 @@ module.exports = {
     timeout: 10000,
     slow: 5000,
     ignoreLeaks: false,
-    reporter: 'dot'
+    reporter: 'dot',
+    globals: ['nil']
   },
   all: {
     src: [
@@ -13,7 +14,7 @@ module.exports = {
       'src/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
-      '!src/ui/**'
+      '!**/_*.js'
     ]
   }
 };

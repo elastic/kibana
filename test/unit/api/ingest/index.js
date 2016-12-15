@@ -1,16 +1,15 @@
 define(function (require) {
-  var bdd = require('intern!bdd');
-  var serverConfig = require('intern/dojo/node!../../../server_config');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
-  var request = require('intern/dojo/node!supertest-as-promised');
-  var url = require('intern/dojo/node!url');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
-  var post = require('./_post');
-  var del = require('./_del');
+  const bdd = require('intern!bdd');
+  const serverConfig = require('intern/dojo/node!../../../server_config');
+  const ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
+  let request = require('intern/dojo/node!supertest-as-promised');
+  const url = require('intern/dojo/node!url');
+  const _ = require('intern/dojo/node!lodash');
+  const expect = require('intern/dojo/node!expect.js');
+  const fieldCapabilities = require('./_field_capabilities');
 
   bdd.describe('ingest API', function () {
-    var scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
+    const scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
     request = request(url.format(serverConfig.servers.kibana) + '/api');
 
     bdd.before(function () {
@@ -21,7 +20,6 @@ define(function (require) {
       return scenarioManager.unload('emptyKibana');
     });
 
-    post(bdd, scenarioManager, request);
-    del(bdd, scenarioManager, request);
+    fieldCapabilities(bdd, scenarioManager, request);
   });
 });

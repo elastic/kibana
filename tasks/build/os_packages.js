@@ -1,55 +1,79 @@
-module.exports = function (grunt) {
-  const { resolve } = require('path');
-  const { indexBy } = require('lodash');
+import { resolve } from 'path';
+import { indexBy } from 'lodash';
+import exec from '../utils/exec';
 
+export default (grunt) => {
   const { config } = grunt;
   const exec = require('../utils/exec');
   const targetDir = config.get('target');
-  const version = config.get('pkg.version');
-  const userScriptsDir = config.get('userScriptsDir');
+  const packageScriptsDir = grunt.config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');
+  const packages = config.get('packages');
+  const fpm = args => exec('fpm', args);
 
   grunt.registerTask('_build:osPackages', function () {
-    grunt.config.get('platforms').forEach(({ name, buildDir }) => {
-      // TODO(sissel): Check if `fpm` is available
-      if (!(/linux-x(86|64)$/.test(name))) return;
+    grunt.file.mkdir(targetDir);
 
-      const arch = /x64$/.test(name) ? 'x86_64' : 'i686';
-      const fpm = args => exec('fpm', args);
-
-      const args = [
+    config.get('platforms')
+    .filter(({ name }) => /linux-x86(_64)?$/.test(name))
+    .forEach(({ buildDir, debArch, rpmArch }) => {
+      const baseOptions = [
         '--force',
-        '--package', targetDir,
+        // we force dashes in the version file name because otherwise fpm uses
+        // the filtered package version, which would have dashes replaced with
+        // underscores
+        '--package', `${targetDir}/NAME-${packages.version}-ARCH.TYPE`,
         '-s', 'dir', // input type
-        '--name', 'kibana',
-        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
-        '--version', version,
-        '--url', 'https://www.elastic.co',
-        '--vendor', 'Elasticsearch,\ Inc.',
-        '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
-        '--license', 'Apache\ 2.0',
-        '--after-install', resolve(userScriptsDir, 'installer.sh'),
-        '--after-remove', resolve(userScriptsDir, 'remover.sh'),
-        '--config-files', '/opt/kibana/config/kibana.yml'
+        '--name', packages.name,
+        '--description', packages.description,
+        '--version', packages.version,
+        '--url', packages.site,
+        '--vendor', packages.vendor,
+        '--maintainer', packages.maintainer,
+        '--license', packages.license,
+        '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
+        '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
+        '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
+        '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
+        '--config-files', packages.path.kibanaConfig,
+        '--template-value', `user=${packages.user}`,
+        '--template-value', `group=${packages.group}`,
+        '--template-value', `optimizeDir=${packages.path.home}/optimize`,
+        '--template-value', `configDir=${packages.path.conf}`,
+        '--template-value', `pluginsDir=${packages.path.plugins}`,
+        '--template-value', `dataDir=${packages.path.data}`,
+        //config folder is moved to path.conf, exclude {path.home}/config
+        //uses relative path to --prefix, strip the leading /
+        '--exclude', `${packages.path.home.slice(1)}/config`,
+        '--exclude', `${packages.path.home.slice(1)}/data`
+      ];
+      const debOptions = [
+        '-t', 'deb',
+        '--architecture', debArch,
+        '--deb-priority', 'optional'
+      ];
+      const rpmOptions = [
+        '-t', 'rpm',
+        '--architecture', rpmArch,
+        '--rpm-os', 'linux'
+      ];
+      const args = [
+        `${buildDir}/=${packages.path.home}/`,
+        `${buildDir}/config/=${packages.path.conf}/`,
+        `${buildDir}/data/=${packages.path.data}/`,
+        `${servicesByName.sysv.outputDir}/etc/=/etc/`,
+        `${servicesByName.systemd.outputDir}/etc/=/etc/`
       ];
 
-      const files = buildDir + '/=/opt/kibana';
-      const sysv = servicesByName.sysv.outputDir + '/etc/=/etc/';
-      const systemd = servicesByName.systemd.outputDir + '/lib/=/lib/';
-
       //Manually find flags, multiple args without assignment are not entirely parsed
-      var flags = grunt.option.flags().join(',');
-
-      const buildDeb = !!flags.match('deb');
-      const buildRpm = !!flags.match('rpm');
-      const noneSpecified = !buildRpm && !buildDeb;
-
-      grunt.file.mkdir(targetDir);
-      if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files, sysv, systemd));
+      const flags = grunt.option.flags().filter(flag => /deb|rpm/.test(flag)).join(',');
+      const buildDeb = flags.includes('deb') || !flags.length;
+      const buildRpm = flags.includes('rpm') || !flags.length;
+      if (buildDeb) {
+        fpm([...baseOptions, ...debOptions, ...args]);
       }
-      if (buildRpm || noneSpecified) {
-        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));
+      if (buildRpm) {
+        fpm([...baseOptions, ...rpmOptions, ...args]);
       }
 
     });

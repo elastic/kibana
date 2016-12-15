@@ -1,0 +1,14 @@
+[[wrapping-up]]
+== Wrapping Up
+
+Now that you have a handle on the basics, you're ready to start exploring
+your own data with Kibana.
+
+* See <<discover, Discover>> for more information about searching and filtering
+your data.
+* See <<visualize, Visualize>> for information about all of the visualization
+types Kibana has to offer.
+* See <<management, Management>> for information about configuring Kibana
+and managing your saved objects. 
+* See <<console-kibana, Console>> for information about the interactive 
+console UI you can use to submit REST requests to Elasticsearch.

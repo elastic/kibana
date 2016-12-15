@@ -1,0 +1,273 @@
+@import (reference) "~ui/styles/variables";
+
+.tab-discover {
+  overflow-x: hidden;
+}
+
+  .discover-wrapper {
+    padding-right: 0px !important;
+    padding-left: @collapser-width;
+  }
+
+  .discover-content {
+    padding-right: @padding-base-horizontal;
+    clear: both;
+  }
+
+  .discover-timechart {
+    display: block;
+    position: relative;
+
+    header {
+      min-height: @input-height-base + 8px;
+      padding: 4px 0;
+    }
+
+    visualize {
+      height: 200px;
+      max-height: 600px;
+
+      .loading {
+        opacity: 1 !important;
+      }
+
+      &.only-spy {
+        height: auto;
+
+        .visualize-table {
+          height: auto;
+        }
+      }
+    }
+
+    .chartwrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .vis-overlay {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .discover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 20;
+
+    opacity: 0.75;
+    text-align: center;
+    background-color: transparent;
+
+    // spinner and progress counter
+    > div {
+      text-align: center;
+    }
+  }
+
+  .discover-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+  }
+
+    .discover-info-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+  .discover-table {
+    overflow-y: auto;
+    overflow-x: auto;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+
+    tbody {
+      font-family: "Lucida Console", Monaco, monospace;
+    }
+  }
+
+    .discover-table-footer {
+      background-color: @discover-table-footer-bg;
+      padding: 5px 10px;
+    }
+
+    .discover-table-details-toggle {
+      margin-bottom: 3px;
+    }
+
+    .discover-table-timefield {
+      white-space: nowrap;
+    }
+
+    .discover-table-open-icon {
+      // when switching between open and closed, the toggle changes size
+      // slightly which is a problem because it forces the entire table to
+      // re-render which is SLOW
+      width: 7px;
+    }
+
+    .discover-field-filter {
+      background-color: @discover-field-filter-bg;
+      margin-right: 10px;
+
+      .form-group {
+        margin-bottom: 0px;
+      }
+    }
+
+    .discover-field-toggle {
+      color: @discover-field-toggle-color;
+      font-size: 9px;
+    }
+
+.shard-failures {
+  color: @discover-shard-failures-color;
+  background-color: @discover-shard-failures-bg !important;
+  border: 1px solid;
+  border-color: @discover-shard-failures-border;
+  border-radius: @border-radius-base;
+  padding: 0 20px 20px;
+  li {
+    padding-bottom: 5px;
+  }
+}
+
+.sidebar-item button.discover-field-toggle {
+  display: none;
+  font-size: 9px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 5px 10px;
+}
+
+.sidebar-item:hover:hover button.discover-field-toggle {
+  display: block;
+}
+
+.discover-field-details {
+  border-top: 1px solid;
+  border-top-color: @discover-field-details-border;
+  padding: 5px 10px;
+  background-color: @discover-field-details-bg;
+  color: @discover-field-details-color;
+}
+
+  .discover-field-details-close {
+    text-align: center;
+    border-top: 1px solid;
+    border-color: @discover-field-details-close-border;
+    background-color: @discover-field-details-close-bg;
+
+    &:hover {
+      background-color: @discover-field-details-close-hover-bg;
+      color: @discover-field-details-close-hover-color;
+    }
+  }
+
+  .discover-field-details-count {
+    white-space: nowrap;
+  }
+
+  .discover-field-details-error {
+    margin-top: 5px;
+  }
+
+  .discover-field-details-item {
+    margin-top: 5px;
+  }
+
+  .discover-field-details-filter {
+    cursor: pointer;
+  }
+
+/**
+ * TODO: Refactor these selectors to be less specific.
+ */
+.discover-field-details {
+  a {
+    color: @discover-link-color !important;
+  }
+
+  a.btn {
+    color: @discover-link-btn-color !important;
+  }
+
+  .progress {
+    margin-bottom: 0px;
+
+    .progress-bar {
+      padding-left: 10px;
+      text-align: right;
+      line-height: 18px;
+      max-width: 100%;
+      border-radius: 4px;
+
+      span {
+        background-color: @discover-field-details-progress-bar-bg;
+        padding: 3px;
+        border-radius: 4px;
+        margin-left: 3px;
+        margin-right: 3px;
+      }
+    }
+  }
+}
+
+field-name,
+[field-name] {
+  > i {
+    margin-right: 5px;
+    text-align: center;
+    display: inline-block;
+    width: 12px;
+    color: @field-name-color;
+  }
+
+  &.no-results {
+    color: @field-name-no-results-color;
+  }
+}
+
+disc-field-chooser {
+  ul.discover-selected-fields {
+    /* If only _source is presend in the selected fields list, hide its toggle button */
+    li:first-child:nth-last-child(1)[attr-field=_source] button.discover-field-toggle {
+      display: none;
+    }
+  }
+
+  .sidebar-item.active .sidebar-item-title {
+    background-color: @sidebar-active-bg;
+    color: @sidebar-active-color;
+  }
+  .sidebar-item-title {
+    position: relative;
+  }
+}
+
+.results {
+  h3 {
+    margin: -20px 0 10px 0;
+    text-align: center;
+  }
+}
+
+  .results-interval {
+    a {
+      text-decoration: underline;
+    }
+
+    select {
+      display: inline-block;
+      width: auto;
+    }
+  }

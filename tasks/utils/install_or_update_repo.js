@@ -1,12 +1,12 @@
-var Promise = require('bluebird');
-var spawn = require('./spawn');
-var grunt = require('grunt');
+const Promise = require('bluebird');
+const spawn = require('./spawn');
+const grunt = require('grunt');
 
 module.exports = function (repo, dir) {
   // store the previous and new hash from the repo
   // to know if there was an update from fetch
-  var prevHash;
-  var newHash;
+  let prevHash;
+  let newHash;
 
   return Promise.resolve()
   .then(function () {

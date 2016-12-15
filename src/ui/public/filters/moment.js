@@ -6,7 +6,7 @@ uiModules
   .get('kibana')
   .filter('moment', function (config) {
     return function (datetime) {
-      let format = config.get('dateFormat');
+      const format = config.get('dateFormat');
       if (moment.isMoment(datetime)) return datetime.format(format);
       if (_.isDate(datetime)) return moment(datetime).format(format);
       return datetime;

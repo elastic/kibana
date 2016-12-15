@@ -8,33 +8,25 @@ uiModules
     return {
       restrict: 'A',
       require: 'ngModel',
-      scope: {
-        'ngModel': '='
-      },
       link: function ($scope, elem, attr, ngModel) {
-        let illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
-        let isValid = function (input) {
+        const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
+        const allowWildcard = !_.isUndefined(attr.allowWildcard) && attr.allowWildcard !== 'false';
+        if (!allowWildcard) {
+          illegalCharacters.push('*');
+        }
+
+        const isValid = function (input) {
           if (input == null || input === '' || input === '.' || input === '..') return false;
 
-          let match = _.find(illegalCharacters, function (character) {
+          const match = _.find(illegalCharacters, function (character) {
             return input.indexOf(character) >= 0;
           });
           return !match;
         };
 
-        // From User
-        ngModel.$parsers.unshift(function (value) {
-          let valid = isValid(value);
-          ngModel.$setValidity('indexNameInput', valid);
-          return valid ? value : undefined;
-        });
-
-        // To user
-        ngModel.$formatters.unshift(function (value) {
-          ngModel.$setValidity('indexNameInput', isValid(value));
-          return value;
-        });
-
+        ngModel.$validators.indexNameInput = function (modelValue, viewValue) {
+          return isValid(viewValue);
+        };
       }
     };
   });

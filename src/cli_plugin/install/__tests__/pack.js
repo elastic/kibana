@@ -12,30 +12,41 @@ describe('kibana cli', function () {
 
   describe('pack', function () {
 
-    const testWorkingPath = join(__dirname, '.test.data');
-    const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
-    const testPluginPath = join(testWorkingPath, '.installedPlugins');
+    let testNum = 0;
+    const workingPathRoot = join(__dirname, '.test.data');
+    let testWorkingPath;
+    let tempArchiveFilePath;
+    let testPluginPath;
     let logger;
-
-    const settings = {
-      workingPath: testWorkingPath,
-      tempArchiveFile: tempArchiveFilePath,
-      pluginDir: testPluginPath,
-      plugin: 'test-plugin'
-    };
+    let settings;
 
     beforeEach(function () {
+      //These tests are dependent on the file system, and I had some inconsistent
+      //behavior with rimraf.sync show up. Until these tests are re-written to not
+      //depend on the file system, I make sure that each test uses a different
+      //working directory.
+      testNum += 1;
+      testWorkingPath = join(workingPathRoot, testNum + '');
+      tempArchiveFilePath = join(testWorkingPath, 'archive.part');
+      testPluginPath = join(testWorkingPath, '.installedPlugins');
+
+      settings = {
+        workingPath: testWorkingPath,
+        tempArchiveFile: tempArchiveFilePath,
+        pluginDir: testPluginPath,
+        plugin: 'test-plugin'
+      };
+
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(testWorkingPath);
       mkdirp.sync(testWorkingPath);
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(testWorkingPath);
+      rimraf.sync(workingPathRoot);
     });
 
     function copyReplyFile(filename) {
@@ -89,7 +100,30 @@ describe('kibana cli', function () {
           expect(settings.plugins[0].name).to.be('test-plugin');
           expect(settings.plugins[0].folder).to.be('test-plugin');
           expect(settings.plugins[0].version).to.be('1.0.0');
+          expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
           expect(settings.plugins[0].platform).to.be(undefined);
+        });
+      });
+
+      it('populate settings.plugin.kibanaVersion', function () {
+        //kibana.version is defined in this package.json and is different than plugin version
+        return copyReplyFile('test_plugin_different_version.zip')
+        .then(() => {
+          return getPackData(settings, logger);
+        })
+        .then(() => {
+          expect(settings.plugins[0].kibanaVersion).to.be('5.0.1');
+        });
+      });
+
+      it('populate settings.plugin.kibanaVersion (default to plugin version)', function () {
+        //kibana.version is not defined in this package.json, defaults to plugin version
+        return copyReplyFile('test_plugin.zip')
+        .then(() => {
+          return getPackData(settings, logger);
+        })
+        .then(() => {
+          expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
         });
       });
 

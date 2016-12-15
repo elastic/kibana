@@ -1,0 +1,8 @@
+<input input-focus ng-show="interval === 'other'"
+  class="form-control timelion-interval"
+  ng-model="otherInterval">
+
+<select class="form-control timelion-interval timelion-interval--select"
+  ng-options="i for i in intervalOptions"
+  ng-class="{'timelion-interval-other': interval == 'other'}"
+  ng-model="interval"></select>

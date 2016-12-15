@@ -7,8 +7,8 @@ import 'plugins/kibana/discover/index';
 
 // TODO: This should not be needed, timefilter is only included here, it should move
 
-let typeaheadHistoryCount = 10;
-let typeaheadName = 'unittest';
+const typeaheadHistoryCount = 10;
+const typeaheadName = 'unittest';
 let $parentScope;
 let $typeaheadScope;
 let $elem;
@@ -20,9 +20,9 @@ let markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
   '<kbn-typeahead-items></kbn-typeahead-items>' +
   '</div>';
-let typeaheadItems = ['abc', 'def', 'ghi'];
+const typeaheadItems = ['abc', 'def', 'ghi'];
 
-let init = function () {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -64,7 +64,7 @@ let init = function () {
 describe('typeahead directive', function () {
   describe('typeahead requirements', function () {
     describe('missing input', function () {
-      let goodMarkup = markup;
+      const goodMarkup = markup;
 
       before(function () {
         markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
@@ -99,7 +99,7 @@ describe('typeahead directive', function () {
       });
 
       it('should not save empty entries', function () {
-        let entries = typeaheadItems.slice(0);
+        const entries = typeaheadItems.slice(0);
         entries.push('', 'jkl');
         for (let i = 0; i < entries.length; i++) {
           $typeaheadScope.inputModel.$setViewValue(entries[i]);
@@ -128,10 +128,10 @@ describe('typeahead directive', function () {
         expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
       });
 
-      it('should order fitlered results', function () {
-        let entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
-        let allEntries = typeaheadItems.concat(entries);
-        let startMatches = allEntries.filter(function (item) {
+      it('should order filtered results', function () {
+        const entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
+        const allEntries = typeaheadItems.concat(entries);
+        const startMatches = allEntries.filter(function (item) {
           return /^a/.test(item);
         });
         typeaheadCtrl.history.add.returns(allEntries);
@@ -144,7 +144,7 @@ describe('typeahead directive', function () {
         typeaheadCtrl.filterItemsByQuery('a');
 
         expect($typeaheadScope.filteredItems).to.contain('phantogram');
-        let nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
+        const nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
 
         startMatches.forEach(function (item) {
           expect($typeaheadScope.filteredItems).to.contain(item);

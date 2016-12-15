@@ -5,10 +5,10 @@ import rison from 'rison-node';
 import StateManagementStateProvider from 'ui/state_management/state';
 import uiModules from 'ui/modules';
 
-let module = uiModules.get('kibana/global_state');
+const module = uiModules.get('kibana/global_state');
 
-module.service('globalState', function (Private, $rootScope, $location) {
-  let State = Private(StateManagementStateProvider);
+function GlobalStateProvider(Private, $rootScope, $location) {
+  const State = Private(StateManagementStateProvider);
 
   _.class(GlobalState).inherits(State);
   function GlobalState(defaults) {
@@ -23,4 +23,9 @@ module.service('globalState', function (Private, $rootScope, $location) {
   };
 
   return new GlobalState();
+}
+
+module.service('globalState', function (Private) {
+  return Private(GlobalStateProvider);
 });
+export default GlobalStateProvider;

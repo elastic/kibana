@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -8,17 +7,23 @@ import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import MockMap from 'fixtures/tilemap_map';
 import $ from 'jquery';
 import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
-let mockChartEl = $('<div>');
+const mockChartEl = $('<div>');
 
 let TileMap;
 let extentsStub;
 
 function createTileMap(handler, chartEl, chartData) {
-  handler = handler || {};
+  handler = handler || {
+    visConfig: {
+      get: function () {
+        return '';
+      }
+    }
+  };
   chartEl = chartEl || mockChartEl;
   chartData = chartData || geoJsonData;
 
-  let tilemap = new TileMap(handler, chartEl, chartData);
+  const tilemap = new TileMap(handler, chartEl, chartData);
   return tilemap;
 }
 
@@ -52,7 +57,7 @@ describe('TileMap Tests', function () {
     });
 
     it('should call destroy for clean state', function () {
-      let destroySpy = sinon.spy(tilemap, 'destroy');
+      const destroySpy = sinon.spy(tilemap, 'destroy');
       tilemap.draw();
       expect(destroySpy.callCount).to.equal(1);
     });
@@ -73,14 +78,15 @@ describe('TileMap Tests', function () {
 
     it('should append maps and required controls', function () {
       expect(tilemap.maps).to.have.length(1);
-      let map = tilemap.maps[0];
+      const map = tilemap.maps[0];
       expect(map.addTitle.callCount).to.equal(0);
       expect(map.addFitControl.callCount).to.equal(1);
       expect(map.addBoundingControl.callCount).to.equal(1);
     });
 
     it('should only add controls if data exists', function () {
-      let noData = {
+      const noData = {
+        geohashGridAgg: { vis: { params: {} } },
         geoJson: {
           features: [],
           properties: {},
@@ -92,17 +98,17 @@ describe('TileMap Tests', function () {
       tilemap._appendMap($selection);
       expect(tilemap.maps).to.have.length(1);
 
-      let map = tilemap.maps[0];
+      const map = tilemap.maps[0];
       expect(map.addTitle.callCount).to.equal(0);
       expect(map.addFitControl.callCount).to.equal(0);
       expect(map.addBoundingControl.callCount).to.equal(0);
     });
 
     it('should append title if set in the data object', function () {
-      let mapTitle = 'Test Title';
+      const mapTitle = 'Test Title';
       tilemap = createTileMap(null, null, _.assign({ title: mapTitle }, geoJsonData));
       tilemap._appendMap($selection);
-      let map = tilemap.maps[0];
+      const map = tilemap.maps[0];
 
       expect(map.addTitle.callCount).to.equal(1);
       expect(map.addTitle.firstCall.calledWith(mapTitle)).to.equal(true);
@@ -110,8 +116,8 @@ describe('TileMap Tests', function () {
   });
 
   describe('destroy', function () {
-    let maps = [];
-    let mapCount = 5;
+    const maps = [];
+    const mapCount = 5;
 
     beforeEach(function () {
       _.times(mapCount, function () {

@@ -1,0 +1,82 @@
+[[connect-to-elasticsearch]]
+== Connect Kibana with Elasticsearch
+
+Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore.
+The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of
+one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can
+add index patterns at any time from the <<settings-create-pattern,Management tab>>.
+
+TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a
+different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and
+restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
+
+To configure the Elasticsearch indices you want to access with Kibana:
+
+. Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or
+`http://YOURDOMAIN.com:5601`.
++
+image:images/Start-Page.png[Kibana start page]
++
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default,
+Kibana guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case,
+you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more
+characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter
+an appropriate pattern. The "pattern" can also simply be the name of a single index.
+. Select the index field that contains the timestamp that you want to use to perform time-based
+comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your
+index doesn't have time-based data, disable the *Index contains time-based events* option.
++
+WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Support for
+this functionality will be removed entirely in the next major Kibana release. Elasticsearch 2.1 includes
+sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to
+specify dates in the index pattern name.
++
+. Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
+When you have more than one index pattern, you can designate which one to use as the default by clicking 
+on the star icon above the index pattern title from *Management > Index Patterns*.
+
+All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
+configured for the matching index.
+
+NOTE: Kibana relies on dynamic mapping to use fields in visualizations and manage the
+`.kibana` index. If you have disabled dynamic mapping, you need to manually provide
+mappings for the fields that Kibana uses to create visualizations. For more information, see
+<<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>>.
+
+[float]
+[[explore]]
+=== Start Exploring your Data!
+You're ready to dive in to your data:
+
+* Search and browse your data interactively from the <<discover, Discover>> page.
+* Chart and map your data from the <<visualize, Visualize>> page.
+* Create and view custom dashboards from the <<dashboard, Dashboard>> page.
+
+For a step-by-step introduction to these core Kibana concepts, see the <<getting-started,
+Getting Started>> tutorial.
+
+[float]
+[[kibana-dynamic-mapping]]
+=== Kibana and Elasticsearch Dynamic Mapping
+By default, Elasticsearch enables {es-ref}dynamic-mapping.html[dynamic mapping] for fields. Kibana needs
+dynamic mapping to use fields in visualizations correctly, as well as to manage the `.kibana` index
+where saved searches, visualizations, and dashboards are stored.
+
+If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide
+mappings for fields that Kibana uses to create visualizations. You also need to manually enable dynamic
+mapping for the `.kibana` index.
+
+The following procedure assumes that the `.kibana` index does not already exist in Elasticsearch and
+that the `index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
+
+. Start Elasticsearch.
+. Create the `.kibana` index with dynamic mapping enabled just for that index:
++
+[source,shell]
+PUT .kibana
+{
+  "index.mapper.dynamic": true
+}
++
+. Start Kibana and navigate to the web UI and verify that there are no error messages related to dynamic
+mapping.

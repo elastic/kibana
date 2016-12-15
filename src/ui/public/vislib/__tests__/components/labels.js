@@ -15,7 +15,7 @@ let rowsArr;
 let uniqLabels;
 let error;
 
-let seriesData = {
+const seriesData = {
   'label': '',
   'series': [
     {
@@ -25,7 +25,7 @@ let seriesData = {
   ]
 };
 
-let rowsData = {
+const rowsData = {
   'rows': [
     {
       'label': 'a',
@@ -66,7 +66,7 @@ let rowsData = {
   ]
 };
 
-let columnsData = {
+const columnsData = {
   'columns': [
     {
       'label': 'a',
@@ -152,23 +152,23 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Data array', function () {
-    let childrenObject = {
+    const childrenObject = {
       children: []
     };
-    let seriesObject = {
+    const seriesObject = {
       series: []
     };
-    let rowsObject = {
+    const rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    const columnsObject = {
       columns: []
     };
-    let string = 'string';
-    let number = 23;
-    let boolean = false;
-    let emptyArray = [];
-    let nullValue = null;
+    const string = 'string';
+    const number = 23;
+    const boolean = false;
+    const emptyArray = [];
+    const nullValue = null;
     let notAValue;
     let dataArray;
     let testSeries;
@@ -267,7 +267,7 @@ describe('Vislib Labels Module Test Suite', function () {
 
   describe('Unique labels', function () {
     let uniqLabels;
-    let arrObj = [
+    const arrObj = [
       {'label': 'a'},
       {'label': 'b'},
       {'label': 'b'},
@@ -276,12 +276,12 @@ describe('Vislib Labels Module Test Suite', function () {
       {'label': 'd'},
       {'label': 'f'}
     ];
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let emptyObject = {};
-    let emptyArray = [];
+    const string = 'string';
+    const number = 24;
+    const boolean = false;
+    const nullValue = null;
+    const emptyObject = {};
+    const emptyArray = [];
     let notAValue;
     let uniq;
     let testArr;
@@ -340,18 +340,18 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Get series', function () {
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let rowsObject = {
+    const string = 'string';
+    const number = 24;
+    const boolean = false;
+    const nullValue = null;
+    const rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    const columnsObject = {
       columns: []
     };
-    let emptyObject = {};
-    let emptyArray = [];
+    const emptyObject = {};
+    const emptyArray = [];
     let notAValue;
     let getSeries;
     let columnsLabels;

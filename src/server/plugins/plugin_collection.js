@@ -2,10 +2,22 @@
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
+import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
 
-let byIdCache = Symbol('byIdCache');
-let pluginApis = Symbol('pluginApis');
+const byIdCache = Symbol('byIdCache');
+const pluginApis = Symbol('pluginApis');
+
+async function addPluginConfig(pluginCollection, plugin) {
+  const configSchema = await plugin.getConfigSchema();
+  const { config } = pluginCollection.kbnServer;
+  config.extendSchema(plugin.configPrefix, configSchema);
+}
+
+function removePluginConfig(pluginCollection, plugin) {
+  const { config } = pluginCollection.kbnServer;
+  config.removeSchema(plugin.configPrefix);
+}
 
 module.exports = class Plugins extends Collection {
 
@@ -16,30 +28,30 @@ module.exports = class Plugins extends Collection {
   }
 
   async new(path) {
-    let api = new PluginApi(this.kbnServer, path);
+    const api = new PluginApi(this.kbnServer, path);
     this[pluginApis].add(api);
 
-    let output = [].concat(require(path)(api) || []);
-    let config = this.kbnServer.config;
+    const output = [].concat(require(path)(api) || []);
+    const config = this.kbnServer.config;
 
     if (!output.length) return;
 
     // clear the byIdCache
     this[byIdCache] = null;
 
-    for (let product of output) {
-
-      if (product instanceof api.Plugin) {
-        let plugin = product;
-        this.add(plugin);
-
-        let enabled = await plugin.readConfig();
-        if (!enabled) this.delete(plugin);
-        continue;
+    for (const plugin of output) {
+      if (!plugin instanceof api.Plugin) {
+        throw new TypeError('unexpected plugin export ' + inspect(plugin));
       }
 
-      throw new TypeError('unexpected plugin export ' + inspect(product));
+      await addPluginConfig(this, plugin);
+      this.add(plugin);
     }
+  }
+
+  async disable(plugin) {
+    removePluginConfig(this, plugin);
+    this.delete(plugin);
   }
 
   get byId() {

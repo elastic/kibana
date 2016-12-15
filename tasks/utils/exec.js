@@ -1,4 +1,4 @@
-let { execFileSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 function exec(cmd, args, opts) {
   console.log(' >', cmd, args.join(' '));

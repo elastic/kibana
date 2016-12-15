@@ -3,7 +3,7 @@ import moment from 'moment';
 export default function DateIntervalRoundingRulesProvider() {
   // these are the rounding rules used by roundInterval()
 
-  let roundingRules = [
+  const roundingRules = [
     [ d(500, 'ms'), d(100, 'ms') ],
     [ d(5, 'second'), d(1, 'second') ],
     [ d(7.5, 'second'), d(5, 'second') ],
@@ -22,16 +22,16 @@ export default function DateIntervalRoundingRulesProvider() {
     [ Infinity, d(1, 'year') ]
   ];
 
-  let revRoundingRules = roundingRules.slice(0).reverse();
+  const revRoundingRules = roundingRules.slice(0).reverse();
 
   function find(rules, check, last) {
     function pick(buckets, duration) {
-      let target = duration / buckets;
+      const target = duration / buckets;
       let lastResp;
 
       for (let i = 0; i < rules.length; i++) {
-        let rule = rules[i];
-        let resp = check(rule[0], rule[1], target);
+        const rule = rules[i];
+        const resp = check(rule[0], rule[1], target);
 
         if (resp == null) {
           if (!last) continue;
@@ -44,12 +44,12 @@ export default function DateIntervalRoundingRulesProvider() {
       }
 
       // fallback to just a number of milliseconds, ensure ms is >= 1
-      let ms = Math.max(Math.floor(target), 1);
+      const ms = Math.max(Math.floor(target), 1);
       return moment.duration(ms, 'ms');
     }
 
     return function (buckets, duration) {
-      let interval = pick(buckets, duration);
+      const interval = pick(buckets, duration);
       if (interval) return moment.duration(interval._data);
     };
   }

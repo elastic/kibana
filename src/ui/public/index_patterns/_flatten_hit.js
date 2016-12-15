@@ -1,18 +1,18 @@
 import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
-export default function FlattenHitProvider(config, $rootScope) {
-
+export default function FlattenHitProvider(config) {
   let metaFields = config.get('metaFields');
-  $rootScope.$on('change:config.metaFields', function () {
-    metaFields = config.get('metaFields');
+
+  config.watch('metaFields', value => {
+    metaFields = value;
   });
 
   function flattenHit(indexPattern, hit) {
-    let flat = {};
+    const flat = {};
 
     // recursively merge _source
-    let fields = indexPattern.fields.byName;
+    const fields = indexPattern.fields.byName;
     (function flatten(obj, keyPrefix) {
       keyPrefix = keyPrefix ? keyPrefix + '.' : '';
       _.forOwn(obj, function (val, key) {
@@ -20,8 +20,8 @@ export default function FlattenHitProvider(config, $rootScope) {
 
         if (flat[key] !== void 0) return;
 
-        let hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
-        let isValue = !_.isPlainObject(val);
+        const hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
+        const isValue = !_.isPlainObject(val);
 
         if (hasValidMapping || isValue) {
           flat[key] = val;
@@ -47,7 +47,7 @@ export default function FlattenHitProvider(config, $rootScope) {
     return flat;
   }
 
-  return function (indexPattern) {
+  return function flattenHitWrapper(indexPattern) {
     function cachedFlatten(hit) {
       return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
     }

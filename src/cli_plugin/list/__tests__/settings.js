@@ -15,15 +15,15 @@ describe('kibana cli', function () {
         let command;
         const options = {};
         beforeEach(function () {
-          command = { pluginDir: fromRoot('installedPlugins') };
+          command = { pluginDir: fromRoot('plugins') };
         });
 
         describe('pluginDir option', function () {
 
-          it('should default to installedPlugins', function () {
+          it('should default to plugins', function () {
             const settings = parse(command, options);
 
-            expect(settings.pluginDir).to.be(fromRoot('installedPlugins'));
+            expect(settings.pluginDir).to.be(fromRoot('plugins'));
           });
 
           it('should set settings.config property', function () {

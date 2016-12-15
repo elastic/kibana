@@ -1,6 +1,7 @@
+import $ from 'jquery';
 import 'ui/filters/short_dots';
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.directive('fieldName', function ($compile, $rootScope, $filter) {
   return {
@@ -12,7 +13,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
     },
     link: function ($scope, $el) {
 
-      let typeIcon = function (fieldType) {
+      const typeIcon = function (fieldType) {
         switch (fieldType) {
           case 'source':
             return '<i title="source" class="fa fa-file-text-o "></i>';
@@ -44,19 +45,22 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         'field.rowCount'
       ], function () {
 
-        let type = $scope.field ? $scope.field.type : $scope.fieldType;
-        let name = $scope.field ? $scope.field.name : $scope.fieldName;
-        let results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
-        let scripted = $scope.field ? $scope.field.scripted : false;
+        const type = $scope.field ? $scope.field.type : $scope.fieldType;
+        const name = $scope.field ? $scope.field.name : $scope.fieldName;
+        const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
+        const scripted = $scope.field ? $scope.field.scripted : false;
 
-        let displayName = $filter('shortDots')(name);
+        const displayName = $filter('shortDots')(name);
 
         $el
-          .text(displayName)
           .attr('title', name)
           .toggleClass('no-results', results)
           .toggleClass('scripted', scripted)
-          .prepend(typeIcon(type));
+          .prepend(typeIcon(type))
+          .append($('<span>')
+            .text(displayName)
+            .addClass('discover-field-name')
+          );
       });
     }
   };

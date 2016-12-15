@@ -6,7 +6,7 @@ import DocTitleProvider from 'ui/doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
-  let MAIN_TITLE = 'Kibana 4';
+  const MAIN_TITLE = 'Kibana 4';
 
   let docTitle;
   let $rootScope;
@@ -36,9 +36,9 @@ describe('docTitle Service', function () {
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
-      let spy = $rootScope.$on;
+      const spy = $rootScope.$on;
 
-      let found = spy.args.some(function (args) {
+      const found = spy.args.some(function (args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 
@@ -61,23 +61,10 @@ describe('docTitle Service', function () {
   });
 
   describe('#change', function () {
-    let getActiveTabStub;
-
-    beforeEach(function () {
-      getActiveTabStub = sinon.stub(require('ui/chrome'), 'getActiveTab');
-    });
-
     it('writes the first param to as the first part of the doc name', function () {
       expect(document.title).to.be(MAIN_TITLE);
       docTitle.change('some secondary title');
       expect(document.title).to.be('some secondary title - ' + MAIN_TITLE);
-    });
-
-    it('includes the title of the active tab if available', function () {
-      expect(document.title).to.be(MAIN_TITLE);
-      getActiveTabStub.returns({ title: 'fancy pants' });
-      docTitle.change('some secondary title');
-      expect(document.title).to.be('some secondary title - fancy pants - ' + MAIN_TITLE);
     });
 
     it('will write just the first param if the second param is true', function () {

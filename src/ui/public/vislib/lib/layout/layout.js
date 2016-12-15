@@ -1,10 +1,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
+import $ from 'jquery';
+import VislibLibLayoutLayoutTypesProvider from './layout_types';
+import AxisProvider from 'ui/vislib/lib/axis';
 export default function LayoutFactory(Private) {
 
-  let layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-
+  const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
+  const Axis = Private(AxisProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -21,133 +23,158 @@ export default function LayoutFactory(Private) {
    * @param data {Object} Elasticsearch query results for this specific chart
    * @param chartType {Object} Reference to chart functions, i.e. Pie
    */
-  function Layout(el, data, chartType, opts) {
-    if (!(this instanceof Layout)) {
-      return new Layout(el, data, chartType, opts);
+  class Layout {
+    constructor(config) {
+      this.el = config.get('el');
+      this.data = config.data.data;
+      this.opts = config;
+      this.layoutType = layoutType[config.get('type')](this.el, this.data);
     }
 
-    this.el = el;
-    this.data = data;
-    this.opts = opts;
-    this.layoutType = layoutType[chartType](this.el, this.data);
-  }
+    // Render the layout
+    /**
+     * Renders visualization HTML layout
+     * Remove all elements from the current visualization and creates the layout
+     *
+     * @method render
+     */
+    render() {
+      this.removeAll(this.el);
+      this.createLayout(this.layoutType);
+      // update y-axis-spacer height based on precalculated horizontal axis heights
+      if (this.opts.get('type') === 'point_series') {
+        this.updateCategoryAxisSize();
+      }
+    };
 
-  // Render the layout
-  /**
-   * Renders visualization HTML layout
-   * Remove all elements from the current visualization and creates the layout
-   *
-   * @method render
-   */
-  Layout.prototype.render = function () {
-    this.removeAll(this.el);
-    this.createLayout(this.layoutType);
-  };
-
-  /**
-   * Create the layout based on the json array provided
-   * for each object in the layout array, call the layout function
-   *
-   * @method createLayout
-   * @param arr {Array} Json array
-   * @returns {*} Creates the visualization layout
-   */
-  Layout.prototype.createLayout = function (arr) {
-    let self = this;
-
-    return _.each(arr, function (obj) {
-      self.layout(obj);
-    });
-  };
-
-  /**
-   * Appends a DOM element based on the object keys
-   * check to see if reference to DOM element is string but not class selector
-   * Create a class selector
-   *
-   * @method layout
-   * @param obj {Object} Instructions for creating the layout of a DOM Element
-   * @returns {*} DOM Element
-   */
-  Layout.prototype.layout = function (obj) {
-    if (!obj.parent) {
-      throw new Error('No parent element provided');
-    }
-
-    if (!obj.type) {
-      throw new Error('No element type provided');
-    }
-
-    if (typeof obj.type !== 'string') {
-      throw new Error(obj.type + ' must be a string');
-    }
-
-    if (typeof obj.parent === 'string' && obj.parent.charAt(0) !== '.') {
-      obj.parent = '.' + obj.parent;
-    }
-
-    let childEl = this.appendElem(obj.parent, obj.type, obj.class);
-
-    if (obj.datum) {
-      childEl.datum(obj.datum);
-    }
-
-    if (obj.splits) {
-      childEl.call(obj.splits, obj.parent, this.opts);
-    }
-
-    if (obj.children) {
-      let newParent = childEl[0][0];
-
-      _.forEach(obj.children, function (obj) {
-        if (!obj.parent) {
-          obj.parent = newParent;
-        }
+    /**
+     * Create the layout based on the json array provided
+     * for each object in the layout array, call the layout function
+     *
+     * @method createLayout
+     * @param arr {Array} Json array
+     * @returns {*} Creates the visualization layout
+     */
+    createLayout(arr) {
+      return _.each(arr, (obj) => {
+        this.layout(obj);
       });
+    };
 
-      this.createLayout(obj.children);
-    }
+    updateCategoryAxisSize() {
+      const visConfig = this.opts;
+      const axisConfig = visConfig.get('categoryAxes[0]');
+      const axis = new Axis(visConfig, axisConfig);
+      const position = axis.axisConfig.get('position');
 
-    return childEl;
-  };
+      const el = $(this.el).find(`.axis-wrapper-${position}`);
 
-  /**
-   * Appends a `type` of DOM element to `el` and gives it a class name attribute `className`
-   *
-   * @method appendElem
-   * @param el {HTMLElement} Reference to a DOM Element
-   * @param type {String} DOM element type
-   * @param className {String} CSS class name
-   * @returns {*} Reference to D3 Selection
-   */
-  Layout.prototype.appendElem = function (el, type, className) {
-    if (!el || !type || !className) {
-      throw new Error('Function requires that an el, type, and class be provided');
-    }
+      el.css('visibility', 'hidden');
+      axis.render();
+      const width = el.width();
+      const height = el.height();
+      axis.destroy();
+      el.css('visibility', '');
 
-    if (typeof el === 'string') {
-      // Create a DOM reference with a d3 selection
-      // Need to make sure that the `el` is bound to this object
-      // to prevent it from being appended to another Layout
-      el = d3.select(this.el)
-        .select(el)[0][0];
-    }
+      if (axis.axisConfig.isHorizontal()) {
+        const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
+        el.height(`${height}px`);
+        spacerNodes.height(el.height());
+      } else {
+        el.find('.y-axis-div-wrapper').width(`${width}px`);
+      }
+    };
 
-    return d3.select(el)
+
+    /**
+     * Appends a DOM element based on the object keys
+     * check to see if reference to DOM element is string but not class selector
+     * Create a class selector
+     *
+     * @method layout
+     * @param obj {Object} Instructions for creating the layout of a DOM Element
+     * @returns {*} DOM Element
+     */
+    layout(obj) {
+      if (!obj.parent) {
+        throw new Error('No parent element provided');
+      }
+
+      if (!obj.type) {
+        throw new Error('No element type provided');
+      }
+
+      if (typeof obj.type !== 'string') {
+        throw new Error(obj.type + ' must be a string');
+      }
+
+      if (typeof obj.parent === 'string' && obj.parent.charAt(0) !== '.') {
+        obj.parent = '.' + obj.parent;
+      }
+
+      const childEl = this.appendElem(obj.parent, obj.type, obj.class);
+
+      if (obj.datum) {
+        childEl.datum(obj.datum);
+      }
+
+      if (obj.splits) {
+        childEl.call(obj.splits, obj.parent, this.opts);
+      }
+
+      if (obj.children) {
+        const newParent = childEl[0][0];
+
+        _.forEach(obj.children, function (obj) {
+          if (!obj.parent) {
+            obj.parent = newParent;
+          }
+        });
+
+        this.createLayout(obj.children);
+      }
+
+      return childEl;
+    };
+
+    /**
+     * Appends a `type` of DOM element to `el` and gives it a class name attribute `className`
+     *
+     * @method appendElem
+     * @param el {HTMLElement} Reference to a DOM Element
+     * @param type {String} DOM element type
+     * @param className {String} CSS class name
+     * @returns {*} Reference to D3 Selection
+     */
+    appendElem(el, type, className) {
+      if (!el || !type || !className) {
+        throw new Error('Function requires that an el, type, and class be provided');
+      }
+
+      if (typeof el === 'string') {
+        // Create a DOM reference with a d3 selection
+        // Need to make sure that the `el` is bound to this object
+        // to prevent it from being appended to another Layout
+        el = d3.select(this.el)
+          .select(el)[0][0];
+      }
+
+      return d3.select(el)
       .append(type)
       .attr('class', className);
-  };
+    };
 
-  /**
-   * Removes all DOM elements from DOM element
-   *
-   * @method removeAll
-   * @param el {HTMLElement} Reference to DOM element
-   * @returns {D3.Selection|D3.Transition.Transition} Reference to an empty DOM element
-   */
-  Layout.prototype.removeAll = function (el) {
-    return d3.select(el).selectAll('*').remove();
-  };
+    /**
+     * Removes all DOM elements from DOM element
+     *
+     * @method removeAll
+     * @param el {HTMLElement} Reference to DOM element
+     * @returns {D3.Selection|D3.Transition.Transition} Reference to an empty DOM element
+     */
+    removeAll(el) {
+      return d3.select(el).selectAll('*').remove();
+    };
+  }
 
   return Layout;
 };

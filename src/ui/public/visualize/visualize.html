@@ -6,7 +6,7 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div div ng-hide="showNoResultsMessage()" class="vis-container">
+<div div ng-hide="showNoResultsMessage()" class="vis-container {{getVisContainerClasses()}}">
   <div
     ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"

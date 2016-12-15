@@ -63,11 +63,15 @@ export async function extractFiles(zipPath, targetPath, strip, filter) {
 
     unzipper.on('error', reject);
 
-    unzipper.extract({
+    const options = {
       path: targetPath,
-      strip: strip,
-      filter: extractFilter(filter)
-    });
+      strip: strip
+    };
+    if (filter) {
+      options.filter = extractFilter(filter);
+    }
+
+    unzipper.extract(options);
 
     unzipper.on('extract', resolve);
   });

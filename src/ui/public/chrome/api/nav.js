@@ -6,15 +6,23 @@ export default function (chrome, internals) {
     return internals.nav;
   };
 
+  chrome.getNavLinkById = (id) => {
+    const navLink = internals.nav.find(link => link.id === id);
+    if (!navLink) {
+      throw new Error(`Nav link for id = ${id} not found`);
+    }
+    return navLink;
+  };
+
   chrome.getBasePath = function () {
     return internals.basePath || '';
   };
 
   chrome.addBasePath = function (url) {
-    let isUrl = url && isString(url);
+    const isUrl = url && isString(url);
     if (!isUrl) return url;
 
-    let parsed = parse(url, true);
+    const parsed = parse(url, true, true);
     if (!parsed.host && parsed.pathname) {
       if (parsed.pathname[0] === '/') {
         parsed.pathname = chrome.getBasePath() + parsed.pathname;
@@ -30,11 +38,24 @@ export default function (chrome, internals) {
     });
   };
 
+  chrome.removeBasePath = function (url) {
+    if (!internals.basePath) {
+      return url;
+    }
+
+    const basePathRegExp = new RegExp(`^${internals.basePath}`);
+    return url.replace(basePathRegExp, '');
+  };
+
   function lastSubUrlKey(link) {
     return `lastSubUrl:${link.url}`;
   }
 
   function setLastUrl(link, url) {
+    if (link.linkToLastSubUrl === false) {
+      return;
+    }
+
     link.lastSubUrl = url;
     internals.appUrlStore.setItem(lastSubUrlKey(link), url);
   }
@@ -89,19 +110,13 @@ export default function (chrome, internals) {
     const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
     for (const link of internals.nav) {
-      const matchingTab = find(internals.tabs, { rootUrl: link.url });
-
       link.active = startsWith(url, link.url);
       if (link.active) {
         setLastUrl(link, url);
         continue;
       }
 
-      if (matchingTab) {
-        setLastUrl(link, matchingTab.getLastUrl());
-      } else {
-        refreshLastUrl(link);
-      }
+      refreshLastUrl(link);
 
       if (newGlobalState) {
         injectNewGlobalState(link, appId, newGlobalState);
@@ -111,7 +126,7 @@ export default function (chrome, internals) {
 
   internals.nav.forEach(link => {
     // convert all link urls to absolute urls
-    let a = document.createElement('a');
+    const a = document.createElement('a');
     a.setAttribute('href', link.url);
     link.url = a.href;
   });

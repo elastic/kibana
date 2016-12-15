@@ -1,14 +1,13 @@
-import d3 from 'd3';
-import VislibLibLayoutSplitsColumnChartChartSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_split';
-import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/y_axis_split';
-import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/x_axis_split';
-import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_title_split';
+import VislibLibLayoutSplitsColumnChartChartSplitProvider from '../splits/column_chart/chart_split';
+import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from '../splits/column_chart/y_axis_split';
+import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from '../splits/column_chart/x_axis_split';
+import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from '../splits/column_chart/chart_title_split';
 export default function ColumnLayoutFactory(Private) {
 
-  let chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
-  let yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
-  let xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
-  let chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
+  const chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
+  const yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
+  const xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
+  const chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
 
   /**
    * Specifies the visualization layout for column charts.
@@ -45,11 +44,15 @@ export default function ColumnLayoutFactory(Private) {
             children: [
               {
                 type: 'div',
-                class: 'y-axis-col',
+                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+              },
+              {
+                type: 'div',
+                class: 'y-axis-col axis-wrapper-left',
                 children: [
                   {
                     type: 'div',
-                    class: 'y-axis-title'
+                    class: 'y-axis-title axis-title'
                   },
                   {
                     type: 'div',
@@ -65,7 +68,7 @@ export default function ColumnLayoutFactory(Private) {
               },
               {
                 type: 'div',
-                class: 'y-axis-spacer-block'
+                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
               }
             ]
           },
@@ -73,6 +76,21 @@ export default function ColumnLayoutFactory(Private) {
             type: 'div',
             class: 'vis-col-wrapper',
             children: [
+              {
+                type: 'div',
+                class: 'x-axis-wrapper axis-wrapper-top',
+                children: [
+                  {
+                    type: 'div',
+                    class: 'x-axis-title axis-title'
+                  },
+                  {
+                    type: 'div',
+                    class: 'x-axis-div-wrapper',
+                    splits: xAxisSplit
+                  }
+                ]
+              },
               {
                 type: 'div',
                 class: 'chart-wrapper',
@@ -84,7 +102,7 @@ export default function ColumnLayoutFactory(Private) {
               },
               {
                 type: 'div',
-                class: 'x-axis-wrapper',
+                class: 'x-axis-wrapper axis-wrapper-bottom',
                 children: [
                   {
                     type: 'div',
@@ -98,9 +116,38 @@ export default function ColumnLayoutFactory(Private) {
                   },
                   {
                     type: 'div',
-                    class: 'x-axis-title'
+                    class: 'x-axis-title axis-title'
                   }
                 ]
+              }
+            ]
+          },
+          {
+            type: 'div',
+            class: 'y-axis-col-wrapper',
+            children: [
+              {
+                type: 'div',
+                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+              },
+              {
+                type: 'div',
+                class: 'y-axis-col axis-wrapper-right',
+                children: [
+                  {
+                    type: 'div',
+                    class: 'y-axis-div-wrapper',
+                    splits: yAxisSplit
+                  },
+                  {
+                    type: 'div',
+                    class: 'y-axis-title axis-title'
+                  }
+                ]
+              },
+              {
+                type: 'div',
+                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
               }
             ]
           }

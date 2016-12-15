@@ -1,5 +1,3 @@
-
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
@@ -9,16 +7,16 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-let dateHistogramArray = [
+const dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-let names = [
+const names = [
   'series',
   'columns',
   'rows',
@@ -30,7 +28,7 @@ dateHistogramArray.forEach(function (data, i) {
     let Handler;
     let vis;
     let persistedState;
-    let events = [
+    const events = [
       'click',
       'brush'
     ];
@@ -44,8 +42,7 @@ dateHistogramArray.forEach(function (data, i) {
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('render Method', function () {
@@ -134,5 +131,27 @@ dateHistogramArray.forEach(function (data, i) {
         expect(vis.handler.charts.length).to.be(0);
       });
     });
+
+    describe('event proxying', function () {
+
+      it('should only pass the original event object to downstream handlers', function (done) {
+        const event = {};
+        const chart = vis.handler.charts[0];
+
+        const mockEmitter = function () {
+          const args = Array.from(arguments);
+          expect(args.length).to.be(2);
+          expect(args[0]).to.be('click');
+          expect(args[1]).to.be(event);
+          done();
+        };
+
+        vis.emit = mockEmitter;
+        vis.handler.enable('click', chart);
+        chart.events.emit('click', event);
+      });
+
+    });
+
   });
 });

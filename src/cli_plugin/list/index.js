@@ -2,6 +2,7 @@ import { fromRoot } from '../../utils';
 import list from './list';
 import Logger from '../lib/logger';
 import { parse } from './settings';
+import logWarnings from '../lib/log_warnings';
 
 function processCommand(command, options) {
   let settings;
@@ -14,6 +15,7 @@ function processCommand(command, options) {
   }
 
   const logger = new Logger(settings);
+  logWarnings(settings, logger);
   list(settings, logger);
 }
 
@@ -23,7 +25,7 @@ export default function pluginList(program) {
     .option(
       '-d, --plugin-dir <path>',
       'path to the directory where plugins are stored',
-      fromRoot('installedPlugins')
+      fromRoot('plugins')
     )
     .description('list installed plugins')
     .action(processCommand);

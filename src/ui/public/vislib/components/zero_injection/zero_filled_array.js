@@ -7,18 +7,19 @@ define(function () {
      * Returns a zero filled array.
     */
 
-    return function (arr) {
+    return function (arr, label) {
       if (!_.isArray(arr)) {
         throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
       }
 
-      let zeroFilledArray = [];
+      const zeroFilledArray = [];
 
       arr.forEach(function (val) {
         zeroFilledArray.push({
           x: val,
           xi: Infinity,
-          y: 0
+          y: 0,
+          series: label
         });
       });
 

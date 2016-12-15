@@ -15,11 +15,32 @@ visualize {
   .vis-container {
     display: flex;
     flex-direction: row;
-
-    flex: 1 0;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
+    flex: 1 1 0;
+
+    // IE11 Hack
+    //
+    // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
+    // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
+    // have to use an IE-specific hack instead.
+    _:-ms-fullscreen, :root  & {
+      flex: 1 0;
+    }
+
+    &.vis-container--legend-left {
+      flex-direction: row-reverse;
+    }
+    &.vis-container--legend-right {
+      flex-direction: row;
+    }
+    &.vis-container--legend-top {
+      flex-direction: column-reverse;
+    }
+    &.vis-container--legend-bottom {
+      flex-direction: column;
+    }
 
     &.spy-only {
       display: none;
@@ -48,11 +69,6 @@ visualize {
   .top { align-self: flext-start; }
   .item { }
   .bottom { align-self: flext-end; }
-
-}
-
-ul.visualizations .media-body {
-  font-size: 0.75em;
 }
 
 visualize-spy {
@@ -75,81 +91,13 @@ visualize-spy {
     padding-top: 0px;
   }
 
-  .visualize-show-spy {
-    flex: 0 0 auto;
-    &-tab {
-      color: @kibanaGray4;
-      position: absolute;
-      z-index: 100;
-      left: 5px;
-      bottom: 0px;
-    }
-  }
-
   .visualize-spy-fill {
     margin-right: 5px;
   }
 
   .visualize-spy-container {
-    flex: 1 1 auto;
-
-    display: flex;
-    flex-direction: column;
-
-    height: 482px;
-    overflow-y: auto;
-
-    header {
-      padding: 0 0 15px;
-    }
-
-    header + * {
-      flex: 1 1 auto;
-    }
-
-    > .alert {
-      flex: 0 0 auto;
-    }
-
-    tr > td {
-      font-size: 0.85em;
-    }
-  }
-
-  &.only .visualize-spy-container {
-    height: auto;
-  }
-
-  .visualize-spy-nav {
-    flex: 0 0 auto;
-
-    a.btn {
-      margin: @padding-small-vertical @padding-small-vertical;
-    }
-  }
-
-  .visualize-spy-content {
-    position: relative;
-
-    .visualize-spy-loading {
-      position: absolute;
-      top: 0px;
-      left: 0px;
-      right: 0px;
-      text-align: center;
-
-      &-text {
-        display: inline-block;
-        margin: 0;
-        background: @alert-info-bg;
-        color: @alert-info-text;
-        padding: 5px 10px;
-        border-radius: @border-radius-base;
-
-        .spinner > * {
-          background-color: @alert-info-text;
-        }
-      }
+    &.only {
+      height: auto;
     }
   }
 
@@ -159,3 +107,74 @@ visualize-spy {
     white-space: pre-wrap;
   }
 }
+
+.visualize-spy-container {
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  height: 482px;
+  overflow-y: auto;
+
+  header {
+    padding: 0 0 15px;
+  }
+
+  header + * {
+    flex: 1 1 auto;
+  }
+
+  > .alert {
+    flex: 0 0 auto;
+  }
+
+  tr > td {
+    font-size: 0.85em;
+  }
+}
+
+.visualize-spy-nav {
+  flex: 0 0 auto;
+
+  a.btn {
+    margin: @padding-small-vertical @padding-small-vertical;
+  }
+}
+
+.visualize-spy-content {
+  position: relative;
+}
+
+  .visualize-spy-loading {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    text-align: center;
+  }
+
+    .visualize-spy-loading-text {
+      display: inline-block;
+      margin: 0;
+      background: @alert-info-bg;
+      color: @alert-info-text;
+      padding: 5px 10px;
+      border-radius: @border-radius-base;
+
+      .spinner > * {
+        background-color: @alert-info-text;
+      }
+    }
+
+.visualize-show-spy {
+  flex: 0 0 auto;
+}
+
+  .visualize-show-spy-tab {
+    color: @kibanaGray4;
+    position: absolute;
+    z-index: 100;
+    left: 5px;
+    bottom: 0px;
+  }

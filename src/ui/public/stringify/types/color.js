@@ -5,8 +5,10 @@ import colorTemplate from 'ui/stringify/editors/color.html';
 export default function ColorFormatProvider(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
+    regex: '<insert regex>',
     text: '#000000',
     background: '#ffffff'
   };
@@ -19,12 +21,17 @@ export default function ColorFormatProvider(Private) {
   _Color.id = 'color';
   _Color.title = 'Color';
   _Color.fieldType = [
-    'number'
+    'number',
+    'string'
   ];
 
   _Color.editor = {
     template: colorTemplate,
     controller($scope) {
+      $scope.$watch('editor.field.type', type => {
+        $scope.editor.formatParams.fieldType = type;
+      });
+
       $scope.addColor = function () {
         $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
       };
@@ -37,24 +44,41 @@ export default function ColorFormatProvider(Private) {
 
 
   _Color.paramDefaults = {
+    fieldType: null, // populated by editor, see controller below
     colors: [_.cloneDeep(DEFAULT_COLOR)]
+  };
+
+  _Color.prototype.findColorRuleForVal = function (val) {
+    switch (this.param('fieldType')) {
+      case 'string':
+        return _.findLast(this.param('colors'), (colorParam) => {
+          return new RegExp(colorParam.regex).test(val);
+        });
+
+      case 'number':
+        return _.findLast(this.param('colors'), ({ range }) => {
+          if (!range) return;
+          const [start, end] = range.split(':');
+          return val >= Number(start) && val <= Number(end);
+        });
+
+      default:
+        return null;
+    }
   };
 
   _Color.prototype._convert = {
     html(val) {
-      const color = _.findLast(this.param('colors'), ({ range }) => {
-        if (!range) return;
-        const [start, end] = range.split(':');
-        return val >= Number(start) && val <= Number(end);
-      });
-
+      const color = this.findColorRuleForVal(val);
       if (!color) return _.asPrettyString(val);
 
-      const styleColor = color.text ? `color: ${color.text};` : '';
-      const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
-      return `<span style="${styleColor}${styleBackgroundColor}">${_.escape(val)}</span>`;
+      let style = '';
+      if (color.text) style += `color: ${color.text};`;
+      if (color.background) style += `background-color: ${color.background};`;
+      return convertTemplate({ val, style });
     }
   };
+
 
   return _Color;
 };

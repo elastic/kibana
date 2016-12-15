@@ -3,19 +3,20 @@ import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_a
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 export default function SignificantTermsAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
 
   return new BucketAggType({
     name: 'significant_terms',
     title: 'Significant Terms',
     makeLabel: function (aggConfig) {
-      return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.displayName;
+      return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
     params: [
       {
         name: 'field',
+        scriptable: false,
         filterFieldTypes: 'string'
       },
       {

@@ -20,7 +20,7 @@
 //== Typography
 //
 //## Font, line-height, and color for body text, headings, and more.
-@font-family-sans-serif:  "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+@font-family-sans-serif:  "Open Sans", Helvetica, Arial, sans-serif;
 @font-family-serif:       Georgia, "Times New Roman", Times, serif;
 //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
@@ -148,9 +148,8 @@
 //
 //##
 
-// TODO: Rename `@input-border-radius` to `@input-border-radius-base` in v4
 //** Default `.form-control` border radius
-@input-border-radius:            @border-radius-base;
+@input-border-radius-base:       @border-radius-base;
 //** Large `.form-control` border radius
 @input-border-radius-large:      @border-radius-large;
 //** Small `.form-control` border radius
@@ -346,7 +345,7 @@
 @navbar-default-link-hover-color:       @kibanaGray2;
 @navbar-default-link-hover-bg:          transparent;
 @navbar-default-link-active-color:      @kibanaGray1;
-@navbar-default-link-active-bg:         @kibanaGray6;
+@navbar-default-link-active-bg:         transparent;
 @navbar-default-link-disabled-color:    @kibanaGray3;
 @navbar-default-link-disabled-bg:       transparent;
 
@@ -743,20 +742,6 @@
 @breadcrumb-padding-horizontal: 15px;
 //** Textual separator for between breadcrumb elements
 @breadcrumb-separator:          "/";
-
-
-//== Carousel
-//
-//##
-
-@carousel-text-shadow:                  0 1px 2px rgba(0,0,0,.6);
-@carousel-control-color:                @white;
-@carousel-indicator-active-bg:          @white;
-@carousel-indicator-border-color:       @white;
-@carousel-caption-color:                @white;
-@carousel-control-width:                      15%;
-@carousel-control-opacity:                    .5;
-@carousel-control-font-size:                  20px;
 
 
 //== Close

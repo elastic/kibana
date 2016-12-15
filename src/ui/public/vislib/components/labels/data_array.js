@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import VislibComponentsLabelsFlattenSeriesProvider from 'ui/vislib/components/labels/flatten_series';
+import VislibComponentsLabelsFlattenSeriesProvider from './flatten_series';
 export default function GetArrayUtilService(Private) {
-  let flattenSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
+  const flattenSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
 
   /*
    * Accepts a Kibana data object and returns an array of values objects.

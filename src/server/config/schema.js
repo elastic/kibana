@@ -1,11 +1,12 @@
 import Joi from 'joi';
-import fs from 'fs';
-import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';
+import { getData } from '../path';
+
+import pkg from '../../../src/utils/package_json';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -29,11 +30,11 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
-  uuid: Joi.string().guid().default(),
 
   server: Joi.object({
+    uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    host: Joi.string().hostname().default('0.0.0.0'),
+    host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
@@ -86,13 +87,17 @@ module.exports = () => Joi.object({
   .default(),
 
   ops: Joi.object({
-    interval: Joi.number().default(10000),
-  }),
+    interval: Joi.number().default(5000),
+  }).default(),
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
     initialize: Joi.boolean().default(true)
+  }).default(),
+
+  path: Joi.object({
+    data: Joi.string().default(getData())
   }).default(),
 
   optimize: Joi.object({
@@ -121,6 +126,33 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
-  }).default()
+  }).default(),
+
+  status: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
+  }).default(),
+
+  tilemap: Joi.object({
+    url: Joi.string().default(`https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=${pkg.version}&elastic_tile_service_tos=agree`),
+    options: Joi.object({
+      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
+      minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
+      maxZoom: Joi.number().default(10),
+      tileSize: Joi.number(),
+      subdomains: Joi.array().items(Joi.string()).single(),
+      errorTileUrl: Joi.string().uri(),
+      tms: Joi.boolean(),
+      reuseTiles: Joi.boolean(),
+      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
+    }).default()
+  }).default(),
+
+  uiSettings: Joi.object({
+    // this is used to prevent the uiSettings from initializing. Since they
+    // require the elasticsearch plugin in order to function we need to turn
+    // them off when we turn off the elasticsearch plugin (like we do in the
+    // optimizer half of the dev server)
+    enabled: Joi.boolean().default(true)
+  }).default(),
 
 }).default();

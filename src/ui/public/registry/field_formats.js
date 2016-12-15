@@ -6,14 +6,12 @@ export default uiRegistry({
   index: ['id'],
   group: ['fieldType'],
 
-  constructor: function (config, $rootScope) {
-    let self = this;
+  constructor: function (config) {
+    const self = this;
     let defaultMap;
 
     function init() {
-      parseDefaultTypeMap();
-      $rootScope.$on('init:config', parseDefaultTypeMap);
-      $rootScope.$on('change:config.format:defaultTypeMap', parseDefaultTypeMap);
+      config.watch('format:defaultTypeMap', parseDefaultTypeMap);
     }
 
 
@@ -56,7 +54,7 @@ export default uiRegistry({
      * @return {FieldFormat}
      */
     self.getInstance = _.memoize(function (formatId) {
-      let FieldFormat = self.byId[formatId];
+      const FieldFormat = self.byId[formatId];
       return new FieldFormat();
     });
 
@@ -67,14 +65,14 @@ export default uiRegistry({
      * @return {FieldFormat}
      */
     self.getDefaultInstance = _.memoize(function (fieldType) {
-      let conf = self.getDefaultConfig(fieldType);
-      let FieldFormat = self.byId[conf.id];
+      const conf = self.getDefaultConfig(fieldType);
+      const FieldFormat = self.byId[conf.id];
       return new FieldFormat(conf.params);
     });
 
 
-    function parseDefaultTypeMap() {
-      defaultMap = config.get('format:defaultTypeMap');
+    function parseDefaultTypeMap(value) {
+      defaultMap = value;
       _.forOwn(self, function (fn) {
         if (_.isFunction(fn) && fn.cache) {
           // clear all memoize caches

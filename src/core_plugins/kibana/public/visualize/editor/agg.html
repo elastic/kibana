@@ -1,0 +1,94 @@
+<!-- header -->
+<div class="vis-editor-agg-header">
+
+  <!-- open/close editor -->
+  <button
+    aria-label="{{ editorOpen ? 'Close Editor' : 'Open Editor' }}"
+    ng-click="editorOpen = !editorOpen"
+    type="button"
+    class="btn btn-primary btn-xs vis-editor-agg-header-toggle">
+    <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
+  </button>
+
+  <!-- title -->
+  <span class="vis-editor-agg-header-title">
+    {{ agg.schema.title }}
+  </span>
+
+  <!-- description -->
+  <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">
+    {{ describe() }}
+  </span>
+
+  <!-- error -->
+  <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
+    {{ aggForm.describeErrors() }}
+  </span>
+
+  <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
+  <div class="vis-editor-agg-header-controls btn-group">
+    <!-- disable aggregation -->
+    <button
+      ng-if="agg.enabled && canRemove(agg)"
+      ng-click="agg.enabled = false"
+      aria-label="Disable aggregation"
+      tooltip="Disable aggregation"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-toggle-on"></i>
+    </button>
+
+    <!-- enable aggregation -->
+    <button
+      ng-if="!agg.enabled"
+      ng-click="agg.enabled = true"
+      aria-label="Enable aggregation"
+      tooltip="Enable aggregation"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-toggle-off"></i>
+    </button>
+
+    <!-- drag handle -->
+    <button
+      draggable-handle
+      aria-label="Modify Priority by Dragging"
+      ng-if="stats.count > 1"
+      tooltip="Modify Priority by Dragging"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-arrows-v"></i>
+    </button>
+
+    <!-- remove button -->
+    <button
+      ng-if="canRemove(agg)"
+      aria-label="Remove Dimension"
+      ng-if="stats.count > stats.min"
+      ng-click="remove(agg)"
+      tooltip="Remove Dimension"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs btn-danger">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+
+  </div>
+
+</div>
+
+<vis-editor-agg-params
+  agg="agg"
+  group-name="groupName"
+  ng-show="editorOpen"
+  class="vis-editor-agg-editor">
+</vis-editor-agg-params>
+
+<vis-editor-agg-add
+  ng-if="$index + 1 === stats.count"
+  ng-hide="dragging"
+  class="vis-editor-agg-add vis-editor-agg-add-subagg">
+</vis-editor-agg-add>

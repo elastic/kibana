@@ -12,7 +12,7 @@ define(function () {
 
     return function (selection, parent) {
       selection.each(function (data) {
-        let div = d3.select(this);
+        const div = d3.select(this);
 
         if (!data.slices) {
           div.selectAll('.chart-title')

@@ -10,6 +10,7 @@ import stringifyString from 'ui/stringify/types/string';
 import stringifySource from 'ui/stringify/types/source';
 import stringifyColor from 'ui/stringify/types/color';
 import stringifyTruncate from 'ui/stringify/types/truncate';
+import stringifyBoolean from 'ui/stringify/types/boolean';
 
 fieldFormats.register(stringifyUrl);
 fieldFormats.register(stringifyBytes);
@@ -22,3 +23,4 @@ fieldFormats.register(stringifyString);
 fieldFormats.register(stringifySource);
 fieldFormats.register(stringifyColor);
 fieldFormats.register(stringifyTruncate);
+fieldFormats.register(stringifyBoolean);

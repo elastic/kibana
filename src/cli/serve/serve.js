@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
-
-import readYamlConfig from './read_yaml_config';
 import { fromRoot } from '../../utils';
+import { getConfig } from '../../server/path';
+import readYamlConfig from './read_yaml_config';
 
-const cwd = process.cwd();
+import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
 let canCluster;
 try {
@@ -28,7 +28,7 @@ const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function initServerSettings(opts, extraCliOptions) {
+function readServerSettings(opts, extraCliOptions) {
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
@@ -39,9 +39,8 @@ function initServerSettings(opts, extraCliOptions) {
     set('env', 'development');
     set('optimize.lazy', true);
     if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.host', 'localhost');
-      set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
-      set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
+      set('server.ssl.cert', DEV_SSL_CERT_PATH);
+      set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
   }
 
@@ -80,7 +79,7 @@ module.exports = function (program) {
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
     'Use mulitple --config args to include multiple config files.',
     configPathCollector,
-    [ process.env.CONFIG_PATH || fromRoot('config/kibana.yml') ]
+    [ getConfig() ]
   )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
@@ -94,8 +93,8 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('installedPlugins'),
-      fromRoot('src/plugins')
+      fromRoot('plugins'),
+      fromRoot('src/core_plugins')
     ]
   )
   .option(
@@ -128,7 +127,8 @@ module.exports = function (program) {
       }
     }
 
-    const settings = initServerSettings(opts, this.getUnknownOptions());
+    const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
+    const settings = getCurrentSettings();
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
@@ -155,6 +155,13 @@ module.exports = function (program) {
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
     }
+
+    process.on('SIGHUP', function reloadConfig() {
+      const settings = getCurrentSettings();
+      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+      kbnServer.applyLoggingConfiguration(settings);
+      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+    });
 
     return kbnServer;
   });

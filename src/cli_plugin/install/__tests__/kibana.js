@@ -44,8 +44,8 @@ describe('kibana cli', function () {
             workingPath: testWorkingPath,
             tempArchiveFile: tempArchiveFilePath,
             plugin: 'test-plugin',
-            version: '5.0.0-snapshot',
-            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), version: '5.0.0-snapshot' } ]
+            version: '5.0.0-SNAPSHOT',
+            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), kibanaVersion: '5.0.0-SNAPSHOT' } ]
           };
           const errorStub = sinon.stub();
 
@@ -59,7 +59,7 @@ describe('kibana cli', function () {
           expect(errorStub.called).to.be(false);
         });
 
-        it('should throw an error if plugin does contain a version.', function () {
+        it('should throw an error if plugin is missing a kibana version.', function () {
           const errorStub = sinon.stub();
 
           try {
@@ -69,12 +69,12 @@ describe('kibana cli', function () {
             errorStub(err);
           }
 
-          expect(errorStub.firstCall.args[0]).to.match(/plugin version not found/i);
+          expect(errorStub.firstCall.args[0]).to.match(/plugin package\.json is missing both a version property/i);
         });
 
-        it('should throw an error if plugin version does does not match kibana version', function () {
+        it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
           const errorStub = sinon.stub();
-          settings.plugins[0].version = '1.2.3.4';
+          settings.plugins[0].kibanaVersion = '1.2.3.4';
 
           try {
             assertVersion(settings);
@@ -83,12 +83,12 @@ describe('kibana cli', function () {
             errorStub(err);
           }
 
-          expect(errorStub.firstCall.args[0]).to.match(/incorrect version/i);
+          expect(errorStub.firstCall.args[0]).to.match(/incorrect kibana version/i);
         });
 
-        it('should not throw an error if plugin version matches kibana version', function () {
+        it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
           const errorStub = sinon.stub();
-          settings.plugins[0].version = '1.0.0';
+          settings.plugins[0].kibanaVersion = '1.0.0';
 
           try {
             assertVersion(settings);
@@ -102,7 +102,7 @@ describe('kibana cli', function () {
 
         it('should ignore version info after the dash in checks on valid version', function () {
           const errorStub = sinon.stub();
-          settings.plugins[0].version = '1.0.0-foo-bar-version-1.2.3';
+          settings.plugins[0].kibanaVersion = '1.0.0-foo-bar-version-1.2.3';
 
           try {
             assertVersion(settings);
@@ -116,7 +116,7 @@ describe('kibana cli', function () {
 
         it('should ignore version info after the dash in checks on invalid version', function () {
           const errorStub = sinon.stub();
-          settings.plugins[0].version = '2.0.0-foo-bar-version-1.2.3';
+          settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
 
           try {
             assertVersion(settings);
@@ -125,7 +125,7 @@ describe('kibana cli', function () {
             errorStub(err);
           }
 
-          expect(errorStub.firstCall.args[0]).to.match(/incorrect version/i);
+          expect(errorStub.firstCall.args[0]).to.match(/incorrect kibana version/i);
         });
       });
 
