@@ -22,10 +22,10 @@ uiModules.get('kibana')
      */
     const mapSettings = {
 
-      _queryParams: {},
+      _queryParams: {license: ""},//this curheprently a mandatory parameter. Remove when no longer the case.
       _settingsInitialized: false,
 
-      //intiialize settings with the default of the configuration
+      //initialize settings with the default of the configuration
       _url: mapsConfig.deprecated.config.url,
       _options: optionsFromConfig,
 
@@ -44,7 +44,8 @@ uiModules.get('kibana')
 
         let manifest;
         try {
-          manifest = await getTileServiceManifest(mapsConfig.config.manifest, this._queryParams, attributionFromConfig, optionsFromConfig);
+          const response = await getTileServiceManifest(mapsConfig.config.manifest, this._queryParams, attributionFromConfig, optionsFromConfig);
+          manifest = response.data;
         } catch (e) {
           //request failed. Continue to use old settings.
           this._settingsInitialized = true;
