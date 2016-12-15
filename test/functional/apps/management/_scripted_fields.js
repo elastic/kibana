@@ -24,11 +24,11 @@ import PageObjects from '../../../support/page_objects';
 bdd.before(async function () {
   await PageObjects.remote.setWindowSize(1200,800);
   // delete .kibana index and then wait for Kibana to re-create it
-  await esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC'});
+  await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC' });
   await PageObjects.settings.navigateTo();
   await PageObjects.settings.clickKibanaIndicies();
   await PageObjects.settings.createIndexPattern();
-  await esClient.updateConfigDoc({'dateFormat:tz':'UTC'});
+  await esClient.updateConfigDoc({ 'dateFormat:tz':'UTC' });
 });
 
 bdd.describe('creating and using Lucence expression scripted fields', function describeIndexTests() {
@@ -321,7 +321,8 @@ bdd.describe('creating and using Painless date scripted fields', function descri
     await PageObjects.settings.clickScriptedFieldsTab();
     await PageObjects.common.debug('add scripted field');
     await PageObjects.settings
-      .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date', {format: 'Date', datePattern: 'YYYY-MM-DD HH:00'}, '1',
+      .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
+      { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
       'doc[\'utc_time\'].value + (1000) * 60 * 60');
     await PageObjects.common.try(async function() {
       expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
