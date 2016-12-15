@@ -18,7 +18,7 @@ define(function (require) {
   module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUrl) {
     const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, es, kbnUrl);
     savedSheetLoader.urlFor = function (id) {
-      return kbnUrl.eval('#/{{id}}', {id: id});
+      return kbnUrl.eval('#/{{id}}', { id: id });
     };
 
     // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.

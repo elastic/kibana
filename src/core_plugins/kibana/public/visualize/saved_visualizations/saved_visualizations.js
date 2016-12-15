@@ -45,7 +45,7 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
   };
 
   saveVisualizationLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', {id: id});
+    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
 
   return saveVisualizationLoader;
