@@ -720,68 +720,6 @@ fieldset {
   }
 
 /**
- * 1. Disable for Angular.
- */
-.kuiButton {
-  display: inline-block;
-  padding: 4px 24px;
-  color: #00a9e5;
-  border: 1px solid;
-  text-decoration: none;
-  border-radius: 3px;
-  background-color: transparent;
-
-  &[disabled] {
-    pointer-events: none; // 1
-    opacity: 0.4;
-  }
-}
-
-.kuiButton--default,
-.kuiButton--default:focus {
-  color: #2D2D2D;
-  border-color: #D4D4D4;
-
-  &:hover,
-  &:active {
-    color: #111111;
-    background-color: #FAFAFA;
-  }
-}
-
-.kuiButton--primary,
-.kuiButton--primary:focus {
-  color: #00a9e5;
-  border-color: #00a9e5;
-
-  &:hover,
-  &:active {
-    color: #00a9e5;
-    background-color: #ECF9FF;
-  }
-}
-
-.kuiButton--danger,
-.kuiButton--danger:focus {
-  color: #d76051;
-  border-color: #d76051;
-
-  &:hover,
-  &:active {
-    color: #d76051;
-    background-color: #ffe4e1;
-  }
-}
-
-.kuiIcon--success {
-  color: #80c383;
-}
-
-.kuiIcon--danger {
-  color: #d76051;
-}
-
-/**
  * 1. Override h1.
  */
 .kuiTitle {
@@ -1070,7 +1008,7 @@ fieldset {
 /**
  * 1. Override Bootstrap styles.
  */
-.localDropdownCloseButton {
+.kuiLocalDropdownCloseButton {
   color: #2d2d2d !important; /* 1 */
 
   .theme-dark & {

@@ -6,7 +6,7 @@
       <!-- Title. -->
       <div
         data-transclude-slot="topLeftCorner"
-        class="localTitle"
+        class="kuiLocalTitle"
       >
         <span
           ng-show="dash.id"
@@ -24,7 +24,7 @@
         ng-submit="filterResults()"
       >
         <div class="typeahead" kbn-typeahead="dashboard">
-          <div class="localSearch">
+          <div class="kuiLocalSearch">
             <input
               parse-query
               input-focus
@@ -33,13 +33,13 @@
               placeholder="Filter..."
               aria-label="Filter input"
               type="text"
-              class="localSearchInput"
-              ng-class="{'localSearchInput-isInvalid': queryInput.$invalid}"
+              class="kuiLocalSearchInput"
+              ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
             >
             <button
               type="submit"
               aria-label="Filter Dashboards"
-              class="localSearchButton"
+              class="kuiLocalSearchButton"
               ng-disabled="queryInput.$invalid"
             >
               <span class="fa fa-search" aria-hidden="true"></span>
