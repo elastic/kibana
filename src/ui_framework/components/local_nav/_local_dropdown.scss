@@ -1,5 +1,4 @@
-
-.localDropdown {
+.kuiLocalDropdown {
   position: relative;
   padding: 10px $localNavSideSpacing 14px;
   background-color: $localDropdownBackgroundColor;
@@ -10,7 +9,7 @@
   }
 }
 
-.localDropdownCloseButton {
+.kuiLocalDropdownCloseButton {
   appearance: none;
   background-color: transparent;
   padding: 4px;
@@ -32,23 +31,23 @@
   }
 }
 
-.localDropdownPanels {
+.kuiLocalDropdownPanels {
   display: flex;
 }
 
-.localDropdownPanel {
+.kuiLocalDropdownPanel {
   flex: 1 1 0%;
 }
 
-.localDropdownPanel--left {
+.kuiLocalDropdownPanel--left {
   margin-right: 30px;
 }
 
-.localDropdownPanel--right {
+.kuiLocalDropdownPanel--right {
   margin-left: 30px;
 }
 
-.localDropdownTitle {
+.kuiLocalDropdownTitle {
   margin-bottom: 12px;
   font-size: 18px;
   color: $localNavTextColor;
@@ -58,7 +57,7 @@
   }
 }
 
-.localDropdownSection {
+.kuiLocalDropdownSection {
   margin-bottom: 16px;
 
   &:last-child {
@@ -66,14 +65,14 @@
   }
 }
 
-.localDropdownHeader {
+.kuiLocalDropdownHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
 }
 
-  .localDropdownHeader__label {
+  .kuiLocalDropdownHeader__label {
     font-size: 14px;
     font-weight: 700;
     color: $localNavTextColor;
@@ -83,11 +82,11 @@
     }
   }
 
-  .localDropdownHeader__actions {
+  .kuiLocalDropdownHeader__actions {
     display: flex;
   }
 
-  .localDropdownHeader__action {
+  .kuiLocalDropdownHeader__action {
     color: $linkColor;
     font-size: 12px;
     text-decoration: none;
@@ -112,7 +111,7 @@
     }
   }
 
-.localDropdownInput {
+.kuiLocalDropdownInput {
   display: block;
   width: 100%;
   margin-bottom: 12px;
@@ -130,7 +129,7 @@
   }
 }
 
-.localDropdownFormNote {
+.kuiLocalDropdownFormNote {
   font-size: 14px;
   color: $localDropdownFormNoteTextColor;
 
@@ -139,7 +138,7 @@
   }
 }
 
-.localDropdownWarning {
+.kuiLocalDropdownWarning {
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
@@ -152,7 +151,7 @@
   }
 }
 
-.localDropdownHelpText {
+.kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
   color: #2D2D2D;
