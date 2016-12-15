@@ -3,14 +3,14 @@
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
  *    a bit.
  */
-.localBreadcrumbs {
+.kuiLocalBreadcrumbs {
   display: flex;
   align-items: center;
   height: 100%;
   padding-left: $localNavSideSpacing; /* 1 */
 }
 
-  .localBreadcrumb {
+  .kuiLocalBreadcrumb {
     & + & {
       margin-left: 6px;
 
@@ -27,7 +27,7 @@
     }
 
     &:last-child {
-      .localBreadcrumb__link {
+      .kuiLocalBreadcrumb__link {
         color: $localNavTextColor;
         cursor: default;
 
@@ -40,10 +40,9 @@
         }
       }
     }
-
   }
 
-    .localBreadcrumb__link {
+    .kuiLocalBreadcrumb__link {
       font-size: $localNavFontSizeNormal;
       color: #5a5a5a;
       text-decoration: none;
@@ -57,6 +56,6 @@
       }
     }
 
-    .localBreadcrumb__emphasis {
+    .kuiLocalBreadcrumb__emphasis {
       font-weight: 700;
     }
