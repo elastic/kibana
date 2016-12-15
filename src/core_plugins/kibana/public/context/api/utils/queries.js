@@ -8,7 +8,7 @@ function createAnchorQuery(uid, contextSort) {
     },
     sort: [contextSort],
   };
-};
+}
 
 function createSuccessorsQuery(anchorUid, anchorSortValues, contextSort, size) {
   return {
@@ -20,7 +20,7 @@ function createSuccessorsQuery(anchorUid, anchorSortValues, contextSort, size) {
     sort: [ contextSort, { _uid: 'asc' } ],
     search_after: anchorSortValues.concat([ anchorUid ]),
   };
-};
+}
 
 
 export {

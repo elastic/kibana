@@ -31,7 +31,7 @@ function linkMultiTransclude(scope, element, attrs, ctrl, transclude) {
 
     if (!transcludedContentContainer) {
       return;
-    };
+    }
 
     const transcludedContent = transcludedContentContainer.children;
     _.forEach(transcludedContent, transcludedItem => {
