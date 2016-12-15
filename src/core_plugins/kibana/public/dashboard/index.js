@@ -111,16 +111,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const viewModeStateKey = 'dash.dashboardViewMode';
 
       const changeViewMode = (newMode) => {
-        $uiState.set(viewModeStateKey, newMode);
         $scope.dashboardViewMode = newMode;
         $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
       };
 
-      if ($uiState.get(viewModeStateKey)) {
-        changeViewMode($uiState.get(viewModeStateKey));
-      } else {
-        changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
-      }
+      changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
