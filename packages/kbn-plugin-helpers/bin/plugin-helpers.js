@@ -32,14 +32,15 @@ program
 
 program
   .command('test:browser')
-  .option('--dev', 'Enable dev mode, keeps the test server running')
   .description('Run the browser tests in a real web browser')
+  .option('--dev', 'Enable dev mode, keeps the test server running')
   .on('--help', docs('test/browser'))
   .action(run('test/browser'));
 
 program
   .command('test:server')
   .description('Run the server tests using mocha')
+  .option('-i, --include <globs>', 'Additional files of glob patterns to include server tests from')
   .on('--help', docs('test/server'))
   .action(run('test/server'));
 
