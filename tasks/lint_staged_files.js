@@ -1,18 +1,12 @@
 import { extname, resolve, relative } from 'path';
 import { isStaged, getFilename } from './utils/files_to_commit';
 import { CLIEngine } from 'eslint';
-import { red } from 'ansicolors';
+import { red, blue } from 'ansicolors';
 import minimatch from 'minimatch';
 
 const root = resolve(__dirname, '..');
 
 export default function (grunt) {
-
-  function skippingFile(file, reason) {
-    if (extname(file) !== '.js') return;
-    grunt.log.writeln(`${red('WARNING:')}: Not linting "${file}" because it is ${reason}`);
-  }
-
   grunt.registerTask('lintStagedFiles', function () {
     grunt.task.requires('collectFilesToCommit');
 
@@ -30,12 +24,16 @@ export default function (grunt) {
     .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
     .filter(file => {
       if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
-        skippingFile(file, 'not selected by grunt eslint config');
+        if (extname(file) === '.js') {
+          grunt.log.writeln(`${red('WARNING:')} ${file} not selected by grunt eslint config`);
+        }
         return false;
       }
 
       if (cli.isPathIgnored(file)) {
-        skippingFile(file, 'ignored by .eslintignore');
+        if (extname(file) === '.js') {
+          grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+        }
         return false;
       }
 
