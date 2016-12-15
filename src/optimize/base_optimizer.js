@@ -154,7 +154,7 @@ class BaseOptimizer {
             exclude: babelExclude.concat(this.env.noParse),
             loader: makeBabelLoader({ nonStandard: true }),
           }
-        ].concat(this.env.loaders),
+        ],
         postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
       },
