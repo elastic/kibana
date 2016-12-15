@@ -1,7 +1,5 @@
 import { resolve } from 'path';
 import { writeFile } from 'fs';
-import { inherits } from 'util';
-import { format as formatUrl } from 'url';
 
 import webpack from 'webpack';
 import Boom from 'boom';
