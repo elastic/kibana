@@ -26,8 +26,13 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, $location, t
 
   $scope.visTypes = Private(RegistryVisTypesProvider);
   $scope.visTypeUrl = function (visType) {
-    if (!visType.requiresSearch) return '#/visualize/create?type=' + encodeURIComponent(visType.name);
-    else return '#/visualize/step/2?type=' + encodeURIComponent(visType.name);
+    let baseUrl = visType.requiresSearch ? '#/visualize/step/2?' : '#/visualize/create?';
+    let params = [`type=${encodeURIComponent(visType.name)}`];
+    if ($route.current.params.addToDash) {
+      params.push('addToDash');
+    }
+
+    return baseUrl + params.join('&');
   };
 });
 
@@ -47,6 +52,9 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, $location, t
   const type = $route.current.params.type;
 
   $scope.step2WithSearchUrl = function (hit) {
+    if ($route.current.params.addToDash) {
+      return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}&addToDash', { type: type, id: hit.id });
+    }
     return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}', { type: type, id: hit.id });
   };
 
@@ -59,6 +67,10 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, $location, t
 
   $scope.makeUrl = function (pattern) {
     if (!pattern) return;
+
+    if ($route.current.params.addToDash) {
+      return `#/visualize/create?addToDash&type=${type}&indexPattern=${pattern}`;
+    }
     return `#/visualize/create?type=${type}&indexPattern=${pattern}`;
   };
 });

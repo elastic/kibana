@@ -5,6 +5,7 @@ import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
+import chrome from 'ui/chrome';
 import angular from 'angular';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -304,7 +305,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if (savedVis.id === $route.current.params.id) {
+        if ($route.current.params.addToDash) {
+          const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
+          window.location.href = `${dashboardBaseUrl.lastSubUrl}&addVis=${savedVis.id}`;
+//          kbnUrl.change(`${dashboardBaseUrl.lastSubUrl}&addVis={{id}}`, {id: savedVis.id});
+        } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
           kbnUrl.change('/visualize/edit/{{id}}', { id: savedVis.id });

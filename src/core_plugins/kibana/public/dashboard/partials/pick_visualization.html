@@ -19,6 +19,7 @@
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="visualization">
     <saved-object-finder title="Choose a visualization" type="visualizations" on-choose="opts.addVis"></saved-object-finder>
+    <a ng-click="opts.addNewVis()">Add a new Visualization</a>
   </div>
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="search">

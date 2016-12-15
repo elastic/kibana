@@ -275,6 +275,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
       };
 
+      if ($route.current.params.addVis) {
+        $scope.addVis({id: $route.current.params.addVis});
+      }
+
+      $scope.addNewVis = function () {
+        kbnUrl.change('/visualize?addToDash');
+      };
+
       $scope.addSearch = function (hit) {
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
@@ -286,6 +294,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
+        addNewVis: $scope.addNewVis,
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
