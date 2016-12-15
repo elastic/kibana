@@ -26,7 +26,7 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
   };
 
   savedSearchLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/discover/{{id}}', {id: id});
+    return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };
   return savedSearchLoader;
 });
