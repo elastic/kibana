@@ -97,7 +97,7 @@ export default class Common {
               // that change.  If we got here, fix it.
               self.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
               self.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
-              return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+              return esClient.updateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
             }
           }
         })

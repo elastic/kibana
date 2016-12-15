@@ -1,6 +1,6 @@
 let mappings = require('../../src/mappings');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
 module("Mappings", {
   setup: function () {
@@ -22,7 +22,7 @@ function fc(f1, f2) {
 }
 
 function f(name, type) {
-  return {name: name, type: type || "string"};
+  return { name: name, type: type || "string" };
 }
 
 test("Multi fields", function () {
@@ -34,16 +34,16 @@ test("Multi fields", function () {
             "type": "multi_field",
             "path": "just_name",
             "fields": {
-              "first_name": {"type": "string", "index": "analyzed"},
-              "any_name": {"type": "string", "index": "analyzed"}
+              "first_name": { "type": "string", "index": "analyzed" },
+              "any_name": { "type": "string", "index": "analyzed" }
             }
           },
           "last_name": {
             "type": "multi_field",
             "path": "just_name",
             "fields": {
-              "last_name": {"type": "string", "index": "analyzed"},
-              "any_name": {"type": "string", "index": "analyzed"}
+              "last_name": { "type": "string", "index": "analyzed" },
+              "any_name": { "type": "string", "index": "analyzed" }
             }
           }
         }
@@ -64,13 +64,13 @@ test("Multi fields 1.0 style", function () {
             "type": "string", "index": "analyzed",
             "path": "just_name",
             "fields": {
-              "any_name": {"type": "string", "index": "analyzed"}
+              "any_name": { "type": "string", "index": "analyzed" }
             }
           },
           "last_name": {
             "type": "string", "index": "no",
             "fields": {
-              "raw": {"type": "string", "index": "analyzed"}
+              "raw": { "type": "string", "index": "analyzed" }
             }
           }
         }
@@ -132,14 +132,14 @@ QUnit.test("Nested fields", function () {
             "properties": {
               "name": {
                 "properties": {
-                  "first_name": {"type": "string"},
-                  "last_name": {"type": "string"}
+                  "first_name": { "type": "string" },
+                  "last_name": { "type": "string" }
                 }
               },
-              "sid": {"type": "string", "index": "not_analyzed"}
+              "sid": { "type": "string", "index": "not_analyzed" }
             }
           },
-          "message": {"type": "string"}
+          "message": { "type": "string" }
         }
       }
     }
@@ -161,10 +161,10 @@ test("Enabled fields", function () {
                 "type": "object",
                 "enabled": false
               },
-              "sid": {"type": "string", "index": "not_analyzed"}
+              "sid": { "type": "string", "index": "not_analyzed" }
             }
           },
-          "message": {"type": "string"}
+          "message": { "type": "string" }
         }
       }
     }
@@ -184,16 +184,16 @@ test("Path tests", function () {
             "type": "object",
             "path": "just_name",
             "properties": {
-              "first1": {"type": "string"},
-              "last1": {"type": "string", "index_name": "i_last_1"}
+              "first1": { "type": "string" },
+              "last1": { "type": "string", "index_name": "i_last_1" }
             }
           },
           "name2": {
             "type": "object",
             "path": "full",
             "properties": {
-              "first2": {"type": "string"},
-              "last2": {"type": "string", "index_name": "i_last_2"}
+              "first2": { "type": "string" },
+              "last2": { "type": "string", "index_name": "i_last_2" }
             }
           }
         }
@@ -210,7 +210,7 @@ test("Use index_name tests", function () {
     "index": {
       "person": {
         "properties": {
-          "last1": {"type": "string", "index_name": "i_last_1"}
+          "last1": { "type": "string", "index_name": "i_last_1" }
         }
       }
     }
@@ -244,14 +244,14 @@ test("Aliases", function () {
     "test_index1": {
       "type1": {
         "properties": {
-          "last1": {"type": "string", "index_name": "i_last_1"}
+          "last1": { "type": "string", "index_name": "i_last_1" }
         }
       }
     },
     "test_index2": {
       "type2": {
         "properties": {
-          "last1": {"type": "string", "index_name": "i_last_1"}
+          "last1": { "type": "string", "index_name": "i_last_1" }
         }
       }
     }

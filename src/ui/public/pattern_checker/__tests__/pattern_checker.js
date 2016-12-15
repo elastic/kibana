@@ -31,7 +31,7 @@ describe('pattern checker', function () {
   }));
 
   it('should display the number of documents in a given index pattern', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
@@ -41,7 +41,7 @@ describe('pattern checker', function () {
   });
 
   it('should poll the api for changes to the document count and update the ui', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
 
@@ -49,7 +49,7 @@ describe('pattern checker', function () {
     $rootScope.$digest();
     expect(_.contains(element.html(), `1 results`)).to.be.ok();
 
-    apiResponse.respond(200, {count: 2});
+    apiResponse.respond(200, { count: 2 });
     $timeout.flush();
     $httpBackend.flush();
     $rootScope.$digest();
@@ -78,7 +78,7 @@ describe('pattern checker', function () {
   });
 
   it('should stop polling when the scope is destroyed', function () {
-    apiResponse.respond(200, {count: 1});
+    apiResponse.respond(200, { count: 1 });
 
     const element = $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);
     const scope = element.scope();

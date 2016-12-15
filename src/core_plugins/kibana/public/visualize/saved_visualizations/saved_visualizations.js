@@ -36,7 +36,7 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
     if (!typeName || !visTypes.byName[typeName]) {
       if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
       else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
-      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', {id: source.id});
+      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', { id: source.id });
     }
 
     source.type = visTypes.byName[typeName];

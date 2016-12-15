@@ -2,7 +2,7 @@
 
 .global-nav-link {
   position: relative;
-  width: @as-closed-width;
+  width: @global-nav-closed-width;
   height: @app-icon-height;
   line-height: @app-line-height;
 
@@ -27,7 +27,7 @@
 
 .is-global-nav-open {
   .global-nav-link {
-    width: @as-open-width;
+    width: @global-nav-open-width;
   }
 }
 
@@ -43,7 +43,7 @@
 
   .global-nav-link__icon {
     display: inline-block;
-    width: @as-closed-width;
+    width: @global-nav-closed-width;
     height: @app-icon-height;
     float: left;
     text-align: center;
@@ -70,7 +70,7 @@
 
   .global-nav-link__title {
     display: none;
-    width: calc(@as-open-width - @as-closed-width);
+    width: calc(@global-nav-open-width - @global-nav-closed-width);
     float: right;
     font-size: 0.9em;
     text-align: left;
