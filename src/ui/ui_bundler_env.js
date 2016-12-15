@@ -77,6 +77,13 @@ module.exports = class UiBundlerEnv {
         return (plugin, spec) => {
           for (const re of arr(spec)) this.addNoParse(re);
         };
+
+      case '__globalImportAliases__':
+        return (plugin, spec) => {
+          for (const key of Object.keys(spec)) {
+            this.aliases[key] = spec[key];
+          }
+        };
     }
   }
 
@@ -90,18 +97,5 @@ module.exports = class UiBundlerEnv {
 
   addNoParse(regExp) {
     this.noParse.push(regExp);
-  }
-
-  claim(id, pluginId) {
-    const owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
-
-    // TODO(spalger): we could do a lot more to detect colliding module defs
-    const existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
-
-    if (existingOwner) {
-      throw new TypeError(`${owner} attempted to override export "${id}" from ${existingOwner}`);
-    }
-
-    this.aliasOwners[id] = owner;
   }
 };
