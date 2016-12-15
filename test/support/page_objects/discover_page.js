@@ -316,18 +316,6 @@ export default class DiscoverPage {
     .click();
   }
 
-  // this doesn't work yet.  Seems like we have to mouse over first to get it to appear?
-  removeFilter(field) {
-    return PageObjects.common.findTestSubject('removeFilter-' + field)
-    .click();
-  }
-
-  // this doesn't work yet.  Seems like we have to mouse over first to get it to appear?
-  disableFilter(field) {
-    return PageObjects.common.findTestSubject('disableFilter-' + field)
-    .click();
-  }
-
   removeAllFilters() {
     return this.findTimeout
     .findByCssSelector('a[ng-click="showFilterActions = !showFilterActions"]')
