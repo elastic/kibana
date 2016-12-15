@@ -39,9 +39,8 @@ program
   .action(run('test/browser'));
 
 program
-  .command('test:server')
+  .command('test:server [files...]')
   .description('Run the server tests using mocha')
-  .option('-i, --include <globs>', 'Additional files of glob patterns to include server tests from')
   .on('--help', docs('test/server'))
   .action(run('test/server'));
 
