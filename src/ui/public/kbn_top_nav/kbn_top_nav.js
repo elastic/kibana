@@ -9,27 +9,11 @@
  *
  * Menu items/templates are passed to the kbnTopNav via the config attribute
  * and should be defined as an array of objects. Each object represents a menu
- * item and should have the following properties:
+ * item and should be of type kbnTopNavConfig.
  *
- * @param {Array<Object>|KbnTopNavController} config
- * @param {string} config[].key
- *        - the uniq key for this menu item.
- * @param {string} [config[].label]
- *        - optional, string that will be displayed for the menu button.
- *        Defaults to the key
- * @param {string} [config[].description]
- *        - optional, used for the screen-reader description of this menu
- *        item, defaults to "Toggle ${key} view" for templated menu items
- *        and just "${key}" for programatic menu items
- * @param {boolean} [config[].hideButton]
- *        - optional, set to true to prevent a menu item from being created.
- *        This allow injecting templates into the navbar that don't have
- *        an associated template
- * @param {function} [config[].run]
- *        - optional, function to call when the menu item is clicked, defaults
- *        to toggling the template
+ * @param {Array<kbnTopNavConfig>|KbnTopNavController} config
  *
- * Programatic control of the navbar can be acheived one of two ways
+ * Programmatic control of the navbar can be achieved one of two ways
  */
 
 import _ from 'lodash';
@@ -99,15 +83,24 @@ module.directive('kbnTopNav', function (Private) {
       });
 
       const extensions = getNavbarExtensions($attrs.name);
-      let controls = _.get($scope, $attrs.config, []);
-      if (controls instanceof KbnTopNavController) {
-        controls.addItems(extensions);
-      } else {
-        controls = controls.concat(extensions);
-      }
 
-      $scope.kbnTopNav = new KbnTopNavController(controls);
-      $scope.kbnTopNav._link($scope, $element);
+      /**
+       * Dashboard makes some dynamic changes to the top nav so we need to watch this
+       * variable. Since the scope isn't isolate, I have to watch a variable that is defined on
+       * the parent scope. This is pretty ugly but without isolate scope, I don't see a better
+       * way to achieve dynamic updates.
+       */
+      $scope.$watch('topNavMenu', function () {
+        let controls = _.get($scope, $attrs.config, []);
+        if (controls instanceof KbnTopNavController) {
+          controls.addItems(extensions);
+        } else {
+          controls = controls.concat(extensions);
+        }
+
+        $scope.kbnTopNav = new KbnTopNavController(controls);
+        $scope.kbnTopNav._link($scope, $element);
+      });
 
       return $scope.kbnTopNav;
     },
