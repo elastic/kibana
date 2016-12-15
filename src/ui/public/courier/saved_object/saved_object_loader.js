@@ -17,9 +17,9 @@ export class SavedObjectLoader {
     });
 
     this.loaderProperties = {
-      name: `${this.lowercaseType}s`,
+      name: `${ this.lowercaseType }s`,
       noun: StringUtils.upperFirst(this.type),
-      nouns: `${this.lowercaseType}s`,
+      nouns: `${ this.lowercaseType }s`,
     };
   }
 
@@ -34,7 +34,7 @@ export class SavedObjectLoader {
   }
 
   urlFor(id) {
-    return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, {id: id});
+    return this.kbnUrl.eval(`#/${ this.lowercaseType }/{{id}}`, { id: id });
   }
 
   delete(ids) {
@@ -85,7 +85,7 @@ export class SavedObjectLoader {
         }
       };
     } else {
-      body = { query: {match_all: {}}};
+      body = { query: { match_all: {} } };
     }
 
     return this.es.search({
