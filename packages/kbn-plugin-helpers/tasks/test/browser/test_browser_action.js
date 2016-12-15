@@ -4,9 +4,14 @@ module.exports = function testBrowserAction(plugin, run, command) {
   command = command || {};
 
   var kbnServerArgs = [
-    '--kbnServer.testsBundle.pluginId=' + plugin.id,
     '--kbnServer.plugin-path=' + plugin.root
   ];
+
+  if (command.plugins) {
+    kbnServerArgs.push('--kbnServer.testsBundle.pluginId=' + command.plugins);
+  } else {
+    kbnServerArgs.push('--kbnServer.testsBundle.pluginId=' + plugin.id);
+  }
 
   var cmd = 'npm';
   var task = (command.dev) ? 'test:dev' : 'test:browser';
