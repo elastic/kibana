@@ -1,5 +1,6 @@
 module.exports = function testBrowserAction(plugin, run, command) {
   var execFileSync = require('child_process').execFileSync;
+  command = command || {};
 
   var kbnServerArgs = [
     '--kbnServer.testsBundle.pluginId=' + plugin.id,
