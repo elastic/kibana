@@ -1,5 +1,6 @@
-module.exports = function (plugin) {
+module.exports = function testBrowserAction(plugin, run, command) {
   var execFileSync = require('child_process').execFileSync;
+  command = command || {};
 
   var kbnServerArgs = [
     '--kbnServer.testsBundle.pluginId=' + plugin.id,
@@ -7,7 +8,8 @@ module.exports = function (plugin) {
   ];
 
   var cmd = 'npm';
-  var args = ['run', 'test:dev', '--'].concat(kbnServerArgs);
+  var task = (command.dev) ? 'test:dev' : 'test:browser';
+  var args = ['run', task, '--'].concat(kbnServerArgs);
   execFileSync(cmd, args, {
     cwd: plugin.kibanaRoot,
     stdio: ['ignore', 1, 2]
