@@ -1,6 +1,6 @@
 import uiRoutes from 'ui/routes';
 import './app';
-import {getDocumentUid} from './api/utils/ids';
+import { getDocumentUid } from './api/utils/ids';
 
 
 uiRoutes

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 
-import {fetchAnchor} from './api/anchor';
-import {fetchPredecessors, fetchSuccessors} from './api/context';
-import {createSelector, started} from './dispatch';
+import { fetchAnchor } from './api/anchor';
+import { fetchPredecessors, fetchSuccessors } from './api/context';
+import { createSelector, started } from './dispatch';
 import {
   QueryParameterActionCreatorsProvider,
   selectPredecessorCount,

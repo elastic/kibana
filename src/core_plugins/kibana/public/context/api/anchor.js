@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-import {addComputedFields} from './utils/fields';
-import {createAnchorQuery} from './utils/queries';
+import { addComputedFields } from './utils/fields';
+import { createAnchorQuery } from './utils/queries';
 
 
 async function fetchAnchor(es, indexPattern, uid, sort) {

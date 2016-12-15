@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
-import {addComputedFields} from './utils/fields';
-import {getDocumentUid} from './utils/ids';
-import {createSuccessorsQuery} from './utils/queries.js';
-import {reverseQuerySort} from './utils/sorting';
+import { addComputedFields } from './utils/fields';
+import { getDocumentUid } from './utils/ids';
+import { createSuccessorsQuery } from './utils/queries.js';
+import { reverseQuerySort } from './utils/sorting';
 
 
 async function fetchSuccessors(es, indexPattern, anchorDocument, sort, size) {
