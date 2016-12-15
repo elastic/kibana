@@ -23,6 +23,15 @@ running the tests
 Running the server tests is simple, just execute `npm run test:server` in your terminal
 and all of the tests in your server will be run.
 
+By default, the runner will look for tests in `server/**/__tests__/**/*.js`. If you'd prefer to
+use a different collection of globs and files, you can specify them after the `npm run test:server`
+task, like so:
+
+`npm run test:server 'plugins/myplugins/server/__tests__/**/*.js'`
+
+NOTE: quoting the glob pattern is not required, but helps to avoid issues with globbing expansion
+in your shell.
+
 
 focus on the task at hand
 =========================
