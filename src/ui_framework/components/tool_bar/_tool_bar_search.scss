@@ -19,6 +19,9 @@
     color: #ACACAC;
   }
 
+  /**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
   .kuiToolBarSearchBox__input {
     width: 100%;
     min-width: 200px;
@@ -28,6 +31,8 @@
     border: 1px solid #FFFFFF;
     border-radius: $buttonBorderRadius;
     font-size: $fontSize;
+    border: none; /* 1 */
+    line-height: normal; /* 1 */
 
     &:focus {
       @include focus;
