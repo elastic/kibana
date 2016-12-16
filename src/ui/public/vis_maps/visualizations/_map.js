@@ -15,8 +15,6 @@ uiRoutes.afterSetupWork(function (tilemapSettings) {
 
 export default function MapFactory(Private, tilemapSettings) {
 
-  console.log('cant use!');
-
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
