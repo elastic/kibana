@@ -5,12 +5,8 @@ export default function (server) {
   const { ElasticsearchClientLogging } = server.plugins.elasticsearch;
 
   class AdminClientLogging extends ElasticsearchClientLogging {
-    constructor() {
-      super();
-
-      this.tags = ['admin'];
-      this.logQueries = config.get('elasticsearch.logQueries');
-    }
+    tags = ['admin'];
+    logQueries = config.get('elasticsearch.logQueries');
   }
 
   const adminCluster = server.plugins.elasticsearch.createCluster(

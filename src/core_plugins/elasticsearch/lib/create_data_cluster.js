@@ -6,12 +6,8 @@ export default function (server) {
   const { ElasticsearchClientLogging } = server.plugins.elasticsearch;
 
   class DataClientLogging extends ElasticsearchClientLogging {
-    constructor() {
-      super();
-
-      this.tags = ['data'];
-      this.logQueries = getConfig().logQueries;
-    }
+    tags = ['data'];
+    logQueries = getConfig().logQueries;
   }
 
   function getConfig() {
