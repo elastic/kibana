@@ -12,7 +12,7 @@ marked.setOptions({
 uiModules.get('kibana')
   .service('tilemapSettings', function ($http, mapsConfig, $sanitize) {
 
-    const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution));
+    const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, {attribution: attributionFromConfig});
 
 
@@ -32,7 +32,7 @@ uiModules.get('kibana')
        */
       async whenSettingsReady() {
 
-        if (!mapsConfig.deprecated.isConfiguredWithDefault) {//if settings are overridden, we will use those.
+        if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
           return true;
         }
 
