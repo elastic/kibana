@@ -9,11 +9,13 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatm
 
 import uiRoutes from 'ui/routes';
 
-uiRoutes.afterSetupWork(async function (tilemapSettings) {
-  await tilemapSettings.whenSettingsReady();
+uiRoutes.afterSetupWork(function (tilemapSettings) {
+  return tilemapSettings.whenSettingsReady();
 });
 
 export default function MapFactory(Private, tilemapSettings) {
+
+  console.log('cant use!');
 
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
