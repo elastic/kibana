@@ -1,8 +1,8 @@
 [[kibana-plugins]]
 == Kibana Plugins added[4.2]
 
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin` 
-command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin`
+command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `installedPlugins` directory and unpacking the plugin files into a new directory.
 
 A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
@@ -20,7 +20,7 @@ You can also use `-i` instead of `--install`, as in the following example:
 [source,shell]
 bin/kibana plugin -i elasticsearch/marvel/latest
 
-Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
+Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the
 plugin from `download.elastic.co`.
 
 [float]
@@ -59,7 +59,7 @@ NOTE: This command creates the specified directory if it does not already exist.
 [float]
 === Removing Plugins
 
-Use the `--remove` or `-r` option to remove a plugin, including any configuration information, as in the following 
+Use the `--remove` or `-r` option to remove a plugin, including any configuration information, as in the following
 example:
 
 [source,shell]
@@ -80,11 +80,11 @@ To update a plugin, remove the current version and reinstall the plugin.
 [float]
 === Configuring the Plugin Manager
 
-By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager 
-to perform. You can control the level of feedback with the `--quiet` and `--silent` options. Use the `--quiet` option to 
+By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager
+to perform. You can control the level of feedback with the `--quiet` and `--silent` options. Use the `--quiet` option to
 suppress all non-error output. Use the `--silent` option to suppress all output.
 
-By default, plugin manager requests do not time out. Use the `--timeout` option, followed by a time, to change this 
+By default, plugin manager requests do not time out. Use the `--timeout` option, followed by a time, to change this
 behavior, as in the following examples:
 
 [source,shell]
@@ -98,8 +98,8 @@ bin/kibana plugin --install username/sample-plugin --timeout 1m
 [float]
 ==== Plugins and Custom Kibana Configurations
 
-Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana 
-uses the configuration file `config/kibana.yml`. When you change your installed plugins, the `bin/kibana plugin` command 
+Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana
+uses the configuration file `config/kibana.yml`. When you change your installed plugins, the `bin/kibana plugin` command
 restarts the Kibana server. When you are using a customized configuration file, you must specify the
 path to that configuration file each time you use the `bin/kibana plugin` command.
 
@@ -116,10 +116,12 @@ path to that configuration file each time you use the `bin/kibana plugin` comman
 [[plugin-switcher]]
 == Switching Plugin Functionality
 
-The Kibana UI serves as a framework that can contain several different plugins. You can switch between these 
+The Kibana UI serves as a framework that can contain several different plugins. You can switch between these
 plugins by clicking the image:images/app-button.png[Plugin Chooser] *Plugin chooser* button to display icons for the
 installed plugins:
 
 image::images/app-picker.png[]
 
 Click a plugin's icon to switch to that plugin's functionality.
+
+include::known-plugins.asciidoc[]
