@@ -1,4 +1,4 @@
-<td ng-click="toggleRow()">
+<td ng-click="toggleRow()" ng-class="{'discover-table-togglefield--highlight': row['$$_isAnchor']}">
   <i
     class="fa discover-table-open-icon"
     ng-class="{ 'fa-caret-down': open, 'fa-caret-right': !open }">

@@ -129,7 +129,16 @@
     }
 
     .discover-table-row--highlight {
-      font-weight: bold;
+      font-weight: 900;
+      outline: 3px solid @table-border-color;
+
+      td {
+        border-top: none !important;
+      }
+    }
+
+    .discover-table-togglefield--highlight {
+      background: @table-border-color;
     }
 
 .shard-failures {
