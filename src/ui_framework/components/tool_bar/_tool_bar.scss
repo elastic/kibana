@@ -5,17 +5,7 @@
   height: 50px;
   background-color: $panelColor;
 
-  .kuiButton--basic {
-    background-color: #FFFFFF;
-
-    &:hover:enabled {
-      background-color: #FFFFFF;
-    }
-
-    &:active:enabled {
-      background-color: #FAFAFA;
-    }
-  }
+  @include buttonOnReverseBackground;
 }
 
 /**
