@@ -5,11 +5,11 @@
 :shield: https://www.elastic.co/guide/en/shield/2.4/
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
-:version: 4.6
+:version: 4.7
 :esversion: 2.4
 
 :repo: https://github.com/elastic/kibana/
-:branch: 4.6
+:branch: 4.7
 
 include::introduction.asciidoc[]
 
