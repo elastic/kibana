@@ -603,6 +603,33 @@ fieldset {
   font-size: 14px;
 }
 
+.kuiVerticalRhythm {
+  & + & {
+    margin-top: 10px;
+  }
+}
+
+.kuiView {
+  background-color: #FFFFFF;
+  flex: 1 1 auto;
+}
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.kuiViewContent--constrainedWidth {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .kuiPage {
   padding: 20px 30px 28px;
   margin: 20px;
@@ -823,13 +850,6 @@ fieldset {
 .kuiOptionLabel {
   font-weight: normal; // 1
   cursor: pointer;
-}
-
-/**
- * 1. Override checkbox styles.
- */
-.kuiCheckbox {
-  cursor: default;
 }
 
 .kuiFormPanel {
