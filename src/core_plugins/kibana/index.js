@@ -26,7 +26,6 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools/hacks/disable'],
       app: {
         id: 'kibana',
         title: 'Kibana',
