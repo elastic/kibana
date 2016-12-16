@@ -32,13 +32,14 @@ program
 
 program
   .command('test:browser')
-  .option('--dev', 'Enable dev mode, keeps the test server running')
   .description('Run the browser tests in a real web browser')
+  .option('--dev', 'Enable dev mode, keeps the test server running')
+  .option('-p, --plugins <plugin-ids>', 'Manually specify which plugins\' test bundles to run')
   .on('--help', docs('test/browser'))
   .action(run('test/browser'));
 
 program
-  .command('test:server')
+  .command('test:server [files...]')
   .description('Run the server tests using mocha')
   .on('--help', docs('test/server'))
   .action(run('test/server'));
