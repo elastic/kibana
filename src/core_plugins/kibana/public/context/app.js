@@ -129,6 +129,5 @@ function createInitialState() {
       predecessors: 'uninitialized',
       successors: 'uninitialized',
     },
-    isInitialized: false,
   };
 }
