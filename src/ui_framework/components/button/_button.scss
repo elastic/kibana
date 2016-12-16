@@ -80,3 +80,21 @@
     @include focus(#ff523c);
   }
 }
+
+@mixin buttonOnReverseBackground {
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    &:hover:enabled,
+    &:active:enabled {
+      color: #000000;
+      background-color: #FAFAFA;
+    }
+
+    &:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}
