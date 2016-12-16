@@ -20,7 +20,7 @@ uiModules.get('kibana')
 
       constructor() {
 
-        this._queryParams = {license: ""};//this is currently a mandatory parameter. Remove when no longer the case.
+        this._queryParams = {};
         this._settingsInitialized = false;
         this._loadingCalled = false;
 
@@ -56,7 +56,7 @@ uiModules.get('kibana')
             subdomains: []
           };
 
-          const queryparams = _.assign({license: this._licenseUid}, manifest.services[0].query_parameters);
+          const queryparams = _.assign({}, manifest.services[0].query_parameters);
           const query = url.format({query: queryparams});
           this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
 
@@ -91,11 +91,9 @@ uiModules.get('kibana')
        * @return {string}
        */
       getUrl() {
-
         if (!this._settingsInitialized) {
           throw new Error('Cannot retrieve url before calling .loadSettings first');
         }
-
         return this._url;
       }
 
