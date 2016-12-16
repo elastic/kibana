@@ -11,9 +11,9 @@ export default function AlertsFactory(Private) {
    * @param el {HTMLElement} Reference to DOM element
    */
   class Alerts {
-    constructor(vis, data, alertDefs) {
+    constructor(vis, alertDefs) {
       this.vis = vis;
-      this.data = data;
+      this.data = vis.data;
       this.binder = new Binder();
       this.alertDefs = alertDefs || [];
 
