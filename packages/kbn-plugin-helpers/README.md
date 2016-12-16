@@ -16,11 +16,11 @@ $ plugin-helpers help
 
   Commands:
 
-    start          start the server
-    test:browser   run the browser tests
-    test:server    run the server tests
-    build          build a distributable archive
-    help [cmd]     display help for [cmd]
+    start                    Start kibana and have it include this plugin
+    build                    Build a distributable archive
+    test                     Run the server and browser tests
+    test:browser [options]   Run the browser tests in a real web browser
+    test:server [files...]   Run the server tests using mocha
 
   Options:
 
