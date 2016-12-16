@@ -1,4 +1,3 @@
-
 import React, {
   Component,
   PropTypes,
@@ -43,6 +42,7 @@ export default class GuideExample extends Component {
         slug={section.slug}
         html={section.html}
         js={section.js}
+        hasDarkTheme={section.hasDarkTheme}
       >
         {section.description}
       </GuidePageSection>
@@ -73,5 +73,6 @@ GuideExample.propTypes = {
     description: React.PropTypes.any,
     html: React.PropTypes.string.isRequired,
     js: React.PropTypes.string,
+    hasDarkTheme: React.PropTypes.bool,
   })),
 };

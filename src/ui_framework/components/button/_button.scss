@@ -1,0 +1,94 @@
+/**
+ * 1. Disable for Angular.
+ */
+.kuiButton {
+  appearance: none;
+  padding: 4px 12px 5px;
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $buttonBorderRadius;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none; // 1
+  }
+
+  &:active:enabled {
+    transform: translateY(1px);
+  }
+
+  &:focus {
+    @include focus;
+  }
+}
+
+.kuiButton--iconText {
+  .kuiButton__icon {
+    margin-right: 4px;
+  }
+}
+
+.kuiButton--basic {
+  color: #5a5a5a;
+  background-color: #F2F2F2;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #ffffff;
+    background-color: #9B9B9B;
+  }
+
+  &:disabled {
+    color: #9B9B9B;
+  }
+}
+
+.kuiButton--primary {
+  color: #FFFFFF;
+  background-color: #6EADC1;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #FFFFFF;
+    background-color: #006E8A;
+  }
+
+  &:disabled {
+    background-color: #B6D6E0;
+  }
+}
+
+.kuiButton--danger {
+  color: #FFFFFF;
+  background-color: #D76051;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #FFFFFF;
+    background-color: #A52E1F;
+  }
+
+  &:disabled {
+    background-color: #efc0ba;
+  }
+
+  &:focus {
+    @include focus(#ff523c);
+  }
+}
+
+@mixin buttonOnReverseBackground {
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    &:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}

@@ -1,34 +1,34 @@
-<div class="localDropdownPanels">
+<div class="kuiLocalDropdownPanels">
   <!-- Left panel -->
-  <div class="localDropdownPanel localDropdownPanel--left">
+  <div class="kuiLocalDropdownPanel kuiLocalDropdownPanel--left">
     <!-- Title -->
     <div
       data-test-subj="shareUiTitle"
-      class="localDropdownTitle"
+      class="kuiLocalDropdownTitle"
     >
       Share saved {{share.objectType}}
     </div>
 
     <!-- Help text -->
-    <div ng-if="share.urls.original" class="localDropdownHelpText">
+    <div ng-if="share.urls.original" class="kuiLocalDropdownHelpText">
       You can share this URL with people to let them load the most recent saved version of this {{share.objectType}}.
     </div>
 
-    <div ng-if="!share.urls.original" class="localDropdownWarning">
+    <div ng-if="!share.urls.original" class="kuiLocalDropdownWarning">
       Please save this {{share.objectType}} to enable this sharing option.
     </div>
 
     <div ng-if="share.urls.original">
       <!-- iframe -->
-      <div class="localDropdownSection" ng-if="share.allowEmbed">
+      <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
         <!-- Header -->
-        <div class="localDropdownHeader">
-          <div class="localDropdownHeader__label">
+        <div class="kuiLocalDropdownHeader">
+          <div class="kuiLocalDropdownHeader__label">
             Embedded iframe
           </div>
-          <div class="localDropdownHeader__actions">
+          <div class="kuiLocalDropdownHeader__actions">
             <a
-              class="localDropdownHeader__action"
+              class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalIframeUrl')"
             >
               Copy
@@ -39,28 +39,28 @@
         <!-- Input -->
         <input
           id="originalIframeUrl"
-          class="localDropdownInput"
+          class="kuiLocalDropdownInput"
           type="text"
           readonly
           value="{{share.makeIframeTag(share.urls.original)}}"
         />
 
         <!-- Notes -->
-        <div class="localDropdownFormNote">
+        <div class="kuiLocalDropdownFormNote">
           Add to your HTML source. Note that all clients must be able to access Kibana.
         </div>
       </div>
 
       <!-- Link -->
-      <div class="localDropdownSection">
+      <div class="kuiLocalDropdownSection">
         <!-- Header -->
-        <div class="localDropdownHeader">
-          <div class="localDropdownHeader__label">
+        <div class="kuiLocalDropdownHeader">
+          <div class="kuiLocalDropdownHeader__label">
             Link
           </div>
-          <div class="localDropdownHeader__actions">
+          <div class="kuiLocalDropdownHeader__actions">
             <a
-              class="localDropdownHeader__action"
+              class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalUrl')"
             >
               Copy
@@ -71,7 +71,7 @@
         <!-- Input -->
         <input
           id="originalUrl"
-          class="localDropdownInput"
+          class="kuiLocalDropdownInput"
           type="text"
           readonly
           value="{{share.urls.original}}"
@@ -81,27 +81,27 @@
   </div>
 
   <!-- Right panel -->
-  <div class="localDropdownPanel localDropdownPanel--right">
+  <div class="kuiLocalDropdownPanel kuiLocalDropdownPanel--right">
     <!-- Title -->
-    <div class="localDropdownTitle">
+    <div class="kuiLocalDropdownTitle">
       Share Snapshot
     </div>
 
     <!-- Help text -->
-    <div class="localDropdownHelpText">
+    <div class="kuiLocalDropdownHelpText">
       Snapshot URLs encode the current state of the {{share.objectType}} in the URL itself. Edits to the saved {{share.objectType}} won't be visible via this URL.
     </div>
 
     <!-- iframe -->
-    <div class="localDropdownSection" ng-if="share.allowEmbed">
+    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
       <!-- Header -->
-      <div class="localDropdownHeader">
-        <div class="localDropdownHeader__label">
+      <div class="kuiLocalDropdownHeader">
+        <div class="kuiLocalDropdownHeader__label">
           Embedded iframe
         </div>
-        <div class="localDropdownHeader__actions">
+        <div class="kuiLocalDropdownHeader__actions">
           <a
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
           >
@@ -109,7 +109,7 @@
           </a>
 
           <a
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
           >
@@ -117,7 +117,7 @@
           </a>
 
           <a
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotIframeUrl')"
           >
             Copy
@@ -128,29 +128,29 @@
       <!-- Input -->
       <input
         id="snapshotIframeUrl"
-        class="localDropdownInput"
+        class="kuiLocalDropdownInput"
         type="text"
         readonly
         value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshotIframe) : share.makeIframeTag(share.urls.snapshot)}}"
       />
 
       <!-- Notes -->
-      <div class="localDropdownFormNote">
+      <div class="kuiLocalDropdownFormNote">
         Add to your HTML source. Note that all clients must be able to access Kibana.
       </div>
     </div>
 
     <!-- Link -->
-    <div class="localDropdownSection">
+    <div class="kuiLocalDropdownSection">
       <!-- Header -->
-      <div class="localDropdownHeader">
-        <div class="localDropdownHeader__label">
+      <div class="kuiLocalDropdownHeader">
+        <div class="kuiLocalDropdownHeader__label">
           Link
         </div>
-        <div class="localDropdownHeader__actions">
+        <div class="kuiLocalDropdownHeader__actions">
           <a
             data-test-subj="sharedSnapshotShortUrlButton"
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
           >
@@ -158,7 +158,7 @@
           </a>
 
           <a
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
           >
@@ -167,7 +167,7 @@
 
           <a
             data-test-subj="sharedSnapshotCopyButton"
-            class="localDropdownHeader__action"
+            class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotUrl')"
           >
             Copy
@@ -179,14 +179,14 @@
       <input
         data-test-subj="sharedSnapshotUrl"
         id="snapshotUrl"
-        class="localDropdownInput"
+        class="kuiLocalDropdownInput"
         type="text"
         readonly
         value="{{share.urlFlags.shortSnapshot ? share.urls.shortSnapshot : share.urls.snapshot}}"
       />
 
       <!-- Notes -->
-      <div class="localDropdownFormNote">
+      <div class="kuiLocalDropdownFormNote">
         We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great.
       </div>
     </div>

@@ -4,6 +4,5 @@
 /test/fixtures/scenarios
 /src/core_plugins/console/public/webpackShims
 /src/core_plugins/console/public/tests/webpackShims
-/src/core_plugins/timelion/bower_components
-/src/core_plugins/timelion/vendor_components
 /src/ui/public/utils/decode_geo_hash.js
+/src/core_plugins/timelion/public/webpackShims/jquery.flot.*

@@ -4,7 +4,7 @@
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <div data-transclude-slot="topLeftCorner">
-        <span class="localTitle" ng-show="opts.savedSheet.id">
+        <span class="kuiLocalTitle" ng-show="opts.savedSheet.id">
           {{opts.savedSheet.lastSavedTitle}}
           &nbsp;
           <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
@@ -23,7 +23,7 @@
         role="form"
         ng-submit="search()"
       >
-        <div class="localSearch timelionLocalSearch">
+        <div class="kuiLocalSearch timelionLocalSearch">
           <input
             input-focus
             ng-model="state.sheet[state.selected]"
@@ -31,7 +31,7 @@
             placeholder="Expression..."
             aria-label="Expression input"
             type="text"
-            class="localSearchInput timelion-expression"
+            class="kuiLocalSearchInput timelion-expression"
           >
 
           <timelion-interval model="state.interval"></timelion-interval>
@@ -39,7 +39,7 @@
           <button
             type="submit"
             aria-label="Search"
-            class="localSearchButton"
+            class="kuiLocalSearchButton"
           >
             <span class="fa fa-play"></span>
           </button>
