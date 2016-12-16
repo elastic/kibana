@@ -18,7 +18,9 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise) {
   return {
     restrict: 'E',
+    controllerAs: 'managementObjectsController',
     controller: function ($scope, $injector, $q, AppState, es) {
+      const self = this;
       const notify = new Notifier({ location: 'Saved Objects' });
 
       const $state = $scope.state = new AppState();
@@ -153,7 +155,7 @@ uiModules.get('apps/management')
       }
 
       function refreshData() {
-        return getData($scope.advancedFilter);
+        return getData(self.advancedFilter);
       }
 
       $scope.changeTab = function (tab) {
@@ -163,7 +165,7 @@ uiModules.get('apps/management')
         $state.save();
       };
 
-      $scope.$watch('advancedFilter', function (filter) {
+      $scope.$watch('managementObjectsController.advancedFilter', function (filter) {
         getData(filter);
       });
     }
