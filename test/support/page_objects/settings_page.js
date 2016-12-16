@@ -13,21 +13,21 @@ export default class SettingsPage {
     this.remote = remote;
   }
 
-  clickNavigation() {
+  async clickNavigation() {
     // TODO: find better way to target the element
-    return this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
+    await this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
   }
 
-  clickLinkText(text) {
-    return this.remote.findDisplayedByLinkText(text).click();
+  async clickLinkText(text) {
+    await this.remote.findDisplayedByLinkText(text).click();
   }
 
-  clickKibanaSettings() {
-    return this.clickLinkText('Advanced Settings');
+  async clickKibanaSettings() {
+    await this.clickLinkText('Advanced Settings');
   }
 
-  clickKibanaIndicies() {
-    return this.clickLinkText('Index Patterns');
+  async clickKibanaIndicies() {
+    await this.clickLinkText('Index Patterns');
   }
 
   getAdvancedSettings(propertyName) {
@@ -36,43 +36,20 @@ export default class SettingsPage {
     .getVisibleText();
   }
 
-  setAdvancedSettings(propertyName, propertyValue) {
-    var self = this;
-
-    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-      return self.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('option[label="' + propertyValue + '"]')
-      .click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(function setAdvancedSettingsClickSaveButton() {
-      return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton')
-      .click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+  async setAdvancedSettings(propertyName, propertyValue) {
+    const self = this;
+    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.sleep(1000);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('option[label="' + propertyValue + '"]').click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
-  getAdvancedSettings(propertyName) {
-    var self = this;
-    PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
-    .getVisibleText();
-  }
-
-  navigateTo() {
-    return PageObjects.common.navigateToApp('settings');
+  async navigateTo() {
+    await PageObjects.common.navigateToApp('settings');
   }
 
   getTimeBasedEventsCheckbox() {
@@ -97,32 +74,22 @@ export default class SettingsPage {
       .findDisplayedByCssSelector('select[ng-model="index.timeField"]');
   }
 
-  selectTimeFieldOption(selection) {
+  async selectTimeFieldOption(selection) {
     // open dropdown
-    return this.getTimeFieldNameField().click()
-    .then(() => {
-      // close dropdown, keep focus
-      return this.getTimeFieldNameField().click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.getTimeFieldOption(selection).click()
-        .then(() => {
-          return this.getTimeFieldOption(selection).isSelected();
-        })
-        .then(selected => {
-          if (!selected) throw new Error('option not selected: ' + selected);
-        });
-      });
+    (await this.getTimeFieldNameField()).click();
+    // close dropdown, keep focus
+    (await this.getTimeFieldNameField()).click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.try(async () => {
+      (await this.getTimeFieldOption(selection)).click();
+      const selected = (await this.getTimeFieldOption(selection)).isSelected();
+      if (!selected) throw new Error('option not selected: ' + selected);
     });
   }
 
   getTimeFieldOption(selection) {
     return this.remote.setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('option[label="' + selection + '"]').click();
+      .findDisplayedByCssSelector('option[label="' + selection + '"]');
   }
 
   getCreateButton() {
@@ -130,16 +97,14 @@ export default class SettingsPage {
       .findDisplayedByCssSelector('[type="submit"]');
   }
 
-  clickDefaultIndexButton() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-success.ng-scope').click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+  async clickDefaultIndexButton() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('button.btn.btn-success.ng-scope').click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
-  clickDeletePattern() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async clickDeletePattern() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-danger.ng-scope').click();
   }
 
@@ -152,6 +117,7 @@ export default class SettingsPage {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('h1');
   }
+
   getTableHeader() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('table.table.table-condensed thead tr th');
@@ -188,28 +154,23 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    var selector = 'a[data-test-subj="tab-indexedFields"] small';
-
+    const selector = 'a[data-test-subj="tab-indexedFields"] small';
     return PageObjects.common.try(() => {
       return this.remote.setFindTimeout(defaultFindTimeout / 10)
-      .findByCssSelector(selector).getVisibleText()
+      .findByCssSelector('a[data-test-subj="tab-indexedFields"] small').getVisibleText()
       .then((theText) => {
-        // the value has () around it, remove them
+      // the value has () around it, remove them
         return theText.replace(/\((.*)\)/, '$1');
       });
     });
   }
 
-  getScriptedFieldsTabCount() {
+  async getScriptedFieldsTabCount() {
     const selector = 'a[data-test-subj="tab-scriptedFields"] small';
-
-    return PageObjects.common.try(() => {
-      return this.remote.setFindTimeout(defaultFindTimeout / 10)
-      .findByCssSelector(selector).getVisibleText()
-      .then((theText) => {
-        // the value has () around it, remove them
-        return theText.replace(/\((.*)\)/, '$1');
-      });
+    return await PageObjects.common.try(async () => {
+      const theText = await this.remote.setFindTimeout(defaultFindTimeout / 10)
+      .findByCssSelector(selector).getVisibleText();
+      return theText.replace(/\((.*)\)/, '$1');
     });
   }
 
@@ -244,157 +205,118 @@ export default class SettingsPage {
     .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
   }
 
-  goToPage(pageNum) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async goToPage(pageNum) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
       (pageNum + 1) + ') a.ng-binding')
-    .click()
-    .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
-  openControlsRow(row) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async openControlsRow(row) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
       (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
     .click();
   }
 
-  openControlsByName(name) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async openControlsByName(name) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
     .click();
   }
 
-  increasePopularity() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async increasePopularity() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
   getPopularity() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('input[ng-model="editor.field.count"]')
-    .then(input => {
-      return input.getProperty('value');
-    });
+    .getProperty('value');
   }
 
-  controlChangeCancel() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async controlChangeCancel() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
-  controlChangeSave() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async controlChangeSave() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
   }
 
-  setPageSize(size) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async setPageSize(size) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+    .click();
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+  }
+
+  async createIndexPattern() {
+    await PageObjects.common.try(async () => {
+      await this.navigateTo();
+      await this.clickKibanaIndicies();
+      await this.selectTimeFieldOption('@timestamp');
+      await this.getCreateButton().click();
+    });
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.try(async () => {
+      const currentUrl = await this.remote.getCurrentUrl();
+      PageObjects.common.log('currentUrl', currentUrl);
+      if (!currentUrl.match(/indices\/.+\?/)) {
+        throw new Error('Index pattern not created');
+      } else {
+        PageObjects.common.debug('Index pattern created: ' + currentUrl);
+      }
     });
   }
 
-  createIndexPattern() {
-    return PageObjects.common.try(() => {
-      return this.navigateTo()
-        .then(() => {
-          return this.clickKibanaIndicies();
-        })
-        .then(() => {
-          return this.selectTimeFieldOption('@timestamp');
-        })
-        .then(() => {
-          return this.getCreateButton().click();
-        });
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            PageObjects.common.log('currentUrl', currentUrl);
-
-            if (!currentUrl.match(/indices\/.+\?/)) {
-              throw new Error('Index pattern not created');
-            } else {
-              PageObjects.common.debug('Index pattern created: ' + currentUrl);
-            }
-          });
-      });
-    });
-  }
-
-  removeIndexPattern() {
+  async removeIndexPattern() {
     var alertText;
-
-    return PageObjects.common.try(() => {
+    await PageObjects.common.try(async () => {
       PageObjects.common.debug('click delete index pattern button');
-      return this.clickDeletePattern();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('getAlertText');
-        return this.remote.getAlertText();
-      });
-    })
-    .then(function (text) {
-      alertText = text;
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('acceptAlert');
-        return this.remote.acceptAlert();
-      });
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.remote.getCurrentUrl()
-        .then(function (currentUrl) {
-          if (currentUrl.match(/indices\/.+\?/)) {
-            throw new Error('Index pattern not removed');
-          }
-        });
-      });
-    })
-    .then(() => {
-      return alertText;
+      await this.clickDeletePattern();
     });
+    await PageObjects.common.try(async () => {
+      PageObjects.common.debug('getAlertText');
+      alertText = await this.remote.getAlertText();
+    });
+    await PageObjects.common.try(async () => {
+      PageObjects.common.debug('acceptAlert');
+      await this.remote.acceptAlert();
+    });
+    await PageObjects.common.try(async () => {
+      const currentUrl = await this.remote.getCurrentUrl();
+      if (currentUrl.match(/indices\/.+\?/)) {
+        throw new Error('Index pattern not removed');
+      }
+    });
+    return alertText;
   }
 
-  clickFieldsTab() {
+  async clickFieldsTab() {
     PageObjects.common.debug('click Fields tab');
-    return PageObjects.common.findTestSubject('tab-indexFields')
+    await PageObjects.common.findTestSubject('tab-indexFields')
     .click();
   }
 
-  clickScriptedFieldsTab() {
+  async clickScriptedFieldsTab() {
     PageObjects.common.debug('click Scripted Fields tab');
-    return PageObjects.common.findTestSubject('tab-scriptedFields')
+    await PageObjects.common.findTestSubject('tab-scriptedFields')
     .click();
   }
 
-  clickSourceFiltersTab() {
+  async clickSourceFiltersTab() {
     PageObjects.common.debug('click Source Filters tab');
-    return PageObjects.common.findTestSubject('tab-sourceFilters')
+    await PageObjects.common.findTestSubject('tab-sourceFilters')
     .click();
   }
 
@@ -428,95 +350,89 @@ export default class SettingsPage {
     await this.clickSaveScriptedField();
   }
 
-  clickAddScriptedField() {
+  async clickAddScriptedField() {
     PageObjects.common.debug('click Add Scripted Field');
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('a[aria-label="Add Scripted Field"]')
     .click();
   }
 
-  clickSaveScriptedField() {
+  async clickSaveScriptedField() {
     PageObjects.common.debug('click Save Scripted Field');
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button[aria-label="Create Field"]')
     .click();
   }
 
-  setScriptedFieldName(name) {
+  async setScriptedFieldName(name) {
     PageObjects.common.debug('set scripted field name = ' + name);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('input[ng-model="editor.field.name"]')
-    .type(name);
+    await PageObjects.common.findTestSubject('editorFieldName').type(name);
   }
 
-  setScriptedFieldLanguage(language) {
+  async setScriptedFieldLanguage(language) {
     PageObjects.common.debug('set scripted field language = ' + language);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('select[ng-model="editor.field.lang"] > option[label="' + language + '"]')
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorFieldLang"] > option[label="' + language + '"]')
     .click();
   }
 
-  setScriptedFieldType(type) {
+  async setScriptedFieldType(type) {
     PageObjects.common.debug('set scripted field type = ' + type);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('select[ng-model="editor.field.type"] > option[label="' + type + '"]')
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorFieldType"] > option[label="' + type + '"]')
     .click();
   }
 
-  setScriptedFieldFormat(format) {
+  async setScriptedFieldFormat(format) {
     PageObjects.common.debug('set scripted field format = ' + format);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('select[ng-model="editor.selectedFormatId"] > option[label="' + format + '"]')
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[label="' + format + '"]')
     .click();
   }
 
-  setScriptedFieldUrlType(type) {
+  async setScriptedFieldUrlType(type) {
     PageObjects.common.debug('set scripted field Url type = ' + type);
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('select[ng-model="editor.formatParams.type"] > option[label="' + type + '"]')
     .click();
   }
 
-  setScriptedFieldUrlTemplate(template) {
+  async setScriptedFieldUrlTemplate(template) {
     PageObjects.common.debug('set scripted field Url Template = ' + template);
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
     .type(template);
   }
 
-  setScriptedFieldUrlLabelTemplate(labelTemplate) {
+  async setScriptedFieldUrlLabelTemplate(labelTemplate) {
     PageObjects.common.debug('set scripted field Url Label Template = ' + labelTemplate);
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
     .type(labelTemplate);
   }
 
-  setScriptedFieldDatePattern(datePattern) {
+  async setScriptedFieldDatePattern(datePattern) {
     PageObjects.common.debug('set scripted field Date Pattern = ' + datePattern);
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('input[ng-model="model"]')
     .clearValue().type(datePattern);
   }
 
-  setScriptedFieldStringTransform(stringTransform) {
+  async setScriptedFieldStringTransform(stringTransform) {
     PageObjects.common.debug('set scripted field string Transform = ' + stringTransform);
-    return this.remote.setFindTimeout(defaultFindTimeout)
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('select[ng-model="editor.formatParams.transform"] > option[label="' + stringTransform + '"]')
     .click();
   }
 
-  setScriptedFieldPopularity(popularity) {
+  async setScriptedFieldPopularity(popularity) {
     PageObjects.common.debug('set scripted field popularity = ' + popularity);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('input[ng-model="editor.field.count"]')
-    .type(popularity);
+    await PageObjects.common.findTestSubject('editorFieldCount').type(popularity);
   }
 
-  setScriptedFieldScript(script) {
+  async setScriptedFieldScript(script) {
     PageObjects.common.debug('set scripted field script = ' + script);
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('textarea[ng-model="editor.field.script"]')
-    .type(script);
+    await PageObjects.common.findTestSubject('editorFieldScript').type(script);
   }
 
 
