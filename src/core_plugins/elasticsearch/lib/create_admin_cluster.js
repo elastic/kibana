@@ -2,9 +2,9 @@ import { bindKey } from 'lodash';
 
 export default function (server) {
   const config = server.config();
-  const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
+  const { ElasticsearchClientLogging } = server.plugins.elasticsearch;
 
-  class AdminClientLogging extends Logger {
+  class AdminClientLogging extends ElasticsearchClientLogging {
     constructor() {
       super();
 

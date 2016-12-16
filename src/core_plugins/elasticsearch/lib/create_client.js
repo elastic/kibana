@@ -6,8 +6,8 @@ import { readFileSync } from 'fs';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-module.exports = function (options) {
-  options = Object.assign({ keepAlive: true, auth: true }, options);
+export default function (optionOverrides) {
+  const options = Object.assign({ keepAlive: true, auth: true }, optionOverrides);
 
   const uri = url.parse(options.url);
 
@@ -49,4 +49,4 @@ module.exports = function (options) {
     },
     log: options.log
   });
-};
+}

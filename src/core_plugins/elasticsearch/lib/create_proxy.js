@@ -25,7 +25,7 @@ function createProxy(server, method, path, config) {
 
   for (const [proxyPrefix, cluster] of proxies) {
     const options = {
-      method: method,
+      method,
       path: createProxy.createPath(proxyPrefix, path),
       config: {
         timeout: {

@@ -95,10 +95,10 @@ export default function AbstractDocSourceFactory(Private, Promise, es, sessionSt
    * @return {undefined}
    */
   AbstractDocSource.prototype._mergeProp = function (state, val, key) {
-    key = '_' + key;
+    const flatKey = '_' + key;
 
-    if (val != null && state[key] == null) {
-      state[key] = val;
+    if (val != null && state[flatKey] == null) {
+      state[flatKey] = val;
     }
   };
 
