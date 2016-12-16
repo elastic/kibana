@@ -43,16 +43,14 @@ module.exports = function (kibana) {
         ],
 
         injectVars: function (server, options) {
-          let serverConfig = server.config();
+          const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
           //if the url is set, the old settings must be used.
           //keeping this logic for backward compatibilty.
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === "string" && configuredUrl !== "";
-          console.log("default", isOverridden);
-
-          let tilemapConfig = serverConfig.get('tilemap');
+          const tilemapConfig = serverConfig.get('tilemap');
 
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
