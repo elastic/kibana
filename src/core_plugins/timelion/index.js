@@ -37,44 +37,7 @@ module.exports = function (kibana) {
       ],
       visTypes: [
         'plugins/timelion/vis'
-      ],
-      modules: {
-        flot$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot'),
-          imports: 'jquery'
-        },
-        flotTime$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.time'),
-          imports: 'flot'
-        },
-        /*flotCanvas$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.canvas'),
-          imports: 'flot'
-        },*/
-        flotSymbol$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.symbol'),
-          imports: 'flot'
-        },
-        angularSortableView$: {
-          path: path.resolve(__dirname, 'bower_components/angular-sortable-view/src/angular-sortable-view.js')
-        },
-        flotCrosshair$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.crosshair'),
-          imports: 'flot'
-        },
-        flotSelection$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.selection'),
-          imports: 'flot'
-        },
-        flotStack$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.stack'),
-          imports: 'flot'
-        },
-        flotAxisLabels$: {
-          path: path.resolve(__dirname, 'vendor_components/flot/jquery.flot.axislabels'),
-          imports: 'flot'
-        }
-      }
+      ]
     },
     init: require('./init.js'),
   });
