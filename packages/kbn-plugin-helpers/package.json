@@ -2,7 +2,7 @@
   "name": "@elastic/plugin-helpers",
   "version": "5.0.1-patch2",
   "description": "Just some helpers for kibana plugin devs.",
-  "main": "bin/plugin-helpers.js",
+  "main": "lib/run.js",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },

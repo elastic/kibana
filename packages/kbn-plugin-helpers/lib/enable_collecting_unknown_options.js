@@ -4,7 +4,7 @@ module.exports = function enableCollectingUnknownOptions(command) {
   command.allowUnknownOption();
   command.parseOptions = function (argv) {
     let opts = origParse.call(this, argv);
-    this.unkownOptions = opts.unknown;
+    this.unknownOptions = opts.unknown;
     return opts;
   };
 };

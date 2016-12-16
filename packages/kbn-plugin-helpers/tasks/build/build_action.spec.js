@@ -1,3 +1,4 @@
+/*eslint-env jest*/
 const resolve = require('path').resolve;
 const fs = require('fs');
 

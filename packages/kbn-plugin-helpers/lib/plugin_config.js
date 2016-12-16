@@ -23,6 +23,7 @@ module.exports = function (root) {
   return Object.assign({
     root: root,
     kibanaRoot: resolve(root, '../kibana'),
+    serverTestPatterns: ['server/**/__tests__/**/*.js'],
     id: pkg.name,
     pkg: pkg,
     version: pkg.version,
