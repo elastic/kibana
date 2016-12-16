@@ -179,9 +179,11 @@ export default function AxisScaleFactory(Private) {
       const scale = this.getD3Scale(config.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
+      const padding = config.get('style.rangePadding');
+      const outerPadding = config.get('style.rangeOuterPadding');
       this.scale = scale.domain(domain);
       if (config.isOrdinal()) {
-        this.scale.rangeBands(range, 0.1);
+        this.scale.rangeBands(range, padding, outerPadding);
       } else {
         this.scale.range(range);
       }

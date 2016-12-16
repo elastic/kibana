@@ -25,7 +25,9 @@ export default function AxisConfigFactory() {
       opacity: 1,
       tickColor: '#ddd',
       tickWidth: '1px',
-      tickLength: '6px'
+      tickLength: '6px',
+      rangePadding: 0.1,
+      rangeOuterPadding: 0
     },
     labels: {
       axisFormatter: null,
