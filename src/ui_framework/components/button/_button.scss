@@ -1,7 +1,10 @@
 /**
- * 1. Disable for Angular.
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
  */
 .kuiButton {
+  display: inline-block; /* 1 */
   appearance: none;
   padding: 4px 12px 5px;
   font-size: $fontSize;
@@ -14,7 +17,7 @@
 
   &:disabled {
     cursor: default;
-    pointer-events: none; // 1
+    pointer-events: none; /* 2 */
   }
 
   &:active:enabled {
