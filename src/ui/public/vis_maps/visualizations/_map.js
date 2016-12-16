@@ -7,21 +7,11 @@ import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/g
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
 
 
-import uiRoutes from 'ui/routes';
-
-uiRoutes.afterSetupWork(function (tilemapSettings) {
-  return tilemapSettings.loadSettings();
-});
-
 export default function MapFactory(Private, tilemapSettings) {
 
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
-  const mapConfiguration = {
-    url: tilemapSettings.getUrl(),
-    options: tilemapSettings.getOptions()
-  };
 
   const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -41,6 +31,7 @@ export default function MapFactory(Private, tilemapSettings) {
    */
   class TileMapMap {
     constructor(container, chartData, params) {
+
       this._container = $(container).get(0);
       this._chartData = chartData;
 
@@ -50,20 +41,22 @@ export default function MapFactory(Private, tilemapSettings) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapConfiguration.options.maxZoom), mapConfiguration.options.minZoom);
+
+      const mapOptions = tilemapSettings.getOptions();
+
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
-      const mapOptions = {
-        minZoom: mapConfiguration.options.minZoom,
-        maxZoom: mapConfiguration.options.maxZoom,
+      const options = {
+        minZoom: mapOptions.minZoom,
+        maxZoom: mapOptions.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
         fadeAnimation: false,
       };
-
-      this._createMap(mapOptions);
+      this._createMap(options, tilemapSettings.getUrl());
     }
 
     addBoundingControl() {
@@ -297,26 +290,26 @@ export default function MapFactory(Private, tilemapSettings) {
       });
     }
 
-    _createMap(mapOptions) {
+    _createMap(options, url) {
       if (this.map) this.destroy();
 
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
-        _.assign(mapOptions, {
+        _.assign(options, {
           minZoom: 1,
           maxZoom: 18
         });
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
-        this._tileLayer = L.tileLayer(mapConfiguration.url, mapConfiguration.options);
+        this._tileLayer = L.tileLayer(url, options);
       }
 
       // append tile layers, center and zoom to the map options
-      mapOptions.layers = this._tileLayer;
-      mapOptions.center = this._mapCenter;
-      mapOptions.zoom = this._mapZoom;
+      options.layers = this._tileLayer;
+      options.center = this._mapCenter;
+      options.zoom = this._mapZoom;
 
-      this.map = L.map(this._container, mapOptions);
+      this.map = L.map(this._container, options);
       this._attachEvents();
       this._addMarkers();
     }

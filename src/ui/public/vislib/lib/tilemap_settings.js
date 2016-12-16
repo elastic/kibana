@@ -2,10 +2,16 @@ import uiModules from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
 import url from 'url';
+import uiRoutes from 'ui/routes';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
   sanitize: true // Sanitize HTML tags
+});
+
+//todo: add comment
+uiRoutes.afterSetupWork(function (tilemapSettings) {
+  return tilemapSettings.loadSettings();
 });
 
 
@@ -14,7 +20,6 @@ uiModules.get('kibana')
 
     const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, {attribution: attributionFromConfig});
-
 
     class MapSettings {
 
@@ -36,7 +41,7 @@ uiModules.get('kibana')
           if (this._settingsInitialized) {
             return true;
           }
-          
+
           let manifest;
           try {
             const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
@@ -44,6 +49,7 @@ uiModules.get('kibana')
           } catch (e) {
             //request failed. Continue to use old settings.
             this._settingsInitialized = true;
+            //todo: make this first class property so map can check on it and display appropriate message
             return true;
           }
 
@@ -95,14 +101,11 @@ uiModules.get('kibana')
        * @return {{}}
        */
       getOptions() {
-
         if (!this._settingsInitialized) {
           throw new Error('Cannot retrieve options before calling .loadSettings first');
         }
-
         return this._options;
       }
-
 
     }
 
@@ -124,6 +127,4 @@ uiModules.get('kibana')
 
     }
   });
-
-
 

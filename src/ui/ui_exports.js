@@ -100,6 +100,13 @@ class UiExports {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };
 
+      case 'visTypeEnhancers':
+        return (plugin, spec) => {
+          //todo: comment
+          //...
+          this.aliases.visTypes = _.union(this.aliases.visTypes || [], spec);
+        };
+
       case 'bundle':
         return (plugin, spec) => {
           this.bundleProviders.push(spec);

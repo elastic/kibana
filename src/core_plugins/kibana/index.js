@@ -26,6 +26,9 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
+
+
+
       app: {
         id: 'kibana',
         title: 'Kibana',
