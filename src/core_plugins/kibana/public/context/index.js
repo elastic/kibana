@@ -33,7 +33,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
     'contextAppRoute.state.columns',
     'contextAppRoute.state.predecessorCount',
     'contextAppRoute.state.successorCount',
-  ], () => this.state.save());
+  ], () => this.state.save(true));
   this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
   this.indexPattern = indexPattern;
 }
