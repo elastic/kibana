@@ -42,7 +42,7 @@ uiModules.get('kibana')
 
         let manifest;
         try {
-          const response = await getTileServiceManifest(mapsConfig.config.manifest, this._queryParams, attributionFromConfig, optionsFromConfig);
+          const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
           manifest = response.data;
         } catch (e) {
           //request failed. Continue to use old settings.

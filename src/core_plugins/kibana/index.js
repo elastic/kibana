@@ -59,7 +59,7 @@ module.exports = function (kibana) {
                 isOverridden: isOverridden,
                 config: tilemapConfig,
               },
-              config: serverConfig.get('maps')
+              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
             },
           };
         },
