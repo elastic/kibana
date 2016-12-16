@@ -16,6 +16,10 @@
   margin-left: $toolBarSectionSpacing * 0.5;
   margin-right: $toolBarSectionSpacing * 0.5;
 
+  &:first-child {
+    margin-left: 0;
+  }
+
   &:last-child {
     margin-right: 0;
   }
