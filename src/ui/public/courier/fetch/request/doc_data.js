@@ -7,10 +7,7 @@ export default function DocRequestProvider(Private) {
   const AbstractDocRequest = Private(AbstractDocRequestProvider);
 
   class DataDocRequest extends AbstractDocRequest {
-    constructor(...args) {
-      super(...args);
-      this.strategy = docStrategy;
-    }
+    strategy = docStrategy;
   }
 
   return DataDocRequest;
