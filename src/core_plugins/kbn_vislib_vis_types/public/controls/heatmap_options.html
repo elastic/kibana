@@ -31,7 +31,7 @@
       <select
         id="axisScale"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.valueAxes[0].scale.type"
+        ng-model="valueAxis.scale.type"
         ng-options="mode for mode in vis.type.params.scales"
       ></select>
     </div>
@@ -42,11 +42,11 @@
       Scale to Data Bounds
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="vis.params.valueAxes[0].scale.defaultYExtents">
+      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="valueAxis.scale.defaultYExtents">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow">
+  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
     <label class="kuiSideBarFormRow__label" for="percentageMode">
       Percentage Mode
     </label>
@@ -159,13 +159,13 @@
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
-        ng-click="vis.params.valueAxes[0].labels.show = !vis.params.valueAxes[0].labels.show"
+        ng-click="valueAxis.labels.show = !valueAxis.labels.show"
       >
         <span
           aria-hidden="true"
           ng-class="{
-          'fa-caret-down': vis.params.valueAxes[0].labels.show,
-          'fa-caret-right': !vis.params.valueAxes[0].labels.show
+          'fa-caret-down': valueAxis.labels.show,
+          'fa-caret-right': !valueAxis.labels.show
           }"
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
@@ -174,19 +174,32 @@
         </span>
       </div>
       <input aria-label="enable"
-             ng-model="vis.params.valueAxes[0].labels.show"
+             ng-model="valueAxis.labels.show"
              type="checkbox"
              class="kuiSideBarSectionTitle__action"
       >
     </div>
-    <div ng-if="vis.params.valueAxes[0].labels.show" class="kuiSideBarCollapsibleSection">
+    <div ng-if="valueAxis.labels.show" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="rotateLabels">
             Rotate
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="options.labels">
+            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="options.rotateLabels">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="labelColor">
+            Color
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="labelColor"
+              class="kuiInput kuiSideBarInput"
+              ng-model="valueAxis.labels.color"
+            >
           </div>
         </div>
       </div>

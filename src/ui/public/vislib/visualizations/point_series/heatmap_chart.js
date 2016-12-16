@@ -150,7 +150,7 @@ export default function HeatmapChartFactory(Private) {
             val = colorsNumber - 1;
           } else {
             val = (d.y - min) / (max - min); /* get val from 0 - 1 */
-            val = Math.floor(val * (colorsNumber - 1));
+            val = Math.round(val * (colorsNumber - 1));
           }
         }
         return val;
@@ -182,7 +182,7 @@ export default function HeatmapChartFactory(Private) {
         .attr('height', squareHeight)
         .attr('data-label', label)
         .attr('fill', z)
-        .attr('style', 'opacity: 1; cursor: pointer; stroke: black; stroke-width: 0.3px')
+        .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.1px')
         .style('display', d => {
           return d.hide ? 'none' : 'initial';
         });
@@ -215,6 +215,7 @@ export default function HeatmapChartFactory(Private) {
           })
           .style('dominant-baseline', 'central')
           .style('text-anchor', 'middle')
+          .style('stroke', zAxisConfig.get('labels.color'))
           .attr('x', function (d) {
             const center = x(d) + squareWidth / 2;
             return center;

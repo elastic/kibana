@@ -3,7 +3,7 @@ import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatma
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
+module.directive('heatmapOptions', function () {
   return {
     restrict: 'E',
     template: heatmapOptionsTemplate,
@@ -12,10 +12,12 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
       $scope.isColorRangeOpen = true;
       $scope.customColors = false;
       $scope.options = {
-        labels: false
+        rotateLabels: false
       };
 
-      $scope.$watch('options.labels', rotate => {
+      $scope.valueAxis = $scope.vis.params.valueAxes[0];
+
+      $scope.$watch('options.rotateLabels', rotate => {
         $scope.vis.params.valueAxes[0].labels.rotate = rotate ? 270 : 0;
       });
 
@@ -33,12 +35,10 @@ module.directive('heatmapOptions', function ($parse, $compile, getAppState) {
         const previousRange = _.last($scope.vis.params.colorsRange);
         const from = previousRange ? previousRange.to : 0;
         $scope.vis.params.colorsRange.push({from: from, to: null});
-        $scope.vis.params.colorsNumber = $scope.vis.params.colorsRange.length;
       };
 
       $scope.removeRange = function (index) {
         $scope.vis.params.colorsRange.splice(index, 1);
-        $scope.vis.params.colorsNumber = $scope.vis.params.colorsRange.length;
       };
 
       $scope.getColor = function (index) {

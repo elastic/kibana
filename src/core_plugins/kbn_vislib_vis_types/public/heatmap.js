@@ -1,6 +1,7 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
+import heatmapColors from 'ui/vislib/components/color/colormaps';
 
 export default function HeatmapVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -25,7 +26,6 @@ export default function HeatmapVisType(Private) {
         colorsRange: [],
         invertColors: false,
         percentageMode: false,
-        cellLabels: false,
         valueAxes: [{
           show: false,
           id: 'ValueAxis-1',
@@ -54,8 +54,7 @@ export default function HeatmapVisType(Private) {
         text: 'bottom',
       }],
       scales: ['linear', 'log', 'square root'],
-      colorSchemas: ['Blues', 'Greens', 'Greys', 'Reds', 'YlOrRd', 'autumn', 'bone',
-        'hot', 'coolwarm', 'Spectral', 'gist_earth', 'terrain', 'gnuplot', 'jet'],
+      colorSchemas: Object.keys(heatmapColors),
       editor: heatmapTemplate
     },
     schemas: new Schemas([

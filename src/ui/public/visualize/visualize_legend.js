@@ -24,8 +24,6 @@ uiModules.get('kibana')
         refresh();
       });
 
-      $scope.uiState.on('change', refresh);
-
       $scope.$watch('renderbot.vislibParams', () => {
         refresh();
       });
@@ -58,6 +56,7 @@ uiModules.get('kibana')
         $scope.uiState.setSilent('vis.colors', null);
         $scope.uiState.set('vis.colors', colors);
         $scope.uiState.emit('colorChanged');
+        refresh();
       };
 
       $scope.toggleLegend = function () {
@@ -106,6 +105,10 @@ uiModules.get('kibana')
       function refresh() {
         if (!$scope.renderbot) return;
         const vislibVis = $scope.renderbot.vislibVis;
+        if (!vislibVis.visConfig) {
+          $scope.labels = [{ label: 'loading ...' }];
+          return $timeout(refresh, 100);
+        }  // make sure vislib is defined at this point
 
         if ($scope.uiState.get('vis.legendOpen') == null && $scope.vis.params.addLegend != null) {
           $scope.open = $scope.vis.params.addLegend;
@@ -114,10 +117,9 @@ uiModules.get('kibana')
         if (vislibVis.visConfigArgs.type === 'heatmap') {
           const labels = vislibVis.getLegendLabels();
           if (labels) {
-            $scope.labels = _.map(labels, label => { return { label: label }; });
-          } else {
-            $scope.labels = [{ label: 'loading ...' }];
-            $timeout(refresh, 100);
+            $scope.labels = _.map(labels, label => {
+              return {label: label};
+            });
           }
         } else {
           $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
