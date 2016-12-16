@@ -1,6 +1,6 @@
 {
   "name": "@elastic/plugin-helpers",
-  "version": "5.0.1-patch2",
+  "version": "5.1.0",
   "description": "Just some helpers for kibana plugin devs.",
   "main": "lib/run.js",
   "bin": {
