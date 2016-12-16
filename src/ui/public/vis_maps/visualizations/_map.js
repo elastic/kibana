@@ -9,22 +9,18 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatm
 
 import uiRoutes from 'ui/routes';
 
-let tilemapUrl = '';
-let tilemapOptions = null;
 uiRoutes.afterSetupWork(async function (tilemapSettings) {
   await tilemapSettings.whenSettingsReady();
-  tilemapUrl = tilemapSettings.getUrl();
-  tilemapOptions = tilemapSettings.getOptions();
 });
 
-export default function MapFactory(Private) {
+export default function MapFactory(Private, tilemapSettings) {
 
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
   const mapConfiguration = {
-    url: tilemapUrl,
-    options: tilemapOptions
+    url: tilemapSettings.getUrl(),
+    options: tilemapSettings.getOptions()
   };
 
   const markerTypes = {
