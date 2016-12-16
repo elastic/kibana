@@ -19,57 +19,70 @@ uiModules.get('kibana')
     class MapSettings {
 
       constructor() {
+
         this._queryParams = {license: ""};//this is currently a mandatory parameter. Remove when no longer the case.
         this._settingsInitialized = false;
+        this._loadingCalled = false;
 
         //initialize settings with the default of the configuration
         this._url = mapsConfig.deprecated.config.url;
         this._options = optionsFromConfig;
+
+        this._loadSettings = _.once(async() => {
+
+          if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
+            return true;
+          }
+
+          if (this._settingsInitialized) {
+            return true;
+          }
+
+          this._loadingCalled = true;
+          let manifest;
+          try {
+            const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
+            manifest = response.data;
+          } catch (e) {
+            //request failed. Continue to use old settings.
+            this._settingsInitialized = true;
+            return true;
+          }
+
+          this._options = {
+            attribution: $sanitize(marked(manifest.services[0].attribution)),
+            minZoom: manifest.services[0].minZoom,
+            maxZoom: manifest.services[0].maxZoom,
+            subdomains: []
+          };
+
+          const queryparams = _.assign({license: this._licenseUid}, manifest.services[0].query_parameters);
+          const query = url.format({query: queryparams});
+          this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
+
+          this._settingsInitialized = true;
+          return true;
+        });
       }
 
       /**
        * Must be called before getUrl/getOptions can be called.
        */
-      async whenSettingsReady() {
-
-        if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
-          return true;
-        }
-
-        if (this._settingsInitialized) {
-          return true;
-        }
-
-        let manifest;
-        try {
-          const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
-          manifest = response.data;
-        } catch (e) {
-          //request failed. Continue to use old settings.
-          this._settingsInitialized = true;
-          return true;
-        }
-
-        this._options = {
-          attribution: $sanitize(marked(manifest.services[0].attribution)),
-          minZoom: manifest.services[0].minZoom,
-          maxZoom: manifest.services[0].maxZoom,
-          subdomains: []
-        };
-
-        const queryparams = _.assign({license: this._licenseUid}, manifest.services[0].query_parameters);
-        const query = url.format({query: queryparams});
-        this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
-
-        this._settingsInitialized = true;
-        return true;
+      async loadSettings() {
+        return this._loadSettings();
       }
 
       /**
-       * add optional query-parameter that will be submitted to the tile service
+       * Add optional query-parameter. Must be called before loading the settings.
+       *
        * @param additionalQueryParams
        */
       addQueryParams(additionalQueryParams) {
+
+        if (this._loadingCalled) {
+          throw new Error("Cannot alter parameters after .loadSettings has been called");
+        }
+
         this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
       }
 
@@ -78,6 +91,11 @@ uiModules.get('kibana')
        * @return {string}
        */
       getUrl() {
+
+        if (!this._settingsInitialized) {
+          throw new Error('Cannot retrieve url before calling .loadSettings first');
+        }
+
         return this._url;
       }
 
@@ -86,6 +104,11 @@ uiModules.get('kibana')
        * @return {{}}
        */
       getOptions() {
+
+        if (!this._settingsInitialized) {
+          throw new Error('Cannot retrieve options before calling .loadSettings first');
+        }
+
         return this._options;
       }
 

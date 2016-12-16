@@ -10,7 +10,7 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatm
 import uiRoutes from 'ui/routes';
 
 uiRoutes.afterSetupWork(function (tilemapSettings) {
-  return tilemapSettings.whenSettingsReady();
+  return tilemapSettings.loadSettings();
 });
 
 export default function MapFactory(Private, tilemapSettings) {
