@@ -22,7 +22,6 @@ uiModules.get('kibana')
 
         this._queryParams = {};
         this._settingsInitialized = false;
-        this._loadingCalled = false;
 
         //initialize settings with the default of the configuration
         this._url = mapsConfig.deprecated.config.url;
@@ -37,8 +36,7 @@ uiModules.get('kibana')
           if (this._settingsInitialized) {
             return true;
           }
-
-          this._loadingCalled = true;
+          
           let manifest;
           try {
             const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
@@ -78,11 +76,6 @@ uiModules.get('kibana')
        * @param additionalQueryParams
        */
       addQueryParams(additionalQueryParams) {
-
-        if (this._loadingCalled) {
-          throw new Error("Cannot alter parameters after .loadSettings has been called");
-        }
-
         this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
       }
 
