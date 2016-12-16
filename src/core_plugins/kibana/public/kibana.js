@@ -21,6 +21,7 @@ import 'ui/agg_types';
 import 'ui/timepicker';
 import Notifier from 'ui/notify/notifier';
 import 'leaflet';
+import { hideEmptyDevTools } from './dev_tools/lib/hide_empty_tools';
 
 routes.enable();
 
@@ -50,3 +51,4 @@ chrome
 });
 
 modules.get('kibana').run(Notifier.pullMessageFromUrl);
+modules.get('kibana').run(hideEmptyDevTools);

@@ -1,9 +1,8 @@
-
 import {
   GuideExample,
 } from '../../components';
 
-export default function createExample(examples) {
+export default function creatExample(examples) {
   class Example extends GuideExample {
     constructor(props) {
       super(props, examples);
