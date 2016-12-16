@@ -73,7 +73,7 @@
       <a ng-click="showFilterActions = !showFilterActions">
         Actions
         <i class="fa"
-        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}"></i>
+        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}" data-test-subj="showFilterActions"></i>
       </a>
     </div>
   </div>
@@ -103,7 +103,7 @@
       <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="removeAll()">Remove</a></div>
+      <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters">Remove</a></div>
     </div>
   </div>
 </div>

@@ -290,14 +290,14 @@ export default class DiscoverPage {
     .findByCssSelector('li[attr-field="' + field + '"]').click();
   }
 
-  clickFieldListItemAdd(field) {
-    return this.findTimeout
-    .findByCssSelector('li[attr-field="' + field + '"] > div > button').click();
+  async clickFieldListItemAdd(field) {
+    await PageObjects.common.findTestSubject('fieldToggle-' + field).click();
   }
 
-  clickFieldListItemVisualize(field) {
-    return this.findTimeout
-    .findByCssSelector('li[attr-field="' + field + '"] > a').click();
+  async clickFieldListItemVisualize(field) {
+    return await PageObjects.common.try(async () => {
+      await PageObjects.common.findTestSubject('fieldVisualize-' + field).click();
+    });
   }
 
   clickFieldListPlusFilter(field, value) {
@@ -316,15 +316,9 @@ export default class DiscoverPage {
     .click();
   }
 
-  removeAllFilters() {
-    return this.findTimeout
-    .findByCssSelector('a[ng-click="showFilterActions = !showFilterActions"]')
-    .click()
-    .then(() => {
-      return this.findTimeout
-      .findByCssSelector('a[ng-click="removeAll()"]')
-      .click();
-    });
+  async removeAllFilters() {
+    await PageObjects.common.findTestSubject('showFilterActions').click();
+    await PageObjects.common.findTestSubject('removeAllFilters').click();
   }
 
 
