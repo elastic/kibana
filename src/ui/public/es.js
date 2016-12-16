@@ -25,34 +25,23 @@ const plugins = [function (Client, config) {
   config.connectionClass = CustomAngularConnector;
 }];
 
-
-// share the clients amongst all apps
-let es;
-let esAdmin;
-
 uiModules
   .get('kibana', ['elasticsearch', 'kibana/config'])
   .service('es', function (esFactory, esUrl, esApiVersion, esRequestTimeout) {
-    if (es) return es;
-    es = esFactory({
+    return esFactory({
       host: esUrl,
       log: 'info',
       requestTimeout: esRequestTimeout,
       apiVersion: esApiVersion,
       plugins
     });
-
-    return es;
   })
   .service('esAdmin', function (esFactory, esAdminUrl, esApiVersion, esRequestTimeout) {
-    if (esAdmin) return esAdmin;
-    esAdmin = esFactory({
+    return esFactory({
       host: esAdminUrl,
       log: 'info',
       requestTimeout: esRequestTimeout,
       apiVersion: esApiVersion,
       plugins
     });
-
-    return esAdmin;
   });
