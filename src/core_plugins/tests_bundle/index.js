@@ -67,14 +67,11 @@ export default (kibana) => {
         });
       },
 
-      modules: {
+      __globalImportAliases__: {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
+        'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils'),
-        'angular-mocks': {
-          path: require.resolve('angular-mocks'),
-          imports: 'angular'
-        },
       }
     }
   });
