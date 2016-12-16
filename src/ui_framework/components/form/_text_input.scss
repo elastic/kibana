@@ -15,7 +15,7 @@
   }
 
   &:focus {
-    @include focus;
+    outline: none;
     border-color: $selectedBorderColor;
   }
 }
