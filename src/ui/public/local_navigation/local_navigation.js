@@ -9,7 +9,7 @@ module.directive('localNavigation', function LocalNavigation() {
   return {
     replace: true,
     restrict: 'E',
-    template: '<div class="localNav" ng-transclude></div>',
+    template: '<div class="kuiLocalNav" ng-transclude></div>',
     transclude: true,
   };
 });

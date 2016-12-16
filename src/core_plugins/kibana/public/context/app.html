@@ -3,31 +3,31 @@
     <local-navigation-row>
       <!-- Breadcrumbs. -->
       <local-navigation-row-section>
-        <div class="localBreadcrumbs">
-          <div class="localBreadcrumb">
-            <a class="localBreadcrumb__link" href="#/discover">Discover</a>
+        <div class="kuiLocalBreadcrumbs">
+          <div class="kuiLocalBreadcrumb">
+            <a class="kuiLocalBreadcrumb__link" href="#/discover">Discover</a>
           </div>
-          <div class="localBreadcrumb">
+          <div class="kuiLocalBreadcrumb">
             <span>Context of </span>
-            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.anchorUid"></span>
+            <span class="kuiLocalBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.anchorUid"></span>
             <span> in </span>
-            <span class="localBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.indexPattern.id"></span>
+            <span class="kuiLocalBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.indexPattern.id"></span>
           </div>
         </div>
       </local-navigation-row-section>
 
       <local-navigation-row-section>
-        <div class="localMenu">
-          <div class="localMenuItem">
+        <div class="kuiLocalMenu">
+          <div class="kuiLocalMenuItem">
             <input
-              class="localMenuItem__input--inPlace"
+              class="kuiLocalMenuItem__input--inPlace"
               ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
               ng-model="contextApp.selectors.predecessorCount"
               type="number"
             />
             <div>newer and</div>
             <input
-              class="localMenuItem__input--inPlace"
+              class="kuiLocalMenuItem__input--inPlace"
               ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
               ng-model="contextApp.selectors.successorCount"
               type="number"
