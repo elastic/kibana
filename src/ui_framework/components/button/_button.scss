@@ -32,13 +32,21 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--basic {
   color: #5a5a5a;
   background-color: #F2F2F2;
 
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: #5a5a5a !important; /* 1 */
+  }
+
   &:hover:enabled,
   &:active:enabled {
-    color: #ffffff;
+    color: #ffffff !important; /* 1 */
     background-color: #9B9B9B;
   }
 
@@ -47,6 +55,9 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1;
@@ -59,6 +70,10 @@
 
   &:disabled {
     background-color: #B6D6E0;
+  }
+
+  &:focus {
+    color: #FFFFFF !important; /* 1 */
   }
 }
 
@@ -76,8 +91,12 @@
     background-color: #efc0ba;
   }
 
+  /**
+   * 1. Override Bootstrap.
+   */
   &:focus {
     @include focus(#ff523c);
+    color: #FFFFFF !important; /* 1 */
   }
 }
 
@@ -85,12 +104,6 @@
   .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF;
-
-    &:hover:enabled,
-    &:active:enabled {
-      color: #000000;
-      background-color: #FAFAFA;
-    }
 
     &:disabled {
       color: #a7a7a7;
