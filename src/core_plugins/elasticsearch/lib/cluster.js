@@ -40,7 +40,7 @@ export default class Cluster {
   }
 
   /**
-   * callAsKibanaUser
+   * callWithInternalUser
    *
    * Performs a call to ES using the credentials in kibana.yml
    *
@@ -50,7 +50,7 @@ export default class Cluster {
    * @returns {Promise}
    */
 
-  callAsKibanaUser = (endpoint, clientParams = {}, options = {}) => {
+  callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
     return callAPI(this._client, endpoint, clientParams, options);
   }
 

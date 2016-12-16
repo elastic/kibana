@@ -9,7 +9,7 @@ describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {
 
     let server;
-    let callAsKibanaUser;
+    let callWithInternalUser;
     let cluster;
 
     beforeEach(function () {
@@ -25,29 +25,29 @@ describe('plugins/elasticsearch', function () {
       _.set(server, 'plugins.elasticsearch', {});
       _.set(server, 'config', config);
 
-      callAsKibanaUser = sinon.stub();
-      cluster = { callAsKibanaUser: callAsKibanaUser };
+      callWithInternalUser = sinon.stub();
+      cluster = { callWithInternalUser: callWithInternalUser };
 
       server.plugins.elasticsearch.getCluster = sinon.stub().withArgs('admin').returns(cluster);
     });
 
     describe('successful requests', function () {
       beforeEach(function () {
-        callAsKibanaUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
-        callAsKibanaUser.withArgs('cluster.health', sinon.match.any).returns(Promise.resolve());
+        callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
+        callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(Promise.resolve());
       });
 
       it('should check cluster.health upon successful index creation', function () {
         const fn = createKibanaIndex(server);
         return fn.then(function () {
-          sinon.assert.calledOnce(callAsKibanaUser.withArgs('cluster.health', sinon.match.any));
+          sinon.assert.calledOnce(callWithInternalUser.withArgs('cluster.health', sinon.match.any));
         });
       });
 
       it('should be created with mappings for config.buildNum', function () {
         const fn = createKibanaIndex(server);
         return fn.then(function () {
-          const params = callAsKibanaUser.args[0][1];
+          const params = callWithInternalUser.args[0][1];
           expect(params)
             .to.have.property('body');
           expect(params.body)
@@ -66,7 +66,7 @@ describe('plugins/elasticsearch', function () {
       it('should be created with 1 shard and default replica', function () {
         const fn = createKibanaIndex(server);
         return fn.then(function () {
-          const params = callAsKibanaUser.args[0][1];
+          const params = callWithInternalUser.args[0][1];
           expect(params)
             .to.have.property('body');
           expect(params.body)
@@ -81,7 +81,7 @@ describe('plugins/elasticsearch', function () {
       it('should be created with index name set in the config', function () {
         const fn = createKibanaIndex(server);
         return fn.then(function () {
-          const params = callAsKibanaUser.args[0][1];
+          const params = callWithInternalUser.args[0][1];
           expect(params)
             .to.have.property('index', '.my-kibana');
         });
@@ -91,7 +91,7 @@ describe('plugins/elasticsearch', function () {
     describe('failure requests', function () {
       it('should reject with an Error', function () {
         const error = new Error('Oops!');
-        callAsKibanaUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
+        callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
           expect(err).to.be.a(Error);
@@ -100,7 +100,7 @@ describe('plugins/elasticsearch', function () {
 
       it('should reject with an error if index creation fails', function () {
         const error = new Error('Oops!');
-        callAsKibanaUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
+        callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
           expect(err.message).to.be('Unable to create Kibana index ".my-kibana"');
@@ -108,8 +108,8 @@ describe('plugins/elasticsearch', function () {
       });
 
       it('should reject with an error if health check fails', function () {
-        callAsKibanaUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
-        callAsKibanaUser.withArgs('cluster.health', sinon.match.any).returns(Promise.reject(new Error()));
+        callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
+        callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(Promise.reject(new Error()));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
           expect(err.message).to.be('Waiting for Kibana index ".my-kibana" to come online failed.');

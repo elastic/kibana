@@ -6,11 +6,11 @@ import { format } from 'util';
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;
 
-  const { callAsKibanaUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
   function createNewConfig() {
-    return callAsKibanaUser('create', {
+    return callWithInternalUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: { buildNum: config.get('pkg.buildNum') },
@@ -52,7 +52,7 @@ module.exports = function (server) {
       newVersion: config.get('pkg.version')
     });
 
-    return callAsKibanaUser('create', {
+    return callWithInternalUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,

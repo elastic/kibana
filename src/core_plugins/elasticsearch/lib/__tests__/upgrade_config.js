@@ -9,7 +9,7 @@ describe('plugins/elasticsearch', function () {
   describe('lib/upgrade_config', function () {
     let get;
     let server;
-    let callAsKibanaUser;
+    let callWithInternalUser;
     let config;
     let upgrade;
 
@@ -19,7 +19,7 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('pkg.version').returns('4.0.1');
       get.withArgs('pkg.buildNum').returns(Math.random());
 
-      callAsKibanaUser = sinon.stub();
+      callWithInternalUser = sinon.stub();
 
       server = {
         log: sinon.stub(),
@@ -31,7 +31,7 @@ describe('plugins/elasticsearch', function () {
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().withArgs('admin').returns({
-              callAsKibanaUser: callAsKibanaUser
+              callWithInternalUser: callWithInternalUser
             })
           }
         }
@@ -43,7 +43,7 @@ describe('plugins/elasticsearch', function () {
       const response = { hits: { hits:[] } };
 
       beforeEach(function () {
-        callAsKibanaUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+        callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
       });
 
       describe('production', function () {
@@ -55,15 +55,15 @@ describe('plugins/elasticsearch', function () {
 
         it('should resolve buildNum to pkg.buildNum config', function () {
           return upgrade(response).then(function (resp) {
-            sinon.assert.calledOnce(callAsKibanaUser);
-            const params = callAsKibanaUser.args[0][1];
+            sinon.assert.calledOnce(callWithInternalUser);
+            const params = callWithInternalUser.args[0][1];
             expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
         it('should resolve version to pkg.version config', function () {
           return upgrade(response).then(function (resp) {
-            const params = callAsKibanaUser.args[0][1];
+            const params = callWithInternalUser.args[0][1];
             expect(params).to.have.property('id', get('pkg.version'));
           });
         });
@@ -78,14 +78,14 @@ describe('plugins/elasticsearch', function () {
 
         it('should resolve buildNum to pkg.buildNum config', function () {
           return upgrade(response).then(function (resp) {
-            const params = callAsKibanaUser.args[0][1];
+            const params = callWithInternalUser.args[0][1];
             expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
         it('should resolve version to pkg.version config', function () {
           return upgrade(response).then(function (resp) {
-            const params = callAsKibanaUser.args[0][1];
+            const params = callWithInternalUser.args[0][1];
             expect(params).to.have.property('id', get('pkg.version'));
           });
         });
@@ -101,12 +101,12 @@ describe('plugins/elasticsearch', function () {
 
     it('should create new config if the nothing is upgradeable', function () {
       get.withArgs('pkg.buildNum').returns(9833);
-      callAsKibanaUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
 
       const response = { hits: { hits: [ { _id: '4.0.1-alpha3' }, { _id: '4.0.1-beta1' }, { _id: '4.0.0-SNAPSHOT1' } ] } };
       return upgrade(response).then(function (resp) {
-        sinon.assert.calledOnce(callAsKibanaUser);
-        const params = callAsKibanaUser.args[0][1];
+        sinon.assert.calledOnce(callWithInternalUser);
+        const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');
         expect(params.body).to.have.property('buildNum', 9833);
         expect(params).to.have.property('index', '.my-kibana');
@@ -117,13 +117,13 @@ describe('plugins/elasticsearch', function () {
 
     it('should update the build number on the new config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callAsKibanaUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
 
       const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
 
       return upgrade(response).then(function (resp) {
-        sinon.assert.calledOnce(callAsKibanaUser);
-        const params = callAsKibanaUser.args[0][1];
+        sinon.assert.calledOnce(callWithInternalUser);
+        const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');
         expect(params.body).to.have.property('buildNum', 5801);
         expect(params).to.have.property('index', '.my-kibana');
@@ -134,7 +134,7 @@ describe('plugins/elasticsearch', function () {
 
     it('should log a message for upgrades', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callAsKibanaUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
 
       const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
 
@@ -150,13 +150,13 @@ describe('plugins/elasticsearch', function () {
 
     it('should copy attributes from old config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callAsKibanaUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
 
       const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1, defaultIndex: 'logstash-*' } } ] } };
 
       return upgrade(response).then(function (resp) {
-        sinon.assert.calledOnce(callAsKibanaUser);
-        const params = callAsKibanaUser.args[0][1];
+        sinon.assert.calledOnce(callWithInternalUser);
+        const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');
         expect(params.body).to.have.property('defaultIndex', 'logstash-*');
       });

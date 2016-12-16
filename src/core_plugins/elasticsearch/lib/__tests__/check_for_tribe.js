@@ -8,7 +8,7 @@ describe('plugins/elasticsearch checkForTribe', () => {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
 
-  const stubCallAsKibanaUser = (nodesInfoResp = { nodes: {} }) => {
+  const stubcallWithInternalUser = (nodesInfoResp = { nodes: {} }) => {
     return sinon.stub().withArgs(
       'nodes.info',
       sinon.match.any
@@ -19,9 +19,9 @@ describe('plugins/elasticsearch checkForTribe', () => {
 
 
   it('fetches the local node stats of the node that the elasticsearch client is connected to', async () => {
-    const callAsKibanaUser = stubCallAsKibanaUser();
-    await checkForTribe(callAsKibanaUser);
-    sinon.assert.calledOnce(callAsKibanaUser);
+    const callWithInternalUser = stubcallWithInternalUser();
+    await checkForTribe(callWithInternalUser);
+    sinon.assert.calledOnce(callWithInternalUser);
   });
 
   it('throws a SetupError when the node info contains tribe settings', async () => {
@@ -39,7 +39,7 @@ describe('plugins/elasticsearch checkForTribe', () => {
     };
 
     try {
-      await checkForTribe(stubCallAsKibanaUser(nodeInfo));
+      await checkForTribe(stubcallWithInternalUser(nodeInfo));
       throw new Error('checkForTribe() should have thrown');
     } catch (err) {
       expect(err).to.be.a(Error);

@@ -17,17 +17,17 @@ const READY = 'ready';
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callAsKibanaUser;
-  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callAsKibanaUser;
+  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callAsKibanaUser, url) {
-    return callAsKibanaUser('ping').catch(function (err) {
+  function waitForPong(callWithInternalUser, url) {
+    return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callAsKibanaUser, url));
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
     });
   }
 

@@ -13,14 +13,14 @@ describe('plugins/elasticsearch', () => {
 
     let server;
     let plugin;
-    let callAsKibanaUser;
+    let callWithInternalUser;
 
     beforeEach(function () {
       server = {
         log: sinon.stub(),
         plugins: {
           elasticsearch: {
-            getCluster: sinon.stub().withArgs('admin').returns({ callAsKibanaUser: sinon.stub() }), // Fix
+            getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }), // Fix
             status: {
               red: sinon.stub()
             },
@@ -52,15 +52,15 @@ describe('plugins/elasticsearch', () => {
       }
 
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
-      callAsKibanaUser = cluster.callAsKibanaUser;
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
-      callAsKibanaUser = cluster.callAsKibanaUser;
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     it('returns true with single a node that matches', async () => {

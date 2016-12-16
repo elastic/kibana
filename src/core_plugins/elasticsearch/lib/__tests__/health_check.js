@@ -36,11 +36,11 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      cluster = { callAsKibanaUser: sinon.stub() };
-      cluster.callAsKibanaUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
-      cluster.callAsKibanaUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
-      cluster.callAsKibanaUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
-      cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({
+      cluster = { callWithInternalUser: sinon.stub() };
+      cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
+      cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({
         nodes: {
           'node-01': {
             version: COMPATIBLE_VERSION_NUMBER,
@@ -77,8 +77,8 @@ describe('plugins/elasticsearch', () => {
     });
 
     it('should set the cluster green if everything is ready', function () {
-      cluster.callAsKibanaUser.withArgs('ping').returns(Promise.resolve());
-      cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any).returns(
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(
         Promise.resolve({ timed_out: false, status: 'green' })
       );
 
@@ -87,9 +87,9 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.yellow);
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
 
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('ping'));
-          sinon.assert.calledTwice(cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
+          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
 
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
@@ -97,11 +97,11 @@ describe('plugins/elasticsearch', () => {
     });
 
     it('should set the cluster red if the ping fails, then to green', function () {
-      const ping = cluster.callAsKibanaUser.withArgs('ping');
+      const ping = cluster.callWithInternalUser.withArgs('ping');
       ping.onCall(0).returns(Promise.reject(new NoConnections()));
       ping.onCall(1).returns(Promise.resolve());
 
-      cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any).returns(
+      cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(
         Promise.resolve({ timed_out: false, status: 'green' })
       );
 
@@ -116,17 +116,17 @@ describe('plugins/elasticsearch', () => {
           );
 
           sinon.assert.calledTwice(ping);
-          sinon.assert.calledTwice(cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any));
+          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
         });
     });
 
     it('should set the cluster red if the health check status is red, then to green', function () {
-      cluster.callAsKibanaUser.withArgs('ping').returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
 
-      const clusterHealth = cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any);
+      const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
       clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: false, status: 'red' }));
       clusterHealth.onCall(1).returns(Promise.resolve({ timed_out: false, status: 'green' }));
 
@@ -138,22 +138,22 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.red.args[0][0]).to.be(
             'Elasticsearch is still initializing the kibana index.'
           );
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('ping'));
-          sinon.assert.calledTwice(cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.calledTwice(cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
+          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
         });
     });
 
     it('should set the cluster yellow if the health check timed_out and create index', function () {
-      cluster.callAsKibanaUser.withArgs('ping').returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
 
-      const clusterHealth = cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any);
+      const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
       clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: true, status: 'red' }));
       clusterHealth.onCall(1).returns(Promise.resolve({ timed_out: false, status: 'green' }));
 
-      cluster.callAsKibanaUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
 
       return health.run()
         .then(function () {
@@ -161,16 +161,16 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           expect(plugin.status.yellow.args[1][0]).to.be('No existing Kibana index found');
 
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('ping'));
-          sinon.assert.calledOnce(cluster.callAsKibanaUser.withArgs('indices.create', sinon.match.any));
-          sinon.assert.calledTwice(cluster.callAsKibanaUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('indices.create', sinon.match.any));
+          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledTwice(clusterHealth);
         });
     });
 
     describe('#waitUntilReady', function () {
       it('polls health until index is ready', function () {
-        const clusterHealth = cluster.callAsKibanaUser.withArgs('cluster.health', sinon.match.any);
+        const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
         clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: true }));
         clusterHealth.onCall(1).returns(Promise.resolve({ status: 'red' }));
         clusterHealth.onCall(2).returns(Promise.resolve({ status: 'green' }));

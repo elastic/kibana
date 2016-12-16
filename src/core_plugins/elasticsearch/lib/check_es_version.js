@@ -17,10 +17,10 @@ import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 const lastWarnedNodesForServer = new WeakMap();
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
-  const { callAsKibanaUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
-  return callAsKibanaUser('nodes.info', {
+  return callWithInternalUser('nodes.info', {
     filterPath: [
       'nodes.*.version',
       'nodes.*.http.publish_address',

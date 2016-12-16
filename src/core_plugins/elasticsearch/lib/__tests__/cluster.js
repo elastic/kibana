@@ -71,7 +71,7 @@ describe('plugins/elasticsearch', function () {
       });
 
       it('is available for callAsKibanUser', async () => {
-        const marco = await cluster.callAsKibanaUser('marco');
+        const marco = await cluster.callWithInternalUser('marco');
         expect(marco).to.eql('polo');
       });
 
@@ -81,7 +81,7 @@ describe('plugins/elasticsearch', function () {
       });
     });
 
-    describe('callAsKibanaUser', () => {
+    describe('callWithInternalUser', () => {
       let client;
 
       beforeEach(() => {
@@ -90,17 +90,17 @@ describe('plugins/elasticsearch', function () {
       });
 
       it('should return a function', () => {
-        expect(cluster.callAsKibanaUser).to.be.a('function');
+        expect(cluster.callWithInternalUser).to.be.a('function');
       });
 
       it('throws an error for an invalid endpoint', () => {
-        const fn = partial(cluster.callAsKibanaUser, 'foo');
+        const fn = partial(cluster.callWithInternalUser, 'foo');
         expect(fn).to.throwException(/called with an invalid endpoint: foo/);
       });
 
       it('calls the client with params', () => {
         const params = { foo: 'Foo' };
-        cluster.callAsKibanaUser('nodes.info', params);
+        cluster.callWithInternalUser('nodes.info', params);
 
         sinon.assert.calledOnce(client.nodes.info);
         expect(client.nodes.info.getCall(0).args[0]).to.eql(params);

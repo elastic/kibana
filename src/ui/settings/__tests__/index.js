@@ -393,7 +393,7 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
 
   const adminCluster = {
     errors: esErrors,
-    callAsKibanaUser: sinon.stub(),
+    callWithInternalUser: sinon.stub(),
     callWithRequest: sinon.spy((withReq, method, params) => {
       if (callWithRequest) {
         return callWithRequest(withReq, method, params);
@@ -411,8 +411,8 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
     })
   };
 
-  adminCluster.callAsKibanaUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
-  adminCluster.callAsKibanaUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
+  adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
+  adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
 
   const server = {
     decorate: (_, key, value) => server[key] = value,

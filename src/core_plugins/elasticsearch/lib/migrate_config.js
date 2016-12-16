@@ -3,7 +3,7 @@ import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
   const config = server.config();
-  const { callAsKibanaUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   const options =  {
     index: config.get('kibana.index'),
@@ -21,5 +21,5 @@ module.exports = function (server) {
     }
   };
 
-  return callAsKibanaUser('search', options).then(upgrade(server));
+  return callWithInternalUser('search', options).then(upgrade(server));
 };
