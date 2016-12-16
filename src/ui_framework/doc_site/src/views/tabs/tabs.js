@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const $tabs = $('.kuiTab');
 let $selectedTab = undefined;
 
