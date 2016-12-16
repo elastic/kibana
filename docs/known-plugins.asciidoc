@@ -1,0 +1,56 @@
+[[known-plugins]]
+=== Known Plugins for Kibana 4.x
+
+[IMPORTANT]
+.Plugin compatibility
+==============================================
+The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
+==============================================
+
+This list of plugins is not guaranteed to work on your version of Kibana. Instead, these are plugins that were known to work at some point with Kibana *4.x*.
+
+[float]
+==== Apps
+* https://github.com/elastic/sense[Sense] - A JSON aware developer's interface to Elasticsearch. Comes with handy machinery such as syntax highlighting, autocomplete, formatting and code folding
+* https://github.com/elastic/timelion[Timelion] - Time series composer for Elasticsearch and beyond
+* https://github.com/sivasamyk/logtrail[LogTrail] - View, analyze, search and tail log events in realtime with a developer/sysadmin friendly interface
+
+[float]
+==== Timelion Extensions
+* https://github.com/fermiumlabs/mathlion[Mathlion] (fermiumlabs) - enables equation parsing and advanced math under Timelion
+
+[float]
+==== Visualizations
+* https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
+* https://github.com/Oxalide/kibana_metric_vis_colors[Metric colors] (Oxalide)
+* https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
+* https://github.com/sbeyn/kibana-plugin-gauge-sg[Gauge] (sbeyn)
+* https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
+* https://github.com/stormpython/tagcloud[Tagcloud] (stormpython)
+* https://github.com/stormpython/heatmap[Heatmap] (stormpython)
+* https://github.com/stormpython/vectormap[Vectormap] (stormpython)
+* https://github.com/sirensolutions/kibi_radar_vis[Radar] (SIREN)
+* https://github.com/sirensolutions/kibi_wordcloud_vis[Wordcloud] (SIREN)
+* https://github.com/sirensolutions/kibi_timeline_vis[Timeline] (SIREN)
+* https://github.com/JuanCarniglia/kbn_sunburst_vis[Sunburst] (JuanCarniglia)
+* https://github.com/JuanCarniglia/kbn_circles_vis[Circles] (JuanCarniglia)
+* https://github.com/JuanCarniglia/kbn_picture_values_vis[Picture values] (JuanCarniglia)
+* https://github.com/JuanCarniglia/area3d_vis[3D Graph] (JuanCarniglia)
+* https://github.com/chenryn/kbn_sankey_vis[Sankey] (Chenryn)
+* https://github.com/raystorm-place/kibana-html-plugin[HTML] (Raystorm)
+* https://github.com/raystorm-place/kibana-slider-plugin[Slider] (Raystorm)
+* https://github.com/JuanCarniglia/kbn_percent_nice_vis[Percent as Image] (JuanCarniglia)
+* https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
+* https://github.com/dlumbrer/kbn_network[Network Plugin] (dlumbrer)
+* https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
+* https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
+* https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
+
+[float]
+==== Other
+* https://github.com/bondib/kibana-iframe-communicator-plugin[Kibana iFrame Communicator] (bondib) - exposes Kibana internals for communication within an iFrame
+* https://github.com/nreese/kibana-time-plugin[Time picker as a dashboard panel] (nreese) Widget to view and edit the time range from within dashboards
+* https://github.com/elasticfence/kibana-logo-hack[Logo Hack] (elasticfence)
+
+NOTE: If you want your plugin to be added to this page, open a {repo}tree/{branch}/docs/known-plugins.asciidoc[pull request].
+

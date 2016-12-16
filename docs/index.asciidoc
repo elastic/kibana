@@ -8,6 +8,9 @@
 :version: 4.6
 :esversion: 2.4
 
+:repo: https://github.com/elastic/kibana/
+:branch: 4.6
+
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
