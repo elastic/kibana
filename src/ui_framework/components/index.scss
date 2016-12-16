@@ -30,6 +30,7 @@ $successColor: #417505;
 $warningColor: #ffac15;
 $errorColor: #D86051;
 $fontColor: #191E23;
+$subduedFontColor: #9fa3a7;
 $panelColor: #E4E4E4;
 $selectedBorderColor: #6EADC1;
 $errorBorderColor: $errorColor;
@@ -68,5 +69,7 @@ body {
 @import "icon/index";
 @import "link/index";
 @import "local_nav/index";
+@import "no_results/index";
+@import "panel/index";
 @import "table/index";
 @import "tool_bar/index";
