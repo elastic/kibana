@@ -15,24 +15,22 @@ uiModules.get('kibana')
     const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution));
     const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, {attribution: attributionFromConfig});
 
-    /**
-     * Object to read out the map-service configuration
-     *
-     * @type {Object}
-     */
-    const mapSettings = {
 
-      _queryParams: {license: ""},//this curheprently a mandatory parameter. Remove when no longer the case.
-      _settingsInitialized: false,
+    class MapSettings {
 
-      //initialize settings with the default of the configuration
-      _url: mapsConfig.deprecated.config.url,
-      _options: optionsFromConfig,
+      constructor() {
+        this._queryParams = {license: ""};//this is currently a mandatory parameter. Remove when no longer the case.
+        this._settingsInitialized = false;
+
+        //initialize settings with the default of the configuration
+        this._url = mapsConfig.deprecated.config.url;
+        this._options = optionsFromConfig;
+      }
 
       /**
        * Must be called before getUrl/getOptions can be called.
        */
-      whenSettingsReady: async function () {
+      async whenSettingsReady() {
 
         if (!mapsConfig.deprecated.isConfiguredWithDefault) {//if settings are overridden, we will use those.
           return true;
@@ -65,14 +63,15 @@ uiModules.get('kibana')
 
         this._settingsInitialized = true;
         return true;
-      },
+      }
+
       /**
        * add optional query-parameter that will be submitted to the tile service
        * @param additionalQueryParams
        */
-      addQueryParams: function (additionalQueryParams) {
+      addQueryParams(additionalQueryParams) {
         this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
-      },
+      }
 
       /**
        * Get the url of the default TMS
@@ -80,7 +79,8 @@ uiModules.get('kibana')
        */
       getUrl() {
         return this._url;
-      },
+      }
+
       /**
        * Get the options of the default TMS
        * @return {{}}
@@ -88,35 +88,15 @@ uiModules.get('kibana')
       getOptions() {
         return this._options;
       }
-    };
-
-    return mapSettings;
 
 
-    /**
-     * mocks call to manifest
-     * will be replaced with AJAX-call to the service when available.
-     *       A sample response would look something like;
-     *
-     {
-   "version":"0.0.0",
-   "expiry":"14d",
-   "services":[
-      {
-         "id":"road_map",
-         "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
-         "minZoom":0,
-         "maxZoom":12,
-         "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
-         "query_parameters":{
-            "elastic_tile_service_tos":"agree",
-            "my_app_name":"kibana"
-         }
-      }
-   ]
     }
-     *
-     */
+
+    return new MapSettings();
+
+
+
+
     async function getTileServiceManifest(manifestUrl, additionalQueryParams) {
 
       const manifestServiceTokens = url.parse(manifestUrl);
