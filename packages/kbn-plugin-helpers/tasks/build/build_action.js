@@ -88,7 +88,7 @@ module.exports = function (plugin) {
         // modify the package.json file
         .pipe(map(function (file) {
           if (file.basename === 'package.json') {
-            const pkg = JSON.parse(file.contents.toString('utf8'));
+            var pkg = JSON.parse(file.contents.toString('utf8'));
 
             // rewrite the target kibana version while the
             // file is on it's way to the archive
