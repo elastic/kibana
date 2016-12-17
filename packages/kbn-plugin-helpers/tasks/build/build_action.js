@@ -4,6 +4,7 @@ var map = require('through2-map').obj;
 var rename = require('gulp-rename');
 var join = require('path').join;
 var inquirer = require('inquirer');
+var execFileSync = require('child_process').execFileSync;
 
 module.exports = function (plugin) {
   return new Promise(function (resolve, reject) {
@@ -44,6 +45,30 @@ module.exports = function (plugin) {
       }
     }
 
+    function gitInfo() {
+      try {
+        var LOG_SEPARATOR = '||';
+        var commitCount = execFileSync('git', ['rev-list', '--count', 'HEAD'], {
+          cwd: plugin.root,
+          stdio: ['ignore', 'pipe', 'ignore'],
+          encoding: 'utf8',
+        });
+        var logLine = execFileSync('git', ['log', '--pretty=%h' + LOG_SEPARATOR + '%cD', '-n', '1'], {
+          cwd: plugin.root,
+          stdio: ['ignore', 'pipe', 'ignore'],
+          encoding: 'utf8',
+        }).split(LOG_SEPARATOR);
+
+        return {
+          count: commitCount.trim(),
+          sha: logLine[0].trim(),
+          date: logLine[1].trim(),
+        };
+      } catch (e) {
+        return {};
+      }
+    }
+
     function build(buildId, deps, kibanaVersion) {
       var files = [
         'package.json',
@@ -60,14 +85,23 @@ module.exports = function (plugin) {
       vfs
         .src(files, { cwd: plugin.root, base: plugin.root })
 
-        // rewrite the target kibana version while the
-        // file is on it's way to the archive
+        // modify the package.json file
         .pipe(map(function (file) {
           if (file.basename === 'package.json') {
-            const pkg = JSON.parse(file.contents.toString('utf8'));
+            var pkg = JSON.parse(file.contents.toString('utf8'));
+
+            // rewrite the target kibana version while the
+            // file is on it's way to the archive
             if (!pkg.kibana) pkg.kibana = {};
             pkg.kibana.version = kibanaVersion;
-            file.contents = toBuffer(JSON.stringify(pkg));
+
+            // append build info
+            pkg.build = {
+              git: gitInfo(),
+              date: new Date().toString()
+            };
+
+            file.contents = toBuffer(JSON.stringify(pkg, null, 2));
           }
 
           return file;
