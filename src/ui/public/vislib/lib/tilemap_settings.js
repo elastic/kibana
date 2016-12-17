@@ -35,6 +35,7 @@ uiModules.get('kibana')
         this._loadSettings = _.once(async() => {
 
           if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
+            this._settingsInitialized = true;
             return true;
           }
 
