@@ -76,12 +76,6 @@ describe('Top hit metric', function () {
     expect(aggDsl.top_hits.docvalue_fields).to.eql([ 'bytes' ]);
   });
 
-  it('should only request for the source if the field is an IP', function () {
-    init({ field: 'ip' });
-    expect(aggDsl.top_hits._source).to.be('ip');
-    expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
-  });
-
   it('should only request for the source if the field does not have the doc_values property', function () {
     init({ field: 'ssl' });
     expect(aggDsl.top_hits._source).to.be('ssl');

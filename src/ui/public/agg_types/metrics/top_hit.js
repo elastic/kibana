@@ -47,9 +47,7 @@ export default function AggTypeMetricTopProvider(Private) {
               }
             };
           } else {
-            // do not try to get the doc_values for IP fields, since it is
-            // an internal representataion of the IP and so of no use for display.
-            if (field.type !== 'ip' && field.doc_values) {
+            if (field.doc_values) {
               output.params.docvalue_fields = [ field.name ];
             }
             output.params._source = field.name === '_source' ? true : field.name;
