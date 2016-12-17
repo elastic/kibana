@@ -26,17 +26,22 @@ uiModules.get('kibana')
       constructor() {
 
         this._queryParams = {};
-        this._settingsInitialized = false;
 
         //initialize settings with the default of the configuration
         this._url = mapsConfig.deprecated.config.url;
         this._options = optionsFromConfig;
 
+        this._invalidateSettings();
+
+      }
+
+      _invalidateSettings() {
+
+        this._settingsInitialized = false;
         this._loadSettings = _.once(async() => {
 
           if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
             this._settingsInitialized = true;
-            return true;
           }
 
           if (this._settingsInitialized) {
@@ -78,12 +83,28 @@ uiModules.get('kibana')
       }
 
       /**
-       * Add optional query-parameter. Must be called before loading the settings.
+       * Add optional query-parameter.
        *
        * @param additionalQueryParams
        */
       addQueryParams(additionalQueryParams) {
-        this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
+
+        //check if there are any changes in the settings.
+        let changes = false;
+        for (let key  in additionalQueryParams) {
+          if (additionalQueryParams.hasOwnProperty(key)) {
+            if (additionalQueryParams[key] !== this._queryParams[key]) {
+              changes = true;
+              break;
+            }
+          }
+        }
+
+        if (changes) {
+          this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
+          this._invalidateSettings();
+        }
+
       }
 
       /**
