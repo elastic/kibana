@@ -9,7 +9,13 @@ marked.setOptions({
   sanitize: true // Sanitize HTML tags
 });
 
-//todo: add comment
+/**
+ * Reloads the setting for each route,
+ * This is to ensure, that if the license changed during the lifecycle of the application,
+ * we get an update.
+ * This is safe to call multiple times.
+ * tilemapSettings itself will take care that the manifest-service is not queried when not necessary.
+ */
 uiRoutes.afterSetupWork(function (tilemapSettings) {
   return tilemapSettings.loadSettings();
 });
@@ -26,6 +32,7 @@ uiModules.get('kibana')
       constructor() {
 
         this._queryParams = {};
+        this._error = null;
 
         //initialize settings with the default of the configuration
         this._url = mapsConfig.deprecated.config.url;
@@ -34,6 +41,7 @@ uiModules.get('kibana')
         this._invalidateSettings();
 
       }
+
 
       _invalidateSettings() {
 
@@ -52,10 +60,11 @@ uiModules.get('kibana')
           try {
             const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
             manifest = response.data;
+            this._error = null;
           } catch (e) {
             //request failed. Continue to use old settings.
             this._settingsInitialized = true;
-            //todo: make this first class property so map can check on it and display appropriate message
+            this._error = e;
             return true;
           }
 
@@ -127,6 +136,17 @@ uiModules.get('kibana')
           throw new Error('Cannot retrieve options before calling .loadSettings first');
         }
         return this._options;
+      }
+
+      /**
+       * Checks if there was an error during initialization of the parameters
+       */
+      hasError() {
+        return this._error !== null;
+      }
+
+      getError() {
+        return this._error;
       }
 
     }
