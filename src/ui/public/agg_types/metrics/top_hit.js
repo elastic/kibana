@@ -2,16 +2,24 @@ import _ from 'lodash';
 import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
+import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size.html';
 
 export default function AggTypeMetricTopProvider(Private) {
   const MetricAggType = Private(MetricAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
+  const isNumber = function (type) {
+    return type === 'number';
+  };
+
   return new MetricAggType({
     name: 'top_hits',
     title: 'Top Hit',
     makeLabel: function (aggConfig) {
-      const prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Last' : 'First';
+      let prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Last' : 'First';
+      if (aggConfig.params.size !== 1) {
+        prefix += ` ${aggConfig.params.size}`;
+      }
       return `${prefix} ${aggConfig.params.field.displayName}`;
     },
     params: [
@@ -27,7 +35,7 @@ export default function AggTypeMetricTopProvider(Private) {
         },
         write(agg, output) {
           const field = agg.params.field;
-          output.params = { size: 1 };
+          output.params = {};
 
           if (field.scripted) {
             output.params.script_fields = {
@@ -47,6 +55,60 @@ export default function AggTypeMetricTopProvider(Private) {
             output.params._source = field.name === '_source' ? true : field.name;
           }
         }
+      },
+      {
+        name: 'aggregate',
+        type: 'optioned',
+        default: 'concat',
+        editor: aggregateAndSizeEditor,
+        options: [
+          {
+            display: 'Min',
+            isCompatibleType: isNumber,
+            disabled: true,
+            val: 'min'
+          },
+          {
+            display: 'Max',
+            isCompatibleType: isNumber,
+            disabled: true,
+            val: 'max'
+          },
+          {
+            display: 'Sum',
+            isCompatibleType: isNumber,
+            disabled: true,
+            val: 'sum'
+          },
+          {
+            display: 'Average',
+            isCompatibleType: isNumber,
+            disabled: true,
+            val: 'average'
+          },
+          {
+            display: 'Concatenate',
+            isCompatibleType: _.constant(true),
+            disabled: true,
+            val: 'concat'
+          }
+        ],
+        controller: function ($scope) {
+          $scope.options = _.cloneDeep($scope.aggParam.options);
+          $scope.$watch('agg.params.field.type', function (type) {
+            if (type) {
+              _.each($scope.options, option => {
+                option.disabled = !option.isCompatibleType(type);
+              });
+            }
+          });
+        },
+        write: _.noop
+      },
+      {
+        name: 'size',
+        editor: null, // size setting is done together with the aggregation setting
+        default: 1
       },
       {
         name: 'sortField',
@@ -102,7 +164,33 @@ export default function AggTypeMetricTopProvider(Private) {
         return null;
       }
       const path = agg.params.field.name;
-      return path === '_source' ? hits[0]._source : agg.vis.indexPattern.flattenHit(hits[0], true)[path];
+      let values = [];
+
+      for (const hit of hits) {
+        const hitValues = path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];;
+        if (_.isArray(hitValues)) {
+          values.push(...hitValues);
+        } else {
+          values.push(hitValues);
+        }
+      }
+      if (values.length === 1) {
+        values = values[0];
+      }
+
+      if (_.isArray(values)) {
+        switch (agg.params.aggregate.val) {
+          case 'max':
+            return _.max(values);
+          case 'min':
+            return _.min(values);
+          case 'sum':
+            return _.sum(values);
+          case 'average':
+            return _.sum(values) / values.length;
+        }
+      }
+      return values;
     }
   });
 };

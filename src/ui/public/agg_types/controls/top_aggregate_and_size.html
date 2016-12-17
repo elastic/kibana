@@ -1,0 +1,27 @@
+<div ng-controller="aggParam.controller" class="vis-editor-agg-form-row">
+  <div class="form-group">
+    <label>
+      Aggregate With
+    </label>
+
+    <select
+      required
+      name="aggregate"
+      ng-model="agg.params.aggregate"
+      ng-options="opt as opt.display disable when opt.disabled for opt in options| orderBy: 'display'"
+      class="form-control"
+    ></select>
+  </div>
+  <div class="form-group">
+    <label>Size</label>
+
+    <input
+       required
+       name="size"
+       ng-model="agg.params.size"
+       class="form-control"
+       type="number"
+       min="1"
+    ></input>
+  </div>
+</div>

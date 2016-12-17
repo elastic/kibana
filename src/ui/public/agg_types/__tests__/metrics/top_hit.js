@@ -9,7 +9,7 @@ describe('Top hit metric', function () {
   let topHitMetric;
   let aggConfig;
 
-  function init({ field, sortOrder }) {
+  function init({ field, sortOrder = 'desc', aggregate = 'concat', size = 1 }) {
     ngMock.module('kibana');
     ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
@@ -20,9 +20,13 @@ describe('Top hit metric', function () {
       if (field) {
         params.field = field;
       }
-      if (sortOrder) {
-        params.sortOrder = sortOrder;
-      }
+      params.sortOrder = {
+        val: sortOrder
+      };
+      params.aggregate = {
+        val: aggregate
+      };
+      params.size = size;
       const vis = new Vis(indexPattern, {
         title: 'New Visualization',
         type: 'metric',
@@ -55,9 +59,7 @@ describe('Top hit metric', function () {
   it('should return a label prefixed with First if sorting in ascending order', function () {
     init({
       field: 'bytes',
-      sortOrder: {
-        val: 'asc'
-      }
+      sortOrder: 'asc'
     });
     expect(topHitMetric.makeLabel(aggConfig)).to.eql('First bytes');
   });
@@ -220,6 +222,77 @@ describe('Top hit metric', function () {
 
       init({ field: 'machine.os.raw' });
       expect(topHitMetric.getValue(aggConfig, bucket)).to.be(undefined);
+    });
+
+    describe('Multivalued field and first/last X docs', function () {
+      it('should return a label prefixed with Last X docs if sorting in descending order', function () {
+        init({
+          field: 'bytes',
+          size: 2
+        });
+        expect(topHitMetric.makeLabel(aggConfig)).to.eql('Last 2 bytes');
+      });
+
+      it('should return a label prefixed with First X docs if sorting in ascending order', function () {
+        init({
+          field: 'bytes',
+          size: 2,
+          sortOrder: 'asc'
+        });
+        expect(topHitMetric.makeLabel(aggConfig)).to.eql('First 2 bytes');
+      });
+
+      [
+        { type: 'concat', result: [ 1, 2, 3 ] },
+        { type: 'sum', result: 6 },
+        { type: 'min', result: 1 },
+        { type: 'max', result: 3 },
+        { type: 'average', result: 2 }
+      ]
+      .forEach(agg => {
+        it(`should return the result of the ${agg.type} aggregation over the last doc`, function () {
+          const bucket = {
+            '1': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      bytes: [ 1, 2, 3 ]
+                    }
+                  }
+                ]
+              }
+            }
+          };
+
+          init({ field: 'bytes', aggregate: agg.type });
+          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+        });
+
+        it(`should return the result of the ${agg.type} aggregation over the last X docs`, function () {
+          const bucket = {
+            '1': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      bytes: [ 1, 2 ]
+                    }
+                  },
+                  {
+                    _source: {
+                      bytes: 3
+                    }
+                  }
+                ]
+              }
+            }
+          };
+
+          init({ field: 'bytes', aggregate: agg.type });
+          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+        });
+      });
     });
   });
 });
