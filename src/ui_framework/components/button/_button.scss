@@ -6,6 +6,7 @@
 .kuiButton {
   display: inline-block; /* 1 */
   appearance: none;
+  cursor: pointer;
   padding: 4px 12px 5px;
   font-size: $fontSize;
   font-weight: 400;
@@ -13,7 +14,6 @@
   text-decoration: none;
   border: none;
   border-radius: $buttonBorderRadius;
-  cursor: pointer;
 
   &:disabled {
     cursor: default;

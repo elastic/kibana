@@ -123,8 +123,6 @@
             <th class="kuiTableHeaderCell">
               Title
             </th>
-            <th class="kuiTableHeaderCell">
-            </th>
           </tr>
         </thead>
 
@@ -142,25 +140,23 @@
               >
             </td>
             <td class="kuiTableRowCell">
-              <a class="kuiLink" href="" ng-click="edit(service, item)">
-                {{ item.title }}
-              </a>
-            </td>
-            <td class="kuiTableRowCell kuiTableRowCell--alignRight kuiTableRowCell--actions">
               <div class="kuiTableRowCell__liner">
-                <!-- Inline view button -->
+                <a class="kuiLink" href="" ng-click="edit(service, item)">
+                  {{ item.title }}
+                </a>
+
                 <button
-                  class="kuiButton kuiButton--basic"
+                  class="kuiMicroButton kuiTableRowHoverReveal"
                   ng-click="open(item)"
                   aria-label="View"
+                  tooltip="View in app"
                 >
                   <span
                     aria-hidden="true"
-                    class="kuiButton__icon kuiIcon fa-eye"
+                    class="kuiIcon fa-eye"
                   ></span>
                 </button>
               </div>
-            </div>
             </td>
           </tr>
 
