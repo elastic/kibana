@@ -65,40 +65,47 @@ export default function AggTypeMetricTopProvider(Private) {
           {
             display: 'Min',
             isCompatibleType: isNumber,
+            isCompatibleVis: _.constant(true),
             disabled: true,
             val: 'min'
           },
           {
             display: 'Max',
             isCompatibleType: isNumber,
+            isCompatibleVis: _.constant(true),
             disabled: true,
             val: 'max'
           },
           {
             display: 'Sum',
             isCompatibleType: isNumber,
+            isCompatibleVis: _.constant(true),
             disabled: true,
             val: 'sum'
           },
           {
             display: 'Average',
             isCompatibleType: isNumber,
+            isCompatibleVis: _.constant(true),
             disabled: true,
             val: 'average'
           },
           {
             display: 'Concatenate',
             isCompatibleType: _.constant(true),
+            isCompatibleVis: function (name) {
+              return name === 'metric' || name === 'table';
+            },
             disabled: true,
             val: 'concat'
           }
         ],
         controller: function ($scope) {
           $scope.options = _.cloneDeep($scope.aggParam.options);
-          $scope.$watch('agg.params.field.type', function (type) {
-            if (type) {
+          $scope.$watchGroup([ 'agg.vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
+            if (fieldType && visName) {
               _.each($scope.options, option => {
-                option.disabled = !option.isCompatibleType(type);
+                option.disabled = !option.isCompatibleVis(visName) || !option.isCompatibleType(fieldType);
               });
             }
           });
@@ -167,7 +174,7 @@ export default function AggTypeMetricTopProvider(Private) {
       let values = [];
 
       for (const hit of hits) {
-        const hitValues = path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];;
+        const hitValues = path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];
         if (_.isArray(hitValues)) {
           values.push(...hitValues);
         } else {
@@ -193,4 +200,4 @@ export default function AggTypeMetricTopProvider(Private) {
       return values;
     }
   });
-};
+}
