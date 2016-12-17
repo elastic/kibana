@@ -1,0 +1,40 @@
+.kuiToolBarSearch {
+  display: flex;
+  flex: 1 1 auto;
+  max-width: 800px;
+  line-height: $lineHeight;
+  margin-right: $toolBarSectionSpacing * 0.5;
+}
+
+.kuiToolBarSearchBox {
+  flex: 1 1 auto;
+  position: relative;
+}
+
+  .kuiToolBarSearchBox__icon {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 14px;
+    color: #ACACAC;
+  }
+
+  /**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
+  .kuiToolBarSearchBox__input {
+    width: 100%;
+    min-width: 200px;
+    padding: 5px 12px 6px 28px;
+    background-color: #FFFFFF;
+    color: $fontColor;
+    border: 1px solid #FFFFFF;
+    border-radius: $buttonBorderRadius;
+    font-size: $fontSize;
+    border: none; /* 1 */
+    line-height: normal; /* 1 */
+
+    &:focus {
+      @include focus;
+    }
+  }

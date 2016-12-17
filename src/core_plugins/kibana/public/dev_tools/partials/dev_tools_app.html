@@ -9,11 +9,11 @@
       ></bread-crumbs>
 
       <!-- Tabs. -->
-      <div data-transclude-slot="bottomRow" class="localTabs">
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
         <a
           ng-repeat="item in kbnDevToolsApp.devTools"
-          class="localTab"
-          ng-class="{'localTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
           kbn-href="{{::item.url}}"
         >
           {{::item.display}}

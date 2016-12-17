@@ -1,6 +1,6 @@
-<div ng-show="timefilter.enabled" class="localMenu" data-test-subj="globalTimepicker">
+<div ng-show="timefilter.enabled" class="kuiLocalMenu" data-test-subj="globalTimepicker">
   <div
-    class="localMenuItem"
+    class="kuiLocalMenuItem"
     ng-click="toggleRefresh()"
     ng-show="timefilter.refreshInterval.value > 0"
   >
@@ -8,8 +8,8 @@
   </div>
 
   <div
-    class="localMenuItem navbar-timepicker-auto-refresh-desc"
-    ng-class="{'localMenuItem-isSelected': kbnTopNav.isCurrent('interval') }"
+    class="kuiLocalMenuItem navbar-timepicker-auto-refresh-desc"
+    ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('interval') }"
     ng-show="timefilter.refreshInterval.value > 0 || kbnTopNav.isCurrent('interval') || kbnTopNav.isCurrent('filter')"
     ng-click="kbnTopNav.toggle('interval')"
   >
@@ -21,14 +21,14 @@
     </span>
   </div>
 
-  <div class="localMenuItem" ng-click="back()">
+  <div class="kuiLocalMenuItem" ng-click="back()">
     <span class="fa fa-chevron-left ng-scope" tooltip="Move backwards in time"></span>
   </div>
 
   <div
     data-test-subj="globalTimepickerButton"
-    class="localMenuItem navbar-timepicker-time-desc"
-    ng-class="{'localMenuItem-isSelected': kbnTopNav.isCurrent('filter')}"
+    class="kuiLocalMenuItem navbar-timepicker-time-desc"
+    ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('filter')}"
     ng-click="kbnTopNav.toggle('filter')"
     aria-haspopup="true"
     aria-expanded="false"
@@ -40,7 +40,7 @@
     ></pretty-duration>
   </div>
 
-  <div class="localMenuItem" ng-click="forward()">
+  <div class="kuiLocalMenuItem" ng-click="forward()">
     <span class="fa fa-chevron-right ng-scope" tooltip="Move forwards in time"></span>
   </div>
 </div>
