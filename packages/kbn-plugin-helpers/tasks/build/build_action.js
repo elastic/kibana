@@ -101,7 +101,7 @@ module.exports = function (plugin) {
               date: new Date().toString()
             };
 
-            file.contents = toBuffer(JSON.stringify(pkg));
+            file.contents = toBuffer(JSON.stringify(pkg, null, 2));
           }
 
           return file;
