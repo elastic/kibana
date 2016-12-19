@@ -21,10 +21,9 @@ uiModules.get('kibana')
       $scope.$watch('renderbot.chartData', function (data) {
         if (!data) return;
         $scope.data = data;
-        refresh();
       });
 
-      $scope.$watch('renderbot.vislibParams', () => {
+      $scope.$watch('renderbot.refreshLegend', () => {
         refresh();
       });
 
@@ -107,7 +106,7 @@ uiModules.get('kibana')
         const vislibVis = $scope.renderbot.vislibVis;
         if (!vislibVis.visConfig) {
           $scope.labels = [{ label: 'loading ...' }];
-          return $timeout(refresh, 100);
+          return;
         }  // make sure vislib is defined at this point
 
         if ($scope.uiState.get('vis.legendOpen') == null && $scope.vis.params.addLegend != null) {
