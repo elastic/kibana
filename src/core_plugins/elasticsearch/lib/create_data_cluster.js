@@ -1,9 +1,10 @@
 import { bindKey } from 'lodash';
+import clientLogger from './client_logger';
 
 export default function (server) {
   const config = server.config();
   const esPlugins = server.plugins.elasticsearch;
-  const { ElasticsearchClientLogging } = server.plugins.elasticsearch;
+  const ElasticsearchClientLogging = clientLogger(server);
 
   class DataClientLogging extends ElasticsearchClientLogging {
     tags = ['data'];
@@ -11,13 +12,11 @@ export default function (server) {
   }
 
   function getConfig() {
-    const esConfig = config.get('elasticsearch.tribe');
-
-    if (!Boolean(esConfig.url)) {
-      return config.get('elasticsearch');
+    if (Boolean(config.get('elasticsearch.tribe.url'))) {
+      return config.get('elasticsearch.tribe');
     }
 
-    return esConfig;
+    return config.get('elasticsearch');
   }
 
   const dataCluster = server.plugins.elasticsearch.createCluster(

@@ -1,8 +1,9 @@
 import { bindKey } from 'lodash';
+import clientLogger from './client_logger';
 
 export default function (server) {
   const config = server.config();
-  const { ElasticsearchClientLogging } = server.plugins.elasticsearch;
+  const ElasticsearchClientLogging = clientLogger(server);
 
   class AdminClientLogging extends ElasticsearchClientLogging {
     tags = ['admin'];
