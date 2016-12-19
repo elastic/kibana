@@ -70,7 +70,7 @@ describe('plugins/elasticsearch', function () {
         expect(cluster.config().plugins).to.eql([plugin, pluginTwo]);
       });
 
-      it('is available for callAsKibanaUser', async () => {
+      it('is available for callWithInternalUser', async () => {
         const marco = await cluster.callWithInternalUser('marco');
         expect(marco).to.eql('polo');
       });
