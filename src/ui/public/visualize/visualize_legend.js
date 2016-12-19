@@ -6,7 +6,7 @@ import uiModules from 'ui/modules';
 
 
 uiModules.get('kibana')
-.directive('visualizeLegend', function (Private, getAppState, $timeout) {
+.directive('visualizeLegend', function (Private, getAppState) {
   const Data = Private(VislibLibDataProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 

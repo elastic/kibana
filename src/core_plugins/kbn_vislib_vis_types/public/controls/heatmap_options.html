@@ -97,7 +97,6 @@
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
           <tr>
-            <th></th>
             <th>
               <label>From</label>
             </th>
@@ -107,9 +106,6 @@
           </tr>
 
           <tr ng-repeat="range in vis.params.colorsRange track by $index">
-            <td>
-              <div class="kuiSideBarFormRow__label__colorbox" ng-style="{ 'background-color': getColor($index) }" />
-            </td>
             <td>
               <input
                 ng-model="range.from"
