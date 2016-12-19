@@ -23,5 +23,8 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
     noun: 'Saved Search',
     nouns: 'saved searches'
   };
+  savedSearchLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/discover/{{id}}', { id: id });
+  };
   return savedSearchLoader;
 });
