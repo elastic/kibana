@@ -11,7 +11,7 @@ const SCROLLER_HEIGHT = 20;
  */
 uiModules
 .get('kibana')
-.directive('fixedScroll', function ($timeout) {
+.directive('fixedScroll', function (debounce) {
   return {
     restrict: 'A',
     link: function ($scope, $el) {
@@ -105,7 +105,6 @@ uiModules
 
       let width;
       let scrollWidth;
-      let widthCheckTimeout = $timeout(checkWidth, 500);
       function checkWidth() {
         const newScrollWidth = $el.prop('scrollWidth');
         const newWidth = $el.width();
@@ -116,15 +115,14 @@ uiModules
 
         scrollWidth = newScrollWidth;
         width = newWidth;
-
-        widthCheckTimeout = $timeout(checkWidth, 500);
       }
+
+     $scope.$watch(debounce(checkWidth, 100));
 
       // cleanup when the scope is destroyed
       $scope.$on('$destroy', function () {
         cleanUp();
         $scroller = $window = null;
-        $timeout.cancel(widthCheckTimeout);
       });
     }
   };
