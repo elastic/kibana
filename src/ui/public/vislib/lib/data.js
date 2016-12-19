@@ -110,6 +110,7 @@ export default function DataFactory(Private) {
     }
 
     shouldBeStacked(seriesConfig) {
+      if (!seriesConfig) return false;
       const isHistogram = (seriesConfig.type === 'histogram');
       const isArea = (seriesConfig.type === 'area');
       const stacked = (seriesConfig.mode === 'stacked');

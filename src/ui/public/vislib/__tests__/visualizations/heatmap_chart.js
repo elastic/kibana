@@ -144,7 +144,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         vis.destroy();
         generateVis({
           setColorRange: true,
-          colorsRange: [{ from: 0, to: 200}, { from: 200, to: 400 }, { from: 400, to: 500 }, { from: 500, to: Infinity }]
+          colorsRange: [{ from: 0, to: 200 }, { from: 200, to: 400 }, { from: 400, to: 500 }, { from: 500, to: Infinity }]
         });
         const labels = vis.getLegendLabels();
         expect(labels[0]).to.be('0 - 200');
