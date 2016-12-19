@@ -22,8 +22,8 @@ export default function mapUri(cluster, proxyPrefix) {
     // copy most url components directly from the elasticsearch.url
     const mappedUrlComponents = {
       protocol: esUrlProtocol,
-      slashes: esUrlHasSlashes, // QUESTION: would it every be anything else?
-      auth: esUrlAuth, // QUESTION: should we pass this on?
+      slashes: esUrlHasSlashes,
+      auth: esUrlAuth,
       hostname: esUrlHostname,
       port: esUrlPort
     };
