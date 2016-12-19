@@ -1,7 +1,10 @@
 /**
- * 1. Disable for Angular.
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
  */
 .kuiButton {
+  display: inline-block; /* 1 */
   appearance: none;
   padding: 4px 12px 5px;
   font-size: $fontSize;
@@ -14,7 +17,7 @@
 
   &:disabled {
     cursor: default;
-    pointer-events: none; // 1
+    pointer-events: none; /* 2 */
   }
 
   &:active:enabled {
@@ -32,13 +35,21 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--basic {
   color: #5a5a5a;
   background-color: #F2F2F2;
 
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: #5a5a5a !important; /* 1 */
+  }
+
   &:hover:enabled,
   &:active:enabled {
-    color: #ffffff;
+    color: #ffffff !important; /* 1 */
     background-color: #9B9B9B;
   }
 
@@ -47,6 +58,9 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1;
@@ -59,6 +73,10 @@
 
   &:disabled {
     background-color: #B6D6E0;
+  }
+
+  &:focus {
+    color: #FFFFFF !important; /* 1 */
   }
 }
 
@@ -76,8 +94,12 @@
     background-color: #efc0ba;
   }
 
+  /**
+   * 1. Override Bootstrap.
+   */
   &:focus {
     @include focus(#ff523c);
+    color: #FFFFFF !important; /* 1 */
   }
 }
 

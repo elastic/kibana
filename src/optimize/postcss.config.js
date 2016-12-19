@@ -3,7 +3,8 @@ module.exports = {
     require('autoprefixer')({
       browsers: [
         'last 2 versions',
-        '> 5%'
+        '> 5%',
+        'Safari 7' // for PhantomJS support
       ]
     })
   ]
