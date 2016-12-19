@@ -1,7 +1,5 @@
 import uiModules from 'ui/modules';
 
-import './local_navigation.less';
-
 
 const module = uiModules.get('kibana');
 
