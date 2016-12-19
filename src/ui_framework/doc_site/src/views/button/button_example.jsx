@@ -35,7 +35,10 @@ export default createExample([{
 }, {
   title: 'ButtonGroup',
   description: (
-    <p>Use the ButtonGroup to emphasize the relationships between a set of Buttons, and differentiate them from Buttons outside of the set.</p>
+    <div>
+      <p>Use the ButtonGroup to emphasize the relationships between a set of Buttons, and differentiate them from Buttons outside of the set.</p>
+      <p>They support containing a single Button, so that Buttons can be dynamically added and removed.</p>
+    </div>
   ),
   html: require('./button_group.html'),
   hasDarkTheme: false,
