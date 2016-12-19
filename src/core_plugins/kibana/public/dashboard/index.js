@@ -17,7 +17,11 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
+
+import { DashboardViewMode } from './dashboard_view_mode';
+import { getTopNavConfig } from './get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
+
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
@@ -104,37 +108,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.topNavMenu = [{
-        key: 'new',
-        description: 'New Dashboard',
-        run: function () { kbnUrl.change('/dashboard', {}); },
-        testId: 'dashboardNewButton',
-      }, {
-        key: 'add',
-        description: 'Add a panel to the dashboard',
-        template: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
-        testId: 'dashboardAddPanelButton',
-      }, {
-        key: 'save',
-        description: 'Save Dashboard',
-        template: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
-        testId: 'dashboardSaveButton',
-      }, {
-        key: 'open',
-        description: 'Open Saved Dashboard',
-        template: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
-        testId: 'dashboardOpenButton',
-      }, {
-        key: 'share',
-        description: 'Share Dashboard',
-        template: require('plugins/kibana/dashboard/partials/share.html'),
-        testId: 'dashboardShareButton',
-      }, {
-        key: 'options',
-        description: 'Options',
-        template: require('plugins/kibana/dashboard/partials/options.html'),
-        testId: 'dashboardOptionsButton',
-      }];
+      const viewModeStateKey = 'dash.dashboardViewMode';
+
+      const changeViewMode = (newMode) => {
+        $scope.dashboardViewMode = newMode;
+        $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+      };
+
+      changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -217,6 +198,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // update data when filters fire fetch event
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
+      $scope.getDashTitle = function () {
+        const isEditMode = $scope.dashboardViewMode === DashboardViewMode.EDIT;
+        return isEditMode ? 'Edit ' + dash.lastSavedTitle : dash.lastSavedTitle;
+      };
+
       $scope.newDashboard = function () {
         kbnUrl.change('/dashboard', {});
       };
@@ -291,6 +277,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       init();
+
+      $scope.showEditHelpText = () => {
+        return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.EDIT;
+      };
     }
   };
 });
