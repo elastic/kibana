@@ -26,7 +26,7 @@ uiModules
    * @returns {string}
    */
   const getPersistedStateId = function (panel) {
-    return `P-${panel.panelId}`;
+    return `P-${panel.panelIndex}`;
   };
 
   return {
