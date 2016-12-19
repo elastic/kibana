@@ -207,6 +207,7 @@ export default function HeatmapChartFactory(Private) {
             Math.abs(squareHeight / Math.cos(rotateRad))
         ) - cellPadding;
 
+        let hiddenLabels = false;
         squares.append('text')
           .text(d => zAxisFormatter(d.y))
           .style('display', function (d) {
@@ -214,11 +215,14 @@ export default function HeatmapChartFactory(Private) {
             const textHeight = this.getBBox().height;
             const textTooLong = textLength > maxLength;
             const textTooWide = textHeight > maxHeight;
+            if (!d.hide && (textTooLong || textTooWide)) {
+              hiddenLabels = true;
+            }
             return d.hide || textTooLong || textTooWide ? 'none' : 'initial';
           })
           .style('dominant-baseline', 'central')
           .style('text-anchor', 'middle')
-          .style('stroke', zAxisConfig.get('labels.color'))
+          .style('fill', zAxisConfig.get('labels.color'))
           .attr('x', function (d) {
             const center = x(d) + squareWidth / 2;
             return center;
@@ -232,6 +236,9 @@ export default function HeatmapChartFactory(Private) {
             const verticalCenter = y(d) + squareHeight / 2;
             return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
           });
+        if (hiddenLabels) {
+          this.baseChart.handler.alerts.show('Some labels were hidden due to size constrains');
+        }
       }
 
       if (isTooltip) {
