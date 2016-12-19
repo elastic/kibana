@@ -43,14 +43,19 @@
     <div class="row">
       <div class="col-md-12">
         <button
-          class="btn btn-block btn-lg btn-link"
+          class="kuiButton kuiButton--basic contextLoadingButton"
           ng-click="contextApp.actions.fetchMorePredecessorRows()"
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
           ng-disabled="contextApp.selectors.isLoadingPredecessorRows()"
         >
-          <i class="fa fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingPredecessorRows()"></i>
-          <span ng-if="!contextApp.selectors.isLoadingPredecessorRows()">Load newer entries</span>
+          <span class="kuiButton__icon kuiIcon fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingPredecessorRows()"></span>
+          <span class="kuiButton__icon kuiIcon fa-chevron-up" ng-if="!contextApp.selectors.isLoadingPredecessorRows()"></span>
+          <span>Load newer entries</span>
         </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
         <div class="discover-overlay" ng-if="contextApp.selectors.isLoadingAnchorRow()">
           <h2>Loading...</h2>
         </div>
@@ -64,14 +69,19 @@
           >
           </doc-table>
         </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
         <button
-          class="btn btn-block btn-lg btn-link"
+          class="kuiButton kuiButton--basic contextLoadingButton"
           ng-click="contextApp.actions.fetchMoreSuccessorRows()"
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
           ng-disabled="contextApp.selectors.isLoadingSuccessorRows()"
         >
-          <i class="fa fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingSuccessorRows()"></i>
-          <span ng-if="!contextApp.selectors.isLoadingSuccessorRows()">Load older entries</span>
+          <span class="kuiButton__icon kuiIcon fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingSuccessorRows()"></span>
+          <span class="kuiButton__icon kuiIcon fa-chevron-down" ng-if="!contextApp.selectors.isLoadingSuccessorRows()"></span>
+          <span>Load older entries</span>
         </button>
       </div>
     </div>
