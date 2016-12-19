@@ -46,6 +46,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
+    metaFieldsVersion: 'boolean',
     fieldFormatMap: {
       type: 'text',
       _serialize(map = {}) {
@@ -112,7 +113,11 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
 
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
+    } else if (!indexPattern.metaFieldsVersion) {
+      promise = indexPattern.refreshFields();
+      indexPattern.metaFieldsVersion = true;
     }
+
     return promise.then(() => {initFields(indexPattern);});
   }
 
