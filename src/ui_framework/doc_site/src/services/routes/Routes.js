@@ -19,6 +19,9 @@ import LocalNavExample
 import TableExample
   from '../../views/table/table_example.jsx';
 
+import TabsExample
+  from '../../views/tabs/tabs_example.jsx';
+
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
 
@@ -41,6 +44,9 @@ const components = [{
 }, {
   name: 'Table',
   component: TableExample,
+}, {
+  name: 'Tabs',
+  component: TabsExample,
 }, {
   name: 'ToolBar',
   component: ToolBarExample,

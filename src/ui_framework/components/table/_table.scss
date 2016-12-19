@@ -15,6 +15,7 @@
   width: 100%;
   border: $tableBorder;
   border-collapse: collapse;
+  background-color: #FFFFFF;
 }
 
 .kuiTableHeaderCell {
@@ -40,6 +41,7 @@
   pointer-events: none;
 }
 
+
 .kuiTableRowCell {
   @include tableCell;
   color: $fontColor;
@@ -52,11 +54,33 @@
     text-overflow: ellipsis;
   }
 
+.kuiTableRowCell--alignRight {
+  text-align: right;
+
+  .kuiTableRowCell__liner {
+    text-align: right;
+  }
+}
+
+.kuiTableRowCell--actions {
+  padding-top: 0;
+  padding-bottom: 0;
+
+  /**
+   * 1. We don't want to clip the focused state of buttons.
+   */
+  .kuiTableRowCell__liner {
+    overflow: visible; /* 1 */
+  }
+}
+
 /**
  * 1. Rendered width of cell with checkbox inside of it.
+ * 2. Align checkbox with text in other cells.
  */
 .kuiTableHeaderCell--checkBox,
 .kuiTableRowCell--checkBox {
   width: 28px; /* 1 */
   padding-right: 0;
+  line-height: 1;
 }

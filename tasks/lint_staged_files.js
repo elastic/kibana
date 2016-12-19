@@ -1,6 +1,7 @@
-import { resolve } from 'path';
+import { extname, resolve, relative } from 'path';
 import { isStaged, getFilename } from './utils/files_to_commit';
 import { CLIEngine } from 'eslint';
+import { red, blue } from 'ansicolors';
 import minimatch from 'minimatch';
 
 const root = resolve(__dirname, '..');
@@ -14,20 +15,25 @@ export default function (grunt) {
     const eslintSourcePaths = grunt.config.get('eslint.options.paths');
     if (!eslintSourcePaths) grunt.fail.warn('eslint.options.paths is not defined');
 
-    const sourcePathRegexps = cli.resolveFileGlobPatterns(eslintSourcePaths)
-      .map(glob => minimatch.makeRe(glob));
+    const sourcePathGlobs = cli.resolveFileGlobPatterns(eslintSourcePaths);
 
     const files = grunt.config
     .get('filesToCommit')
     .filter(isStaged)
     .map(getFilename)
-    .map(file => resolve(root, file))
+    .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
     .filter(file => {
-      if (!sourcePathRegexps.some(re => file.match(re))) {
+      if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
+        if (extname(file) === '.js') {
+          grunt.log.writeln(`${red('WARNING:')} ${file} not selected by grunt eslint config`);
+        }
         return false;
       }
 
       if (cli.isPathIgnored(file)) {
+        if (extname(file) === '.js') {
+          grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+        }
         return false;
       }
 
