@@ -111,13 +111,13 @@ uiModules
 
         if (scrollWidth !== newScrollWidth || width !== newWidth) {
           setup();
-        }
 
-        scrollWidth = newScrollWidth;
-        width = newWidth;
+          scrollWidth = newScrollWidth;
+          width = newWidth;
+        }
       }
 
-     $scope.$watch(debounce(checkWidth, 100));
+      $scope.$watch(debounce(checkWidth, 100));
 
       // cleanup when the scope is destroyed
       $scope.$on('$destroy', function () {
