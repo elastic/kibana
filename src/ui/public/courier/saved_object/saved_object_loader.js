@@ -40,11 +40,12 @@ export class SavedObjectLoader {
   delete(ids) {
     ids = !_.isArray(ids) ? [ids] : ids;
 
-    const promises = [];
-    for (let i = 0; i < ids.length; i++) {
-      promises.push((new this.Class(ids[i])).delete());
-    }
-    return Promise.all(promises);
+    const deletions = ids.map(id => {
+      const savedObject = new this.Class(id);
+      return savedObject.delete();
+    });
+
+    return Promise.all(deletions);
   }
 
   /**
