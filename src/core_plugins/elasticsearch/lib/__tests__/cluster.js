@@ -40,44 +40,6 @@ describe('plugins/elasticsearch', function () {
       expect(localRequestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
     });
 
-    describe('adding a plugin', () => {
-      const plugin = (Client, config, components) => {
-        Client.prototype.marco = () => {
-          return Promise.resolve('polo');
-        };
-      };
-
-      beforeEach(() => {
-        cluster.addClientPlugins([plugin]);
-      });
-
-      it('persists previous plugins', () => {
-        const pluginTwo = (Client, config, components) => {
-          Client.prototype.foo = () => {
-            return Promise.resolve('bar');
-          };
-        };
-
-        expect(cluster._config.plugins).to.have.length(1);
-        expect(cluster._config.plugins[0]).to.be(plugin);
-
-        cluster.addClientPlugins([pluginTwo]);
-
-        expect(cluster._config.plugins).to.have.length(2);
-        expect(cluster._config.plugins).to.eql([plugin, pluginTwo]);
-      });
-
-      it('is available for callWithInternalUser', async () => {
-        const marco = await cluster.callWithInternalUser('marco');
-        expect(marco).to.eql('polo');
-      });
-
-      it('is available for callWithRequest', async () => {
-        const marco = await cluster.callWithRequest({}, 'marco');
-        expect(marco).to.eql('polo');
-      });
-    });
-
     describe('callWithInternalUser', () => {
       let client;
 

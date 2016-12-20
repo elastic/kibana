@@ -6,15 +6,6 @@ import Boom from 'boom';
 import createClient from './create_client';
 import filterHeaders from './filter_headers';
 
-function getClonedProperties(config, paths) {
-  return cloneDeep(paths ? pick(config, paths) : config);
-}
-
-function getClonedProperty(config, path) {
-  return cloneDeep(path ? get(config, path) : config);
-}
-
-
 export default class Cluster {
   constructor(config) {
     this._config = Object.assign({}, config);
@@ -71,17 +62,7 @@ export default class Cluster {
 
   getSsl = () => getClonedProperty(this._config, 'ssl');
 
-  addClientPlugins(plugins = []) {
-    this.close(); // close existing client connections
-
-    if (Array.isArray(this._config.plugins)) {
-      this._config.plugins = this._config.plugins.concat(plugins);
-    } else {
-      this._config.plugins = plugins;
-    }
-
-    createClients.call(this);
-  }
+  getClient = () => this._client;
 
   close() {
     if (this._client) {
@@ -135,6 +116,14 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
 
     throw boomError;
   });
+}
+
+function getClonedProperties(config, paths) {
+  return cloneDeep(paths ? pick(config, paths) : config);
+}
+
+function getClonedProperty(config, path) {
+  return cloneDeep(path ? get(config, path) : config);
 }
 
 function createClients() {
