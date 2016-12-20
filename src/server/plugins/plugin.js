@@ -102,7 +102,7 @@ module.exports = class Plugin {
   }
 
   getDeprecations() {
-    let rules = this.getExternalDeprecations(Deprecations);
+    const rules = this.getExternalDeprecations(Deprecations);
     return rules || [];
   }
 

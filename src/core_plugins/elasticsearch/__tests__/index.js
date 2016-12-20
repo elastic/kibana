@@ -13,7 +13,7 @@ describe('plugins/elasticsearch', function () {
         this.deprecations = options.deprecations;
       };
 
-      const plugin = index({Plugin});
+      const plugin = index({ Plugin });
 
       const deprecations = plugin.deprecations(Deprecations);
       transformDeprecations = (settings, log = noop) => {

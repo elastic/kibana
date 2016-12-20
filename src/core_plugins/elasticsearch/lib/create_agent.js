@@ -12,7 +12,7 @@ module.exports = _.memoize(function (server) {
 
   const agentOptions = {};
 
-  let verificationMode = config.get('elasticsearch.ssl.verificationMode');
+  const verificationMode = config.get('elasticsearch.ssl.verificationMode');
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
