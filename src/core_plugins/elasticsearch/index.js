@@ -5,7 +5,7 @@ import healthCheck from './lib/health_check';
 import createDataCluster from './lib/create_data_cluster';
 import createAdminCluster from './lib/create_admin_cluster';
 import clientLogger from './lib/client_logger';
-import { getCluster, createCluster } from './lib/clusters';
+import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
 
 import createProxy, { createPath } from './lib/create_proxy';
@@ -78,9 +78,11 @@ module.exports = function ({ Plugin }) {
 
     init(server, options) {
       const kibanaIndex = server.config().get('kibana.index');
+      const clusters = createClusters(server);
 
-      server.expose('getCluster', getCluster);
-      server.expose('createCluster', createCluster);
+      server.expose('getCluster', clusters.get);
+      server.expose('createCluster', clusters.create);
+
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
 
