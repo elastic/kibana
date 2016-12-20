@@ -2,40 +2,40 @@ import _ from 'lodash';
 
 
 function createDispatchProvider($q) {
-  return function createDispatch(getState, setState, update) {
-    const dispatchWithProcessors = _.compose(
-      createThunkProcessor,
-      createPromiseProcessor,
+  return function createDispatch(getState, setState, reducer) {
+    const dispatchWithMiddleware = _.compose(
+      createThunkMiddleware,
+      createPromiseMiddleware,
     )(dispatch);
 
-    return dispatchWithProcessors;
+    return dispatchWithMiddleware;
 
     function dispatch(action) {
-      const nextState = update(getState(), action);
+      const nextState = reducer(getState(), action);
       setState(nextState);
 
       return action;
     }
 
-    function createThunkProcessor(next) {
+    function createThunkMiddleware(next) {
       return (action) => {
         if (_.isFunction(action)) {
-          return action(dispatchWithProcessors, getState);
+          return action(dispatchWithMiddleware, getState);
         }
 
         return next(action);
       };
     }
 
-    function createPromiseProcessor(next) {
+    function createPromiseMiddleware(next) {
       return (action) => {
         if (_.isFunction(_.get(action, ['payload', 'then']))) {
           next({ type: started(action.type) });
 
           return $q.resolve(action.payload)
             .then(
-              (result) => dispatchWithProcessors({ type: action.type, payload: result }),
-              (error) => dispatchWithProcessors({ type: failed(action.type), payload: error, error: true }),
+              (result) => dispatchWithMiddleware({ type: action.type, payload: result }),
+              (error) => dispatchWithMiddleware({ type: failed(action.type), payload: error, error: true }),
             );
         }
 
@@ -46,7 +46,7 @@ function createDispatchProvider($q) {
   };
 }
 
-function createPipeline(...updaters) {
+function createReducerPipeline(...updaters) {
   return (state, action) => (
     _.flow(...updaters.map((updater) => (state) => updater(state, action)))(state)
   );
@@ -58,10 +58,10 @@ function bindActionCreators(actionCreators, dispatch) {
   ));
 }
 
-function createScopedUpdater(key, updater) {
+function scopeReducer(key, reducer) {
   return (state, action) => {
     const subState = state[key];
-    const newSubState = updater(subState, action);
+    const newSubState = reducer(subState, action);
 
     if (subState !== newSubState) {
       return { ...state, [key] : newSubState };
@@ -99,8 +99,8 @@ function createSelector(dependencies, selector) {
 export {
   bindActionCreators,
   createDispatchProvider,
-  createPipeline,
-  createScopedUpdater,
+  createReducerPipeline,
+  scopeReducer,
   createSelector,
   failed,
   started,

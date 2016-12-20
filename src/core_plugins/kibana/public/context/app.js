@@ -7,8 +7,8 @@ import './app.less';
 import {
   bindActionCreators,
   createDispatchProvider,
-  createPipeline,
-  createScopedUpdater,
+  createReducerPipeline,
+  scopeReducer,
 } from './dispatch';
 import {
   QueryParameterActionCreatorsProvider,
@@ -59,16 +59,16 @@ function ContextAppController($scope, Private) {
 
   this.state = createInitialState();
 
-  this.update = createPipeline(
-    createScopedUpdater('queryParameters', updateQueryParameters),
-    createScopedUpdater('rows', updateQueryResults),
-    createScopedUpdater('loadingStatus', updateLoadingStatus),
+  this.reducer = createReducerPipeline(
+    scopeReducer('queryParameters', updateQueryParameters),
+    scopeReducer('rows', updateQueryResults),
+    scopeReducer('loadingStatus', updateLoadingStatus),
   );
 
   this.dispatch = createDispatch(
     () => this.state,
     (state) => this.state = state,
-    this.update,
+    this.reducer,
   );
 
   this.actions = bindActionCreators({
