@@ -1,0 +1,17 @@
+Promise.map is not a native function
+
+Backports PR #9562
+
+**Commit 1:**
+Promise.map is not a native function
+
+Fixes #9557 and adds a test that would have caught it.
+
+* Original sha: a7485fb6d7ecf53b657691126716b7d74a7f035a
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-19T21:23:14Z
+
+**Commit 2:**
+use native map
+
+* Original sha: e0faa8bf2de4819b36dd3c87b0b08c27669658c1
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-19T21:48:16Z
