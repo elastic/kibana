@@ -572,7 +572,7 @@ export default class VisualizePage {
     .then(function getRect() {
       return self
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.chart-wrapper > div.chart > svg')
+      .findByCssSelector('rect.background')
       .then(function getRectHeight(chartAreaObj) {
         return chartAreaObj
         .getAttribute('height')
