@@ -71,14 +71,14 @@ class BaseOptimizer {
 
     const makeStyleLoader = preprocessor => {
       let loaders = [
-        loaderWithSourceMaps('css')
+        loaderWithSourceMaps('css-loader')
       ];
 
       if (preprocessor) {
         loaders = [
           ...loaders,
           {
-            name: 'postcss',
+            name: 'postcss-loader',
             query: {
               config: require.resolve('./postcss.config')
             }
@@ -93,7 +93,7 @@ class BaseOptimizer {
     const makeBabelLoader = query => {
       return makeLoaderString([
         {
-          name: 'babel',
+          name: 'babel-loader',
           query: defaults({}, query || {}, babelOptions.webpack)
         }
       ]);
@@ -133,15 +133,15 @@ class BaseOptimizer {
 
       module: {
         loaders: [
-          { test: /\.less$/, loader: makeStyleLoader('less') },
-          { test: /\.scss$/, loader: makeStyleLoader('sass') },
+          { test: /\.less$/, loader: makeStyleLoader('less-loader') },
+          { test: /\.scss$/, loader: makeStyleLoader('sass-loader') },
           { test: /\.css$/, loader: makeStyleLoader() },
-          { test: /\.jade$/, loader: 'jade' },
-          { test: /\.json$/, loader: 'json' },
-          { test: /\.(html|tmpl)$/, loader: 'raw' },
-          { test: /\.png$/, loader: 'url' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file' },
-          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack') },
+          { test: /\.jade$/, loader: 'jade-loader' },
+          { test: /\.json$/, loader: 'json-loader' },
+          { test: /\.(html|tmpl)$/, loader: 'raw-loader' },
+          { test: /\.png$/, loader: 'url-loader' },
+          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
+          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
           {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
@@ -171,7 +171,7 @@ class BaseOptimizer {
       resolveLoader: {
         alias: transform(pkg.dependencies, function (aliases, version, name) {
           if (name.endsWith('-loader')) {
-            aliases[name.replace(/-loader$/, '')] = require.resolve(name);
+            aliases[name] = require.resolve(name);
           }
         }, {})
       }
