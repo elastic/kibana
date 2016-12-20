@@ -1,10 +1,19 @@
 import elasticsearch from 'elasticsearch';
-import { get, set, isEmpty, cloneDeep } from 'lodash';
+import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Boom from 'boom';
 
 import createClient from './create_client';
 import filterHeaders from './filter_headers';
+
+function getClonedProperties(config, paths) {
+  return cloneDeep(paths ? pick(config, paths) : config);
+}
+
+function getClonedProperty(config, path) {
+  return cloneDeep(path ? get(config, path) : config);
+}
+
 
 export default class Cluster {
   constructor(config) {
@@ -21,8 +30,6 @@ export default class Cluster {
    *
    * Performs a call to ES, passing through whitelisted headers in the request
    *
-   * The whitelisted headers are defined in the config under _requestHeadersWhitelist_
-   *
    * @param {Object|undefined} req - The request object
    * @param {string} endpoint
    * @param {Object} clientParams
@@ -32,7 +39,7 @@ export default class Cluster {
    */
   callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
     if (req.headers) {
-      const filteredHeaders = filterHeaders(req.headers, this.config('requestHeadersWhitelist'));
+      const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
       set(clientParams, 'headers', filteredHeaders);
     }
 
@@ -54,9 +61,15 @@ export default class Cluster {
     return callAPI(this._client, endpoint, clientParams, options);
   }
 
-  config = (path) => {
-    return cloneDeep(path ? get(this._config, path) : this._config);
-  }
+  getRequestHeadersWhitelist = () => getClonedProperty(this._config, 'requestHeadersWhitelist');
+
+  getCustomHeaders = () => getClonedProperty(this._config, 'customHeaders');
+
+  getRequestTimeout = () => getClonedProperty(this._config, 'requestTimeout');
+
+  getUrl = () => getClonedProperty(this._config, 'url');
+
+  getSsl = () => getClonedProperty(this._config, 'ssl');
 
   addClientPlugins(plugins = []) {
     this.close(); // close existing client connections
@@ -78,6 +91,22 @@ export default class Cluster {
     if (this._noAuthClient) {
       this._noAuthClient.close();
     }
+  }
+
+  _getClientConfig = () => {
+    return getClonedProperties(this._config, [
+      'url',
+      'ssl',
+      'username',
+      'password',
+      'customHeaders',
+      'plugins',
+      'apiVersion',
+      'keepAlive',
+      'pingTimeout',
+      'requestTimeout',
+      'log'
+    ]);
   }
 }
 
@@ -109,6 +138,6 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
 }
 
 function createClients() {
-  this._client = createClient(this.config());
-  this._noAuthClient = createClient(Object.assign({}, this.config(), { auth: false }));
+  this._client = createClient(this._getClientConfig());
+  this._noAuthClient = createClient(Object.assign({}, this._getClientConfig(), { auth: false }));
 }

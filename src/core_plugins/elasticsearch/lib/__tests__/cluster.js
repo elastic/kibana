@@ -19,7 +19,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('persists the config', () => {
-      expect(cluster.config()).to.eql(config);
+      expect(cluster._config).to.eql(config);
     });
 
     it('exposes error definitions', () => {
@@ -36,11 +36,8 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('protects the config from changes', () => {
-      const localConfig = cluster.config();
-      localConfig.requestHeadersWhitelist.push('123');
-      delete localConfig.url;
-      expect(localConfig).to.not.equal(config);
-      expect(localConfig.requestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
+      const localRequestHeadersWhitelist = cluster.getRequestHeadersWhitelist();
+      expect(localRequestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
     });
 
     describe('adding a plugin', () => {
@@ -61,13 +58,13 @@ describe('plugins/elasticsearch', function () {
           };
         };
 
-        expect(cluster.config().plugins).to.have.length(1);
-        expect(cluster.config().plugins[0]).to.be(plugin);
+        expect(cluster._config.plugins).to.have.length(1);
+        expect(cluster._config.plugins[0]).to.be(plugin);
 
         cluster.addClientPlugins([pluginTwo]);
 
-        expect(cluster.config().plugins).to.have.length(2);
-        expect(cluster.config().plugins).to.eql([plugin, pluginTwo]);
+        expect(cluster._config.plugins).to.have.length(2);
+        expect(cluster._config.plugins).to.eql([plugin, pluginTwo]);
       });
 
       it('is available for callWithInternalUser', async () => {

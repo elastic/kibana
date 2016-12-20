@@ -17,7 +17,9 @@ describe('plugins/elasticsearch', function () {
       });
 
       return {
-        config: (path) => path ? get(settings, path) : settings
+        getUrl: () => settings.url,
+        getCustomHeaders: () => settings.customHeaders,
+        getRequestHeadersWhitelist: () => settings.requestHeadersWhitelist
       };
     }
 
