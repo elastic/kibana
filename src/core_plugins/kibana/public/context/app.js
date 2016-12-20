@@ -15,6 +15,10 @@ import {
   bindActionCreators,
 } from './redux_lite/action_creator_helpers';
 import {
+  bindAngularGetterSetters,
+  bindSelectors,
+} from './redux_lite/selector_helpers';
+import {
   QueryParameterActionCreatorsProvider,
   QUERY_PARAMETER_KEYS,
   selectPredecessorCount,
@@ -81,16 +85,22 @@ function ContextAppController($scope, Private) {
   }, this.dispatch);
 
   this.selectors = {
-    rows: () => selectRows(this.state),
-    isLoadingAnchorRow: () => selectIsLoadingAnchorRow(this.state),
-    isLoadingPredecessorRows: () => selectIsLoadingPredecessorRows(this.state),
-    isLoadingSuccessorRows: () => selectIsLoadingSuccessorRows(this.state),
-    predecessorCount: (value) => (
-      value ? this.actions.fetchGivenPredecessorRows(value) : selectPredecessorCount(this.state)
-    ),
-    successorCount: (value) => (
-      value ? this.actions.fetchGivenSuccessorRows(value) : selectSuccessorCount(this.state)
-    ),
+    ...bindSelectors({
+      rows: selectRows,
+      isLoadingAnchorRow: selectIsLoadingAnchorRow,
+      isLoadingPredecessorRows: selectIsLoadingPredecessorRows,
+      isLoadingSuccessorRows: selectIsLoadingSuccessorRows,
+    }, () => this.state),
+    ...bindAngularGetterSetters({
+      predecessorCount: [
+        this.actions.fetchGivenPredecessorRows,
+        selectPredecessorCount,
+      ],
+      successorCount: [
+        this.actions.fetchGivenSuccessorRows,
+        selectSuccessorCount,
+      ],
+    }, () => this.state),
   };
 
   /**
