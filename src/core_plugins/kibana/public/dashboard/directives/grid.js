@@ -165,6 +165,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                 <dashboard-panel remove="removePanelFromState(${panel.panelIndex})"
                                  panel="getPanelByPanelIndex(${panel.panelIndex})"
                                  is-full-screen-mode="!chrome.getVisible()"
+                                 state="state"
                                  parent-ui-state="uiState">
             </li>`;
         panel.$el = $compile(panelHtml)($scope);
