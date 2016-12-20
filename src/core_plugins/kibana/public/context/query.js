@@ -2,7 +2,8 @@ import _ from 'lodash';
 
 import { fetchAnchor } from './api/anchor';
 import { fetchPredecessors, fetchSuccessors } from './api/context';
-import { createSelector, started } from './dispatch';
+import { started } from './redux_lite/action_creator_helpers';
+import { createSelector } from './redux_lite/selector_helpers';
 import {
   QueryParameterActionCreatorsProvider,
   selectPredecessorCount,

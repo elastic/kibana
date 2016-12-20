@@ -5,11 +5,15 @@ import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './app.less';
 import {
-  bindActionCreators,
   createDispatchProvider,
+} from './redux_lite/create_dispatch';
+import {
   createReducerPipeline,
   scopeReducer,
-} from './dispatch';
+} from './redux_lite/reducer_helpers';
+import {
+  bindActionCreators,
+} from './redux_lite/action_creator_helpers';
 import {
   QueryParameterActionCreatorsProvider,
   QUERY_PARAMETER_KEYS,
