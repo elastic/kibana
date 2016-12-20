@@ -1,0 +1,76 @@
+New scripted field tests
+
+Backports PR #9242
+
+**Commit 1:**
+[WIP] new scripted field tests
+
+* Original sha: 6440101a7bbf4e6b7ffe7179382c135888ef1658
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-11-29T14:33:58Z
+
+**Commit 2:**
+Merge branch 'master' into scriptedFieldTests
+
+* Original sha: 4590fcb2779fe7b06b58e8e0b18dcdb7ae3e1eb6
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-08T19:39:57Z
+
+**Commit 3:**
+Final improvements on 12 new tests for 1 expression and 2 painless scripted fields
+
+* Original sha: 7e85c641aeec4250389b36a1932c062aab0d4a04
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-09T04:48:45Z
+
+**Commit 4:**
+Add try loops around testing first Discover doc
+
+* Original sha: 8dfab849f4acc740aa708339a3b5d44954ed188c
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-09T15:50:50Z
+
+**Commit 5:**
+Set timezone to UTC and adjusted data accordingly
+
+* Original sha: 78018adbc5bc3a366f112b4fc5dea3766cff2144
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-09T17:23:31Z
+
+**Commit 6:**
+Merge branch 'master' into scriptedFieldTests
+
+* Original sha: 75eb35096017d12b916d39db1cb26c0b2f9ae947
+* Authored by Spencer <spalger@users.noreply.github.com> on 2016-12-13T18:13:54Z
+* Committed by GitHub <noreply@github.com> on 2016-12-13T18:13:54Z
+
+**Commit 7:**
+Added boolean and date Painless scripted field types
+
+* Original sha: 1854ee39f24b8475c7294922a2ff56d689c186f5
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-15T19:59:04Z
+
+**Commit 8:**
+Remove unused (non-working) methods
+
+* Original sha: c190cc5d39663ab22261e6764430f15f0d5d267f
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-15T20:07:15Z
+
+**Commit 9:**
+Merge branch 'master' into scriptedFieldTests
+
+* Original sha: ca29b91e133b4f773b5108aad6b3d85a5043527d
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-15T20:08:47Z
+
+**Commit 10:**
+Fix lint error
+
+* Original sha: c4f3e6cdaee4eb186f76360d4a6d07da0daecbda
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-15T20:18:49Z
+
+**Commit 11:**
+Added several data-test-subj attributes and used them in the tests
+
+* Original sha: 0528a553ad67551cce30825b06a72fcbcbe0275e
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-16T22:28:01Z
+
+**Commit 12:**
+Reverting previous change to getBarChartData
+
+* Original sha: 047d91289194fd81eb0dc57adf1e59e9a238f85a
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-12-20T15:01:27Z
