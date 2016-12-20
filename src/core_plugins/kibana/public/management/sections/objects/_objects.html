@@ -116,7 +116,7 @@
               <input
                 type="checkbox"
                 class="kuiCheckBox"
-                ng-checked="currentTab.data.length > 0 && selectedItems.length == currentTab.data.length"
+                ng-checked="managementObjectsController.areAllRowsChecked()"
                 ng-click="toggleAll()"
               >
             </th>

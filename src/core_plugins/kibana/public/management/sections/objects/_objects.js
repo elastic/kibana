@@ -20,12 +20,18 @@ uiModules.get('apps/management')
     restrict: 'E',
     controllerAs: 'managementObjectsController',
     controller: function ($scope, $injector, $q, AppState, es) {
-      const self = this;
       const notify = new Notifier({ location: 'Saved Objects' });
 
       const $state = $scope.state = new AppState();
       $scope.currentTab = null;
       $scope.selectedItems = [];
+
+      this.areAllRowsChecked = function areAllRowsChecked() {
+        if ($scope.currentTab.data.length === 0) {
+          return false;
+        }
+        return $scope.selectedItems.length === $scope.currentTab.data.length;
+      };
 
       const getData = function (filter) {
         const services = registry.all().map(function (obj) {
@@ -53,6 +59,9 @@ uiModules.get('apps/management')
         });
       };
 
+      const refreshData = () => {
+        return getData(this.advancedFilter);
+      };
 
       $scope.toggleAll = function () {
         if ($scope.selectedItems.length === $scope.currentTab.data.length) {
@@ -152,10 +161,6 @@ uiModules.get('apps/management')
         return es.indices.refresh({
           index: kbnIndex
         });
-      }
-
-      function refreshData() {
-        return getData(self.advancedFilter);
       }
 
       $scope.changeTab = function (tab) {
