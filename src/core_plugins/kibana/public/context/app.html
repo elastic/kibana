@@ -17,22 +17,12 @@
       </local-navigation-row-section>
 
       <local-navigation-row-section>
-        <div class="contextSizePicker">
-          <input
-            class="kuiTextInput contextSizePicker__item contextSizePicker__sizeInput"
-            ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
-            ng-model="contextApp.selectors.predecessorCount"
-            type="number"
-          />
-          <div class="contextSizePicker__item">newer and</div>
-          <input
-            class="kuiTextInput contextSizePicker__item contextSizePicker__sizeInput"
-            ng-model-options="{updateOn: 'change', getterSetter: true, debounce: 200}"
-            ng-model="contextApp.selectors.successorCount"
-            type="number"
-          />
-          <div class="contextSizePicker__item">older entries</div>
-        </div>
+        <context-size-picker
+          predecessor-count="contextApp.selectors.predecessorCount()"
+          successor-count="contextApp.selectors.successorCount()"
+          set-predecessor-count="contextApp.actions.fetchGivenPredecessorRows"
+          set-successor-count="contextApp.actions.fetchGivenSuccessorRows"
+        />
       </local-navigation-row-section>
     </local-navigation-row>
   </local-navigation>

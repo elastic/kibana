@@ -1,12 +1,6 @@
 import _ from 'lodash';
 
 
-function bindAngularGetterSetters(getterSetters, getState) {
-  return _.mapValues(getterSetters, ([actionCreator, selector]) => (value) =>
-    _.isUndefined(value) ? selector(getState()) : actionCreator(value)
-  );
-}
-
 function bindSelectors(selectors, getState) {
   return _.mapValues(selectors, (selector) => () =>
     selector(getState())
@@ -31,7 +25,6 @@ function createSelector(dependencies, selector) {
 
 
 export {
-  bindAngularGetterSetters,
   bindSelectors,
   createSelector,
 };

@@ -4,20 +4,11 @@ import 'ui/local_navigation/index';
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './app.less';
-import {
-  createDispatchProvider,
-} from './redux_lite/create_dispatch';
-import {
-  createReducerPipeline,
-  scopeReducer,
-} from './redux_lite/reducer_helpers';
-import {
-  bindActionCreators,
-} from './redux_lite/action_creator_helpers';
-import {
-  bindAngularGetterSetters,
-  bindSelectors,
-} from './redux_lite/selector_helpers';
+import './components/size_picker';
+import { createDispatchProvider } from './redux_lite/create_dispatch';
+import { createReducerPipeline, scopeReducer } from './redux_lite/reducer_helpers';
+import { bindActionCreators } from './redux_lite/action_creator_helpers';
+import { bindSelectors } from './redux_lite/selector_helpers';
 import {
   QueryParameterActionCreatorsProvider,
   QUERY_PARAMETER_KEYS,
@@ -84,24 +75,14 @@ function ContextAppController($scope, Private) {
     ...queryActionCreators,
   }, this.dispatch);
 
-  this.selectors = {
-    ...bindSelectors({
-      rows: selectRows,
-      isLoadingAnchorRow: selectIsLoadingAnchorRow,
-      isLoadingPredecessorRows: selectIsLoadingPredecessorRows,
-      isLoadingSuccessorRows: selectIsLoadingSuccessorRows,
-    }, () => this.state),
-    ...bindAngularGetterSetters({
-      predecessorCount: [
-        this.actions.fetchGivenPredecessorRows,
-        selectPredecessorCount,
-      ],
-      successorCount: [
-        this.actions.fetchGivenSuccessorRows,
-        selectSuccessorCount,
-      ],
-    }, () => this.state),
-  };
+  this.selectors = bindSelectors({
+    isLoadingAnchorRow: selectIsLoadingAnchorRow,
+    isLoadingPredecessorRows: selectIsLoadingPredecessorRows,
+    isLoadingSuccessorRows: selectIsLoadingSuccessorRows,
+    predecessorCount: selectPredecessorCount,
+    rows: selectRows,
+    successorCount: selectSuccessorCount,
+  }, () => this.state);
 
   /**
    * Sync query parameters to arguments
