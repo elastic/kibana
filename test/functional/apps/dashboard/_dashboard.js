@@ -15,7 +15,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     PageObjects.common.debug('Starting dashboard before method');
     const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+    return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     // and load a set of makelogs data
     .then(function loadkibanaVisualizations() {
       PageObjects.common.debug('load kibana index with visualizations');

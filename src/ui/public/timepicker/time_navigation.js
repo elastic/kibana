@@ -2,7 +2,7 @@ import moment from 'moment';
 
 export default {
   // travel forward in time based on the interval between from and to
-  stepForward({min, max}) {
+  stepForward({ min, max }) {
     const diff = max.diff(min);
     return {
       from: max.toISOString(),
@@ -11,7 +11,7 @@ export default {
   },
 
   // travel backwards in time based on the interval between from and to
-  stepBackward({min, max}) {
+  stepBackward({ min, max }) {
     const diff = max.diff(min);
     return {
       from: moment(min).subtract(diff).toISOString(),
@@ -20,7 +20,7 @@ export default {
   },
 
   // zoom out, doubling the difference between start and end, keeping the same time range center
-  zoomOut({min, max}) {
+  zoomOut({ min, max }) {
     const diff = max.diff(min);
     return {
       from: moment(min).subtract(diff / 2).toISOString(),
@@ -29,7 +29,7 @@ export default {
   },
 
   // zoom in, halving the difference between start and end, keeping the same time range center
-  zoomIn({min, max}) {
+  zoomIn({ min, max }) {
     const diff = max.diff(min);
     return {
       from: moment(min).add(diff / 4).toISOString(),

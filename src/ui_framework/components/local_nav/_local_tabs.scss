@@ -1,7 +1,7 @@
 /**
  * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
  */
-.localTabs {
+.kuiLocalTabs {
   display: flex;
   align-items: flex-end; // 1
   height: 100%;
@@ -10,7 +10,7 @@
   /**
    * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
    */
-  .localTab {
+  .kuiLocalTab {
     padding: 5px 0 6px 0;
     font-size: 18px;
     line-height: 22px; /* 1 */
@@ -28,7 +28,7 @@
       }
     }
 
-    &.localTab-isSelected {
+    &.kuiLocalTab-isSelected {
       color: $localTabTextColor-isSelected;
       border-bottom-color: $localTabTextColor-isSelected;
       cursor: default;

@@ -31,5 +31,5 @@ export default function LocalCacheFactory() {
   }
 
   return LocalCache;
-};
+}
 

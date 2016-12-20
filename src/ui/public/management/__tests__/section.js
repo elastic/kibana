@@ -52,7 +52,7 @@ describe('ManagementSection', () => {
         section.register('about');
       } catch (e) {
         threwException = e.message.indexOf('is already registered') > -1;
-      };
+      }
 
       expect(threwException).to.be(true);
     });

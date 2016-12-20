@@ -18,4 +18,4 @@ export default function TypeFactory(Private) {
     tile_map: Private(VislibLibTypesTileMapProvider),
     point_series: pointSeries.line
   };
-};
+}

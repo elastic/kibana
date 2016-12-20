@@ -60,7 +60,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     return $http.post(chrome.addBasePath(`/api/kibana/${indexPattern}/_data`), formData, {
       params: params,
       transformRequest: angular.identity,
-      headers: {'Content-Type': undefined}
+      headers: { 'Content-Type': undefined }
     });
   };
 

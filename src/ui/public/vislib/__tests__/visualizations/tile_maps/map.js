@@ -102,7 +102,7 @@ describe('TileMap Map Tests', function () {
 
     it('should create a WMS layer if WMS is enabled', function () {
       expect(L.tileLayer.wms.called).to.be(false);
-      map = new TileMapMap($mockMapEl, geoJsonData, {attr: {wms: {enabled: true}}});
+      map = new TileMapMap($mockMapEl, geoJsonData, { attr: { wms: { enabled: true } } });
       map._createMap({});
       expect(L.tileLayer.wms.called).to.be(true);
       L.tileLayer.restore();

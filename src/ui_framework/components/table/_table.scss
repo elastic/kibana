@@ -1,0 +1,86 @@
+@mixin tableCell {
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  padding: 7px 8px 8px;
+  text-align: left;
+
+  &:last-child {
+    padding-right: 16px;
+  }
+}
+
+.kuiTable {
+  table-layout: fixed;
+  width: 100%;
+  border: $tableBorder;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+}
+
+.kuiTableHeaderCell {
+  @include tableCell;
+  color: #787878;
+}
+
+/**
+ * 1. Prevent rapid clicking from selecting text.
+ */
+.kuiTableHeaderCell--sortable {
+  user-select: none; /* 1 */
+  cursor: pointer;
+
+  &:hover:not(.kuiTableHeaderCell-isSorted) {
+    .kuiTableSortIcon {
+      opacity: 0.4;
+    }
+  }
+}
+
+.kuiTableSortIcon {
+  pointer-events: none;
+}
+
+
+.kuiTableRowCell {
+  @include tableCell;
+  color: $fontColor;
+  border-top: $tableBorder;
+}
+
+  .kuiTableRowCell__liner {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+.kuiTableRowCell--alignRight {
+  text-align: right;
+
+  .kuiTableRowCell__liner {
+    text-align: right;
+  }
+}
+
+.kuiTableRowCell--actions {
+  padding-top: 0;
+  padding-bottom: 0;
+
+  /**
+   * 1. We don't want to clip the focused state of buttons.
+   */
+  .kuiTableRowCell__liner {
+    overflow: visible; /* 1 */
+  }
+}
+
+/**
+ * 1. Rendered width of cell with checkbox inside of it.
+ * 2. Align checkbox with text in other cells.
+ */
+.kuiTableHeaderCell--checkBox,
+.kuiTableRowCell--checkBox {
+  width: 28px; /* 1 */
+  padding-right: 0;
+  line-height: 1;
+}

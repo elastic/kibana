@@ -1,11 +1,11 @@
 
-.localMenu {
+.kuiLocalMenu {
   display: flex;
   align-items: center;
   height: 100%;
 }
 
-  .localMenuItem {
+  .kuiLocalMenuItem {
     display: flex;
     align-items: center;
     height: 100%;
@@ -21,11 +21,11 @@
       color: $localNavButtonTextColor-isHover;
     }
 
-    &.localMenuItem-isSelected {
+    &.kuiLocalMenuItem-isSelected {
       background-color: $localNavButtonBackgroundColor-isSelected;
     }
 
-    &.localMenuItem-isDisabled {
+    &.kuiLocalMenuItem-isDisabled {
       opacity: 0.5;
       cursor: default;
 
@@ -43,11 +43,11 @@
         color: $localNavButtonTextColor-isHover--darkTheme;
       }
 
-      &.localMenuItem-isSelected {
+      &.kuiLocalMenuItem-isSelected {
         background-color: $localNavButtonBackgroundColor-isSelected--darkTheme;
       }
 
-      &.localMenuItem-isDisabled {
+      &.kuiLocalMenuItem-isDisabled {
         &:hover {
           background-color: transparent;
           color: $localNavButtonTextColor--darkTheme;
@@ -56,7 +56,7 @@
     }
   }
 
-    .localMenuItem__icon {
+    .kuiLocalMenuItem__icon {
       margin-right: 5px;
       margin-bottom: -1px;
     }

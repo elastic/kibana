@@ -1,0 +1,14 @@
+.kuiLink {
+  color: $linkColor;
+  text-decoration: none;
+
+  &:visited,
+  &:active {
+    color: #3CAED2;
+  }
+
+  &:hover {
+    color: $linkHoverColor;
+    text-decoration: underline;
+  }
+}

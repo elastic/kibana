@@ -155,7 +155,7 @@ function getFieldNamesFromFieldMapping(field_name, field_mapping) {
     return applyPathSettings(nested_fields);
   }
 
-  var ret = {name: field_name, type: field_type};
+  var ret = { name: field_name, type: field_type };
 
   if (field_mapping["index_name"]) {
     ret.name = field_mapping["index_name"];

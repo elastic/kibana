@@ -25,4 +25,4 @@ export default function fieldWildcard(config) {
   }
 
   return { makeRegEx, fieldWildcardMatcher, fieldWildcardFilter };
-};
+}

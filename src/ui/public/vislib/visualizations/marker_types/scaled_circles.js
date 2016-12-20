@@ -51,9 +51,9 @@ export default function ScaledCircleMarkerFactory(Private) {
 
       // square root value percentage
       return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
-    };
+    }
   }
 
 
   return ScaledCircleMarker;
-};
+}

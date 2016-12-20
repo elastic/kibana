@@ -65,4 +65,4 @@ export default function contentTypesProvider(highlightFilter) {
     types: types,
     setup: setup
   };
-};
+}

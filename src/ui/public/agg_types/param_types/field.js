@@ -105,4 +105,4 @@ export default function FieldAggParamFactory(Private, $filter) {
   };
 
   return FieldAggParam;
-};
+}

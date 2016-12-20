@@ -8,4 +8,4 @@ export default function findByParam(values, param) {
     return values[index][param];
   }
   return values[param]; // pie chart
-};
+}

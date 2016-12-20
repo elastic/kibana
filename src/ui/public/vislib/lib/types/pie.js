@@ -10,4 +10,4 @@ export default function PieConfig(Private) {
     }
     return config;
   };
-};
+}

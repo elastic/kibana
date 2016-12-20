@@ -121,7 +121,7 @@ export default function downloadNodeBuilds(grunt) {
       createReadStream(filePath)
         .pipe(createGunzip())
         .on('error', reject)
-        .pipe(new Extract({path: platform.nodeDir, strip: 1}))
+        .pipe(new Extract({ path: platform.nodeDir, strip: 1 }))
         .on('error', reject)
         .on('end', resolve);
     });
@@ -148,4 +148,4 @@ export default function downloadNodeBuilds(grunt) {
     map(platforms, extract).nodeify(this.async());
   });
 
-};
+}

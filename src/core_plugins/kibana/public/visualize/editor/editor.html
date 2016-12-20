@@ -6,7 +6,7 @@
       <!-- Title. -->
       <div
         data-transclude-slot="topLeftCorner"
-        class="localTitle"
+        class="kuiLocalTitle"
       >
         <span
           ng-show="savedVis.id"
@@ -41,7 +41,7 @@
           class="fullWidth"
         >
           <div class="typeahead" kbn-typeahead="visualize">
-            <div class="localSearch">
+            <div class="kuiLocalSearch">
               <input
                 ng-model="state.query"
                 parse-query
@@ -49,13 +49,13 @@
                 kbn-typeahead-input
                 placeholder="Search..."
                 type="text"
-                class="localSearchInput"
-                ng-class="{'localSearchInput-isInvalid': queryInput.$invalid}"
+                class="kuiLocalSearchInput"
+                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
               >
               <button
                 type="submit"
                 aria-label="Search"
-                class="localSearchButton"
+                class="kuiLocalSearchButton"
                 ng-disabled="queryInput.$invalid"
               >
                 <span aria-hidden="true" class="fa fa-search"></span>

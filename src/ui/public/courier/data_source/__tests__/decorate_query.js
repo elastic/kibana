@@ -37,8 +37,8 @@ describe('Query decorator', function () {
   });
 
   it('should merge in the query string options', function () {
-    config.set('query:queryString:options', {analyze_wildcard: true});
-    expect(fn({query_string: {query: '*'}})).to.eql({query_string: {query: '*', analyze_wildcard: true}});
+    config.set('query:queryString:options', { analyze_wildcard: true });
+    expect(fn({ query_string: { query: '*' } })).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
   });
 
 });

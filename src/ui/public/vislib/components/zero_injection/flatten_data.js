@@ -25,4 +25,4 @@ export default function FlattenDataObjectUtilService() {
     .filter(Boolean)
     .value();
   };
-};
+}
