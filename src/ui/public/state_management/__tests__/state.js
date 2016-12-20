@@ -1,46 +1,76 @@
-
-let _ = require('lodash');
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-require('ui/private');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import { encode as encodeRison } from 'ui/utils/rison';
+import 'ui/private';
+import Notifier from 'ui/notify/notifier';
+import StateManagementStateProvider from 'ui/state_management/state';
+import {
+  unhashQueryString,
+} from 'ui/state_management/state_hashing';
+import {
+  createStateHash,
+  isStateHash,
+} from 'ui/state_management/state_storage';
+import HashedItemStore from 'ui/state_management/state_storage/hashed_item_store';
+import StubBrowserStorage from 'testUtils/stub_browser_storage';
+import EventsProvider from 'ui/events';
 
 describe('State Management', function () {
+  const notifier = new Notifier();
   let $rootScope;
   let $location;
   let State;
   let Events;
+  let setup;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
+  beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
     $location = _$location_;
     $rootScope = _$rootScope_;
-    State = Private(require('ui/state_management/state'));
-    Events = Private(require('ui/events'));
+    State = Private(StateManagementStateProvider);
+    Events = Private(EventsProvider);
+    Notifier.prototype._notifs.splice(0);
+
+    setup = opts => {
+      const { param, initial, storeInHash } = (opts || {});
+      sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
+      const store = new StubBrowserStorage();
+      const hashedItemStore = new HashedItemStore(store);
+      const state = new State(param, initial, hashedItemStore, notifier);
+
+      const getUnhashedSearch = state => {
+        return unhashQueryString($location.search(), [ state ]);
+      };
+
+      return { notifier, store, hashedItemStore, state, getUnhashedSearch };
+    };
   }));
+
+  afterEach(() => Notifier.prototype._notifs.splice(0));
 
   describe('Provider', function () {
     it('should reset the state to the defaults', function () {
-      let state = new State('_s', { message: ['test'] });
+      const { state, getUnhashedSearch } = setup({ initial: { message: ['test'] } });
       state.reset();
-      let search = $location.search();
+      let search = getUnhashedSearch(state);
       expect(search).to.have.property('_s');
       expect(search._s).to.equal('(message:!(test))');
       expect(state.message).to.eql(['test']);
     });
 
     it('should apply the defaults upon initialization', function () {
-      let state = new State('_s', { message: 'test' });
+      const { state } = setup({ initial: { message: 'test' } });
       expect(state).to.have.property('message', 'test');
     });
 
     it('should inherit from Events', function () {
-      let state = new State();
+      const { state } = setup();
       expect(state).to.be.an(Events);
     });
 
     it('should emit an event if reset with changes', function (done) {
-      let state = new State('_s', { message: 'test' });
+      const { state } = setup({ initial: { message: ['test'] } });
       state.on('reset_with_changes', function (keys) {
         expect(keys).to.eql(['message']);
         done();
@@ -52,7 +82,7 @@ describe('State Management', function () {
     });
 
     it('should not emit an event if reset without changes', function () {
-      let state = new State('_s', { message: 'test' });
+      const { state } = setup({ initial: { message: 'test' } });
       state.on('reset_with_changes', function () {
         expect().fail();
       });
@@ -65,29 +95,29 @@ describe('State Management', function () {
 
   describe('Search', function () {
     it('should save to $location.search()', function () {
-      let state = new State('_s', { test: 'foo' });
+      const { state, getUnhashedSearch } = setup({ initial: { test: 'foo' } });
       state.save();
-      let search = $location.search();
+      let search = getUnhashedSearch(state);
       expect(search).to.have.property('_s');
       expect(search._s).to.equal('(test:foo)');
     });
 
     it('should emit an event if changes are saved', function (done) {
-      let state = new State();
+      const { state, getUnhashedSearch } = setup();
       state.on('save_with_changes', function (keys) {
         expect(keys).to.eql(['test']);
         done();
       });
       state.test = 'foo';
       state.save();
-      let search = $location.search();
+      getUnhashedSearch(state);
       $rootScope.$apply();
     });
   });
 
   describe('Fetch', function () {
     it('should emit an event if changes are fetched', function (done) {
-      let state = new State();
+      const { state } = setup();
       state.on('fetch_with_changes', function (keys) {
         expect(keys).to.eql(['foo']);
         done();
@@ -99,7 +129,7 @@ describe('State Management', function () {
     });
 
     it('should have events that attach to scope', function (done) {
-      let state = new State();
+      const { state } = setup();
       state.on('test', function (message) {
         expect(message).to.equal('foo');
         done();
@@ -109,7 +139,7 @@ describe('State Management', function () {
     });
 
     it('should fire listeners for #onUpdate() on #fetch()', function (done) {
-      let state = new State();
+      const { state } = setup();
       state.on('fetch_with_changes', function (keys) {
         expect(keys).to.eql(['foo']);
         done();
@@ -121,7 +151,7 @@ describe('State Management', function () {
     });
 
     it('should apply defaults to fetches', function () {
-      let state = new State('_s', { message: 'test' });
+      const { state } = setup({ initial: { message: 'test' } });
       $location.search({ _s: '(foo:bar)' });
       state.fetch();
       expect(state).to.have.property('foo', 'bar');
@@ -129,7 +159,7 @@ describe('State Management', function () {
     });
 
     it('should call fetch when $routeUpdate is fired on $rootScope', function () {
-      let state = new State();
+      const { state } = setup();
       let spy = sinon.spy(state, 'fetch');
       $rootScope.$emit('$routeUpdate', 'test');
       sinon.assert.calledOnce(spy);
@@ -137,9 +167,9 @@ describe('State Management', function () {
 
     it('should clear state when missing form URL', function () {
       let stateObj;
-      let state = new State();
+      const { state } = setup();
 
-      // set satte via URL
+      // set state via URL
       $location.search({ _s: '(foo:(bar:baz))' });
       state.fetch();
       stateObj = state.toObject();
@@ -156,6 +186,62 @@ describe('State Management', function () {
       state.fetch();
       stateObj = state.toObject();
       expect(stateObj).to.eql({});
+    });
+  });
+
+  describe('Hashing', () => {
+    it('stores state values in a hashedItemStore, writing the hash to the url', () => {
+      const { state, hashedItemStore } = setup({ storeInHash: true });
+      state.foo = 'bar';
+      state.save();
+      const urlVal = $location.search()[state.getQueryParamName()];
+
+      expect(isStateHash(urlVal)).to.be(true);
+      expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify({ foo: 'bar' }));
+    });
+
+    it('should replace rison in the URL with a hash', () => {
+      const { state, hashedItemStore } = setup({ storeInHash: true });
+      const obj = { foo: { bar: 'baz' } };
+      const rison = encodeRison(obj);
+
+      $location.search({ _s: rison });
+      state.fetch();
+
+      const urlVal = $location.search()._s;
+      expect(urlVal).to.not.be(rison);
+      expect(isStateHash(urlVal)).to.be(true);
+      expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify(obj));
+    });
+
+    context('error handling', () => {
+      it('notifies the user when a hash value does not map to a stored value', () => {
+        const { state, notifier } = setup({ storeInHash: true });
+        const search = $location.search();
+        const badHash = createStateHash('{"a": "b"}', () => null);
+
+        search[state.getQueryParamName()] = badHash;
+        $location.search(search);
+
+        expect(notifier._notifs).to.have.length(0);
+        state.fetch();
+        expect(notifier._notifs).to.have.length(1);
+        expect(notifier._notifs[0].content).to.match(/use the share functionality/i);
+      });
+
+      it('presents fatal error linking to github when setting item fails', () => {
+        const { state, hashedItemStore, notifier } = setup({ storeInHash: true });
+        const fatalStub = sinon.stub(notifier, 'fatal').throws();
+        sinon.stub(hashedItemStore, 'setItem').returns(false);
+
+        expect(() => {
+          state.toQueryParam();
+        }).to.throwError();
+
+        sinon.assert.calledOnce(fatalStub);
+        expect(fatalStub.firstCall.args[0]).to.be.an(Error);
+        expect(fatalStub.firstCall.args[0].message).to.match(/github\.com/);
+      });
     });
   });
 });

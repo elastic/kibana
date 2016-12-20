@@ -14,6 +14,7 @@ module.exports = function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = require('./short_url_lookup')(server);
+  kbnServer.mixin(require('./register_hapi_plugins'));
 
   // Create a new connection
   let connectionOptions = {
@@ -153,10 +154,10 @@ module.exports = function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-
+      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
+        pathname: pathPrefix + path.slice(0, -1),
       }))
       .permanent(true);
     }

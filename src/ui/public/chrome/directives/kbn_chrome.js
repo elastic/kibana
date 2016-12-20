@@ -4,6 +4,10 @@ import { remove } from 'lodash';
 import UiModules from 'ui/modules';
 import ConfigTemplate from 'ui/ConfigTemplate';
 import { isSystemApiRequest } from 'ui/system_api';
+import {
+  getUnhashableStatesProvider,
+  unhashUrl,
+} from 'ui/state_management/state_hashing';
 
 export default function (chrome, internals) {
 
@@ -28,17 +32,19 @@ export default function (chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http) {
+      controller($scope, $rootScope, $location, $http, Private) {
+        const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
-          let { href } = window.location;
-          let persist = chrome.getVisible();
-          internals.trackPossibleSubUrl(href);
-          internals.tabs.consumeRouteUpdate(href, persist);
+          const urlWithHashes = window.location.href;
+          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+          const persist = chrome.getVisible();
+          internals.trackPossibleSubUrl(urlWithStates);
+          internals.tabs.consumeRouteUpdate(urlWithStates, persist);
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);

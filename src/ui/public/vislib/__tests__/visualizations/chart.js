@@ -105,6 +105,7 @@ describe('Vislib _chart Test Suite', function () {
 
   afterEach(function () {
     el.remove();
+    vis.destroy();
   });
 
   it('should be a constructor for visualization modules', function () {

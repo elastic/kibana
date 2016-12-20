@@ -13,7 +13,6 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var visualizePage;
-      // var remote;
       var fromTime;
       var toTime;
 
@@ -23,7 +22,6 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
-        // remote = this.remote;
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
 
@@ -91,7 +89,6 @@ define(function (require) {
           var testSubName = 'TileMap';
           common.debug('Start of test' + testSubName + 'Visualization');
           var vizName1 = 'Visualization ' + testSubName;
-          // var remote = this.remote;
 
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
@@ -121,7 +118,6 @@ define(function (require) {
         bdd.it('should show correct tile map data', function pageHeader() {
           var testSubName = 'TileMap';
           common.debug('Start of test' + testSubName + 'Visualization');
-          // var remote = this.remote;
           var expectedTableData = [ 'dn 1,429', 'dp 1,418', '9y 1,215', '9z 1,099', 'dr 1,076',
             'dj 982', '9v 938', '9q 722', '9w 475', 'cb 457', 'c2 453', '9x 420', 'dq 399',
             '9r 396', '9t 274', 'c8 271', 'dh 214', 'b6 207', 'bd 206', 'b7 167', 'f0 141',

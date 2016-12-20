@@ -99,8 +99,7 @@ bin/kibana plugin --install username/sample-plugin --timeout 1m
 ==== Plugins and Custom Kibana Configurations
 
 Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana
-uses the configuration file `config/kibana.yml`. When you change your installed plugins, the `bin/kibana plugin` command
-restarts the Kibana server. When you are using a customized configuration file, you must specify the
+uses the configuration file `config/kibana.yml`. After you have changed the configuration file, you have to restart the Kibana server for changes to take effect (e.g. if Kibana is installed on an Ubuntu machine, you can restart it using `service kibana stop` followed by `service kibana start`). When you are using a customized configuration file, you must specify the
 path to that configuration file each time you use the `bin/kibana plugin` command.
 
 [float]

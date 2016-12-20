@@ -30,16 +30,14 @@ define(function (require) {
     // that we will use for all the tests
     bdd.before(function () {
       common = new Common(this.remote);
-      remote = this.remote;
       headerPage = new HeaderPage(this.remote);
       settingsPage = new SettingsPage(this.remote);
     });
 
     bdd.before(function () {
-      var self = this;
-      remote.setWindowSize(1200,800);
+      this.remote.setWindowSize(1200,800);
       // load a set of makelogs data
-      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
+      common.debug('loadIfEmpty logstashFunctional');
       return scenarioManager.loadIfEmpty('logstashFunctional');
     });
 

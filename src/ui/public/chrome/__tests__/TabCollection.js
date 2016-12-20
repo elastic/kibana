@@ -1,7 +1,7 @@
 const expect = require('expect.js');
 const { indexBy, random } = require('lodash');
 
-const TabFakeStore = require('./_TabFakeStore');
+const StubBrowserStorage = require('testUtils/stub_browser_storage');
 const TabCollection = require('../TabCollection');
 const Tab = require('../Tab');
 
@@ -54,7 +54,7 @@ describe('Chrome TabCollection', function () {
 
   describe('#consumeRouteUpdate()', function () {
     it('updates the active tab', function () {
-      const store = new TabFakeStore();
+      const store = new StubBrowserStorage();
       const baseUrl = `http://localhost:${random(1000, 9999)}`;
       const tabs = new TabCollection({ store, defaults: { baseUrl } });
       tabs.set([

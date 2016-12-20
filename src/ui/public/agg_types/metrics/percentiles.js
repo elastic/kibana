@@ -13,7 +13,8 @@ define(function (require) {
 
     let valueProps = {
       makeLabel: function () {
-        return ordinalSuffix(this.key) + ' percentile of ' + this.fieldDisplayName();
+        const label = this.params.customLabel || this.fieldDisplayName();
+        return ordinalSuffix(this.key) + ' percentile of ' + label;
       }
     };
 

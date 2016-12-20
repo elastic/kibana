@@ -1,7 +1,7 @@
 const expect = require('expect.js');
 
 const setup = require('../apps');
-const TabFakeStore = require('../../__tests__/_TabFakeStore');
+const StubBrowserStorage = require('testUtils/stub_browser_storage');
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
@@ -147,13 +147,13 @@ describe('Chrome API :: apps', function () {
     describe('#get/setLastUrlFor()', function () {
       it('reads/writes last url from storage', function () {
         const chrome = {};
-        const store = new TabFakeStore();
+        const store = new StubBrowserStorage();
         setup(chrome, { appUrlStore: store });
-        expect(chrome.getLastUrlFor('app')).to.equal(undefined);
+        expect(chrome.getLastUrlFor('app')).to.equal(null);
         chrome.setLastUrlFor('app', 'url');
         expect(chrome.getLastUrlFor('app')).to.equal('url');
-        expect(store.getKeys().length).to.equal(1);
-        expect(store.getValues().shift()).to.equal('url');
+        expect(store.getStubbedKeys().length).to.equal(1);
+        expect(store.getStubbedValues().shift()).to.equal('url');
       });
     });
   });
