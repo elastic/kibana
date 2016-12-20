@@ -34,21 +34,21 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // debounced layout function is safe to call as much as possible
       const safeLayout = _.debounce(layout, 200);
 
-      $scope.removePanelFromState = (panelId) => {
+      $scope.removePanelFromState = (panelIndex) => {
         _.remove($scope.state.panels, function (panel) {
-          return panel.panelId === panelId;
+          return panel.panelIndex === panelIndex;
         });
       };
 
       /**
-       * Removes the panel with the given id from the $scope.state.panels array. Does not
+       * Removes the panel with the given index from the $scope.state.panels array. Does not
        * remove the ui element from gridster - that is triggered by a watcher that is
        * triggered on changes made to $scope.state.panels.
-       * @param panelId {number}
+       * @param panelIndex {number}
        */
-      $scope.getPanelByPanelId = (panelId) => {
+      $scope.getPanelByPanelIndex = (panelIndex) => {
         return _.find($scope.state.panels, function (panel) {
-          return panel.panelId === panelId;
+          return panel.panelIndex === panelIndex;
         });
       };
 
@@ -162,8 +162,8 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
         const panelHtml = `
             <li>
-                <dashboard-panel remove="removePanelFromState(${panel.panelId})"
-                                 panel="getPanelByPanelId(${panel.panelId})"
+                <dashboard-panel remove="removePanelFromState(${panel.panelIndex})"
+                                 panel="getPanelByPanelIndex(${panel.panelIndex})"
                                  is-full-screen-mode="!chrome.getVisible()"
                                  state="state"
                                  parent-ui-state="uiState">
