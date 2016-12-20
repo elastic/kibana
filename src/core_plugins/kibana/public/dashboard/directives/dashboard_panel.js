@@ -53,7 +53,13 @@ uiModules
        * Handles removing this panel from the grid.
        * @type {() => void}
        */
-      remove: '&'
+      remove: '&',
+      /**
+       * We have to pass the dashboard state on through because filter bar click handlers expect it, as well
+       * as saved searches. We need to remove reliance there before we can break it out here.
+       * See https://github.com/elastic/kibana/issues/9558 for more information.
+       */
+      state: '='
     },
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
