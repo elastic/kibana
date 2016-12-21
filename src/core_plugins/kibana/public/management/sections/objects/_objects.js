@@ -18,12 +18,21 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise) {
   return {
     restrict: 'E',
+    controllerAs: 'managementObjectsController',
     controller: function ($scope, $injector, $q, AppState, es) {
       const notify = new Notifier({ location: 'Saved Objects' });
 
+      // TODO: Migrate all scope variables to the controller.
       const $state = $scope.state = new AppState();
       $scope.currentTab = null;
       $scope.selectedItems = [];
+
+      this.areAllRowsChecked = function areAllRowsChecked() {
+        if ($scope.currentTab.data.length === 0) {
+          return false;
+        }
+        return $scope.selectedItems.length === $scope.currentTab.data.length;
+      };
 
       const getData = function (filter) {
         const services = registry.all().map(function (obj) {
@@ -51,7 +60,11 @@ uiModules.get('apps/management')
         });
       };
 
+      const refreshData = () => {
+        return getData(this.advancedFilter);
+      };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.toggleAll = function () {
         if ($scope.selectedItems.length === $scope.currentTab.data.length) {
           $scope.selectedItems.length = 0;
@@ -60,6 +73,7 @@ uiModules.get('apps/management')
         }
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.toggleItem = function (item) {
         const i = $scope.selectedItems.indexOf(item);
         if (i >= 0) {
@@ -69,10 +83,12 @@ uiModules.get('apps/management')
         }
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.open = function (item) {
         kbnUrl.change(item.url.substr(1));
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.edit = function (service, item) {
         const params = {
           service: service.serviceName,
@@ -82,6 +98,7 @@ uiModules.get('apps/management')
         kbnUrl.change('/management/kibana/objects/{{ service }}/{{ id }}', params);
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.bulkDelete = function () {
         $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
         .then(refreshData)
@@ -91,11 +108,13 @@ uiModules.get('apps/management')
         .catch(error => notify.error(error));
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.bulkExport = function () {
         const objs = $scope.selectedItems.map(partialRight(extend, {type: $scope.currentTab.type}));
         retrieveAndExportDocs(objs);
       };
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.exportAll = () => Promise
         .map($scope.services, service => service.service
           .scanAll('')
@@ -125,6 +144,7 @@ uiModules.get('apps/management')
         saveAs(blob, 'export.json');
       }
 
+      // TODO: Migrate all scope methods to the controller.
       $scope.importAll = function (fileContents) {
         let docs;
         try {
@@ -152,10 +172,7 @@ uiModules.get('apps/management')
         });
       }
 
-      function refreshData() {
-        return getData($scope.advancedFilter);
-      }
-
+      // TODO: Migrate all scope methods to the controller.
       $scope.changeTab = function (tab) {
         $scope.currentTab = tab;
         $scope.selectedItems.length = 0;
@@ -163,7 +180,7 @@ uiModules.get('apps/management')
         $state.save();
       };
 
-      $scope.$watch('advancedFilter', function (filter) {
+      $scope.$watch('managementObjectsController.advancedFilter', function (filter) {
         getData(filter);
       });
     }

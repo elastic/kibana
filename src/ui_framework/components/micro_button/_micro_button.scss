@@ -1,0 +1,20 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+.kuiMicroButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: $subduedFontColor;
+  background-color: transparent;
+  font-size: 12px;
+  line-height: 1; /* 2 */
+
+  &:hover {
+    color: $fontColor;
+  }
+}
