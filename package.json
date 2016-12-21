@@ -74,7 +74,7 @@
     "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@elastic/datemath": "2.3.0",
     "@elastic/kibana-ui-framework": "0.0.13",
-    "@elastic/webpack-directory-name-as-main": "2.0.1",
+    "@elastic/webpack-directory-name-as-main": "2.0.2",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
     "@spalger/leaflet-heat": "0.1.3",
