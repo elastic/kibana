@@ -37,10 +37,25 @@
   }
 }
 
+.kuiTableHeaderCell--alignRight {
+  text-align: right;
+}
+
 .kuiTableSortIcon {
   pointer-events: none;
 }
 
+.kuiTableRow {
+  &:hover {
+    .kuiTableRowHoverReveal {
+      display: inline-block;
+    }
+  }
+}
+
+.kuiTableRowHoverReveal {
+  display: none;
+}
 
 .kuiTableRowCell {
   @include tableCell;
@@ -48,10 +63,17 @@
   border-top: $tableBorder;
 }
 
+  /**
+   * 1. Vertically align all children.
+   */
   .kuiTableRowCell__liner {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    * > {
+      vertical-align: middle; /* 1 */
+    }
   }
 
 .kuiTableRowCell--alignRight {
@@ -59,18 +81,6 @@
 
   .kuiTableRowCell__liner {
     text-align: right;
-  }
-}
-
-.kuiTableRowCell--actions {
-  padding-top: 0;
-  padding-bottom: 0;
-
-  /**
-   * 1. We don't want to clip the focused state of buttons.
-   */
-  .kuiTableRowCell__liner {
-    overflow: visible; /* 1 */
   }
 }
 

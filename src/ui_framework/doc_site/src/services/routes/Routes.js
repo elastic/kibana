@@ -16,6 +16,9 @@ import LinkExample
 import LocalNavExample
   from '../../views/local_nav/local_nav_example.jsx';
 
+import MicroButtonExample
+  from '../../views/micro_button/micro_button_example.jsx';
+
 import TableExample
   from '../../views/table/table_example.jsx';
 
@@ -41,6 +44,9 @@ const components = [{
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+}, {
+  name: 'MicroButton',
+  component: MicroButtonExample,
 }, {
   name: 'Table',
   component: TableExample,
