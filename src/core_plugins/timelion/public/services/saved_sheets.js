@@ -15,8 +15,8 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, es, kbnUrl) {
-    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, es, kbnUrl);
+  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
+    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl);
     savedSheetLoader.urlFor = function (id) {
       return kbnUrl.eval('#/{{id}}', { id: id });
     };

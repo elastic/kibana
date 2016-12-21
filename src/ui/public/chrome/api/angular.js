@@ -31,6 +31,11 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
+    .value('esAdminUrl', (function () {
+      const a = document.createElement('a');
+      a.href = chrome.addBasePath('/es_admin');
+      return a.href;
+    }()))
     .config(chrome.$setupXsrfRequestInterceptor)
     .config(['$compileProvider', function ($compileProvider) {
       if (!internals.devMode) {

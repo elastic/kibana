@@ -3,25 +3,30 @@
  * that defined in Kibana's package.json.
  */
 
-import _ from 'lodash';
+import { forEach, get } from 'lodash';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
- *  tracks the node descriptions that get logged in warnings so
- *  that we don't spam the log with the same message over and over.
+ * tracks the node descriptions that get logged in warnings so
+ * that we don't spam the log with the same message over and over.
  *
- *  There are situations, like in testing or multi-tenancy, where
- *  the server argument changes, so we must track the previous
- *  node warnings per server
+ * There are situations, like in testing or multi-tenancy, where
+ * the server argument changes, so we must track the previous
+ * node warnings per server
  */
 const lastWarnedNodesForServer = new WeakMap();
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
-
-  const client = server.plugins.elasticsearch.client;
-
-  return client.nodes.info()
+  return callWithInternalUser('nodes.info', {
+    filterPath: [
+      'nodes.*.version',
+      'nodes.*.http.publish_address',
+      'nodes.*.ip',
+    ]
+  })
   .then(function (info) {
     // Aggregate incompatible ES nodes.
     const incompatibleNodes = [];
@@ -29,7 +34,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
     // Aggregate ES nodes which should prompt a Kibana upgrade.
     const warningNodes = [];
 
-    _.forEach(info.nodes, esNode => {
+    forEach(info.nodes, esNode => {
       if (!isEsCompatibleWithKibana(esNode.version, kibanaVersion)) {
         // Exit early to avoid collecting ES nodes with newer major versions in the `warningNodes`.
         return incompatibleNodes.push(esNode);
@@ -44,7 +49,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
     function getHumanizedNodeNames(nodes) {
       return nodes.map(node => {
-        const publishAddress =  _.get(node, 'http.publish_address') ? (_.get(node, 'http.publish_address') + ' ') : '';
+        const publishAddress =  get(node, 'http.publish_address') ? (get(node, 'http.publish_address') + ' ') : '';
         return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
       });
     }
@@ -53,7 +58,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
       const simplifiedNodes = warningNodes.map(node => ({
         version: node.version,
         http: {
-          publish_address: _.get(node, 'http.publish_address')
+          publish_address: get(node, 'http.publish_address')
         },
         ip: node.ip,
       }));

@@ -13,15 +13,14 @@ describe('plugins/elasticsearch', () => {
 
     let server;
     let plugin;
+    let callWithInternalUser;
 
     beforeEach(function () {
       server = {
         log: sinon.stub(),
         plugins: {
           elasticsearch: {
-            client: {
-              nodes: {}
-            },
+            getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }), // Fix
             status: {
               red: sinon.stub()
             },
@@ -52,14 +51,16 @@ describe('plugins/elasticsearch', () => {
         nodes[name] = node;
       }
 
-      const client = server.plugins.elasticsearch.client;
-      client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
+      const cluster = server.plugins.elasticsearch.getCluster('admin');
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
-      const client = server.plugins.elasticsearch.client;
-      client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
+      const cluster = server.plugins.elasticsearch.getCluster('admin');
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     it('returns true with single a node that matches', async () => {
