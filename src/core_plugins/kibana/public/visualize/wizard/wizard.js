@@ -9,17 +9,14 @@ import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import './wizard.less';
 
-const templateStep = function (num, txt) {
-  return '<div ng-controller="VisualizeWizardStep' + num + '" class="container-fluid vis-wizard">' + txt + '</div>';
-};
-
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
 /********
 /** Wizard Step 1
 /********/
 routes.when('/visualize/step/1', {
-  template: templateStep(1, require('plugins/kibana/visualize/wizard/step_1.html'))
+  template: require('plugins/kibana/visualize/wizard/step_1.html'),
+  controller: 'VisualizeWizardStep1',
 });
 
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
@@ -44,7 +41,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 /** Wizard Step 2
 /********/
 routes.when('/visualize/step/2', {
-  template: templateStep(2, require('plugins/kibana/visualize/wizard/step_2.html')),
+  template: require('plugins/kibana/visualize/wizard/step_2.html'),
+  controller: 'VisualizeWizardStep2',
   resolve: {
     indexPatternIds: function (courier) {
       return courier.indexPatterns.getIds();
