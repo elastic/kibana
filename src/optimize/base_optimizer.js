@@ -1,3 +1,6 @@
+import { resolve } from 'path';
+import { writeFile } from 'fs';
+
 import webpack from 'webpack';
 import Boom from 'boom';
 import DirectoryNameAsMain from 'webpack-directory-name-as-main';
@@ -5,15 +8,14 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 import DefinePlugin from 'webpack/lib/DefinePlugin';
 import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
+import { defaults, transform } from 'lodash';
 
 import fromRoot from '../utils/from_root';
 import babelOptions from './babel_options';
-import { inherits } from 'util';
-import { defaults, transform } from 'lodash';
-import { resolve } from 'path';
-import { writeFile } from 'fs';
-const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 import pkg from '../../package.json';
+import { setLoaderQueryParam, makeLoaderString } from './loaders';
+
+const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
 class BaseOptimizer {
   constructor(opts) {
@@ -64,8 +66,29 @@ class BaseOptimizer {
   }
 
   getConfig() {
-    const mapQ = this.sourceMaps ? '?sourceMap' : '';
-    const mapQPre = mapQ ? mapQ + '&' : '?';
+    const loaderWithSourceMaps = (loader) =>
+      setLoaderQueryParam(loader, 'sourceMap', !!this.sourceMaps);
+
+    const makeStyleLoader = preprocessor => {
+      let loaders = [
+        loaderWithSourceMaps('css-loader')
+      ];
+
+      if (preprocessor) {
+        loaders = [
+          ...loaders,
+          {
+            name: 'postcss-loader',
+            query: {
+              config: require.resolve('./postcss.config')
+            }
+          },
+          loaderWithSourceMaps(preprocessor)
+        ];
+      }
+
+      return ExtractTextPlugin.extract(makeLoaderString(loaders));
+    };
 
     return {
       context: fromRoot('.'),
@@ -101,42 +124,26 @@ class BaseOptimizer {
 
       module: {
         loaders: [
+          { test: /\.less$/, loader: makeStyleLoader('less-loader') },
+          { test: /\.scss$/, loader: makeStyleLoader('sass-loader') },
+          { test: /\.css$/, loader: makeStyleLoader() },
+          { test: /\.jade$/, loader: 'jade-loader' },
+          { test: /\.json$/, loader: 'json-loader' },
+          { test: /\.(html|tmpl)$/, loader: 'raw-loader' },
+          { test: /\.png$/, loader: 'url-loader' },
+          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
+          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
           {
-            test: /\.less$/,
-            loader: ExtractTextPlugin.extract(
-              'style',
-              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
-            )
-          },
-          {
-            test: /\.scss$/,
-            loader: ExtractTextPlugin.extract(
-              'style',
-              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!sass${mapQPre}`
-            )
-          },
-          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
-          { test: /\.jade$/, loader: 'jade' },
-          { test: /\.json$/, loader: 'json' },
-          { test: /\.(html|tmpl)$/, loader: 'raw' },
-          { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
-          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
-          {
-            test: /\.js$/,
+            test: /\.jsx?$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: babelOptions.webpack
+            loader: makeLoaderString([
+              {
+                name: 'babel-loader',
+                query: babelOptions.webpack
+              }
+            ]),
           },
-          {
-            test: /\.jsx$/,
-            exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: defaults({
-              nonStandard: true,
-            }, babelOptions.webpack)
-          }
-        ].concat(this.env.loaders),
+        ],
         postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
       },
@@ -155,7 +162,7 @@ class BaseOptimizer {
       resolveLoader: {
         alias: transform(pkg.dependencies, function (aliases, version, name) {
           if (name.endsWith('-loader')) {
-            aliases[name.replace(/-loader$/, '')] = require.resolve(name);
+            aliases[name] = require.resolve(name);
           }
         }, {})
       }

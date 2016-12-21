@@ -34,4 +34,4 @@ export default function BoundToConfigObjProvider(config) {
 
   return BoundToConfigObj;
 
-};
+}

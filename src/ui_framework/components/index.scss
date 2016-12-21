@@ -18,10 +18,64 @@ $inputTextColor--darkTheme: $textColor--darkTheme;
 $inputBackgroundColor--darkTheme: #444444;
 $inputBorderColor--darkTheme: $inputBackgroundColor--darkTheme;
 
+// Font
+$font: "Open Sans", Helvetica, Arial, sans-serif;
+$fontSize: 14px;
+$lineHeight: 1.5;
+
+// Button
+$buttonBorderRadius: 4px;
+
+// Colors
+$successColor: #417505;
+$warningColor: #ffac15;
+$errorColor: #D86051;
+$fontColor: #191E23;
+$subduedFontColor: #9fa3a7;
+$linkColor: #3CAED2;
+$linkHoverColor: #006E8A;
+$panelColor: #E4E4E4;
+$selectedBorderColor: #6EADC1;
+$errorBorderColor: $errorColor;
+
+// Borders
+$tableBorder: 2px solid $panelColor;
+
+// Timing
+$formTransitionTiming: 0.1s linear;
+
 @mixin darkTheme() {
   .theme-dark & {
     @content;
   }
 }
 
+/**
+ * 1. Make sure outline doesn't get hidden beneath adjacent elements.
+ * 2. Override inherited styles (possibly from Bootstrap).
+ */
+@mixin focus($color: #6EADC1) {
+  z-index: 1; /* 1 */
+  outline: 1px solid $color !important; /* 2 */
+  outline-offset: 2px !important; /* 2 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font;
+}
+
+@import "button/index";
+@import "form/index";
+@import "icon/index";
+@import "link/index";
 @import "local_nav/index";
+@import "micro_button/index";
+@import "no_results/index";
+@import "panel/index";
+@import "table/index";
+@import "tabs/index";
+@import "tool_bar/index";

@@ -135,7 +135,7 @@ export default function AxisConfigFactory() {
       this.set('scale.offset', _.get(axisConfigArgs, 'scale.offset', offset));
       /* axis.scale.stacked means that axis stacking function should be run */
       this.set('scale.stacked', stacked);
-    };
+    }
 
     get(property, defaults) {
       if (typeof defaults !== 'undefined' || _.has(this._values, property)) {
@@ -144,43 +144,43 @@ export default function AxisConfigFactory() {
         throw new Error(`Accessing invalid config property: ${property}`);
         return defaults;
       }
-    };
+    }
 
     set(property, value) {
       return _.set(this._values, property, value);
-    };
+    }
 
     isHorizontal() {
       return (this._values.position === 'top' || this._values.position === 'bottom');
-    };
+    }
 
     isOrdinal() {
       return !!this.values && (!this.isTimeDomain());
-    };
+    }
 
     isTimeDomain() {
       return this.ordered && this.ordered.date;
-    };
+    }
 
     isPercentage() {
       return this._values.scale.mode === SCALE_MODES.PERCENTAGE;
-    };
+    }
 
     isUserDefined() {
       return this._values.scale.setYExtents;
-    };
+    }
 
     isYExtents() {
       return this._values.scale.defaultYExtents;
-    };
+    }
 
     isLogScale() {
       return this.getScaleType() === 'log';
-    };
+    }
 
     getScaleType() {
       return this._values.scale.type;
-    };
+    }
   }
 
   return AxisConfig;

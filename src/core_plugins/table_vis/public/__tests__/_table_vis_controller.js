@@ -60,7 +60,7 @@ describe('Controller', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
-    $rootScope.uiState = new AppState({uiState: {}}).makeStateful('uiState');
+    $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')
@@ -112,7 +112,7 @@ describe('Controller', function () {
       columnIndex: 1,
       direction: 'asc'
     };
-    initController(new OneRangeVis({sort: sortObj}));
+    initController(new OneRangeVis({ sort: sortObj }));
 
     // modify the data to not have any buckets
     const resp = _.cloneDeep(fixtures.oneRangeBucket);

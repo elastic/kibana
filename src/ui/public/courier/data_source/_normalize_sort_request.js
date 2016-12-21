@@ -55,7 +55,7 @@ export default function normalizeSortRequest(config) {
     normalized[sortField] = sortValue;
     return normalized;
   }
-};
+}
 
 // The ES API only supports sort scripts of type 'number' and 'string'
 function castSortType(type) {

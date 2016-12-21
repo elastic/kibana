@@ -133,7 +133,7 @@ describe('brushEvent', function () {
           meta: {
             key: 'numberField'
           },
-          range: {gte: 1, lt: 4}
+          range: { gte: 1, lt: 4 }
         });
         brushEvent(event);
         expect($state)

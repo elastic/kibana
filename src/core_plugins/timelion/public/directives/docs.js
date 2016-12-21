@@ -22,7 +22,7 @@ define(function (require) {
           };
           getFunctions();
           checkElasticsearch();
-        };
+        }
 
         function getFunctions() {
           return $http.get('../api/timelion/functions').then(function (resp) {
@@ -61,7 +61,7 @@ define(function (require) {
             }
             return $scope.es.valid;
           });
-        };
+        }
         init();
       }
     };

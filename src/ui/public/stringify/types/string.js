@@ -38,7 +38,7 @@ export default function StringFormatProvider(Private) {
     { id: 'upper', name: 'Upper Case' },
     { id: 'title', name: 'Title Case' },
     { id: 'short', name: 'Short Dots' },
-    { id: 'base64', name: 'Base64 Decode'}
+    { id: 'base64', name: 'Base64 Decode' }
   ];
 
   _String.sampleInputs = [
@@ -73,4 +73,4 @@ export default function StringFormatProvider(Private) {
   };
 
   return _String;
-};
+}

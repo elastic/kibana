@@ -112,9 +112,9 @@ module.exports = function (api) {
                   ""
                 ]
               },
-              distance_type: {__one_of: ["sloppy_arc", "arc", "plane"]},
-              sort_mode: {__one_of: ["min", "max", "avg"]},
-              order: {__one_of: ["asc", "desc"]},
+              distance_type: { __one_of: ["sloppy_arc", "arc", "plane"] },
+              sort_mode: { __one_of: ["min", "max", "avg"] },
+              order: { __one_of: ["asc", "desc"] },
               unit: "km"
             }
           }
@@ -173,7 +173,7 @@ module.exports = function (api) {
       },
       stats: [''],
       timeout: "1s",
-      version: {__one_of: [true, false]}
+      version: { __one_of: [true, false] }
     }
   });
 
@@ -187,8 +187,8 @@ module.exports = function (api) {
     data_autocomplete_rules: {
       "template": {
         __one_of: [
-          {__scope_link: "_search"},
-          {__scope_link: "GLOBAL.script"}
+          { __scope_link: "_search" },
+          { __scope_link: "GLOBAL.script" }
         ]
       },
       "params": {}
@@ -202,8 +202,8 @@ module.exports = function (api) {
     ],
     data_autocomplete_rules: {
       __one_of: [
-        {"inline": {__scope_link: "_search"}},
-        {__scope_link: "GLOBAL.script"}
+        { "inline": { __scope_link: "_search" } },
+        { __scope_link: "GLOBAL.script" }
       ],
       "params": {}
     }

@@ -53,8 +53,10 @@ module.exports = class UiBundlerEnv {
     // map of which plugins created which aliases
     this.aliasOwners = {};
 
-    // webpack loaders map loader configuration to regexps
-    this.loaders = [];
+    // loaders that are applied to webpack modules after all other processing
+    // NOTE: this is intentionally not exposed as a uiExport because it leaks
+    // too much of the webpack implementation to plugins, but is used by test_bundle
+    // core plugin to inject the instrumentation loader
     this.postLoaders = [];
   }
 
@@ -71,24 +73,16 @@ module.exports = class UiBundlerEnv {
 
   exportConsumer(type) {
     switch (type) {
-      case 'loaders':
-        return (plugin, spec) => {
-          for (const loader of arr(spec)) this.addLoader(loader);
-        };
-
-      case 'postLoaders':
-        return (plugin, spec) => {
-          for (const loader of arr(spec)) this.addPostLoader(loader);
-        };
-
       case 'noParse':
         return (plugin, spec) => {
           for (const re of arr(spec)) this.addNoParse(re);
         };
 
-      case 'modules':
+      case '__globalImportAliases__':
         return (plugin, spec) => {
-          for (const id of keys(spec)) this.addModule(id, spec[id], plugin.id);
+          for (const key of Object.keys(spec)) {
+            this.aliases[key] = spec[key];
+          }
         };
     }
   }
@@ -97,72 +91,11 @@ module.exports = class UiBundlerEnv {
     this.context[key] = val;
   }
 
-  addLoader(loader) {
-    this.loaders.push(loader);
-  }
-
   addPostLoader(loader) {
     this.postLoaders.push(loader);
   }
 
   addNoParse(regExp) {
     this.noParse.push(regExp);
-  }
-
-  addModule(id, spec, pluginId) {
-    this.claim(id, pluginId);
-
-    // configurable via spec
-    let path;
-    let parse = true;
-    let imports = null;
-    let exports = null;
-    let expose = null;
-
-    // basic style, just a path
-    if (isString(spec)) path = spec;
-
-    if (isArray(spec)) {
-      path = spec[0];
-      imports = spec[1];
-      exports = spec[2];
-    }
-
-    if (isPlainObject(spec)) {
-      path = spec.path;
-      parse = get(spec, 'parse', parse);
-      imports = get(spec, 'imports', imports);
-      exports = get(spec, 'exports', exports);
-      expose = get(spec, 'expose', expose);
-    }
-
-    if (!path) {
-      throw new TypeError('Invalid spec definition, unable to identify path');
-    }
-
-    this.aliases[id] = path;
-
-    const loader = [];
-    if (imports) {
-      loader.push(`imports?${imports}`);
-    }
-
-    if (exports) loader.push(`exports?${exports}`);
-    if (expose) loader.push(`expose?${expose}`);
-    if (loader.length) this.loaders.push({ test: asRegExp(path), loader: loader.join('!') });
-    if (!parse) this.addNoParse(path);
-  }
-
-  claim(id, pluginId) {
-    const owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
-
-    // TODO(spalger): we could do a lot more to detect colliding module defs
-    const existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
-
-    if (existingOwner) {
-      throw new TypeError(`${owner} attempted to override export "${id}" from ${existingOwner}`);
-    }
-
-    this.aliasOwners[id] = owner;
   }
 };

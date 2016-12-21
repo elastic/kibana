@@ -184,4 +184,4 @@ export default function LooperFactory($timeout, Promise) {
   };
 
   return Looper;
-};
+}

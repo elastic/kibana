@@ -6,9 +6,9 @@ export default function createHistogramFilterProvider(Private) {
 
     return buildRangeFilter(
       aggConfig.params.field,
-      {gte: value, lt: value + aggConfig.params.interval},
+      { gte: value, lt: value + aggConfig.params.interval },
       aggConfig.vis.indexPattern,
       aggConfig.fieldFormatter()(key)
     );
   };
-};
+}

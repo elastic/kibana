@@ -42,4 +42,4 @@ export function download(settings, logger) {
   }
 
   return tryNext();
-};
+}

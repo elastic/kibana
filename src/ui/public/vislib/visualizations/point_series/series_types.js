@@ -9,4 +9,4 @@ export default function SeriesTypeFactory(Private) {
     line: Private(VislibVisualizationsLineChartProvider),
     area: Private(VislibVisualizationsAreaChartProvider)
   };
-};
+}

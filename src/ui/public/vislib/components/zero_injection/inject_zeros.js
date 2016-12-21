@@ -29,4 +29,4 @@ export default function ZeroInjectionUtilService(Private) {
 
     return obj;
   };
-};
+}

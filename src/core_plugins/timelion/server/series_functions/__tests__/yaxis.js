@@ -45,10 +45,10 @@ describe(filename, () => {
     ]);
   });
 
-  it('sets the minimum (default: 0)', () => {
+  it('sets the minimum (default: no min)', () => {
     return Promise.all([
       invoke(fn, [seriesList, 1, null]).then((r) => {
-        expect(r.output.list[0]._global.yaxes[0].min).to.equal(0);
+        expect(r.output.list[0]._global.yaxes[0].min).to.equal(null);
       }),
       invoke(fn, [seriesList, 2, 10]).then((r) => {
         expect(r.output.list[0]._global.yaxes[1].min).to.equal(10);

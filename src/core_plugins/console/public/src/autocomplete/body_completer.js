@@ -97,7 +97,7 @@ function compileParametrizedValue(value, compilingContext, template) {
   }
   component = component(value, null, template);
   if (!_.isUndefined(template)) {
-    component = engine.wrapComponentWithDefaults(component, {template: template});
+    component = engine.wrapComponentWithDefaults(component, { template: template });
   }
   return component;
 
@@ -169,7 +169,7 @@ function ObjectComponent(name, constants, patternsAndWildCards) {
 
 ObjectComponent.prototype = _.create(
   engine.AutocompleteComponent.prototype,
-  {'constructor': ObjectComponent});
+  { 'constructor': ObjectComponent });
 
 
 (function (cls) {
@@ -244,7 +244,7 @@ function ScopeResolver(link, compilingContext) {
 
 ScopeResolver.prototype = _.create(
   engine.SharedComponent.prototype,
-  {'constructor': ScopeResolver});
+  { 'constructor': ScopeResolver });
 
 
 (function (cls) {
@@ -316,7 +316,7 @@ function ConditionalProxy(predicate, delegate) {
 
 ConditionalProxy.prototype = _.create(
   engine.SharedComponent.prototype,
-  {'constructor': ConditionalProxy});
+  { 'constructor': ConditionalProxy });
 
 
 (function (cls) {
@@ -345,7 +345,7 @@ function GlobalOnlyComponent(name) {
 
 GlobalOnlyComponent.prototype = _.create(
   engine.AutocompleteComponent.prototype,
-  {'constructor': ObjectComponent});
+  { 'constructor': ObjectComponent });
 
 
 (function (cls) {

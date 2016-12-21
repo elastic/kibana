@@ -59,7 +59,7 @@ export function getCurrentSettings() {
   };
 }
 
-export function updateSettings({ fontSize, wrapMode, autocomplete}) {
+export function updateSettings({ fontSize, wrapMode, autocomplete }) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);

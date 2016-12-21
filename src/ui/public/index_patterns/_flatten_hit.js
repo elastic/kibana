@@ -56,5 +56,5 @@ export default function FlattenHitProvider(config) {
 
     return cachedFlatten;
   };
-};
+}
 

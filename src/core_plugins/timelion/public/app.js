@@ -158,7 +158,7 @@ app.controller('timelion', function (
           if (!$scope.running) $scope.search();
           startRefresh();
         }, interval.value);
-      };
+      }
       startRefresh();
     }
   });
@@ -230,14 +230,14 @@ app.controller('timelion', function (
       if (id) {
         notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {
-          kbnUrl.change('/{{id}}', {id: savedSheet.id});
+          kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
       }
     });
-  };
+  }
 
   function saveExpression(title) {
-    savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
+    savedVisualizations.get({ type: 'timelion' }).then(function (savedExpression) {
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval
@@ -248,7 +248,7 @@ app.controller('timelion', function (
         if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
       });
     });
-  };
+  }
 
   function dismissNotifications() {
     unsafeNotifications.splice(0, unsafeNotifications.length);

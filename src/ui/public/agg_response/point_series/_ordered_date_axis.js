@@ -24,4 +24,4 @@ export default function PointSeriesOrderedDateAxis(timefilter) {
       chart.ordered.endzones = false;
     }
   };
-};
+}

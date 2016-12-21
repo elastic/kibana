@@ -128,4 +128,4 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   };
 
   return Url;
-};
+}
