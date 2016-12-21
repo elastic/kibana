@@ -91,23 +91,21 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    const healthChecks = [
+    const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
       .then(checkForTribe.bind(this, callAdminAsKibanaUser))
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
-    ];
+      .then(() => {
+        const tribeUrl = config.get('elasticsearch.tribe.url');
+        if (tribeUrl) {
+          return waitForPong(callDataAsKibanaUser, tribeUrl)
+          .then(() => checkEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+        }
+      });
 
-    const tribeUrl = config.get('elasticsearch.tribe.url');
-    if (tribeUrl) {
-      healthChecks.push(
-        waitForPong(callDataAsKibanaUser, tribeUrl)
-        .then(() => checkEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser))
-      );
-    }
-
-    return Promise.all(healthChecks)
+    return healthCheck
     .then(setGreenStatus)
     .catch(err => plugin.status.red(err));
   }
