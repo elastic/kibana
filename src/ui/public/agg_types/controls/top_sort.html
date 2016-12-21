@@ -23,7 +23,7 @@
      name="sortOrder"
      ng-model="agg.params.sortOrder"
      required
-     ng-options="opt as opt.display for opt in aggParam.options"
+     ng-options="opt as opt.display for opt in aggParam.options track by opt.val"
      class="form-control">
   </select>
 </div>

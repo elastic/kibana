@@ -2,18 +2,28 @@
   <div class="form-group">
     <label>
       Aggregate With
+      <kbn-info
+       info="Choose a strategy for combining multiple hits or a multi-valued field into a single metric."
+       placement="right">
+      </kbn-info>
     </label>
 
     <select
       required
       name="aggregate"
       ng-model="agg.params.aggregate"
-      ng-options="opt as opt.display disable when opt.disabled for opt in options| orderBy: 'display'"
+      ng-options="opt as opt.display disable when opt.disabled for opt in options| orderBy: 'display' track by opt.val"
       class="form-control"
     ></select>
   </div>
   <div class="form-group">
-    <label>Size</label>
+    <label>
+      Size
+      <kbn-info
+       info="Request top-K hits. Multiple hits will be combined via 'aggregate with'."
+       placement="right">
+      </kbn-info>
+    </label>
 
     <input
        required

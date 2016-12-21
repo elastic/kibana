@@ -57,7 +57,6 @@ export default function AggTypeMetricTopProvider(Private) {
       {
         name: 'aggregate',
         type: 'optioned',
-        default: 'concat',
         editor: aggregateAndSizeEditor,
         options: [
           {
@@ -169,16 +168,13 @@ export default function AggTypeMetricTopProvider(Private) {
         return null;
       }
       const path = agg.params.field.name;
-      let values = [];
 
-      for (const hit of hits) {
-        const hitValues = path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];
-        if (_.isArray(hitValues)) {
-          values.push(...hitValues);
-        } else {
-          values.push(hitValues);
-        }
-      }
+      let values = _(hits).map(hit => {
+        return path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];
+      })
+      .flatten()
+      .value();
+
       if (values.length === 1) {
         values = values[0];
       }
