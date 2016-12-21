@@ -11,7 +11,8 @@ export default class Cluster {
     this._config = Object.assign({}, config);
     this.errors = elasticsearch.errors;
 
-    createClients.call(this);
+    this._client = this.createClient();
+    this._noAuthClient = this.createClient({ auth: false });
 
     return this;
   }
@@ -129,9 +130,4 @@ function getClonedProperties(config, paths) {
 
 function getClonedProperty(config, path) {
   return cloneDeep(path ? get(config, path) : config);
-}
-
-function createClients() {
-  this._client = this.createClient();
-  this._noAuthClient = this.createClient({ auth: false });
 }
