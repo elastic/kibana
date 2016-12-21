@@ -1,0 +1,39 @@
+Update Saved Objects view with new components.
+
+Backports PR #9535
+
+**Commit 1:**
+Componentize Saved Objects table.
+
+* Original sha: b7c08acd46939f16b1bf836e7b9af939276085ff
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-16T05:12:38Z
+
+**Commit 2:**
+Remove Edit button from Saved Objects table.
+
+* Original sha: 09b7a08e732f110d91b767b150ddde0cba953358
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-16T23:28:26Z
+
+**Commit 3:**
+Remove inline Buttons from Table. Add MicroButtons to serve the same purpose.
+
+* Original sha: 0f32b83747db2c082f0069bd04ec1a66abaeedf6
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-17T00:36:56Z
+
+**Commit 4:**
+Use fat arrow function instead of self var in _objects.js. Add 'areAllRowsChecked' controller method.
+
+* Original sha: fd29dbb445b804894f2649209adde2552a1fe1e6
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-20T17:04:07Z
+
+**Commit 5:**
+Create visual separation between tabs and table, and add a border.
+
+* Original sha: 94ea28559c778ec704c5990ce5213c92e9597e65
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-21T01:03:48Z
+
+**Commit 6:**
+Add TODO comments to migrate scope vars to the controller.
+
+* Original sha: c2a164d18af5f87e3f7ab33d980a4dd6ed55dbda
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-21T19:11:26Z
