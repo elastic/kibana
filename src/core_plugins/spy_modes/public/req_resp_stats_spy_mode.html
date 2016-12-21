@@ -10,21 +10,21 @@
   <i class="fa fa-danger"></i> Request Failed
 </div>
 
-<div ng-show="spy.mode.name === 'request'">
+<div ng-if="spy.mode.name === 'request'">
   <label>
     Elasticsearch request body &nbsp;
   </label>
   <pre>{{req.fetchParams.body | json}}</pre>
 </div>
 
-<div ng-show="spy.mode.name === 'response'">
+<div ng-if="spy.mode.name === 'response'">
   <label>
     Elasticsearch response body &nbsp;
   </label>
   <pre>{{req.resp | json}}</pre>
 </div>
 
-<div ng-show="spy.mode.name === 'stats'">
+<div ng-if="spy.mode.name === 'stats'">
   <table class="table">
     <tr ng-repeat="pair in stats">
       <td>{{pair[0]}}</td>
