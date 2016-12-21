@@ -620,6 +620,7 @@ fieldset {
 }
 
 .kuiViewContent--constrainedWidth {
+  width: 100%;
   max-width: 1100px;
   margin-left: auto;
   margin-right: auto;
@@ -629,30 +630,6 @@ fieldset {
   padding-left: 20px;
   padding-right: 20px;
 }
-
-.kuiPage {
-  padding: 20px 30px 28px;
-  margin: 20px;
-  background-color: white;
-  max-width: 1200px;
-}
-
-/**
- * 1. Center content.
- * 2. Expand to fill container.
- */
-.kuiPageView {
-  display: flex;
-  flex-direction: column;
-  align-items: center; // 1
-  justify-content: center; // 1
-  flex-grow: 1; // 2
-  background-color: #f6f6f6;
-}
-
-  .kuiPageView__content {
-    max-width: 1100px;
-  }
 
 .kuiSubHeader {
   display: flex;
@@ -794,7 +771,6 @@ fieldset {
   }
 
 .kuiTextArea,
-.kuiInput,
 .kuiStaticInput {
   display: block;
   width: 100%;
@@ -809,7 +785,6 @@ fieldset {
   border-color: transparent;
 }
 
-.kuiInput,
 .kuiTextArea {
   padding: 5px 15px;
   border-color: #D4D4D4;
@@ -857,54 +832,6 @@ fieldset {
   padding: 12px;
 }
 
-/**
- * 1. Stack title and content children. Necessary for scrollable content;
- */
-.kiuFormPanel--scrollable {
-  display: flex; // 1
-  flex-direction: column; // 1
-}
-
-.kuiFormPanel--verticalLayout {
-  & + & {
-    border-top: 0;
-  }
-}
-
-.kuiFormPanel--horizontalLayout {
-  flex: 1 1 auto;
-
-  & + & {
-    border-left: 0;
-  }
-}
-
-  .kuiFormPanel__title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    font-size: 14px;
-    line-height: 12px;
-    font-weight: 300;
-    color: #2d2d2d;
-    border-bottom: 1px solid #efefef;
-  }
-
-  .kuiFormPanel__label {
-    font-weight: 700;
-  }
-
-  .kuiFormPanel__content {
-    overflow-y: auto;
-  }
-
-.kuiFormPanelLayout {
-  display: flex;
-  align-items: stretch;
-  height: 100%;
-}
-
 .kuiList {
   margin-bottom: 10px;
 }
@@ -922,28 +849,6 @@ fieldset {
 
   &:last-child {
     padding-bottom: 0;
-  }
-}
-
-.kuiMenuItem {
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 400;
-  color: #2d2d2d;
-  border-bottom: 1px solid #efefef;
-
-  &.kuiMenuItem-isSelected {
-    background-color: #e4e4e4;
-
-    &:hover {
-      background-color: #e4e4e4;
-      cursor: default;
-    }
-  }
-
-  &:hover {
-    background-color: @list-group-menu-item-active-bg;
-    cursor: pointer;
   }
 }
 
@@ -974,28 +879,6 @@ fieldset {
   .flexGroup__filler {
     flex: 1 1 auto;
   }
-
-.kuiTableControls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-  .kuiTableControls__input {
-    display: flex;
-    align-items: center;
-    flex: 1 1 auto;
-  }
-
-  .kuiTableControls__actions {
-    align-items: center;
-    display: flex;
-  }
-
-  .kuiTableControlAction {
-    margin-right: 5px;
-  }
-
 
 .kuiColumn + .kuiColumn {
   padding-left: 10px;
