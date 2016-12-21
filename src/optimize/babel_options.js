@@ -10,7 +10,7 @@ if (!process.env.BABEL_CACHE_PATH) {
 
 exports.webpack = {
   stage: 1,
-  nonStandard: false,
+  nonStandard: true,
   optional: ['runtime']
 };
 
