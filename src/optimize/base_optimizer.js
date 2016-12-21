@@ -90,15 +90,6 @@ class BaseOptimizer {
       return ExtractTextPlugin.extract(makeLoaderString(loaders));
     };
 
-    const makeBabelLoader = query => {
-      return makeLoaderString([
-        {
-          name: 'babel-loader',
-          query: defaults({}, query || {}, babelOptions.webpack)
-        }
-      ]);
-    };
-
     return {
       context: fromRoot('.'),
       entry: this.bundles.toWebpackEntries(),
@@ -143,15 +134,15 @@ class BaseOptimizer {
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
           { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
           {
-            test: /\.js$/,
+            test: /\.jsx?$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: makeBabelLoader(),
+            loader: makeLoaderString([
+              {
+                name: 'babel-loader',
+                query: babelOptions.webpack
+              }
+            ]),
           },
-          {
-            test: /\.jsx$/,
-            exclude: babelExclude.concat(this.env.noParse),
-            loader: makeBabelLoader({ nonStandard: true }),
-          }
         ],
         postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
