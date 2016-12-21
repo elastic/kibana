@@ -1,7 +1,7 @@
 module.exports = function (server) {
   return class ElasticsearchClientLogging {
     // additional tags to differentiate connection
-    tags = ['admin'];
+    tags = [];
 
     logQueries = false;
 

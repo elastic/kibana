@@ -3,8 +3,8 @@ import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Boom from 'boom';
 
-import createClient from './create_client';
 import filterHeaders from './filter_headers';
+import { parseConfig } from './parse_config';
 
 export default class Cluster {
   constructor(config) {
@@ -74,6 +74,11 @@ export default class Cluster {
     }
   }
 
+  createClient = configOverrides => {
+    const config = Object.assign({}, this._getClientConfig(), configOverrides);
+    return new elasticsearch.Client(parseConfig(config));
+  }
+
   _getClientConfig = () => {
     return getClonedProperties(this._config, [
       'url',
@@ -127,6 +132,6 @@ function getClonedProperty(config, path) {
 }
 
 function createClients() {
-  this._client = createClient(this._getClientConfig());
-  this._noAuthClient = createClient(Object.assign({}, this._getClientConfig(), { auth: false }));
+  this._client = this.createClient();
+  this._noAuthClient = this.createClient({ auth: false });
 }
