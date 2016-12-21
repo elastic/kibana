@@ -1,0 +1,116 @@
+.rhythm_chart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.rhythm_chart__title {
+  color: @textColor;
+  margin: 0 0 10px;
+}
+
+.rhythm_chart__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex: 1 0 auto;
+}
+
+.rhythm_chart__visualization {
+  cursor: crosshair;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  position: relative;
+  & > div {
+    min-width: 1px;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.rhythm_chart__legend-control {
+  padding: 6px 2px 0 0;
+  color: @textColor;
+  font-size: 12px;
+}
+
+.rhythm_chart__legend-series {
+  flex-grow: 1;
+}
+
+.rhythm_chart__legend {
+  display: flex;
+  font-size: 11px;
+  width: 200px;
+  padding: 5px 0;
+  overflow: auto;
+}
+
+.rhythm_chart__legend_item {
+  cursor: pointer;
+  &.disabled {
+    opacity: 0.5;
+  }
+  padding: 5px;
+  border-bottom: 1px solid @lineColor;
+  &:first-child {
+    border-top: 1px solid @lineColor;
+  }
+  display: flex;
+  max-width: 170px;
+}
+
+.rhythm_chart__legend_label {
+  flex-grow: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  span {
+    color: @textColor;
+    margin-left: 5px;
+  }
+}
+
+.rhythm_chart__legend_value {
+  color: @valueColor;
+  margin-left: 3px;
+}
+
+.rhythm_chart.reversed {
+  .rhythm_chart__title { color: @textColorReversed; }
+  .rhythm_chart__legend-control { color: @textColorReversed; }
+  .rhythm_chart__legend_item {
+    border-bottom: 1px solid @lineColorReversed;
+    &:first-child { border-top: 1px solid @lineColorReversed; }
+  }
+  .rhythm_chart__legend_label { span { color: @textColorReversed; } }
+  .rhythm_chart__legend_value { color: @valueColorReversed; }
+}
+
+.rhythm_chart__legend-horizontal,
+.rhythm_chart.reversed .rhythm_chart__legend-horizontal {
+  width: auto;
+  display: flex;
+  .rhythm_chart__legend-control {
+    padding: 5px 5px 0 0;
+  }
+  .rhythm_chart__legend-series {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .rhythm_chart__legend_label {
+    flex: 0 1 auto;
+  }
+  .rhythm_chart__legend_item {
+    max-width: inherit;
+    font-size: 12px;
+    display: flex;
+    margin-right: 10px;
+    border-bottom: none;
+    &:first-child { border-top: none; }
+  }
+}
