@@ -37,7 +37,7 @@ export function parseConfig(serverConfig = {}) {
     config.ssl.key = readFile(serverConfig.ssl.key);
   }
 
-  if (size(get(config, 'ssl.ca'))) {
+  if (size(get(serverConfig, 'ssl.ca'))) {
     config.ssl.ca = serverConfig.ssl.ca.map(readFile);
   }
 
