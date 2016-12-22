@@ -7,7 +7,6 @@ import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
-import './wizard.less';
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 

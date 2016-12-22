@@ -79,9 +79,14 @@
               ng-click="landingController.toggleAll()"
             >
           </th>
+
+          <th class="kuiTableHeaderCell kuiTableHeaderCell--icon">
+          </th>
+
           <th class="kuiTableHeaderCell">
             Visualization
           </th>
+
           <th class="kuiTableHeaderCell">
             Type
           </th>
@@ -100,6 +105,10 @@
               ng-click="landingController.toggleItem(item)"
               ng-checked="landingController.isItemChecked(item)"
             >
+          </td>
+
+          <td class="kuiTableRowCell kuiTableRowCell--icon">
+            <div class="kuiIcon kuiIcon--basic {{ item.icon }}"></div>
           </td>
 
           <td class="kuiTableRowCell">
