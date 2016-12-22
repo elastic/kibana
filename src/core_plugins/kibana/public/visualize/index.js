@@ -1,5 +1,6 @@
 import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/kibana/visualize/editor/editor';
+import 'plugins/kibana/visualize/landing/landing';
 import 'plugins/kibana/visualize/wizard/wizard';
 import 'plugins/kibana/visualize/editor/add_bucket_agg';
 import 'plugins/kibana/visualize/editor/agg';
@@ -24,7 +25,7 @@ uiRoutes
   requireDefaultIndex: true
 })
 .when('/visualize', {
-  redirectTo: '/visualize/step/1'
+  redirectTo: '/visualize/landing'
 });
 
 // preloading
