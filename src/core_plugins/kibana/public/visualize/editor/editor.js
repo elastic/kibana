@@ -106,7 +106,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); },
+    run: function () { kbnUrl.change('/visualize/step/1', {}); },
     testId: 'visualizeNewButton',
   }, {
     key: 'save',
@@ -116,7 +116,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }, {
     key: 'open',
     description: 'Open Saved Visualization',
-    template: require('plugins/kibana/visualize/editor/panels/load.html'),
+    run: function () { kbnUrl.change('/visualize', {}); },
     testId: 'visualizeOpenButton',
   }, {
     key: 'share',
