@@ -1,29 +1,32 @@
 var resolve = require('path').resolve;
 var readFileSync = require('fs').readFileSync;
+var configFile = require('./config_file');
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
+
   var pkg = require(resolve(root, 'package.json'));
-  // config files to read from, in the order they are merged together
-  var configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
-  var config = {};
+  var config = configFile(root);
 
-  configFiles.forEach(function (configFile) {
-    try {
-      var content = JSON.parse(readFileSync(resolve(root, configFile)));
-      config = Object.assign(config, content);
-    } catch (e) {
-      // noop
-    }
-  });
+  var buildSourcePatterns = [
+    'package.json',
+    'index.js',
+    '{lib,public,server,webpackShims}/**/*',
+  ];
 
-  // if the kibanaRoot is set, use resolve to ensure correct resolution
-  if (config.kibanaRoot) config.kibanaRoot = resolve(root, config.kibanaRoot);
+  // add dependency files
+  var deps = Object.keys(pkg.dependencies || {});
+  if (deps.length === 1) {
+    buildSourcePatterns.push(`node_modules/${ deps[0] }/**/*`);
+  } else if (deps.length) {
+    buildSourcePatterns.push(`node_modules/{${ deps.join(',') }}/**/*`);
+  }
 
   return Object.assign({
     root: root,
     kibanaRoot: resolve(root, '../kibana'),
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
+    buildSourcePatterns: buildSourcePatterns,
     id: pkg.name,
     pkg: pkg,
     version: pkg.version,

@@ -3,12 +3,17 @@ var delimiter = require('path').delimiter;
 var execFileSync = require('child_process').execFileSync;
 
 module.exports = function (plugin, run, options) {
+  options = options || {};
   var kibanaBins = resolve(plugin.kibanaRoot, 'node_modules/.bin');
   var mochaSetupJs = resolve(plugin.kibanaRoot, 'test/mocha_setup.js');
-  options = options || {};
+  var testPaths = plugin.serverTestPatterns;
+
+  // allow server test files to be overridden
+  if (options.files && options.files.length) {
+    testPaths = options.files;
+  }
 
   var cmd = 'mocha';
-  var testPaths = (options.files && options.files.length) ? options.files : plugin.serverTestPatterns;
   var args = ['--require', mochaSetupJs].concat(testPaths);
   var path = `${kibanaBins}${delimiter}${process.env.PATH}`;
 
