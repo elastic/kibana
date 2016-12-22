@@ -6,5 +6,5 @@ module.exports = function run(name, options) {
   if (!action) throw new Error('Invalid task: "' + name + '"');
 
   var plugin = pluginConfig();
-  action(plugin, run, options);
+  return action(plugin, run, options);
 };
