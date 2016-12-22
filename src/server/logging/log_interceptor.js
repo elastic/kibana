@@ -63,8 +63,35 @@ export class LogInterceptor extends Stream.Transform {
     };
   }
 
+  /**
+   *  Since the upgrade to hapi 14, any socket write
+   *  error is surfaced as a generic "client error"
+   *  but "ECANCELED" specifically is not useful for the
+   *  logs unless you are trying to debug edge-case behaviors.
+   *
+   *  For that reason, we downgrade this from error to debug level
+   *
+   *  @param {object} - log event
+   */
+  downgradeIfEcanceled(event) {
+    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
+    const isEcanceled = isClientError && get(event, 'data.errno') === 'ECANCELED';
+
+    if (!isEcanceled) return null;
+
+    return {
+      event: 'log',
+      pid: event.pid,
+      timestamp: event.timestamp,
+      tags: ['debug', 'connection', 'ecanceled'],
+      data: 'ECANCELED: Socket was closed by the client (probably the browser) before the response could be completed'
+    };
+  }
+
   _transform(event, enc, next) {
-    const downgraded = this.downgradeIfEconnreset(event) || this.downgradeIfEpipe(event);
+    const downgraded = this.downgradeIfEconnreset(event)
+      || this.downgradeIfEpipe(event)
+      || this.downgradeIfEcanceled(event);
 
     this.push(downgraded || event);
     next();
