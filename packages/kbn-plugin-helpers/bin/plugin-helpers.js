@@ -54,7 +54,7 @@ program
   .on('--help', docs('test/browser'))
   .action(taskRunner(function (command) {
     run('testBrowser', {
-      dev: Boolean(command.options.dev),
+      dev: Boolean(command.dev),
       plugins: command.plugins,
     });
   }));
