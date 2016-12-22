@@ -18,20 +18,20 @@
       <span ng-if="!filter.meta.alias">"{{ filter.meta.value }}"</span>
     </div>
     <div class="filter-actions">
-      <a class="action filter-toggle" ng-click="toggleFilter(filter)">
+      <a class="action filter-toggle" ng-click="toggleFilter(filter)" data-test-subj="disableFilter-{{ filter.meta.key }}">
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
       </a>
-      <a class="action filter-pin" ng-click="pinFilter(filter)">
+      <a class="action filter-pin" ng-click="pinFilter(filter)" data-test-subj="pinFilter-{{ filter.meta.key }}">
         <i ng-show="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></i>
         <i ng-hide="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></i>
       </a>
-      <a class="action filter-invert" ng-click="invertFilter(filter)">
+      <a class="action filter-invert" ng-click="invertFilter(filter)" data-test-subj="invertFilter-{{ filter.meta.key }}">
         <i ng-show="filter.meta.negate" class="fa fa-fw fa-search-plus negative"></i>
         <i ng-hide="filter.meta.negate" class="fa fa-fw fa-search-minus positive"></i>
       </a>
       <a class="action filter-remove" ng-click="removeFilter(filter)">
-        <i class="fa fa-fw fa-trash"></i>
+        <i class="fa fa-fw fa-trash" data-test-subj="removeFilter-{{ filter.meta.key }}"></i>
       </a>
       <a class="action filter-edit" ng-click="startEditingFilter(filter)">
         <i class="fa fa-fw fa-edit"></i>
@@ -73,7 +73,7 @@
       <a ng-click="showFilterActions = !showFilterActions">
         Actions
         <i class="fa"
-        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}"></i>
+        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}" data-test-subj="showFilterActions"></i>
       </a>
     </div>
   </div>
@@ -103,7 +103,7 @@
       <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="removeAll()">Remove</a></div>
+      <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters">Remove</a></div>
     </div>
   </div>
 </div>

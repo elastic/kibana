@@ -39,9 +39,13 @@ export class SavedObjectLoader {
 
   delete(ids) {
     ids = !_.isArray(ids) ? [ids] : ids;
-    return Promise.map(ids, (id) => {
-      return (new this.Class(id)).delete();
+
+    const deletions = ids.map(id => {
+      const savedObject = new this.Class(id);
+      return savedObject.delete();
     });
+
+    return Promise.all(deletions);
   }
 
   /**

@@ -39,8 +39,8 @@
 
       <!-- tab list -->
       <ul class="nav nav-tabs">
-        <li class="kbn-management-tab" ng-class="{ active: state.tab === editSection.index }" ng-repeat="editSection in editSections">
-          <a ng-click="changeTab(editSection)">
+        <li class="kbn-management-tab" ng-class="{ active: state.tab === editSection.index }" ng-repeat="editSection in editSections"  data-test-subj="li-{{ editSection.index }}">
+          <a ng-click="changeTab(editSection)" data-test-subj="tab-{{ editSection.index }}" >
             {{ editSection.title }}
             <small>({{ editSection.count }})</small>
           </a>
