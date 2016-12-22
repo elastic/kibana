@@ -1,3 +1,5 @@
+import logWarnings from '../lib/log_warnings';
+
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
 const settingParser = require('./setting_parser');
@@ -19,6 +21,7 @@ export default function pluginCli(program) {
     }
 
     const logger = pluginLogger(settings);
+    logWarnings(settings, logger);
 
     switch (settings.action) {
       case 'install':
