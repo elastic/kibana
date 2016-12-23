@@ -1367,6 +1367,20 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
       return ch;
     },
 
+    nextUpTo = function (upTo, errorMessage) {
+      var currentAt = at,
+        i = text.indexOf(upTo, currentAt);
+      if (i < 0) {
+        error(errorMessage || "Expected '" + upTo + "'");
+      }
+      reset(i + upTo.length);
+      return text.substring(currentAt, i);
+    },
+
+    peek = function (c) {
+      return text.substr(at, c.length) === c; // nocommit - double check
+    },
+
     number = function () {
 
       var number,
@@ -1414,29 +1428,36 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         uffff;
 
       if (ch === '"') {
-        while (next()) {
-          if (ch === '"') {
-            next();
-            return string;
-          } else if (ch === '\\') {
-            next();
-            if (ch === 'u') {
-              uffff = 0;
-              for (i = 0; i < 4; i += 1) {
-                hex = parseInt(next(), 16);
-                if (!isFinite(hex)) {
-                  break;
+        if (peek('""')) {
+          // literal
+          next('"');
+          next('"');
+          return nextUpTo('"""', "failed to find closing '\"\"\"'");
+        } else {
+          while (next()) {
+            if (ch === '"') {
+              next();
+              return string;
+            } else if (ch === '\\') {
+              next();
+              if (ch === 'u') {
+                uffff = 0;
+                for (i = 0; i < 4; i += 1) {
+                  hex = parseInt(next(), 16);
+                  if (!isFinite(hex)) {
+                    break;
+                  }
+                  uffff = uffff * 16 + hex;
                 }
-                uffff = uffff * 16 + hex;
+                string += String.fromCharCode(uffff);
+              } else if (typeof escapee[ch] === 'string') {
+                string += escapee[ch];
+              } else {
+                break;
               }
-              string += String.fromCharCode(uffff);
-            } else if (typeof escapee[ch] === 'string') {
-              string += escapee[ch];
             } else {
-              break;
+              string += ch;
             }
-          } else {
-            string += ch;
           }
         }
       }
