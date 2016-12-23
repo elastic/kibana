@@ -38,8 +38,7 @@ regularize the display of data sets with variabilities that are themselves highl
 the variability is itself variable over the domain being examined, is known as _heteroscedastic_ data. For example, if
 a data set of height versus weight has a relatively narrow range of variability at the short end of height, but a wider
 range at the taller end, the data set is heteroscedastic.
-*Smooth Lines*:: Check this box to curve the line from point to point. Bear in mind that smoothed lines necessarily
-affect the representation of your data and create a potential for ambiguity.
+*Line Mode*:: You can choose between straight line, smoothed line and stepped line.
 *Show Connecting Lines*:: Check this box to draw lines between the points on the chart.
 *Show Circles*:: Check this box to draw each data point on the chart as a small circle.
 *Current time marker*:: For charts of time-series data, check this box to draw a red line on the current time.
