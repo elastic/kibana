@@ -1,4 +1,4 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
 // Downsampling of cummulative metrics
 // Good: count, sum
@@ -15,15 +15,15 @@ function sum(set) {
 
 module.exports = function (dataTuples, targetTuples) {
 
-  var i = 0;
-  var j = 0;
-  var spreadCount = 0;
-  var result = [];
-  var bucket;
-  var time;
-  var scaleSet;
-  var step;
-  var nextRealNumber;
+  let i = 0;
+  let j = 0;
+  let spreadCount = 0;
+  const result = [];
+  let bucket;
+  let time;
+  let scaleSet;
+  let step;
+  let nextRealNumber;
 
   while (i < targetTuples.length) {
     scaleSet = [];

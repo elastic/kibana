@@ -12,14 +12,14 @@ uiModules.get('kibana/table_vis')
       template: tagCloudVisParamsTemplate,
       link: function ($scope, $element) {
         const sliderContainer = $element[0];
-        var slider = sliderContainer.querySelector('.tag-cloud-fontsize-slider');
+        const slider = sliderContainer.querySelector('.tag-cloud-fontsize-slider');
         noUiSlider.create(slider, {
           start: [$scope.vis.params.minFontSize, $scope.vis.params.maxFontSize],
           connect: true,
           tooltips: true,
           step: 1,
-          range: {'min': 1, 'max': 100},
-          format: {to: (value) => parseInt(value) + 'px', from: value => parseInt(value)}
+          range: { 'min': 1, 'max': 100 },
+          format: { to: (value) => parseInt(value) + 'px', from: value => parseInt(value) }
         });
         slider.noUiSlider.on('change', function () {
           const fontSize = slider.noUiSlider.get();

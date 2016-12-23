@@ -79,7 +79,7 @@ describe('Saved Object', function () {
    * SavedObject
    */
   function createInitializedSavedObject(config = {}) {
-    let savedObject = new SavedObject(config);
+    const savedObject = new SavedObject(config);
     return savedObject.init();
   }
 
@@ -100,7 +100,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         let newUniqueId;
-        return createInitializedSavedObject({type: 'dashboard', id: 'myId'}).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', function () {
             newUniqueId = savedObject.id;
             expect(newUniqueId).to.not.be('myId');
@@ -118,8 +118,8 @@ describe('Saved Object', function () {
       it('as true does not create a copy when save fails', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
-        let originalId = 'id1';
-        return createInitializedSavedObject({type: 'dashboard', id: originalId}).then(savedObject => {
+        const originalId = 'id1';
+        return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', function () {
             return BluebirdPromise.reject('simulated error');
           });
@@ -136,7 +136,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         const id = 'myId';
-        return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', function () {
             expect(savedObject.id).to.be(id);
             return BluebirdPromise.resolve(id);
@@ -151,7 +151,7 @@ describe('Saved Object', function () {
     });
 
     it('returns id from server on success', function () {
-      return createInitializedSavedObject({type: 'dashboard'}).then(savedObject => {
+      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         return savedObject.save()
@@ -163,9 +163,9 @@ describe('Saved Object', function () {
 
     describe('updates isSaving variable', function () {
       it('on success', function () {
-        let id = 'id';
+        const id = 'id';
         stubESResponse(getMockedDocResponse(id));
-        return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', () => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve(id);
@@ -179,7 +179,7 @@ describe('Saved Object', function () {
       });
 
       it('on failure', function () {
-        return createInitializedSavedObject({type: 'dashboard'}).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', () => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.reject();
@@ -197,7 +197,7 @@ describe('Saved Object', function () {
   describe('applyESResp', function () {
     it('throws error if not found', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-        const response = {found: false};
+        const response = { found: false };
         try {
           savedObject.applyESResp(response);
           expect(true).to.be(false);
@@ -225,7 +225,7 @@ describe('Saved Object', function () {
       return savedObject.init()
         .then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
-          const response = {found: true, _source: {}};
+          const response = { found: true, _source: {} };
           return savedObject.applyESResp(response);
         }).then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
@@ -275,11 +275,11 @@ describe('Saved Object', function () {
 
       const mockDocResponse = getMockedDocResponse(
         id,
-        { _source: { dinosaurs: { tRex: 'is not so bad'}, } });
+        { _source: { dinosaurs: { tRex: 'is not so bad' }, } });
       stubESResponse(mockDocResponse);
 
 
-      let savedObject = new SavedObject(config);
+      const savedObject = new SavedObject(config);
       return savedObject.init()
         .then(() => {
           const response = {

@@ -6,6 +6,6 @@
           ng-click="toggleDisplay(field)"
           ng-class="::field.display ? 'btn-danger' : 'btn-primary'"
           ng-bind="::field.display ? 'remove' : 'add'"
-          class="btn btn-xs btn-primary discover-field-toggle" ></button>
+          class="btn btn-xs btn-primary discover-field-toggle" data-test-subj="fieldToggle-{{::field.name}}"></button>
       </div>
     </li>

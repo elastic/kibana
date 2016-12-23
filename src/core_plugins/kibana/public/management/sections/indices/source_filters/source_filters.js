@@ -82,7 +82,7 @@ uiModules.get('kibana')
               ]);
             });
             // Update the tab count
-            find($scope.$parent.editSections, {index: 'sourceFilters'}).count = $scope.rows.length;
+            find($scope.$parent.editSections, { index: 'sourceFilters' }).count = $scope.rows.length;
           }
         });
       }

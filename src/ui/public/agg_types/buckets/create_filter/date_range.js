@@ -4,9 +4,9 @@ import buildRangeFilter from 'ui/filter_manager/lib/range';
 export default function createDateRangeFilterProvider(config) {
 
   return function (agg, key) {
-    let range = dateRange.parse(key, config.get('dateFormat'));
+    const range = dateRange.parse(key, config.get('dateFormat'));
 
-    let filter = {};
+    const filter = {};
     if (range.from) filter.gte = +range.from;
     if (range.to) filter.lt = +range.to;
     if (range.to && range.from) filter.format = 'epoch_millis';
@@ -14,4 +14,4 @@ export default function createDateRangeFilterProvider(config) {
     return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
   };
 
-};
+}

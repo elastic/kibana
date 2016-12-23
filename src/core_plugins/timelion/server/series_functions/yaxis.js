@@ -1,6 +1,6 @@
-var alter = require('../lib/alter.js');
+const alter = require('../lib/alter.js');
 
-var Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('yaxis', {
   args: [
     {
@@ -49,9 +49,9 @@ module.exports = new Chainable('yaxis', {
       eachSeries._global.yaxes = eachSeries._global.yaxes || [];
       eachSeries._global.yaxes[yaxis - 1] = eachSeries._global.yaxes[yaxis - 1] || {};
 
-      var myAxis = eachSeries._global.yaxes[yaxis - 1];
+      const myAxis = eachSeries._global.yaxes[yaxis - 1];
       myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
-      myAxis.min = min == null ? 0 : min;
+      myAxis.min = min;
       myAxis.max = max;
       myAxis.axisLabelFontSizePixels = 11;
       myAxis.axisLabel = label;

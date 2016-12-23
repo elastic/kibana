@@ -103,7 +103,7 @@ describe('Integration', function () {
   });
 
   it('displays an error if the search had no hits', function () {
-    init(new OneRangeVis(), { hits: { total: 0, hits: [] }});
+    init(new OneRangeVis(), { hits: { total: 0, hits: [] } });
 
     expect($el.find('kbn-agg-table-group').size()).to.be(0);
 

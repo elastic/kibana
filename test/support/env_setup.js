@@ -1,4 +1,4 @@
-var defaults = require('lodash').defaults;
+const defaults = require('lodash').defaults;
 const babelOptions = require('../../src/optimize/babel_options');
 
 require('source-map-support').install();

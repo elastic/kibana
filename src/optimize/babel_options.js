@@ -1,8 +1,8 @@
 // this file is not transpiled
 'use strict'; // eslint-disable-line strict
 
-let cloneDeep = require('lodash').cloneDeep;
-let fromRoot = require('path').resolve.bind(null, __dirname, '../../');
+const cloneDeep = require('lodash').cloneDeep;
+const fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
 if (!process.env.BABEL_CACHE_PATH) {
   process.env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');
@@ -10,7 +10,7 @@ if (!process.env.BABEL_CACHE_PATH) {
 
 exports.webpack = {
   stage: 1,
-  nonStandard: false,
+  nonStandard: true,
   optional: ['runtime']
 };
 

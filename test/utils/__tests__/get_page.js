@@ -1,9 +1,9 @@
-var expect = require('expect.js');
-var getUrl = require('../get_url');
+const expect = require('expect.js');
+const getUrl = require('../get_url');
 
 describe('getUrl', function () {
   it('should convert to a url', function () {
-    var url = getUrl({
+    const url = getUrl({
       protocol: 'http',
       hostname: 'localhost',
     }, {
@@ -14,7 +14,7 @@ describe('getUrl', function () {
   });
 
   it('should convert to a url with port', function () {
-    var url = getUrl({
+    const url = getUrl({
       protocol: 'http',
       hostname: 'localhost',
       port: 9220

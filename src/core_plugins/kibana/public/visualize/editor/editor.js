@@ -23,7 +23,7 @@ uiRoutes
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
       const visTypes = Private(RegistryVisTypesProvider);
-      const visType = _.find(visTypes, {name: $route.current.params.type});
+      const visType = _.find(visTypes, { name: $route.current.params.type });
       if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');
       }
@@ -138,13 +138,13 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
 
   // Instance of app_state.js.
-  let $state = $scope.$state = (function initState() {
+  const $state = $scope.$state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
@@ -307,7 +307,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
         if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
-          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+          kbnUrl.change('/visualize/edit/{{id}}', { id: savedVis.id });
         }
       }
     }, notify.fatal);
@@ -363,4 +363,4 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
   }
 
   init();
-};
+}

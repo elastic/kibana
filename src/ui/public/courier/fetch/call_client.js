@@ -119,4 +119,4 @@ export default function CourierFetchCallClient(Private, Promise, es) {
   }
 
   return callClient;
-};
+}

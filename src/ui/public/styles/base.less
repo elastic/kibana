@@ -3,9 +3,6 @@
 @import (reference) "./variables";
 @import (reference) "~ui/styles/bootstrap/bootstrap";
 
-// Kibana UI Framework
-@import (less) "~@elastic/kibana-ui-framework/dist/framework.css";
-
 html,
 body {
   .flex-parent();
@@ -198,23 +195,6 @@ a {
 
 .navbtn-inverse {
   .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
-.navbar-timepicker {
-  > li > a {
-    padding-left: 7px !important;
-    padding-right: 7px !important;
-  }
-
-  .fa {
-    font-size: 16px;
-    vertical-align: middle;
-  }
-
-  button {
-    background-color: transparent;
-    border-radius: 0;
-  }
 }
 
   .navbar-timepicker-time-desc > .fa-clock-o {
@@ -623,6 +603,33 @@ fieldset {
   font-size: 14px;
 }
 
+.kuiVerticalRhythm {
+  & + & {
+    margin-top: 10px;
+  }
+}
+
+.kuiView {
+  background-color: #FFFFFF;
+  flex: 1 1 auto;
+}
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.kuiViewContent--constrainedWidth {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .kuiPage {
   padding: 20px 30px 28px;
   margin: 20px;
@@ -740,68 +747,6 @@ fieldset {
   }
 
 /**
- * 1. Disable for Angular.
- */
-.kuiButton {
-  display: inline-block;
-  padding: 4px 24px;
-  color: #00a9e5;
-  border: 1px solid;
-  text-decoration: none;
-  border-radius: 3px;
-  background-color: transparent;
-
-  &[disabled] {
-    pointer-events: none; // 1
-    opacity: 0.4;
-  }
-}
-
-.kuiButton--default,
-.kuiButton--default:focus {
-  color: #2D2D2D;
-  border-color: #D4D4D4;
-
-  &:hover,
-  &:active {
-    color: #111111;
-    background-color: #FAFAFA;
-  }
-}
-
-.kuiButton--primary,
-.kuiButton--primary:focus {
-  color: #00a9e5;
-  border-color: #00a9e5;
-
-  &:hover,
-  &:active {
-    color: #00a9e5;
-    background-color: #ECF9FF;
-  }
-}
-
-.kuiButton--danger,
-.kuiButton--danger:focus {
-  color: #d76051;
-  border-color: #d76051;
-
-  &:hover,
-  &:active {
-    color: #d76051;
-    background-color: #ffe4e1;
-  }
-}
-
-.kuiIcon--success {
-  color: #80c383;
-}
-
-.kuiIcon--danger {
-  color: #d76051;
-}
-
-/**
  * 1. Override h1.
  */
 .kuiTitle {
@@ -905,13 +850,6 @@ fieldset {
 .kuiOptionLabel {
   font-weight: normal; // 1
   cursor: pointer;
-}
-
-/**
- * 1. Override checkbox styles.
- */
-.kuiCheckbox {
-  cursor: default;
 }
 
 .kuiFormPanel {
@@ -1085,6 +1023,17 @@ fieldset {
     width: (@i * 100% / @n);
   }
   .makeKuiColumns(@n, (@i + 1));
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.kuiLocalDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
+  }
 }
 
 @import "~dragula/dist/dragula.css";

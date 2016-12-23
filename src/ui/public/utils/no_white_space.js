@@ -1,4 +1,4 @@
-let TAGS_WITH_WS = />\s+</g;
+const TAGS_WITH_WS = />\s+</g;
 
 /**
  * Remove all of the whitespace between html tags
@@ -15,4 +15,4 @@ let TAGS_WITH_WS = />\s+</g;
  */
 export default function noWhiteSpace(html) {
   return html.replace(TAGS_WITH_WS, '><');
-};
+}

@@ -30,6 +30,7 @@ module.exports = function (grunt) {
     'test:server',
     'test:browser-ci',
     'test:api',
+    '_build:verifyTranslations',
   ]);
 
   grunt.registerTask('jenkins:selenium', [

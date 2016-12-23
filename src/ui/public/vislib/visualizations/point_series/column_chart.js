@@ -61,7 +61,7 @@ export default function ColumnChartFactory(Private) {
       }
 
       return bars;
-    };
+    }
 
     /**
      * Determines whether bars are grouped or stacked and updates the D3
@@ -77,7 +77,7 @@ export default function ColumnChartFactory(Private) {
       }
       return this.addGroupedBars(bars);
 
-    };
+    }
 
     /**
      * Adds stacked bars to column chart visualization
@@ -99,7 +99,7 @@ export default function ColumnChartFactory(Private) {
 
       let barWidth;
       if (isTimeScale) {
-        const {min, interval} = this.handler.data.get('ordered');
+        const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
         if (!isHorizontal) groupWidth *= -1;
         const groupSpacing = groupWidth * groupSpacingPercentage;
@@ -142,7 +142,7 @@ export default function ColumnChartFactory(Private) {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
-    };
+    }
 
     /**
      * Adds grouped bars to column chart visualization
@@ -165,7 +165,7 @@ export default function ColumnChartFactory(Private) {
       let barWidth;
 
       if (isTimeScale) {
-        const {min, interval} = this.handler.data.get('ordered');
+        const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
         if (!isHorizontal) groupWidth *= -1;
         const groupSpacing = groupWidth * groupSpacingPercentage;
@@ -212,7 +212,7 @@ export default function ColumnChartFactory(Private) {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -238,8 +238,8 @@ export default function ColumnChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return ColumnChart;
-};
+}

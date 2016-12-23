@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 
 function ParamClassStub(parent, body) {
-  let stub = sinon.spy(body || function () {
+  const stub = sinon.spy(body || function () {
     stub.Super && stub.Super.call(this);
   });
   if (parent) _.class(stub).inherits(parent);
@@ -24,7 +24,7 @@ function ParamClassStub(parent, body) {
  * @return {undefined}
  */
 module.exports = function stubParamClasses(Private) {
-  let BaseAggParam = Private.stub(
+  const BaseAggParam = Private.stub(
     require('ui/agg_types/param_types/base'),
     new ParamClassStub(null, function (config) {
       _.assign(this, config);

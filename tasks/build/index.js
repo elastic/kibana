@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  let { flatten } = require('lodash');
+  const { flatten } = require('lodash');
 
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
@@ -12,6 +12,7 @@ module.exports = function (grunt) {
       '_build:babelOptions',
       '_build:plugins',
       '_build:data',
+      '_build:verifyTranslations',
       '_build:packageJson',
       '_build:readme',
       '_build:babelCache',

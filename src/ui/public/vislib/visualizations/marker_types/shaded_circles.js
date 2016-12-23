@@ -57,9 +57,9 @@ export default function ShadedCircleMarkerFactory(Private) {
       const eastRadius = Math.floor(center.distanceTo(east));
       const northRadius = Math.floor(center.distanceTo(north));
       return _.min([eastRadius, northRadius]);
-    };
+    }
   }
 
 
   return ShadedCircleMarker;
-};
+}

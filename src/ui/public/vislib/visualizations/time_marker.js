@@ -30,7 +30,7 @@ export default function TimeMarkerFactory() {
       return data.every(function (datum) {
         return (datum.ordered && datum.ordered.date);
       });
-    };
+    }
 
     render(selection) {
       const self = this;
@@ -64,8 +64,8 @@ export default function TimeMarkerFactory() {
         .attr('y1', self.height)
         .attr('y2', self.xScale.range()[0]);
       });
-    };
+    }
   }
 
   return TimeMarker;
-};
+}

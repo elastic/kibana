@@ -10,8 +10,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
-    var fromTime = '2015-09-19 06:31:44.000';
-    var toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
     return PageObjects.common.navigateToApp('visualize')
@@ -59,7 +59,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
   bdd.describe('pie chart', function indexPatternCreation() {
-    var vizName1 = 'Visualization PieChart';
+    const vizName1 = 'Visualization PieChart';
 
     bdd.it('should save and load', function () {
       return PageObjects.visualize.saveVisualization(vizName1)
@@ -83,11 +83,11 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show 10 slices in pie chart, take screenshot', function () {
-      var expectedPieChartSliceCount = 10;
+      const expectedPieChartSliceCount = 10;
 
       return PageObjects.visualize.getPieChartData()
       .then(function (pieData) {
-        var barHeightTolerance = 1;
+        const barHeightTolerance = 1;
         PageObjects.common.debug('pieData.length = ' + pieData.length);
         PageObjects.common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);
@@ -95,7 +95,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data', function () {
-      var expectedTableData =  [ '0 55', '40,000 50', '80,000 41', '120,000 43',
+      const expectedTableData =  [ '0 55', '40,000 50', '80,000 41', '120,000 43',
         '160,000 44', '200,000 40', '240,000 46', '280,000 39', '320,000 40', '360,000 47'
       ];
 

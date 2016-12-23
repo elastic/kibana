@@ -3,9 +3,9 @@ import _ from 'lodash';
 // if the param is missing, return undefined
 export default function findByParam(values, param) {
   if (_.isArray(values)) { // point series chart
-    let index = _.findIndex(values, param);
+    const index = _.findIndex(values, param);
     if (index === -1) return;
     return values[index][param];
   }
   return values[param]; // pie chart
-};
+}
