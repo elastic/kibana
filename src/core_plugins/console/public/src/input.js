@@ -16,7 +16,9 @@ let input;
 export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   input = new SenseEditor($el);
 
-  uiModules.get('app/sense').setupResizeCheckerForRootEditors($el, input, output);
+  // this may not exist if running from tests
+  let appSense = uiModules.get('app/sense');
+  appSense.setupResizeCheckerForRootEditors($el, input, output);
 
   input.autocomplete = new Autocomplete(input);
 
@@ -127,7 +129,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
         var req = requests.shift();
         var es_path = req.url;
         var es_method = req.method;
-        var es_data = req.data.join("\n");
+        var es_data = utils.collapseLiteralStrings(req.data.join("\n"));
         if (es_data) {
           es_data += "\n";
         } //append a new line for bulk requests.
@@ -167,7 +169,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
             if (mode === null || mode === "application/json") {
               // assume json - auto pretty
               try {
-                value = JSON.stringify(JSON.parse(value), null, 2);
+                value = utils.expandLiteralStrings(JSON.stringify(JSON.parse(value), null, 2));
               }
               catch (e) {
 
