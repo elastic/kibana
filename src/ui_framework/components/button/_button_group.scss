@@ -1,6 +1,13 @@
 .kuiButtonGroup {
   display: flex;
+  align-items: center;
 
+  .kuiButton + .kuiButton {
+    margin-left: 4px;
+  }
+}
+
+.kuiButtonGroup--united {
   > .kuiButton:not(:first-child):not(:last-child) {
     border-radius: 0;
   }

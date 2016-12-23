@@ -60,6 +60,33 @@ $formTransitionTiming: 0.1s linear;
   outline-offset: 2px !important; /* 2 */
 }
 
+@mixin formControl {
+  appearance: none;
+  padding: 3px 12px 4px;
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: $fontColor;
+  border-radius: $buttonBorderRadius;
+  transition: border-color $formTransitionTiming;
+
+  &:invalid {
+    border-color: $errorBorderColor;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $selectedBorderColor;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -71,6 +98,7 @@ body {
 @import "button/index";
 @import "form/index";
 @import "icon/index";
+@import "info_panel/index";
 @import "link/index";
 @import "local_nav/index";
 @import "micro_button/index";
