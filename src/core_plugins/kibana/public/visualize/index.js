@@ -1,6 +1,5 @@
 import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/kibana/visualize/editor/editor';
-import 'plugins/kibana/visualize/landing/landing';
 import 'plugins/kibana/visualize/wizard/wizard';
 import 'plugins/kibana/visualize/editor/add_bucket_agg';
 import 'plugins/kibana/visualize/editor/agg';
@@ -19,13 +18,17 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import uiRoutes from 'ui/routes';
 
+import visualizeListingTemplate from './listing/visualize_listing.html';
+import { VisualizeListingController } from './listing/visualize_listing';
 
 uiRoutes
 .defaults(/visualize/, {
   requireDefaultIndex: true
 })
 .when('/visualize', {
-  redirectTo: '/visualize/landing'
+  template: visualizeListingTemplate,
+  controller: VisualizeListingController,
+  controllerAs: 'listingController',
 });
 
 // preloading

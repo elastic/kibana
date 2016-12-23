@@ -25,7 +25,7 @@
             type="text"
             placeholder="Search..."
             aria-label="Filter"
-            ng-model="landingController.filter"
+            ng-model="listingController.filter"
           >
         </div>
       </div>
@@ -34,10 +34,10 @@
         <!-- Bulk delete button -->
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText"
-          confirm-click="landingController.deleteSelectedItems()"
+          confirm-click="listingController.deleteSelectedItems()"
           confirmation="Are you sure you want to delete the selected visualizations? This action is irreversible!"
           aria-label="Delete selected objects"
-          ng-hide="landingController.getSelectedItemsCount() === 0"
+          ng-hide="listingController.getSelectedItemsCount() === 0"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
           Delete
@@ -48,7 +48,7 @@
           class="kuiButton kuiButton--primary kuiButton--iconText"
           href="#/visualize/step/1"
           aria-label="Create new visualization"
-          ng-hide="landingController.getSelectedItemsCount() > 0"
+          ng-hide="listingController.getSelectedItemsCount() > 0"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
           Create visualization
@@ -61,22 +61,22 @@
     </div>
 
     <!-- NoResults -->
-    <div class="kuiPanel kuiPanel--centered" ng-if="!landingController.items.length">
+    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length">
       <div class="kuiNoResults">
         No visualizations matched your search.
       </div>
     </div>
 
     <!-- Table -->
-    <table class="kuiTable" ng-if="landingController.items.length">
+    <table class="kuiTable" ng-if="listingController.items.length">
       <thead>
         <tr>
           <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
             <input
               type="checkbox"
               class="kuiCheckBox"
-              ng-checked="landingController.areAllItemsChecked()"
-              ng-click="landingController.toggleAll()"
+              ng-checked="listingController.areAllItemsChecked()"
+              ng-click="listingController.toggleAll()"
             >
           </th>
 
@@ -95,15 +95,15 @@
 
       <tbody>
         <tr
-          ng-repeat="item in landingController.items track by item.id | orderBy:'title'"
+          ng-repeat="item in listingController.items track by item.id | orderBy:'title'"
           class="kuiTableRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox">
             <input
               type="checkbox"
               class="kuiCheckBox"
-              ng-click="landingController.toggleItem(item)"
-              ng-checked="landingController.isItemChecked(item)"
+              ng-click="listingController.toggleItem(item)"
+              ng-checked="listingController.isItemChecked(item)"
             >
           </td>
 
@@ -119,7 +119,7 @@
 
               <button
                 class="kuiMicroButton kuiTableRowHoverReveal"
-                ng-click="landingController.edit(item)"
+                ng-click="listingController.edit(item)"
                 aria-label="Edit"
                 tooltip="Edit object"
               >
@@ -144,8 +144,8 @@
     <!-- ToolBarFooter -->
     <div class="kuiToolBarFooter">
       <div class="kuiToolBarFooterSection">
-        <div class="kuiToolBarText" ng-hide="landingController.getSelectedItemsCount() === 0">
-          {{ landingController.getSelectedItemsCount() }} selected
+        <div class="kuiToolBarText" ng-hide="listingController.getSelectedItemsCount() === 0">
+          {{ listingController.getSelectedItemsCount() }} selected
         </div>
       </div>
       <div class="kuiToolBarFooterSection">

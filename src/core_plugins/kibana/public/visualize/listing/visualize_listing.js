@@ -1,6 +1,6 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 
-export function VisualizeLandingController(
+export function VisualizeListingController(
   $scope,
   kbnUrl,
   Notifier,
