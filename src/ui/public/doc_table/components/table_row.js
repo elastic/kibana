@@ -27,6 +27,7 @@ const MIN_LINE_LENGTH = 20;
 module.directive('kbnTableRow', function ($compile) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const cellDetailsTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/document_details.html')));
 
   return {
     restrict: 'A',
@@ -151,7 +152,7 @@ module.directive('kbnTableRow', function ($compile) {
         const text = indexPattern.formatField(row, fieldName);
 
         if (truncate && text.length > MIN_LINE_LENGTH) {
-          return truncateByHeightTemplate({
+          return cellDetailsTemplate({
             body: text
           });
         }

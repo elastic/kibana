@@ -919,225 +919,48 @@ fieldset {
   }
 }
 
-
-// TODO: Extract these styles into the UI Framework.
-
-.kuiFormSection {
-  margin-bottom: 16px;
-}
-
-.kuiFormLabel {
-  display: block;
-}
-
-.kuiFormSubLabel {
-  display: block;
-  font-weight: normal;
-}
-
-.kuiTextArea,
-.kuiInput,
-.kuiStaticInput {
-  display: block;
-  width: 100%;
-  font-size: 14px;
-  color: #2d2d2d;
-  border: 1px solid;
-  border-radius: 4px;
-}
-
-.kuiStaticInput {
-  padding: 5px 0;
-  border-color: transparent;
-}
-
-.kuiInput,
-.kuiTextArea {
-  padding: 5px 15px;
-  border-color: #D4D4D4;
-}
-
-.kuiSelect {
-  display: block;
-  width: 100%;
-  height: 32px;
-  padding: 5px 15px;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #2D2D2D;
-  background-color: #ffffff;
-  background-image: none;
-  border: 1px solid #D4D4D4;
-  border-radius: 4px;
-}
-
-/**
- * 1. Override Bootstrap checkbox styles.
- */
-.kuiCheckBox {
-  margin: 0 !important; // 1
-}
-
-.kuiSideBarSelect {
-  // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
-  height: 24px;
-  font-size: 12px;
-  padding: 0 15px;
-}
-
-.kuiSideBarInput {
-  // TODO: @include kuiInput styles when this is moved to the UI Framework and we're using SASS.
-  height: 24px;
-  font-size: 12px;
-}
-
-.kuiSideBarSection {
-  margin-bottom: 6px;
-}
-
-.kuiSideBarSectionTitle {
+.kuiDocumentDetails {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #D4D4D4;
-}
+  max-height: 100px;
+  overflow-x: auto;
+  overflow-y: hidden;
 
-.kuiSideBarSectionTitle__text {
-  font-size: 14px;
-  font-weight: 700;
-  color: #5A5A5A;
-}
+  &::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
 
-/**
- * 1. Override Bootstrap button styles.
- */
-.kuiSideBarSectionTitle__action {
-  background-color: transparent; // 1
-  padding: 0; // 1
-  cursor: pointer;
-  color: #328CAA;
+  &::-webkit-scrollbar-thumb {
+    background-color: #ecf0f1;
+    border: 6px solid transparent;
+    background-clip: content-box;
+  }
 
-  &:hover {
-    color: #105A73;
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
   }
 }
 
-.kuiSideBarCollapsibleTitle {
+.kuiDocumentSource {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #E8E8E8;
+  flex-direction: column;
+  flex-wrap: wrap;
 }
 
-.kuiSideBarCollapsibleTitle__label {
-  display: flex;
-  align-items: center;
+.kuiDocumentSourceItem {
+  width: 300px;
+  padding: 4px 2px 0;
+  margin-right: 2px;
 }
 
-/**
- * 1. Override FontAwesome .fa styles.
- */
-.kuiSideBarCollapsibleTitle__caret {
-  width: 12px;
-  height: 12px;
-  font-size: 12px !important; // 1
-  font-weight: 700;
-  color: #5A5A5A;
-}
-
-.kuiSideBarCollapsibleTitle__text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
-}
-
-/**
- * 1. Override Bootstrap button styles.
- */
-.kuiSideBarCollapsibleTitle__action {
-  background-color: transparent; // 1
-  padding: 0; // 1
-  cursor: pointer;
-  color: #328CAA;
-
-  &:hover {
-    color: #105A73;
+  .kuiDocumentSourceItem__term {
+    word-wrap: break-word;
+    font-weight: bold;
   }
-}
 
-.kuiSideBarCollapsibleSection {
-  padding-left: 16px;
-}
-
-/**
- * 1. Override Bootstrap h1 styles.
- */
-.kuiSideBarFormSectionTitle {
-  font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
-  border-bottom: 1px solid #E8E8E8;
-  margin: 4px 0 !important; // 1
-  padding-bottom: 2px;
-}
-
-.kuiSideBarFormRow {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
-  margin-bottom: 1px;
-}
-
-/**
- * 1. Override .vis-editor-sidebar styles.
- */
-.kuiSideBarFormRow__label {
-  display: flex;
-  align-items: center;
-  flex: 1 1 40% !important; // 1
-  font-weight: 400;
-}
-
-.kuiSideBarFormRow__label__colorbox {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  margin-right: 10px;
-  border: 1px ridge lightgray;
-}
-
-.kuiSideBarFormRow__control {
-  display: flex;
-  align-items: center;
-  flex: 1 1 60%;
-}
-
-/**
- * 1. Override .sidebar-item styles.
- */
-.kuiSideBarOptionsLink {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: #328CAA !important; // 1
-
-  &:hover {
-    color: #105A73 !important; // 1
+  .kuiDocumentSourceItem__description {
+    word-wrap: break-word;
+    padding-bottom: 4px;
   }
-}
-
-.kuiSideBarOptionsLink__caret {
-  width: 10px;
-  height: 10px;
-}
-
-.kuiSideBarOptionsLink__text {
-  margin-left: 2px;
-}
-
 
 @import "~dragula/dist/dragula.css";
