@@ -4,10 +4,10 @@ let oop = ace.require("ace/lib/oop");
 let TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
 
 let painlessKeywords = (
-  "def|int|long|byte|String|new|null|for|if|return|ctx"
+  "def|int|long|byte|String|float|double|char|null|if|else|while|do|for|continue|break|new|try|catch|throw|this|instanceof|return|ctx"
 );
 
-var ScriptHighlightRules = function () {
+export var ScriptHighlightRules = function () {
     this.name = "ScriptHighlightRules";
     this.$rules = {
       "start": [
@@ -63,4 +63,3 @@ var ScriptHighlightRules = function () {
   }
 };
 oop.inherits(ScriptHighlightRules, TextHighlightRules);
-module.exports.ScriptHighlightRules = ScriptHighlightRules;

@@ -22,8 +22,8 @@ var Mode = function () {
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
   this.createModeDelegates({
-      "script-": ScriptMode
-    });
+    "script-": ScriptMode
+  });
 };
 oop.inherits(Mode, TextMode);
 
@@ -36,9 +36,7 @@ oop.inherits(Mode, TextMode);
   this.getNextLineIndent = function (state, line, tab) {
     var indent = this.$getIndent(line);
 
-    if (state == "string_literal") {
-      // noop
-    } else {
+    if (state !== "string_literal") {
       var match = line.match(/^.*[\{\(\[]\s*$/);
       if (match) {
         indent += tab;

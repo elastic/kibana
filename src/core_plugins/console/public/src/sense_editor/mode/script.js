@@ -12,7 +12,7 @@ var AceTokenizer = acequire("ace/tokenizer").Tokenizer;
 var ScriptHighlightRules = require("./script_highlight_rules").ScriptHighlightRules;
 
 
-var ScriptMode = function () {
+export var ScriptMode = function () {
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
@@ -20,9 +20,6 @@ var ScriptMode = function () {
 oop.inherits(ScriptMode, TextMode);
 
 (function () {
-  // this.getCompletions = function (editor, session, pos, prefix) {
-  //   return [];
-  // };
 
   this.HighlightRules = ScriptHighlightRules;
 
@@ -62,5 +59,3 @@ oop.inherits(ScriptMode, TextMode);
 
 
 }).call(ScriptMode.prototype);
-
-module.exports.ScriptMode = ScriptMode;

@@ -18,9 +18,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   // this may not exist if running from tests
   let appSense = uiModules.get('app/sense');
-  if (appSense.setupResizeCheckerForRootEditors) {
-    appSense.setupResizeCheckerForRootEditors($el, input, output);
-  }
+  appSense.setupResizeCheckerForRootEditors($el, input, output);
 
   input.autocomplete = new Autocomplete(input);
 
