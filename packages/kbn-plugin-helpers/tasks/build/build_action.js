@@ -1,3 +1,5 @@
+var join = require('path').join;
+var resolve = require('path').resolve;
 var inquirer = require('inquirer');
 
 var createBuild = require('./create_build');
@@ -7,6 +9,7 @@ module.exports = function (plugin, run, options) {
   var buildVersion = plugin.version;
   var kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
   var buildFiles = plugin.buildSourcePatterns;
+  var buildTarget = join(plugin.root, 'build');
 
   // allow source files to be overridden
   if (options.files && options.files.length) {
@@ -14,15 +17,16 @@ module.exports = function (plugin, run, options) {
   }
 
   // allow options to override plugin info
+  if (options.buildDestination) buildTarget = resolve(plugin.root, options.buildDestination);
   if (options.buildVersion) buildVersion = options.buildVersion;
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
   if (kibanaVersion === 'kibana') {
     return askForKibanaVersion().then(function (customKibanaVersion) {
-      return createBuild(plugin, buildVersion, customKibanaVersion, buildFiles);
+      return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
     });
   } else {
-    return createBuild(plugin, buildVersion, kibanaVersion, buildFiles);
+    return createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
   }
 };
 

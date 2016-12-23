@@ -44,7 +44,7 @@ describe('build_action', () => {
 
       return buildAction(PLUGIN, noop, options).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
-        const [ plugin, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+        const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         expect(buildVersion).toBe('1.2.3');
         expect(kibanaVersion).toBe('4.5.6');
       });
@@ -53,7 +53,7 @@ describe('build_action', () => {
     it('uses default file list without files option', function () {
       return buildAction(PLUGIN).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
-        const [ plugin, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+        const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
       });
     });
@@ -70,7 +70,7 @@ describe('build_action', () => {
 
       return buildAction(PLUGIN, noop, options).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
-        const [ plugin, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+        const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         options.files.forEach(file => expect(files).toContain(file));
       });
     });

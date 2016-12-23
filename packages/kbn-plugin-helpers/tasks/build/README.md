@@ -7,3 +7,13 @@ be found at:
 ```
 build/{pkg.name}-{pkg.version}.zip
 ```
+
+If you use the `--build-destination` flag, the resulting build will be found
+in that directory.
+
+```
+plugin-helpers build --build-destination build/some/child/path
+
+# This will place the resulting build at:
+build/some/child/path/{pkg.name}-{pkg.version}.zip
+```
