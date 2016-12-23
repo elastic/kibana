@@ -7,6 +7,8 @@ import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
+import visualizeWizardStep1Template from './step_1.html';
+import visualizeWizardStep2Template from './step_2.html';
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -14,7 +16,7 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /** Wizard Step 1
 /********/
 routes.when('/visualize/step/1', {
-  template: require('plugins/kibana/visualize/wizard/step_1.html'),
+  template: visualizeWizardStep1Template,
   controller: 'VisualizeWizardStep1',
 });
 
@@ -40,7 +42,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 /** Wizard Step 2
 /********/
 routes.when('/visualize/step/2', {
-  template: require('plugins/kibana/visualize/wizard/step_2.html'),
+  template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
   resolve: {
     indexPatternIds: function (courier) {
