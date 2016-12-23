@@ -31,32 +31,32 @@
       </div>
 
       <div class="kuiToolBarSection">
+        <!-- We need an empty section for the buttons to be positioned consistently. -->
+      </div>
+
+      <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
         <button
-          class="kuiButton kuiButton--danger kuiButton--iconText"
+          class="kuiButton kuiButton--danger"
           confirm-click="listingController.deleteSelectedItems()"
           confirmation="Are you sure you want to delete the selected visualizations? This action is irreversible!"
           aria-label="Delete selected objects"
           ng-hide="listingController.getSelectedItemsCount() === 0"
+          tooltip="Delete selected visualizations"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
-          Delete
         </button>
 
         <!-- Create visualization button -->
         <a
-          class="kuiButton kuiButton--primary kuiButton--iconText"
+          class="kuiButton kuiButton--primary"
           href="#/visualize/step/1"
           aria-label="Create new visualization"
           ng-hide="listingController.getSelectedItemsCount() > 0"
+          tooltip="Create new visualization"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
-          Create visualization
         </a>
-      </div>
-
-      <div class="kuiToolBarSection">
-        <!-- We need an empty section for the buttons to be positioned consistently. -->
       </div>
     </div>
 
@@ -84,7 +84,7 @@
           </th>
 
           <th class="kuiTableHeaderCell">
-            Visualization
+            Name
           </th>
 
           <th class="kuiTableHeaderCell">
