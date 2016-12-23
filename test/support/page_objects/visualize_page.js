@@ -82,10 +82,7 @@ export default class VisualizePage {
   }
 
   getChartTypes() {
-
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findAllByCssSelector('.wizard-type-heading h4')
+    return PageObjects.common.findAllTestSubjects('visualizeWizardChartTypeTitle')
     .then(function (chartTypes) {
       function getChartType(chart) {
         return chart.getVisibleText();
@@ -379,14 +376,7 @@ export default class VisualizePage {
   // this is for starting on the
   // bottom half of the "Create a new visualization      Step 1" page
   openSavedVisualization(vizName) {
-    const self = this;
-    return self.filterVisByName(vizName)
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(function clickDashboardByLinkedText() {
-      return self.clickVisualizationByLinkText(vizName);
-    });
+    return this.clickVisualizationByLinkText(vizName);
   }
 
   getXAxisLabels() {
