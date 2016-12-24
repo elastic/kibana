@@ -1,0 +1,66 @@
+<div>
+  <div class="kuiSideBarCollapsibleTitle">
+    <div
+      class="kuiSideBarCollapsibleTitle__label"
+      ng-click="isGridOpen = !isGridOpen"
+    >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': isCategoryAxisOpen, 'fa-caret-right': !isCategoryAxisOpen }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+      <span class="kuiSideBarCollapsibleTitle__text">
+        Grid
+      </span>
+    </div>
+    <input
+      aria-label="enable"
+      ng-model="vis.params.grid.show"
+      type="checkbox"
+      class="kuiSideBarSectionTitle__action"
+    >
+  </div>
+
+  <div ng-show="isGridOpen" class="kuiSideBarCollapsibleSection">
+    <!-- General -->
+    <div class="kuiSideBarSection">
+      <div class="kuiSideBarFormRow">
+        <label class="kuiSideBarFormRow__label" for="showCategoryLines">
+          Category lines
+        </label>
+        <div class="kuiSideBarFormRow__control">
+          <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="vis.params.grid.categoryLines">
+        </div>
+      </div>
+
+      <div class="kuiSideBarFormRow">
+        <label class="kuiSideBarFormRow__label" for="gridAxis">
+          Value Axis
+        </label>
+        <div class="kuiSideBarFormRow__control">
+          <select
+            id="gridAxis"
+            class="kuiSelect kuiSideBarSelect"
+            ng-model="vis.params.grid.valueAxis"
+            ng-options="axis.id as axis.id for axis in vis.params.valueAxes"
+          >
+            <option value="">Don't show</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="kuiSideBarFormRow">
+        <label class="kuiSideBarFormRow__label" for="gridColor">
+          Color
+        </label>
+        <div class="kuiSideBarFormRow__control">
+          <input
+            id="gridColor"
+            class="kuiInput kuiSideBarInput"
+            ng-model="vis.params.grid.style.color"
+          >
+        </div>
+      </div>
+    </div>
+
+  </div>

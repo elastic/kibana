@@ -1,8 +1,8 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
-import lineTemplate from 'plugins/kbn_vislib_vis_types/editors/line.html';
+import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
-export default function HistogramVisType(Private) {
+export default function PointSeriesVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -11,9 +11,55 @@ export default function HistogramVisType(Private) {
     title: 'Line chart',
     icon: 'fa-line-chart',
     description: 'Often the best chart for high density time series. Great for comparing one series to another. ' +
-      'Be careful with sparse sets as the connection between points can be misleading.',
+    'Be careful with sparse sets as the connection between points can be misleading.',
     params: {
       defaults: {
+        grid: {
+          show: false,
+          categoryLines: true,
+          style: {
+            color: '#eee'
+          }
+        },
+        categoryAxes: [
+          {
+            id: 'CategoryAxis-1',
+            type: 'category',
+            position: 'bottom',
+            show: true,
+            style: {
+            },
+            scale: {
+              type: 'linear'
+            },
+            labels: {
+              show: true,
+            },
+            title: {}
+          }
+        ],
+        valueAxes: [
+          {
+            id: 'ValueAxis-1',
+            type: 'value',
+            position: 'left',
+            show: true,
+            style: {
+            },
+            scale: {
+              type: 'linear',
+              mode: 'normal'
+            },
+            labels: {
+              show: true,
+              rotate: 0,
+              filter: false,
+              truncate: 100
+            },
+            title: {}
+          }
+        ],
+        seriesParams: [],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
@@ -27,19 +73,11 @@ export default function HistogramVisType(Private) {
         defaultYExtents: false,
         setYExtents: false
       },
-      legendPositions: [{
-        value: 'left',
-        text: 'left',
-      }, {
-        value: 'right',
-        text: 'right',
-      }, {
-        value: 'top',
-        text: 'top',
-      }, {
-        value: 'bottom',
-        text: 'bottom',
-      }],
+      positions: ['top', 'left', 'right', 'bottom'],
+      chartTypes: ['line', 'area', 'histogram'],
+      axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
+      scaleTypes: ['linear', 'log', 'square root'],
+      chartModes: ['normal', 'stacked'],
       interpolationModes: [{
         value: 'linear',
         text: 'straight',
@@ -50,10 +88,8 @@ export default function HistogramVisType(Private) {
         value: 'step-after',
         text: 'stepped',
       }],
-      scales: ['linear', 'log', 'square root'],
-      editor: lineTemplate
+      editor: pointSeriesTemplate
     },
-    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
@@ -83,7 +119,7 @@ export default function HistogramVisType(Private) {
       {
         group: 'buckets',
         name: 'group',
-        title: 'Split Lines',
+        title: 'Split Series',
         min: 0,
         max: 1,
         aggFilter: '!geohash_grid'

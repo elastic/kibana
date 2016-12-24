@@ -1,0 +1,115 @@
+<div class="kuiSideBarSection">
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Series
+    </div>
+  </div>
+
+  <div
+    ng-repeat="chart in vis.params.seriesParams track by $index"
+    class="kuiSideBarSection"
+  >
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="isSeriesOpen = !isSeriesOpen"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': isSeriesOpen, 'fa-caret-right': !isSeriesOpen }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          {{chart.data.label}}
+        </span>
+      </div>
+    </div>
+
+    <div ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
+      <!-- General -->
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="showCursor">
+            Show
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="showCursor" type="checkbox" ng-model="chart.show">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
+            Type
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesType' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.type"
+              ng-options="mode for mode in vis.type.params.chartTypes"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesMode' + $index }}">
+            Mode
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesMode' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.mode"
+              ng-options="mode for mode in vis.type.params.chartModes"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesValueAxis' + $index }}">
+            Value Axis
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesValueAxis' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.valueAxis"
+              ng-options="axis.id as axis.id for axis in vis.params.valueAxes"
+            ></select>
+          </div>
+        </div>
+
+        <div ng-show="chart.type == 'line' || chart.type == 'area'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'smoothLine' + $index }}">
+              Smooth lines
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="{{ 'smoothLine' + $index }}" type="checkbox" ng-model="chart.smoothLines">
+            </div>
+          </div>
+        </div>
+        <div ng-show="chart.type == 'line'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'drawLines' + $index }}">
+              Show line
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="{{ 'drawLines' + $index }}" type="checkbox" ng-model="chart.drawLinesBetweenPoints">
+            </div>
+          </div>
+
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'showCircles' + $index }}">
+              Show circles
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="{{ 'showCircles' + $index }}" type="checkbox" ng-model="chart.showCircles">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
