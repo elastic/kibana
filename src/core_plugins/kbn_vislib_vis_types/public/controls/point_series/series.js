@@ -47,6 +47,13 @@ module.directive('vislibSeries', function ($parse, $compile) {
         });
         $scope.vis.params.seriesParams = $scope.vis.params.seriesParams.slice(0, serieCount);
       });
+
+      $scope.$watch(() => {
+        return $scope.vis.params.seriesParams.map(series => series.type).join();
+      }, () => {
+        const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
+        $scope.savedVis.type = types.length === 1 ? types[0] : 'histogram';
+      });
     }
   };
 });
