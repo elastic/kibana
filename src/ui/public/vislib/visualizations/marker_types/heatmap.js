@@ -21,7 +21,7 @@ export default function HeatmapMarkerFactory(Private) {
       this._createMarkerGroup({
         radius: +this._attr.heatRadius,
         blur: +this._attr.heatBlur,
-        maxZoom: +this._attr.heatMaxZoom,
+        maxZoom: map.getZoom(),
         minOpacity: +this._attr.heatMinOpacity
       });
 
@@ -34,7 +34,7 @@ export default function HeatmapMarkerFactory(Private) {
         );
       }, function (feature) {
         // turn coords into a string for the memoize cache
-        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
+        return `${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}`;
       });
     }
 
