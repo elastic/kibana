@@ -50,9 +50,8 @@ export default function ColumnChartFactory(Private) {
       .enter()
       .append('rect')
       .attr('data-label', data.label)
-      .attr('fill', () => {
-        return color(data.label);
-      });
+      .attr('fill', () => color(data.label))
+      .attr('stroke', () => color(data.label));
 
       self.updateBars(bars);
 
@@ -117,7 +116,6 @@ export default function ColumnChartFactory(Private) {
         if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
           return yScale(d.y0);
         }
-        /*if (!isHorizontal && d.y < 0) return yScale(d.y);*/
         return yScale(d.y0 + d.y);
       }
 

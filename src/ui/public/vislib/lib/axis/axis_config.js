@@ -42,7 +42,7 @@ export default function AxisConfigFactory() {
     },
     title: {
       text: '',
-      elSelector: '.axis-wrapper-{pos} .axis-title'
+      elSelector: '.axis-wrapper-{pos} .axis-div',
     }
   };
 
@@ -77,8 +77,11 @@ export default function AxisConfigFactory() {
       const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
+      const isHorizontal = (axisConfigArgsClone.position &&
+        ['top', 'bottom'].includes(axisConfigArgsClone.position)) ||
+        axisConfigArgsClone.type === 'category';
+      _.merge(typeDefaults, isHorizontal ? horizontalDefaults : verticalDefaults);
       this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
-      _.merge(this._values, this.isHorizontal() ? horizontalDefaults : verticalDefaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');

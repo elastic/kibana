@@ -4,6 +4,7 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
 import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
+import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import VisSchemasProvider from 'ui/vis/schemas';
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
