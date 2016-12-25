@@ -1,0 +1,126 @@
+[[xy-chart]]
+== X/Y Charts
+X/Y charts refer to Area, Line and Bar charts which allow you to plot your data on X/Y axis.
+
+First you need to select your _metrics_ which define Value axis. The following aggregations are available for this axis:
+
+*Count*:: The {es-ref}search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
+the elements in the selected index pattern.
+*Average*:: This aggregation returns the {es-ref}search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
+field. Select a field from the drop-down.
+*Sum*:: The {es-ref}search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
+field. Select a field from the drop-down.
+*Min*:: The {es-ref}search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
+numeric field. Select a field from the drop-down.
+*Max*:: The {es-ref}search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
+numeric field. Select a field from the drop-down.
+*Unique Count*:: The {es-ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
+the number of unique values in a field. Select a field from the drop-down.
+*Percentiles*:: The {es-ref}search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
+values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
+or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a
+percentile field.
+*Percentile Rank*:: The {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_]
+aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field
+from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
+values field. Click *+Add* to add a values field.
+
+You can add an aggregation by clicking the *+ Add Aggregation* button.
+
+Enter a string in the *Custom Label* field to change the display label.
+
+The _buckets_ aggregations determine what information is being retrieved from your data set.
+
+Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
+multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
+if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
+
+include::x-axis-aggs.asciidoc[]
+
+include::color-picker.asciidoc[]
+
+Enter a string in the *Custom Label* field to change the display label.
+
+You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
+
+*Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
+*Include Pattern*:: Specify a pattern in this field to include in the results.
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
+definition, as in the following example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
+{es-ref}modules-scripting.html[dynamic Groovy scripting].
+
+The availability of these options varies depending on the aggregation you choose.
+
+=== Options
+
+Select the *Options* tab to change the way your data is visualized. Customization options are grouped into areas to provide easier access:
+
+==== General Settings
+
+*Legend Position*:: Allows you to move your legend to the *left*, *right*, *top* or *bottom*
+*Show Tooltip*:: Enables or disables the display of tooltip on hovering over chart objects
+*Order buckets by descending sum*:: Check this box to enforce sorting of buckets by descending sum in the visualization
+
+==== Category Axis
+The category axis is defined by the bucket aggregation you chose under Data tab. Here you can customize how its displayed:
+
+*Show*:: You can chose if you want to display category axis or not
+*Position*:: You can choose where you want to display category axis. If you position your category axis on the left or right the chart will turn to the horizontal type.
+*Advanced Options*::
+*Labels - Show Labels*:::: Allows you to hide axis labels
+*Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough spave to display them
+*Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
+*Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
+
+==== Grid
+You can enable grid on the chart. By default grid is displayed on the category axis only.
+
+*Category Lines*:: You can disable the display of grid lines on category axis
+*Value Axis*:: You can choose on which (if any) of the value axes you want to display grid lines
+*Color*:: You can specify the color for gird lines 
+
+==== Value Axes
+By default one value axis is defined on a chart, but you can add as much as you need. Clicking on the + sign will create a new value axis.
+
+Each value axis has this options:
+
+*Show*:: You can decide to hide the value axis completely
+*Label*:: Allows to define a custom label
+*Position*:: Options for position depend on the position of your category axis. If category axis is positioned on the top or bottom you can position value axis on the left or right. In the oposite case you can position your value axis on the top or bottom.
+*Mode*:: Mode allows you to define how value axis represents the values. You can choose among the following:
+_wiggle_:::: Displays the aggregations as a https://en.wikipedia.org/wiki/Streamgraph[streamgraph].
+_percentage_:::: Displays each aggregation as a proportion of the total.
+_silhouette_:::: Displays each aggregation as variance from a central line.
+*Scale Type*:: Allows you to choose between *linear*, *square root* and *log* scale
+
+*Advanced Options*::
+*Labels - Show Labels*:::: Allows you to hide axis labels
+*Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough spave to display them
+*Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
+*Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
+*Scale to Data Bounds*:::: The default Y axis bounds are zero and the maximum value returned in the data. Check
+                           this box to change both upper and lower bounds to match the values returned in the data.
+*Custom Extents*:::: You can define custom minimum and maximum for each axis
+
+==== Series
+Each of the *Series* represents a metric you added in the data tab. For each Series you can define the following options:
+
+*Show*:: Allows you to hide specific series.
+*Type*:: Allows you to choose between *Area*, *Line* and *Histogram* types. This allows you to show each metrics as a different chart type.
+*Mode*:: Allows you to choose how your values are showed on the chart. 
+_stacked_:::: Values for this series will be stacked. Stacking happens per value axis. This means that if you have two series on one value axis and both modes are set to stacked they will be stacked on top of each other. If one of the series modes is set to normal the other series values (in case series are split) will be split and the second series will be grouped next to them. If you want both series to be stacked but not to be stacked on top of each other you will want to plot them on separate value axes.
+_normal_:::: In normal mode values will not be stacked.
+*Value Axis*:: You can define to which value axis this series belongs. If you dont select a value it will belong to the first value axis.
+
+Additional options might be available depending the on the *type* selected. For Area and Line types you can decide to smooth the lines. And for Line chart you can decide to not show lines or circles.
+
+[float]
+[[vertbar-viewing-detailed-information]]
+== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]
