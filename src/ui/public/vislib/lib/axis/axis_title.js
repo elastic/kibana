@@ -27,6 +27,7 @@ export default function AxisTitleFactory(Private) {
           const div = d3.select(el);
           const width = $(el).width();
           const height = $(el).height();
+          const titlePadding = 15;
 
           const svg = div.append('svg')
           .attr('width', width)
@@ -35,9 +36,9 @@ export default function AxisTitleFactory(Private) {
           const bbox = svg.append('text')
           .attr('transform', function () {
             if (config.isHorizontal()) {
-              return 'translate(' + width / 2 + ',15)';
+              return `translate(${width / 2},${titlePadding})`;
             }
-            return 'translate(15,' + height / 2 + ') rotate(270)';
+            return `translate(${titlePadding},${height / 2}) rotate(270)`;
           })
           .attr('text-anchor', 'middle')
           .text(config.get('title.text'))

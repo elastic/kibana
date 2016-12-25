@@ -7,15 +7,14 @@ export default function PointSeriesVisType(Private) {
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
-    name: 'point_series',
+    name: 'horizontal_bar',
     title: 'Horizontal bar chart',
     icon: 'fa-bars',
     description: 'Like histogram chart but with horizontal bars.',
     params: {
       defaults: {
         grid: {
-          show: false,
-          categoryLines: true,
+          categoryLines: false,
           color: '#eee'
         },
         categoryAxes: [
@@ -71,7 +70,6 @@ export default function PointSeriesVisType(Private) {
         addLegend: true,
         legendPosition: 'right',
         showCircles: true,
-        smoothLines: false,
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,
@@ -86,6 +84,16 @@ export default function PointSeriesVisType(Private) {
       axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
       scaleTypes: ['linear', 'log', 'square root'],
       chartModes: ['normal', 'stacked'],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
+      }],
       editor: pointSeriesTemplate
     },
     schemas: new Schemas([

@@ -77,10 +77,10 @@ export default function AxisConfigFactory() {
       const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
-      const isHorizontal = (axisConfigArgsClone.position &&
-        ['top', 'bottom'].includes(axisConfigArgsClone.position)) ||
-        axisConfigArgsClone.type === 'category';
-      _.merge(typeDefaults, isHorizontal ? horizontalDefaults : verticalDefaults);
+      const isCategoryAxis = axisConfigArgsClone.type === 'category';
+      const isHorizontal = axisConfigArgsClone.position && ['top', 'bottom'].includes(axisConfigArgsClone.position);
+
+      _.merge(typeDefaults, isHorizontal || isCategoryAxis ? horizontalDefaults : verticalDefaults);
       this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);

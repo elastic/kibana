@@ -17,8 +17,7 @@ export default function PointSeriesVisType(Private) {
     params: {
       defaults: {
         grid: {
-          show: false,
-          categoryLines: true,
+          categoryLines: false,
           style: {
             color: '#eee'
           }
@@ -73,7 +72,6 @@ export default function PointSeriesVisType(Private) {
         addLegend: true,
         legendPosition: 'right',
         showCircles: true,
-        smoothLines: false,
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,

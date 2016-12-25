@@ -15,8 +15,7 @@ export default function PointSeriesVisType(Private) {
     params: {
       defaults: {
         grid: {
-          show: false,
-          categoryLines: true,
+          categoryLines: false,
           style: {
             color: '#eee'
           }
@@ -73,7 +72,6 @@ export default function PointSeriesVisType(Private) {
         addLegend: true,
         legendPosition: 'right',
         showCircles: true,
-        smoothLines: false,
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,
@@ -88,6 +86,16 @@ export default function PointSeriesVisType(Private) {
       axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
       scaleTypes: ['linear', 'log', 'square root'],
       chartModes: ['normal', 'stacked'],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
+      }],
       editor: pointSeriesTemplate
     },
     schemas: new Schemas([

@@ -15,8 +15,7 @@ export default function PointSeriesVisType(Private) {
     params: {
       defaults: {
         grid: {
-          show: false,
-          categoryLines: true,
+          categoryLines: false,
           style: {
             color: '#eee'
           }

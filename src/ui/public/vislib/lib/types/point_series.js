@@ -10,7 +10,7 @@ export default function ColumnHandler(Private) {
     }) : null;
 
 
-    let interpolate = cfg.interpolate;
+    let interpolate = matchingSeriParams ? matchingSeriParams.interpolate : cfg.interpolate;
     // for backward compatibility when loading URLs or configs we need to check smoothLines
     if (cfg.smoothLines) interpolate = 'cardinal';
 
@@ -32,8 +32,8 @@ export default function ColumnHandler(Private) {
       show: matchingSeriParams.show,
       type: matchingSeriParams.type,
       mode: matchingSeriParams.mode,
+      interpolate: interpolate,
       valueAxis: matchingSeriParams.valueAxis,
-      smoothLines: matchingSeriParams.smoothLines,
       drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
       showCircles: matchingSeriParams.showCircles,
       radiusRatio: matchingSeriParams.radiusRatio,

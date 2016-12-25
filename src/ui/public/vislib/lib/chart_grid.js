@@ -6,8 +6,7 @@ export default function ChartTitleFactory(Private) {
     style: {
       color: '#eee'
     },
-    show: false,
-    categoryLines: true,
+    categoryLines: false,
     valueAxis: undefined,
   };
 
@@ -54,7 +53,7 @@ export default function ChartTitleFactory(Private) {
     draw(width, height) {
       const self = this;
       return function (selection) {
-        if (!self._values || !self.get('show')) return;
+        if (!self._values) return;
         selection.each(function () {
           if (self.get('categoryLines')) self.drawCategoryLines(d3.select(this), width, height);
           if (self.get('valueAxis', false)) self.drawValueLines(d3.select(this), width, height);
