@@ -13,7 +13,7 @@ describe('addToSiri', function () {
     const series = new Map();
     const point = {};
     const id = 'id';
-    addToSiri(series, point, id);
+    addToSiri(series, point, id, id, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
@@ -27,10 +27,10 @@ describe('addToSiri', function () {
     const id = 'id';
 
     const point = {};
-    addToSiri(series, point, id);
+    addToSiri(series, point, id, id, { id: id });
 
     const point2 = {};
-    addToSiri(series, point2, id);
+    addToSiri(series, point2, id, id, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
@@ -45,7 +45,7 @@ describe('addToSiri', function () {
     const id = 'id';
     const label = 'label';
     const point = {};
-    addToSiri(series, point, id, label);
+    addToSiri(series, point, id, label, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');

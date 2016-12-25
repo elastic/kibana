@@ -9,7 +9,7 @@ export default function PointSeriesAddToSiri() {
 
     series.set(id, {
       label: label == null ? id : label,
-      aggLabel: agg.type.makeLabel(agg),
+      aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
       aggId: agg.parentId ? agg.parentId : agg.id,
       count: 0,
       values: [point]
