@@ -1,4 +1,4 @@
-# Kibana UI Framework
+  # Kibana UI Framework
 
 ## Development
 
@@ -7,9 +7,39 @@
 
 ## What is this?
 
-The UI Framework provides you with UI components you can quickly use to build UIs, as well as interactive examples which document how they're supposed to be used. These UI components are currently only implemented in CSS and markup, but eventually they'll grow to involve JS as well.
+The Kibana UI Framework provides you with UI components you can quickly use to build user interfaces for Kibana.
 
-When you build a UI using this framework (e.g. a plugin's UI), you can rest assured it will fit into the overall Kibana UI.
+The UI Framework comes with interactive examples which document how to use its various UI components. These components are currently only implemented in CSS, but eventually they'll grow to involve JS as well.
+
+When you build a UI using this framework (e.g. a plugin's UI), you can rest assured it will integrate seamlessly into the overall Kibana UI.
+
+## How to create a new component
+
+There are two steps to creating a new component:
+
+1. Create the CSS for the component in `ui_framework/components`.
+2. Document it with examples in `ui_framework/doc_site`.
+
+### Create the component CSS
+
+1. Create a directory for your component in `ui_framework/components`.
+2. Create an `_index.scss` file and however many component SCSS files you need in this directory. Import the component SCSS files into `_index.scss`.
+3. Import the `_index.scss` file into `ui_framework/components/index.scss`.
+
+This makes your styles available to Kibana and the UI Framework documentation.
+
+### Document the component with examples
+
+1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the component.
+2. Create a `{component name}_example.jsx` file inside the directory. You'll use this file to define the different examples for your component.
+3. Add the route to this file in `ui_framework/doc_site/src/services/routes/Routes.js`.
+4. In the `.jsx` file you created, define examples which demonstrate the component. An example consists of a title, an optional description, an HTML file and an optional JavaScript file. It might help to refer to other examples to see how they're structured.
+
+The complexity of the component should determine how many examples you need to create, and how complex they should be. In general, your examples should demonstrate:
+
+* The most common use-cases for the component.
+* How the component handles edge cases, e.g. overflowing content, text-based vs. element-based content.
+* The various states of the component, e.g. disabled, selected, empty of content, error state.
 
 ## Benefits
 
@@ -23,7 +53,7 @@ Engineers can copy and paste sample code into their projects to quickly get reli
 
 ### Remove CSS from the day-to-day
 
-The CSS portion of this framework means engineers don't need to spend mental cycles. These cycles can be spent on the things critical to the identity of the specific project they're working on, like architecture and business logic.
+The CSS portion of this framework means engineers don't need to spend mental cycles translating a design into CSS. These cycles can be spent on the things critical to the identity of the specific project they're working on, like architecture and business logic.
 
 Once this framework also provides JS components, engineers won't even need to _see_ CSS -- it will be encapsulated behind the JS components' interfaces.
 
@@ -48,6 +78,8 @@ For a more in-depth analysis of the problems with Bootstrap (and similar framewo
 
 ## Examples of other in-house UI frameworks
 
+* [GitHub's Primer](http://primercss.io/)
+* [Palantir's Blueprint](http://blueprintjs.com/docs/#components)
 * [Ubiquiti CSS Framework](http://ubnt-css.herokuapp.com/#/app/popover)
 * [Smaato React UI Framework](http://smaato.github.io/ui-framework/#/modal)
 * [Lonely Planet Style Guide](http://rizzo.lonelyplanet.com/styleguide/design-elements/colours)
