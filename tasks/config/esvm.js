@@ -37,9 +37,6 @@ module.exports = function (grunt) {
             data: dataDir
           }
         },
-        plugins: [{
-          name: 'x-pack', path: 'http://download.elastic.co/esvm/xpack-snapshots/master.zip'
-        }],
         nodes: [{
           cluster: { name: 'data-01' },
           http: { port: 9201 },
