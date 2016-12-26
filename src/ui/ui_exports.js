@@ -102,8 +102,7 @@ class UiExports {
 
       case 'visTypeEnhancers':
         return (plugin, spec) => {
-          //todo: comment
-          //...
+          //used for plugins that augment capabilities of an existing visualization
           this.aliases.visTypes = _.union(this.aliases.visTypes || [], spec);
         };
 
