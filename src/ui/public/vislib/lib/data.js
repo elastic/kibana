@@ -46,6 +46,7 @@ export default function DataFactory(Private) {
                   newVal.aggConfig = val.aggConfig;
                   newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
+                  newVal.series = val.series || seri.label;
                   return newVal;
                 })
               };
@@ -74,7 +75,7 @@ export default function DataFactory(Private) {
 
     _getLabels(data) {
       return this.type === 'series' ? getLabels(data) : this.pieNames();
-    };
+    }
 
     getDataType() {
       const data = this.getVisData();
@@ -91,7 +92,7 @@ export default function DataFactory(Private) {
       });
 
       return type;
-    };
+    }
 
     /**
      * Returns an array of the actual x and y data value objects
@@ -106,15 +107,16 @@ export default function DataFactory(Private) {
         return _.toArray(arr);
       }
       return [this.data];
-    };
+    }
 
     shouldBeStacked(seriesConfig) {
+      if (!seriesConfig) return false;
       const isHistogram = (seriesConfig.type === 'histogram');
       const isArea = (seriesConfig.type === 'area');
       const stacked = (seriesConfig.mode === 'stacked');
 
       return (isHistogram || isArea) && stacked;
-    };
+    }
 
     getStackedSeries(chartConfig, axis, series, first = false) {
       const matchingSeries = [];
@@ -125,7 +127,7 @@ export default function DataFactory(Private) {
         }
       });
       return matchingSeries;
-    };
+    }
 
     stackChartData(handler, data, chartConfig) {
       const stackedData = {};
@@ -136,7 +138,7 @@ export default function DataFactory(Private) {
         axis.stack(_.map(stackedData[id], 'values'));
       });
       return stackedData;
-    };
+    }
 
     stackData(handler) {
       const data = this.data;
@@ -168,7 +170,7 @@ export default function DataFactory(Private) {
       }
 
       return visData;
-    };
+    }
 
     /**
      * get min and max for all cols, rows of data
@@ -184,8 +186,8 @@ export default function DataFactory(Private) {
           min: Math.min(props.min, minMax.min),
           max: Math.max(props.max, minMax.max)
         };
-      }, {min: Infinity, max: -Infinity});
-    };
+      }, { min: Infinity, max: -Infinity });
+    }
 
     /**
      * Returns array of chart data objects for pie data objects
@@ -198,7 +200,7 @@ export default function DataFactory(Private) {
         return this.data.rows ? this.data.rows : this.data.columns;
       }
       return [this.data];
-    };
+    }
 
     /**
      * Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
@@ -213,7 +215,7 @@ export default function DataFactory(Private) {
     get(thing, def) {
       const source = (this.data.rows || this.data.columns || [this.data])[0];
       return _.get(source, thing, def);
-    };
+    }
 
     /**
      * Returns true if null values are present
@@ -229,7 +231,7 @@ export default function DataFactory(Private) {
           });
         });
       });
-    };
+    }
 
     /**
      * Return an array of all value objects
@@ -246,7 +248,7 @@ export default function DataFactory(Private) {
         .pluck('values')
         .flattenDeep()
         .value();
-    };
+    }
 
     /**
      * Validates that the Y axis min value defined by user input
@@ -260,7 +262,7 @@ export default function DataFactory(Private) {
         throw new Error('validateUserDefinedYMin expects a number');
       }
       return val;
-    };
+    }
 
     /**
      * Helper function for getNames
@@ -294,7 +296,7 @@ export default function DataFactory(Private) {
       });
 
       return names;
-    };
+    }
 
     /**
      * Flattens hierarchical data into an array of objects with a name and index value.
@@ -321,7 +323,7 @@ export default function DataFactory(Private) {
         })
         .value();
       }
-    };
+    }
 
     /**
      * Removes zeros from pie chart data
@@ -342,7 +344,7 @@ export default function DataFactory(Private) {
       }, []);
 
       return slices;
-    };
+    }
 
     /**
      * Returns an array of names ordered by appearance in the nested array
@@ -365,7 +367,7 @@ export default function DataFactory(Private) {
       });
 
       return _.uniq(names, 'label');
-    };
+    }
 
     /**
      * Inject zeros into the data
@@ -375,7 +377,7 @@ export default function DataFactory(Private) {
      */
     injectZeros(data, orderBucketsBySum = false) {
       return injectZeros(data, this.data, orderBucketsBySum);
-    };
+    }
 
     /**
      * Returns an array of all x axis values from the data
@@ -385,7 +387,7 @@ export default function DataFactory(Private) {
      */
     xValues(orderBucketsBySum = false) {
       return orderKeys(this.data, orderBucketsBySum);
-    };
+    }
 
     /**
      * Return an array of unique labels
@@ -397,7 +399,7 @@ export default function DataFactory(Private) {
      */
     getLabels() {
       return getLabels(this.data);
-    };
+    }
 
     /**
      * Returns a function that does color lookup on labels
@@ -406,8 +408,11 @@ export default function DataFactory(Private) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     getColorFunc() {
-      return color(this.getLabels(), this.uiState.get('vis.colors'));
-    };
+      const defaultColors = this.uiState.get('vis.defaultColors');
+      const overwriteColors = this.uiState.get('vis.colors');
+      const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
+      return color(this.getLabels(), colors);
+    }
 
     /**
      * Returns a function that does color lookup on names for pie charts
@@ -419,7 +424,7 @@ export default function DataFactory(Private) {
       return color(this.pieNames(this.getVisData()).map(function (d) {
         return d.label;
       }), this.uiState.get('vis.colors'));
-    };
+    }
 
     /**
      * ensure that the datas ordered property has a min and max
@@ -443,7 +448,7 @@ export default function DataFactory(Private) {
           if (missingMax) d.ordered.max = extent[1];
         }
       });
-    };
+    }
 
     /**
      * Calculates min and max values for all map data
@@ -456,12 +461,11 @@ export default function DataFactory(Private) {
      * @returns {Array} min and max values
      */
     mapDataExtents(series) {
-      let values;
-      values = _.map(series.rows, function (row) {
+      const values = _.map(series.rows, function (row) {
         return row[row.length - 1];
       });
       return [_.min(values), _.max(values)];
-    };
+    }
 
     /**
      * Get the maximum number of series, considering each chart
@@ -473,8 +477,8 @@ export default function DataFactory(Private) {
       return this.chartData().reduce(function (max, chart) {
         return Math.max(max, chart.series.length);
       }, 0);
-    };
+    }
   }
 
   return Data;
-};
+}

@@ -8,6 +8,7 @@ function makeDirectiveDef(id, compare) {
         let getBound = function () { return $parse($attr[id])(); };
         let defaultVal = {
           'greaterThan': -Infinity,
+          'greaterOrEqualThan': -Infinity,
           'lessThan': Infinity
         }[id];
 
@@ -36,4 +37,7 @@ uiModules
   }))
   .directive('lessThan', makeDirectiveDef('lessThan', function (a, b) {
     return a < b;
+  }))
+  .directive('greaterOrEqualThan', makeDirectiveDef('greaterOrEqualThan', function (a, b) {
+    return a >= b;
   }));

@@ -12,6 +12,7 @@ uiModules
     scope: {
       vis: '=',
       savedVis: '=',
+      uiState: '=',
     },
     link: function ($scope, $el) {
       const $optionContainer = $el.find('.visualization-options');

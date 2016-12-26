@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import errors from 'ui/errors';
 
 export default function ColumnHandler(Private) {
 
@@ -44,7 +45,8 @@ export default function ColumnHandler(Private) {
 
     return function (cfg, data) {
       const isUserDefinedYAxis = cfg.setYExtents;
-      const config = _.defaults({}, cfg, {
+      const config = _.cloneDeep(cfg);
+      _.defaultsDeep(config, {
         chartTitle: {},
         mode: 'normal'
       }, opts);
@@ -104,6 +106,8 @@ export default function ColumnHandler(Private) {
         config.charts = createCharts(cfg, data.data);
       }
 
+      if (typeof config.enableHover === 'undefined') config.enableHover = true;
+
       return config;
     };
   }
@@ -140,6 +144,32 @@ export default function ColumnHandler(Private) {
           }
         }
       ]
-    })
+    }),
+
+    heatmap: (cfg, data) => {
+      const defaults = create()(cfg, data);
+      defaults.valueAxes[0].show = false;
+      defaults.categoryAxes[0].style = {
+        rangePadding: 0,
+        rangeOuterPadding: 0
+      };
+      defaults.valueAxes.push({
+        id: 'CategoryAxis-2',
+        type: 'category',
+        position: 'left',
+        values: data.getLabels(),
+        scale: {
+          inverted: true
+        },
+        labels: {
+          axisFormatter: val => val
+        },
+        style: {
+          rangePadding: 0,
+          rangeOuterPadding: 0
+        }
+      });
+      return defaults;
+    }
   };
 };
