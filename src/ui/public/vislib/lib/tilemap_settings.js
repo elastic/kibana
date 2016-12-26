@@ -25,7 +25,7 @@ uiModules.get('kibana')
   .service('tilemapSettings', function ($http, mapsConfig, $sanitize) {
 
     const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution || ''));
-    const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, {attribution: attributionFromConfig});
+    const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
     class MapSettings {
 
@@ -58,7 +58,8 @@ uiModules.get('kibana')
 
           let manifest;
           try {
-            const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams, attributionFromConfig, optionsFromConfig);
+            const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams,
+              attributionFromConfig, optionsFromConfig);
             manifest = response.data;
             this._error = null;
           } catch (e) {
@@ -75,8 +76,8 @@ uiModules.get('kibana')
             subdomains: []
           };
 
-          const queryparams = _.assign({}, manifest.services[0].query_parameters);
-          const query = url.format({query: queryparams});
+          const queryparams = _.assign({ }, manifest.services[0].query_parameters);
+          const query = url.format({ query: queryparams });
           this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
 
           this._settingsInitialized = true;
@@ -100,7 +101,7 @@ uiModules.get('kibana')
 
         //check if there are any changes in the settings.
         let changes = false;
-        for (let key  in additionalQueryParams) {
+        for (const key in additionalQueryParams) {
           if (additionalQueryParams.hasOwnProperty(key)) {
             if (additionalQueryParams[key] !== this._queryParams[key]) {
               changes = true;

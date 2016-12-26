@@ -52,7 +52,7 @@ module.exports = function (kibana) {
           //if the url is set, the old settings must be used.
           //keeping this logic for backward compatibilty.
           const configuredUrl = server.config().get('tilemap.url');
-          const isOverridden = typeof configuredUrl === "string" && configuredUrl !== "";
+          const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
 
           return {
