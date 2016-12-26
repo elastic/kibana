@@ -1,4 +1,6 @@
+import { has } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
+import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
 
 module.exports = function (kibana) {
   let { resolve, join, sep } = require('path');
@@ -49,22 +51,18 @@ module.exports = function (kibana) {
               key: Joi.string()
             }).default()
           })
-        ).default([
-          {
-            match: {
-              protocol: '*',
-              host: '*',
-              port: '*',
-              path: '*'
-            },
-
-            timeout: 180000,
-            ssl: {
-              verify: true
-            }
-          }
-        ])
+        ).default()
       }).default();
+    },
+
+    deprecations: function () {
+      return [
+        (settings, log) => {
+          if (has(settings, 'proxyConfig')) {
+            log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+          }
+        }
+      ];
     },
 
     init: function (server, options) {
@@ -107,6 +105,14 @@ module.exports = function (kibana) {
 
           const requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
           const filterHeaders = server.plugins.elasticsearch.filterHeaders;
+
+          let additionalConfig;
+          if (server.config().get('console.proxyConfig')) {
+            additionalConfig = proxyConfigCollection.configForUri(uri);
+          } else {
+            additionalConfig = getElasticsearchProxyConfig(server);
+          }
+
           reply.proxy({
             mapUri: function (request, done) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist))
@@ -120,7 +126,7 @@ module.exports = function (kibana) {
               }
             },
 
-            ...proxyConfigCollection.configForUri(uri)
+            ...additionalConfig
           })
         }
       };

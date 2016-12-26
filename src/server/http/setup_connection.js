@@ -1,8 +1,31 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 import httpolyglot from 'httpolyglot';
-
+import { map } from 'lodash';
+import secureOptions from './secure_options';
 import tlsCiphers from './tls_ciphers';
+
+const getClientAuthenticationHttpOptions = (clientAuthentication) => {
+  switch (clientAuthentication) {
+    case 'none':
+      return {
+        requestCert: false,
+        rejectUnauthorized: false
+      };
+    case 'optional':
+      return {
+        requestCert: true,
+        rejectUnauthorized: false
+      };
+    case 'required':
+      return {
+        requestCert: true,
+        rejectUnauthorized: true
+      };
+    default:
+      throw new Error(`Unknown clientAuthentication option: ${clientAuthentication}`);
+  }
+};
 
 export default function (kbnServer, server, config) {
   // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
@@ -25,8 +48,7 @@ export default function (kbnServer, server, config) {
     }
   };
 
-  // enable tlsOpts if ssl key and cert are defined
-  const useSsl = config.get('server.ssl.key') && config.get('server.ssl.cert');
+  const useSsl = config.get('server.ssl.enabled');
 
   // not using https? well that's easy!
   if (!useSsl) {
@@ -34,16 +56,23 @@ export default function (kbnServer, server, config) {
     return;
   }
 
+  const { requestCert, rejectUnauthorized } = getClientAuthenticationHttpOptions(config.get('server.ssl.clientAuthentication'));
+
   server.connection({
     ...connectionOptions,
     tls: true,
     listener: httpolyglot.createServer({
       key: readFileSync(config.get('server.ssl.key')),
-      cert: readFileSync(config.get('server.ssl.cert')),
+      cert: readFileSync(config.get('server.ssl.certificate')),
+      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      passphrase: config.get('server.ssl.keyPassphrase'),
 
       ciphers: tlsCiphers,
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
-      honorCipherOrder: true
+      honorCipherOrder: true,
+      requestCert,
+      rejectUnauthorized,
+      secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
     })
   });
 

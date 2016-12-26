@@ -1,10 +1,12 @@
-import url from 'url';
 import _ from 'lodash';
-const readFile = (file) => require('fs').readFileSync(file, 'utf8');
+import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
+import url from 'url';
 
-module.exports = _.memoize(function (server) {
+const readFile = (file) => readFileSync(file, 'utf8');
+
+const createAgent = (server) => {
   const config = server.config();
   const target = url.parse(config.get('elasticsearch.url'));
 
@@ -12,7 +14,7 @@ module.exports = _.memoize(function (server) {
 
   const agentOptions = {};
 
-  const verificationMode = config.get('elasticsearch.ssl.verificationMode');
+  let verificationMode = config.get('elasticsearch.ssl.verificationMode');
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
@@ -42,8 +44,11 @@ module.exports = _.memoize(function (server) {
   }
 
   return new https.Agent(agentOptions);
-});
+};
 
-// See https://lodash.com/docs#memoize: We use a Map() instead of the default, because we want the keys in the cache
-// to be the server objects, and by default these would be coerced to strings as keys (which wouldn't be useful)
-module.exports.cache = new Map();
+export const getElasticsearchProxyConfig = (server) => {
+  return {
+    timeout: server.config().get('elasticsearch.requestTimeout'),
+    agent: createAgent(server)
+  };
+};

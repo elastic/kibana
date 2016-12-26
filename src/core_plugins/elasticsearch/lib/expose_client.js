@@ -28,10 +28,11 @@ module.exports = function (server) {
       url: config.get('elasticsearch.url'),
       username: config.get('elasticsearch.username'),
       password: config.get('elasticsearch.password'),
-      verifySsl: config.get('elasticsearch.ssl.verify'),
-      clientCrt: config.get('elasticsearch.ssl.cert'),
+      sslVerificationMode: config.get('elasticsearch.ssl.verificationMode'),
+      clientCrt: config.get('elasticsearch.ssl.certificate'),
       clientKey: config.get('elasticsearch.ssl.key'),
-      ca: config.get('elasticsearch.ssl.ca'),
+      clientKeyPassphrase: config.get('elasticsearch.ssl.keyPassphrase'),
+      ca: config.get('elasticsearch.ssl.certificateAuthorities'),
       apiVersion: config.get('elasticsearch.apiVersion'),
       pingTimeout: config.get('elasticsearch.pingTimeout'),
       requestTimeout: config.get('elasticsearch.requestTimeout'),
@@ -46,10 +47,29 @@ module.exports = function (server) {
       uri.auth = util.format('%s:%s', options.username, options.password);
     }
 
-    const ssl = { rejectUnauthorized: options.verifySsl };
+    const ssl = { };
+
+    switch (options.sslVerificationMode) {
+      case 'none':
+        ssl.rejectUnauthorized = false;
+        break;
+      case 'certificate':
+        ssl.rejectUnauthorized = true;
+
+        // by default, NodeJS is checking the server identify
+        ssl.checkServerIdentity = _.noop;
+        break;
+      case 'full':
+        ssl.rejectUnauthorized = true;
+        break;
+      default:
+        throw new Error(`Unknown ssl verificationMode: ${options.sslVerificationMode}`);
+    }
+
     if (options.clientCrt && options.clientKey) {
       ssl.cert = readFile(options.clientCrt);
       ssl.key = readFile(options.clientKey);
+      ssl.passphrase = options.clientKeyPassphrase;
     }
     if (options.ca) {
       ssl.ca = options.ca.map(readFile);

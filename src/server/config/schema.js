@@ -41,8 +41,19 @@ module.exports = () => Joi.object({
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
-      cert: Joi.string(),
-      key: Joi.string()
+      enabled: Joi.boolean().default(false),
+      certificate: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required(),
+      }),
+      key: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required()
+      }),
+      keyPassphrase: Joi.string(),
+      certificateAuthorities: Joi.array().single().items(Joi.string()),
+      clientAuthentication: Joi.string().valid('none', 'optional', 'required').default('none'),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2'))
     }).default(),
     cors: Joi.when('$dev', {
       is: true,
