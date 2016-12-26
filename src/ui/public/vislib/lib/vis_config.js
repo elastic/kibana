@@ -13,7 +13,7 @@ export default function VisConfigFactory(Private) {
     style: {
       margin : { top: 10, right: 3, bottom: 5, left: 3 }
     },
-    alerts: {},
+    alerts: [],
     categoryAxes: [],
     valueAxes: []
   };

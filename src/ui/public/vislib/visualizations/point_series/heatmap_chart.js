@@ -153,7 +153,7 @@ export default function HeatmapChartFactory(Private) {
             val = colorsNumber - 1;
           } else {
             val = (d.y - min) / (max - min); /* get val from 0 - 1 */
-            val = Math.floor(val * colorsNumber);
+            val = Math.min(colorsNumber - 1, Math.floor(val * colorsNumber));
           }
         }
         return val;

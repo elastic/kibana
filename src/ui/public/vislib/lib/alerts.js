@@ -14,6 +14,7 @@ export default function AlertsFactory(Private) {
     constructor(vis, alertDefs) {
       this.vis = vis;
       this.data = vis.data;
+      this.alertDefs = _.cloneDeep(alertDefs);
 
       this.alerts = _(alertDefs)
         .map(alertDef => {
@@ -55,11 +56,14 @@ export default function AlertsFactory(Private) {
     // shows new alert
     show(msg, type) {
       const vis = this.vis;
+      const alert = {
+        msg: msg,
+        type: type
+      };
+      if (this.alertDefs.find(alertDef => alertDef.msg === alert.msg)) return;
+      this.alertDefs.push(alert);
       $(vis.el).find('.vis-alerts-tray').append(
-        this._addAlert({
-          msg: msg,
-          type: type
-        })
+        this._addAlert(alert)
       );
     }
 

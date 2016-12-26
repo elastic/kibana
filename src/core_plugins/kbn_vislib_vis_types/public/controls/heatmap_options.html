@@ -75,11 +75,11 @@
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
-        ng-click="vis.params.setColorRange = !vis.params.setColorRange"
+        ng-click="toggleColorRangeSection()"
       >
         <span
           aria-hidden="true"
-          ng-class="{ 'fa-caret-down': vis.params.setColorRange, 'fa-caret-right': !vis.params.setColorRange }"
+          ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
@@ -90,10 +90,11 @@
              ng-model="vis.params.setColorRange"
              type="checkbox"
              class="kuiSideBarSectionTitle__action"
+             ng-click="toggleColorRangeSection(true)"
       >
     </div>
 
-    <div ng-if="vis.params.setColorRange" class="kuiSideBarCollapsibleSection">
+    <div ng-if="vis.params.setColorRange" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
           <tr>
@@ -155,13 +156,13 @@
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
-        ng-click="valueAxis.labels.show = !valueAxis.labels.show"
+        ng-click="toggleLabelSection()"
       >
         <span
           aria-hidden="true"
           ng-class="{
-          'fa-caret-down': valueAxis.labels.show,
-          'fa-caret-right': !valueAxis.labels.show
+          'fa-caret-down': showLabels,
+          'fa-caret-right': !showLabels
           }"
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
@@ -175,7 +176,7 @@
              class="kuiSideBarSectionTitle__action"
       >
     </div>
-    <div ng-if="valueAxis.labels.show" class="kuiSideBarCollapsibleSection">
+    <div ng-if="valueAxis.labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="rotateLabels">

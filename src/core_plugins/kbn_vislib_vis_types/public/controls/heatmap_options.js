@@ -9,7 +9,8 @@ module.directive('heatmapOptions', function () {
     template: heatmapOptionsTemplate,
     replace: true,
     link: function ($scope) {
-      $scope.isColorRangeOpen = true;
+      $scope.showColorRange = false;
+      $scope.showLabels = false;
       $scope.customColors = false;
       $scope.options = {
         rotateLabels: false
@@ -21,20 +22,32 @@ module.directive('heatmapOptions', function () {
         $scope.vis.params.valueAxes[0].labels.rotate = rotate ? 270 : 0;
       });
 
-      $scope.resetColors = () => {
+      $scope.resetColors = function () {
         $scope.uiState.set('vis.colors', null);
         $scope.customColors = false;
       };
 
+      $scope.toggleColorRangeSection = function (checkbox = false) {
+        $scope.showColorRange = !$scope.showColorRange;
+        if (checkbox && !$scope.vis.params.setColorRange) $scope.showColorRange = false;
+        if (!checkbox && $scope.showColorRange && !$scope.vis.params.setColorRange) $scope.vis.params.setColorRange = true;
+      };
+
+      $scope.toggleLabelSection = function (checkbox = false) {
+        $scope.showLabels = !$scope.showLabels;
+        if (checkbox && !$scope.valueAxis.labels.show) $scope.showLabels = false;
+        if ($scope.showLabels && !$scope.valueAxis.labels.show) $scope.valueAxis.labels.show = true;
+      };
+
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return -1;
+        if (index === 0) return;
         return $scope.vis.params.colorsRange[index - 1].to;
       };
 
       $scope.addRange = function () {
         const previousRange = _.last($scope.vis.params.colorsRange);
         const from = previousRange ? previousRange.to : 0;
-        $scope.vis.params.colorsRange.push({from: from, to: null});
+        $scope.vis.params.colorsRange.push({ from: from, to: null });
       };
 
       $scope.removeRange = function (index) {

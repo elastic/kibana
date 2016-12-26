@@ -117,7 +117,7 @@ uiModules.get('kibana')
           const labels = vislibVis.getLegendLabels();
           if (labels) {
             $scope.labels = _.map(labels, label => {
-              return {label: label};
+              return { label: label };
             });
           }
         } else {
