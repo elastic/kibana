@@ -7,10 +7,10 @@ marked.setOptions({
   sanitize: true // Sanitize HTML tags
 });
 
-import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
-import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
-import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
-import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
+import VislibVisualizationsMarkerTypesScaledCirclesProvider from './marker_types/scaled_circles';
+import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types/shaded_circles';
+import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
+import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
 export default function MapFactory(Private, tilemap, $sanitize) {
 
   const defaultMapZoom = 2;
