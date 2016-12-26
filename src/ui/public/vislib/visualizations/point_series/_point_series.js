@@ -80,10 +80,13 @@ export default function PointSeriesProvider(Private) {
 
     addCircleEvents(element) {
       const events = this.events;
-      const hover = events.addHoverEvent();
-      const mouseout = events.addMouseoutEvent();
+      if (this.handler.visConfig.get('enableHover')) {
+        const hover = events.addHoverEvent();
+        const mouseout = events.addMouseoutEvent();
+        element.call(hover).call(mouseout);
+      }
       const click = events.addClickEvent();
-      return element.call(hover).call(mouseout).call(click);
+      return element.call(click);
     }
 
     checkIfEnoughData() {
