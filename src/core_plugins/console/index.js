@@ -1,13 +1,14 @@
+import Joi from 'joi';
+import Boom from 'boom';
+import apiServer from './api_server/server';
+import { existsSync } from 'fs';
+import { resolve, join, sep } from 'path';
+import { startsWith, endsWith } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
 
-module.exports = function (kibana) {
-  let { resolve, join, sep } = require('path');
-  let Joi = require('joi');
-  let Boom = require('boom');
-  let modules = resolve(__dirname, 'public/webpackShims/');
-  let src = resolve(__dirname, 'public/src/');
-  let { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
+export default function (kibana) {
+  const modules = resolve(__dirname, 'public/webpackShims/');
+  const src = resolve(__dirname, 'public/src/');
 
   const apps = [];
 
@@ -88,7 +89,7 @@ module.exports = function (kibana) {
 
             if (!filters.some(re => re.test(uri))) {
               const err = Boom.forbidden();
-              err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+              err.output.payload = `Error connecting to '${uri}':\n\nUnable to send requests to that url.`;
               err.output.headers['content-type'] = 'text/plain';
               reply(err);
             } else {
@@ -109,19 +110,19 @@ module.exports = function (kibana) {
           const filterHeaders = server.plugins.elasticsearch.filterHeaders;
           reply.proxy({
             mapUri: function (request, done) {
-              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist))
+              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
             },
             xforward: true,
             onResponse(err, res, request, reply, settings, ttl) {
               if (err != null) {
-                reply("Error connecting to '" + uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                reply(`Error connecting to '${uri}':\n\n${err.message}`).type('text/plain').statusCode = 502;
               } else {
                 reply(null, res);
               }
             },
 
             ...proxyConfigCollection.configForUri(uri)
-          })
+          });
         }
       };
 
@@ -150,14 +151,13 @@ module.exports = function (kibana) {
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
         handler: function (req, reply) {
-          let server = require('./api_server/server');
-          let { sense_version, apis } = req.query;
+          const { sense_version, apis } = req.query;
           if (!apis) {
             reply(Boom.badRequest('"apis" is a required param.'));
             return;
           }
 
-          return server.resolveApi(sense_version, apis.split(","), reply);
+          return apiServer.resolveApi(sense_version, apis.split(','), reply);
         }
       });
 
@@ -190,5 +190,5 @@ module.exports = function (kibana) {
         join(src, 'sense_editor/mode/worker.js')
       ]
     }
-  })
-};
+  });
+}

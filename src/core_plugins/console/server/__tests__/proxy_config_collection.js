@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import { Agent as HttpsAgent } from 'https';
 
-import { ProxyConfigCollection } from '../proxy_config_collection'
+import { ProxyConfigCollection } from '../proxy_config_collection';
 
 describe('ProxyConfigCollection', function () {
   beforeEach(function () {
@@ -60,7 +60,7 @@ describe('ProxyConfigCollection', function () {
 
       timeout: 5
     }
-  ]
+  ];
 
   function getTimeout(uri) {
     const collection = new ProxyConfigCollection(proxyConfigs);
@@ -69,7 +69,7 @@ describe('ProxyConfigCollection', function () {
 
   context('http://localhost:5601', function () {
     it('defaults to the first matching timeout', function () {
-      expect(getTimeout('http://localhost:5601')).to.be(3)
+      expect(getTimeout('http://localhost:5601')).to.be(3);
     });
   });
 
