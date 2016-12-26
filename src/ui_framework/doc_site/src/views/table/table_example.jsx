@@ -14,6 +14,10 @@ export default createExample([{
   html: require('./controlled_table.html'),
   hasDarkTheme: false,
 }, {
+  title: 'ControlledTable with LoadingResults',
+  html: require('./controlled_table_loading_results.html'),
+  hasDarkTheme: false,
+}, {
   title: 'ControlledTable with NoResults',
   html: require('./controlled_table_no_results.html'),
   hasDarkTheme: false,
