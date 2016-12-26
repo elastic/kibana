@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import html from 'ui/visualize/visualize_legend.html';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
+import VislibComponentsColorColorProvider from 'ui/vis/components/color/color';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import uiModules from 'ui/modules';
 
