@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import supports from 'ui/utils/supports';
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
+import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
-  const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
+  const MapsVisType = Private(MapsVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonGeoJsonProvider);
 
-  return new VislibVisType({
+  return new MapsVisType({
     name: 'tile_map',
     title: 'Tile map',
     icon: 'fa-map-marker',

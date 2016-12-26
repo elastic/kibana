@@ -7,7 +7,7 @@ import L from 'leaflet';
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import $ from 'jquery';
-import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
+import VislibVisualizationsMapProvider from 'ui/vis_maps/visualizations/_map';
 
 // // Data
 // const dataArray = [

@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import dataLabel from 'ui/vislib/lib/_data_label';
 import VislibLibDispatchProvider from '../lib/dispatch';
 import TooltipProvider from 'ui/vis/components/tooltip';
 export default function ChartBaseClass(Private) {
@@ -33,44 +32,14 @@ export default function ChartBaseClass(Private) {
         this.tooltip = new Tooltip('chart', $el, formatter, events);
         this.tooltips.push(this.tooltip);
       }
-
-      this._addIdentifier = _.bind(this._addIdentifier, this);
     }
 
-    /**
-     * Renders the chart(s)
-     *
-     * @method render
-     * @returns {HTMLElement} Contains the D3 chart
-     */
     render() {
       const selection = d3.select(this.chartEl);
-
       selection.selectAll('*').remove();
       selection.call(this.draw());
-    };
+    }
 
-    /**
-     * Append the data label to the element
-     *
-     * @method _addIdentifier
-     * @param selection {Object} d3 select object
-     */
-    _addIdentifier(selection, labelProp) {
-      labelProp = labelProp || 'label';
-      const labels = this.handler.data.labels;
-
-      function resolveLabel(datum) {
-        if (labels.length === 1) return labels[0];
-        if (datum[0]) return datum[0][labelProp];
-        return datum[labelProp];
-      }
-
-      selection.each(function (datum) {
-        const label = resolveLabel(datum);
-        if (label != null) dataLabel(this, label);
-      });
-    };
 
     /**
      * Removes all DOM elements from the root element
@@ -84,8 +53,8 @@ export default function ChartBaseClass(Private) {
         tooltip.destroy();
       });
       selection.remove();
-    };
+    }
   }
 
   return Chart;
-};
+}

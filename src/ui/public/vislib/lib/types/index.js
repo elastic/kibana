@@ -1,6 +1,5 @@
 import VislibLibTypesPointSeriesProvider from './point_series';
 import VislibLibTypesPieProvider from './pie';
-import VislibLibTypesTileMapProvider from './tile_map';
 
 export default function TypeFactory(Private) {
   const pointSeries = Private(VislibLibTypesPointSeriesProvider);
@@ -15,7 +14,6 @@ export default function TypeFactory(Private) {
     line: pointSeries.line,
     pie: Private(VislibLibTypesPieProvider),
     area: pointSeries.area,
-    tile_map: Private(VislibLibTypesTileMapProvider),
     point_series: pointSeries.line
   };
 };
