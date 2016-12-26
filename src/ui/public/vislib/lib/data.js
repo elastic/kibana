@@ -46,6 +46,7 @@ export default function DataFactory(Private) {
                   newVal.aggConfig = val.aggConfig;
                   newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
+                  newVal.series = val.series || seri.label;
                   return newVal;
                 })
               };
@@ -109,6 +110,7 @@ export default function DataFactory(Private) {
     }
 
     shouldBeStacked(seriesConfig) {
+      if (!seriesConfig) return false;
       const isHistogram = (seriesConfig.type === 'histogram');
       const isArea = (seriesConfig.type === 'area');
       const stacked = (seriesConfig.mode === 'stacked');
@@ -406,7 +408,10 @@ export default function DataFactory(Private) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     getColorFunc() {
-      return color(this.getLabels(), this.uiState.get('vis.colors'));
+      const defaultColors = this.uiState.get('vis.defaultColors');
+      const overwriteColors = this.uiState.get('vis.colors');
+      const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
+      return color(this.getLabels(), colors);
     }
 
     /**
