@@ -76,7 +76,8 @@ uiModules.get('kibana')
             subdomains: []
           };
 
-          const queryparams = _.assign({ }, manifest.services[0].query_parameters);
+          //additional query params need to be propagated to the TMS endpoint as well.
+          const queryparams = _.assign({ }, manifest.services[0].query_parameters, this._queryParams);
           const query = url.format({ query: queryparams });
           this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
 
