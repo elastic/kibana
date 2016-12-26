@@ -11,6 +11,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   _.class(VislibRenderbot).inherits(Renderbot);
   function VislibRenderbot(vis, $el, uiState) {
     VislibRenderbot.Super.call(this, vis, $el, uiState);
+    this.refreshLegend = 0;
     this._createVis();
   }
 
@@ -26,6 +27,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
 
     if (this.chartData) {
       this.vislibVis.render(this.chartData, this.uiState);
+      this.refreshLegend++;
     }
   };
 
@@ -49,6 +51,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
     this.chartData = this.buildChartData(esResponse);
     return AngularPromise.delay(1).then(() => {
       this.vislibVis.render(this.chartData, this.uiState);
+      this.refreshLegend++;
     });
   };
 

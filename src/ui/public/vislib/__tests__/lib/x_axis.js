@@ -94,10 +94,9 @@ describe('Vislib xAxis Class Test Suite', function () {
     fixture = el.append('div')
       .attr('class', 'x-axis-div');
 
-    let visConfig = new VisConfig({
-      el: $('.x-axis-div')[0],
+    const visConfig = new VisConfig({
       type: 'histogram'
-    }, data, persistedState);
+    }, data, persistedState, $('.x-axis-div')[0]);
     xAxis = new Axis(visConfig, {
       type: 'category',
       id: 'CategoryAxis-1'

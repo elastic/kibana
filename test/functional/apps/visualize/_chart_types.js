@@ -15,8 +15,8 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.describe('chart types', function indexPatternCreation() {
     bdd.it('should show the correct chart types', function () {
-      var expectedChartTypes = [
-        'Area chart', 'Data table', 'Line chart', 'Markdown widget',
+      const expectedChartTypes = [
+        'Area chart', 'Data table', 'Heatmap chart', 'Line chart', 'Markdown widget',
         'Metric', 'Pie chart', 'Tag cloud', 'Tile map', 'Timeseries', 'Vertical bar chart'
       ];
       // find all the chart types and make sure there all there

@@ -25,7 +25,9 @@ export default function AxisConfigFactory() {
       opacity: 1,
       tickColor: '#ddd',
       tickWidth: '1px',
-      tickLength: '6px'
+      tickLength: '6px',
+      rangePadding: 0.1,
+      rangeOuterPadding: 0
     },
     labels: {
       axisFormatter: null,
@@ -47,6 +49,15 @@ export default function AxisConfigFactory() {
   const categoryDefaults = {
     type: 'category',
     position: 'bottom',
+  };
+
+  const valueDefaults = {
+    labels: {
+      axisFormatter: d3.format('n')
+    }
+  };
+
+  const horizontalDefaults = {
     labels: {
       rotate: 0,
       rotateAnchor: 'end',
@@ -55,9 +66,9 @@ export default function AxisConfigFactory() {
     }
   };
 
-  const valueDefaults = {
+  const verticalDefaults = {
     labels: {
-      axisFormatter: d3.format('n')
+      rotateAnchor: 'middle'
     }
   };
 
@@ -67,6 +78,7 @@ export default function AxisConfigFactory() {
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
       this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
+      _.merge(this._values, this.isHorizontal() ? horizontalDefaults : verticalDefaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');
@@ -114,6 +126,7 @@ export default function AxisConfigFactory() {
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
+        this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
       }
 
       let offset;

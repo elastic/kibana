@@ -75,10 +75,9 @@ function createData(seriesData) {
   .attr('class', 'y-axis-div');
 
   buildYAxis = function (params) {
-    let visConfig = new VisConfig({
-      el: node,
+    const visConfig = new VisConfig({
       type: 'histogram'
-    }, data, persistedState);
+    }, data, persistedState, node);
     return new YAxis(visConfig, _.merge({}, {
       id: 'ValueAxis-1',
       type: 'value',
