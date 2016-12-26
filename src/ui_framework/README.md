@@ -23,8 +23,11 @@ There are two steps to creating a new component:
 ### Create the component CSS
 
 1. Create a directory for your component in `ui_framework/components`.
-2. Create an `_index.scss` file and however many component SCSS files you need in this directory. Import the component SCSS files into `_index.scss`.
-3. Import the `_index.scss` file into `ui_framework/components/index.scss`.
+2. Create an `_index.scss` file in this directory.
+3. Create at least one component SCSS file in the same directory.
+4. If your component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g. Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput, TextArea, and CheckBox), then you can create additional SCSS files for them in the same directory.
+5. Import these component SCSS files into `_index.scss`.
+6. Import the `_index.scss` file into `ui_framework/components/index.scss`.
 
 This makes your styles available to Kibana and the UI Framework documentation.
 
