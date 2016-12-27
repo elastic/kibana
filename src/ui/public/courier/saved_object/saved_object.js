@@ -259,12 +259,41 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     }
 
     /**
+     * Attempts to create the current object using the serialized source. If an object already
+     * exists, a warning message requests an overwrite confirmation.
+     * @param source - serialized version of this object (return value from this.serialize())
+     * What will be indexed into elasticsearch.
+     * @returns {Promise} - A promise that is resolved with the objects id if the object is
+     * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
+     * a confirmRejected = true parameter so that case can be handled differently than
+     * a create or index error.
+     * @resolved {String} - The id of the doc
+     */
+    const createSource = (source) => {
+      return docSource.doCreate(source)
+        .catch((err) => {
+          // record exists, confirm overwriting
+          if (_.get(err, 'origError.status') === 409) {
+            const confirmMessage = 'Are you sure you want to overwrite ' + this.title + '?';
+
+            return safeConfirm(confirmMessage).then(
+              () => { return docSource.doIndex(source); },
+              () => { throw { confirmRejected : true }; }
+            );
+          }
+          return Promise.reject(err);
+        });
+    };
+
+    /**
      * Saves this object.
      *
+     * @param {bool} confirmOverwrite=false If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists. Defaults to false.
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = () => {
+    this.save = (confirmOverwrite = false) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -285,7 +314,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       const source = this.serialize();
 
       this.isSaving = true;
-      return docSource.doIndex(source)
+      const doSave = confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+      return doSave
         .then((id) => { this.id = id; })
         .then(refreshIndex)
         .then(() => {
@@ -296,6 +326,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           this.isSaving = false;
           this.id = originalId;
+          if (err && err.confirmRejected) return;
           return Promise.reject(err);
         });
     };
