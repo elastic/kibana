@@ -72,8 +72,15 @@ $formTransitionTiming: 0.1s linear;
   border-radius: $buttonBorderRadius;
   transition: border-color $formTransitionTiming;
 
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
   &:invalid {
-    border-color: $errorBorderColor;
+    &:not(.ng-untouched) { /* 1 */
+      border-color: $errorBorderColor;
+    }
   }
 
   &:focus {
