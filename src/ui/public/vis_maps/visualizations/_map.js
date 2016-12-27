@@ -5,7 +5,7 @@ import VislibVisualizationsMarkerTypesScaledCirclesProvider from './marker_types
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
-
+import '../lib/tilemap_settings';
 
 export default function MapFactory(Private, tilemapSettings) {
   const defaultMapZoom = 2;
