@@ -288,8 +288,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
 
     /**
      * @typedef {Object} SaveOptions
-     * @property {boolean} confirmOverwrite=false - If true, attempts to create the source so it
-     * can confirm an overwrite if a document with the id already exists. Defaults to false.
+     * @property {boolean} confirmOverwrite - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists.
      */
 
     /**
