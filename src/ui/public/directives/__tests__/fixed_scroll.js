@@ -12,6 +12,11 @@ describe('FixedScroll directive', function () {
   let trash = [];
 
   beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module(function ($provide) {
+    $provide.service('debounce', () => {
+      return targetFunction => targetFunction;
+    });
+  }));
   beforeEach(ngMock.inject(function ($compile, $rootScope) {
 
     compile = function (ratioY, ratioX) {
