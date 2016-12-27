@@ -64,7 +64,7 @@ uiModules.get('kibana')
           } catch (e) {
             //request failed. Continue to use old settings.
             this._settingsInitialized = true;
-            this._error = e;
+            this._error = new Error(`Could not retrieve map service configuration from the manifest-service. ${e.message}`);
             return true;
           }
 
