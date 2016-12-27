@@ -17,9 +17,12 @@
 
         <file-upload
           on-read="importAll(fileContents)"
-          upload-selector="button.upload"
+          upload-selector="[data-import-saved-objects-button]"
         >
-          <button class="kuiButton kuiButton--basic kuiButton--iconText">
+          <button
+            class="kuiButton kuiButton--basic kuiButton--iconText"
+            data-import-saved-objects-button
+          >
             <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
             Import
           </button>
