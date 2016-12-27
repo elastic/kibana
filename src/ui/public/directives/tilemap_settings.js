@@ -20,12 +20,11 @@ uiRoutes.afterSetupWork(function (tilemapSettings) {
   return tilemapSettings.loadSettings();
 });
 
-
 uiModules.get('kibana')
-  .service('tilemapSettings', function ($http, mapsConfig, $sanitize) {
+  .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize) {
 
-    const attributionFromConfig = $sanitize(marked(mapsConfig.deprecated.config.options.attribution || ''));
-    const optionsFromConfig = _.assign({}, mapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+    const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
+    const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
     class MapSettings {
 
@@ -35,7 +34,7 @@ uiModules.get('kibana')
         this._error = null;
 
         //initialize settings with the default of the configuration
-        this._url = mapsConfig.deprecated.config.url;
+        this._url = tilemapsConfig.deprecated.config.url;
         this._options = optionsFromConfig;
 
         this._invalidateSettings();
@@ -48,7 +47,7 @@ uiModules.get('kibana')
         this._settingsInitialized = false;
         this._loadSettings = _.once(async() => {
 
-          if (mapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
+          if (tilemapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
             this._settingsInitialized = true;
           }
 
@@ -58,7 +57,7 @@ uiModules.get('kibana')
 
           let manifest;
           try {
-            const response = await getTileServiceManifest(mapsConfig.manifestServiceUrl, this._queryParams,
+            const response = await getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams,
               attributionFromConfig, optionsFromConfig);
             manifest = response.data;
             this._error = null;
@@ -154,9 +153,6 @@ uiModules.get('kibana')
     }
 
     return new MapSettings();
-
-
-
 
     async function getTileServiceManifest(manifestUrl, additionalQueryParams) {
 

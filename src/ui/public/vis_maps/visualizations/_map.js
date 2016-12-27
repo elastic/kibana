@@ -8,7 +8,6 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatm
 
 
 export default function MapFactory(Private, tilemapSettings) {
-
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
@@ -43,7 +42,6 @@ export default function MapFactory(Private, tilemapSettings) {
       this._geoJson = _.get(this._chartData, 'geoJson');
 
       const mapOptions = tilemapSettings.getOptions();
-
       this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};

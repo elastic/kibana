@@ -57,7 +57,7 @@ module.exports = function (kibana) {
 
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-            mapsConfig: {
+            tilemapsConfig: {
               deprecated: {
                 isOverridden: isOverridden,
                 config: tilemapConfig,
