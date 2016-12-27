@@ -47,6 +47,10 @@ The complexity of the component should determine how many examples you need to c
 * How the component handles edge cases, e.g. overflowing content, text-based vs. element-based content.
 * The various states of the component, e.g. disabled, selected, empty of content, error state.
 
+## Writing CSS
+
+Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/css_style_guide.md).
+
 ## Benefits
 
 ### Dynamic, interactive documentation
