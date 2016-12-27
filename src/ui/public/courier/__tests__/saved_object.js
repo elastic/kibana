@@ -128,7 +128,7 @@ describe('Saved Object', function () {
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
-            return savedObject.save(true)
+            return savedObject.save({ confirmOverwrite : true })
               .then(() => {
                 expect(window.confirm.called).to.be(true);
                 expect(savedObject.id).to.be('myId');
@@ -148,7 +148,7 @@ describe('Saved Object', function () {
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
-            return savedObject.save(true)
+            return savedObject.save({ confirmOverwrite : true })
               .then(() => {
                 expect(savedObject.id).to.be('HI');
                 expect(savedObject.isSaving).to.be(false);
@@ -164,11 +164,11 @@ describe('Saved Object', function () {
             stubConfirmOverwrite();
             esAdminStub.index.restore();
             esDataStub.index.restore();
-            
+
             sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.reject());
             sinon.stub(esDataStub, 'index').returns(BluebirdPromise.reject());
 
-            return savedObject.save(true)
+            return savedObject.save({ confirmOverwrite : true })
               .then(() => {
                 expect(true).to.be(false); // Force failure, the save should not succeed.
               })
@@ -188,7 +188,7 @@ describe('Saved Object', function () {
           });
 
           stubConfirmOverwrite();
-          return savedObject.save(false)
+          return savedObject.save({ confirmOverwrite : false })
             .then(() => {
               expect(window.confirm.called).to.be(false);
             });

@@ -158,7 +158,7 @@ uiModules.get('apps/management')
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
-              return obj.save(true);
+              return obj.save({ confirmOverwrite : true });
             });
           });
         })

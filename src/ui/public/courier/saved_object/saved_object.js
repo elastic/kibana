@@ -285,15 +285,21 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         });
     };
 
+
+    /**
+     * @typedef {Object} SaveOptions
+     * @property {boolean} confirmOverwrite=false - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists. Defaults to false.
+     */
+
     /**
      * Saves this object.
      *
-     * @param {bool} confirmOverwrite=false If true, attempts to create the source so it
-     * can confirm an overwrite if a document with the id already exists. Defaults to false.
+     * @param {SaveOptions} saveOptions?
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = (confirmOverwrite = false) => {
+    this.save = (saveOptions = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -314,7 +320,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       const source = this.serialize();
 
       this.isSaving = true;
-      const doSave = confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+      const doSave = saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
       return doSave
         .then((id) => { this.id = id; })
         .then(refreshIndex)
