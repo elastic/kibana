@@ -6,20 +6,20 @@ import fs from 'fs';
 import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
 
-import { ProxyConfig } from '../proxy_config'
+import { ProxyConfig } from '../proxy_config';
 
 const matchGoogle = {
   protocol: 'https',
   host: 'google.com',
   path: '/search'
-}
+};
 const parsedGoogle = parseUrl('https://google.com/search');
 const parsedLocalEs = parseUrl('https://localhost:5601/search');
 
 describe('ProxyConfig', function () {
   beforeEach(function () {
     sinon.stub(fs, 'readFileSync', function (path) {
-      return { path }
+      return { path };
     });
   });
 
