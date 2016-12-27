@@ -14,11 +14,11 @@ export default createExample([{
   html: require('./controlled_table.html'),
   hasDarkTheme: false,
 }, {
-  title: 'ControlledTable with LoadingResults',
-  html: require('./controlled_table_loading_results.html'),
+  title: 'ControlledTable with LoadingItems',
+  html: require('./controlled_table_loading_items.html'),
   hasDarkTheme: false,
 }, {
-  title: 'ControlledTable with NoResults',
-  html: require('./controlled_table_no_results.html'),
+  title: 'ControlledTable with NoItems',
+  html: require('./controlled_table_no_items.html'),
   hasDarkTheme: false,
 }]);
