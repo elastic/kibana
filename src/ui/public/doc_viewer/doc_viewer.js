@@ -30,7 +30,7 @@ uiModules.get('kibana')
           </li>`);
         $tabs.append($tab);
         const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns"';
-        const $ext = $(`<render-directive ${$viewAttrs} ng-show="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
+        const $ext = $(`<render-directive ${$viewAttrs} ng-if="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
           </render-directive>`);
         $ext.html(view.directive.template);
         $content.append($ext);
