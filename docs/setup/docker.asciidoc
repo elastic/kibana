@@ -6,7 +6,7 @@ installed.
 
 NOTE: https://www.elastic.co/guide/en/x-pack/current/index.html[X-Pack] is
 pre-installed in this image. With X-Pack installed, Kibana expects to
-connect to an Elasticsearch cluster that is also runnning X-Pack.
+connect to an Elasticsearch cluster that is also running X-Pack.
 
 === Pulling the image
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
