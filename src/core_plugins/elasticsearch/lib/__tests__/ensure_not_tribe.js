@@ -2,9 +2,9 @@ import expect from 'expect.js';
 import { noop } from 'lodash';
 import sinon from 'sinon';
 
-import { checkForTribe } from '../check_for_tribe';
+import { ensureNotTribe } from '../ensure_not_tribe';
 
-describe('plugins/elasticsearch checkForTribe', () => {
+describe('plugins/elasticsearch ensureNotTribe', () => {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
 
@@ -20,7 +20,7 @@ describe('plugins/elasticsearch checkForTribe', () => {
 
   it('fetches the local node stats of the node that the elasticsearch client is connected to', async () => {
     const callWithInternalUser = stubcallWithInternalUser();
-    await checkForTribe(callWithInternalUser);
+    await ensureNotTribe(callWithInternalUser);
     sinon.assert.calledOnce(callWithInternalUser);
   });
 
@@ -39,8 +39,8 @@ describe('plugins/elasticsearch checkForTribe', () => {
     };
 
     try {
-      await checkForTribe(stubcallWithInternalUser(nodeInfo));
-      throw new Error('checkForTribe() should have thrown');
+      await ensureNotTribe(stubcallWithInternalUser(nodeInfo));
+      throw new Error('ensureNotTribe() should have thrown');
     } catch (err) {
       expect(err).to.be.a(Error);
     }

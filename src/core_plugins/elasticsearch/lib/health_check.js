@@ -3,9 +3,9 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
-import checkEsVersion from './check_es_version';
 import kibanaVersion from './kibana_version';
-import { checkForTribe } from './check_for_tribe';
+import { ensureEsVersion } from './ensure_es_version';
+import { ensureNotTribe } from './ensure_not_tribe';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -80,7 +80,7 @@ module.exports = function (plugin, server) {
   }
 
   function waitForEsVersion() {
-    return checkEsVersion(server, kibanaVersion.get()).catch(err => {
+    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
       return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
     });
@@ -94,14 +94,14 @@ module.exports = function (plugin, server) {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
-      .then(checkForTribe.bind(this, callAdminAsKibanaUser))
+      .then(ensureNotTribe.bind(this, callAdminAsKibanaUser))
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
           return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => checkEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
         }
       });
 

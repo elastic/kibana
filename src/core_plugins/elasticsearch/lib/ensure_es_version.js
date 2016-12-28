@@ -16,7 +16,7 @@ import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-module.exports = function checkEsVersion(server, kibanaVersion) {
+export function ensureEsVersion(server, kibanaVersion) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -90,4 +90,4 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
     return true;
   });
-};
+}

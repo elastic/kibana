@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-export function checkForTribe(callWithInternalUser) {
+export function ensureNotTribe(callWithInternalUser) {
   return callWithInternalUser('nodes.info', {
     nodeId: '_local',
     filterPath: 'nodes.*.settings.tribe'
