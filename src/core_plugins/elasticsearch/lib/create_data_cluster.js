@@ -1,5 +1,5 @@
 import { bindKey } from 'lodash';
-import clientLogger from './client_logger';
+import { clientLogger } from './client_logger';
 
 export function createDataCluster(server) {
   const config = server.config();

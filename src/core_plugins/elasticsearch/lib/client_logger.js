@@ -1,4 +1,4 @@
-module.exports = function (server) {
+export function clientLogger(server) {
   return class ElasticsearchClientLogging {
     // additional tags to differentiate connection
     tags = [];
@@ -32,4 +32,4 @@ module.exports = function (server) {
     }
     close() {}
   };
-};
+}

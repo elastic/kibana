@@ -1,4 +1,4 @@
-import Cluster from './cluster';
+import { Cluster } from './cluster';
 import { get, set } from 'lodash';
 
 export function createClusters(server) {

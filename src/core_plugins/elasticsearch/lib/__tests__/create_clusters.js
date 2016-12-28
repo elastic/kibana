@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import { createClusters } from '../create_clusters';
-import Cluster from '../cluster';
+import { Cluster } from '../cluster';
 import sinon from 'sinon';
 import { partial } from 'lodash';
 

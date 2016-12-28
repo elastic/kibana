@@ -6,7 +6,7 @@ import Boom from 'boom';
 import filterHeaders from './filter_headers';
 import { parseConfig } from './parse_config';
 
-export default class Cluster {
+export class Cluster {
   constructor(config) {
     this._config = Object.assign({}, config);
     this.errors = elasticsearch.errors;
