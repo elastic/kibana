@@ -17,18 +17,6 @@ export class Cluster {
     return this;
   }
 
-  /**
-   * callWithRequest
-   *
-   * Performs a call to ES, passing through whitelisted headers in the request
-   *
-   * @param {Object|undefined} req - The request object
-   * @param {string} endpoint
-   * @param {Object} clientParams
-   * @param {Object} options
-   * @param {boolean} options.wrap401Errors
-   * @returns {Promise}
-   */
   callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
     if (req.headers) {
       const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
@@ -37,17 +25,6 @@ export class Cluster {
 
     return callAPI(this._noAuthClient, endpoint, clientParams, options);
   }
-
-  /**
-   * callWithInternalUser
-   *
-   * Performs a call to ES using the credentials in kibana.yml
-   *
-   * @param {string} endpoint
-   * @param {Object} clientParams
-   * @param {Object} options
-   * @returns {Promise}
-   */
 
   callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
     return callAPI(this._client, endpoint, clientParams, options);
