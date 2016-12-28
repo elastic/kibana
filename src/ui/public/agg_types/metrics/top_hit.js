@@ -98,12 +98,15 @@ export default function AggTypeMetricTopProvider(Private) {
           }
         ],
         controller: function ($scope) {
-          $scope.options = _.cloneDeep($scope.aggParam.options);
+          $scope.options = [];
           $scope.$watchGroup([ 'agg.vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
             if (fieldType && visName) {
-              _.each($scope.options, option => {
-                option.disabled = !option.isCompatibleVis(visName) || !option.isCompatibleType(fieldType);
+              $scope.options = _.filter($scope.aggParam.options, option => {
+                return option.isCompatibleVis(visName) && option.isCompatibleType(fieldType);
               });
+              if ($scope.options.length === 1) {
+                $scope.agg.params.aggregate = $scope.options[0];
+              }
             }
           });
         },

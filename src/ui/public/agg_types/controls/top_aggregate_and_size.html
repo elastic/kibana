@@ -12,7 +12,7 @@
       required
       name="aggregate"
       ng-model="agg.params.aggregate"
-      ng-options="opt as opt.display disable when opt.disabled for opt in options| orderBy: 'display' track by opt.val"
+      ng-options="opt as opt.display for opt in options| orderBy: 'display' track by opt.val"
       class="form-control"
     ></select>
   </div>
