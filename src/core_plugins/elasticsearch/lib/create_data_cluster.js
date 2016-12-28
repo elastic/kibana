@@ -1,7 +1,7 @@
 import { bindKey } from 'lodash';
 import clientLogger from './client_logger';
 
-export default function (server) {
+export function createDataCluster(server) {
   const config = server.config();
   const ElasticsearchClientLogging = clientLogger(server);
 

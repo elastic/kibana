@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { bindKey, set, get, partial } from 'lodash';
-import createDataCluster from '../create_data_cluster';
+import { createDataCluster } from '../create_data_cluster';
 
 describe('plugins/elasticsearch', function () {
   describe('create_data_cluster', function () {

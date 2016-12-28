@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { bindKey, set, get, partial } from 'lodash';
-import createAdminCluster from '../create_admin_cluster';
+import { createAdminCluster } from '../create_admin_cluster';
 
 describe('plugins/elasticsearch', function () {
   describe('create_admin_cluster', function () {

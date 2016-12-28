@@ -2,8 +2,8 @@ import { trim, trimRight, bindKey } from 'lodash';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
-import createDataCluster from './lib/create_data_cluster';
-import createAdminCluster from './lib/create_admin_cluster';
+import { createDataCluster } from './lib/create_data_cluster';
+import { createAdminCluster } from './lib/create_admin_cluster';
 import clientLogger from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
