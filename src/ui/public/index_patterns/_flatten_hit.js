@@ -19,10 +19,6 @@ export default function FlattenHitProvider(config) {
       _.forOwn(obj, function (val, key) {
         key = keyPrefix + key;
 
-        if (!deep && flat[key] !== void 0) {
-          return;
-        }
-
         if (deep) {
           const isNestedField = fields[key] && fields[key].type === 'nested';
           const isArrayOfObjects = _.isArray(val) && _.isPlainObject(_.first(val));
@@ -30,6 +26,8 @@ export default function FlattenHitProvider(config) {
             _.each(val, v => flatten(v, key));
             return;
           }
+        } else if (flat[key] !== void 0) {
+          return;
         }
 
         const hasValidMapping = fields[key] && fields[key].type !== 'conflict';
@@ -70,4 +68,4 @@ export default function FlattenHitProvider(config) {
       return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit, deep));
     };
   };
-};
+}
