@@ -20,7 +20,7 @@ describe('plugins/elasticsearch', () => {
         log: sinon.stub(),
         plugins: {
           elasticsearch: {
-            getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }), // Fix
+            getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }),
             status: {
               red: sinon.stub()
             },
