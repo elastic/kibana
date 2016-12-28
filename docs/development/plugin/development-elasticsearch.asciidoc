@@ -1,0 +1,4 @@
+[[development-elasticsearch]]
+=== Communicating with elasticsearch
+
+Kibana exposes clients for communicating with elasticsearch on the server passed into each plugin.
