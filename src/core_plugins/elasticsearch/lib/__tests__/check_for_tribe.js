@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import { noop } from 'lodash';
 import sinon from 'sinon';
 
-import checkForTribe from '../check_for_tribe';
+import { checkForTribe } from '../check_for_tribe';
 
 describe('plugins/elasticsearch checkForTribe', () => {
   const sandbox = sinon.sandbox.create();

@@ -5,7 +5,7 @@ import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import checkEsVersion from './check_es_version';
 import kibanaVersion from './kibana_version';
-import checkForTribe from './check_for_tribe';
+import { checkForTribe } from './check_for_tribe';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
