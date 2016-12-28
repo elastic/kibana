@@ -27,6 +27,9 @@ const plugins = [function (Client, config) {
 
 uiModules
   .get('kibana', ['elasticsearch', 'kibana/config'])
+
+  //Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy,
+  //Uses a tribe node if configured, otherwise uses the base elasticsearch configuration
   .service('es', function (esFactory, esUrl, esApiVersion, esRequestTimeout) {
     return esFactory({
       host: esUrl,
@@ -36,6 +39,9 @@ uiModules
       plugins
     });
   })
+
+  //Elasticsearch client used for managing Kibana's state.  Connects to the /es-admin proxy,
+  //Always uses the base elasticsearch configuartion
   .service('esAdmin', function (esFactory, esAdminUrl, esApiVersion, esRequestTimeout) {
     return esFactory({
       host: esAdminUrl,
