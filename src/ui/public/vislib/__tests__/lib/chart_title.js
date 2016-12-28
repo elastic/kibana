@@ -96,9 +96,8 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       type: 'histogram',
       title: {
         'text': 'rows'
-      },
-      el: el.node()
-    }, data, persistedState);
+      }
+    }, data, persistedState, el.node());
     chartTitle = new ChartTitle(visConfig);
   }));
 

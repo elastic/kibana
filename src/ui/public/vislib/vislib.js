@@ -1,10 +1,8 @@
 import './lib/types/pie';
 import './lib/types/point_series';
-import './lib/types/tile_map';
 import './lib/types';
 import './lib/layout/layout_types';
 import './lib/data';
-import './visualizations/_map.js';
 import './visualizations/vis_types';
 import './styles/main.less';
 import VislibVisProvider from './vis';

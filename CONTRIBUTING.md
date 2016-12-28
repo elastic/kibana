@@ -142,6 +142,8 @@ Start the development server.
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
+Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `npm start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
 #### Customizing `config/kibana.dev.yml`
 
 The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).

@@ -76,9 +76,8 @@ describe('Vislib VisConfig Class Test Suite', function () {
       .node();
 
     visConfig = new VisConfig({
-      type: 'point_series',
-      el: el
-    }, data, new PersistedState());
+      type: 'point_series'
+    }, data, new PersistedState(), el);
   }));
 
   describe('get Method', function () {

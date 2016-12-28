@@ -1,7 +1,7 @@
 /* eslint-env mocha */
-import expect from 'expect.js'
+import expect from 'expect.js';
 
-import { WildcardMatcher } from '../wildcard_matcher'
+import { WildcardMatcher } from '../wildcard_matcher';
 
 function should(candidate, ...constructorArgs) {
   if (!new WildcardMatcher(...constructorArgs).match(candidate)) {

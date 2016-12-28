@@ -6,7 +6,7 @@ import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import MockMap from 'fixtures/tilemap_map';
 import $ from 'jquery';
-import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
+import VislibVisualizationsTileMapProvider from 'ui/vis_maps/visualizations/tile_map';
 const mockChartEl = $('<div>');
 
 let TileMap;
@@ -15,6 +15,11 @@ let extentsStub;
 function createTileMap(handler, chartEl, chartData) {
   handler = handler || {
     visConfig: {
+      get: function () {
+        return '';
+      }
+    },
+    uiState: {
       get: function () {
         return '';
       }
@@ -32,7 +37,7 @@ describe('TileMap Tests', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Private.stub(require('ui/vislib/visualizations/_map'), MockMap);
+    Private.stub(require('ui/vis_maps/visualizations/_map'), MockMap);
     TileMap = Private(VislibVisualizationsTileMapProvider);
     extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);
   }));
@@ -54,12 +59,6 @@ describe('TileMap Tests', function () {
   describe('draw', function () {
     it('should return a function', function () {
       expect(tilemap.draw()).to.be.a('function');
-    });
-
-    it('should call destroy for clean state', function () {
-      const destroySpy = sinon.spy(tilemap, 'destroy');
-      tilemap.draw();
-      expect(destroySpy.callCount).to.equal(1);
     });
   });
 

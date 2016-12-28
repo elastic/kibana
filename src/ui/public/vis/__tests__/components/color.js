@@ -3,10 +3,10 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
-import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
-import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
-import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/color/mapped_colors';
-import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
+import VislibComponentsColorSeedColorsProvider from 'ui/vis/components/color/seed_colors';
+import VislibComponentsColorColorProvider from 'ui/vis/components/color/color';
+import VislibComponentsColorMappedColorsProvider from 'ui/vis/components/color/mapped_colors';
+import VislibComponentsColorColorPaletteProvider from 'ui/vis/components/color/color_palette';
 
 describe('Vislib Color Module Test Suite', function () {
   let seedColors;

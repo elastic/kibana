@@ -1,12 +1,15 @@
 let ace = require('ace');
 let $ = require('jquery');
-let input = require('../../src/input');
+import { initializeInput } from '../../src/input';
+let input;
 
 var token_iterator = ace.require("ace/token_iterator");
 var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
+
 module("Tokenization", {
   setup: function () {
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
   },
@@ -282,3 +285,93 @@ states_test(
   '  }\n' +
   '}'
 );
+
+states_test(
+  ["start", "json", "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "script": { "inline": "" }\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "script": ""\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", ["json", "json"], "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "script": {\n' +
+  '   }\n' +
+  '}'
+);
+
+
+states_test(
+  ["start", "json", ["script-start", "json", "json", "json"], ["script-start", "json", "json", "json"],
+   ["json", "json"], "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "test": { "script": """\n' +
+  '  test script\n' +
+  ' """\n' +
+  ' }\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", ["script-start", "json"], ["script-start", "json"], "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "script": """\n' +
+  '  test script\n' +
+  ' """,\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "script": """test script""",\n' +
+  '}'
+);
+
+
+states_test(
+  ["start", "json", ["string_literal", "json"], ["string_literal", "json"], "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "somthing": """\n' +
+  '  test script\n' +
+  ' """,\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", ["string_literal", "json", "json", "json"], ["string_literal", "json", "json", "json"],
+  ["json", "json"], ["json", "json"],
+  "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "somthing": { "f" : """\n' +
+  '  test script\n' +
+  ' """,\n' +
+  ' "g": 1\n' +
+  ' }\n' +
+  '}'
+);
+
+states_test(
+  ["start", "json", "json", "start"],
+  'POST _search\n' +
+  '{\n' +
+  '  "something": """test script""",\n' +
+  '}'
+);
+

@@ -39,9 +39,6 @@ export default function TileMapFactory(Private) {
     draw() {
       const self = this;
 
-      // clean up old maps
-      self.destroy();
-
       return function (selection) {
         selection.each(function () {
           self._appendMap(this);
@@ -95,10 +92,10 @@ export default function TileMapFactory(Private) {
      */
     _appendMap(selection) {
       const container = $(selection).addClass('tilemap');
-      const uiStateParams = this.handler.vis ? {
-        mapCenter: this.handler.vis.uiState.get('mapCenter'),
-        mapZoom: this.handler.vis.uiState.get('mapZoom')
-      } : {};
+      const uiStateParams = {
+        mapCenter: this.handler.uiState.get('mapCenter'),
+        mapZoom: this.handler.uiState.get('mapZoom')
+      };
 
       const params = _.assign({}, _.get(this._chartData, 'geoAgg.vis.params'), uiStateParams);
 
