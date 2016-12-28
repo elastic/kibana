@@ -4,13 +4,17 @@
       {{::savedObj.title}}
     </span>
     <div class="btn-group">
+      <a aria-label="Expand" ng-click="toggleExpand()">
+        <span ng-show="!isExpanded" class="fa fa-expand"></span>
+        <span ng-show="isExpanded" class="fa fa-compress"></span>
+      </a>
       <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
-      <a aria-label="Move" ng-show="!isFullScreenMode" class="panel-move">
+      <a aria-label="Move" ng-show="!isExpanded && !isFullScreenMode" class="panel-move">
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
-      <a aria-label="Remove" ng-show="!isFullScreenMode" ng-click="remove()">
+      <a aria-label="Remove" ng-show="!isExpanded && !isFullScreenMode" ng-click="remove()">
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
     </div>
