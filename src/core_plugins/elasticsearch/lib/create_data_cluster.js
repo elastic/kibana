@@ -3,7 +3,6 @@ import clientLogger from './client_logger';
 
 export default function (server) {
   const config = server.config();
-  const esPlugins = server.plugins.elasticsearch;
   const ElasticsearchClientLogging = clientLogger(server);
 
   class DataClientLogging extends ElasticsearchClientLogging {
