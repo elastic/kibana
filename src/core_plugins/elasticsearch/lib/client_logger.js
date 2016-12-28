@@ -13,10 +13,6 @@ export function clientLogger(server) {
       server.log(['warning', 'elasticsearch'].concat(this.tags), message);
     }
 
-    info() {}
-
-    debug() {}
-
     trace(method, options, query, _response, statusCode) {
       /* Check if query logging is enabled
        * It requires Kibana to be configured with verbose logging turned on. */
@@ -30,6 +26,14 @@ export function clientLogger(server) {
         ].join('\n'));
       }
     }
+
+
+    // elasticsearch-js expects the following functions to exist
+
+    info() {}
+
+    debug() {}
+
     close() {}
   };
 }
