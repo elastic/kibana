@@ -13,7 +13,6 @@ import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
-import 'ui/highlight/highlight_tags';
 import 'ui/share';
 import VisProvider from 'ui/vis';
 import DocTitleProvider from 'ui/doc_title';
@@ -89,7 +88,7 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController($scope, config, courier, $route, $window, Notifier,
-  AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
+  AppState, timefilter, Promise, Private, kbnUrl) {
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -481,16 +480,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .sort(getSort($state.sort, $scope.indexPattern))
     .query(!$state.query ? null : $state.query)
     .set('filter', queryFilter.getFilters());
-
-    if (config.get('doc_table:highlight')) {
-      $scope.searchSource.highlight({
-        pre_tags: [highlightTags.pre],
-        post_tags: [highlightTags.post],
-        fields: { '*': {} },
-        require_field_match: false,
-        fragment_size: 2147483647 // Limit of an integer.
-      });
-    }
   });
 
   // TODO: On array fields, negating does not negate the combination, rather all terms

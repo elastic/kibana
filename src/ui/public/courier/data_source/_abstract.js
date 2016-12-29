@@ -7,6 +7,7 @@ import RequestQueueProvider from '../_request_queue';
 import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
+import HighlightBodyProvider from './_highlight_body';
 import FieldWildcardProvider from '../../field_wildcard';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
@@ -274,6 +275,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
       if (type === 'search') {
         // This is down here to prevent the circular dependency
         const decorateQuery = Private(DecorateQueryProvider);
+        const highlightBody = Private(HighlightBodyProvider);
 
         flatState.body = flatState.body || {};
 
@@ -389,6 +391,8 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
             recurse(agg.aggs || agg.aggregations);
           });
         }(flatState.body.aggs || flatState.body.aggregations));
+
+        highlightBody(flatState.body);
       }
 
       return flatState;
