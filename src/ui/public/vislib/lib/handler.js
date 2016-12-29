@@ -188,18 +188,18 @@ export default function HandlerBaseClass(Private) {
       // to continuously call render on resize
       .attr('class', 'visualize-error chart error');
 
-      if (message === 'No results found') {
-        div.append('div')
-        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
-        .append('div').attr('class', 'item top')
-        .append('div').attr('class', 'item')
-        .append('h2').html('<i class="fa fa-meh-o"></i>')
-        .append('h4').text(message);
-
-        div.append('div').attr('class', 'item bottom');
-      } else {
-        div.append('h4').text(message);
-      }
+      // if (message === 'No results found') {
+      //   div.append('div')
+      //   .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+      //   .append('div').attr('class', 'item top')
+      //   .append('div').attr('class', 'item')
+      //   .append('h2').html('<i class="fa fa-meh-o"></i>')
+      //   .append('h4').text(message);
+      //
+      //   div.append('div').attr('class', 'item bottom');
+      // } else {
+      //   div.append('h4').text(message);
+      // }
 
       $(this.el).trigger('renderComplete');
       return div;

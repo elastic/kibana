@@ -98,96 +98,107 @@
 
 </div>
 
-<vislib-basic-options></vislib-basic-options>
+<!--<vislib-basic-options></vislib-basic-options>-->
 
 <div class="vis-option-item form-group">
   <label>
     <input type="checkbox"
-    name="isDesaturated"
-    ng-disabled="!vis.type.params.canDesaturate"
-    ng-model="vis.params.isDesaturated">
-
-    Desaturate map tiles
-
-    <kbn-info info="Reduce the vibrancy of tile colors, this does not work in any version of Internet Explorer"></kbn-info>
+           name="isFilterWithBounds"
+           ng-model="vis.params.isFilterWithBounds">
+    Query in bounds
+    <kbn-info info="only query for data in bounds"></kbn-info>
   </label>
 </div>
 
-<div class="vis-option-item form-group">
-  <label>
-    <input type="checkbox"
-    name="wms.enabled"
-    ng-model="vis.params.wms.enabled">
 
-    WMS compliant map server
+<!--<div class="vis-option-item form-group">-->
+  <!--<label>-->
+    <!--<input type="checkbox"-->
+    <!--name="isDesaturated"-->
+    <!--ng-disabled="!vis.type.params.canDesaturate"-->
+    <!--ng-model="vis.params.isDesaturated">-->
 
-    <kbn-info info="Use WMS compliant map tile server. For advanced users only."></kbn-info>
-  </label>
-</div>
+    <!--Desaturate map tiles-->
 
-<div ng-show="vis.params.wms.enabled" class="well">
-  <div class="vis-option-item form-group">
+    <!--<kbn-info info="Reduce the vibrancy of tile colors, this does not work in any version of Internet Explorer"></kbn-info>-->
+  <!--</label>-->
+<!--</div>-->
 
-    <p>
-      WMS maps are 3rd party mapping services that have not been verified to work with Kibana.
-      These should be considered expert settings.
-    </p>
+<!--<div class="vis-option-item form-group">-->
+  <!--<label>-->
+    <!--<input type="checkbox"-->
+    <!--name="wms.enabled"-->
+    <!--ng-model="vis.params.wms.enabled">-->
 
-    <label>
-      WMS url*
-    </label>
-    <input type="text" class="form-control"
-      name="wms.url"
-      ng-model="vis.params.wms.url">
-  </div>
+    <!--WMS compliant map server-->
 
-  <div class="vis-option-item form-group">
-    <label>
-      WMS layers* <kbn-info info="A comma seperated list of layers to use."></kbn-info>
-    </label>
-    <input type="text" class="form-control"
-      ng-require="vis.params.wms.enabled"
-      ng-model="vis.params.wms.options.layers"
-      name="wms.options.layers">
-  </div>
+    <!--<kbn-info info="Use WMS compliant map tile server. For advanced users only."></kbn-info>-->
+  <!--</label>-->
+<!--</div>-->
 
-  <div class="vis-option-item form-group">
-    <label>
-      WMS version* <kbn-info info="The version of WMS the server supports"></kbn-info>
-    </label>
-    <input type="text" class="form-control"
-      name="wms.options.version"
-      ng-model="vis.params.wms.options.version">
-  </div>
+<!--<div ng-show="vis.params.wms.enabled" class="well">-->
+  <!--<div class="vis-option-item form-group">-->
 
-  <div class="vis-option-item form-group">
-    <label>
-      WMS format* <kbn-info info="Usually image/png or image/jpeg. Use png if the server will return transparent layers"></kbn-info>
-    </label>
-    <input type="text" class="form-control"
-      name="wms.options.format"
-      ng-model="vis.params.wms.options.format">
-  </div>
+    <!--<p>-->
+      <!--WMS maps are 3rd party mapping services that have not been verified to work with Kibana.-->
+      <!--These should be considered expert settings.-->
+    <!--</p>-->
 
-  <div class="vis-option-item form-group">
-    <label>
-      WMS attribution <kbn-info info="Attribution string for the lower right corner<"></kbn-info>
-    </label>
-    <input type="text" class="form-control"
-      name="wms.options.attribution"
-      ng-model="vis.params.wms.options.attribution">
-  </div>
+    <!--<label>-->
+      <!--WMS url*-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--name="wms.url"-->
+      <!--ng-model="vis.params.wms.url">-->
+  <!--</div>-->
 
-  <div class="vis-option-item form-group">
-    <label>
-      WMS styles* <kbn-info info="A comma seperated list of WMS server supported styles to use. Blank in most cases."></kbn-info>
-    </label>
-    <input type="text" class="form-control"
-      name="wms.options.styles"
-      ng-model="vis.params.wms.options.styles">
-  </div>
+  <!--<div class="vis-option-item form-group">-->
+    <!--<label>-->
+      <!--WMS layers* <kbn-info info="A comma seperated list of layers to use."></kbn-info>-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--ng-require="vis.params.wms.enabled"-->
+      <!--ng-model="vis.params.wms.options.layers"-->
+      <!--name="wms.options.layers">-->
+  <!--</div>-->
 
-  <p>* if this parameter is incorrect, maps will fail to load.</p>
+  <!--<div class="vis-option-item form-group">-->
+    <!--<label>-->
+      <!--WMS version* <kbn-info info="The version of WMS the server supports"></kbn-info>-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--name="wms.options.version"-->
+      <!--ng-model="vis.params.wms.options.version">-->
+  <!--</div>-->
+
+  <!--<div class="vis-option-item form-group">-->
+    <!--<label>-->
+      <!--WMS format* <kbn-info info="Usually image/png or image/jpeg. Use png if the server will return transparent layers"></kbn-info>-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--name="wms.options.format"-->
+      <!--ng-model="vis.params.wms.options.format">-->
+  <!--</div>-->
+
+  <!--<div class="vis-option-item form-group">-->
+    <!--<label>-->
+      <!--WMS attribution <kbn-info info="Attribution string for the lower right corner<"></kbn-info>-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--name="wms.options.attribution"-->
+      <!--ng-model="vis.params.wms.options.attribution">-->
+  <!--</div>-->
+
+  <!--<div class="vis-option-item form-group">-->
+    <!--<label>-->
+      <!--WMS styles* <kbn-info info="A comma seperated list of WMS server supported styles to use. Blank in most cases."></kbn-info>-->
+    <!--</label>-->
+    <!--<input type="text" class="form-control"-->
+      <!--name="wms.options.styles"-->
+      <!--ng-model="vis.params.wms.options.styles">-->
+  <!--</div>-->
+
+  <!--<p>* if this parameter is incorrect, maps will fail to load.</p>-->
 
 
-</div>
+<!--</div>-->
