@@ -148,7 +148,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       }
 
       $scope.applyAbsolute = function () {
-        $scope.onFilterSelect($scope.absolute.from, $scope.absolute.to);
+        $scope.onFilterSelect(moment($scope.absolute.from), moment($scope.absolute.to));
       };
 
       $scope.setRefreshInterval = function (interval) {
