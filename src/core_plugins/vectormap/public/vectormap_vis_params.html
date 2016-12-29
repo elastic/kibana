@@ -1,0 +1,35 @@
+<div class="form-group">
+  <div class="form-group">
+    <h3>Map Type</h3>
+    <select ng-model="vis.params.mapType" class="form-control">
+      <option value="world_mill" selected="selected">World</option>
+      <option value="africa_mill">Africa</option>
+      <option value="asia_mill">Asia</option>
+      <option value="europe_mill">Europe</option>
+      <option value="north_america_mill">North America</option>
+      <option value="oceania_mill">Oceania</option>
+      <option value="south_america_mill">South America</option>
+      <option value="us_aea">USA</option>
+    </select>
+  </div>
+
+  <!-- Color Scale -->
+  <div class="form-group">
+    <h3>Map Color Scale</h3>
+    <label>Min Color: </label>
+    <input type="text" ng-model="vis.params.minColor"><br>
+    <label>Max Color: </label>
+    <input type="text" ng-model="vis.params.maxColor">
+  </div>
+
+  <!-- Tooltip Number Format Type -->
+  <div class="form-group">
+    <h3>Tooltip Number Format</h3>
+    <select ng-model="vis.params.tipNumberFormat" class="form-control">
+      <option value="number" selected="selected">number</option>
+      <option value="bytes">bytes</option>
+      <option value="currency">currency</option>
+      <option value="percentage">percentage</option>
+    </select>
+  </div>
+</div>

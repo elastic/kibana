@@ -275,6 +275,7 @@ export default function MapFactory(Private, tilemapSettings) {
         self._mapZoom = self.map.getZoom();
         if (!self._events) return;
 
+        console.log('emit mapZoomEnd');
         self._events.emit('mapZoomEnd', {
           chart: self._chartData,
           map: self.map,

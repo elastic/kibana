@@ -90,6 +90,9 @@ export default function TileMapFactory(Private) {
      * @param selection {Object} d3 selection
      */
     _appendMap(selection) {
+
+      console.log('appendMap');
+
       const container = $(selection).addClass('tilemap');
       const uiStateParams = {
         mapCenter: this.handler.uiState.get('mapCenter'),
