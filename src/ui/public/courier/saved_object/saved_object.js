@@ -259,6 +259,12 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     }
 
     /**
+     * An error message to be used when the user rejects a confirm overwrite.
+     * @type {string}
+     */
+    const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+
+    /**
      * Attempts to create the current object using the serialized source. If an object already
      * exists, a warning message requests an overwrite confirmation.
      * @param source - serialized version of this object (return value from this.serialize())
@@ -274,12 +280,11 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           // record exists, confirm overwriting
           if (_.get(err, 'origError.status') === 409) {
-            const confirmMessage = 'Are you sure you want to overwrite ' + this.title + '?';
+            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
-            return safeConfirm(confirmMessage).then(
-              () => { return docSource.doIndex(source); },
-              () => { throw { confirmRejected : true }; }
-            );
+            return safeConfirm(confirmMessage)
+              .then(() => docSource.doIndex(source))
+              .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
         });
@@ -332,7 +337,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           this.isSaving = false;
           this.id = originalId;
-          if (err && err.confirmRejected) return;
+          if (err && err.message === OVERWRITE_REJECTED) return;
           return Promise.reject(err);
         });
     };

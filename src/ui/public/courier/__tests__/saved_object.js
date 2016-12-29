@@ -92,11 +92,8 @@ describe('Saved Object', function () {
     // The default implementation of safeConfirm uses $timeout which will cause
     // the test environment to hang.
     function ($provide) {
-      $provide.decorator('safeConfirm', () => {
-        return (message) => {
-          return window.confirm(message) ? Promise.resolve() : Promise.reject();
-        };
-      });
+      const overrideSafeConfirm = message => window.confirm(message) ? Promise.resolve() : Promise.reject();
+      $provide.decorator('safeConfirm', () => overrideSafeConfirm);
     })
   );
   beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
