@@ -23,7 +23,7 @@ The full list of configurations can be found at <<settings>>.
 [[tribe-limitations]]
 === Limitations
 
-Due to the ambiguity of which cluster is being used, certain features are disabled in Kibana: 
+Due to the ambiguity of which cluster is being used, certain features are disabled in Kibana:
 
 * Console
 * Managing users and roles with the x-pack plugin
