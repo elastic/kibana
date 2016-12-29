@@ -293,7 +293,8 @@ describe('tilemaptest - Marker Tests', function () {
           const index = _.random(mapData.features.length - 1);
           const feature = mapData.features[index];
           const featureValue = feature.properties.value;
-          const featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
+          // Reverse coordinates since _dataToHeatArray returns LatLng and geoJson coordinates are in LngLat
+          const featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });
       });
@@ -306,7 +307,8 @@ describe('tilemaptest - Marker Tests', function () {
           const index = _.random(mapData.features.length - 1);
           const feature = mapData.features[index];
           const featureValue = feature.properties.value / max;
-          const featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
+          // Reverse coordinates since _dataToHeatArray returns LatLng and geoJson coordinates are in LngLat
+          const featureArr = feature.geometry.coordinates.slice(0).reverse().concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });
       });
