@@ -64,6 +64,14 @@ module.exports = new Datasource('es', {
     const callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
 
     const body = buildRequest(config, tlConfig);
+
+    if (tlConfig.server.config) {
+      const logTimelionRequests = tlConfig.server.config().get('logging.timelion');
+      if (logTimelionRequests) {
+        tlConfig.server.log(['info', 'timelion'], JSON.stringify(body));
+      }
+    }
+
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
       return {
