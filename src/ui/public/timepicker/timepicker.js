@@ -25,8 +25,8 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       mode: '=',
       interval: '=',
       activeTab: '=',
-      onFilterSelect: '=',
-      onIntervalSelect: '='
+      onFilterSelect: '&',
+      onIntervalSelect: '&'
     },
     template: html,
     controller: function ($scope) {
@@ -126,7 +126,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.setQuick = function (from, to) {
-        $scope.onFilterSelect(from, to);
+        $scope.onFilterSelect({ from, to });
       };
 
       $scope.setToNow = function () {
@@ -140,7 +140,10 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.applyRelative = function () {
-        $scope.onFilterSelect(getRelativeString(), 'now');
+        $scope.onFilterSelect({
+          from: getRelativeString(),
+          to: 'now'
+        });
       };
 
       function getRelativeString() {
@@ -148,7 +151,10 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       }
 
       $scope.applyAbsolute = function () {
-        $scope.onFilterSelect(moment($scope.absolute.from), moment($scope.absolute.to));
+        $scope.onFilterSelect({
+          from: moment($scope.absolute.from),
+          to: moment($scope.absolute.to)
+        });
       };
 
       $scope.setRefreshInterval = function (interval) {
@@ -158,7 +164,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
         notify.log('after: ' + interval.pause);
 
-        $scope.onIntervalSelect(interval);
+        $scope.onIntervalSelect({ interval });
       };
 
       $scope.setMode($scope.mode);
