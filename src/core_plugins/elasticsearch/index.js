@@ -1,4 +1,4 @@
-import { trim, trimRight, bindKey } from 'lodash';
+import { trim, trimRight, bindKey, get } from 'lodash';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
@@ -71,7 +71,7 @@ module.exports = function ({ Plugin }) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
-          esDataIsTribe: options.tribe ? true : false,
+          esDataIsTribe: get(options, 'tribe.url') ? true : false,
         };
       }
     },
