@@ -11,7 +11,7 @@ import errors from 'ui/errors';
 import RequestQueueProvider from 'ui/courier/_request_queue';
 import FetchProvider from 'ui/courier/fetch/fetch';
 
-export default function (Promise, Private, es) {
+export default function (Promise, Private, es, esAdmin, kbnIndex) {
   const requestQueue = Private(RequestQueueProvider);
   const courierFetch = Private(FetchProvider);
 
@@ -33,7 +33,8 @@ export default function (Promise, Private, es) {
       params.version = doc._getVersion();
     }
 
-    return es[method](params)
+    const client = [].concat(params.index).includes(kbnIndex) ? esAdmin : es;
+    return client[method](params)
     .then(function (resp) {
       if (resp.status === 409) throw new errors.VersionConflict(resp);
 

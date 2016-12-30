@@ -14,7 +14,8 @@ import SearchStrategyProvider from './fetch/strategy/search';
 import RequestQueueProvider from './_request_queue';
 import ErrorHandlersProvider from './_error_handlers';
 import FetchProvider from './fetch';
-import DocLooperProvider from './looper/doc';
+import DocDataLooperProvider from './looper/doc_data';
+import DocAdminLooperProvider from './looper/doc_admin';
 import SearchLooperProvider from './looper/search';
 import RootSearchSourceProvider from './data_source/_root_search_source';
 import SavedObjectProvider from './saved_object';
@@ -34,7 +35,8 @@ uiModules.get('kibana/courier')
     const errorHandlers = Private(ErrorHandlersProvider);
 
     const fetch = Private(FetchProvider);
-    const docLooper = self.docLooper = Private(DocLooperProvider);
+    const docDataLooper = self.docLooper = Private(DocDataLooperProvider);
+    const docAdminLooper = self.docLooper = Private(DocAdminLooperProvider);
     const searchLooper = self.searchLooper = Private(SearchLooperProvider);
 
     // expose some internal modules
@@ -65,7 +67,8 @@ uiModules.get('kibana/courier')
      */
     self.start = function () {
       searchLooper.start();
-      docLooper.start();
+      docDataLooper.start();
+      docAdminLooper.start();
       return this;
     };
 
@@ -124,7 +127,8 @@ uiModules.get('kibana/courier')
      */
     self.close = function () {
       searchLooper.stop();
-      docLooper.stop();
+      docAdminLooper.stop();
+      docDataLooper.stop();
 
       _.invoke(requestQueue, 'abort');
 

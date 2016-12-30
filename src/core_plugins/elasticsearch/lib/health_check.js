@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import exposeClient from './expose_client';
 import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
-import checkEsVersion from './check_es_version';
 import kibanaVersion from './kibana_version';
+import { ensureEsVersion } from './ensure_es_version';
+import { ensureNotTribe } from './ensure_not_tribe';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -15,27 +15,25 @@ const NO_INDEX = 'no_index';
 const INITIALIZING = 'initializing';
 const READY = 'ready';
 
-const REQUEST_DELAY = 2500;
-
 module.exports = function (plugin, server) {
   const config = server.config();
-  const client = server.plugins.elasticsearch.client;
+  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-
-  function waitForPong() {
-    return client.ping().catch(function (err) {
+  function waitForPong(callWithInternalUser, url) {
+    return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
-
-      return Promise.delay(REQUEST_DELAY).then(waitForPong);
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
     });
   }
 
   // just figure out the current "health" of the es setup
   function getHealth() {
-    return client.cluster.health({
+    return callAdminAsKibanaUser('cluster.health', {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
@@ -82,7 +80,7 @@ module.exports = function (plugin, server) {
   }
 
   function waitForEsVersion() {
-    return checkEsVersion(server, kibanaVersion.get()).catch(err => {
+    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
       return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
     });
@@ -93,13 +91,25 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    return waitForPong()
-    .then(waitForEsVersion)
-    .then(waitForShards)
+    const healthCheck =
+      waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
+      .then(waitForEsVersion)
+      .then(ensureNotTribe.bind(this, callAdminAsKibanaUser))
+      .then(waitForShards)
+      .then(_.partial(migrateConfig, server))
+      .then(() => {
+        const tribeUrl = config.get('elasticsearch.tribe.url');
+        if (tribeUrl) {
+          return waitForPong(callDataAsKibanaUser, tribeUrl)
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+        }
+      });
+
+    return healthCheck
     .then(setGreenStatus)
-    .then(_.partial(migrateConfig, server))
     .catch(err => plugin.status.red(err));
   }
+
 
   let timeoutId = null;
 
