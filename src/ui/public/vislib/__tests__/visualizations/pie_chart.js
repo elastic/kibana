@@ -6,7 +6,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import VisProvider from 'ui/vis';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
@@ -78,7 +78,7 @@ describe('No global chart settings', function () {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
     chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new (Private(PersistedStateProvider))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
@@ -172,7 +172,7 @@ aggArray.forEach(function (dataAgg, i) {
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
       Vis = Private(VisProvider);
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new (Private(PersistedStateProvider))();
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 

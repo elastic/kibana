@@ -7,7 +7,7 @@ import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
@@ -81,7 +81,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
     ChartTitle = Private(VislibLibChartTitleProvider);
     Data = Private(VislibLibDataProvider);
     VisConfig = Private(VislibLibVisConfigProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new (Private(PersistedStateProvider))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')

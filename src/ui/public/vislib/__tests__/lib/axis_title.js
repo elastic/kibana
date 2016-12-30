@@ -8,7 +8,7 @@ import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis/axis_title';
 import VislibLibAxisConfigProvider from 'ui/vislib/lib/axis/axis_config';
 import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;
@@ -86,7 +86,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     AxisConfig = Private(VislibLibAxisConfigProvider);
     VisConfig = Private(VislibLibVisConfigProvider);
     Data = Private(VislibLibDataProvider);
-    PersistedState = Private(PersistedStatePersistedStateProvider);
+    PersistedState = Private(PersistedStateProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper');

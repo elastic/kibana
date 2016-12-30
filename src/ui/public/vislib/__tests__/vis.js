@@ -8,7 +8,7 @@ import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 
 const dataArray = [
   series,
@@ -37,7 +37,7 @@ dataArray.forEach(function (data, i) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new (Private(PersistedStateProvider))();
       secondVis = Private(FixturesVislibVisFixtureProvider)();
     }));
 

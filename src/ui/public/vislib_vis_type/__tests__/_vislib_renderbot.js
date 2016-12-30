@@ -7,7 +7,7 @@ import VislibProvider from 'ui/vislib';
 import VislibVisProvider from 'ui/vislib/vis';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 import AggResponseIndexProvider from 'ui/agg_response/index';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
@@ -30,7 +30,7 @@ describe('renderbot', function exportWrapper() {
       Vis = Private(VislibVisProvider);
       Renderbot = Private(VisRenderbotProvider);
       VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new (Private(PersistedStateProvider))();
       normalizeChartData = Private(AggResponseIndexProvider);
     });
   }

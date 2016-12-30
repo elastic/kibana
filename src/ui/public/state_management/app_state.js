@@ -11,12 +11,12 @@
 import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 const urlParam = '_a';
 
 function AppStateProvider(Private, $rootScope, $location) {
   const State = Private(StateManagementStateProvider);
-  const PersistedState = Private(PersistedStatePersistedStateProvider);
+  const PersistedState = Private(PersistedStateProvider);
   let persistedStates;
   let eventUnsubscribers;
 

@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 import VislibLibAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
@@ -83,7 +83,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new (Private(PersistedStateProvider))();
     Axis = Private(VislibLibAxisProvider);
     VisConfig = Private(VislibVisConfig);
 

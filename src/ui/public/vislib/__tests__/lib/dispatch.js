@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import data from 'fixtures/vislib/mock_data/date_histogram/_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 
 describe('Vislib Dispatch Class Test Suite', function () {
 
@@ -28,7 +28,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new (Private(PersistedStateProvider))();
       vis.render(data, persistedState);
       SimpleEmitter = require('ui/utils/simple_emitter');
     }));
@@ -53,7 +53,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new (Private(PersistedStateProvider))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));
@@ -123,7 +123,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        persistedState = new (Private(PersistedStateProvider))();
         vis.on('someEvent', _.noop);
         vis.render(data, persistedState);
 
@@ -142,7 +142,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        persistedState = new (Private(PersistedStateProvider))();
         vis.render(data, persistedState);
         vis.on('someEvent', _.noop);
 

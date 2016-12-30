@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
 import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
@@ -87,7 +87,7 @@ describe('Vislib _chart Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VislibVisProvider);
     Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new (Private(PersistedStateProvider))();
     PieChart = Private(VislibVisualizationsPieChartProvider);
     Chart = Private(VislibVisualizationsChartProvider);
 
