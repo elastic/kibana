@@ -3,7 +3,7 @@ import { format } from 'util';
 import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
-  const client = server.plugins.elasticsearch.client;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
 
   function handleError(message) {
@@ -12,7 +12,7 @@ module.exports = function (server) {
     };
   }
 
-  return client.indices.create({
+  return callWithInternalUser('indices.create', {
     index: index,
     body: {
       settings: {
@@ -23,7 +23,7 @@ module.exports = function (server) {
   })
   .catch(handleError('Unable to create Kibana index "<%= kibana.index %>"'))
   .then(function () {
-    return client.cluster.health({
+    return callWithInternalUser('cluster.health', {
       waitForStatus: 'yellow',
       index: index
     })

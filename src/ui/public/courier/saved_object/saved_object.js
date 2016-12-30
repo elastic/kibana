@@ -16,10 +16,10 @@ import errors from 'ui/errors';
 import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
-import DocSourceProvider from '../data_source/doc_source';
+import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 
-export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
+export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
 
   let DocSource = Private(DocSourceProvider);
   let SearchSource = Private(SearchSourceProvider);
@@ -255,7 +255,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @returns {Promise}
      */
     function refreshIndex() {
-      return es.indices.refresh({ index: kbnIndex });
+      return esAdmin.indices.refresh({ index: kbnIndex });
     }
 
     /**
@@ -312,7 +312,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @return {promise}
      */
     this.delete = () => {
-      return es.delete(
+      return esAdmin.delete(
         {
           index: kbnIndex,
           type: type,
