@@ -39,7 +39,7 @@ describe('Field', function () {
         getIndexPattern: () => indexPattern
       });
       expect(fields).to.not.have.length(0);
-      for (let field of fields) {
+      for (const field of fields) {
         expect(field.aggregatable).to.be(true);
       }
     });

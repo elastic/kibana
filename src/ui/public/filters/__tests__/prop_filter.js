@@ -12,7 +12,7 @@ describe('prop filter', function () {
     const count = new Map();
     const objects = [];
 
-    for (let name of names) {
+    for (const name of names) {
       if (!count.has(name)) {
         count.set(name, 1);
       }
