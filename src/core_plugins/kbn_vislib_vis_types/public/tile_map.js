@@ -99,7 +99,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         name: 'centroid',
         title: 'Geo Centroid',
         aggFilter: 'geo_centroid',
-        min: 1,
+        min: 0,
         max: 1
       },
       {
