@@ -16,6 +16,6 @@ require('plugins/kibana/management/saved_object_registry').register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (SavedDashboard, kbnIndex, es, kbnUrl) {
-  return new SavedObjectLoader(SavedDashboard, kbnIndex, es, kbnUrl);
+module.service('savedDashboards', function (SavedDashboard, kbnIndex, esAdmin, kbnUrl) {
+  return new SavedObjectLoader(SavedDashboard, kbnIndex, esAdmin, kbnUrl);
 });

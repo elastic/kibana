@@ -1,6 +1,6 @@
 import FetchProvider from '../fetch';
 import LooperProvider from './_looper';
-import DocStrategyProvider from '../fetch/strategy/doc';
+import DocStrategyProvider from '../fetch/strategy/doc_admin';
 
 export default function DocLooperService(Private) {
   const fetch = Private(FetchProvider);
