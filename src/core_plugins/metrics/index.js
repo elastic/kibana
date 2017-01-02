@@ -1,6 +1,5 @@
 import fieldsRoutes from './server/routes/api/fields';
 import visDataRoutes from './server/routes/api/vis';
-import Promise from 'bluebird';
 
 export default function (kibana) {
   return new kibana.Plugin({
