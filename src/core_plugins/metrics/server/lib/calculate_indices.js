@@ -3,7 +3,7 @@ import moment from 'moment';
 
 export default (req, indexPattern = '*', timeField = '@timestamp') => {
   const { server } = req;
-  const { callWithRequest } = server.plugins.elasticsearch;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
   const from = moment.utc(req.payload.timerange.min);
   const to = moment.utc(req.payload.timerange.max);

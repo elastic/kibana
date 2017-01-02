@@ -2,7 +2,7 @@ import _ from 'lodash';
 export default (req) => {
   const { server } = req;
   const config = server.config();
-  const { callWithRequest } = server.plugins.elasticsearch;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const index = req.query.index || '*';
 
   return () => {

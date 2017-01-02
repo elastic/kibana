@@ -24,7 +24,7 @@ function withoutSiblingBuckets(row) {
 
 export default (req) => {
   const { server } = req;
-  const { callWithRequest } = server.plugins.elasticsearch;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
   const globalFilter = req.payload.global_filter;
   const from = moment.utc(req.payload.timerange.min);
