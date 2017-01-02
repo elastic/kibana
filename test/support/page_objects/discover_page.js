@@ -285,4 +285,41 @@ export default class DiscoverPage {
       .catch(() => false);
   }
 
+  clickFieldListItem(field) {
+    return this.findTimeout
+    .findByCssSelector('li[attr-field="' + field + '"]').click();
+  }
+
+  async clickFieldListItemAdd(field) {
+    await PageObjects.common.findTestSubject('fieldToggle-' + field).click();
+  }
+
+  async clickFieldListItemVisualize(field) {
+    return await PageObjects.common.try(async () => {
+      await PageObjects.common.findTestSubject('fieldVisualize-' + field).click();
+    });
+  }
+
+  clickFieldListPlusFilter(field, value) {
+    // this method requires the field details to be open from clickFieldListItem()
+    // findTestSubject doesn't handle spaces in the data-test-subj value
+    return this.findTimeout
+    .findByCssSelector('i[data-test-subj="plus-' + field + '-' + value + '"]')
+    .click();
+  }
+
+  clickFieldListMinusFilter(field, value) {
+    // this method requires the field details to be open from clickFieldListItem()
+    // findTestSubject doesn't handle spaces in the data-test-subj value
+    return this.findTimeout
+    .findByCssSelector('i[data-test-subj="minus-' + field + '-' + value + '"]')
+    .click();
+  }
+
+  async removeAllFilters() {
+    await PageObjects.common.findTestSubject('showFilterActions').click();
+    await PageObjects.common.findTestSubject('removeAllFilters').click();
+  }
+
+
 }
