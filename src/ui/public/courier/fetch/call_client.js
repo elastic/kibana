@@ -4,7 +4,7 @@ import IsRequestProvider from './is_request';
 import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
 import ReqStatusProvider from './req_status';
 
-export default function CourierFetchCallClient(Private, Promise, es) {
+export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
 
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -94,7 +94,9 @@ export default function CourierFetchCallClient(Private, Promise, es) {
         throw ABORTED;
       }
 
-      return (esPromise = es[strategy.clientMethod]({ body }));
+      const id = strategy.id;
+      const client = (id && id.includes('admin')) ? esAdmin : es;
+      return (esPromise = client[strategy.clientMethod]({ body }));
     })
     .then(function (clientResp) {
       return strategy.getResponses(clientResp);

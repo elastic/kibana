@@ -121,3 +121,5 @@ include::visualize/tilemap.asciidoc[]
 include::visualize/vertbar.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
+
+include::visualize/heatmap.asciidoc[]

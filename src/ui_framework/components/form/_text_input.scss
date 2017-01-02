@@ -1,21 +1,3 @@
 .kuiTextInput {
-  appearance: none;
-  padding: 3px 12px 4px;
-  font-size: $fontSize;
-  font-weight: 400;
-  line-height: $lineHeight;
-  background-color: #ffffff;
-  border: 1px solid #DEDEDE;
-  color: $fontColor;
-  border-radius: $buttonBorderRadius;
-  transition: border-color $formTransitionTiming;
-
-  &:invalid {
-    border-color: $errorBorderColor;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: $selectedBorderColor;
-  }
+  @include formControl;
 }

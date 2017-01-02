@@ -612,7 +612,16 @@ module.exports = function (api) {
         min_score: 1.0
       },
       SCORING_FUNCS
-    )
+    ),
+    script: {
+      __template: {
+        "script": "_score * doc['f'].value"
+      },
+      script: {
+        //populated by a global rule
+      }
+    },
+
 
   });
 };

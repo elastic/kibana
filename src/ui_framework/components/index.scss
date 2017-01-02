@@ -60,6 +60,40 @@ $formTransitionTiming: 0.1s linear;
   outline-offset: 2px !important; /* 2 */
 }
 
+@mixin formControl {
+  appearance: none;
+  padding: 3px 12px 4px;
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: $fontColor;
+  border-radius: $buttonBorderRadius;
+  transition: border-color $formTransitionTiming;
+
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  &:invalid {
+    &:not(.ng-untouched) { /* 1 */
+      border-color: $errorBorderColor;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $selectedBorderColor;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -71,9 +105,12 @@ body {
 @import "button/index";
 @import "form/index";
 @import "icon/index";
+@import "info_panel/index";
 @import "link/index";
+@import "loading_items/index";
 @import "local_nav/index";
-@import "no_results/index";
+@import "micro_button/index";
+@import "no_items/index";
 @import "panel/index";
 @import "table/index";
 @import "tabs/index";

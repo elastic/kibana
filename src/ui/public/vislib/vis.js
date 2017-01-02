@@ -27,8 +27,7 @@ export default function VisFactory(Private) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this.visConfigArgs = visConfigArgs;
-      this.visConfigArgs.el = this.el;
+      this.visConfigArgs = _.cloneDeep(visConfigArgs);
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -67,9 +66,18 @@ export default function VisFactory(Private) {
         uiState.on('change', this._uiStateChangeHandler);
       }
 
-      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState);
+      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
+
       this.handler = new Handler(this, this.visConfig);
       this._runWithoutResizeChecker('render');
+    }
+
+    getLegendLabels() {
+      return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
+    }
+
+    getLegendColors() {
+      return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
     }
 
     /**

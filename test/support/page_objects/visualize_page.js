@@ -67,6 +67,13 @@ export default class VisualizePage {
     .click();
   }
 
+  clickHeatmapChart() {
+    return this.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Heatmap chart')
+      .click();
+  }
+
   getChartTypeCount() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
@@ -570,7 +577,7 @@ export default class VisualizePage {
         return chartAreaObj
         .getAttribute('height')
         .then(function (theHeight) {
-          yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
+          yAxisHeight = theHeight;
           PageObjects.common.debug('theHeight = ' + theHeight);
           return theHeight;
         });
@@ -604,6 +611,29 @@ export default class VisualizePage {
         return bars;
       });
     });
+  }
+
+  getHeatmapData() {
+    const self = this.remote;
+
+    // 1). get the maximim chart Y-Axis marker value
+    return this.remote
+      .setFindTimeout(defaultFindTimeout * 2)
+      // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+      .findAllByCssSelector('svg > g > g.series rect') // rect
+      .then(function (chartTypes) {
+        PageObjects.common.debug('rects=' + chartTypes);
+        function getChartType(chart) {
+          return chart
+            .getAttribute('data-label');
+        }
+        const getChartTypesPromises = chartTypes.map(getChartType);
+        return Promise.all(getChartTypesPromises);
+      })
+      .then(function (labels) {
+        PageObjects.common.debug('labels=' + labels);
+        return labels;
+      });
   }
 
   getPieChartData() {

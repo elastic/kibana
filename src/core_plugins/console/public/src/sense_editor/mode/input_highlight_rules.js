@@ -1,4 +1,6 @@
 let ace = require('ace');
+let x_json = require('./x_json_highlight_rules');
+let _ = require('lodash');
 
 var oop = ace.require("ace/lib/oop");
 var TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
@@ -55,101 +57,18 @@ var InputHighlightRules = function () {
       addEOL(["url.param", "url.equal", "url.value"], /([^&=]+)(=)([^&]*)/, "start"),
       addEOL(["url.param"], /([^&=]+)/, "start"),
       addEOL(["url.amp"], /(&)/, "start")
-    ),
-
-
-    "json": [
-      {
-        token: "variable", // single line
-        regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]\\s*(?=:)'
-      },
-      {
-        token: "string", // single line
-        regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]'
-      },
-      {
-        token: "constant.numeric", // hex
-        regex: "0[xX][0-9a-fA-F]+\\b"
-      },
-      {
-        token: "constant.numeric", // float
-        regex: "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b"
-      },
-      {
-        token: "constant.language.boolean",
-        regex: "(?:true|false)\\b"
-      },
-      {
-        token: "invalid.illegal", // single quoted strings are not allowed
-        regex: "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']"
-      },
-      {
-        token: "invalid.illegal", // comments are not allowed
-        regex: "\\/\\/.*$"
-      },
-      {
-        token: "paren.lparen",
-        merge: false,
-        regex: "{",
-        next: "json",
-        push: true
-      },
-      {
-        token: "paren.lparen",
-        merge: false,
-        regex: "[[(]"
-      },
-      {
-        token: "paren.rparen",
-        merge: false,
-        regex: "[\\])]"
-      },
-      {
-        token: "paren.rparen",
-        regex: "}",
-        merge: false,
-        next: "pop"
-      },
-      {
-        token: "punctuation.comma",
-        regex: ","
-      },
-      {
-        token: "punctuation.colon",
-        regex: ":"
-      },
-      {
-        token: "whitespace",
-        regex: "\\s+"
-      },
-      {
-        token: "text",
-        regex: ".+?"
-      }
-    ],
-    "double_q_string": [
-      {
-        token: "string",
-        regex: '[^"]+'
-      },
-      {
-        token: "punctuation.end_quote",
-        regex: '"',
-        next: "json"
-      },
-      {
-        token: "string",
-        regex: "",
-        next: "json"
-      }
-    ]
+    )
   };
+
+  x_json.addToRules(this);
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();
   }
+
 };
 
 oop.inherits(InputHighlightRules, TextHighlightRules);
+
 
 module.exports.InputHighlightRules = InputHighlightRules;

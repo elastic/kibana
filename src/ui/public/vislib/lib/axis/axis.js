@@ -277,7 +277,7 @@ export default function AxisFactory(Private) {
 
       return function (selection) {
         const n = selection[0].length;
-        if (self.axisTitle) {
+        if (config.get('show') && self.axisTitle) {
           self.axisTitle.render(selection);
         }
         selection.each(function () {

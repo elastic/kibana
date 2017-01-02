@@ -1,17 +1,19 @@
 let ace = require('ace');
 let es = require('../../src/es');
-let input = require('../../src/input');
+import { initializeInput } from '../../src/input';
 let editor_input1 = require('raw!./editor_input1.txt');
+let utils = require('../../src/utils');
 
 var aceRange = ace.require("ace/range");
 var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
+let input;
 
 module("Editor", {
   setup: function () {
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
-
   },
   teardown: function () {
     input.$el.hide();
@@ -85,7 +87,6 @@ var multi_doc_request = {
   ]
 };
 multi_doc_request.data = multi_doc_request.data_as_array.join("\n");
-
 
 utils_test("simple request range", simple_request.prefix, simple_request.data, function () {
   input.getRequestRange(function (range) {
@@ -256,6 +257,42 @@ utils_test("multi doc request data", multi_doc_request.prefix, multi_doc_request
     start();
   });
 });
+
+var script_request = {
+  prefix: 'POST _search',
+  data: [
+    '{',
+    '   "query": { "script": """',
+    '   some script ',
+    '   """}',
+    '}'
+  ].join('\n')
+};
+
+utils_test("script request range", script_request.prefix, script_request.data, function () {
+  input.getRequestRange(function (range) {
+    var expected = new aceRange.Range(
+      0, 0,
+      5, 1
+    );
+    compareRequest(range, expected);
+    start();
+  });
+});
+
+utils_test("simple request data", simple_request.prefix, simple_request.data, function () {
+  input.getRequest(function (request) {
+    var expected = {
+      method: "POST",
+      url: "_search",
+      data: [utils.collapseLiteralStrings(simple_request.data)]
+    };
+
+    compareRequest(request, expected);
+    start();
+  });
+});
+
 
 function multi_req_test(name, editor_input, range, expected) {
   utils_test("multi request select - " + name, editor_input, function () {

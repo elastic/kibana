@@ -10,11 +10,17 @@ import FormExample
 import IconExample
   from '../../views/icon/icon_example.jsx';
 
+import InfoPanelExample
+  from '../../views/info_panel/info_panel_example.jsx';
+
 import LinkExample
   from '../../views/link/link_example.jsx';
 
 import LocalNavExample
   from '../../views/local_nav/local_nav_example.jsx';
+
+import MicroButtonExample
+  from '../../views/micro_button/micro_button_example.jsx';
 
 import TableExample
   from '../../views/table/table_example.jsx';
@@ -36,11 +42,17 @@ const components = [{
   name: 'Icon',
   component: IconExample,
 }, {
+  name: 'InfoPanel',
+  component: InfoPanelExample,
+}, {
   name: 'Link',
   component: LinkExample,
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+}, {
+  name: 'MicroButton',
+  component: MicroButtonExample,
 }, {
   name: 'Table',
   component: TableExample,

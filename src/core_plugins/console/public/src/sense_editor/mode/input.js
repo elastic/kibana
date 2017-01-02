@@ -4,6 +4,7 @@ let mode_json = require('ace/mode-json');
 
 var oop = acequire("ace/lib/oop");
 var TextMode = acequire("ace/mode/text").Mode;
+var ScriptMode = require("./script").ScriptMode;
 var MatchingBraceOutdent = acequire("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
 var CstyleBehaviour = acequire("ace/mode/behaviour/cstyle").CstyleBehaviour;
 var CStyleFoldMode = acequire("ace/mode/folding/cstyle").FoldMode;
@@ -20,6 +21,9 @@ var Mode = function () {
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
+  this.createModeDelegates({
+    "script-": ScriptMode
+  });
 };
 oop.inherits(Mode, TextMode);
 
@@ -32,7 +36,7 @@ oop.inherits(Mode, TextMode);
   this.getNextLineIndent = function (state, line, tab) {
     var indent = this.$getIndent(line);
 
-    if (state != "double_q_string") {
+    if (state !== "string_literal") {
       var match = line.match(/^.*[\{\(\[]\s*$/);
       if (match) {
         indent += tab;
