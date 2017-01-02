@@ -21,7 +21,7 @@ app.controller('MetricsEditorController', (
     return globalNavState.isOpen();
   }, newValue => {
     if (newValue) {
-      $scope.editorWidth = '160px';
+      $scope.editorWidth = '180px';
     } else {
       $scope.editorWidth = '53px';
     }
