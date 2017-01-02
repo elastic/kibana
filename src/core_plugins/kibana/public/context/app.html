@@ -7,12 +7,7 @@
           <div class="kuiLocalBreadcrumb">
             <a class="kuiLocalBreadcrumb__link" href="#/discover">Discover</a>
           </div>
-          <div class="kuiLocalBreadcrumb">
-            <span>Context of </span>
-            <span class="kuiLocalBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.anchorUid"></span>
-            <span> in </span>
-            <span class="kuiLocalBreadcrumb__emphasis" ng-bind="contextApp.state.queryParameters.indexPattern.id"></span>
-          </div>
+          <div class="kuiLocalBreadcrumb" ng-bind="contextApp.state.queryParameters.indexPattern.id"></div>
         </div>
       </local-navigation-row-section>
 
@@ -24,6 +19,11 @@
           set-successor-count="contextApp.actions.fetchGivenSuccessorRows"
         />
       </local-navigation-row-section>
+    </local-navigation-row>
+    <local-navigation-row is-secondary="true">
+      <div class="kuiLocalTabs">
+        <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind-template="Context of {{ contextApp.state.queryParameters.anchorUid }}"></div>
+      </div>
     </local-navigation-row>
   </local-navigation>
 

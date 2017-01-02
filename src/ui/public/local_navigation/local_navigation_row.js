@@ -10,7 +10,7 @@ module.directive('localNavigationRow', function LocalNavigationRow() {
     scope: {
       isSecondary: '=?',
     },
-    template: `<div class="kuiLocalNavRow" ng-class="{ 'kuiLocalNavigationRow--secondary': isSecondary }" ng-transclude></div>`,
+    template: `<div class="kuiLocalNavRow" ng-class="{ 'kuiLocalNavRow--secondary': isSecondary }" ng-transclude></div>`,
     transclude: true,
   };
 });
