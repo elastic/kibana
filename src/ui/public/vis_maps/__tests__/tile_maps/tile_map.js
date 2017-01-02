@@ -32,7 +32,7 @@ function createTileMap(handler, chartEl, chartData) {
   return tilemap;
 }
 
-describe('TileMap Tests', function () {
+describe('tilemaptest - TileMap Tests', function () {
   let tilemap;
 
   beforeEach(ngMock.module('kibana'));

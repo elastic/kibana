@@ -26,7 +26,7 @@ uiModules.get('kibana')
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
-    class MapSettings {
+    class TilemapSettings {
 
       constructor() {
 
@@ -152,7 +152,7 @@ uiModules.get('kibana')
 
     }
 
-    return new MapSettings();
+    return new TilemapSettings();
 
     async function getTileServiceManifest(manifestUrl, additionalQueryParams) {
 
