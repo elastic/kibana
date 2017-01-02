@@ -40,4 +40,4 @@ export async function mixin(kbnServer, server, config) {
       }
     });
   });
-};
+}

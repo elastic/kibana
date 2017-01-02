@@ -102,4 +102,4 @@ export default function (chrome, internals) {
     modules.link(kibana);
   };
 
-};
+}

@@ -29,4 +29,4 @@ export default function (chrome, internals) {
     if (_.isUndefined(internals.visible)) return def;
     return internals.visible;
   };
-};
+}

@@ -61,4 +61,4 @@ export default function (chrome, internals) {
   chrome.setLastUrlFor = function (appId, url) {
     internals.appUrlStore.setItem(`appLastUrl:${appId}`, url);
   };
-};
+}

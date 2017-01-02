@@ -135,12 +135,8 @@ class BaseOptimizer {
           {
             test: /\.jsx?$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: makeLoaderString([
-              {
-                name: 'babel-loader',
-                query: babelOptions.webpack
-              }
-            ]),
+            loader: 'babel-loader',
+            query: babelOptions.webpack
           },
         ],
         postLoaders: this.env.postLoaders || [],

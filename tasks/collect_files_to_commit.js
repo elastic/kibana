@@ -12,4 +12,4 @@ module.exports = function registerCollectFilesToCommit(grunt) {
     })
     .nodeify(this.async());
   });
-}
+};

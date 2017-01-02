@@ -4,4 +4,4 @@ module.exports = function (grunt) {
     'checkAddedFilenames',
     'lintStagedFiles'
   ]);
-}
+};
