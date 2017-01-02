@@ -130,8 +130,8 @@ export default function AxisScaleFactory(Private) {
       const max = this.axisConfig.get('scale.max') || this.getYMax();
       const domain = [min, max];
       if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
-      if (this.axisConfig.isYExtents()) return domain;
       if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
+      if (this.axisConfig.isYExtents()) return domain;
       return [Math.min(0, min), Math.max(0, max)];
     }
 
@@ -179,16 +179,18 @@ export default function AxisScaleFactory(Private) {
       const scale = this.getD3Scale(config.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
+      const padding = config.get('style.rangePadding');
+      const outerPadding = config.get('style.rangeOuterPadding');
       this.scale = scale.domain(domain);
       if (config.isOrdinal()) {
-        this.scale.rangeBands(range, 0.1);
+        this.scale.rangeBands(range, padding, outerPadding);
       } else {
         this.scale.range(range);
       }
 
       if (this.canApplyNice()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
-      if (this.visConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      if (this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 

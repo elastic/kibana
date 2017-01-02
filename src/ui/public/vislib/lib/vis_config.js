@@ -13,19 +13,20 @@ export default function VisConfigFactory(Private) {
     style: {
       margin : { top: 10, right: 3, bottom: 5, left: 3 }
     },
-    alerts: {},
+    alerts: [],
     categoryAxes: [],
     valueAxes: []
   };
 
 
   class VisConfig {
-    constructor(visConfigArgs, data, uiState) {
+    constructor(visConfigArgs, data, uiState, el) {
       this.data = new Data(data, uiState);
 
       const visType = visTypes[visConfigArgs.type];
       const typeDefaults = visType(visConfigArgs, this.data);
       this._values = _.defaultsDeep({}, typeDefaults, DEFAULT_VIS_CONFIG);
+      this._values.el = el;
     }
 
     get(property, defaults) {

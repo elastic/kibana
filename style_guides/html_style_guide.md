@@ -3,9 +3,11 @@
 
 ## Multiple attribute values
 
-When a node has multiple attributes, each attribute including the first should be on its own line with a single indent.
+When an element has multiple attributes, each attribute including the first should be on its own line with a single indent.
+This makes the attributes easier to scan and compare across similar elements.
 
-The closing bracket should be on its own line. This allows attributes to be shuffled and edited without having to move the bracket around. It also makes it easier to scan vertically and match opening and closing brackets.
+The closing bracket should be on its own line. This allows attributes to be shuffled and edited without having to move the bracket around. It also makes it easier to scan vertically and match opening and closing brackets. This format
+is inspired by the positioning of the opening and closing parentheses in [Pug/Jade](https://pugjs.org/language/attributes.html#multiline-attributes).
 
 ```
 <div
@@ -17,7 +19,7 @@ The closing bracket should be on its own line. This allows attributes to be shuf
 </div>
 ```
 
-If the node doesn't have child notes, add the closing tag on the same line as the opening tag's closing bracket.
+If the element doesn't have children, add the closing tag on the same line as the opening tag's closing bracket.
 
 ```
 <div

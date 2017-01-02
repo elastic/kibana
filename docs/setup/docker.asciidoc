@@ -88,6 +88,10 @@ mappings are available:
 `SERVER_PORT`:: `server.port`
 `SERVER_SSL_CERT`:: `server.ssl.cert`
 `SERVER_SSL_KEY`:: `server.ssl.key`
+`XPACK_SECURITY_COOKIENAME`:: `xpack.security.cookieName`
+`XPACK_SECURITY_ENCRYPTIONKEY`:: `xpack.security.encryptionKey`
+`XPACK_SECURITY_SECURECOOKIES`:: `xpack.security.secureCookies`
+`XPACK_SECURITY_SESSIONTIMEOUT`:: `xpack.security.sessionTimeout`
 
 These variables can be set with +docker-compose+ like this:
 

@@ -4,7 +4,7 @@ import sinon from 'auto-release-sinon';
 
 import RequestQueueProv from '../_request_queue';
 import SearchStrategyProv from '../fetch/strategy/search';
-import DocStrategyProv from '../fetch/strategy/doc';
+import DocStrategyProv from '../fetch/strategy/doc_data';
 
 describe('Courier Request Queue', function () {
   let docStrategy;

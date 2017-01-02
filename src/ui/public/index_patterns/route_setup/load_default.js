@@ -31,7 +31,13 @@ module.exports = function (opts) {
       }
 
       if (!defined && route.requireDefaultIndex) {
-        throw new NoDefaultIndexPattern();
+        // If there is only one index pattern, set it as default
+        if (patterns.length === 1) {
+          defaultId = patterns[0];
+          config.set('defaultIndex', defaultId);
+        } else {
+          throw new NoDefaultIndexPattern();
+        }
       }
 
       return notify.event('loading default index pattern', function () {

@@ -1,6 +1,6 @@
-export default function RefreshKibanaIndexFn(es, kbnIndex) {
+export default function RefreshKibanaIndexFn(esAdmin, kbnIndex) {
   return function () {
-    return es.indices.refresh({
+    return esAdmin.indices.refresh({
       index: kbnIndex
     });
   };

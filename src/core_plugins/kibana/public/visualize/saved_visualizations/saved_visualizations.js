@@ -15,13 +15,13 @@ require('plugins/kibana/management/saved_object_registry').register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
+app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
   const visTypes = Private(RegistryVisTypesProvider);
   const notify = new Notifier({
     location: 'Saved Visualization Service'
   });
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, es, kbnUrl);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl);
   saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;
     source.id = hit._id;
