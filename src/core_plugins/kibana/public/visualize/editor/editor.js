@@ -174,23 +174,22 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
-    $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
+    $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
+    kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
 
-    // Don't save this mode to the uiState, it's a one time flow only, if you break out of the
-    // flow you should no longer be in the mode.
-    $location.search(DashboardConsts.ADD_TO_DASH_PARAM, null);
+    $scope.isAddToDashMode = () => { return $scope.addToDashMode; };
 
     // Associate PersistedState instance with the Vis instance, so that
     // `uiStateVal` can be called on it. Currently this is only used to extract
     // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
 
-    $scope.isAddToDashMode = () => { return $scope.addToDashMode; };
+
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
@@ -315,6 +314,9 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
         notify.info('Saved Visualization "' + savedVis.title + '"');
         if ($scope.addToDashMode) {
           const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
+          // Not using kbnUrl.change here because the dashboardBaseUrl is a full path, not a url suffix.
+          // Rather than guess the right substring, we'll just navigate there directly, just as if the user
+          // clicked the dashboard link in the UI.
           window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConsts.ADD_VIS_PARAM}=${savedVis.id}`;
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);

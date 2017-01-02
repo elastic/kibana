@@ -278,8 +278,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       if ($route.current.params && $route.current.params[DashboardConsts.ADD_VIS_PARAM]) {
         $scope.addVis({ id: $route.current.params[DashboardConsts.ADD_VIS_PARAM] });
-        $location.search(DashboardConsts.ADD_TO_DASH_PARAM, null);
-        $location.search(DashboardConsts.ADD_VIS_PARAM, null);
+        kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
+        kbnUrl.removeParam(DashboardConsts.ADD_VIS_PARAM);
       }
 
       $scope.addNewVis = function () {

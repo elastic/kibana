@@ -22,11 +22,11 @@ routes.when('/visualize/step/1', {
   template: templateStep(1, require('plugins/kibana/visualize/wizard/step_1.html'))
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, $location, timefilter, Private) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
   timefilter.enabled = false;
 
   $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
-  $location.search(DashboardConsts.ADD_TO_DASH_PARAM, null);
+  kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
 
   $scope.visTypes = Private(RegistryVisTypesProvider);
   $scope.visTypeUrl = function (visType) {
@@ -52,10 +52,10 @@ routes.when('/visualize/step/2', {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, $location, timefilter, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
   const type = $route.current.params.type;
   $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
-  $location.search(DashboardConsts.ADD_TO_DASH_PARAM, null);
+  kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
 
   $scope.step2WithSearchUrl = function (hit) {
     if ($scope.addToDashMode) {
