@@ -1,7 +1,7 @@
 import _ from 'lodash';
 export default (id, metrics) => {
   const metric = _.find(metrics, { id });
-  let bucketsPath = id;
+  let bucketsPath = String(id);
 
   switch (metric.type) {
     case 'derivative':
@@ -25,5 +25,4 @@ export default (id, metrics) => {
 
   return bucketsPath;
 };
-
 

@@ -1,5 +1,9 @@
 import _ from 'lodash';
 
+function mean(values) {
+  return _.sum(values) / values.length;
+}
+
 const basic = fnName => targetSeries => {
   const data = [];
   _.zip(...targetSeries).forEach(row => {
@@ -27,12 +31,31 @@ export default {
   sum: basic('sum'),
   max: basic('max'),
   min: basic('min'),
-  mean: basic('mean'),
+  mean(targetSeries) {
+    const data = [];
+    _.zip(...targetSeries).forEach(row => {
+      const key = row[0][0];
+      const values = row.map(r => r[1]);
+      data.push([key, mean(values)]);
+    });
+    return [data];
+  },
+
 
   overall_max: overall('max'),
   overall_min: overall('min'),
-  overall_avg: overall('mean'),
   overall_sum: overall('sum'),
+
+  overall_avg(targetSeries) {
+    const fn = mean;
+    const keys = [];
+    const values = [];
+    _.zip(...targetSeries).forEach(row => {
+      keys.push(row[0][0]);
+      values.push(_.sum(row.map(r => r[1])));
+    });
+    return [keys.map(k => [k, fn(values)])];
+  },
 
   cumlative_sum(targetSeries) {
     const data = [];

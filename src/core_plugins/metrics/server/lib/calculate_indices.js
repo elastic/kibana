@@ -1,10 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-export default (req, indexPattern = '*', timeField = '@timestamp') => {
-  const { server } = req;
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const config = server.config();
+function getParams(req, indexPattern, timeField) {
   const from = moment.utc(req.payload.timerange.min);
   const to = moment.utc(req.payload.timerange.max);
 
@@ -14,7 +11,7 @@ export default (req, indexPattern = '*', timeField = '@timestamp') => {
     min_value: { lte: from.toISOString() }
   };
 
-  const params = {
+  return {
     index: indexPattern,
     level: 'indices',
     ignoreUnavailable: true,
@@ -24,13 +21,27 @@ export default (req, indexPattern = '*', timeField = '@timestamp') => {
     }
   };
 
+}
+
+function handleResponse(resp) {
+  const indices = _.map(resp.indices, (_info, index) => index);
+  if (indices.length === 0) {
+    // there are no relevant indices for the given timeframe in the data
+    return [];
+  }
+  return indices;
+}
+
+function calculateIndices(req, indexPattern = '*', timeField = '@timestamp') {
+  const { server } = req;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const params = getParams(req, indexPattern, timeField);
+
   return callWithRequest(req, 'fieldStats', params)
-    .then(resp => {
-      const indices = _.map(resp.indices, (_info, index) => index);
-      if (indices.length === 0) {
-        // there are no relevant indices for the given timeframe in the data
-        return [];
-      }
-      return indices;
-    });
-};
+    .then(handleResponse);
+}
+
+
+calculateIndices.handleResponse = handleResponse;
+calculateIndices.getParams = getParams;
+export default calculateIndices;

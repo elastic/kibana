@@ -6,7 +6,7 @@ export default (server) => {
     path: '/api/metrics/fields',
     method: 'GET',
     handler: (req, reply) => {
-      return Promise.try(getFields(req))
+      return getFields(req)
         .then(reply)
         .catch(err => reply([]));
     }

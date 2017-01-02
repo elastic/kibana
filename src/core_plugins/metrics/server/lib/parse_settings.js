@@ -7,7 +7,16 @@ const numericKeys = [
 const booleanKeys = [ 'pad' ];
 function castBasedOnKey(key, val) {
   if (~numericKeys.indexOf(key)) return Number(val);
-  if (~booleanKeys.indexOf(key)) return Boolean(val);
+  if (~booleanKeys.indexOf(key)) {
+    switch(val) {
+      case 'true':
+      case 1:
+      case '1':
+        return true;
+      default:
+        return false;
+    }
+  }
   return val;
 }
 export default (settingsStr) => {
