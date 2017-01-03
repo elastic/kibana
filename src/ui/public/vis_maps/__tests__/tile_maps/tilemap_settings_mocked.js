@@ -86,9 +86,9 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   describe('modify', function () {
 
     beforeEach(function (done) {
-      theTileMapSettings.addQueryParams({foo: 'bar'});
-      theTileMapSettings.addQueryParams({bar: 'stool'});
-      theTileMapSettings.addQueryParams({foo: 'tstool'});
+      theTileMapSettings.addQueryParams({ foo: 'bar' });
+      theTileMapSettings.addQueryParams({ bar: 'stool' });
+      theTileMapSettings.addQueryParams({ foo: 'tstool' });
       theTileMapSettings.loadSettings().then(function () {
         done();
       });

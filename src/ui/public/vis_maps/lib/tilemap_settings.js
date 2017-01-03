@@ -162,7 +162,7 @@ uiModules.get('kibana')
           method: 'GET'
         });
 
-      };
+      }
 
     }
 
