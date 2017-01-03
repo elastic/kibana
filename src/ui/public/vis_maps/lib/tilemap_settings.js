@@ -3,6 +3,7 @@ import _ from 'lodash';
 import marked from 'marked';
 import url from 'url';
 import uiRoutes from 'ui/routes';
+import { modifyUrl } from 'ui/url';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
@@ -24,6 +25,21 @@ uiModules.get('kibana')
 
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+
+    const extendUrl = (url, props) => (
+      modifyUrl(url, parsed => _.merge(parsed, props))
+    );
+
+    /**
+     *  Unescape a url template that was escaped by encodeURI() so leaflet
+     *  will be able to correctly locate the varables in the template
+     *  @param  {String} url
+     *  @return {String}
+     */
+    const unescapeTemplateVars = url => {
+      const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
+      return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
+    };
 
     class TilemapSettings {
 
@@ -66,10 +82,12 @@ uiModules.get('kibana')
               subdomains: []
             };
 
-            //additional query params need to be propagated to the TMS endpoint as well.
-            const queryparams = _.assign({ }, manifest.services[0].query_parameters, this._queryParams);
-            const query = url.format({ query: queryparams });
-            this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
+            this._url = unescapeTemplateVars(extendUrl(manifest.services[0].url, {
+              query: {
+                ...(manifest.services[0].query_parameters || {}),
+                ...this._queryParams
+              }
+            }));
 
             this._settingsInitialized = true;
           })
@@ -153,11 +171,8 @@ uiModules.get('kibana')
        * Make this instance property to allow for overrides by test code
        */
       _getTileServiceManifest(manifestUrl, additionalQueryParams) {
-        const manifestServiceTokens = url.parse(manifestUrl);
-        manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
-        const requestUrl = url.format(manifestServiceTokens);
         return $http({
-          url: requestUrl,
+          url: extendUrl(manifestUrl, { query: this._queryParams }),
           method: 'GET'
         });
       }
