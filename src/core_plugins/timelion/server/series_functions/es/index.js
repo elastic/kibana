@@ -61,9 +61,10 @@ module.exports = new Datasource('es', {
       fit: 'nearest'
     });
 
-    var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
+    const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
 
-    var body = buildRequest(config, tlConfig);
+    const body = buildRequest(config, tlConfig);
+
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
       return {

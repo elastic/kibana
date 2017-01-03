@@ -9,18 +9,23 @@ import esResponse from './fixtures/es_response';
 
 import Promise from 'bluebird';
 import _ from 'lodash';
-import {expect} from 'chai';
+import { expect } from 'chai';
+import sinon from 'sinon';
 import invoke from './helpers/invoke_series_fn.js';
 
 function stubResponse(response) {
   return {
-    server: {plugins:{
-      elasticsearch: {
-        callWithRequest: function () {
-          return Promise.resolve(response);
+    server: {
+      plugins:{
+        elasticsearch: {
+          getCluster: sinon.stub().withArgs('data').returns({
+            callWithRequest: function () {
+              return Promise.resolve(response);
+            }
+          })
         }
       }
-    }}
+    }
   };
 }
 

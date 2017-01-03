@@ -16,7 +16,7 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjectsView', function (kbnIndex, Notifier) {
   return {
     restrict: 'E',
-    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
+    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
       const notify = new Notifier({ location: 'SavedObject view' });
       const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
       const serviceObj = registry.get($routeParams.service);
@@ -104,7 +104,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
-      es.get({
+      esAdmin.get({
         index: kbnIndex,
         type: service.type,
         id: $routeParams.id
@@ -163,7 +163,7 @@ uiModules.get('apps/management')
        * @returns {type} description
        */
       $scope.delete = function () {
-        es.delete({
+        esAdmin.delete({
           index: kbnIndex,
           type: service.type,
           id: $routeParams.id
@@ -191,7 +191,7 @@ uiModules.get('apps/management')
           _.set(source, field.name, value);
         });
 
-        es.index({
+        esAdmin.index({
           index: kbnIndex,
           type: service.type,
           id: $routeParams.id,
@@ -204,7 +204,7 @@ uiModules.get('apps/management')
       };
 
       function redirectHandler(action) {
-        return es.indices.refresh({
+        return esAdmin.indices.refresh({
           index: kbnIndex
         })
         .then(function (resp) {
