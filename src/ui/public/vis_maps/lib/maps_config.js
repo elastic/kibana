@@ -3,7 +3,7 @@
  */
 import _ from 'lodash';
 
-export default function MapsConfigFactory(Private) {
+export default function MapsConfigFactory() {
 
   const DEFAULT_VIS_CONFIG = {
     style: {

@@ -1,4 +1,3 @@
-import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import VislibVisualizationsChartProvider from './_chart';

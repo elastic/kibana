@@ -24,14 +24,16 @@ import VislibVisualizationsMapProvider from 'ui/vis_maps/visualizations/_map';
 //   'Heatmap'
 // ];
 
-describe('TileMap Map Tests', function () {
+describe('tilemaptest - TileMap Map Tests', function () {
   const $mockMapEl = $('<div>');
   let TileMapMap;
+  let theTileMapSettings;
   const leafletStubs = {};
   const leafletMocks = {};
 
+
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, tilemapSettings) {
     // mock parts of leaflet
     leafletMocks.tileLayer = { on: sinon.stub() };
     leafletMocks.map = { on: sinon.stub() };
@@ -41,13 +43,22 @@ describe('TileMap Map Tests', function () {
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
     TileMapMap = Private(VislibVisualizationsMapProvider);
+
+    theTileMapSettings = tilemapSettings;
+
   }));
+
+  async function loadTileMapSettings() {
+    await theTileMapSettings.loadSettings();
+  }
 
   describe('instantiation', function () {
     let map;
     let createStub;
 
-    beforeEach(function () {
+    beforeEach(loadTileMapSettings);
+
+    beforeEach(async function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
@@ -68,6 +79,8 @@ describe('TileMap Map Tests', function () {
   describe('createMap', function () {
     let map;
     let mapStubs;
+
+    beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
       mapStubs = {
@@ -112,6 +125,8 @@ describe('TileMap Map Tests', function () {
   describe('attachEvents', function () {
     let map;
 
+    beforeEach(loadTileMapSettings);
+
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
         this._tileLayer = leafletMocks.tileLayer;
@@ -148,12 +163,13 @@ describe('TileMap Map Tests', function () {
     let map;
     let createStub;
 
+    beforeEach(loadTileMapSettings);
+
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');
       createStub = sinon.stub(TileMapMap.prototype, '_createMarkers', _.constant({ addLegend: _.noop }));
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
-
     it('should pass the map options to the marker', function () {
       map._addMarkers();
 
@@ -174,6 +190,8 @@ describe('TileMap Map Tests', function () {
 
   describe('getDataRectangles', function () {
     let map;
+
+    beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');
