@@ -38,7 +38,7 @@ const mockMap = {
   getZoom: _.constant(5)
 };
 
-describe('Marker Tests', function () {
+describe('tilemaptest - Marker Tests', function () {
   let mapData;
   let markerLayer;
 

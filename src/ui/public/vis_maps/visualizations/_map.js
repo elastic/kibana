@@ -1,29 +1,20 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
-import marked from 'marked';
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
-
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from './marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
-export default function MapFactory(Private, tilemap, $sanitize) {
+import '../lib/tilemap_settings';
 
+export default function MapFactory(Private, tilemapSettings, Notifier) {
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
 
-  const tilemapOptions = tilemap.options;
-  const attribution = $sanitize(marked(tilemapOptions.attribution));
-
-  const mapTiles = {
-    url: tilemap.url,
-    options: _.assign({}, tilemapOptions, { attribution })
-  };
+  const notify = new Notifier({
+    location: 'Vis'
+  });
 
   const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -43,6 +34,8 @@ export default function MapFactory(Private, tilemap, $sanitize) {
    */
   class TileMapMap {
     constructor(container, chartData, params) {
+
+
       this._container = $(container).get(0);
       this._chartData = chartData;
 
@@ -52,20 +45,26 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
+
+      const mapOptions = tilemapSettings.getOptions();
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
-      const mapOptions = {
-        minZoom: tilemapOptions.minZoom,
-        maxZoom: tilemapOptions.maxZoom,
+      const options = {
+        minZoom: mapOptions.minZoom,
+        maxZoom: mapOptions.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
         fadeAnimation: false,
       };
 
-      this._createMap(mapOptions);
+      if (tilemapSettings.hasError()) {
+        notify.fatal(tilemapSettings.getError());
+      }
+      this._createMap(options, tilemapSettings.getUrl());
+
     }
 
     addBoundingControl() {
@@ -210,7 +209,6 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       const saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
-
       this._tileLayer.on('load', () => {
         if (!self._events) return;
 
@@ -300,26 +298,26 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       });
     };
 
-    _createMap(mapOptions) {
+    _createMap(options, url) {
       if (this.map) this.destroy();
 
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
-        _.assign(mapOptions, {
+        _.assign(options, {
           minZoom: 1,
           maxZoom: 18
         });
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
-        this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
+        this._tileLayer = L.tileLayer(url, options);
       }
 
       // append tile layers, center and zoom to the map options
-      mapOptions.layers = this._tileLayer;
-      mapOptions.center = this._mapCenter;
-      mapOptions.zoom = this._mapZoom;
+      options.layers = this._tileLayer;
+      options.center = this._mapCenter;
+      options.zoom = this._mapZoom;
 
-      this.map = L.map(this._container, mapOptions);
+      this.map = L.map(this._container, options);
       this._attachEvents();
       this._addMarkers();
     };

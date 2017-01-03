@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/indexed_array';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-let notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
+const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
 /**
  * Create a registry, which is just a Private module provider.
