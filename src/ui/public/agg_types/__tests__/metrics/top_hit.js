@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import TopHitProvider from 'ui/agg_types/metrics/top_hit';
@@ -237,21 +238,70 @@ describe('Top hit metric', function () {
       });
 
       [
-        { type: 'concat', result: [ 1, 2, 3 ] },
-        { type: 'sum', result: 6 },
-        { type: 'min', result: 1 },
-        { type: 'max', result: 3 },
-        { type: 'average', result: 2 }
+        {
+          description: 'concat values with a comma',
+          type: 'concat',
+          data: [ 1, 2, 3 ],
+          result: [ 1, 2, 3 ]
+        },
+        {
+          description: 'sum up the values',
+          type: 'sum',
+          data: [ 1, 2, 3 ],
+          result: 6
+        },
+        {
+          description: 'take the minimum value',
+          type: 'min',
+          data: [ 1, 2, 3 ],
+          result: 1
+        },
+        {
+          description: 'take the maximum value',
+          type: 'max',
+          data: [ 1, 2, 3 ],
+          result: 3
+        },
+        {
+          description: 'take the average value',
+          type: 'average',
+          data: [ 1, 2, 3 ],
+          result: 2
+        },
+        {
+          description: 'support null/undefined',
+          type: 'min',
+          data: [ undefined, null ],
+          result: null
+        },
+        {
+          description: 'support null/undefined',
+          type: 'max',
+          data: [ undefined, null ],
+          result: null
+        },
+        {
+          description: 'support null/undefined',
+          type: 'sum',
+          data: [ undefined, null ],
+          result: null
+        },
+        {
+          description: 'support null/undefined',
+          type: 'average',
+          data: [ undefined, null ],
+          result: null
+        }
       ]
       .forEach(agg => {
-        it(`should return the result of the ${agg.type} aggregation over the last doc`, function () {
+        it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, function () {
           const bucket = {
             '1': {
               hits: {
                 hits: [
                   {
                     _source: {
-                      bytes: [ 1, 2, 3 ]
+                      bytes: agg.data
                     }
                   }
                 ]
@@ -263,19 +313,19 @@ describe('Top hit metric', function () {
           expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
         });
 
-        it(`should return the result of the ${agg.type} aggregation over the last X docs`, function () {
+        it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, function () {
           const bucket = {
             '1': {
               hits: {
                 hits: [
                   {
                     _source: {
-                      bytes: [ 1, 2 ]
+                      bytes: _.dropRight(agg.data, 1)
                     }
                   },
                   {
                     _source: {
-                      bytes: 3
+                      bytes: _.last(agg.data)
                     }
                   }
                 ]

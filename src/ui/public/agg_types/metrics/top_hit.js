@@ -183,6 +183,9 @@ export default function AggTypeMetricTopProvider(Private) {
       }
 
       if (_.isArray(values)) {
+        if (!_.compact(values).length) {
+          return null;
+        }
         switch (agg.params.aggregate.val) {
           case 'max':
             return _.max(values);
