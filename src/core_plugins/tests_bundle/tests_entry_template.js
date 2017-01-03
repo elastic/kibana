@@ -38,9 +38,9 @@ window.__KBN__ = {
             maxZoom: 10,
             attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
           }
-        },
-        manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest'
-      }
+        }        
+      },
+      manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest'
     }
   },
   uiSettings: {

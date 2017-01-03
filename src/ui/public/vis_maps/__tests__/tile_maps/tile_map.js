@@ -28,8 +28,7 @@ function createTileMap(handler, chartEl, chartData) {
   chartEl = chartEl || mockChartEl;
   chartData = chartData || geoJsonData;
 
-  const tilemap = new TileMap(handler, chartEl, chartData);
-  return tilemap;
+  return new TileMap(handler, chartEl, chartData);
 }
 
 describe('tilemaptest - TileMap Tests', function () {
