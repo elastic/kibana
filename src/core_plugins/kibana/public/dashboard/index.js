@@ -18,7 +18,7 @@ import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
-import { DashboardConsts } from './dashboard_consts';
+import { DashboardConstants } from './dashboard_constants';
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
@@ -276,14 +276,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
       };
 
-      if ($route.current.params && $route.current.params[DashboardConsts.ADD_VIS_PARAM]) {
-        $scope.addVis({ id: $route.current.params[DashboardConsts.ADD_VIS_PARAM] });
-        kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
-        kbnUrl.removeParam(DashboardConsts.ADD_VIS_PARAM);
+      if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
+        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
+        kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+        kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
 
-      $scope.addNewVis = function () {
-        kbnUrl.change(`/visualize?${DashboardConsts.ADD_TO_DASH_PARAM}`);
+      const addNewVis = function addNewVis() {
+        kbnUrl.change(`/visualize?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
       $scope.addSearch = function (hit) {
@@ -297,7 +297,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
-        addNewVis: $scope.addNewVis,
+        addNewVis,
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };

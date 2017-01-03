@@ -3,7 +3,7 @@ import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
-import { DashboardConsts } from 'plugins/kibana/dashboard/dashboard_consts';
+import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
@@ -25,15 +25,15 @@ routes.when('/visualize/step/1', {
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
   timefilter.enabled = false;
 
-  $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
-  kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
+  const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+  kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   $scope.visTypes = Private(RegistryVisTypesProvider);
   $scope.visTypeUrl = function (visType) {
     const baseUrl = visType.requiresSearch ? '#/visualize/step/2?' : '#/visualize/create?';
     const params = [`type=${encodeURIComponent(visType.name)}`];
-    if ($scope.addToDashMode) {
-      params.push(DashboardConsts.ADD_TO_DASH_PARAM);
+    if (addToDashMode) {
+      params.push(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
     }
 
     return baseUrl + params.join('&');
@@ -54,13 +54,13 @@ routes.when('/visualize/step/2', {
 
 module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
   const type = $route.current.params.type;
-  $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
-  kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
+  const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+  kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   $scope.step2WithSearchUrl = function (hit) {
-    if ($scope.addToDashMode) {
+    if (addToDashMode) {
       return kbnUrl.eval(
-        `#/visualize/create?&type={{type}}&savedSearchId={{id}}&${DashboardConsts.ADD_TO_DASH_PARAM}`,
+        `#/visualize/create?&type={{type}}&savedSearchId={{id}}&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
         { type: type, id: hit.id });
     }
     return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}', { type: type, id: hit.id });
@@ -76,8 +76,8 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
   $scope.makeUrl = function (pattern) {
     if (!pattern) return;
 
-    if ($scope.addToDashMode) {
-      return `#/visualize/create?${DashboardConsts.ADD_TO_DASH_PARAM}&type=${type}&indexPattern=${pattern}`;
+    if (addToDashMode) {
+      return `#/visualize/create?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}&type=${type}&indexPattern=${pattern}`;
     }
     return `#/visualize/create?type=${type}&indexPattern=${pattern}`;
   };

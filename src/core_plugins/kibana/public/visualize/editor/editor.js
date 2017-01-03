@@ -17,7 +17,7 @@ import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
-import { DashboardConsts } from 'plugins/kibana/dashboard/dashboard_consts';
+import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 
 uiRoutes
 .when('/visualize/create', {
@@ -65,7 +65,7 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -179,10 +179,10 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
-    $scope.addToDashMode = $route.current.params[DashboardConsts.ADD_TO_DASH_PARAM];
-    kbnUrl.removeParam(DashboardConsts.ADD_TO_DASH_PARAM);
+    const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+    kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
-    $scope.isAddToDashMode = () => { return $scope.addToDashMode; };
+    $scope.isAddToDashMode = () => addToDashMode;
 
     // Associate PersistedState instance with the Vis instance, so that
     // `uiStateVal` can be called on it. Currently this is only used to extract
@@ -312,12 +312,12 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if ($scope.addToDashMode) {
+        if ($scope.isAddToDashMode()) {
           const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
           // Not using kbnUrl.change here because the dashboardBaseUrl is a full path, not a url suffix.
           // Rather than guess the right substring, we'll just navigate there directly, just as if the user
           // clicked the dashboard link in the UI.
-          window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConsts.ADD_VIS_PARAM}=${savedVis.id}`;
+          $window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}=${savedVis.id}`;
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
