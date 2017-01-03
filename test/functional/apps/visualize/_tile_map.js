@@ -317,17 +317,20 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
-        return PageObjects.visualize.getMapZoomInEnabled();
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomInEnabled()
+            .then(function (enabled) {
+              expect(enabled).to.be(true);
+            });
+        });
       })
-      .then(function (enabled) {
-        // we are at zoom level 9 here and zoom out should still be enabled
-        expect(enabled).to.be(true);
+      .then(function () {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
         return PageObjects.visualize.getMapZoomInEnabled();
       })
-      // now we're at level 10 and zoom out should be disabled
+      // now we're at level 12 and zoom out should be disabled
       .then(function (enabled) {
         expect(enabled).to.be(false);
       });
