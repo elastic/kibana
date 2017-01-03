@@ -36,6 +36,10 @@ dashboard-grid {
   .gs-w {
     border: 2px dashed transparent;
 
+    .panel .panel-heading .btn-group {
+      display: none;
+    }
+
     &:hover {
       border-color: @kibanaGray4;
 
@@ -54,101 +58,110 @@ dashboard-grid {
   i.remove {
     cursor: pointer;
   }
+}
 
-  dashboard-panel {
-    display: block;
+.dashboard-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+dashboard-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  background: @dashboard-panel-bg;
+  color: @dashboard-panel-color;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+
+  .panel {
+    margin: 0;
+    // maintain the 100% height of the panel
     height: 100%;
-    background: @dashboard-panel-bg;
-    color: @dashboard-panel-color;
-    padding: 0;
-    overflow: hidden;
-    position: relative;
+    flex: 1;
 
-    .panel {
-      margin: 0;
-      // maintain the 100% height of the panel
-      height: 100%;
+    // flex layout allows us to define the visualize element as "fill available space"
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border: 0 solid transparent;
 
-      // flex layout allows us to define the visualize element as "fill available space"
+    .panel-heading {
+      padding: 0px 0px 0px 5px;
+      flex: 0 0 auto;
+      white-space: nowrap;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      border: 0 solid transparent;
+      border-top-right-radius: 0;
+      border-top-left-radius: 0;
+      background-color: @white;
+      border: none;
 
-      .panel-heading {
-        padding: 0px 0px 0px 5px;
-        flex: 0 0 auto;
-        white-space: nowrap;
-        display: flex;
-        border-top-right-radius: 0;
-        border-top-left-radius: 0;
-        background-color: @white;
-        border: none;
-
-        .btn-group {
-          a {
-            color: inherit;
-          }
-          display: none;
-          white-space: nowrap;
-          flex: 0 0 auto;
-        }
-
-        .panel-title {
-          font-size: inherit;
-
-          // flexbox fix for IE10
-          // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
-          display: inline-block;
-
-          .ellipsis();
-          flex: 1 1 auto;
-
-          i {
-            opacity: 0.3;
-            font-size: 1.2em;
-            margin-right: 4px;
-          }
-        }
-
-        .panel-move:hover {
-          cursor: move;
-        }
-
+      .btn-group {
         a {
-          color: @dashboard-panel-heading-link-color;
-          border: none;
-          background: none;
-          padding: 0px 3px;
-          &:hover {
-            color: @dashboard-panel-heading-link-hover-color;
-          }
+          color: inherit;
+        }
+        white-space: nowrap;
+        flex: 0 0 auto;
+      }
+
+      .panel-title {
+        font-size: inherit;
+
+        // flexbox fix for IE10
+        // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
+        display: inline-block;
+
+        .ellipsis();
+        flex: 1 1 auto;
+
+        i {
+          opacity: 0.3;
+          font-size: 1.2em;
+          margin-right: 4px;
         }
       }
 
-      .visualize-show-spy {
-        visibility: hidden;
+      .panel-move:hover {
+        cursor: move;
       }
 
-      .load-error {
-        text-align: center;
-        font-size: 1em;
-        display: flex;
-        flex: 1 0 auto;
-        justify-content: center;
-        flex-direction: column;
-
-        .fa-exclamation-triangle {
-          font-size: 2em;
-          color: @dashboard-panel-load-error-color;
+      a {
+        color: @dashboard-panel-heading-link-color;
+        border: none;
+        background: none;
+        padding: 0px 3px;
+        &:hover {
+          color: @dashboard-panel-heading-link-hover-color;
         }
       }
+    }
 
-      .panel-content {
-        display: flex;
-        flex: 1 1 100%;
-        height: auto;
+    .visualize-show-spy {
+      visibility: hidden;
+    }
+
+    .load-error {
+      text-align: center;
+      font-size: 1em;
+      display: flex;
+      flex: 1 0 auto;
+      justify-content: center;
+      flex-direction: column;
+
+      .fa-exclamation-triangle {
+        font-size: 2em;
+        color: @dashboard-panel-load-error-color;
       }
+    }
+
+    .panel-content {
+      display: flex;
+      flex: 1 1 100%;
+      height: auto;
     }
   }
 }

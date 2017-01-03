@@ -209,6 +209,17 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.addApplicationClass(theme);
       }
 
+      $scope.expandedPanel = null;
+      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
+      $scope.toggleExpandPanel = (panelIndex) => {
+        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
+          $scope.expandedPanel = null;
+        } else {
+          $scope.expandedPanel =
+            $scope.state.panels.find((panel) => panel.panelIndex === panelIndex);
+        }
+      };
+
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
         updateQueryOnRootSource();
