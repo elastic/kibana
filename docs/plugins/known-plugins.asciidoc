@@ -11,7 +11,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 
 [float]
 === Packs
-* https://www.elastic.co/downloads/x-pack[X-Pack] - security, monitoring, reporting, alerts, graph
+* https://www.elastic.co/downloads/x-pack[X-Pack] - security, monitoring, reporting, alerting, Graph
 
 [float]
 === Apps
