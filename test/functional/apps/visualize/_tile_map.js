@@ -129,16 +129,25 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       // we can tell we're at level 1 because zoom out is disabled
       .then(function () {
-        return PageObjects.visualize.getMapZoomOutEnabled();
-      })
-      .then(function (enabled) {
-        expect(enabled).to.be(false);
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomOutEnabled()
+            .then(function (enabled) {
+              //should be able to zoom more as current config has 0 as min level.
+              expect(enabled).to.be(true);
+            });
+        });
       })
       .then(function () {
-        return PageObjects.visualize.getTileMapData();
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getTileMapData()
+          .then(function (data) {
+            expect(data).to.eql(expectedPrecision2Circles);
+          });
+        });
       })
-      .then(function (data) {
-        expect(data).to.eql(expectedPrecision2Circles);
+      .then(function takeScreenshot() {
+        PageObjects.common.debug('Take screenshot (success)');
+        PageObjects.common.saveScreenshot('map-after-zoom-from-1-to-2');
       });
     });
 
@@ -284,8 +293,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
 
-
-    bdd.it('should zoom in to level 10', function () {
+    bdd.it('should zoom in to level 12', function () {
       // 6
       return PageObjects.visualize.clickMapZoomIn()
       .then(function () {
@@ -301,17 +309,28 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
-        return PageObjects.visualize.getMapZoomInEnabled();
+        // 10
+        return PageObjects.visualize.clickMapZoomIn();
       })
-      .then(function (enabled) {
-        // we are at zoom level 9 here and zoom out should still be enabled
-        expect(enabled).to.be(true);
+      .then(function () {
+        // 11
+        return PageObjects.visualize.clickMapZoomIn();
+      })
+      .then(function () {
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomInEnabled()
+            .then(function (enabled) {
+              expect(enabled).to.be(true);
+            });
+        });
+      })
+      .then(function () {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
         return PageObjects.visualize.getMapZoomInEnabled();
       })
-      // now we're at level 10 and zoom out should be disabled
+      // now we're at level 12 and zoom out should be disabled
       .then(function (enabled) {
         expect(enabled).to.be(false);
       });
