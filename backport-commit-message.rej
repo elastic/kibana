@@ -1,0 +1,191 @@
+Read map service metadata from external service
+
+Backports PR #8630
+
+**Commit 1:**
+Add API for setting tilemap URL
+
+* Original sha: 109832e5465e3ba5ff3da7452bc78d05fa70fd37
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-10-11T22:37:17Z
+
+**Commit 2:**
+improve tilemap-service position
+
+* Original sha: c0079a0e172b7929a4a17f90e0d5d8bb9122f267
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-10-17T13:40:01Z
+
+**Commit 3:**
+move manifest resolution to Kibana-core
+
+* Original sha: e0b1bddf1f840d9ac3a8d7ff0f6da606ac3e6434
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-10-26T05:44:31Z
+
+**Commit 4:**
+Pass license-id to manifest server
+
+Refactor of earlier proposal. Instead, now pass license-id info to the manifest-service. This returns metadata applicable to the license.
+
+* Original sha: 47b9f10379dc7a8110923731f10687ed6f220a23
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-08T06:39:52Z
+
+**Commit 5:**
+Pass license-id for individual tile request
+
+* Original sha: 37f4c70304c091f6d3e62cfe0e9418e73f2c191b
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-08T22:10:12Z
+
+**Commit 6:**
+do not explicitly refer to license-paramter
+
+* Original sha: fc45628caadf9efb0d40f78d949f15bd04a41121
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-12T21:49:24Z
+
+**Commit 7:**
+Add proxy configuration
+
+Also changed the initialization of the parameters to fallback on the old settings if the proxy is not configured or not reachable.
+
+* Original sha: 4778709626fa0b9d59e58110771ec8c650c1968d
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-14T00:04:24Z
+
+**Commit 8:**
+Correctly read out response from server
+
+Also added license parameter, which is currently still a mandatory parameter (will likely change)
+
+* Original sha: 14d58641d475ca29e4795afb093e72cf16b5044b
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-15T19:00:14Z
+
+**Commit 9:**
+use class abstraction
+
+* Original sha: 11101a36d4feb0bc32820e818c19cc30d1f350fb
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T15:52:20Z
+
+**Commit 10:**
+do not trap state in module scope
+
+* Original sha: 89d0c956af00981d48b85da9a1a2e04872bb2617
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T16:01:14Z
+
+**Commit 11:**
+remove default legacy settings
+
+* Original sha: 95d643e643bc5a46cf5f4116e02021e93a2bd2ad
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T16:23:46Z
+
+**Commit 12:**
+replace let with const
+
+* Original sha: 6e90ed549ca3acc09b5566f61f3f45f3365768d9
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T16:43:10Z
+
+**Commit 13:**
+do not introduce new config section for manifest url
+
+* Original sha: f90bba28c14640b820da5870cd5925a2b302b7d9
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T16:55:19Z
+
+**Commit 14:**
+remove use of async/await
+
+* Original sha: 10cdf17b42e0d2411c553188ba2bc048db60b36e
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T17:21:21Z
+
+**Commit 15:**
+remove cruft
+
+* Original sha: fe791d7916337e975f70a196cbe47312a41ad5c4
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T17:29:13Z
+
+**Commit 16:**
+ensure map-settings are not loaded twice
+
+* Original sha: b99d16f8b7dcf22e80a4de7cf75dae18161d5087
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T17:52:34Z
+
+**Commit 17:**
+remove optional license parameter
+
+* Original sha: 2cd025c6ab4d27bf1437a3064c9fbcfa19b70d5e
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T17:58:41Z
+
+**Commit 18:**
+remove explicit check
+
+* Original sha: 935ed418eeb274126f7cd5f3e91a702d724b4be2
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T18:42:01Z
+
+**Commit 19:**
+improve for legibility
+
+* Original sha: 367d7746b1e512e57219bc2446f43aad4d68d2a4
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-16T21:47:14Z
+
+**Commit 20:**
+should work when overriding value
+
+* Original sha: 56c0180d03b32eda8b5861732cb868d56af3049a
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-17T00:19:34Z
+
+**Commit 21:**
+Invalidate configuration when changing settings
+
+This allows Kibana to pick up any new license configuration on every route change (if any).
+
+* Original sha: 29eb1ec1c9245ebac89ccc3ff844ca75735fe315
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-17T00:47:51Z
+
+**Commit 22:**
+add api to check if there was an error loading the settings
+
+* Original sha: bb503d59167b7955bb787a464dad63e144277167
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-17T01:22:48Z
+
+**Commit 23:**
+fix linting errors
+
+* Original sha: ca83e34c7b13c0875171c32e4b5cafcd3874c03f
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-26T14:53:17Z
+
+**Commit 24:**
+improve doc
+
+* Original sha: ac8882a3144e06db61121c334da5daca1b698fb8
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-26T14:59:23Z
+
+**Commit 25:**
+additional query params for manifest also need to be propagated to the TMS endpoint
+
+* Original sha: e3e11b2d0fc4e18dd230ddf19c89c87972f6805c
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-26T18:12:27Z
+
+**Commit 26:**
+fix imports due to rebase after tilemaps/vislib refactor
+
+* Original sha: bd240badcfbc7b6a39434ab01d5e3fdbf1cf67ad
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-27T10:21:43Z
+
+**Commit 27:**
+move tilemapsettings
+
+* Original sha: 0fffb1ac00d3a0cbd8339421da81419416a1ecc9
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-27T13:32:13Z
+
+**Commit 28:**
+display error notification when manifest cannot be retrieved
+
+* Original sha: e5646946af8a6289cb183ace85a21a2cb11a02cd
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-27T14:26:19Z
+
+**Commit 29:**
+fix test-stub to reflect new config
+
+* Original sha: 2f0d9ed1b4c251102fffb25de852fd5e46ccd788
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-27T15:00:51Z
+
+**Commit 30:**
+ensure tilemapSettings are initialized before running test
+
+* Original sha: 874c5402bca9801d2709c600fceeba7fca3ec556
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-02T22:17:22Z
