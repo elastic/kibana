@@ -5,8 +5,7 @@
     </span>
     <div class="btn-group">
       <a aria-label="Expand" ng-click="toggleExpand()">
-        <span ng-show="!isExpanded" class="fa fa-expand"></span>
-        <span ng-show="isExpanded" class="fa fa-compress"></span>
+        <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
       <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>

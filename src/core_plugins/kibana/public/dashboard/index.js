@@ -209,13 +209,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       }
 
       $scope.expandedPanel = null;
+      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
           $scope.expandedPanel = null;
         } else {
-          $scope.expandedPanel = $scope.state.panels.find(function (panel) {
-            return panel.panelIndex === panelIndex;
-          });
+          $scope.expandedPanel =
+            $scope.state.panels.find((panel) => panel.panelIndex === panelIndex);
         }
       };
 
