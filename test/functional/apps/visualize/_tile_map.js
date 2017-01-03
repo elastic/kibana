@@ -135,10 +135,16 @@ bdd.describe('visualize app', function describeIndexTests() {
         expect(enabled).to.be(false);
       })
       .then(function () {
-        return PageObjects.visualize.getTileMapData();
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getTileMapData()
+          .then(function (data) {
+            expect(data).to.eql(expectedPrecision2Circles);
+          });
+        });
       })
-      .then(function (data) {
-        expect(data).to.eql(expectedPrecision2Circles);
+      .then(function takeScreenshot() {
+        PageObjects.common.debug('Take screenshot (success)');
+        PageObjects.common.saveScreenshot('map-after-zoom-from-1-to-2');
       });
     });
 
