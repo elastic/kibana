@@ -129,10 +129,13 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       // we can tell we're at level 1 because zoom out is disabled
       .then(function () {
-        return PageObjects.visualize.getMapZoomOutEnabled();
-      })
-      .then(function (enabled) {
-        expect(enabled).to.be(false);
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomOutEnabled()
+            .then(function (enabled) {
+              //should be able to zoom more as current config has 0 as min level.
+              expect(enabled).to.be(true);
+            });
+        });
       })
       .then(function () {
         return PageObjects.common.try(function tryingForTime() {
@@ -290,8 +293,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
 
-
-    bdd.it('should zoom in to level 10', function () {
+    bdd.it('should zoom in to level 12', function () {
       // 6
       return PageObjects.visualize.clickMapZoomIn()
       .then(function () {
@@ -304,6 +306,14 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function () {
         // 9
+        return PageObjects.visualize.clickMapZoomIn();
+      })
+      .then(function () {
+        // 10
+        return PageObjects.visualize.clickMapZoomIn();
+      })
+      .then(function () {
+        // 11
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
