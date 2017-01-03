@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import url from 'url';
 
-describe('tilemaptest - TileMapSettingsTests', function () {
+describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
   let theTileMapSettings;
   let theTilemapsConfig;
 
@@ -10,6 +10,7 @@ describe('tilemaptest - TileMapSettingsTests', function () {
   beforeEach(ngMock.inject(function (Private, tilemapSettings, tilemapsConfig) {
     theTileMapSettings = tilemapSettings;
     theTilemapsConfig = tilemapsConfig;
+    theTilemapsConfig.deprecated.isOverridden = true;
   }));
 
 

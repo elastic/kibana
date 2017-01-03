@@ -13,7 +13,6 @@ marked.setOptions({
  * Reloads the setting for each route,
  * This is to ensure, that if the license changed during the lifecycle of the application,
  * we get an update.
- * This is safe to call multiple times.
  * tilemapSettings itself will take care that the manifest-service is not queried when not necessary.
  */
 uiRoutes.afterSetupWork(function (tilemapSettings) {
@@ -57,7 +56,7 @@ uiModules.get('kibana')
 
           let manifest;
           try {
-            const response = await getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams,
+            const response = await this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams,
               attributionFromConfig, optionsFromConfig);
             manifest = response.data;
             this._error = null;
@@ -93,7 +92,8 @@ uiModules.get('kibana')
       }
 
       /**
-       * Add optional query-parameter.
+       * Add optional query-parameters for the request.
+       * These are only applied when requesting dfrom the manifest.
        *
        * @param additionalQueryParams
        */
@@ -150,21 +150,25 @@ uiModules.get('kibana')
         return this._error;
       }
 
+      /**
+       * Make this instance property to allow for overrides by test code
+       */
+      async  _getTileServiceManifest(manifestUrl, additionalQueryParams) {
+        const manifestServiceTokens = url.parse(manifestUrl);
+        manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
+        const requestUrl = url.format(manifestServiceTokens);
+        return await $http({
+          url: requestUrl,
+          method: 'GET'
+        });
+
+      };
+
     }
+
 
     return new TilemapSettings();
 
-    async function getTileServiceManifest(manifestUrl, additionalQueryParams) {
 
-      const manifestServiceTokens = url.parse(manifestUrl);
-      manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
-      const requestUrl = url.format(manifestServiceTokens);
-
-      return await $http({
-        url: requestUrl,
-        method: 'GET'
-      });
-
-    }
   });
 
