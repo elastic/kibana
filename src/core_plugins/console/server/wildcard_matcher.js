@@ -1,4 +1,4 @@
-import { Minimatch } from 'minimatch'
+import { Minimatch } from 'minimatch';
 
 export class WildcardMatcher {
   constructor(wildcardPattern, emptyVal) {
@@ -10,7 +10,7 @@ export class WildcardMatcher {
       nocase: true,
       matchBase: true,
       nocomment: true
-    })
+    });
   }
 
   match(candidate) {
@@ -19,6 +19,6 @@ export class WildcardMatcher {
       return true;
     }
 
-    return this.matcher.match(candidate || '')
+    return this.matcher.match(candidate || '');
   }
 }

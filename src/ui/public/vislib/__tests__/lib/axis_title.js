@@ -108,9 +108,8 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
     dataObj = new Data(data, new PersistedState());
     const visConfig = new VisConfig({
-      type: 'histogram',
-      el: el.node()
-    }, data, new PersistedState());
+      type: 'histogram'
+    }, data, new PersistedState(), el.node());
     const xAxisConfig = new AxisConfig(visConfig, {
       position: 'bottom',
       title: {

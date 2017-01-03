@@ -3,6 +3,8 @@ import Scanner from 'ui/utils/scanner';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
+import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+
 const app = uiModules.get('app/visualize');
 
 
@@ -13,50 +15,14 @@ require('plugins/kibana/management/saved_object_registry').register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
+app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
   const visTypes = Private(RegistryVisTypesProvider);
-
-  const scanner = new Scanner(es, {
-    index: kbnIndex,
-    type: 'visualization'
-  });
-
   const notify = new Notifier({
     location: 'Saved Visualization Service'
   });
 
-  this.type = SavedVis.type;
-  this.Class = SavedVis;
-
-  this.loaderProperties = {
-    name: 'visualizations',
-    noun: 'Visualization',
-    nouns: 'visualizations'
-  };
-
-  this.get = function (id) {
-    return (new SavedVis(id)).init();
-  };
-
-  this.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
-  };
-
-  this.delete = function (ids) {
-    ids = !_.isArray(ids) ? [ids] : ids;
-    return Promise.map(ids, function (id) {
-      return (new SavedVis(id)).delete();
-    });
-  };
-
-  this.scanAll = function (queryString, pageSize = 1000) {
-    return scanner.scanAndMap(queryString, {
-      pageSize,
-      docCount: Infinity
-    }, (hit) => this.mapHits(hit));
-  };
-
-  this.mapHits = function (hit) {
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl);
+  saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
@@ -78,34 +44,9 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
     return source;
   };
 
-  this.find = function (searchString, size = 100) {
-    let body;
-    if (searchString) {
-      body = {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND',
-            analyze_wildcard: true
-          }
-        }
-      };
-    } else {
-      body = { query: { match_all: {} } };
-    }
-
-    return es.search({
-      index: kbnIndex,
-      type: 'visualization',
-      body: body,
-      size: size
-    })
-    .then((resp) => {
-      return {
-        total: resp.hits.total,
-        hits: resp.hits.hits.map((hit) => this.mapHits(hit))
-      };
-    });
+  saveVisualizationLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
+
+  return saveVisualizationLoader;
 });

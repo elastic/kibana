@@ -2,7 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
-import TooltipProvider from '../components/tooltip';
+import TooltipProvider from 'ui/vis/components/tooltip';
 import VislibVisualizationsChartProvider from './_chart';
 import VislibVisualizationsTimeMarkerProvider from './time_marker';
 import VislibVisualizationsSeriTypesProvider from './point_series/series_types';
@@ -33,6 +33,11 @@ export default function PointSeriesFactory(Private) {
       this.chartEl = chartEl;
       this.chartConfig = this.findChartConfig();
       this.handler.pointSeries = this;
+
+      const seriesLimit = 25;
+      if (this.chartConfig.series.length > seriesLimit) {
+        throw new errors.VislibError('There are too many series defined.');
+      }
     }
 
     findChartConfig() {

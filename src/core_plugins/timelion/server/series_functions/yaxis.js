@@ -51,7 +51,7 @@ module.exports = new Chainable('yaxis', {
 
       const myAxis = eachSeries._global.yaxes[yaxis - 1];
       myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
-      myAxis.min = min == null ? 0 : min;
+      myAxis.min = min;
       myAxis.max = max;
       myAxis.axisLabelFontSizePixels = 11;
       myAxis.axisLabel = label;

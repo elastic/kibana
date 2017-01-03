@@ -43,4 +43,15 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       expect(advancedSetting).to.be('America/Phoenix');
     });
   });
+
+  bdd.after(function () {
+    return PageObjects.settings.clickKibanaSettings()
+    .then(function TestCallSetAdvancedSettingsForTimezone() {
+      PageObjects.common.saveScreenshot('Settings-advanced-tab');
+      PageObjects.common.debug('calling setAdvancedSetting');
+      return PageObjects.settings.setAdvancedSettings('dateFormat:tz', 'UTC');
+    });
+  });
+
+
 });

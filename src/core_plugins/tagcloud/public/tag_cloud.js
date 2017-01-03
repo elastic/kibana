@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
-import vislibComponentsSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
+import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
 import { EventEmitter } from 'events';
 
 
