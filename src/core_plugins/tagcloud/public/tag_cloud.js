@@ -308,7 +308,10 @@ class TagCloud extends EventEmitter {
   getDebugInfo() {
     const debug = {};
     debug.positions = this._currentJob ? this._currentJob.words.map(tag => [tag.text, tag.x, tag.y, tag.rotate]) : [];
-    debug.size = this._size.slice();
+    debug.size = {
+      width: this._size[0],
+      height: this._size[1]
+    };
     return debug;
   }
 

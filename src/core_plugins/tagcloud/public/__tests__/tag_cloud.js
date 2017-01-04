@@ -440,12 +440,12 @@ describe('tag cloud tests', function () {
 
 
     const centered = (largest[1] === 0 && largest[2] === 0);
-    const halfWidth = debugInfo.size[0] / 2;
-    const halfHeight = debugInfo.size[1] / 2;
+    const halfWidth = debugInfo.size.width / 2;
+    const halfHeight = debugInfo.size.height / 2;
     const inside = debugInfo.positions.filter(position => {
       const x = position[1] + halfWidth;
       const y = position[2] + halfHeight;
-      return 0 <= x && x <= debugInfo.size[0] && 0 <= y && y <= debugInfo.size[1];
+      return 0 <= x && x <= debugInfo.size.width && 0 <= y && y <= debugInfo.size.height;
     });
 
     return centered && inside.length === count - 1;
