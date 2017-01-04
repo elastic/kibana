@@ -53,6 +53,7 @@ export default function (vis, resp) {
    * @returns {void}
    */
   function walkBuckets(agg, data, record) {
+    if (!data) return;
     if (!_.isArray(record)) {
       record = [];
     }
