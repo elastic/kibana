@@ -13,7 +13,7 @@ export default React.createClass({
     const classes = ['rhythm_chart__legend_item'];
     const key = row.id;
     if (!_.includes(this.props.seriesFilter, row.id)) classes.push('disabled');
-    if (!row.label || row.legend === false) return (<div key={ key } style={{display: 'none'}}/>);
+    if (!row.label || row.legend === false) return (<div key={ key } style={{ display: 'none' }}/>);
     return (
       <div
         className={ classes.join(' ') }

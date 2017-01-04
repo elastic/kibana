@@ -55,7 +55,7 @@ export default React.createClass({
     }
     if (model.split_mode === 'terms') {
       const { metrics } = model;
-      const defaultCount = { value: '_count', label: 'Doc Count (default)'};
+      const defaultCount = { value: '_count', label: 'Doc Count (default)' };
       return (
         <div className="vis_editor__split-container">
           <div className="vis_editor__label">Group By</div>

@@ -14,7 +14,7 @@ export default React.createClass({
     const { model } = this.props;
     if (!model.background_color_rules || (model.background_color_rules && model.background_color_rules.length === 0)) {
       this.props.onChange({
-        background_color_rules: [{id: uuid.v1() }]
+        background_color_rules: [{ id: uuid.v1() }]
       });
     }
   },
@@ -57,7 +57,7 @@ export default React.createClass({
               name="ignore_global_filter"
               onChange={this.props.onChange}/>
           </div>
-          <div className="vis_editor__label" style={{margin: '0 10px 0 0'}}>Color Rules</div>
+          <div className="vis_editor__label" style={{ margin: '0 10px 0 0' }}>Color Rules</div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
               model={model}

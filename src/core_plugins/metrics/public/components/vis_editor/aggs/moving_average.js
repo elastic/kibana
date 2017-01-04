@@ -28,7 +28,7 @@ export default React.createClass({
     return (
       <AggRow {...this.props}>
         <div className="vis_editor__row_item">
-          <div className="vis_editor__agg_row-item" style={{marginBottom: 10}}>
+          <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
@@ -46,7 +46,7 @@ export default React.createClass({
                 value={model.field}/>
             </div>
           </div>
-          <div className="vis_editor__agg_row-item" style={{marginBottom: 10}}>
+          <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Model</div>
               <Select

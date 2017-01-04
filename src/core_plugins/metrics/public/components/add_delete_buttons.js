@@ -4,7 +4,7 @@ import Tooltip from './tooltip';
 export default (props) => {
   const createDelete = () => {
     if (props.disableDelete) {
-      return (<span style={{display: 'none'}}/>);
+      return (<span style={{ display: 'none' }}/>);
     }
     return (
       <Tooltip text="Delete">
@@ -16,7 +16,7 @@ export default (props) => {
   };
   const createAdd = () => {
     if (props.disableAdd) {
-      return (<span style={{display: 'none'}}/>);
+      return (<span style={{ display: 'none' }}/>);
     }
     return (
       <Tooltip text="Add">

@@ -15,7 +15,7 @@ export default React.createClass({
   componentWillMount() {
     if (!this.props.model.variables) {
       this.props.onChange(_.assign({}, this.props.model, {
-        variables: [{id: uuid.v1()}]
+        variables: [{ id: uuid.v1() }]
       }));
     }
   },
@@ -36,7 +36,7 @@ export default React.createClass({
               panelType={panelType}
               value={model.type}
               onChange={handleSelectChange('type')}/>
-            <div className="vis_editor__row_item" style={{ margin: '10px 0'}}>
+            <div className="vis_editor__row_item" style={{ margin: '10px 0' }}>
               <div className="vis_editor__label">Variables</div>
               <Vars
                 metrics={siblings}

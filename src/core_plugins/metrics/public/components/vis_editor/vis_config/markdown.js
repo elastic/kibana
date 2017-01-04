@@ -100,7 +100,7 @@ export default React.createClass({
                 onChange={handleSelectChange('markdown_vertical_align')}/>
             </div>
           </div>
-          <div className="vis_editor__label" style={{margin: '0 0 10px 0'}}>Custom CSS (supports Less)</div>
+          <div className="vis_editor__label" style={{ margin: '0 0 10px 0' }}>Custom CSS (supports Less)</div>
           <div className="vis_editor__ace-editor">
             <AceEditor
               mode="less"

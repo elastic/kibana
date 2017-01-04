@@ -4,7 +4,7 @@ import Select from 'react-select';
 export default React.createClass({
 
   getDefaultProps() {
-    return { label: 'Data Formatter'};
+    return { label: 'Data Formatter' };
   },
 
   handleChange(value) {

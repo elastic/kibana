@@ -61,7 +61,7 @@ export default React.createClass({
     let caretClassName = 'fa fa-caret-down';
     if (!visible) caretClassName = 'fa fa-caret-right';
 
-    let body = (<div style={{display: 'none'}}/>);
+    let body = (<div style={{ display: 'none' }}/>);
     if (visible) {
       let metricsClassName = 'kbnTabs__tab';
       let optionsClassname = 'kbnTabs__tab';

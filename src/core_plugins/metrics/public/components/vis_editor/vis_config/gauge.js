@@ -17,7 +17,7 @@ export default React.createClass({
     const parts = {};
     if (!model.gauge_color_rules ||
       (model.gauge_color_rules && model.gauge_color_rules.length === 0)) {
-      parts.gauge_color_rules = [{id: uuid.v1() }];
+      parts.gauge_color_rules = [{ id: uuid.v1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 2;
@@ -79,7 +79,7 @@ export default React.createClass({
               type="number"
               ref="gauge_max"
               onChange={handleTextChange('gauge_max')}
-              style={{width: '20px'}}
+              style={{ width: '20px' }}
               defaultValue={model.gauge_max}/>
             <div className="vis_editor__label">Gauge Style</div>
             <Select
@@ -101,19 +101,19 @@ export default React.createClass({
               className="vis_editor__input-grows"
               type="number"
               ref="gauge_inner_width"
-              style={{width: '20px'}}
+              style={{ width: '20px' }}
               onChange={handleTextChange('gauge_inner_width')}
               defaultValue={model.gauge_inner_width}/>
             <div className="vis_editor__label">Gauge Line Width</div>
             <input
               className="vis_editor__input-grows"
               type="number"
-              style={{width: 20}}
+              style={{ width: 20 }}
               ref="gauge_width"
               onChange={handleTextChange('gauge_width')}
               defaultValue={model.gauge_width}/>
           </div>
-          <div className="vis_editor__label" style={{margin: '0 10px 0 0'}}>Color Rules</div>
+          <div className="vis_editor__label" style={{ margin: '0 10px 0 0' }}>Color Rules</div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
               primaryName="gauge color"

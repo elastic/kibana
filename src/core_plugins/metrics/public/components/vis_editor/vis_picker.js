@@ -33,11 +33,11 @@ export default React.createClass({
   render() {
     const { model } = this.props;
     const icons = [
-      { type: 'timeseries', icon: 'fa-line-chart', label: 'Time Series'},
-      { type: 'metric', icon: 'fa-superscript', label: 'Metric'},
-      { type: 'top_n', icon: 'fa-bar-chart fa-rotate-90', label: 'Top N'},
-      { type: 'gauge', icon: 'fa-circle-o-notch', label: 'Gauge'},
-      { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown'}
+      { type: 'timeseries', icon: 'fa-line-chart', label: 'Time Series' },
+      { type: 'metric', icon: 'fa-superscript', label: 'Metric' },
+      { type: 'top_n', icon: 'fa-bar-chart fa-rotate-90', label: 'Top N' },
+      { type: 'gauge', icon: 'fa-circle-o-notch', label: 'Gauge' },
+      { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown' }
     ].map((item, i, items) => {
       return (
         <VisPickerItem
