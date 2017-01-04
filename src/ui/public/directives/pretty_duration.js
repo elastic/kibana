@@ -46,7 +46,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
         } else {
           cantLookup();
         }
-      };
+      }
 
       function cantLookup() {
         const display = {};
@@ -63,7 +63,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
           }
         });
         $elem.text(display.from + ' to ' + display.to);
-      };
+      }
 
       $scope.$watch('from', stringify);
       $scope.$watch('to', stringify);

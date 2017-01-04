@@ -7,7 +7,7 @@
 
   window.console = function () {
     var msgs = Array.prototype.slice.call(arguments, 0);
-    window.postMessage({type: "log", data: msgs});
+    window.postMessage({ type: "log", data: msgs });
   };
   window.console.error =
     window.console.warn =
@@ -273,7 +273,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     } else if (Array.isArray(text)) {
       this._insertLines(0, text);
     } else {
-      this.insert({row: 0, column: 0}, text);
+      this.insert({ row: 0, column: 0 }, text);
     }
   };
 
@@ -283,7 +283,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     this.setValue = function (text) {
       var len = this.getLength();
       this.remove(new Range(0, 0, len, this.getLine(len - 1).length));
-      this.insert({row: 0, column: 0}, text);
+      this.insert({ row: 0, column: 0 }, text);
     };
     this.getValue = function () {
       return this.getAllLines().join(this.getNewLineCharacter());
@@ -386,12 +386,12 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
     };
     this.insertLines = function (row, lines) {
       if (row >= this.getLength())
-        return this.insert({row: row, column: 0}, "\n" + lines.join("\n"));
+        return this.insert({ row: row, column: 0 }, "\n" + lines.join("\n"));
       return this._insertLines(Math.max(row, 0), lines);
     };
     this._insertLines = function (row, lines) {
       if (lines.length == 0)
-        return {row: row, column: 0};
+        return { row: row, column: 0 };
       var end;
       if (lines.length > 0xFFFF) {
         end = this._insertLines(row, lines.slice(0xFFFF));
@@ -596,9 +596,9 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
       for (var i = startRow || 0, l = lines.length; i < l; i++) {
         index -= lines[i].length + newlineLength;
         if (index < 0)
-          return {row: i, column: index + lines[i].length + newlineLength};
+          return { row: i, column: index + lines[i].length + newlineLength };
       }
-      return {row: l - 1, column: lines[l - 1].length};
+      return { row: l - 1, column: lines[l - 1].length };
     };
     this.positionToIndex = function (pos, startRow) {
       var lines = this.$lines || this.getAllLines();
@@ -680,7 +680,7 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
   EventEmitter.setDefaultHandler = function (eventName, callback) {
     var handlers = this._defaultHandlers
     if (!handlers)
-      handlers = this._defaultHandlers = {_disabled_: {}};
+      handlers = this._defaultHandlers = { _disabled_: {} };
 
     if (handlers[eventName]) {
       var old = handlers[eventName];
@@ -918,14 +918,14 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
     this.clipRows = function (firstRow, lastRow) {
       var start, end;
       if (this.end.row > lastRow)
-        end = {row: lastRow + 1, column: 0};
+        end = { row: lastRow + 1, column: 0 };
       else if (this.end.row < firstRow)
-        end = {row: firstRow, column: 0};
+        end = { row: firstRow, column: 0 };
 
       if (this.start.row > lastRow)
-        start = {row: lastRow + 1, column: 0};
+        start = { row: lastRow + 1, column: 0 };
       else if (this.start.row < firstRow)
-        start = {row: firstRow, column: 0};
+        start = { row: firstRow, column: 0 };
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
@@ -935,9 +935,9 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       if (cmp == 0)
         return this;
       else if (cmp == -1)
-        start = {row: row, column: column};
+        start = { row: row, column: column };
       else
-        end = {row: row, column: column};
+        end = { row: row, column: column };
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
@@ -1337,7 +1337,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     text,
 
     annotate = function (type, text) {
-      annos.push({type: type, text: text, at: at});
+      annos.push({ type: type, text: text, at: at });
     },
 
     error = function (m) {
@@ -1365,6 +1365,20 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
       ch = text.charAt(at);
       at += 1;
       return ch;
+    },
+
+    nextUpTo = function (upTo, errorMessage) {
+      var currentAt = at,
+        i = text.indexOf(upTo, currentAt);
+      if (i < 0) {
+        error(errorMessage || "Expected '" + upTo + "'");
+      }
+      reset(i + upTo.length);
+      return text.substring(currentAt, i);
+    },
+
+    peek = function (c) {
+      return text.substr(at, c.length) === c; // nocommit - double check
     },
 
     number = function () {
@@ -1414,29 +1428,36 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         uffff;
 
       if (ch === '"') {
-        while (next()) {
-          if (ch === '"') {
-            next();
-            return string;
-          } else if (ch === '\\') {
-            next();
-            if (ch === 'u') {
-              uffff = 0;
-              for (i = 0; i < 4; i += 1) {
-                hex = parseInt(next(), 16);
-                if (!isFinite(hex)) {
-                  break;
+        if (peek('""')) {
+          // literal
+          next('"');
+          next('"');
+          return nextUpTo('"""', "failed to find closing '\"\"\"'");
+        } else {
+          while (next()) {
+            if (ch === '"') {
+              next();
+              return string;
+            } else if (ch === '\\') {
+              next();
+              if (ch === 'u') {
+                uffff = 0;
+                for (i = 0; i < 4; i += 1) {
+                  hex = parseInt(next(), 16);
+                  if (!isFinite(hex)) {
+                    break;
+                  }
+                  uffff = uffff * 16 + hex;
                 }
-                uffff = uffff * 16 + hex;
+                string += String.fromCharCode(uffff);
+              } else if (typeof escapee[ch] === 'string') {
+                string += escapee[ch];
+              } else {
+                break;
               }
-              string += String.fromCharCode(uffff);
-            } else if (typeof escapee[ch] === 'string') {
-              string += escapee[ch];
             } else {
-              break;
+              string += ch;
             }
-          } else {
-            string += ch;
           }
         }
       }
@@ -1711,7 +1732,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         }
       }
       return reviver.call(holder, key, value);
-    })({'': result}, '') : result;
+    })({ '': result }, '') : result;
   };
 });
 
@@ -1764,7 +1785,7 @@ define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oo
       var nl = this.doc.getNewLineCharacter().length;
 
       if (!len) {
-        return { row: 0, column: 0};
+        return { row: 0, column: 0 };
       }
 
       var lineStart = 0, line;

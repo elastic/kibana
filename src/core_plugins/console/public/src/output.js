@@ -41,7 +41,7 @@ export function initializeOutput($el) {
       session.toggleFold(false);
 
     }
-    session.insert({row: lastLine, column: 0}, "\n" + val);
+    session.insert({ row: lastLine, column: 0 }, "\n" + val);
     output.moveCursorTo(lastLine + 1, 0);
     if (typeof cb === 'function') {
       setTimeout(cb);
@@ -65,8 +65,8 @@ export function initializeOutput($el) {
   }
 
   return output;
-};
+}
 
 export default function getOutput() {
   return output;
-};
+}

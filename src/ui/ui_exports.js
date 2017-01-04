@@ -41,6 +41,16 @@ class UiExports {
     this.consumers.push(consumer);
   }
 
+  addConsumerForType(typeToConsume, consumer) {
+    this.consumers.push({
+      exportConsumer(uiExportType) {
+        if (uiExportType === typeToConsume) {
+          return consumer;
+        }
+      }
+    });
+  }
+
   exportConsumer(type) {
     for (const consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
@@ -88,6 +98,12 @@ class UiExports {
       case 'hacks':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
+        };
+
+      case 'visTypeEnhancers':
+        return (plugin, spec) => {
+          //used for plugins that augment capabilities of an existing visualization
+          this.aliases.visTypes = _.union(this.aliases.visTypes || [], spec);
         };
 
       case 'bundle':

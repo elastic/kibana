@@ -7,4 +7,4 @@ export default function BytesFormatProvider(Private) {
     title: 'Bytes',
     sampleInputs: [1024, 5150000, 1990000000]
   });
-};
+}

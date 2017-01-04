@@ -13,33 +13,33 @@ export default function AxisScaleFactory(Private) {
         this.values = this.axisConfig.values;
         this.ordered = this.axisConfig.ordered;
       }
-    };
+    }
 
     getScaleType() {
       return this.axisConfig.getScaleType();
-    };
+    }
 
     validateUserExtents(domain) {
       const config = this.axisConfig;
       return domain.map((val) => {
-        val = parseInt(val, 10);
+        val = parseFloat(val);
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
         if (config.isPercentage() && config.isUserDefined()) return val / 100;
         return val;
       });
-    };
+    }
 
     getTimeDomain(data) {
       return [this.minExtent(data), this.maxExtent(data)];
-    };
+    }
 
     minExtent(data) {
       return this.calculateExtent(data || this.values, 'min');
-    };
+    }
 
     maxExtent(data) {
       return this.calculateExtent(data || this.values, 'max');
-    };
+    }
 
     calculateExtent(data, extent) {
       const ordered = this.ordered;
@@ -56,15 +56,15 @@ export default function AxisScaleFactory(Private) {
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, []));
-    };
+    }
 
     addInterval(x) {
       return this.modByInterval(x, +1);
-    };
+    }
 
     subtractInterval(x) {
       return this.modByInterval(x, -1);
-    };
+    }
 
     modByInterval(x, n) {
       const ordered = this.ordered;
@@ -84,7 +84,7 @@ export default function AxisScaleFactory(Private) {
       });
 
       return y.valueOf();
-    };
+    }
 
     getAllPoints() {
       const config = this.axisConfig;
@@ -110,15 +110,15 @@ export default function AxisScaleFactory(Private) {
       }, []);
 
       return chartPoints;
-    };
+    }
 
     getYMin() {
       return d3.min(this.getAllPoints());
-    };
+    }
 
     getYMax() {
       return d3.max(this.getAllPoints());
-    };
+    }
 
     getExtents() {
       if (this.axisConfig.get('type') === 'category') {
@@ -130,10 +130,10 @@ export default function AxisScaleFactory(Private) {
       const max = this.axisConfig.get('scale.max') || this.getYMax();
       const domain = [min, max];
       if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
-      if (this.axisConfig.isYExtents()) return domain;
       if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
+      if (this.axisConfig.isYExtents()) return domain;
       return [Math.min(0, min), Math.max(0, max)];
-    };
+    }
 
     getRange(length) {
       if (this.axisConfig.isHorizontal()) {
@@ -141,20 +141,20 @@ export default function AxisScaleFactory(Private) {
       } else {
         return this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
       }
-    };
+    }
 
     throwCustomError(message) {
       throw new Error(message);
-    };
+    }
 
     throwLogScaleValuesError() {
       throw new errors.InvalidLogScaleValues();
-    };
+    }
 
     logDomain(min, max) {
       if (min < 0 || max < 0) return this.throwLogScaleValuesError();
       return [1, max];
-    };
+    }
 
     getD3Scale(scaleTypeArg) {
       let scaleType = scaleTypeArg || 'linear';
@@ -167,7 +167,7 @@ export default function AxisScaleFactory(Private) {
       }
 
       return d3.scale[scaleType]();
-    };
+    }
 
     canApplyNice() {
       const config = this.axisConfig;
@@ -179,25 +179,27 @@ export default function AxisScaleFactory(Private) {
       const scale = this.getD3Scale(config.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
+      const padding = config.get('style.rangePadding');
+      const outerPadding = config.get('style.rangeOuterPadding');
       this.scale = scale.domain(domain);
       if (config.isOrdinal()) {
-        this.scale.rangeBands(range, 0.1);
+        this.scale.rangeBands(range, padding, outerPadding);
       } else {
         this.scale.range(range);
       }
 
       if (this.canApplyNice()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
-      if (this.visConfig.get('type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      if (this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 
       return this.scale;
-    };
+    }
 
     validateScale(scale) {
       if (!scale || _.isNaN(scale)) throw new Error('scale is ' + scale);
-    };
+    }
   }
   return AxisScale;
-};
+}

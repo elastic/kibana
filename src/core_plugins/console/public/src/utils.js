@@ -18,7 +18,10 @@ utils.reformatData = function (data, indent) {
   for (var i = 0; i < data.length; i++) {
     var cur_doc = data[i];
     try {
-      var new_doc = utils.jsonToString(JSON.parse(cur_doc), indent ? 2 : 0);
+      var new_doc = utils.jsonToString(JSON.parse(utils.collapseLiteralStrings(cur_doc)), indent ? 2 : 0);
+      if (indent) {
+        new_doc = utils.expandLiteralStrings(new_doc);
+      }
       changed = changed || new_doc != cur_doc;
       formatted_data.push(new_doc);
     }
@@ -34,5 +37,23 @@ utils.reformatData = function (data, indent) {
   };
 };
 
+utils.collapseLiteralStrings = function (data) {
+  return data.replace(/"""(?:\s*\n)?((?:.|\n)*?)(?:\n\s*)?"""/g,function (match, literal) {
+      return JSON.stringify(literal);
+  });
+}
+
+utils.expandLiteralStrings = function (data) {
+  return data.replace(/("(?:\\"|[^"])*?")/g, function (match, string) {
+    // expand things with two slashes or more
+    if (string.split(/\\./).length > 2) {
+      string = JSON.parse(string).replace("^\s*\n", "").replace("\n\s*^", "");
+      var append = string.includes("\n") ? "\n" : ""; // only go multi line if the string has multiline
+      return '"""' + append + string + append + '"""';
+    } else {
+      return string;
+    }
+  });
+}
 
 module.exports = utils;

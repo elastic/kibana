@@ -18,6 +18,7 @@ import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
+import { DashboardConstants } from './dashboard_constants';
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
@@ -89,7 +90,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
         options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
         uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
-        query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+        query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || { query_string: { query: '*' } },
         filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
       };
 
@@ -153,7 +154,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           docTitle.change(dash.title);
         }
 
-        initPanelIds();
+        initPanelIndexes();
 
         // watch for state changes and update the appStatus.dirty value
         stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -172,21 +173,21 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $scope.$emit('application.load');
       }
 
-      function initPanelIds() {
-        // find the largest panelId in all the panels
-        let maxIndex = getMaxPanelId();
+      function initPanelIndexes() {
+        // find the largest panelIndex in all the panels
+        let maxIndex = getMaxPanelIndex();
 
-        // ensure that all panels have a panelId
+        // ensure that all panels have a panelIndex
         $scope.state.panels.forEach(function (panel) {
-          if (!panel.panelId) {
-            panel.panelId = maxIndex++;
+          if (!panel.panelIndex) {
+            panel.panelIndex = maxIndex++;
           }
         });
       }
 
-      function getMaxPanelId() {
+      function getMaxPanelIndex() {
         let maxId = $scope.state.panels.reduce(function (id, panel) {
-          return Math.max(id, panel.panelId || id);
+          return Math.max(id, panel.panelIndex || id);
         }, 0);
         return ++maxId;
       }
@@ -207,6 +208,17 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.removeApplicationClass(['theme-dark', 'theme-light']);
         chrome.addApplicationClass(theme);
       }
+
+      $scope.expandedPanel = null;
+      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
+      $scope.toggleExpandPanel = (panelIndex) => {
+        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
+          $scope.expandedPanel = null;
+        } else {
+          $scope.expandedPanel =
+            $scope.state.panels.find((panel) => panel.panelIndex === panelIndex);
+        }
+      };
 
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
@@ -245,7 +257,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
             }
@@ -272,12 +284,22 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
         pendingVis++;
-        $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelId()));
+        $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
+      };
+
+      if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
+        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
+        kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+        kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
+      }
+
+      const addNewVis = function addNewVis() {
+        kbnUrl.change(`/visualize?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
       $scope.addSearch = function (hit) {
         pendingVis++;
-        $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelId()));
+        $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
       };
 
       // Setup configurable values for config directive, after objects are initialized
@@ -286,6 +308,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
+        addNewVis,
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };

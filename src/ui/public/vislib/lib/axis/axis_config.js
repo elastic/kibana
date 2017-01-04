@@ -25,7 +25,9 @@ export default function AxisConfigFactory() {
       opacity: 1,
       tickColor: '#ddd',
       tickWidth: '1px',
-      tickLength: '6px'
+      tickLength: '6px',
+      rangePadding: 0.1,
+      rangeOuterPadding: 0
     },
     labels: {
       axisFormatter: null,
@@ -47,6 +49,15 @@ export default function AxisConfigFactory() {
   const categoryDefaults = {
     type: 'category',
     position: 'bottom',
+  };
+
+  const valueDefaults = {
+    labels: {
+      axisFormatter: d3.format('n')
+    }
+  };
+
+  const horizontalDefaults = {
     labels: {
       rotate: 0,
       rotateAnchor: 'end',
@@ -55,9 +66,9 @@ export default function AxisConfigFactory() {
     }
   };
 
-  const valueDefaults = {
+  const verticalDefaults = {
     labels: {
-      axisFormatter: d3.format('n')
+      rotateAnchor: 'middle'
     }
   };
 
@@ -67,6 +78,7 @@ export default function AxisConfigFactory() {
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
       this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
+      _.merge(this._values, this.isHorizontal() ? horizontalDefaults : verticalDefaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');
@@ -114,6 +126,7 @@ export default function AxisConfigFactory() {
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
+        this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
       }
 
       let offset;
@@ -135,7 +148,7 @@ export default function AxisConfigFactory() {
       this.set('scale.offset', _.get(axisConfigArgs, 'scale.offset', offset));
       /* axis.scale.stacked means that axis stacking function should be run */
       this.set('scale.stacked', stacked);
-    };
+    }
 
     get(property, defaults) {
       if (typeof defaults !== 'undefined' || _.has(this._values, property)) {
@@ -144,43 +157,43 @@ export default function AxisConfigFactory() {
         throw new Error(`Accessing invalid config property: ${property}`);
         return defaults;
       }
-    };
+    }
 
     set(property, value) {
       return _.set(this._values, property, value);
-    };
+    }
 
     isHorizontal() {
       return (this._values.position === 'top' || this._values.position === 'bottom');
-    };
+    }
 
     isOrdinal() {
       return !!this.values && (!this.isTimeDomain());
-    };
+    }
 
     isTimeDomain() {
       return this.ordered && this.ordered.date;
-    };
+    }
 
     isPercentage() {
       return this._values.scale.mode === SCALE_MODES.PERCENTAGE;
-    };
+    }
 
     isUserDefined() {
       return this._values.scale.setYExtents;
-    };
+    }
 
     isYExtents() {
       return this._values.scale.defaultYExtents;
-    };
+    }
 
     isLogScale() {
       return this.getScaleType() === 'log';
-    };
+    }
 
     getScaleType() {
       return this._values.scale.type;
-    };
+    }
   }
 
   return AxisConfig;

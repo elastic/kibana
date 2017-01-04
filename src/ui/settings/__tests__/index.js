@@ -103,7 +103,7 @@ describe('ui settings', function () {
 
   describe('#getDefaults()', function () {
     it('is promised the default values', async function () {
-      const {server, uiSettings, configGet} = instantiate();
+      const { server, uiSettings, configGet } = instantiate();
       const defaults = await uiSettings.getDefaults();
       expect(isEqual(defaults, defaultsProvider())).to.equal(true);
     });
@@ -114,12 +114,12 @@ describe('ui settings', function () {
       const defaults = defaultsProvider();
       const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
       const expected = {
-        ip: {id: 'ip', params: {}},
-        date: {id: 'date', params: {}},
-        number: {id: 'number', params: {}},
-        boolean: {id: 'boolean', params: {}},
-        _source: {id: '_source', params: {}},
-        _default_: {id: 'string', params: {}}
+        ip: { id: 'ip', params: {} },
+        date: { id: 'date', params: {} },
+        number: { id: 'number', params: {} },
+        boolean: { id: 'boolean', params: {} },
+        _source: { id: '_source', params: {} },
+        _default_: { id: 'string', params: {} }
       };
 
       Object.keys(mapping).forEach(function (dataType) {
@@ -343,7 +343,7 @@ describe('ui settings', function () {
 });
 
 function expectElasticsearchGetQuery(server, req, configGet) {
-  const { callWithRequest } = server.plugins.elasticsearch;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   sinon.assert.calledOnce(callWithRequest);
   const [reqPassed, method, params] = callWithRequest.args[0];
   expect(reqPassed).to.be(req);
@@ -356,7 +356,7 @@ function expectElasticsearchGetQuery(server, req, configGet) {
 }
 
 function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
-  const { callWithRequest } = server.plugins.elasticsearch;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   sinon.assert.calledOnce(callWithRequest);
   const [reqPassed, method, params] = callWithRequest.args[0];
   expect(reqPassed).to.be(req);
@@ -388,27 +388,37 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
     },
     ready: sinon.stub().returns(Promise.resolve())
   };
+
   const req = { __stubHapiRequest: true, path: '', headers: {} };
+
+  const adminCluster = {
+    errors: esErrors,
+    callWithInternalUser: sinon.stub(),
+    callWithRequest: sinon.spy((withReq, method, params) => {
+      if (callWithRequest) {
+        return callWithRequest(withReq, method, params);
+      }
+
+      expect(withReq).to.be(req);
+      switch (method) {
+        case 'get':
+          return Promise.resolve({ _source: getResult });
+        case 'update':
+          return Promise.resolve();
+        default:
+          throw new Error(`callWithRequest() is using unexpected method "${method}"`);
+      }
+    })
+  };
+
+  adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
+  adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
+
   const server = {
     decorate: (_, key, value) => server[key] = value,
     plugins: {
       elasticsearch: {
-        errors: esErrors,
-        callWithRequest: sinon.spy((withReq, method, params) => {
-          if (callWithRequest) {
-            return callWithRequest(withReq, method, params);
-          }
-
-          expect(withReq).to.be(req);
-          switch (method) {
-            case 'get':
-              return Promise.resolve({ _source: getResult });
-            case 'update':
-              return Promise.resolve();
-            default:
-              throw new Error(`callWithRequest() is using unexpected method "${method}"`);
-          }
-        })
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
       }
     }
   };

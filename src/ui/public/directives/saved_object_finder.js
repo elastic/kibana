@@ -20,7 +20,12 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // optional on-choose attr, sets the userOnChoose in our scope
       userOnChoose: '=?onChoose',
       // optional useLocalManagement attr,  removes link to management section
-      useLocalManagement: '=?useLocalManagement'
+      useLocalManagement: '=?useLocalManagement',
+      /**
+       * @type {function} - an optional function. If supplied an `Add new X` button is shown
+       * and this function is called when clicked.
+       */
+      onAddNew: '='
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
@@ -229,7 +234,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       };
 
       self.manageObjects = function (type) {
-        $location.url('/management/kibana/objects?_a=' + rison.encode({tab: type}));
+        $location.url('/management/kibana/objects?_a=' + rison.encode({ tab: type }));
       };
 
       self.hitCountNoun = function () {

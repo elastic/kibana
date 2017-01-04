@@ -11,7 +11,6 @@ export default function AreaChartFactory(Private) {
     showCircles: true,
     radiusRatio: 9,
     showLines: true,
-    smoothLines: false,
     interpolate: 'linear',
     color: undefined,
     fillColor: undefined,
@@ -68,7 +67,7 @@ export default function AreaChartFactory(Private) {
       const color = this.handler.data.getColorFunc();
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
-      const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
+      const interpolate = this.seriesConfig.interpolate;
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       // Data layers
@@ -130,7 +129,7 @@ export default function AreaChartFactory(Private) {
       });
 
       return path;
-    };
+    }
 
     /**
      * Adds SVG circles to area chart
@@ -204,7 +203,7 @@ export default function AreaChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -231,8 +230,8 @@ export default function AreaChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return AreaChart;
-};
+}

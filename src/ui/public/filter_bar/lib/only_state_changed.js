@@ -13,4 +13,4 @@ export default function (newFilters, oldFilters) {
     });
     return !!match;
   });
-};
+}

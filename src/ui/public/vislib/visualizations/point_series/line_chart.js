@@ -10,7 +10,6 @@ export default function LineChartFactory(Private) {
     showCircles: true,
     radiusRatio: 9,
     showLines: true,
-    smoothLines: false,
     interpolate: 'linear',
     color: undefined,
     fillColor: undefined
@@ -126,7 +125,7 @@ export default function LineChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Adds path to SVG
@@ -142,7 +141,7 @@ export default function LineChartFactory(Private) {
       const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
-      const interpolate = (this.seriesConfig.smoothLines) ? 'cardinal' : this.seriesConfig.interpolate;
+      const interpolate = this.seriesConfig.interpolate;
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const line = svg.append('g')
@@ -179,7 +178,7 @@ export default function LineChartFactory(Private) {
       .attr('stroke-width', 2);
 
       return line;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -209,8 +208,8 @@ export default function LineChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return LineChart;
-};
+}

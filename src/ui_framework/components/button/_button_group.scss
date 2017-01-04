@@ -1,0 +1,35 @@
+.kuiButtonGroup {
+  display: flex;
+  align-items: center;
+
+  .kuiButton + .kuiButton {
+    margin-left: 4px;
+  }
+}
+
+.kuiButtonGroup--united {
+  > .kuiButton:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+
+  > .kuiButton:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  > .kuiButton:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  > .kuiButton:only-child {
+    border-top-right-radius: $buttonBorderRadius;
+    border-bottom-right-radius: $buttonBorderRadius;
+    border-top-left-radius: $buttonBorderRadius;
+    border-bottom-left-radius: $buttonBorderRadius;
+  }
+
+  .kuiButton + .kuiButton {
+    margin-left: 2px;
+  }
+}

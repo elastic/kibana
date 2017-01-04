@@ -71,32 +71,32 @@ describe('parse-query directive', function () {
     });
 
     it('should return the input if passed an object', function () {
-      expect(fromUser({foo: 'bar'})).to.eql({foo: 'bar'});
+      expect(fromUser({ foo: 'bar' })).to.eql({ foo: 'bar' });
     });
 
     it('unless the object is empty, that implies a *', function () {
-      expect(fromUser({})).to.eql({query_string: {query: '*'}});
+      expect(fromUser({})).to.eql({ query_string: { query: '*' } });
     });
 
     it('should treat an empty string as a *', function () {
-      expect(fromUser('')).to.eql({query_string: {query: '*'}});
+      expect(fromUser('')).to.eql({ query_string: { query: '*' } });
     });
 
     it('should merge in the query string options', function () {
-      config.set('query:queryString:options', {analyze_wildcard: true});
-      expect(fromUser('foo')).to.eql({query_string: {query: 'foo', analyze_wildcard: true}});
-      expect(fromUser('')).to.eql({query_string: {query: '*', analyze_wildcard: true}});
+      config.set('query:queryString:options', { analyze_wildcard: true });
+      expect(fromUser('foo')).to.eql({ query_string: { query: 'foo', analyze_wildcard: true } });
+      expect(fromUser('')).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
     });
 
     it('should treat input that does not start with { as a query string', function () {
-      expect(fromUser('foo')).to.eql({query_string: {query: 'foo'}});
-      expect(fromUser('400')).to.eql({query_string: {query: '400'}});
-      expect(fromUser('true')).to.eql({query_string: {query: 'true'}});
+      expect(fromUser('foo')).to.eql({ query_string: { query: 'foo' } });
+      expect(fromUser('400')).to.eql({ query_string: { query: '400' } });
+      expect(fromUser('true')).to.eql({ query_string: { query: 'true' } });
     });
 
     it('should parse valid JSON', function () {
       expect(fromUser('{}')).to.eql({});
-      expect(fromUser('{a:b}')).to.eql({query_string: {query: '{a:b}'}});
+      expect(fromUser('{a:b}')).to.eql({ query_string: { query: '{a:b}' } });
     });
   });
 
@@ -111,7 +111,7 @@ describe('parse-query directive', function () {
     });
 
     it('should present objects as strings', function () {
-      expect(toUser({foo: 'bar'})).to.be('{"foo":"bar"}');
+      expect(toUser({ foo: 'bar' })).to.be('{"foo":"bar"}');
     });
 
     it('should present query_string queries as strings', function () {

@@ -1,17 +1,17 @@
 import _ from 'lodash';
 export default function buildPhraseFilter(field, value, indexPattern) {
-  const filter = { meta: { index: indexPattern.id} };
+  const filter = { meta: { index: indexPattern.id } };
 
   if (field.scripted) {
     // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
-    // for the reason behind this change. ES doesn't handle boolean types very well, so they come
-    // back as strings.
+    // and https://github.com/elastic/elasticsearch/pull/22201
+    // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
     let convertedValue = value;
     if (typeof value !== 'boolean' && field.type === 'boolean') {
-      if (value !== 'true' && value !== 'false') {
+      if (value !== 1 && value !== 0) {
         throw new Error('Boolean scripted fields must return true or false');
       }
-      convertedValue = value === 'true' ? true : false;
+      convertedValue = value === 1 ? true : false;
     }
 
     const script = buildInlineScriptForPhraseFilter(field);
@@ -32,7 +32,7 @@ export default function buildPhraseFilter(field, value, indexPattern) {
     };
   }
   return filter;
-};
+}
 
 
 /**

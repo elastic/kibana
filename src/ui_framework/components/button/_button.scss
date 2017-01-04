@@ -1,0 +1,122 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ */
+.kuiButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 4px 12px 5px;
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $buttonBorderRadius;
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none; /* 2 */
+  }
+
+  &:active:enabled {
+    transform: translateY(1px);
+  }
+
+  &:focus {
+    @include focus;
+  }
+}
+
+.kuiButton--iconText {
+  .kuiButton__icon {
+    &:first-child {
+      margin-right: 4px;
+    }
+
+    &:last-child {
+      margin-left: 4px;
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--basic {
+  color: #5a5a5a;
+  background-color: #F2F2F2;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: #5a5a5a !important; /* 1 */
+  }
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #ffffff !important; /* 1 */
+    background-color: #9B9B9B;
+  }
+
+  &:disabled {
+    color: #9B9B9B;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--primary {
+  color: #FFFFFF;
+  background-color: #6EADC1;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #FFFFFF;
+    background-color: #006E8A;
+  }
+
+  &:disabled {
+    background-color: #B6D6E0;
+  }
+
+  &:focus {
+    color: #FFFFFF !important; /* 1 */
+  }
+}
+
+.kuiButton--danger {
+  color: #FFFFFF;
+  background-color: #D76051;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #FFFFFF;
+    background-color: #A52E1F;
+  }
+
+  &:disabled {
+    background-color: #efc0ba;
+  }
+
+  /**
+   * 1. Override Bootstrap.
+   */
+  &:focus {
+    @include focus(#ff523c);
+    color: #FFFFFF !important; /* 1 */
+  }
+}
+
+@mixin buttonOnReverseBackground {
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    &:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}

@@ -39,4 +39,4 @@ export default function TruncateFormatProvider(Private) {
   Bool.fieldType = ['boolean', 'number', 'string'];
 
   return Bool;
-};
+}

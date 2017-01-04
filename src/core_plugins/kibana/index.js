@@ -1,5 +1,8 @@
+import { resolve } from 'path';
+
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
+
 import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
@@ -13,6 +16,7 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
+
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -22,6 +26,9 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
+
+
+
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -39,10 +46,24 @@ module.exports = function (kibana) {
         ],
 
         injectVars: function (server, options) {
-          const config = server.config();
+          const serverConfig = server.config();
+
+          //DEPRECATED SETTINGS
+          //if the url is set, the old settings must be used.
+          //keeping this logic for backward compatibilty.
+          const configuredUrl = server.config().get('tilemap.url');
+          const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
+          const tilemapConfig = serverConfig.get('tilemap');
+
           return {
-            kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            tilemap: config.get('tilemap')
+            kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            tilemapsConfig: {
+              deprecated: {
+                isOverridden: isOverridden,
+                config: tilemapConfig,
+              },
+              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+            },
           };
         },
       },
@@ -70,6 +91,7 @@ module.exports = function (kibana) {
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
         }, {
+          id: 'kibana:dev_tools',
           title: 'Dev Tools',
           order: 9001,
           url: '/app/kibana#/dev_tools',
@@ -85,12 +107,17 @@ module.exports = function (kibana) {
           linkToLastSubUrl: false
         },
       ],
+
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
           kbnBaseUrl
         };
       },
+
+      translations: [
+        resolve(__dirname, './translations/en.json')
+      ]
     },
 
     preInit: async function (server) {
@@ -113,9 +140,7 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
-
       server.expose('systemApi', systemApi);
     }
   });
-
 };

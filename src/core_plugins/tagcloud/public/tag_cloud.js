@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
-import vislibComponentsSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
-import {EventEmitter} from 'events';
+import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
+import { EventEmitter } from 'events';
 
 
 const ORIENTATIONS = {
@@ -226,7 +226,7 @@ class TagCloud extends EventEmitter {
       resolveWhenDone();
     });
 
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
@@ -307,21 +307,31 @@ class TagCloud extends EventEmitter {
    */
   getDebugInfo() {
     const debug = {};
-    debug.positions = this._currentJob ? this._currentJob.words.map(tag => [tag.text, tag.x, tag.y, tag.rotate]) : [];
-    debug.size = this._size.slice();
+    debug.positions = this._currentJob ? this._currentJob.words.map(tag => {
+      return {
+        text: tag.text,
+        x: tag.x,
+        y: tag.y,
+        rotate: tag.rotate
+      };
+    }) : [];
+    debug.size = {
+      width: this._size[0],
+      height: this._size[1]
+    };
     return debug;
   }
 
 }
 
-TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
+TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
 function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
-  return {value: word.value, text: word.text};
+  return { value: word.value, text: word.text };
 }
 
 

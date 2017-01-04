@@ -1,7 +1,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import ErrorHandlerProvider from './_error_handler';
-import TooltipProvider from '../components/tooltip';
+import TooltipProvider from 'ui/vis/components/tooltip';
+
 export default function ChartTitleFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
   const Tooltip = Private(TooltipProvider);
@@ -21,7 +22,7 @@ export default function ChartTitleFactory(Private) {
       const height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
-    };
+    }
 
     truncate(size) {
       const self = this;
@@ -49,13 +50,13 @@ export default function ChartTitleFactory(Private) {
           return text.text();
         });
       };
-    };
+    }
 
     addMouseEvents(target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
-    };
+    }
 
     draw(width, height) {
       const self = this;
@@ -88,8 +89,8 @@ export default function ChartTitleFactory(Private) {
           div.selectAll('text').call(self.truncate(size));
         });
       };
-    };
+    }
   }
 
   return ChartTitle;
-};
+}

@@ -1,12 +1,12 @@
-import { defaultsDeep } from 'lodash'
+import { defaultsDeep } from 'lodash';
 
-import { ProxyConfig } from './proxy_config'
-import { parse as parseUrl } from 'url'
+import { ProxyConfig } from './proxy_config';
+import { parse as parseUrl } from 'url';
 
 
 export class ProxyConfigCollection {
   constructor(configs = []) {
-    this.configs = configs.map(settings => new ProxyConfig(settings))
+    this.configs = configs.map(settings => new ProxyConfig(settings));
   }
 
   configForUri(uri) {

@@ -1,17 +1,19 @@
-let input = require('../../src/input');
+import { initializeInput } from '../../src/input';
+let input;
 let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let $ = require('jquery');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
 module("Integration", {
   setup: function () {
-    $("#editor_container").show();
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
+    input.$el.show();
     input.autocomplete._test.removeChangeListener();
   },
   teardown: function () {
-    $("#editor_container").hide();
+    input.$el.hide();
     input.autocomplete._test.addChangeListener();
   }
 });
@@ -96,7 +98,7 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
             if (test["autoCompleteSet"]) {
               var expected_terms = _.map(test["autoCompleteSet"], function (t) {
                 if (typeof t !== "object") {
-                  t = {"name": t};
+                  t = { "name": t };
                 }
                 return t;
               });
@@ -173,13 +175,13 @@ var SEARCH_KB = {
         "_search"
       ],
       data_autocomplete_rules: {
-        query: {match_all: {}, term: {"{field}": {__template: {"f": 1}}}},
+        query: { match_all: {}, term: { "{field}": { __template: { "f": 1 } } } },
         size: {},
         facets: {
           __template: {
             "FIELD": {}
           },
-          "*": {terms: {field: "{field}"}}
+          "*": { terms: { field: "{field}" } }
         }
       }
     }
@@ -190,16 +192,16 @@ var MAPPING = {
   "index1": {
     "type1.1": {
       "properties": {
-        "field1.1.1": {"type": "string"},
-        "field1.1.2": {"type": "string"}
+        "field1.1.1": { "type": "string" },
+        "field1.1.2": { "type": "string" }
       }
     }
   },
   "index2": {
     "type2.1": {
       "properties": {
-        "field2.1.1": {"type": "string"},
-        "field2.1.2": {"type": "string"}
+        "field2.1.1": { "type": "string" },
+        "field2.1.2": { "type": "string" }
       }
     }
   }
@@ -213,12 +215,12 @@ context_tests(
   [
     {
       name: "Empty doc",
-      cursor: {row: 0, column: 1},
+      cursor: { row: 0, column: 1 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 0, column: 1}, end: {row: 0, column: 1}},
+      rangeToReplace: { start: { row: 0, column: 1 }, end: { row: 0, column: 1 } },
       autoCompleteSet: ["facets", "query", "size"]
     }
   ]
@@ -232,7 +234,7 @@ context_tests(
   [
     {
       name: "Missing KB",
-      cursor: {row: 0, column: 1},
+      cursor: { row: 0, column: 1 },
       no_context: true
     }
   ]
@@ -257,7 +259,7 @@ context_tests(
   [
     {
       name: "Missing KB - global auto complete",
-      cursor: {row: 2, column: 5},
+      cursor: { row: 2, column: 5 },
       autoCompleteSet: ["t1"]
     }
   ]
@@ -277,37 +279,37 @@ context_tests(
   [
     {
       name: "existing dictionary key, no template",
-      cursor: {row: 1, column: 6},
+      cursor: { row: 1, column: 6 },
       initialValue: "query",
       addTemplate: false,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 1, column: 3}, end: {row: 1, column: 10}},
+      rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "existing inner dictionary key",
-      cursor: {row: 2, column: 7},
+      cursor: { row: 2, column: 7 },
       initialValue: "field",
       addTemplate: false,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 2, column: 6}, end: {row: 2, column: 13}},
+      rangeToReplace: { start: { row: 2, column: 6 }, end: { row: 2, column: 13 } },
       autoCompleteSet: ["match_all", "term"]
     },
     {
       name: "existing dictionary key, yes template",
-      cursor: {row: 4, column: 7},
+      cursor: { row: 4, column: 7 },
       initialValue: "facets",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 4, column: 3}, end: {row: 4, column: 15}},
+      rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "ignoring meta keys",
-      cursor: {row: 4, column: 14},
+      cursor: { row: 4, column: 14 },
       no_context: true
     }
   ]
@@ -327,42 +329,42 @@ context_tests(
   [
     {
       name: "trailing comma, end of line",
-      cursor: {row: 4, column: 16},
+      cursor: { row: 4, column: 16 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: ", ",
-      rangeToReplace: {start: {row: 4, column: 16}, end: {row: 4, column: 16}},
+      rangeToReplace: { start: { row: 4, column: 16 }, end: { row: 4, column: 16 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "trailing comma, beginning of line",
-      cursor: {row: 5, column: 1},
+      cursor: { row: 5, column: 1 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: ", ",
-      rangeToReplace: {start: {row: 5, column: 1}, end: {row: 5, column: 1}},
+      rangeToReplace: { start: { row: 5, column: 1 }, end: { row: 5, column: 1 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "prefix comma, beginning of line",
-      cursor: {row: 6, column: 0},
+      cursor: { row: 6, column: 0 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: ", ",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 6, column: 0}, end: {row: 6, column: 0}},
+      rangeToReplace: { start: { row: 6, column: 0 }, end: { row: 6, column: 0 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "prefix comma, end of line",
-      cursor: {row: 5, column: 14},
+      cursor: { row: 5, column: 14 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: ", ",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 5, column: 14}, end: {row: 5, column: 14}},
+      rangeToReplace: { start: { row: 5, column: 14 }, end: { row: 5, column: 14 } },
       autoCompleteSet: ["facets", "query", "size"]
     }
 
@@ -385,11 +387,11 @@ context_tests(
           "_test"
         ],
         data_autocomplete_rules: {
-          object: {bla: 1},
+          object: { bla: 1 },
           array: [1],
-          value_one_of: {__one_of: [1, 2]},
+          value_one_of: { __one_of: [1, 2] },
           value: 3,
-          "*": {__one_of: [4, 5]}
+          "*": { __one_of: [4, 5] }
         }
       }
     }
@@ -398,31 +400,31 @@ context_tests(
   [
     {
       name: "not matching object when { is not opened",
-      cursor: {row: 1, column: 12},
+      cursor: { row: 1, column: 12 },
       initialValue: "",
       autoCompleteSet: ["{"]
     },
     {
       name: "not matching array when [ is not opened",
-      cursor: {row: 2, column: 12},
+      cursor: { row: 2, column: 12 },
       initialValue: "",
       autoCompleteSet: ["["]
     },
     {
       name: "matching value with one_of",
-      cursor: {row: 3, column: 19},
+      cursor: { row: 3, column: 19 },
       initialValue: "",
       autoCompleteSet: [1, 2]
     },
     {
       name: "matching value",
-      cursor: {row: 4, column: 12},
+      cursor: { row: 4, column: 12 },
       initialValue: "",
       autoCompleteSet: [3]
     },
     {
       name: "matching any value with one_of",
-      cursor: {row: 5, column: 21},
+      cursor: { row: 5, column: 21 },
       initialValue: "",
       autoCompleteSet: [4, 5]
     }
@@ -445,14 +447,14 @@ context_tests(
   [
     {
       name: "* matching everything",
-      cursor: {row: 5, column: 15},
+      cursor: { row: 5, column: 15 },
       initialValue: "",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 5, column: 15}, end: {row: 5, column: 15}},
+      rangeToReplace: { start: { row: 5, column: 15 }, end: { row: 5, column: 15 } },
       autoCompleteSet: [
-        {name: "terms", meta: "API"}
+        { name: "terms", meta: "API" }
       ]
     }
   ]
@@ -479,17 +481,17 @@ context_tests(
   [
     {
       name: "{index} matching",
-      cursor: {row: 1, column: 15},
+      cursor: { row: 1, column: 15 },
       autoCompleteSet: [
-        {name: "index1", meta: "index"},
-        {name: "index2", meta: "index"}
+        { name: "index1", meta: "index" },
+        { name: "index2", meta: "index" }
       ]
     }
   ]
 );
 
 function tt(term, template, meta) {
-  term = {name: term, template: template};
+  term = { name: term, template: template };
   if (meta) {
     term.meta = meta;
   }
@@ -514,8 +516,8 @@ context_tests(
           array: ["a", "b"],
           number: 1,
           object: {},
-          fixed: {__template: {"a": 1}},
-          oneof: {__one_of: ["o1", "o2"]}
+          fixed: { __template: { "a": 1 } },
+          oneof: { __one_of: ["o1", "o2"] }
         }
       }
     }
@@ -524,14 +526,14 @@ context_tests(
   [
     {
       name: "Templates 1",
-      cursor: {row: 1, column: 0},
+      cursor: { row: 1, column: 0 },
       autoCompleteSet: [
-        tt("array", []), tt("fixed", {a: 1}), tt("number", 1), tt("object", {}), tt("oneof", "o1")
+        tt("array", []), tt("fixed", { a: 1 }), tt("number", 1), tt("object", {}), tt("oneof", "o1")
       ]
     },
     {
       name: "Templates - one off",
-      cursor: {row: 4, column: 12},
+      cursor: { row: 4, column: 12 },
       autoCompleteSet: [tt("o1"), tt("o2")]
     }
   ]
@@ -561,7 +563,7 @@ context_tests(
                 lines_regex: "other"
               },
               "no_match": {}
-            }, {"always": {}}]
+            }, { "always": {} }]
           }
         }
       }
@@ -571,7 +573,7 @@ context_tests(
   [
     {
       name: "Conditionals",
-      cursor: {row: 2, column: 15},
+      cursor: { row: 2, column: 15 },
       autoCompleteSet: [
         tt("always", {}), tt("match", {})
       ]
@@ -605,18 +607,18 @@ context_tests(
           "_endpoint"
         ],
         data_autocomplete_rules: {
-          any_of_numbers: {__template: [1, 2], __any_of: [1, 2, 3]},
+          any_of_numbers: { __template: [1, 2], __any_of: [1, 2, 3] },
           any_of_obj: {
             __template: [
-              {c: 1}
+              { c: 1 }
             ], __any_of: [
-              {a: 1, b: 2},
-              {c: 1}
+              { a: 1, b: 2 },
+              { c: 1 }
             ]
           },
           any_of_mixed: {
             __any_of: [
-              {a: 1},
+              { a: 1 },
               3
             ]
           }
@@ -628,37 +630,37 @@ context_tests(
   [
     {
       name: "Any of - templates",
-      cursor: {row: 1, column: 0},
+      cursor: { row: 1, column: 0 },
       autoCompleteSet: [
         tt("any_of_mixed", []),
         tt("any_of_numbers", [1, 2]),
         tt("any_of_obj", [
-          {c: 1}
+          { c: 1 }
         ])
       ]
     },
     {
       name: "Any of - numbers",
-      cursor: {row: 2, column: 2},
+      cursor: { row: 2, column: 2 },
       autoCompleteSet: [1, 2, 3]
     },
     {
       name: "Any of - object",
-      cursor: {row: 6, column: 2},
+      cursor: { row: 6, column: 2 },
       autoCompleteSet: [
         tt("a", 1), tt("b", 2), tt("c", 1)
       ]
     },
     {
       name: "Any of - mixed - obj",
-      cursor: {row: 11, column: 2},
+      cursor: { row: 11, column: 2 },
       autoCompleteSet: [
         tt("a", 1)
       ]
     },
     {
       name: "Any of - mixed - both",
-      cursor: {row: 13, column: 2},
+      cursor: { row: 13, column: 2 },
       autoCompleteSet: [
         tt("{"), tt(3)
       ]
@@ -683,7 +685,7 @@ context_tests(
   [
     {
       name: "Empty string as default",
-      cursor: {row: 0, column: 1},
+      cursor: { row: 0, column: 1 },
       autoCompleteSet: [tt("query", "")]
     }
   ]
@@ -765,7 +767,7 @@ context_tests(
   [
     {
       name: "Relative scope link test",
-      cursor: {row: 2, column: 12},
+      cursor: { row: 2, column: 12 },
       autoCompleteSet: [
         tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [
           {}
@@ -774,37 +776,37 @@ context_tests(
     },
     {
       name: "External scope link test",
-      cursor: {row: 3, column: 12},
+      cursor: { row: 3, column: 12 },
       autoCompleteSet: [tt("t2", 1)]
     },
     {
       name: "Global scope link test",
-      cursor: {row: 4, column: 12},
+      cursor: { row: 4, column: 12 },
       autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
     },
     {
       name: "Global scope link with an internal scope link",
-      cursor: {row: 5, column: 17},
+      cursor: { row: 5, column: 17 },
       autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
     },
     {
       name: "Entire endpoint scope link test",
-      cursor: {row: 7, column: 12},
+      cursor: { row: 7, column: 12 },
       autoCompleteSet: [tt("target", {})]
     },
     {
       name: "A scope link within an array",
-      cursor: {row: 9, column: 10},
+      cursor: { row: 9, column: 10 },
       autoCompleteSet: [tt("t2", 1)]
     },
     {
       name: "A function based scope link",
-      cursor: {row: 11, column: 12},
+      cursor: { row: 11, column: 12 },
       autoCompleteSet: [tt("a", 1), tt("b", 2)]
     },
     {
       name: "A global scope link with wrong link",
-      cursor: {row: 12, column: 12},
+      cursor: { row: 12, column: 12 },
       assertThrows: /broken/
 
     }
@@ -834,7 +836,7 @@ context_tests(
   [
     {
       name: "Top level scope link",
-      cursor: {row: 0, column: 1},
+      cursor: { row: 0, column: 1 },
       autoCompleteSet: [
         tt("t1", 2)
       ]
@@ -862,7 +864,7 @@ context_tests(
   [
     {
       name: "Path after empty object",
-      cursor: {row: 1, column: 10},
+      cursor: { row: 1, column: 10 },
       autoCompleteSet: ["a", "b"]
     }
   ]
@@ -878,8 +880,8 @@ context_tests(
   [
     {
       name: "Replace an empty string",
-      cursor: {row: 1, column: 4},
-      rangeToReplace: {start: {row: 1, column: 3}, end: {row: 1, column: 9}}
+      cursor: { row: 1, column: 4 },
+      rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 9 } }
     }
   ]
 );
@@ -899,7 +901,7 @@ context_tests(
         patterns: ["_endpoint"],
         data_autocomplete_rules: {
           "a": [
-            {b: 1}
+            { b: 1 }
           ]
         }
       }
@@ -909,12 +911,12 @@ context_tests(
   [
     {
       name: "List of objects - internal autocomplete",
-      cursor: {row: 3, column: 10},
+      cursor: { row: 3, column: 10 },
       autoCompleteSet: ["b"]
     },
     {
       name: "List of objects - external template",
-      cursor: {row: 0, column: 1},
+      cursor: { row: 0, column: 1 },
       autoCompleteSet: [tt("a", [
         {}
       ])]
@@ -944,15 +946,15 @@ context_tests(
   [
     {
       name: "Field completion as scope",
-      cursor: {row: 3, column: 10},
-      autoCompleteSet: [tt("field1.1.1", {"f": 1}, "string"), tt("field1.1.2", {"f": 1}, "string")]
+      cursor: { row: 3, column: 10 },
+      autoCompleteSet: [tt("field1.1.1", { "f": 1 }, "string"), tt("field1.1.2", { "f": 1 }, "string")]
     },
     {
       name: "Field completion as value",
-      cursor: {row: 9, column: 23},
+      cursor: { row: 9, column: 23 },
       autoCompleteSet: [
-        {name: "field1.1.1", meta: "string"},
-        {name: "field1.1.2", meta: "string"}
+        { name: "field1.1.1", meta: "string" },
+        { name: "field1.1.2", meta: "string" }
       ]
     }
   ]
@@ -967,7 +969,7 @@ context_tests(
   [
     {
       name: "initial doc start",
-      cursor: {row: 1, column: 0},
+      cursor: { row: 1, column: 0 },
       autoCompleteSet: ["{"],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -988,14 +990,14 @@ context_tests(
   [
     {
       name: "Cursor rows after request end",
-      cursor: {row: 4, column: 0},
+      cursor: { row: 4, column: 0 },
       autoCompleteSet: ["GET", "PUT", "POST", "DELETE", "HEAD"],
       prefixToAdd: "",
       suffixToAdd: " "
     },
     {
       name: "Cursor just after request end",
-      cursor: {row: 2, column: 1},
+      cursor: { row: 2, column: 1 },
       no_context: true
     }
 
@@ -1033,7 +1035,7 @@ context_tests(
   [
     {
       name: "Endpoints with slashes - no slash",
-      cursor: {row: 0, column: 8},
+      cursor: { row: 0, column: 8 },
       autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1049,21 +1051,21 @@ context_tests(
   [
     {
       name: "Endpoints with slashes - before slash",
-      cursor: {row: 0, column: 7},
+      cursor: { row: 0, column: 7 },
       autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
       prefixToAdd: "",
       suffixToAdd: ""
     },
     {
       name: "Endpoints with slashes - on slash",
-      cursor: {row: 0, column: 12},
+      cursor: { row: 0, column: 12 },
       autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
       prefixToAdd: "",
       suffixToAdd: ""
     },
     {
       name: "Endpoints with slashes - after slash",
-      cursor: {row: 0, column: 13},
+      cursor: { row: 0, column: 13 },
       autoCompleteSet: ["nodes/stats", "stats"],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1079,10 +1081,10 @@ context_tests(
   [
     {
       name: "Endpoints with slashes - after slash",
-      cursor: {row: 0, column: 14},
+      cursor: { row: 0, column: 14 },
       autoCompleteSet: [
-        {name: "nodes/stats", meta: "endpoint"},
-        {name: "stats", meta: "endpoint"}
+        { name: "nodes/stats", meta: "endpoint" },
+        { name: "stats", meta: "endpoint" }
       ],
       prefixToAdd: "",
       suffixToAdd: "",
@@ -1099,7 +1101,7 @@ context_tests(
   [
     {
       name: "Endpoints with two slashes",
-      cursor: {row: 0, column: 20},
+      cursor: { row: 0, column: 20 },
       autoCompleteSet: ["stats"],
       prefixToAdd: "",
       suffixToAdd: "",
@@ -1116,13 +1118,13 @@ context_tests(
   [
     {
       name: "Immediately after space + method",
-      cursor: {row: 0, column: 4},
+      cursor: { row: 0, column: 4 },
       autoCompleteSet: [
-        {name: "_cluster/nodes/stats", meta: "endpoint"},
-        {name: "_cluster/stats", meta: "endpoint"},
-        {name: "_search", meta: "endpoint"},
-        {name: "index1", meta: "index"},
-        {name: "index2", meta: "index"}
+        { name: "_cluster/nodes/stats", meta: "endpoint" },
+        { name: "_cluster/stats", meta: "endpoint" },
+        { name: "_search", meta: "endpoint" },
+        { name: "index1", meta: "index" },
+        { name: "index2", meta: "index" }
       ],
       prefixToAdd: "",
       suffixToAdd: "",
@@ -1139,13 +1141,13 @@ context_tests(
   [
     {
       name: "Endpoints by subpart",
-      cursor: {row: 0, column: 6},
+      cursor: { row: 0, column: 6 },
       autoCompleteSet: [
-        {name: "_cluster/nodes/stats", meta: "endpoint"},
-        {name: "_cluster/stats", meta: "endpoint"},
-        {name: "_search", meta: "endpoint"},
-        {name: "index1", meta: "index"},
-        {name: "index2", meta: "index"}
+        { name: "_cluster/nodes/stats", meta: "endpoint" },
+        { name: "_cluster/stats", meta: "endpoint" },
+        { name: "_search", meta: "endpoint" },
+        { name: "index1", meta: "index" },
+        { name: "index2", meta: "index" }
       ],
       prefixToAdd: "",
       suffixToAdd: "",
@@ -1162,13 +1164,13 @@ context_tests(
   [
     {
       name: "Endpoints by subpart",
-      cursor: {row: 0, column: 7},
+      cursor: { row: 0, column: 7 },
       autoCompleteSet: [
-        {name: "_cluster/nodes/stats", meta: "endpoint"},
-        {name: "_cluster/stats", meta: "endpoint"},
-        {name: "_search", meta: "endpoint"},
-        {name: "index1", meta: "index"},
-        {name: "index2", meta: "index"}
+        { name: "_cluster/nodes/stats", meta: "endpoint" },
+        { name: "_cluster/stats", meta: "endpoint" },
+        { name: "_search", meta: "endpoint" },
+        { name: "index1", meta: "index" },
+        { name: "index2", meta: "index" }
       ],
       prefixToAdd: "",
       suffixToAdd: "",
@@ -1186,13 +1188,13 @@ context_tests(
   [
     {
       name: "Params just after ?",
-      cursor: {row: 0, column: 12},
+      cursor: { row: 0, column: 12 },
       autoCompleteSet: [
-        {name: "filter_path", meta: "param", "insert_value": "filter_path="},
-        {name: "format", meta: "param", "insert_value": "format="},
-        {name: "pretty", meta: "flag"},
-        {name: "scroll", meta: "param", "insert_value": "scroll="},
-        {name: "search_type", meta: "param", "insert_value": "search_type="},
+        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
+        { name: "format", meta: "param", "insert_value": "format=" },
+        { name: "pretty", meta: "flag" },
+        { name: "scroll", meta: "param", "insert_value": "scroll=" },
+        { name: "search_type", meta: "param", "insert_value": "search_type=" },
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1208,10 +1210,10 @@ context_tests(
   [
     {
       name: "Params values",
-      cursor: {row: 0, column: 19},
+      cursor: { row: 0, column: 19 },
       autoCompleteSet: [
-        {name: "json", meta: "format"},
-        {name: "yaml", meta: "format"}
+        { name: "json", meta: "format" },
+        { name: "yaml", meta: "format" }
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1227,13 +1229,13 @@ context_tests(
   [
     {
       name: "Params after amp",
-      cursor: {row: 0, column: 24},
+      cursor: { row: 0, column: 24 },
       autoCompleteSet: [
-        {name: "filter_path", meta: "param", "insert_value": "filter_path="},
-        {name: "format", meta: "param", "insert_value": "format="},
-        {name: "pretty", meta: "flag"},
-        {name: "scroll", meta: "param", "insert_value": "scroll="},
-        {name: "search_type", meta: "param", "insert_value": "search_type="},
+        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
+        { name: "format", meta: "param", "insert_value": "format=" },
+        { name: "pretty", meta: "flag" },
+        { name: "scroll", meta: "param", "insert_value": "scroll=" },
+        { name: "search_type", meta: "param", "insert_value": "search_type=" },
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1249,17 +1251,17 @@ context_tests(
   [
     {
       name: "Params on existing param",
-      cursor: {row: 0, column: 26},
+      cursor: { row: 0, column: 26 },
       rangeToReplace: {
-        start: {row: 0, column: 24},
-        end: {row: 0, column: 30}
+        start: { row: 0, column: 24 },
+        end: { row: 0, column: 30 }
       },
       autoCompleteSet: [
-        {name: "filter_path", meta: "param", "insert_value": "filter_path="},
-        {name: "format", meta: "param", "insert_value": "format="},
-        {name: "pretty", meta: "flag"},
-        {name: "scroll", meta: "param", "insert_value": "scroll="},
-        {name: "search_type", meta: "param", "insert_value": "search_type="},
+        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
+        { name: "format", meta: "param", "insert_value": "format=" },
+        { name: "pretty", meta: "flag" },
+        { name: "scroll", meta: "param", "insert_value": "scroll=" },
+        { name: "search_type", meta: "param", "insert_value": "search_type=" },
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1275,14 +1277,14 @@ context_tests(
   [
     {
       name: "Params on existing value",
-      cursor: {row: 0, column: 37},
+      cursor: { row: 0, column: 37 },
       rangeToReplace: {
-        start: {row: 0, column: 36},
-        end: {row: 0, column: 39}
+        start: { row: 0, column: 36 },
+        end: { row: 0, column: 39 }
       },
       autoCompleteSet: [
-        {name: "count", meta: "search_type"},
-        {name: "query_then_fetch", meta: "search_type"},
+        { name: "count", meta: "search_type" },
+        { name: "query_then_fetch", meta: "search_type" },
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1297,14 +1299,14 @@ context_tests(
   [
     {
       name: "Params on just after = with existing value",
-      cursor: {row: 0, column: 36},
+      cursor: { row: 0, column: 36 },
       rangeToReplace: {
-        start: {row: 0, column: 36},
-        end: {row: 0, column: 36}
+        start: { row: 0, column: 36 },
+        end: { row: 0, column: 36 }
       },
       autoCompleteSet: [
-        {name: "count", meta: "search_type"},
-        {name: "query_then_fetch", meta: "search_type"},
+        { name: "count", meta: "search_type" },
+        { name: "query_then_fetch", meta: "search_type" },
       ],
       prefixToAdd: "",
       suffixToAdd: ""
@@ -1327,32 +1329,32 @@ context_tests(
   [
     {
       name: "fullurl - existing dictionary key, no template",
-      cursor: {row: 1, column: 6},
+      cursor: { row: 1, column: 6 },
       initialValue: "query",
       addTemplate: false,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 1, column: 3}, end: {row: 1, column: 10}},
+      rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 } },
       autoCompleteSet: ["facets", "query", "size"]
     },
     {
       name: "fullurl - existing inner dictionary key",
-      cursor: {row: 2, column: 7},
+      cursor: { row: 2, column: 7 },
       initialValue: "field",
       addTemplate: false,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 2, column: 6}, end: {row: 2, column: 13}},
+      rangeToReplace: { start: { row: 2, column: 6 }, end: { row: 2, column: 13 } },
       autoCompleteSet: ["match_all", "term"]
     },
     {
       name: "fullurl - existing dictionary key, yes template",
-      cursor: {row: 4, column: 7},
+      cursor: { row: 4, column: 7 },
       initialValue: "facets",
       addTemplate: true,
       prefixToAdd: "",
       suffixToAdd: "",
-      rangeToReplace: {start: {row: 4, column: 3}, end: {row: 4, column: 15}},
+      rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 } },
       autoCompleteSet: ["facets", "query", "size"]
     }
   ]

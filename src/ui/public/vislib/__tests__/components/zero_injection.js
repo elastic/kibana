@@ -41,23 +41,23 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         'label': 'html',
         'values': [
-          {'x': 1418410560000, 'y': 2},
-          {'x': 1418410620000, 'y': 4},
-          {'x': 1418410680000, 'y': 1},
-          {'x': 1418410740000, 'y': 5},
-          {'x': 1418410800000, 'y': 2},
-          {'x': 1418410860000, 'y': 3},
-          {'x': 1418410920000, 'y': 2}
+          { 'x': 1418410560000, 'y': 2 },
+          { 'x': 1418410620000, 'y': 4 },
+          { 'x': 1418410680000, 'y': 1 },
+          { 'x': 1418410740000, 'y': 5 },
+          { 'x': 1418410800000, 'y': 2 },
+          { 'x': 1418410860000, 'y': 3 },
+          { 'x': 1418410920000, 'y': 2 }
         ]
       },
       {
         'label': 'css',
         'values': [
-          {'x': 1418410560000, 'y': 1},
-          {'x': 1418410620000, 'y': 3},
-          {'x': 1418410680000, 'y': 1},
-          {'x': 1418410740000, 'y': 4},
-          {'x': 1418410800000, 'y': 2}
+          { 'x': 1418410560000, 'y': 1 },
+          { 'x': 1418410620000, 'y': 3 },
+          { 'x': 1418410680000, 'y': 1 },
+          { 'x': 1418410740000, 'y': 4 },
+          { 'x': 1418410800000, 'y': 2 }
         ]
       }
     ]
@@ -68,11 +68,11 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     {
       label: '200',
       values: [
-        {x: 'v1', y: 234},
-        {x: 'v2', y: 34},
-        {x: 'v3', y: 834},
-        {x: 'v4', y: 1234},
-        {x: 'v5', y: 4}
+        { x: 'v1', y: 234 },
+        { x: 'v2', y: 34 },
+        { x: 'v3', y: 834 },
+        { x: 'v4', y: 1234 },
+        { x: 'v5', y: 4 }
       ]
     }
   ];
@@ -82,11 +82,11 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: 'v1', y: 234},
-          {x: 'v2', y: 34},
-          {x: 'v3', y: 834},
-          {x: 'v4', y: 1234},
-          {x: 'v5', y: 4}
+          { x: 'v1', y: 234 },
+          { x: 'v2', y: 34 },
+          { x: 'v3', y: 834 },
+          { x: 'v4', y: 1234 },
+          { x: 'v5', y: 4 }
         ]
       }
     ]
@@ -96,25 +96,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     {
       label: '200',
       values: [
-        {x: '1', y: 234},
-        {x: '2', y: 34},
-        {x: '3', y: 834},
-        {x: '4', y: 1234},
-        {x: '5', y: 4}
+        { x: '1', y: 234 },
+        { x: '2', y: 34 },
+        { x: '3', y: 834 },
+        { x: '4', y: 1234 },
+        { x: '5', y: 4 }
       ]
     },
     {
       label: '404',
       values: [
-        {x: '1', y: 1234},
-        {x: '3', y: 234},
-        {x: '5', y: 34}
+        { x: '1', y: 1234 },
+        { x: '3', y: 234 },
+        { x: '5', y: 34 }
       ]
     },
     {
       label: '503',
       values: [
-        {x: '3', y: 834}
+        { x: '3', y: 834 }
       ]
     }
   ];
@@ -124,25 +124,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: '1', y: 234},
-          {x: '2', y: 34},
-          {x: '3', y: 834},
-          {x: '4', y: 1234},
-          {x: '5', y: 4}
+          { x: '1', y: 234 },
+          { x: '2', y: 34 },
+          { x: '3', y: 834 },
+          { x: '4', y: 1234 },
+          { x: '5', y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: '1', y: 1234},
-          {x: '3', y: 234},
-          {x: '5', y: 34}
+          { x: '1', y: 1234 },
+          { x: '3', y: 234 },
+          { x: '5', y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: '3', y: 834}
+          { x: '3', y: 834 }
         ]
       }
     ]
@@ -152,25 +152,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     {
       label: '200',
       values: [
-        {x: 1, y: 234},
-        {x: 2, y: 34},
-        {x: 3, y: 834},
-        {x: 4, y: 1234},
-        {x: 5, y: 4}
+        { x: 1, y: 234 },
+        { x: 2, y: 34 },
+        { x: 3, y: 834 },
+        { x: 4, y: 1234 },
+        { x: 5, y: 4 }
       ]
     },
     {
       label: '404',
       values: [
-        {x: 1, y: 1234},
-        {x: 3, y: 234},
-        {x: 5, y: 34}
+        { x: 1, y: 1234 },
+        { x: 3, y: 234 },
+        { x: 5, y: 34 }
       ]
     },
     {
       label: '503',
       values: [
-        {x: 3, y: 834}
+        { x: 3, y: 834 }
       ]
     }
   ];
@@ -180,25 +180,25 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       {
         label: '200',
         values: [
-          {x: 1, y: 234},
-          {x: 2, y: 34},
-          {x: 3, y: 834},
-          {x: 4, y: 1234},
-          {x: 5, y: 4}
+          { x: 1, y: 234 },
+          { x: 2, y: 34 },
+          { x: 3, y: 834 },
+          { x: 4, y: 1234 },
+          { x: 5, y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: 1, y: 1234},
-          {x: 3, y: 234},
-          {x: 5, y: 34}
+          { x: 1, y: 1234 },
+          { x: 3, y: 234 },
+          { x: 5, y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: 3, y: 834}
+          { x: 3, y: 834 }
         ]
       }
     ]
@@ -492,7 +492,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     const xValueArr = [1, 2, 3, 4, 5];
     let createZeroArray;
     let arr1;
-    const arr2 = [ {x: 3, y: 834} ];
+    const arr2 = [ { x: 3, y: 834 } ];
     let results;
 
     beforeEach(ngMock.module('kibana'));

@@ -24,17 +24,17 @@ describe('SearchSource#normalizeSortRequest', function () {
   }));
 
   it('should return an array', function () {
-    const sortable = { someField: 'desc'};
+    const sortable = { someField: 'desc' };
     const result = normalizeSortRequest(sortable, indexPattern);
     expect(result).to.be.an(Array);
     expect(result).to.eql(normalizedSort);
     // ensure object passed in is not mutated
     expect(result[0]).to.not.be.equal(sortable);
-    expect(sortable).to.eql({ someField: 'desc'});
+    expect(sortable).to.eql({ someField: 'desc' });
   });
 
   it('should make plain string sort into the more verbose format', function () {
-    const result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
+    const result = normalizeSortRequest([{ someField: 'desc' }], indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
@@ -93,7 +93,7 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should remove unmapped_type parameter from _score sorting', function () {
-    const sortable = { _score: 'desc'};
+    const sortable = { _score: 'desc' };
     const expected = [{
       _score: {
         order: 'desc'

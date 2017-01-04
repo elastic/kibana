@@ -150,8 +150,8 @@ describe('AggType Class', function () {
 
         it('passes the params arg directly to the AggParams constructor', function () {
           const params = [
-            {name: 'one'},
-            {name: 'two'}
+            { name: 'one' },
+            { name: 'two' }
           ];
           const paramLength = params.length + 2; // json and custom label are always appended
 

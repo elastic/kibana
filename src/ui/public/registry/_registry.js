@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/indexed_array';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
 /**
@@ -86,5 +85,5 @@ export default function createRegistry(spec) {
   };
 
   return registry;
-};
+}
 

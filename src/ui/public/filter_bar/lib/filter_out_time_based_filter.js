@@ -10,4 +10,4 @@ export default function filterOutTimeBaseFilter(courier, Promise) {
       });
     });
   });
-};
+}

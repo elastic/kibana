@@ -136,7 +136,8 @@ function SenseEditor($el) {
           var formatted_data = utils.reformatData(parsed_req.data, indent);
           if (!formatted_data.changed) {
             // toggle.
-            formatted_data = utils.reformatData(parsed_req.data, !indent);
+            indent = !indent;
+            formatted_data = utils.reformatData(parsed_req.data, indent);
           }
           parsed_req.data = formatted_data.data;
 
@@ -546,8 +547,9 @@ function SenseEditor($el) {
         var ret = 'curl -X' + es_method + ' "' + url + '"';
         if (es_data && es_data.length) {
           ret += " -d'\n";
+          var data_as_string = utils.collapseLiteralStrings(es_data.join("\n"))
           // since Sense doesn't allow single quote json string any single qoute is within a string.
-          ret += es_data.join("\n").replace(/'/g, '\\"');
+          ret += data_as_string.replace(/'/g, '\\"');
           if (es_data.length > 1) {
             ret += "\n";
           } // end with a new line

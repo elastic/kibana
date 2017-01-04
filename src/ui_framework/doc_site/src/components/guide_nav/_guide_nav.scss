@@ -1,11 +1,12 @@
 .guideNav {
+  display: flex;
+  flex-direction: column;
   position: fixed;
-  z-index: 1;
+  z-index: 10000;
   top: 0;
   left: 0;
   right: 0;
   height: $guideNavHeight;
-  padding: 0 20px;
   background-color: #e8488b;
   color: #ffffff;
   box-shadow:
@@ -20,9 +21,11 @@
 }
 
   .guideNav__header {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     height: 60px;
+    padding: 0 20px;
   }
 
     .guideNav__menu {
@@ -54,14 +57,30 @@
       font-size: 14px;
     }
 
-  .guideNavItem {
-    color: white;
-    text-decoration: none;
-    font-size: 20px;
-    padding: 10px;
-    border-radius: 3px;
+.guideNavItemsContainer {
+  @include scrollbar;
+  display: flex;
+  overflow: auto;
+  min-height: calc(100vh - 100px);
+}
 
-    &:hover {
-      background-color: rgba(black, 0.15);
-    }
+.guideNavItems {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.guideNavItem {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  line-height: 20px;
+  padding: 8px 20px;
+  border-radius: 3px;
+
+  &:hover {
+    background-color: rgba(black, 0.15);
   }
+}
