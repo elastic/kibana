@@ -1,0 +1,33 @@
+<form
+  role="form"
+  name="splitLogsForm"
+  ng-submit="saveEdit()">
+  <div class="form-group">
+    <label>Target Property</label>
+    <input
+      type="text"
+      class="form-control"
+      ng-model="targetProperty" />
+  </div>
+  <div class="form-group">
+    <label>Log Lines</label>
+    <textarea
+      ng-model="logLines"
+      class="form-control"
+      input-focus></textarea>
+  </div>
+  <div class="form-group buttons">
+    <button
+      type="button"
+      class="btn btn-primary"
+      ng-click="cancelEdit()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn-success"
+      ng-disabled="splitLogsForm.$invalid">
+      Add Samples
+    </button>
+  </div>
+</form>

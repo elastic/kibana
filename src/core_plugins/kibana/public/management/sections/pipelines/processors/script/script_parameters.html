@@ -1,0 +1,37 @@
+<table>
+  <tr ng-repeat="parameter in parameters">
+    <td>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="parameter.name"
+        ng-change="onChange()"
+        input-focus />
+    </td>
+    <td>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="parameter.value"
+        ng-change="onChange()" />
+    </td>
+    <td>
+      <button
+        type="button"
+        ng-click="parameters.splice($index, 1)"
+        class="btn btn-danger btn-xs">
+        <i class="fa fa-times"></i>
+      </button>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      <button
+        type="button"
+        ng-click="parameters.push({})"
+        class="btn btn-primary add-range">
+        Add Parameter
+      </button>
+    </td>
+  </tr>
+</table>

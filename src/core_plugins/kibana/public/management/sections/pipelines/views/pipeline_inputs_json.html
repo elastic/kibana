@@ -1,0 +1,40 @@
+<form
+  role="form"
+  name="editSampleForm"
+  ng-submit="saveEdit()">
+  <div class="form-group">
+    <label>Description</label>
+    <input
+      type="text"
+      class="form-control"
+      ng-model="editSample.description"
+      input-focus />
+  </div>
+  <div class="form-group">
+    <label>JSON Document</label>
+    <div
+      class="json-editor"
+      json-input
+      require-keys="true"
+      ui-ace="{
+        mode: 'json',
+        onLoad: aceLoaded
+      }"
+      ng-model="editSample.doc">
+    </div>
+  </div>
+  <div class="form-group buttons">
+    <button
+      type="button"
+      class="btn btn-primary"
+      ng-click="cancelEdit()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn-success"
+      ng-disabled="editSampleForm.$invalid">
+      Done
+    </button>
+  </div>
+</form>

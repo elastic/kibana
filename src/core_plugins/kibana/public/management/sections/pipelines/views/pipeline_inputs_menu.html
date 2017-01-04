@@ -1,0 +1,25 @@
+<h2><em>Pipeline Samples</em></h2>
+
+<paginated-table
+  class="pattern-review-field-table"
+  columns="columns"
+  rows="rows"
+  per-page="10">
+</paginated-table>
+
+<p class="text-center default-message" ng-if="rows.length === 0">No Samples defined. Add at least one to start editing the Pipeline.</p>
+
+<div class="buttons">
+  <button
+    ng-click="addFromLogs()"
+    type="button"
+    class="btn btn-primary">
+    Add Samples from Logs
+  </button>
+  <button
+    ng-click="addFromJson()"
+    type="button"
+    class="btn btn-primary">
+    Add Single Sample
+  </button>
+</div>

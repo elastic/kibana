@@ -1,0 +1,52 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+processor-input {
+  // .visual {
+  //   border: none;
+  //   background-color: @settings-add-data-wizard-panel-bg;
+  //   border-radius: 0;
+  //   overflow-x: auto;
+  // }
+
+  // .visual.collapsed {
+  //   max-height: 125px;
+  //   overflow-y: auto;
+  // }
+
+  // pre {
+  //   background-color: transparent;
+  //   border: none;
+  // }
+
+  // .hide-unchanged {
+  //   .jsondiffpatch-unchanged {
+  //     display: none;
+  //   }
+  // }
+  pre {
+    &.full {
+      max-height: auto;
+      height: auto;
+    }
+
+    &.small {
+      max-height: 110px;
+      height: 110px;
+      overflow-y: scroll;
+    }
+  }
+
+  .header {
+    display: flex;
+
+    label {
+      flex: 1 1 auto;
+    }
+
+    input-output-controls {
+      flex: 0 0 auto;
+    }
+  }
+}

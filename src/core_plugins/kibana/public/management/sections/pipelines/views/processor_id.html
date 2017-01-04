@@ -1,0 +1,11 @@
+<div class="form-group">
+  <label>Processor Id:</label>
+  <input
+    type="text"
+    class="form-control"
+    input-focus="select"
+    ng-model="processor.processorId"
+    ng-change="changeProcessorId(processor.processorId)"
+    ng-model-options="{ updateOn: 'blur' }"
+    required />
+</div>

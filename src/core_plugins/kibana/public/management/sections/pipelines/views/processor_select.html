@@ -1,0 +1,12 @@
+<ui-select ng-model="selectedItem.value">
+  <ui-select-match placeholder="Add a Processor...">
+    <span ng-bind="$select.selected.title"></span>
+  </ui-select-match>
+  <ui-select-choices
+    repeat="processorType in (processorTypes | filter: $select.search) track by processorType.typeId">
+    <label ng-bind="processorType.title"></label>
+    <div class="processor-help-text">
+      <span ng-bind="processorType.helpText"></span>
+    </div>
+  </ui-select-choices>
+</ui-select>

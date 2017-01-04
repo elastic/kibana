@@ -1,0 +1,30 @@
+<div class="pipeline-menu">
+  <div class="container-fluid">
+    <p>
+      From here you can add, edit, and delete Elasticsearch Ingest pipelines. Ingest pipelines are an easy way to modify documents before they're indexed in Elasticsearch. They're composed of processors which can change your data in many ways.
+    </p>
+    <form role="form">
+      <div class="filter">
+        <input
+          aria-label="Filter"
+          ng-model="advancedFilter"
+          class="form-control"
+          type="text" placeholder="Filter" />
+        <button
+          ng-click="addNew()"
+          class="btn btn-primary"
+          aria-label="Add New">
+          <i aria-hidden="true" class="fa fa-plus"></i>
+          <span> New</span>
+        </button>
+      </div>
+    </form>
+
+    <paginated-table
+      class="pattern-review-field-table"
+      columns="columns"
+      rows="rows"
+      per-page="10">
+    </paginated-table>
+  </div>
+</div>

@@ -259,6 +259,11 @@ export default function defaultSettingsProvider() {
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.'
     },
+    //prototypes
+    'prototypes:pipelines' : {
+      value: false,
+      description: 'Prototype flag. Enable to experiment with in-development pipelines functionality'
+    },
     // Timelion stuff
     'timelion:showTutorial': {
       value: false,

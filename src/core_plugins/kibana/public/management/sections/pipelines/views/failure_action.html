@@ -1,0 +1,20 @@
+<div class="form-group">
+  <label>On Data Error:</label>
+
+  <div class="controls">
+    <select
+      class="form-control"
+      ng-model="failureAction"
+      ng-options="k as v for (k, v) in options">
+    </select>
+
+    <button
+      class="btn btn-primary"
+      ng-if="failureAction === 'on_error'"
+      ng-click="defineProcessors()">
+      Define processors
+    </button>
+  </div>
+</div>
+
+

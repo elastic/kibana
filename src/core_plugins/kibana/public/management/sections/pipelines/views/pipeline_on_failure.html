@@ -1,0 +1,35 @@
+<div class="processor-ui-container-header">
+  <button
+    aria-label="{{ collapsed ? 'Expand Section' : 'Collapse Section' }}"
+    tooltip="{{ collapsed ? 'Expand Section' : 'Collapse Section' }}"
+    tooltip-append-to-body="true"
+    ng-click="collapsed = !collapsed"
+    type="button"
+    class="btn btn-primary btn-xs processor-ui-container-header-toggle">
+    <i aria-hidden="true" ng-class="{ 'fa-caret-down': !collapsed, 'fa-caret-right': collapsed }" class="fa"></i>
+  </button>
+
+  <div class="processor-ui-container-header-title">
+    <span class="processor-title">
+      On-Failure Default
+    </span>
+
+    <span class="processor-description">
+      - {{ pipeline.failureOptions[pipeline.failureAction] }}
+    </span>
+  </div>
+</div>
+
+<div class="processor-ui-container-body">
+  <div
+    class="processor-ui-container-body-content"
+    ng-hide="collapsed">
+    <div class="alert alert-info">This is the action that will be taken if the index process fails and the failure is not handled in any other way.</div>
+    <failure-action
+      failure-action="pipeline.failureAction"
+      processor-collection="pipeline.failureProcessorCollection"
+      pipeline="pipeline"
+      options="pipeline.failureOptions">
+    </failure-action>
+  </div>
+</div>

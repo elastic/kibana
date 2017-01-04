@@ -1,0 +1,70 @@
+<button
+  aria-label="Show Metadata"
+  tooltip="Show Metadata"
+  tooltip-append-to-body="true"
+  ng-click="options.showMeta = !options.showMeta"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="!options.showMeta"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-file-o"></i>
+</button>
+<button
+  aria-label="Show Document"
+  tooltip="Show Document"
+  tooltip-append-to-body="true"
+  ng-click="options.showMeta = !options.showMeta"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="options.showMeta"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-file"></i>
+</button>
+
+<button
+  aria-label="Show Entire Document"
+  tooltip="Show Entire Document"
+  tooltip-append-to-body="true"
+  ng-click="options.showChanges = !options.showChanges"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="options.showChanges && options.enableShowChanges"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-eye"></i>
+</button>
+
+<button
+  aria-label="Show Changes Only"
+  tooltip="Show Changes Only"
+  tooltip-append-to-body="true"
+  ng-click="options.showChanges = !options.showChanges"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="!options.showChanges && options.enableShowChanges"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-eye-slash"></i>
+</button>
+
+<button
+  aria-label="Collapse"
+  tooltip="Collapse"
+  tooltip-append-to-body="true"
+  ng-click="options.expandLevel = options.expandLevel - 1"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="options.expandLevel > options.minExpandLevel && options.enableExpand"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-compress"></i>
+</button>
+
+<button
+  aria-label="Expand"
+  tooltip="Expand"
+  tooltip-append-to-body="true"
+  ng-click="options.expandLevel = options.expandLevel + 1"
+  type="button"
+  class="btn btn-xs btn-secondary"
+  ng-show="options.expandLevel < options.maxExpandLevel && options.enableExpand"
+  tabindex="-1">
+  <i aria-hidden="true" class="fa fa-expand"></i>
+</button>

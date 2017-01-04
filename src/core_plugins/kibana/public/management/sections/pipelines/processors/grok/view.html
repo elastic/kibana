@@ -1,0 +1,63 @@
+<div class="form-group">
+  <label>Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.sourceField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Patterns:</label><span> (line delimited)</span>
+  <a
+    aria-label="Grok Help"
+    tooltip="Grok Help"
+    tooltip-append-to-body="true"
+    href="{{docLinks.grok}}"
+    target="_blank">
+    <i aria-hidden="true" class="fa fa-question-circle"></i>
+  </a>
+  <list-textarea list="processor.patterns"></list-textarea>
+</div>
+<div class="form-group">
+  <label>Ignore Missing Field:</label>
+  <select
+    class="form-control"
+    ng-model="processor.ignoreMissing"
+    ng-options="o.v as o.n for o in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+  </select>
+</div>
+
+<div class="advanced-section">
+  <div class="form-group advanced-section-heading">
+    <button
+      ng-click="processor.advancedExpanded = !processor.advancedExpanded"
+      type="button"
+      class="btn btn-default btn-xs processor-ui-container-header-toggle">
+      <i
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': processor.advancedExpanded, 'fa-caret-right': !processor.advancedExpanded }"
+        class="fa">
+      </i>
+    </button>
+    <label
+      ng-click="processor.advancedExpanded = !processor.advancedExpanded">
+      Advanced Settings
+    </label>
+  </div>
+  <div ng-show="processor.advancedExpanded">
+    <div class="form-group">
+      <label>Trace Match:</label>
+      <select
+        class="form-control"
+        ng-model="processor.traceMatch"
+        ng-options="o.v as o.n for o in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Pattern Definitions:</label>
+      <grok-pattern-definitions
+        definitions="processor.patternDefinitions"
+        on-change="pipeline.setDirty()">
+      </grok-pattern-definitions>
+    </div>
+  </div>
+</div>

@@ -163,6 +163,7 @@
     "tinygradient": "0.3.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
+    "ui-select": "0.18.1",
     "url-loader": "0.5.6",
     "validate-npm-package-name": "2.2.2",
     "vision": "4.1.0",

@@ -1,0 +1,27 @@
+<div class="header">
+  <div class="label-wrapper">
+    <label>
+      Pipeline Output
+      <a
+        aria-label="The pipeline output shows the result of the defined pipeline using the sample records supplied in the previous step."
+        tooltip="The pipeline output shows the result of the defined pipeline using the sample records supplied in the previous step."
+        tooltip-append-to-body="true"
+        target="_blank">
+        <i aria-hidden="true" class="fa fa-question-circle"></i>
+      </a>
+    </label>
+    <span ng-if="pipeline.outputControlsState.showMeta"> (metadata)</span>
+  </div>
+  <input-output-controls options="pipeline.outputControlsState"></input-output-controls>
+</div>
+<pre
+  ng-show="pipeline.outputControlsState.showMeta && !pipeline.error"
+  class="output">{{ pipeline.output.meta | json }}</pre>
+<pre
+  ng-show="!pipeline.outputControlsState.showMeta && !pipeline.error"
+  class="output">{{ pipeline.output.doc | json }}</pre>
+<div
+  ng-show="pipeline.error"
+  class="alert alert-danger">
+  Current pipeline will not successfully index the sample document.
+</div>

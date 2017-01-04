@@ -1,0 +1,48 @@
+@import "~font-awesome/less/font-awesome";
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+pipeline-inputs-menu {
+  .buttons {
+    float: right;
+  }
+
+  .status(@color, @icon) {
+    &:before {
+      font-family: 'FontAwesome';
+      content: @icon;
+    }
+
+    font-size: 1.5em;
+    color: @color;
+  }
+
+  .status {
+    &-valid {
+      .status(green, @fa-var-check);
+    }
+
+    &-invalid {
+      .status(red, @fa-var-times-circle-o);
+    }
+
+    &-unknown {
+      .status(black, @fa-var-hourglass-o);
+    }
+  }
+
+  .sample {
+    max-width: 700px;
+    .ellipsis();
+  }
+
+  .current-sample {
+    &:before {
+      font-family: 'FontAwesome';
+      content: @fa-var-circle;
+      font-size: 1.5em;
+      color: @kibanaGray4;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<div class="buttons">
+  <button
+    ng-click="selectSample(index)"
+    class="btn btn-primary"
+    aria-label="View In Pipeline Builder"
+    tooltip="View In Pipeline Builder"
+    tooltip-append-to-body="true">
+    <span class="sr-only">View In Pipeline Builder</span>
+    <i aria-hidden="true" class="fa fa-eye"></i>
+  </button>
+
+  <button
+    ng-click="editSample(sample)"
+    class="btn btn-default"
+    aria-label="Edit Sample"
+    tooltip="Edit Sample"
+    tooltip-append-to-body="true">
+    <span class="sr-only">Edit</span>
+    <i aria-hidden="true" class="fa fa-pencil"></i>
+  </button>
+
+  <button
+    ng-click="duplicateSample(sample)"
+    class="btn btn-default"
+    aria-label="Duplicate Sample"
+    tooltip="Duplicate Sample"
+    tooltip-append-to-body="true">
+    <span class="sr-only">Duplicate</span>
+    <i aria-hidden="true" class="fa fa-clone"></i>
+  </button>
+
+  <button
+    class="btn btn-danger"
+    confirm-click="deleteSample(sample)"
+    confirmation="Are you sure you want to delete this sample? This action is irreversible!"
+    aria-label="Delete Sample"
+    tooltip="Delete Sample"
+    tooltip-append-to-body="true">
+    <span class="sr-only">Delete</span>
+    <i aria-hidden="true" class="fa fa-trash"></i>
+  </button>
+</div>

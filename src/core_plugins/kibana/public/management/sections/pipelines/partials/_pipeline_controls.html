@@ -1,0 +1,18 @@
+<div style="float:right;">
+  <button
+    ng-click="editPipeline(pipeline)"
+    class="btn btn-default"
+    aria-label="Edit">
+    <span class="sr-only">Edit</span>
+    <i aria-hidden="true" class="fa fa-pencil"></i>
+  </button>
+
+  <button
+    class="btn btn-danger"
+    confirm-click="deletePipeline(pipeline)"
+    confirmation="Are you sure you want to delete the [{{pipeline.description || pipeline.pipelineId}}] pipeline? This action is irreversible!"
+    aria-label="Hide">
+    <span class="sr-only">Delete</span>
+    <i aria-hidden="true" class="fa fa-trash"></i>
+  </button>
+</div>

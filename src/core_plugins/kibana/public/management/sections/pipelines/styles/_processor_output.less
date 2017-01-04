@@ -1,0 +1,46 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+processor-output {
+  .visual {
+    border: none;
+    background-color: @settings-add-data-wizard-panel-bg;
+    border-radius: 0;
+    overflow-x: auto;
+
+    &.full {
+      max-height: auto;
+      height: auto;
+    }
+
+    &.small {
+      max-height: 125px;
+      max-height: 125px;
+      overflow-y: scroll;
+    }
+  }
+
+  pre {
+    background-color: transparent;
+    border: none;
+  }
+
+  .hide-unchanged {
+    .jsondiffpatch-unchanged {
+      display: none;
+    }
+  }
+
+  .header {
+    display: flex;
+
+    label {
+      flex: 1 1 auto;
+    }
+
+    input-output-controls {
+      flex: 0 0 auto;
+    }
+  }
+}

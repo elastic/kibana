@@ -1,0 +1,76 @@
+<div class="processor-ui-container-header">
+  <button
+    aria-label="{{ processor.collapsed ? 'Expand Section' : 'Collapse Section' }}"
+    tooltip="{{ processor.collapsed ? 'Expand Section' : 'Collapse Section' }}"
+    tooltip-append-to-body="true"
+    ng-click="processor.collapsed = !processor.collapsed"
+    type="button"
+    class="btn btn-primary btn-xs processor-ui-container-header-toggle">
+    <i aria-hidden="true" ng-class="{ 'fa-caret-down': !processor.collapsed, 'fa-caret-right': processor.collapsed }" class="fa"></i>
+  </button>
+
+  <div class="processor-ui-container-header-title">
+    <span class="processor-title">
+      {{processor.title}}
+    </span>
+
+    <span class="processor-description">
+      - {{ processor.description }}
+    </span>
+
+    <span ng-if="processor.state === processorStates.ERROR_COMPILE" class="processor-description danger">
+      - Compile Error
+    </span>
+    <span ng-if="processor.state === processorStates.ERROR_FAIL" class="processor-description danger">
+      - Error
+    </span>
+    <span ng-if="processor.state === processorStates.ERROR_RECOVER" class="processor-description warning">
+      - Error with recovery
+    </span>
+    <span ng-if="processor.state === processorStates.NO_RESULT" class="processor-description info">
+      - No Results
+    </span>
+  </div>
+
+  <div
+    ng-show="processorCollection.type!=collectionTypes.FOREACH"
+    class="processor-ui-container-header-controls btn-group">
+
+    <button
+      draggable-handle
+      aria-label="Modify Priority by Dragging"
+      ng-if="processorCollection.processors.length > 1"
+      tooltip="Modify Priority by Dragging"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-arrows-v"></i>
+    </button>
+
+    <button
+      aria-label="Remove Processor"
+      tooltip="Remove Processor"
+      tooltip-append-to-body="true"
+      ng-click="processorCollection.remove(processor)"
+      type="button"
+      class="btn btn-xs btn-danger"
+      ng-disabled="pipeline.hasCompileError && !processor.error">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <div
+    ng-hide="processorCollection.type!=collectionTypes.FOREACH"
+    class="processor-ui-container-header-controls btn-group">
+    <button
+      aria-label="Remove Processor"
+      tooltip="Remove Processor"
+      tooltip-append-to-body="true"
+      ng-click="processorCollection.remove(processor)"
+      type="button"
+      class="btn btn-xs btn-danger"
+      ng-disabled="pipeline.hasCompileError && !processor.error">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+  </div>
+</div>

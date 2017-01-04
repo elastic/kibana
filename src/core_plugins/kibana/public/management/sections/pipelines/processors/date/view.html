@@ -1,0 +1,52 @@
+<div class="form-group">
+  <label>Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.sourceField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Target Field:</label>
+  <input type="text" class="form-control" ng-model="processor.targetField">
+</div>
+<div class="form-group">
+  <label>Formats:</label>
+  <span> (line delimited)</span>
+  <a
+    aria-label="Custom Date Format Help"
+    tooltip="Custom Date Format Help"
+    tooltip-append-to-body="true"
+    href="http://www.joda.org/joda-time/key_format.html"
+    target="_blank">
+    <i aria-hidden="true" class="fa fa-question-circle"></i>
+  </a>
+  <list-textarea list="processor.formats"></list-textarea>
+</div>
+<div class="form-group">
+  <label>
+    Timezone:
+    <a
+      aria-label="Timezone Help"
+      tooltip="Timezone Help"
+      tooltip-append-to-body="true"
+      href="http://joda-time.sourceforge.net/timezones.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.timezone"></div>
+</div>
+<div class="form-group">
+  <label>
+    Locale:
+    <a
+      aria-label="Locale Help"
+      tooltip="Locale Help"
+      tooltip-append-to-body="true"
+      href="https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.locale"></div>
+</div>

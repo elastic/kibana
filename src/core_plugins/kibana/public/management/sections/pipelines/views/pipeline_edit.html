@@ -1,0 +1,15 @@
+<div class="pipeline-edit wizard-container">
+  <bread-crumbs class="bread-crumbs--navbar" omit-current-page="false" ng-if="!pipeline.pipelineId"></bread-crumbs>
+  <bread-crumbs class="bread-crumbs--navbar" omit-current-page="true" ng-if="pipeline.pipelineId"></bread-crumbs>
+  <kbn-top-nav name="pipelines" config="topNavMenu">
+    <div class="vis-editor-info">
+      <span ng-show="pipeline.pipelineId" class="vis-editor-info-title">
+        <span ng-bind="::pipeline.pipelineId"></span>
+      </span>
+    </div>
+  </kbn-top-nav>
+
+  <div class="container-fluid" style="margin-top:20px;">
+    <pipeline-setup></pipeline-setup>
+  </div>
+</div>

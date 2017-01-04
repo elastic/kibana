@@ -1,0 +1,27 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+pipeline-output {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    display: flex;
+
+    .label-wrapper {
+      flex: 1 1 auto;
+    }
+
+    input-output-controls {
+      flex: 0 0 auto;
+    }
+  }
+
+
+  pre.output {
+    min-height: 450px;
+    flex: 1 1 1px;
+  }
+}

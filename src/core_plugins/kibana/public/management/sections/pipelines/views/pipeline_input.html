@@ -1,0 +1,36 @@
+<div class="header">
+  <label>Pipeline Input</label>
+  <div class="controls">
+    <button
+      aria-label="Edit Samples"
+      tooltip="Edit Samples"
+      tooltip-append-to-body="true"
+      ng-click="editSamples()"
+      type="button"
+      class="btn btn-xs btn-primary">
+      <i aria-hidden="true" class="fa fa-pencil"></i>
+    </button>
+    <button
+      aria-label="Previous Sample"
+      tooltip="Previous Sample"
+      tooltip-append-to-body="true"
+      ng-click="previousSample()"
+      type="button"
+      class="btn btn-xs btn-primary"
+      ng-disabled="disabled">
+      <i aria-hidden="true" class="fa fa-caret-left"></i>
+    </button>
+    <button
+      aria-label="Next Sample"
+      tooltip="Next Sample"
+      tooltip-append-to-body="true"
+      ng-click="nextSample()"
+      type="button"
+      class="btn btn-xs btn-primary"
+      ng-disabled="disabled">
+      <i aria-hidden="true" class="fa fa-caret-right"></i>
+    </button>
+  </div>
+</div>
+<pre class="description" ng-if="currentSample.description">{{currentSample.description}}</pre>
+<pre>{{currentSample.doc | json}}</pre>

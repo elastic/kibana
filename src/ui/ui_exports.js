@@ -95,6 +95,7 @@ class UiExports {
       case 'managementSections':
       case 'devTools':
       case 'docViews':
+      case 'pipelinesProcessors':
       case 'hacks':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);

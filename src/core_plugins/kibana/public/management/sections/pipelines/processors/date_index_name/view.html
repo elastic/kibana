@@ -1,0 +1,55 @@
+<div class="form-group">
+  <label>Source Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.sourceField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Index Name Prefix:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.indexNamePrefix">
+</div>
+<div class="form-group">
+  <label>Date Rounding:</label>
+  <select
+    class="form-control"
+    ng-options="roundingType.value as roundingType.label for roundingType in roundingTypes"
+    ng-model="processor.dateRounding">
+  </select>
+</div>
+<div class="form-group">
+  <label>Date Formats:</label><span> (line delimited)</span>
+  <list-textarea list="processor.dateFormats" class="form-control"></list-textarea>
+</div>
+<div class="form-group">
+  <label>
+    Timezone:
+    <a
+      aria-label="Timezone Help"
+      tooltip="Timezone Help"
+      tooltip-append-to-body="true"
+      href="http://joda-time.sourceforge.net/timezones.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.timezone"></div>
+</div>
+<div class="form-group">
+  <label>
+    Locale:
+    <a
+      aria-label="Locale Help"
+      tooltip="Locale Help"
+      tooltip-append-to-body="true"
+      href="https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.locale"></div>
+</div>
+<div class="form-group">
+  <label>Index Name Format:</label>
+  <input type="text" class="form-control" ng-model="processor.indexNameFormat">
+</div>
