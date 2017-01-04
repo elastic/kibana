@@ -259,12 +259,52 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     }
 
     /**
+     * An error message to be used when the user rejects a confirm overwrite.
+     * @type {string}
+     */
+    const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+
+    /**
+     * Attempts to create the current object using the serialized source. If an object already
+     * exists, a warning message requests an overwrite confirmation.
+     * @param source - serialized version of this object (return value from this.serialize())
+     * What will be indexed into elasticsearch.
+     * @returns {Promise} - A promise that is resolved with the objects id if the object is
+     * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
+     * a confirmRejected = true parameter so that case can be handled differently than
+     * a create or index error.
+     * @resolved {String} - The id of the doc
+     */
+    const createSource = (source) => {
+      return docSource.doCreate(source)
+        .catch((err) => {
+          // record exists, confirm overwriting
+          if (_.get(err, 'origError.status') === 409) {
+            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
+
+            return safeConfirm(confirmMessage)
+              .then(() => docSource.doIndex(source))
+              .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
+          }
+          return Promise.reject(err);
+        });
+    };
+
+
+    /**
+     * @typedef {Object} SaveOptions
+     * @property {boolean} confirmOverwrite - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists.
+     */
+
+    /**
      * Saves this object.
      *
+     * @param {SaveOptions} saveOptions?
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = () => {
+    this.save = (saveOptions = {}) => {
       // Save the original id in case the save fails.
       let originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -285,7 +325,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       let source = this.serialize();
 
       this.isSaving = true;
-      return docSource.doIndex(source)
+      const doSave = saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+      return doSave
         .then((id) => { this.id = id; })
         .then(refreshIndex)
         .then(() => {
@@ -296,6 +337,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           this.isSaving = false;
           this.id = originalId;
+          if (err && err.message === OVERWRITE_REJECTED) return;
           return Promise.reject(err);
         });
     };
