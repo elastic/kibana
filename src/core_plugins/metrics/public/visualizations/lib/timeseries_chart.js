@@ -19,7 +19,8 @@ const Chart = React.createClass({
     if (props.yaxes && this.props.yaxes) {
       // We need to rerender if the axis change
       const valuesChanged = props.yaxes.some((axis, i) => {
-        return !_.isEqual(axis, this.props.yaxes[i]);
+        return axis.tickFormatter !== this.props.yaxes[i].tickFormatter &&
+          axis.position !== this.props.yaxes[i].position;
       });
       if (props.yaxes.length !== this.props.yaxes.length || valuesChanged) {
         return true;
@@ -149,7 +150,7 @@ const Chart = React.createClass({
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       const { min, max } = this.props;
       const type = this.props.type || 'line';
-      const { target} = this.refs;
+      const { target } = this.refs;
       const { series } = this.props;
       const parent = $(target.parentElement);
       const data = this.calculateData(series, this.props.show);
@@ -251,7 +252,7 @@ export default React.createClass({
     const el = this.refs.container;
     const offset = plot.offset();
     const canvas = plot.getCanvas();
-    const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1]});
+    const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
     const edge = (point.left + 10) / canvas.width;
     let right;
     let left;
@@ -273,7 +274,7 @@ export default React.createClass({
 
     if (item) {
       const plotOffset = plot.getPlotOffset();
-      const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1]});
+      const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
       const [left, right ] = this.calculateLeftRight(item, plot);
       const top = point.top;
       this.setState({
