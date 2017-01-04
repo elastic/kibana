@@ -2,10 +2,10 @@ import { format } from 'util';
 import { mappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
-  const client = server.plugins.elasticsearch.client;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
 
-  return client.indices.create({
+  return callWithInternalUser('indices.create', {
     index: index,
     body: {
       settings: {
@@ -18,7 +18,7 @@ module.exports = function (server) {
     throw new Error(`Unable to create Kibana index "${index}"`);
   })
   .then(function () {
-    return client.cluster.health({
+    return callWithInternalUser('cluster.health', {
       waitForStatus: 'yellow',
       index: index
     })

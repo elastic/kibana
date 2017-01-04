@@ -18,7 +18,6 @@ export default function HistogramVisType(Private) {
         addLegend: true,
         legendPosition: 'right',
         showCircles: true,
-        smoothLines: false,
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,
@@ -40,6 +39,16 @@ export default function HistogramVisType(Private) {
       }, {
         value: 'bottom',
         text: 'bottom',
+      }],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
       }],
       scales: ['linear', 'log', 'square root'],
       editor: lineTemplate

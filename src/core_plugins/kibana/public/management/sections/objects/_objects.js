@@ -19,7 +19,7 @@ uiModules.get('apps/management')
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function ($scope, $injector, $q, AppState, es) {
+    controller: function ($scope, $injector, $q, AppState, esAdmin) {
       const notify = new Notifier({ location: 'Saved Objects' });
 
       // TODO: Migrate all scope variables to the controller.
@@ -125,7 +125,7 @@ uiModules.get('apps/management')
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        es.mget({
+        esAdmin.mget({
           index: kbnIndex,
           body: { docs: objs.map(transformToMget) }
         })
@@ -158,7 +158,7 @@ uiModules.get('apps/management')
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
-              return obj.save();
+              return obj.save({ confirmOverwrite : true });
             });
           });
         })
@@ -167,7 +167,7 @@ uiModules.get('apps/management')
       };
 
       function refreshIndex() {
-        return es.indices.refresh({
+        return esAdmin.indices.refresh({
           index: kbnIndex
         });
       }

@@ -18,6 +18,11 @@
       <div class="finder-hit-count col-md-2">
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
+      <div class="finder-manage-object col-md-2" ng-if="onAddNew">
+        <a class="small" ng-click="onAddNew()">
+          Add new {{finder.properties.noun}}
+        </a>
+      </div>
       <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
         <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
           Manage {{finder.properties.nouns}}

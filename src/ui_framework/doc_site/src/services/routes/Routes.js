@@ -10,6 +10,9 @@ import FormExample
 import IconExample
   from '../../views/icon/icon_example.jsx';
 
+import InfoPanelExample
+  from '../../views/info_panel/info_panel_example.jsx';
+
 import LinkExample
   from '../../views/link/link_example.jsx';
 
@@ -38,6 +41,9 @@ const components = [{
 }, {
   name: 'Icon',
   component: IconExample,
+}, {
+  name: 'InfoPanel',
+  component: InfoPanelExample,
 }, {
   name: 'Link',
   component: LinkExample,

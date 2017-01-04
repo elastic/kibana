@@ -31,7 +31,13 @@
 
 .kuiButton--iconText {
   .kuiButton__icon {
-    margin-right: 4px;
+    &:first-child {
+      margin-right: 4px;
+    }
+
+    &:last-child {
+      margin-left: 4px;
+    }
   }
 }
 
