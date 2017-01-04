@@ -408,6 +408,9 @@ export default function DataFactory(Private) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     getColorFunc() {
+      if (this.type === 'slices') {
+        return this.getPieColorFunc();
+      }
       const defaultColors = this.uiState.get('vis.defaultColors');
       const overwriteColors = this.uiState.get('vis.colors');
       const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
