@@ -18,7 +18,7 @@ export default function _SourceFormatProvider(Private, shortDotsFilter) {
   Source.prototype._convert = {
     text: angular.toJson,
     html: function sourceToHtml(source, field, hit) {
-      if (!field) return this.getConverter('text')(source, field, hit);
+      if (!field) return this.getConverterFor('text')(source, field, hit);
 
       const highlights = (hit && hit.highlight) || {};
       const formatted = field.indexPattern.formatHit(hit);
