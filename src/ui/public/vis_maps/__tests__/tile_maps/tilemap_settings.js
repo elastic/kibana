@@ -6,13 +6,27 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
   let tilemapSettings;
   let tilemapsConfig;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.decorator('tilemapsConfig', () => ({
+      manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest',
+      deprecated: {
+        isOverridden: true,
+        config: {
+          url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana_tests',
+          options: {
+            minZoom: 1,
+            maxZoom: 10,
+            attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
+          }
+        },
+      }
+    }));
+  }));
+
   beforeEach(ngMock.inject(function ($injector) {
     tilemapSettings = $injector.get('tilemapSettings');
     tilemapsConfig = $injector.get('tilemapsConfig');
-    tilemapsConfig.deprecated.isOverridden = true;
   }));
-
 
   describe('getting settings', function () {
     beforeEach(async function () {
@@ -27,10 +41,8 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
       expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.host).to.match(/elastic.co$/);
-      expect(urlObject.query).to.have.property('my_app_name');
-      expect(urlObject.query).to.have.property('my_app_version');
-      expect(urlObject.query).to.have.property('elastic_tile_service_tos');
+      expect(urlObject.hostname).to.be('tiles.elastic.co');
+      expect(urlObject.query).to.have.property('my_app_name', 'kibana_tests');
 
     });
 

@@ -33,20 +33,33 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     };
   };
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.decorator('tilemapsConfig', () => ({
+      manifestServiceUrl: 'http://foo.bar/manifest',
+      deprecated: {
+        isOverridden: false,
+        config: {
+          url: '',
+          options: {
+            minZoom: 1,
+            maxZoom: 10,
+            attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
+          }
+        },
+      }
+    }));
+  }));
+
   beforeEach(ngMock.inject(function ($injector) {
     tilemapSettings = $injector.get('tilemapSettings');
     tilemapsConfig = $injector.get('tilemapsConfig');
 
-    //mock the use of a manifest
-    tilemapsConfig.deprecated.isOverridden = false;
     oldGetManifest = tilemapSettings._getTileServiceManifest;
     tilemapSettings._getTileServiceManifest = mockGetManifest;
   }));
 
   afterEach(function () {
     //restore overrides.
-    tilemapsConfig.isOverridden = true;
     tilemapSettings._getTileServiceManifest = oldGetManifest;
   });
 
