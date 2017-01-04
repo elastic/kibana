@@ -3,26 +3,25 @@ import ngMock from 'ng_mock';
 import url from 'url';
 
 describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
-  let theTileMapSettings;
-  let theTilemapsConfig;
+  let tilemapSettings;
+  let tilemapsConfig;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, tilemapSettings, tilemapsConfig) {
-    theTileMapSettings = tilemapSettings;
-    theTilemapsConfig = tilemapsConfig;
-    theTilemapsConfig.deprecated.isOverridden = true;
+  beforeEach(ngMock.inject(function ($injector) {
+    tilemapSettings = $injector.get('tilemapSettings');
+    tilemapsConfig = $injector.get('tilemapsConfig');
+    tilemapsConfig.deprecated.isOverridden = true;
   }));
 
 
   describe('getting settings', function () {
-
     beforeEach(async function () {
-      await theTileMapSettings.loadSettings();
+      await tilemapSettings.loadSettings();
     });
 
     it('should get url', async function () {
 
-      const mapUrl = theTileMapSettings.getUrl();
+      const mapUrl = tilemapSettings.getUrl();
       expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
       expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
       expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
@@ -36,7 +35,7 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
     });
 
     it('should get options', async function () {
-      const options = theTileMapSettings.getOptions();
+      const options = tilemapSettings.getOptions();
       expect(options).to.have.property('minZoom');
       expect(options).to.have.property('maxZoom');
       expect(options).to.have.property('attribution');

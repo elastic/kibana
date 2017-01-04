@@ -3,8 +3,8 @@ import ngMock from 'ng_mock';
 import url from 'url';
 
 describe('tilemaptest - TileMapSettingsTests-mocked', function () {
-  let theTileMapSettings;
-  let theTilemapsConfig;
+  let tilemapSettings;
+  let tilemapsConfig;
   let oldGetManifest;
 
   const mockGetManifest = async function () {
@@ -34,27 +34,27 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, tilemapSettings, tilemapsConfig) {
-    theTileMapSettings = tilemapSettings;
-    theTilemapsConfig = tilemapsConfig;
+  beforeEach(ngMock.inject(function ($injector) {
+    tilemapSettings = $injector.get('tilemapSettings');
+    tilemapsConfig = $injector.get('tilemapsConfig');
 
     //mock the use of a manifest
-    theTilemapsConfig.deprecated.isOverridden = false;
-    oldGetManifest = theTileMapSettings._getTileServiceManifest;
-    theTileMapSettings._getTileServiceManifest = mockGetManifest;
+    tilemapsConfig.deprecated.isOverridden = false;
+    oldGetManifest = tilemapSettings._getTileServiceManifest;
+    tilemapSettings._getTileServiceManifest = mockGetManifest;
   }));
 
   afterEach(function () {
     //restore overrides.
-    theTilemapsConfig.isOverridden = true;
-    theTileMapSettings._getTileServiceManifest = oldGetManifest;
+    tilemapsConfig.isOverridden = true;
+    tilemapSettings._getTileServiceManifest = oldGetManifest;
   });
 
 
   describe('getting settings', function () {
 
     beforeEach(function (done) {
-      theTileMapSettings.loadSettings().then(function () {
+      tilemapSettings.loadSettings().then(function () {
         done();
       });
     });
@@ -62,7 +62,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
     it('should get url', async function () {
 
-      const mapUrl = theTileMapSettings.getUrl();
+      const mapUrl = tilemapSettings.getUrl();
       expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
       expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
       expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
@@ -75,7 +75,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     });
 
     it('should get options', async function () {
-      const options = theTileMapSettings.getOptions();
+      const options = tilemapSettings.getOptions();
       expect(options).to.have.property('minZoom');
       expect(options).to.have.property('maxZoom');
       expect(options).to.have.property('attribution');
@@ -86,10 +86,10 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   describe('modify', function () {
 
     beforeEach(function (done) {
-      theTileMapSettings.addQueryParams({ foo: 'bar' });
-      theTileMapSettings.addQueryParams({ bar: 'stool' });
-      theTileMapSettings.addQueryParams({ foo: 'tstool' });
-      theTileMapSettings.loadSettings().then(function () {
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      tilemapSettings.addQueryParams({ bar: 'stool' });
+      tilemapSettings.addQueryParams({ foo: 'tstool' });
+      tilemapSettings.loadSettings().then(function () {
         done();
       });
 
@@ -98,7 +98,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
     it('addQueryParameters', async function () {
 
-      const mapUrl = theTileMapSettings.getUrl();
+      const mapUrl = tilemapSettings.getUrl();
       const urlObject = url.parse(mapUrl, true);
       expect(urlObject.query).to.have.property('foo');
       expect(urlObject.query).to.have.property('bar');
