@@ -22,12 +22,17 @@
       title="Choose a visualization"
       use-local-management="true"
       type="visualizations"
-      on-add-new="opts.addNewVis"
-      on-choose="opts.addVis">
+      on-add-new="onAddNewVis"
+      on-choose="onAddVis">
     </saved-object-finder>
   </div>
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="search">
-    <saved-object-finder title="Choose a search" type="searches" use-local-management="true" on-choose="opts.addSearch"></saved-object-finder>
+    <saved-object-finder
+    title="Choose a search"
+    type="searches"
+    use-local-management="true"
+    on-choose="onAddSearch"
+  ></saved-object-finder>
   </div>
 </div>

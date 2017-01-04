@@ -1,0 +1,13 @@
+<div
+  class="kuiLocalMenuItem"
+  aria-label="{{::description}}"
+  ng-class="{'kuiLocalMenuItem-isSelected': ctrl.isDropdownOpen(), 'kuiLocalMenuItem-isDisabled': disable()}"
+  ng-click="ctrl.onClick()"
+  tooltip="{{tooltip}}"
+  tooltip-placement="bottom"
+  tooltip-popup-delay="400"
+  tooltip-append-to-body="1"
+  data-test-subj="{{testId}}"
+>
+  {{ label }}
+</div>

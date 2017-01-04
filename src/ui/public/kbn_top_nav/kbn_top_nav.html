@@ -1,6 +1,6 @@
 <div
   class="kuiLocalNav"
-  ng-show="kbnTopNav.isVisible()"
+  ng-show="ctrl.isVisible()"
   data-test-subj="top-nav"
 >
   <!-- Top row -->
@@ -12,8 +12,11 @@
     ></div>
 
     <!-- Right-side: menu -->
-    <div class="kuiLocalNavRow__section">
-      <div class="kuiLocalMenu">
+    <div class="kuiLocalNavRow__section" data-menu>
+
+
+
+        <!--
         <div
           class="kuiLocalMenuItem"
           ng-repeat="menuItem in kbnTopNav.menuItems"
@@ -28,23 +31,19 @@
           tooltip-popup-delay="400"
           tooltip-append-to-body="1"
           data-test-subj="{{menuItem.testId}}"
-        ></div>
-
-        <!-- Time-picker "menu item" -->
-        <kbn-global-timepicker></kbn-global-timepicker>
-      </div>
+        ></div>-->
     </div>
   </div>
 
   <!-- Dropdown content, e.g. time-picker. -->
   <div
     class="kuiLocalDropdown"
-    ng-show="kbnTopNav.rendered"
+    ng-show="ctrl.isDropdownOpen()"
   >
-    <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()">
+    <button class="kuiLocalDropdownCloseButton" ng-click="ctrl.closeDropdown()">
       <span class="fa fa-chevron-circle-up"></span>
     </button>
-    <div id="template_wrapper">
+    <div data-dropdown>
       <!-- Content gets dynamically inserted here. -->
     </div>
   </div>
