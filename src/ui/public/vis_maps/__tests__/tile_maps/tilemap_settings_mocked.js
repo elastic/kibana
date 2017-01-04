@@ -63,22 +63,22 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     it('should get url', async function () {
 
       const mapUrl = tilemapSettings.getUrl();
-      expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
+      expect(mapUrl).to.contain('{x}');
+      expect(mapUrl).to.contain('{y}');
+      expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.host.endsWith('elastic.co')).to.be.ok();
-      expect(urlObject.query).to.have.property('my_app_name');
-      expect(urlObject.query).to.have.property('elastic_tile_service_tos');
+      expect(urlObject).to.have.property('hostname', 'proxy-tiles.elastic.co');
+      expect(urlObject.query).to.have.property('my_app_name', 'kibana');
+      expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
 
     });
 
     it('should get options', async function () {
       const options = tilemapSettings.getOptions();
-      expect(options).to.have.property('minZoom');
-      expect(options).to.have.property('maxZoom');
-      expect(options).to.have.property('attribution');
+      expect(options).to.have.property('minZoom', 0);
+      expect(options).to.have.property('maxZoom', 12);
+      expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
     });
 
   });
@@ -100,10 +100,8 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
       const mapUrl = tilemapSettings.getUrl();
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.query).to.have.property('foo');
-      expect(urlObject.query).to.have.property('bar');
-      expect(urlObject.query.foo).to.equal('tstool');
-      expect(urlObject.query.bar).to.equal('stool');
+      expect(urlObject.query).to.have.property('foo', 'tstool');
+      expect(urlObject.query).to.have.property('bar', 'stool');
 
     });
 

@@ -22,12 +22,12 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
     it('should get url', async function () {
 
       const mapUrl = tilemapSettings.getUrl();
-      expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
+      expect(mapUrl).to.contain('{x}');
+      expect(mapUrl).to.contain('{y}');
+      expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.host.endsWith('elastic.co')).to.be.ok();
+      expect(urlObject.host).to.match(/elastic.co$/);
       expect(urlObject.query).to.have.property('my_app_name');
       expect(urlObject.query).to.have.property('my_app_version');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos');
