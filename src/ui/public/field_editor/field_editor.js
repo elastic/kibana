@@ -6,18 +6,17 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import uiModules from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-import chrome from 'ui/chrome';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
-import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
+import { GetScriptingLangsProvider } from 'ui/scripting_langs';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
-  const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
+  const getScriptingLangs = Private(GetScriptingLangsProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -33,7 +32,7 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl, $http, $q) {
+    controller: function ($scope, Notifier, kbnUrl, $http) {
       const self = this;
       const notify = new Notifier({ location: 'Field Editor' });
 
@@ -158,13 +157,6 @@ uiModules
       function getFieldFormatType() {
         if (self.selectedFormatId) return fieldFormats.getType(self.selectedFormatId);
         else return fieldFormats.getDefaultType(self.field.type);
-      }
-
-      function getScriptingLangs() {
-        return getEnabledScriptingLanguages()
-        .then((enabledLanguages) => {
-          return _.intersection(enabledLanguages, getSupportedScriptingLanguages());
-        });
       }
 
       function initDefaultFormat() {
