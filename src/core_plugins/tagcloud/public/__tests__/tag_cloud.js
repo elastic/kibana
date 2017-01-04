@@ -443,8 +443,8 @@ describe('tag cloud tests', function () {
     const halfWidth = debugInfo.size.width / 2;
     const halfHeight = debugInfo.size.height / 2;
     const inside = debugInfo.positions.filter(position => {
-      const x = position[1] + halfWidth;
-      const y = position[2] + halfHeight;
+      const x = position.x + halfWidth;
+      const y = position.y + halfHeight;
       return 0 <= x && x <= debugInfo.size.width && 0 <= y && y <= debugInfo.size.height;
     });
 
