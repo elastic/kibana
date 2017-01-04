@@ -27,6 +27,11 @@ describe('_source formatting', function () {
       convertHtml = format.getConverterFor('html');
     }));
 
+    it('should use the text content type if a field is not passed', function () {
+      const hit = _.first(hits);
+      expect(convertHtml(hit._source)).to.be(JSON.stringify(hit._source));
+    });
+
     it('uses the _source, field, and hit to create a <dl>', function () {
       const hit = _.first(hits);
       const $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
