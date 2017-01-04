@@ -26,7 +26,7 @@ export default (req) => {
   const { server } = req;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
-  const globalFilter = req.payload.global_filter;
+  const globalFilters = req.payload.filters;
   const from = moment.utc(req.payload.timerange.min);
   const to = moment.utc(req.payload.timerange.max);
 
@@ -71,13 +71,8 @@ export default (req) => {
       };
       params.body.query.bool.must.push(timerange);
 
-      if (globalFilter && !panel.ignore_global_filter) {
-        params.body.query.bool.must.push({
-          query_string: {
-            query: globalFilter,
-            analyze_wildcard: true
-          }
-        });
+      if (globalFilters && !panel.ignore_global_filter) {
+        params.body.query.bool.must = params.body.query.bool.must.concat(globalFilters);
       }
 
       if (panel.filter) {
