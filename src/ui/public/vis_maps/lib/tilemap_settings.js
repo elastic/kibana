@@ -54,40 +54,39 @@ uiModules.get('kibana')
             return true;
           }
 
-          let manifest;
-          try {
-            const response = await this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams,
-              attributionFromConfig, optionsFromConfig);
-            manifest = response.data;
+          return this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams)
+          .then(response => {
+            const manifest = response.data;
             this._error = null;
-          } catch (e) {
-            //request failed. Continue to use old settings.
+
+            this._options = {
+              attribution: $sanitize(marked(manifest.services[0].attribution)),
+              minZoom: manifest.services[0].minZoom,
+              maxZoom: manifest.services[0].maxZoom,
+              subdomains: []
+            };
+
+            //additional query params need to be propagated to the TMS endpoint as well.
+            const queryparams = _.assign({ }, manifest.services[0].query_parameters, this._queryParams);
+            const query = url.format({ query: queryparams });
+            this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
+
             this._settingsInitialized = true;
-            this._error = new Error(`Could not retrieve map service configuration from the manifest-service. ${e.message}`);
+          })
+          .catch(e => {
+            this._settingsInitialized = true;
+            this._error = new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
+          })
+          .then(() => {
             return true;
-          }
-
-          this._options = {
-            attribution: $sanitize(marked(manifest.services[0].attribution)),
-            minZoom: manifest.services[0].minZoom,
-            maxZoom: manifest.services[0].maxZoom,
-            subdomains: []
-          };
-
-          //additional query params need to be propagated to the TMS endpoint as well.
-          const queryparams = _.assign({ }, manifest.services[0].query_parameters, this._queryParams);
-          const query = url.format({ query: queryparams });
-          this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
-
-          this._settingsInitialized = true;
-          return true;
+          });
         });
       }
 
       /**
        * Must be called before getUrl/getOptions can be called.
        */
-      async loadSettings() {
+      loadSettings() {
         return this._loadSettings();
       }
 
@@ -153,22 +152,17 @@ uiModules.get('kibana')
       /**
        * Make this instance property to allow for overrides by test code
        */
-      async  _getTileServiceManifest(manifestUrl, additionalQueryParams) {
+      _getTileServiceManifest(manifestUrl, additionalQueryParams) {
         const manifestServiceTokens = url.parse(manifestUrl);
         manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
         const requestUrl = url.format(manifestServiceTokens);
-        return await $http({
+        return $http({
           url: requestUrl,
           method: 'GET'
         });
-
       }
 
     }
 
-
     return new TilemapSettings();
-
-
   });
-

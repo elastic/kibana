@@ -2,36 +2,16 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import url from 'url';
 
+function matchUrlWithoutQuery(expected) {
+  return (url) => (
+    expected === url.split('?')[0]
+  );
+}
+
 describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   let tilemapSettings;
   let tilemapsConfig;
-  let oldGetManifest;
-
-  const mockGetManifest = async function () {
-    const data = JSON.parse(`
-             {
-                "version":"0.0.0",
-                  "expiry":"14d",
-                  "services":[
-                  {
-                    "id":"road_map",
-                    "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
-                    "minZoom":0,
-                    "maxZoom":12,
-                    "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
-                    "query_parameters":{
-                      "elastic_tile_service_tos":"agree",
-                      "my_app_name":"kibana"
-                    }
-                  }
-                ]
-              }
-            `);
-
-    return {
-      data: data
-    };
-  };
+  let loadSettings;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('tilemapsConfig', () => ({
@@ -50,26 +30,57 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     }));
   }));
 
-  beforeEach(ngMock.inject(function ($injector) {
+  beforeEach(ngMock.inject(($injector, $httpBackend) => {
     tilemapSettings = $injector.get('tilemapSettings');
     tilemapsConfig = $injector.get('tilemapsConfig');
 
-    oldGetManifest = tilemapSettings._getTileServiceManifest;
-    tilemapSettings._getTileServiceManifest = mockGetManifest;
+    // body and headers copied from https://proxy-tiles.elastic.co/v1/manifest
+    const MANIFEST_BODY = `{
+      "version":"0.0.0",
+        "expiry":"14d",
+        "services":[
+        {
+          "id":"road_map",
+          "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
+          "minZoom":0,
+          "maxZoom":12,
+          "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
+          "query_parameters":{
+            "elastic_tile_service_tos":"agree",
+            "my_app_name":"kibana"
+          }
+        }
+      ]
+    }`;
+
+    const MANIFEST_HEADERS = {
+      'access-control-allow-methods': 'GET, OPTIONS',
+      'access-control-allow-origin': '*',
+      'content-length': `${MANIFEST_BODY.length}`,
+      'content-type': 'application/json; charset=utf-8',
+      date: (new Date()).toUTCString(),
+      server: 'tileprox/20170102101655-a02e54d',
+      status: '200',
+    };
+
+    $httpBackend
+      .expect('GET', matchUrlWithoutQuery('http://foo.bar/manifest'))
+      .respond(MANIFEST_BODY, MANIFEST_HEADERS);
+
+    loadSettings = () => {
+      tilemapSettings.loadSettings();
+      $httpBackend.flush();
+    };
   }));
 
-  afterEach(function () {
-    //restore overrides.
-    tilemapSettings._getTileServiceManifest = oldGetManifest;
-  });
-
+  afterEach(ngMock.inject($httpBackend => {
+    $httpBackend.verifyNoOutstandingRequest();
+    $httpBackend.verifyNoOutstandingExpectation();
+  }));
 
   describe('getting settings', function () {
-
-    beforeEach(function (done) {
-      tilemapSettings.loadSettings().then(function () {
-        done();
-      });
+    beforeEach(() => {
+      loadSettings();
     });
 
 
@@ -105,26 +116,26 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
       });
     }
 
-    it('accepts an object', async () => {
+    it('accepts an object', () => {
       tilemapSettings.addQueryParams({ foo: 'bar' });
-      await tilemapSettings.loadSettings();
+      loadSettings();
       assertQuery({ foo: 'bar' });
     });
 
-    it('merged additions with previous values', async () => {
+    it('merged additions with previous values', () => {
       // ensure that changes are always additive
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapSettings.addQueryParams({ bar: 'stool' });
-      await tilemapSettings.loadSettings();
+      loadSettings();
       assertQuery({ foo: 'bar', bar: 'stool' });
     });
 
-    it('overwrites conflicting previous values', async () => {
+    it('overwrites conflicting previous values', () => {
       // ensure that conflicts are overwritten
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapSettings.addQueryParams({ bar: 'stool' });
       tilemapSettings.addQueryParams({ foo: 'tstool' });
-      await tilemapSettings.loadSettings();
+      loadSettings();
       assertQuery({ foo: 'tstool', bar: 'stool' });
     });
 

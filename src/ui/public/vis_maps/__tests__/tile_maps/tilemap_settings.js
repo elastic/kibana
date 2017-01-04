@@ -5,6 +5,7 @@ import url from 'url';
 describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
   let tilemapSettings;
   let tilemapsConfig;
+  let loadSettings;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('tilemapsConfig', () => ({
@@ -23,17 +24,22 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
     }));
   }));
 
-  beforeEach(ngMock.inject(function ($injector) {
+  beforeEach(ngMock.inject(function ($injector, $rootScope) {
     tilemapSettings = $injector.get('tilemapSettings');
     tilemapsConfig = $injector.get('tilemapsConfig');
+
+    loadSettings = () => {
+      tilemapSettings.loadSettings();
+      $rootScope.$digest();
+    };
   }));
 
   describe('getting settings', function () {
-    beforeEach(async function () {
-      await tilemapSettings.loadSettings();
+    beforeEach(function () {
+      loadSettings();
     });
 
-    it('should get url', async function () {
+    it('should get url', function () {
 
       const mapUrl = tilemapSettings.getUrl();
       expect(mapUrl).to.contain('{x}');
@@ -46,7 +52,7 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
 
     });
 
-    it('should get options', async function () {
+    it('should get options', function () {
       const options = tilemapSettings.getOptions();
       expect(options).to.have.property('minZoom');
       expect(options).to.have.property('maxZoom');
