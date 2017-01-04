@@ -1,0 +1,9 @@
+fixes #9370 - pie chart with no data throws error in console
+
+Backports PR #9718
+
+**Commit 1:**
+fixing issue #9370
+
+* Original sha: 409d00ab1840dd4e6bfda4b3eceaf2e6c13a9e82
+* Authored by ppisljar <peter.pisljar@gmail.com> on 2017-01-04T14:25:37Z
