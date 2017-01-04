@@ -105,15 +105,7 @@ export default React.createClass({
       yaxes,
       legend: Boolean(model.show_legend),
       onBrush: (ranges) => {
-        // const link = {
-        //   path: location.path,
-        //   query: _.assign({}, location.query, {
-        //     mode: 'absolute',
-        //     from: moment(ranges.xaxis.from).valueOf(),
-        //     to: moment(ranges.xaxis.to).valueOf()
-        //   })
-        // };
-        // dispatch(changeLocation(link));
+        if (this.props.onBrush) this.props.onBrush(ranges);
       }
     };
     const style = { };

@@ -167,7 +167,7 @@ const Chart = React.createClass({
         }
       };
 
-      this.handleResize();
+      _.defer(() => this.handleResize());
       findDOMNode(this.refs.resize).addEventListener('resize', this.handleResize);
 
 

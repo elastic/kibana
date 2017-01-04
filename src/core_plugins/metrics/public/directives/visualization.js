@@ -5,14 +5,20 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import Visualization from '../components/vis_editor/visualization';
 import addScope from '../lib/add_scope';
 import modules from 'ui/modules';
+import moment from 'moment';
 const app = modules.get('apps/metrics/directives');
-app.directive('metricsVisualization', () => {
+app.directive('metricsVisualization', (timefilter) => {
   return {
     restrict: 'E',
     link: ($scope, $el, $attrs) => {
       const addToState = ['model', 'visData', 'backgroundColor'];
       const Component = addScope(Visualization, $scope, addToState);
-      render(<Component className="dashboard__visualization"/>, $el[0]);
+      const handleBrush = (ranges) => {
+        timefilter.time.from = moment(ranges.xaxis.from).toISOString();
+        timefilter.time.to = moment(ranges.xaxis.to).toISOString();
+        timefilter.time.mode = 'absolute';
+      };
+      render(<Component onBrush={handleBrush} className="dashboard__visualization"/>, $el[0]);
       $scope.$on('$destroy', () => unmountComponentAtNode($el[0]));
 
       // For Metrics, Gauges and markdown visualizations we want to hide the
