@@ -28,11 +28,12 @@ export default React.createClass({
   ${value}
 }`;
     lessC.render(lessSrc, { compress: true }, (e, output) => {
+      const parts = { markdown_less: value };
       if (output) {
-        this.props.onChange({ markdown_css: output.css });
+        parts.markdown_css = output.css;
       }
+      this.props.onChange(parts);
     });
-    this.props.onChange({ markdown_less: value });
   },
 
   render() {
