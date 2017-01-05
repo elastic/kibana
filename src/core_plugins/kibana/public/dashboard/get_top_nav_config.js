@@ -1,9 +1,8 @@
-import { createTopNavExecuteConfig, createTopNavTemplateConfig } from 'ui/kbn_top_nav/kbn_top_nav_config';
 
 /**
  * @param kbnUrl - used to change the url.
- * @return {Array} - Returns an array of objects for a top nav configuration, based on the
- * mode.
+ * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration.
+ * Note that order matters and the top nav will be displayed in the same order.
  */
 export function getTopNavConfig(kbnUrl) {
   return [
@@ -15,50 +14,76 @@ export function getTopNavConfig(kbnUrl) {
     getOptionsConfig()];
 }
 
+/**
+ *
+ * @param kbnUrl
+ * @returns {kbnTopNavConfig}
+ */
 function getNewConfig(kbnUrl) {
-  return createTopNavExecuteConfig(
-    'new',
-    'New Dashboard',
-    'dashboardNewButton',
-    () => { kbnUrl.change('/dashboard', {}); });
+  return {
+    key: 'new',
+    description: 'New Dashboard',
+    testId: 'dashboardNewButton',
+    run: () => { kbnUrl.change('/dashboard', {}); }
+  };
 }
 
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getAddConfig() {
-  return createTopNavTemplateConfig(
-    'add',
-    'Add a panel to the dashboard',
-    'dashboardAddPanelButton',
-    require('plugins/kibana/dashboard/partials/pick_visualization.html'));
+  return {
+    key: 'add',
+    description: 'Add a panel to the dashboard',
+    testId: 'dashboardAddPanelButton',
+    template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+  };
 }
 
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getSaveConfig() {
-  return createTopNavTemplateConfig(
-    'save',
-    'Save Dashboard',
-    'dashboardSaveButton',
-    require('plugins/kibana/dashboard/partials/save_dashboard.html'));
+  return {
+    key: 'save',
+    description: 'Save Dashboard',
+    testId: 'dashboardSaveButton',
+    template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
+  };
 }
 
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getOpenConfig() {
-  return createTopNavTemplateConfig(
-    'open',
-    'Open Saved Dashboard',
-    'dashboardOpenButton',
-    require('plugins/kibana/dashboard/partials/load_dashboard.html'));
+  return {
+    key: 'open',
+    description: 'Open Saved Dashboard',
+    testId: 'dashboardOpenButton',
+    template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+  };
 }
 
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getShareConfig() {
-  return createTopNavTemplateConfig(
-    'share',
-    'Share Dashboard',
-    'dashboardShareButton',
-    require('plugins/kibana/dashboard/partials/share.html'));
+  return {
+    key: 'share',
+    description: 'Share Dashboard',
+    testId: 'dashboardShareButton',
+    template: require('plugins/kibana/dashboard/partials/share.html')
+  };
 }
 
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getOptionsConfig() {
-  return createTopNavTemplateConfig(
-    'options',
-    'Options',
-    'dashboardOptionsButton',
-     require('plugins/kibana/dashboard/partials/options.html'));
+  return {
+    key: 'options',
+    description: 'Options',
+    testId: 'dashboardOptionsButton',
+    template: require('plugins/kibana/dashboard/partials/options.html')
+  };
 }

@@ -1,4 +1,21 @@
 /**
+ * A configuration object for a top nav component.
+ * @typedef {Object} KbnTopNavConfig
+ * @type Object
+ * @property {string} key - A display string which will be shown in the top nav for this option.
+ * @property {string} [description] - optional, used for the screen-reader description of this
+ *  menu. Defaults to "Toggle ${key} view" for templated menu items and just "${key}" for
+ *  programmatic menu items
+ * @property {string} testId - for testing purposes, can be used to retrieve this item.
+ * @property {Object} [template] - an html template that will be shown when this item is clicked.
+ *  If template is not given then run should be supplied.
+ * @property {function} [run] - an optional function that will be run when the nav item is clicked.
+ *  Either this or template parameter should be specified.
+ * @param {boolean} [hideButton] - optional, set to true to prevent a menu item from being created.
+ *  This allow injecting templates into the navbar that don't have an associated template
+ */
+
+/**
  * kbnTopNav directive
  *
  * The top section that shows the timepicker, load, share and save dialogues.
@@ -84,23 +101,15 @@ module.directive('kbnTopNav', function (Private) {
 
       const extensions = getNavbarExtensions($attrs.name);
 
-      /**
-       * Dashboard makes some dynamic changes to the top nav so we need to watch this
-       * variable. Since the scope isn't isolate, I have to watch a variable that is defined on
-       * the parent scope. This is pretty ugly but without isolate scope, I don't see a better
-       * way to achieve dynamic updates.
-       */
-      $scope.$watch('topNavMenu', function () {
-        let controls = _.get($scope, $attrs.config, []);
-        if (controls instanceof KbnTopNavController) {
-          controls.addItems(extensions);
-        } else {
-          controls = controls.concat(extensions);
-        }
+      let controls = _.get($scope, $attrs.config, []);
+      if (controls instanceof KbnTopNavController) {
+        controls.addItems(extensions);
+      } else {
+        controls = controls.concat(extensions);
+      }
 
-        $scope.kbnTopNav = new KbnTopNavController(controls);
-        $scope.kbnTopNav._link($scope, $element);
-      });
+      $scope.kbnTopNav = new KbnTopNavController(controls);
+      $scope.kbnTopNav._link($scope, $element);
 
       return $scope.kbnTopNav;
     },
