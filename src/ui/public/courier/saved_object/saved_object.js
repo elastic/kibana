@@ -19,6 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -115,6 +116,8 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
+
+      this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
     };
 
     /**

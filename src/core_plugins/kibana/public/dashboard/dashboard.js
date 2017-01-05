@@ -6,6 +6,7 @@ import chrome from 'ui/chrome';
 
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
+import 'ui/query_bar';
 
 import { SavedObjectNotFound } from 'ui/errors';
 import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
@@ -25,6 +26,9 @@ import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { addNode, toKueryExpression, fromKueryExpression, filterToKueryAST, nodeTypes } from 'ui/kuery';
+import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { ESC_KEY_CODE } from 'ui_framework/services';
 
 const app = uiModules.get('app/dashboard', [
@@ -81,6 +85,7 @@ app.directive('dashboardApp', function ($injector) {
   const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
+  const config = $injector.get('config');
   const Private = $injector.get('Private');
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
@@ -89,6 +94,7 @@ app.directive('dashboardApp', function ($injector) {
     restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+      const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -130,7 +136,10 @@ app.directive('dashboardApp', function ($injector) {
         updateState();
       });
 
-      dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
+      dashboardState.applyFilters(
+        dashboardState.getQuery() || { query: '', language: config.get('search:queryLanguage') },
+        filterBar.getFilters()
+      );
       let pendingVisCount = _.size(dashboardState.getPanels());
 
       timefilter.enabled = true;
@@ -178,9 +187,14 @@ app.directive('dashboardApp', function ($injector) {
         }
       };
 
-      $scope.filterResults = function () {
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
-        $scope.refresh();
+      $scope.updateQuery = function (query) {
+        // reset state if language changes
+        if ($scope.model.query.language && $scope.model.query.language !== query.language) {
+          filterBar.removeAll();
+          dashboardState.getAppState().$newFilters = [];
+        }
+
+        $scope.model.query = query;
       };
 
       // called by the saved-object-finder when a user clicks a vis
@@ -227,6 +241,43 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.removePanel(panelIndex);
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
+
+      $scope.filter = function (field, value, operator, index) {
+        if ($scope.model.query.language === 'lucene') {
+          filterManager.add(field, value, operator, index);
+        }
+
+        if ($scope.model.query.language === 'kuery') {
+          const fieldName = _.isObject(field) ? field.name : field;
+          const kueryAST = fromKueryExpression($scope.model.query.query);
+          const newAST = addNode(
+            kueryAST,
+            nodeTypes.match.buildNode({ field: fieldName, values: value, operation: operator })
+          );
+          $scope.updateQuery({ query: toKueryExpression(newAST), language: 'kuery' });
+        }
+      };
+
+
+      $scope.$watch('model.query', (newQuery) => {
+        $scope.model.query = migrateLegacyQuery(newQuery);
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        $scope.refresh();
+      });
+
+      $scope.$watch(() => dashboardState.getAppState().$newFilters, function (filters = []) {
+        // need to convert filters generated from user interaction with viz into kuery AST
+        // normally these would be handled by the filter bar directive
+        if ($scope.model.query.language === 'kuery') {
+          const kueryAST = fromKueryExpression($scope.model.query.query);
+
+          const newKueryAST = filters.reduce((currentAST, filter) => {
+            return addNode(currentAST, filterToKueryAST(filter));
+          }, kueryAST);
+
+          $scope.updateQuery({ query: toKueryExpression(newKueryAST), language: 'kuery' });
+        }
+      });
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 

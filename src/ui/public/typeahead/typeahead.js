@@ -215,10 +215,6 @@ typeahead.directive('kbnTypeahead', function () {
       if (!_.has(attrs, 'onSelect')) {
         throw new Error('on-select must be defined');
       }
-      // should be defined via setInput() method
-      if (!$scope.inputModel) {
-        throw new Error('kbn-typeahead-input must be defined');
-      }
 
       $scope.$watch('typeahead.isVisible()', function (vis) {
         $el.toggleClass('visible', vis);
