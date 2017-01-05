@@ -13,8 +13,9 @@ export default function MapFactory(Private, tilemapSettings, Notifier) {
   const defaultMarkerType = 'Scaled Circle Markers';
 
   const notify = new Notifier({
-    location: 'Vis'
+    location: 'Tilemap'
   });
+  const previousErrors = [];
 
   const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -60,10 +61,17 @@ export default function MapFactory(Private, tilemapSettings, Notifier) {
         fadeAnimation: false,
       };
 
+      let url;
       if (tilemapSettings.hasError()) {
-        notify.fatal(tilemapSettings.getError());
+        if (!previousErrors.includes(tilemapSettings.getError())) {
+          notify.warning(tilemapSettings.getError().message);
+          previousErrors.push(tilemapSettings.getError());
+        }
+        url = '';
+      } else {
+        url = tilemapSettings.getUrl();
       }
-      this._createMap(options, tilemapSettings.getUrl());
+      this._createMap(options, url);
 
     }
 

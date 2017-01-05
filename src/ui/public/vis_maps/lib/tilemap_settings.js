@@ -161,7 +161,6 @@ uiModules.get('kibana')
           url: requestUrl,
           method: 'GET'
         });
-
       }
 
     }
