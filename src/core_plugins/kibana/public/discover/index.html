@@ -16,51 +16,14 @@
       </div>
 
       <!-- Search. -->
-      <form
-        data-transclude-slot="bottomRow"
-        class="fullWidth"
-        role="form"
-        name="discoverSearch"
-        ng-submit="fetch()"
-      >
-        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
-          <div class="kuiLocalSearch">
-            <div class="kuiLocalSearchAssistedInput">
-              <input
-                parse-query
-                input-focus
-                kbn-typeahead-input
-                ng-model="state.query"
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
-                aria-label="Search input"
-                type="text"
-                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
-                ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
-              >
-              <div class="kuiLocalSearchAssistedInput__assistance">
-                <p class="kuiText">
-                  <a
-                    class="kuiLink"
-                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
-                    target="_blank"
-                  >
-                    Uses lucene query syntax
-                  </a>
-                </p>
-              </div>
-            </div>
-            <button
-              type="submit"
-              aria-label="Search"
-              class="kuiLocalSearchButton"
-              ng-disabled="discoverSearch.$invalid"
-            >
-              <span class="kuiIcon fa-search" aria-hidden="true"></span>
-            </button>
-          </div>
-          <kbn-typeahead-items></kbn-typeahead-items>
-        </div>
-      </form>
+      <div data-transclude-slot="bottomRow" class="fullWidth">
+        <query-bar
+          query="state.query"
+          app-name="discover"
+          on-submit="fetchWithNewQuery($query)"
+        >
+        </query-bar>
+      </div>
     </div>
   </kbn-top-nav>
 
@@ -69,6 +32,7 @@
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
+        ng-if="state.query.language === 'lucene'"
       ></filter-bar>
     </div>
     <div class="row">

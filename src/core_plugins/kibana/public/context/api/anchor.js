@@ -15,9 +15,12 @@ function fetchAnchorProvider(courier, Private) {
       .set('version', true)
       .set('size', 1)
       .set('query', {
-        terms: {
-          _uid: [uid],
+        query: {
+          terms: {
+            _uid: [uid],
+          }
         },
+        language: 'lucene'
       })
       .set('sort', sort);
 

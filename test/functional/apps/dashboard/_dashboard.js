@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
         const currentQuery = await PageObjects.dashboard.getQuery();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
+        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);

@@ -269,6 +269,9 @@ export function SearchSourceProvider(Promise, Private, config) {
         val = normalizeSortRequest(val, this.get('index'));
         addToBody();
         break;
+      case 'query':
+        state.query = (state.query || []).concat(val);
+        break;
       case 'fields':
         state[key] = _.uniq([...(state[key] || []), ...val]);
         break;
@@ -283,10 +286,6 @@ export function SearchSourceProvider(Promise, Private, config) {
       state.body = state.body || {};
       // ignore if we already have a value
       if (state.body[key] == null) {
-        if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val } };
-        }
-
         state.body[key] = val;
       }
     }
