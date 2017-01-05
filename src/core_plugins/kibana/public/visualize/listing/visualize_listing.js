@@ -4,8 +4,11 @@ export function VisualizeListingController(
   $scope,
   kbnUrl,
   Notifier,
-  Private
+  Private,
+  timefilter
 ) {
+  timefilter.enabled = false;
+
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
@@ -56,11 +59,11 @@ export function VisualizeListingController(
     const selectedIds = selectedItems.map(item => item.id);
 
     visualizationService.delete(selectedIds)
-    .then(fetchObjects)
-    .then(() => {
-      selectedItems = [];
-    })
-    .catch(error => notify.error(error));
+      .then(fetchObjects)
+      .then(() => {
+        selectedItems = [];
+      })
+      .catch(error => notify.error(error));
   };
 
   this.open = function open(item) {
@@ -69,7 +72,7 @@ export function VisualizeListingController(
 
   this.edit = function edit(item) {
     const params = {
-      // TODO: Get this value from somewhere instead of hardcodign it.
+      // TODO: Get this value from somewhere instead of hardcoding it.
       service: 'savedVisualizations',
       id: item.id
     };

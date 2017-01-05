@@ -1,5 +1,5 @@
 <!-- Local nav. -->
-<kbn-top-nav name="visualize" no-menu-extensions>
+<kbn-top-nav name="visualize">
   <!-- Transcluded elements. -->
   <div data-transclude-slots>
     <!-- Breadcrumbs. -->
@@ -26,11 +26,11 @@
           ng-href="{{ visTypeUrl(type) }}"
         >
           <div class="wizard-type-heading">
-            <i
+            <span
               aria-hidden="true"
               class="wizard-type-heading-icon fa fa-fw"
               ng-class="type.icon"
-            ></i>
+            ></span>
             <h4 data-test-subj="visualizeWizardChartTypeTitle" class="wizard-type-heading-text">{{type.title}}</h4>
           </div>
           <p class="wizard-type-description">{{type.description}}</p>

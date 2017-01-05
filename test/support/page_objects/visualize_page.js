@@ -373,8 +373,6 @@ export default class VisualizePage {
     });
   }
 
-  // this is for starting on the
-  // bottom half of the "Create a new visualization      Step 1" page
   openSavedVisualization(vizName) {
     return this.clickVisualizationByLinkText(vizName);
   }

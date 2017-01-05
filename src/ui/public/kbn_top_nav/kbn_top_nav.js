@@ -99,9 +99,8 @@ module.directive('kbnTopNav', function (Private) {
         });
       });
 
+      const extensions = getNavbarExtensions($attrs.name);
       let controls = _.get($scope, $attrs.config, []);
-      const noMenuExtensions = $attrs.hasOwnProperty('noMenuExtensions');
-      const extensions = noMenuExtensions ? [] : getNavbarExtensions($attrs.name);
 
       if (controls instanceof KbnTopNavController) {
         controls.addItems(extensions);
