@@ -94,6 +94,7 @@
     "d3": "3.5.6",
     "elasticsearch": "8.0.1",
     "elasticsearch-browser": "8.0.1",
+    "encode-uri-query": "1.0.0",
     "expiry-js": "0.1.7",
     "exports-loader": "0.6.2",
     "expose-loader": "0.7.0",
