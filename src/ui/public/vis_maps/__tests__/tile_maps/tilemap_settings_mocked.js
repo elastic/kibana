@@ -84,27 +84,36 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   });
 
   describe('modify', function () {
+    function assertQuery(expected) {
+      const mapUrl = tilemapSettings.getUrl();
+      const urlObject = url.parse(mapUrl, true);
+      Object.keys(expected).forEach(key => {
+        expect(urlObject.query).to.have.property(key, expected[key]);
+      });
+    }
 
-    beforeEach(function (done) {
+    it('accepts an object', async () => {
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      await tilemapSettings.loadSettings();
+      assertQuery({ foo: 'bar' });
+    });
+
+    it('merged additions with previous values', async () => {
+      // ensure that changes are always additive
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      tilemapSettings.addQueryParams({ bar: 'stool' });
+      await tilemapSettings.loadSettings();
+      assertQuery({ foo: 'bar', bar: 'stool' });
+    });
+
+    it('overwrites conflicting previous values', async () => {
+      // ensure that conflicts are overwritten
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapSettings.addQueryParams({ bar: 'stool' });
       tilemapSettings.addQueryParams({ foo: 'tstool' });
-      tilemapSettings.loadSettings().then(function () {
-        done();
-      });
-
+      await tilemapSettings.loadSettings();
+      assertQuery({ foo: 'tstool', bar: 'stool' });
     });
-
-
-    it('addQueryParameters', async function () {
-
-      const mapUrl = tilemapSettings.getUrl();
-      const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.query).to.have.property('foo', 'tstool');
-      expect(urlObject.query).to.have.property('bar', 'stool');
-
-    });
-
 
   });
 
