@@ -89,7 +89,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         title: 'Value',
         min: 1,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]

@@ -59,7 +59,17 @@ uiModules
        * as saved searches. We need to remove reliance there before we can break it out here.
        * See https://github.com/elastic/kibana/issues/9558 for more information.
        */
-      state: '='
+      state: '=',
+      /**
+       * Expand or collapse the current panel, so it either takes up the whole screen or goes back to its
+       * natural size.
+       * @type {function}
+       */
+      toggleExpand: '&',
+      /**
+       * @type {boolean}
+       */
+      isExpanded: '='
     },
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;

@@ -1,0 +1,37 @@
+<div ng-controller="aggParam.controller" class="vis-editor-agg-form-row">
+  <div class="form-group">
+    <label>
+      Aggregate With
+      <kbn-info
+       info="Choose a strategy for combining multiple hits or a multi-valued field into a single metric."
+       placement="right">
+      </kbn-info>
+    </label>
+
+    <select
+      required
+      name="aggregate"
+      ng-model="agg.params.aggregate"
+      ng-options="opt as opt.display for opt in options| orderBy: 'display' track by opt.val"
+      class="form-control"
+    ></select>
+  </div>
+  <div class="form-group">
+    <label>
+      Size
+      <kbn-info
+       info="Request top-K hits. Multiple hits will be combined via 'aggregate with'."
+       placement="right">
+      </kbn-info>
+    </label>
+
+    <input
+       required
+       name="size"
+       ng-model="agg.params.size"
+       class="form-control"
+       type="number"
+       min="1"
+    ></input>
+  </div>
+</div>
