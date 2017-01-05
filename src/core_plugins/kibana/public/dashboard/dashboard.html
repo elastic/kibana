@@ -31,54 +31,14 @@
       </div>
 
       <!-- Search. -->
-      <form
-        data-transclude-slot="bottomRow"
-        class="fullWidth"
-        ng-show="chrome.getVisible()"
-        role="form"
-        name="queryInput"
-        ng-submit="filterResults()"
-      >
-        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
-          <div class="kuiLocalSearch">
-            <div class="kuiLocalSearchAssistedInput">
-              <input
-                parse-query
-                input-focus
-                kbn-typeahead-input
-                ng-model="model.query"
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
-                aria-label="Enter query"
-                data-test-subj="dashboardQuery"
-                type="text"
-                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
-                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-              >
-              <div class="kuiLocalSearchAssistedInput__assistance">
-                <p class="kuiText">
-                  <a
-                    class="kuiLink"
-                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
-                    target="_blank"
-                  >
-                    Uses lucene query syntax
-                  </a>
-                </p>
-              </div>
-            </div>
-            <button
-              type="submit"
-              aria-label="Submit query"
-              class="kuiLocalSearchButton"
-              data-test-subj="dashboardQueryFilterButton"
-              ng-disabled="queryInput.$invalid"
-            >
-              <span class="kuiIcon fa-search" aria-hidden="true"></span>
-            </button>
-          </div>
-          <kbn-typeahead-items></kbn-typeahead-items>
-        </div>
-      </form>
+      <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
+        <query-bar
+          query="model.query"
+          app-name="'dashboard'"
+          on-submit="updateQuery($query)"
+        >
+        </query-bar>
+      </div>
     </div>
   </kbn-top-nav>
 
@@ -87,6 +47,7 @@
     ng-show="showFilterBar()"
     state="state"
     index-patterns="indexPatterns"
+    ng-if="model.query.language === 'lucene'"
   ></filter-bar>
 
   <div
@@ -126,6 +87,7 @@
     toggle-expand="toggleExpandPanel"
     register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
+    on-filter="filter"
   ></dashboard-grid>
 
   <dashboard-panel

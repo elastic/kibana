@@ -1,5 +1,3 @@
-
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
@@ -38,7 +36,7 @@ describe('AggConfig Filters', function () {
 
       const aggConfig = vis.aggs.byTypeName.filters[0];
       const filter = createFilter(aggConfig, 'type:nginx');
-      expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
+      expect(filter.query.query_string.query).to.be('type:nginx');
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });
