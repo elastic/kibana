@@ -1,0 +1,35 @@
+Streamline adding a visualization to a dashboard
+
+Backports PR #9400
+
+**Commit 1:**
+Fix bug with param sticking around in the url causing multiple vis to add again and again
+
+Move the link into the saved object finder
+
+and get rid of the management link
+fix crash in tests
+lint fixes
+
+* Original sha: 4ff60302612297d46c9df5ab08c9478490f7b73d
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-07T17:46:05Z
+
+**Commit 2:**
+rebase with master
+
+* Original sha: df8142d533977b84ee58528d7ecc19fd8eea17d4
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T19:02:05Z
+
+**Commit 3:**
+code review comments
+
+make the function simpler and reduce the need to pass null everywhere
+
+* Original sha: 0dd98e73775d3d0b1a31cb0ba882729e4318fdf8
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-02T19:31:37Z
+
+**Commit 4:**
+address comments and cleanup
+
+* Original sha: d18f14c7370cac18012a0e9f0cb2b7485be103c4
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-03T15:58:19Z
