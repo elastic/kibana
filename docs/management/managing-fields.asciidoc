@@ -72,14 +72,13 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you go to define a scripted field in Kibana, you'll be given a choice of scripting language, allowing you to pick 
-from all the languages installed on the Elasticsearch nodes that have dynamic scripting enabled. Starting with 5.0, 
-by default that is {es-ref}modules-scripting-expression.html[Lucene expression syntax] and {es-ref}modules-scripting-painless.html[Painless] scripting. 
-You can install other scripting languages and enable dynamic scripting for them, but it is not recommended because 
-they cannot be sufficiently {es-ref}modules-scripting-security.html[sandboxed] and have been deprecated.
+When you define a scripted field in Kibana, you have a choice of scripting languages. Starting with 5.0, the default 
+options are {es-ref}modules-scripting-expression.html[Lucene expressions] and {es-ref}modules-scripting-painless.html[Painless]. 
+While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended 
+because they cannot be sufficiently {es-ref}modules-scripting-security.html[sandboxed].
 
-WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those scripting 
-languages will be removed in the future. 
+WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those 
+scripting languages will be removed in the future. 
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -87,7 +86,8 @@ You can reference any single value numeric field in your expressions, for exampl
 doc['field_name'].value
 ----
 
-For more background on scripted fields and additional examples, refer to this blog: https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in Kibana scripted fields]
+For more background on scripted fields and additional examples, refer to this blog: 
+https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in Kibana scripted fields]
 
 [float]
 [[create-scripted-field]]
