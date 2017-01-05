@@ -127,6 +127,7 @@
     "mkdirp": "0.5.1",
     "moment": "2.13.0",
     "moment-timezone": "0.5.4",
+    "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "requirefrom": "0.2.0",
