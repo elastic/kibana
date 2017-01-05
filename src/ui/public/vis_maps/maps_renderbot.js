@@ -2,11 +2,15 @@ import _ from 'lodash';
 import MapsProvider from 'ui/vis_maps/maps';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import MapsVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
-module.exports = function MapsRenderbotFactory(Private, $injector) {
+
+module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier) {
   const AngularPromise = $injector.get('Promise');
   const Maps = Private(MapsProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(MapsVisTypeBuildChartDataProvider);
+  const notify = new Notifier({
+    location: 'Tilemap'
+  });
 
   _.class(MapsRenderbot).inherits(Renderbot);
   function MapsRenderbot(vis, $el, uiState) {
@@ -15,6 +19,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector) {
   }
 
   MapsRenderbot.prototype._createVis = function () {
+    if (tilemapSettings.getError()) {
+      //Still allow the visualization to be build, but show a toast that there was a problem retrieving map settings
+      //Even though the basemap will not display, the user will at least still see the overlay data
+      notify.warning(tilemapSettings.getError().message);
+    }
     if (this.mapsVis) this.destroy();
     this.mapsParams = this._getMapsParams();
     this.mapsVis = new Maps(this.$el[0], this.vis, this.mapsParams);

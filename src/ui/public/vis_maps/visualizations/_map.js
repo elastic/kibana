@@ -7,15 +7,10 @@ import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/g
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
 import '../lib/tilemap_settings';
 
-export default function MapFactory(Private, tilemapSettings, Notifier) {
+export default function MapFactory(Private, tilemapSettings) {
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
-
-  const notify = new Notifier({
-    location: 'Tilemap'
-  });
-  const previousErrors = [];
 
   const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -61,16 +56,7 @@ export default function MapFactory(Private, tilemapSettings, Notifier) {
         fadeAnimation: false,
       };
 
-      let url;
-      if (tilemapSettings.hasError()) {
-        if (!previousErrors.includes(tilemapSettings.getError())) {
-          notify.warning(tilemapSettings.getError().message);
-          previousErrors.push(tilemapSettings.getError());
-        }
-        url = '';
-      } else {
-        url = tilemapSettings.getUrl();
-      }
+      const url = tilemapSettings.hasError() ? '' : tilemapSettings.getUrl();
       this._createMap(options, url);
 
     }
