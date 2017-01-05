@@ -20,7 +20,8 @@ export default React.createClass({
       parts.gauge_color_rules = [{ id: uuid.v1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
-    if (model.gauge_inner_width == null) parts.gauge_inner_width = 2;
+    if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;
+    if (model.gauge_style == null) parts.gauge_style = 'half';
     this.props.onChange(parts);
   },
 
