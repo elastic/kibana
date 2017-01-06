@@ -151,7 +151,7 @@ uiModules.get('kibana')
       }
 
       /**
-       * Make this instance property to allow for overrides by test code
+       * Make this a method to allow for overrides by test code
        */
       async  _getTileServiceManifest(manifestUrl, additionalQueryParams) {
         const manifestServiceTokens = url.parse(manifestUrl);
@@ -161,7 +161,6 @@ uiModules.get('kibana')
           url: requestUrl,
           method: 'GET'
         });
-
       }
 
     }
