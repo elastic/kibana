@@ -138,6 +138,15 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     self.change(self.getRouteUrl(obj, route));
   };
 
+  /**
+   * Removes the given parameter from the url. Does so without modifying the browser
+   * history.
+   * @param param
+   */
+  self.removeParam = function (param) {
+    $location.search(param, null).replace();
+  };
+
   /////
   // private api
   /////
