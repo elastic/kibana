@@ -92,3 +92,36 @@ as flat as possible and free of duplicate information. The performance penalty
 for performing these calculations at query time is commonly circumvented by
 memoizing the selector results as is the case with `createSelector` from
 [redux_lite/selector_helpers.js](./redux_lite/selector_helpers.js).
+
+
+## Directory Structure
+
+**index.js**: Defines the route and renders the `<context-app>` directive,
+binding it to the `AppState`.
+
+**app.js**: Defines the `<context-app>` directive, that is at the root of the
+application. Creates the store, reducer and bound actions/selectors.
+
+**query.js**: Exports the actions, reducers and selectors related to the
+query status and results.
+
+**query_parameters.js**: Exports the actions, reducers and selectors related to
+the parameters used to construct the query.
+
+**components/loading_button**: Defines the `<context-loading-button>`
+directive including its respective styles.
+
+**components/size_picker**: Defines the `<context-size-picker>`
+directive including its respective styles.
+
+**api/anchor.js**: Exports `fetchAnchor()` that creates and executes the
+query for the anchor document.
+
+**api/context.js**: Exports `fetchPredecessors()` and `fetchSuccessors()` that
+create and execute the queries for the preceeding and succeeding documents.
+
+**api/utils**: Exports various functions used to create and transform
+queries.
+
+**redux_lite**: Exports various functions to create the dispatcher, action
+creators, reducers and selectors.
