@@ -1,0 +1,42 @@
+{
+  "name": "rework",
+  "version": "kibana",
+  "description": "Weeeeee",
+  "main": "gulpfile.js",
+  "scripts": {
+    "start": "gulp dev",
+    "build": "gulp build",
+    "package": "gulp package",
+    "test": "gulp test"
+  },
+  "devDependencies": {
+    "@elastic/eslint-config-kibana": "^0.1.0",
+    "babel-eslint": "^4.1.8",
+    "bluebird": "^3.1.1",
+    "eslint": "^1.10.3",
+    "eslint-plugin-mocha": "^1.1.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "^1.1.1",
+    "gulp-gzip": "^1.2.0",
+    "gulp-tar": "^1.8.0",
+    "gulp-util": "^3.0.7",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.5.0",
+    "rsync": "^0.4.0"
+  },
+  "dependencies": {
+    "angular": "^1.5.3",
+    "api-check": "^7.5.5",
+    "babel-register": "^6.3.13",
+    "bootstrap": "^3.3.6",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.16.1",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-redux": "^5.0.1",
+    "redux": "^3.6.0",
+    "redux-actions": "^1.2.0",
+    "redux-promise": "^0.5.3",
+    "redux-thunk": "^2.1.0"
+  }
+}
