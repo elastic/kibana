@@ -8,8 +8,8 @@ import AppStateProvider from 'ui/state_management/app_state';
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
-  let self = this;
+export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
+  const self = this;
 
   /**
    * Navigate to a url
@@ -207,5 +207,3 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     return (reloadOnSearch && searchSame) || !reloadOnSearch;
   };
 }
-
-export default KbnUrlProvider;
