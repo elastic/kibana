@@ -1,4 +1,21 @@
 /**
+ * A configuration object for a top nav component.
+ * @typedef {Object} KbnTopNavConfig
+ * @type Object
+ * @property {string} key - A display string which will be shown in the top nav for this option.
+ * @property {string} [description] - optional, used for the screen-reader description of this
+ *  menu. Defaults to "Toggle ${key} view" for templated menu items and just "${key}" for
+ *  programmatic menu items
+ * @property {string} testId - for testing purposes, can be used to retrieve this item.
+ * @property {Object} [template] - an html template that will be shown when this item is clicked.
+ *  If template is not given then run should be supplied.
+ * @property {function} [run] - an optional function that will be run when the nav item is clicked.
+ *  Either this or template parameter should be specified.
+ * @param {boolean} [hideButton] - optional, set to true to prevent a menu item from being created.
+ *  This allow injecting templates into the navbar that don't have an associated template
+ */
+
+/**
  * kbnTopNav directive
  *
  * The top section that shows the timepicker, load, share and save dialogues.
@@ -9,27 +26,11 @@
  *
  * Menu items/templates are passed to the kbnTopNav via the config attribute
  * and should be defined as an array of objects. Each object represents a menu
- * item and should have the following properties:
+ * item and should be of type kbnTopNavConfig.
  *
- * @param {Array<Object>|KbnTopNavController} config
- * @param {string} config[].key
- *        - the uniq key for this menu item.
- * @param {string} [config[].label]
- *        - optional, string that will be displayed for the menu button.
- *        Defaults to the key
- * @param {string} [config[].description]
- *        - optional, used for the screen-reader description of this menu
- *        item, defaults to "Toggle ${key} view" for templated menu items
- *        and just "${key}" for programatic menu items
- * @param {boolean} [config[].hideButton]
- *        - optional, set to true to prevent a menu item from being created.
- *        This allow injecting templates into the navbar that don't have
- *        an associated template
- * @param {function} [config[].run]
- *        - optional, function to call when the menu item is clicked, defaults
- *        to toggling the template
+ * @param {Array<kbnTopNavConfig>|KbnTopNavController} config
  *
- * Programatic control of the navbar can be acheived one of two ways
+ * Programmatic control of the navbar can be achieved one of two ways
  */
 
 import _ from 'lodash';
@@ -99,6 +100,7 @@ module.directive('kbnTopNav', function (Private) {
       });
 
       const extensions = getNavbarExtensions($attrs.name);
+
       let controls = _.get($scope, $attrs.config, []);
       if (controls instanceof KbnTopNavController) {
         controls.addItems(extensions);
