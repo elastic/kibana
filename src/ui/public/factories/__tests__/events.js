@@ -89,7 +89,7 @@ describe('Events', function () {
     });
   });
 
-  it('should handle mulitple identical emits in the same tick', function () {
+  it('should handle multiple identical emits in the same tick', function () {
     let obj = new Events();
     let handler1 = sinon.stub();
 

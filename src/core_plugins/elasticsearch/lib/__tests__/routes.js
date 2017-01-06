@@ -36,7 +36,7 @@ describe('plugins/elasticsearch', function () {
       }
 
       describe(format('%s %s', options.method, options.url), function () {
-        it('should should return ' + statusCode, function (done) {
+        it('should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
             if (res.statusCode === statusCode) {
               done();
