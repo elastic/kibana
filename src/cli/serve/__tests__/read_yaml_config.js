@@ -17,7 +17,7 @@ describe('cli/serve/read_yaml_config', function () {
     });
   });
 
-  it('reads and merged mulitple config file', function () {
+  it('reads and merged multiple config file', function () {
     const config = readYamlConfig([
       fixture('one.yml'),
       fixture('two.yml')
