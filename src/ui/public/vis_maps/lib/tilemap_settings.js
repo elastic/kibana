@@ -3,6 +3,7 @@ import _ from 'lodash';
 import marked from 'marked';
 import url from 'url';
 import uiRoutes from 'ui/routes';
+import { modifyUrl } from 'ui/url';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
@@ -24,6 +25,21 @@ uiModules.get('kibana')
 
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+
+    const extendUrl = (url, props) => (
+      modifyUrl(url, parsed => _.merge(parsed, props))
+    );
+
+    /**
+     *  Unescape a url template that was escaped by encodeURI() so leaflet
+     *  will be able to correctly locate the varables in the template
+     *  @param  {String} url
+     *  @return {String}
+     */
+    const unescapeTemplateVars = url => {
+      const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
+      return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
+    };
 
     class TilemapSettings {
 
@@ -54,40 +70,41 @@ uiModules.get('kibana')
             return true;
           }
 
-          let manifest;
-          try {
-            const response = await this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams,
-              attributionFromConfig, optionsFromConfig);
-            manifest = response.data;
+          return this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams)
+          .then(response => {
+            const manifest = response.data;
             this._error = null;
-          } catch (e) {
-            //request failed. Continue to use old settings.
+
+            this._options = {
+              attribution: $sanitize(marked(manifest.services[0].attribution)),
+              minZoom: manifest.services[0].minZoom,
+              maxZoom: manifest.services[0].maxZoom,
+              subdomains: []
+            };
+
+            this._url = unescapeTemplateVars(extendUrl(manifest.services[0].url, {
+              query: {
+                ...(manifest.services[0].query_parameters || {}),
+                ...this._queryParams
+              }
+            }));
+
             this._settingsInitialized = true;
-            this._error = new Error(`Could not retrieve map service configuration from the manifest-service. ${e.message}`);
+          })
+          .catch(e => {
+            this._settingsInitialized = true;
+            this._error = new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
+          })
+          .then(() => {
             return true;
-          }
-
-          this._options = {
-            attribution: $sanitize(marked(manifest.services[0].attribution)),
-            minZoom: manifest.services[0].minZoom,
-            maxZoom: manifest.services[0].maxZoom,
-            subdomains: []
-          };
-
-          //additional query params need to be propagated to the TMS endpoint as well.
-          const queryparams = _.assign({ }, manifest.services[0].query_parameters, this._queryParams);
-          const query = url.format({ query: queryparams });
-          this._url = manifest.services[0].url + query;//must preserve {} patterns from the url, so do not format path.
-
-          this._settingsInitialized = true;
-          return true;
+          });
         });
       }
 
       /**
        * Must be called before getUrl/getOptions can be called.
        */
-      async loadSettings() {
+      loadSettings() {
         return this._loadSettings();
       }
 
@@ -153,21 +170,14 @@ uiModules.get('kibana')
       /**
        * Make this a method to allow for overrides by test code
        */
-      async  _getTileServiceManifest(manifestUrl, additionalQueryParams) {
-        const manifestServiceTokens = url.parse(manifestUrl);
-        manifestServiceTokens.query = _.assign({}, manifestServiceTokens.query, additionalQueryParams);
-        const requestUrl = url.format(manifestServiceTokens);
-        return await $http({
-          url: requestUrl,
+      _getTileServiceManifest(manifestUrl, additionalQueryParams) {
+        return $http({
+          url: extendUrl(manifestUrl, { query: this._queryParams }),
           method: 'GET'
         });
       }
 
     }
 
-
     return new TilemapSettings();
-
-
   });
-

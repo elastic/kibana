@@ -3,110 +3,142 @@ import ngMock from 'ng_mock';
 import url from 'url';
 
 describe('tilemaptest - TileMapSettingsTests-mocked', function () {
-  let theTileMapSettings;
-  let theTilemapsConfig;
-  let oldGetManifest;
+  let tilemapSettings;
+  let tilemapsConfig;
+  let loadSettings;
 
-  const mockGetManifest = async function () {
-    const data = JSON.parse(`
-             {
-                "version":"0.0.0",
-                  "expiry":"14d",
-                  "services":[
-                  {
-                    "id":"road_map",
-                    "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
-                    "minZoom":0,
-                    "maxZoom":12,
-                    "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
-                    "query_parameters":{
-                      "elastic_tile_service_tos":"agree",
-                      "my_app_name":"kibana"
-                    }
-                  }
-                ]
-              }
-            `);
-
-    return {
-      data: data
-    };
-  };
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, tilemapSettings, tilemapsConfig) {
-    theTileMapSettings = tilemapSettings;
-    theTilemapsConfig = tilemapsConfig;
-
-    //mock the use of a manifest
-    theTilemapsConfig.deprecated.isOverridden = false;
-    oldGetManifest = theTileMapSettings._getTileServiceManifest;
-    theTileMapSettings._getTileServiceManifest = mockGetManifest;
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.decorator('tilemapsConfig', () => ({
+      manifestServiceUrl: 'http://foo.bar/manifest',
+      deprecated: {
+        isOverridden: false,
+        config: {
+          url: '',
+          options: {
+            minZoom: 1,
+            maxZoom: 10,
+            attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
+          }
+        },
+      }
+    }));
   }));
 
-  afterEach(function () {
-    //restore overrides.
-    theTilemapsConfig.isOverridden = true;
-    theTileMapSettings._getTileServiceManifest = oldGetManifest;
-  });
+  beforeEach(ngMock.inject(($injector, $httpBackend) => {
+    tilemapSettings = $injector.get('tilemapSettings');
+    tilemapsConfig = $injector.get('tilemapsConfig');
 
+    loadSettings = (expectedUrl) => {
+      // body and headers copied from https://proxy-tiles.elastic.co/v1/manifest
+      const MANIFEST_BODY = `{
+        "version":"0.0.0",
+          "expiry":"14d",
+          "services":[
+          {
+            "id":"road_map",
+            "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
+            "minZoom":0,
+            "maxZoom":12,
+            "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
+            "query_parameters":{
+              "elastic_tile_service_tos":"agree",
+              "my_app_name":"kibana"
+            }
+          }
+        ]
+      }`;
+
+      const MANIFEST_HEADERS = {
+        'access-control-allow-methods': 'GET, OPTIONS',
+        'access-control-allow-origin': '*',
+        'content-length': `${MANIFEST_BODY.length}`,
+        'content-type': 'application/json; charset=utf-8',
+        date: (new Date()).toUTCString(),
+        server: 'tileprox/20170102101655-a02e54d',
+        status: '200',
+      };
+
+      $httpBackend
+        .expect('GET', expectedUrl ? expectedUrl : () => true)
+        .respond(MANIFEST_BODY, MANIFEST_HEADERS);
+
+      tilemapSettings.loadSettings();
+
+      $httpBackend.flush();
+    };
+  }));
+
+  afterEach(ngMock.inject($httpBackend => {
+    $httpBackend.verifyNoOutstandingRequest();
+    $httpBackend.verifyNoOutstandingExpectation();
+  }));
 
   describe('getting settings', function () {
-
-    beforeEach(function (done) {
-      theTileMapSettings.loadSettings().then(function () {
-        done();
-      });
+    beforeEach(() => {
+      loadSettings();
     });
 
 
     it('should get url', async function () {
 
-      const mapUrl = theTileMapSettings.getUrl();
-      expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
+      const mapUrl = tilemapSettings.getUrl();
+      expect(mapUrl).to.contain('{x}');
+      expect(mapUrl).to.contain('{y}');
+      expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.host.endsWith('elastic.co')).to.be.ok();
-      expect(urlObject.query).to.have.property('my_app_name');
-      expect(urlObject.query).to.have.property('elastic_tile_service_tos');
+      expect(urlObject).to.have.property('hostname', 'proxy-tiles.elastic.co');
+      expect(urlObject.query).to.have.property('my_app_name', 'kibana');
+      expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
 
     });
 
     it('should get options', async function () {
-      const options = theTileMapSettings.getOptions();
-      expect(options).to.have.property('minZoom');
-      expect(options).to.have.property('maxZoom');
-      expect(options).to.have.property('attribution');
+      const options = tilemapSettings.getOptions();
+      expect(options).to.have.property('minZoom', 0);
+      expect(options).to.have.property('maxZoom', 12);
+      expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
     });
 
   });
 
   describe('modify', function () {
-
-    beforeEach(function (done) {
-      theTileMapSettings.addQueryParams({ foo: 'bar' });
-      theTileMapSettings.addQueryParams({ bar: 'stool' });
-      theTileMapSettings.addQueryParams({ foo: 'tstool' });
-      theTileMapSettings.loadSettings().then(function () {
-        done();
-      });
-
-    });
-
-
-    it('addQueryParameters', async function () {
-
-      const mapUrl = theTileMapSettings.getUrl();
+    function assertQuery(expected) {
+      const mapUrl = tilemapSettings.getUrl();
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.query).to.have.property('foo');
-      expect(urlObject.query).to.have.property('bar');
-      expect(urlObject.query.foo).to.equal('tstool');
-      expect(urlObject.query.bar).to.equal('stool');
+      Object.keys(expected).forEach(key => {
+        expect(urlObject.query).to.have.property(key, expected[key]);
+      });
+    }
 
+    it('accepts an object', () => {
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      loadSettings();
+      assertQuery({ foo: 'bar' });
     });
 
+    it('merged additions with previous values', () => {
+      // ensure that changes are always additive
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      tilemapSettings.addQueryParams({ bar: 'stool' });
+      loadSettings();
+      assertQuery({ foo: 'bar', bar: 'stool' });
+    });
+
+    it('overwrites conflicting previous values', () => {
+      // ensure that conflicts are overwritten
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      tilemapSettings.addQueryParams({ bar: 'stool' });
+      tilemapSettings.addQueryParams({ foo: 'tstool' });
+      loadSettings();
+      assertQuery({ foo: 'tstool', bar: 'stool' });
+    });
+
+    it('merges query params into manifest request', () => {
+      tilemapSettings.addQueryParams({ foo: 'bar' });
+      tilemapsConfig.manifestServiceUrl = 'http://test.com/manifest?v=1';
+      loadSettings('http://test.com/manifest?v=1&foo=bar');
+    });
 
   });
 
