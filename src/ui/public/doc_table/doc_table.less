@@ -18,6 +18,38 @@ doc-table {
     word-break: break-word;
   }
 
+  .discover-table-row {
+    td {
+      position: relative;
+
+      .table-cell-filter {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.75);
+        white-space: nowrap;
+        right: 0;
+        visibility: hidden;
+      }
+
+      &:hover {
+        .table-cell-filter {
+          visibility: visible;
+        }
+      }
+    }
+  }
+
+  /**
+   * 1. Align icon with text in cell.
+   */
+  .docTableRowFilterIcon {
+    font-size: 14px;
+    line-height: 1; /* 1 */
+
+    & + & {
+      margin-left: 5px;
+    }
+  }
+
   .loading {
     opacity: @loading-opacity;
   }
