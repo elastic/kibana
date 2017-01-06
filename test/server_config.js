@@ -1,6 +1,13 @@
-const shield = require('./shield');
+import url from 'url';
+import shield from './shield';
 
-const kibanaURL = '/app/kibana';
+const KIBANA_BASE_PATH = '/app/kibana';
+const TEST_KIBANA_URL = url.parse(process.env.TEST_KIBANA ? process.env.TEST_KIBANA : 'http://localhost:5620');
+const TEST_ES_URL = url.parse(process.env.TEST_ES ? process.env.TEST_ES : 'http://localhost:9220');
+const TEST_KIBANA_USERNAME = TEST_KIBANA_URL.username || shield.kibanaUser.username;
+const TEST_KIBANA_PASSWORD = TEST_KIBANA_URL.password || shield.kibanaUser.password;
+const TEST_ES_USERNAME = TEST_ES_URL.username || shield.admin.username;
+const TEST_ES_PASSWORD = TEST_ES_URL.password || shield.admin.password;
 
 module.exports = {
   servers: {
@@ -10,20 +17,20 @@ module.exports = {
       port: parseInt(process.env.TEST_WEBDRIVER_PORT, 10) || 4444
     },
     kibana: {
-      protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
-      hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 5620,
-      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password,
-      username: shield.kibanaUser.username,
-      password: shield.kibanaUser.password
+      protocol: process.env.TEST_KIBANA_PROTOCOL || TEST_KIBANA_URL.protocol,
+      hostname: process.env.TEST_KIBANA_HOSTNAME || TEST_KIBANA_URL.hostname,
+      port: parseInt(process.env.TEST_KIBANA_PORT, 10) || parseInt(TEST_KIBANA_URL.port, 10),
+      username: TEST_KIBANA_USERNAME,
+      password: TEST_KIBANA_PASSWORD,
+      auth: `${TEST_KIBANA_USERNAME}:${TEST_KIBANA_PASSWORD}`
     },
     elasticsearch: {
-      protocol: process.env.TEST_ES_PROTOCOL || 'http',
-      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_ES_PORT, 10) || 9220,
-      auth: shield.admin.username + ':' + shield.admin.password,
-      username: shield.admin.username,
-      password: shield.admin.password
+      protocol: process.env.TEST_ES_PROTOCOL || TEST_ES_URL.protocol,
+      hostname: process.env.TEST_ES_HOSTNAME || TEST_ES_URL.hostname,
+      port: parseInt(process.env.TEST_ES_PORT, 10) || parseInt(TEST_ES_URL.port, 10),
+      username: TEST_ES_USERNAME,
+      password: TEST_ES_PASSWORD,
+      auth: `${TEST_ES_USERNAME}:${TEST_ES_PASSWORD}`
     }
   },
   apps: {
@@ -31,23 +38,23 @@ module.exports = {
       pathname: 'status'
     },
     discover: {
-      pathname: kibanaURL,
+      pathname: KIBANA_BASE_PATH,
       hash: '/discover',
     },
     visualize: {
-      pathname: kibanaURL,
+      pathname: KIBANA_BASE_PATH,
       hash: '/visualize',
     },
     dashboard: {
-      pathname: kibanaURL,
+      pathname: KIBANA_BASE_PATH,
       hash: '/dashboard',
     },
     settings: {
-      pathname: kibanaURL,
+      pathname: KIBANA_BASE_PATH,
       hash: '/management'
     },
     console: {
-      pathname: kibanaURL,
+      pathname: KIBANA_BASE_PATH,
       hash: '/dev_tools/console',
     }
   }
