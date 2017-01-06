@@ -28,16 +28,14 @@
   <div class="container-fluid" role="main">
     <div class="row">
       <div class="col-md-12">
-        <button
-          class="kuiButton kuiButton--basic contextLoadingButton"
+        <context-loading-button
+          disabled="contextApp.selectors.isLoadingPredecessorRows()"
+          icon="'fa-chevron-up'"
           ng-click="contextApp.actions.fetchMorePredecessorRows()"
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
-          ng-disabled="contextApp.selectors.isLoadingPredecessorRows()"
         >
-          <span class="kuiButton__icon kuiIcon fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingPredecessorRows()"></span>
-          <span class="kuiButton__icon kuiIcon fa-chevron-up" ng-if="!contextApp.selectors.isLoadingPredecessorRows()"></span>
-          <span>Load newer entries</span>
-        </button>
+          Load newer entries
+        </context-loading-button>
       </div>
     </div>
     <div class="row">
@@ -59,16 +57,14 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <button
-          class="kuiButton kuiButton--basic contextLoadingButton"
+        <context-loading-button
+          disabled="contextApp.selectors.isLoadingSuccessorRows()"
+          icon="'fa-chevron-down'"
           ng-click="contextApp.actions.fetchMoreSuccessorRows()"
           ng-if="!contextApp.selectors.isLoadingAnchorRow()"
-          ng-disabled="contextApp.selectors.isLoadingSuccessorRows()"
         >
-          <span class="kuiButton__icon kuiIcon fa-spinner fa-spin" ng-if="contextApp.selectors.isLoadingSuccessorRows()"></span>
-          <span class="kuiButton__icon kuiIcon fa-chevron-down" ng-if="!contextApp.selectors.isLoadingSuccessorRows()"></span>
-          <span>Load older entries</span>
-        </button>
+          Load older entries
+        </context-loading-button>
       </div>
     </div>
   </div>

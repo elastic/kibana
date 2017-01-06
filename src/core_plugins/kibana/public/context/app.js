@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
-import './app.less';
+import './components/loading_button';
 import './components/size_picker';
 import { createDispatchProvider } from './redux_lite/create_dispatch';
 import { createReducerPipeline, scopeReducer } from './redux_lite/reducer_helpers';

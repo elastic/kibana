@@ -1,0 +1,10 @@
+<button
+  class="kuiButton kuiButton--basic contextLoadingButton"
+  ng-disabled="disabled"
+>
+  <span
+    class="kuiButton__icon kuiIcon fa-spinner fa-spin"
+    ng-class="disabled ? ['fa-spinner', 'fa-spin'] : [icon]"
+  />
+  <span ng-transclude />
+</button>
