@@ -9,6 +9,7 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import uiModules from 'ui/modules';
+import FilterManagerProvider from 'ui/filter_manager';
 const module = uiModules.get('app/discover');
 
 
@@ -27,7 +28,7 @@ const MIN_LINE_LENGTH = 20;
 module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Private) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
-  const filterManager = Private(require('ui/filter_manager'));
+  const filterManager = Private(FilterManagerProvider);
 
   return {
     restrict: 'A',
@@ -84,7 +85,7 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         createSummaryRow($scope.row, $scope.row._id);
       });
 
-      $scope.inlineFilter = function ($event, type) {
+      $scope.inlineFilter = function inlineFilter($event, type) {
         const column = $($event.target).data().column;
         const field = $scope.indexPattern.fields.byName[column];
         $scope.indexPattern.popularizeField(field, 1);
@@ -112,14 +113,18 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         }
 
         $scope.columns.forEach(function (column) {
-          var filterable = mapping[column] ? mapping[column].filterable : false;
-          const flattened = indexPattern.flattenHit(row);
-          filterable = flattened[column] === undefined ? false : filterable;
+          const flattenedRow = indexPattern.flattenHit(row);
+          const isFilterable =
+            flattenedRow[column] === undefined
+            ? false
+            : !mapping[column]
+            ? false
+            : mapping[column].filterable;
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true),
-            filterable: filterable,
+            filterable: isFilterable,
             column: column
           }));
         });
