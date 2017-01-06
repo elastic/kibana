@@ -168,7 +168,7 @@ uiModules.get('kibana')
       }
 
       /**
-       * Make this instance property to allow for overrides by test code
+       * Make this a method to allow for overrides by test code
        */
       _getTileServiceManifest(manifestUrl, additionalQueryParams) {
         return $http({
