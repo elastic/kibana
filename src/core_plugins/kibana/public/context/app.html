@@ -1,31 +1,29 @@
 <div class="app-container">
-  <local-navigation>
-    <local-navigation-row>
-      <!-- Breadcrumbs. -->
-      <local-navigation-row-section>
+  <div class="kuiLocalNav">
+    <div class="kuiLocalNavRow">
+      <div class="kuiLocalNavRow__section">
         <div class="kuiLocalBreadcrumbs">
           <div class="kuiLocalBreadcrumb">
             <a class="kuiLocalBreadcrumb__link" href="#/discover">Discover</a>
           </div>
           <div class="kuiLocalBreadcrumb" ng-bind="contextApp.state.queryParameters.indexPattern.id"></div>
         </div>
-      </local-navigation-row-section>
-
-      <local-navigation-row-section>
+      </div>
+      <div class="kuiLocalNavRow__section">
         <context-size-picker
           predecessor-count="contextApp.selectors.predecessorCount()"
           successor-count="contextApp.selectors.successorCount()"
           set-predecessor-count="contextApp.actions.fetchGivenPredecessorRows"
           set-successor-count="contextApp.actions.fetchGivenSuccessorRows"
         />
-      </local-navigation-row-section>
-    </local-navigation-row>
-    <local-navigation-row is-secondary="true">
+      </div>
+    </div>
+    <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
       <div class="kuiLocalTabs">
         <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind-template="Context of {{ contextApp.state.queryParameters.anchorUid }}"></div>
       </div>
-    </local-navigation-row>
-  </local-navigation>
+    </div>
+  </div>
 
   <div class="container-fluid" role="main">
     <div class="row">
