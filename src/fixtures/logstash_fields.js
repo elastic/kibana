@@ -5,7 +5,7 @@ function stubbedLogstashFields() {
     //                                  |      |      |aggregatable
     //                                  |      |      |      |searchable
     // name                type         |      |      |      |     |metadata
-    ['bytes',             'number',     true,  true,  true,  true,  { count: 10 } ],
+    ['bytes',             'number',     true,  true,  true,  true,  { count: 10, docValues: true } ],
     ['ssl',               'boolean',    true,  true,  true,  true,  { count: 20 } ],
     ['@timestamp',        'date',       true,  true,  true,  true,  { count: 30 } ],
     ['time',              'date',       true,  true,  true,  true,  { count: 30 } ],
@@ -20,6 +20,7 @@ function stubbedLogstashFields() {
     ['geo.coordinates',   'geo_point',  true,  true,  true,  true ],
     ['extension',         'string',     true,  true,  true,  true ],
     ['machine.os',        'string',     true,  true,  true,  true ],
+    ['machine.os.raw',    'string',     true,  false, true,  true,  { docValues: true } ],
     ['geo.src',           'string',     true,  true,  true,  true ],
     ['_id',               'string',     false, false, true,  true ],
     ['_type',             'string',     false, false, true,  true ],
@@ -41,6 +42,7 @@ function stubbedLogstashFields() {
     ] = row;
 
     const {
+      docValues = false,
       count = 0,
       script,
       lang = script ? 'expression' : undefined,
@@ -50,6 +52,7 @@ function stubbedLogstashFields() {
     return {
       name,
       type,
+      doc_values: docValues,
       indexed,
       analyzed,
       aggregatable,
