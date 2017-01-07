@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
@@ -12,6 +13,16 @@ export default function DateTermsAggDefinition(Private) {
     dslName: 'terms',
     title: 'Date Terms',
     ordered: false,
+    getKey: function (bucket, key, agg) {
+      let prettyKey = key;
+      switch (agg.params.date_term) {
+        case 'month_of_year':
+          const monthIndex = key - 1;
+          prettyKey = moment.monthsShort()[monthIndex];
+          break;
+      }
+      return prettyKey;
+    },
     getFormat: function () {
       return fieldFormats.getDefaultInstance('string');
     },
@@ -81,6 +92,12 @@ export default function DateTermsAggDefinition(Private) {
           output.params.order = {
             '_term': 'asc'
           };
+        }
+      },
+      {
+        name: 'valueType',
+        write: function (agg, output) {
+          output.params.valueType = 'float';
         }
       }
     ]
