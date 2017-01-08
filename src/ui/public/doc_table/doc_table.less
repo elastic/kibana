@@ -38,18 +38,6 @@ doc-table {
     }
   }
 
-  /**
-   * 1. Align icon with text in cell.
-   */
-  .docTableRowFilterIcon {
-    font-size: 14px;
-    line-height: 1; /* 1 */
-
-    & + & {
-      margin-left: 5px;
-    }
-  }
-
   .loading {
     opacity: @loading-opacity;
   }
@@ -61,5 +49,17 @@ doc-table {
     right: 0;
     z-index: 20;
     opacity: @loading-opacity;
+  }
+}
+
+/**
+ * 1. Align icon with text in cell.
+ */
+.docTableRowFilterIcon {
+  font-size: 14px;
+  line-height: 1; /* 1 */
+
+  & + & {
+    margin-left: 5px;
   }
 }
