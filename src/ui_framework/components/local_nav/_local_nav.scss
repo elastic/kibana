@@ -1,13 +1,8 @@
 
-/**
- * 1. Match height of logo in side bar, but allow it to expand to accommodate
- *    dropdown.
- */
 .kuiLocalNav {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 70px; /* 1 */
   color: $localNavTextColor;
   background-color: $localNavBackgroundColor;
 
@@ -29,6 +24,10 @@
   }
 
 .kuiLocalNavRow--secondary {
-  height: 38px;
+  height: auto;
   padding: 0 $localNavSideSpacing;
+}
+
+.kuiLocalNavRow--secondary form {
+  padding: 4px 0;
 }
