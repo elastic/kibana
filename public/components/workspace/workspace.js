@@ -14,16 +14,15 @@ import './workspace.less';
 const Workspace = React.createClass({
   render() {
     const  {editor} = this.props;
-    const conditionalEditor = editor ? (
-      <div className="rework--editor--left">
-        <Editor></Editor>
-      </div>
-    ) : null;
 
     return (
       <div className="rework--workspace">
         <LeftSidebar>
-          {conditionalEditor}
+          {editor ? (
+            <div className="rework--editor--left">
+              <Editor></Editor>
+            </div>
+          ) : null}
           <div className="rework--editor-toggle--left">
             <EditorToggle></EditorToggle>
           </div>
