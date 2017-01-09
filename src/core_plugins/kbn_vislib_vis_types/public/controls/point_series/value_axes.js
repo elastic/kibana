@@ -55,9 +55,11 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
       };
 
       $scope.removeValueAxis = function (axis) {
-        _.remove($scope.vis.params.valueAxes, function (valAxis) {
-          return valAxis.id === axis.id;
-        });
+        if ($scope.vis.params.valueAxes.length > 1) {
+          _.remove($scope.vis.params.valueAxes, function (valAxis) {
+            return valAxis.id === axis.id;
+          });
+        }
       };
 
       $scope.updateExtents = function (axis) {
