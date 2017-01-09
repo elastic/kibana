@@ -34,7 +34,7 @@ export default function ColumnChartFactory(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
-      .attr('class', 'series')
+      .attr('class', 'series histogram')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')

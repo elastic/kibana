@@ -29,7 +29,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function clickBucket() {
       PageObjects.common.debug('Click X-Axis');
-      return PageObjects.visualize.clickBucket('X-Axis');
+      return PageObjects.visualize.clickBucket(PageObjects.visualize.xAxisBucket);
     })
     .then(function selectAggregation() {
       PageObjects.common.debug('Click Date Histogram');
