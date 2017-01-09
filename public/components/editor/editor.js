@@ -13,8 +13,6 @@ const Editor = React.createClass({
   render() {
     return (
       <div className="rework--editor">
-        {this.props.editor ? 'YES' : 'NO'}
-        <button onClick={this.editorToggle}>Editor</button>
       </div>
     );
   }

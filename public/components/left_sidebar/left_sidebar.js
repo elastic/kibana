@@ -6,7 +6,8 @@ import { editorToggle } from 'plugins/rework/state/actions';
 export default React.createClass({
   render() {
     const style = {
-      display: 'flex'
+      display: 'flex',
+      position: 'relative'
     };
 
     return (

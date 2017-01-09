@@ -1,6 +1,26 @@
 @import (reference) "~plugins/rework/main.less";
 
+@rework--editor--background: @kibanaGray5;
+
 .rework--workspace {
   flex-grow: 1;
   background: @kibanaGray3;
+  display: flex;
+}
+
+.rework--editor-toggle--left .rework--editor-toggle {
+  display: block;
+  position: absolute;
+  background-color: @rework--editor--background;
+  width: 24px;
+  right: -24px;
+  padding: 25px 8px;;
+  color: @text-color;
+}
+
+.rework--editor--left {
+  display: flex;
+  flex-grow: 1;
+  background-color: @rework--editor--background;
+  width: 350px;
 }

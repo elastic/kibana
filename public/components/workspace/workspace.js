@@ -1,19 +1,34 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { editorToggle } from 'plugins/rework/state/actions';
+
+import Editor from 'plugins/rework/components/editor/editor.js';
+import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle.js';
+
+import Workpad from 'plugins/rework/components/workpad/workpad.js';
+import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar.js';
+
 import './workspace.less';
 
 const Workspace = React.createClass({
-  editorToggle() {
-    const { dispatch } = this.props;
-    dispatch(editorToggle());
-  },
   render() {
+    const  {editor} = this.props;
+    const conditionalEditor = editor ? (
+      <div className="rework--editor--left">
+        <Editor></Editor>
+      </div>
+    ) : null;
+
     return (
       <div className="rework--workspace">
-        {this.props.editor ? 'YES' : 'NO'}
-        <button onClick={this.editorToggle}>Editor</button>
+        <LeftSidebar>
+          {conditionalEditor}
+          <div className="rework--editor-toggle--left">
+            <EditorToggle></EditorToggle>
+          </div>
+        </LeftSidebar>
+
+        <Workpad></Workpad>
       </div>
     );
   }
