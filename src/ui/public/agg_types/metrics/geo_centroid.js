@@ -14,7 +14,10 @@ export default function AggTypeMetricGeoCentroidProvider(Private) {
         name: 'field',
         filterFieldTypes: 'geo_point'
       }
-    ]
+    ],
+    getValue: function (agg, bucket) {
+      return bucket[agg.id] && bucket[agg.id].location;
+    }
   });
 }
 

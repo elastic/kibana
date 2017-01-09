@@ -30,11 +30,6 @@ export default function MetricAggTypeProvider(Private) {
     // `Count` handles empty sets properly
     if (!bucket[agg.id] && isSettableToZero) return 0;
 
-    // Geo centroid metric type value is stored in property name 'location'
-    if ('geo_centroid'.indexOf(agg.__type.name) !== -1) {
-      return bucket[agg.id] && bucket[agg.id].location;
-    }
-
     return bucket[agg.id] && bucket[agg.id].value;
   };
 

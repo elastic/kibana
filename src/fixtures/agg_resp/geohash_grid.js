@@ -9,7 +9,8 @@ export default function GeoHashGridAggResponseFixture() {
   //   aggs:[
   //     { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
   //     { schema: 'split', type: 'terms', params: { field: '@tags', size: 10 } },
-  //     { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
+  //     { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } },
+  //     { schema: 'centroid', type: 'geo_centroid', params: { field: 'geo.coordinates' } }
   //   ],
   //   params: {
   //     isDesaturated: true,
@@ -34,6 +35,8 @@ export default function GeoHashGridAggResponseFixture() {
     .sort()
     .map(function (geoHash) {
       const count = _.random(1, 5000);
+      const lat = _.random(-180, 180, true);
+      const lon = _.random(-180, 180, true);
 
       totalDocCount += count;
       docCount += count;
@@ -43,6 +46,12 @@ export default function GeoHashGridAggResponseFixture() {
         doc_count: count,
         1: {
           value: 2048 + i
+        },
+        4: {
+          location: {
+            lat: lat,
+            lon: lon
+          }
         }
       };
     });
