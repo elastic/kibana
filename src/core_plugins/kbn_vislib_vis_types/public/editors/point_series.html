@@ -5,16 +5,7 @@
   <div class="kuiSideBarSection">
     <div class="kuiSideBarSectionTitle">
       <div class="kuiSideBarSectionTitle__text">
-        Global Settings
-      </div>
-    </div>
-
-    <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="showLegend">
-        Show Legend
-      </label>
-      <div class="kuiSideBarFormRow__control">
-        <input class="kuiCheckBox" id="showLegend" type="checkbox" ng-model="vis.params.addLegend">
+        Settings
       </div>
     </div>
 
@@ -43,7 +34,7 @@
 
     <div class="kuiSideBarFormRow" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
       <label class="kuiSideBarFormRow__label" for="currentTimeMarker">
-        Current time marker
+        Current Time Marker
       </label>
       <div class="kuiSideBarFormRow__control">
         <input class="kuiCheckBox" id="currentTimeMarker" type="checkbox"
@@ -55,17 +46,16 @@
 
     <div class="kuiSideBarFormRow" ng-show="!vis.hasSchemaAgg('segment', 'date_histogram')">
       <label class="kuiSideBarFormRow__label" for="orderBuckets">
-        Order buckets by sum
+        Order Buckets by Sum
       </label>
       <div class="kuiSideBarFormRow__control">
         <input class="kuiCheckBox" id="orderBuckets" type="checkbox" ng-model="vis.params.orderBucketsBySum">
       </div>
     </div>
 
+    <vislib-grid></vislib-grid>
 
     <vislib-category-axis></vislib-category-axis>
-
-    <vislib-grid></vislib-grid>
   </div>
 
   <vislib-value-axes></vislib-value-axes>

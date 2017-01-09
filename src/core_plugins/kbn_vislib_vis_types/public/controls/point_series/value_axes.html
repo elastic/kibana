@@ -33,6 +33,8 @@
         </span>
       </div>
 
+      <div tooltip="{{getSeries(axis)}}">{{getSeriesShort(axis)}}</div>
+
       <button
         ng-hide="vis.params.valueAxes.length === 1"
         aria-label="Remove value axis"
@@ -167,12 +169,12 @@
                 Rotate
               </label>
               <div class="kuiSideBarFormRow__control">
-                <input
+                <select
                   id="rotateLabels"
-                  class="kuiInput kuiSideBarInput"
-                  type="number"
+                  class="kuiSelect kuiSideBarSelect"
                   ng-model="axis.labels.rotate"
-                >
+                  ng-options="mode.value as mode.name for mode in rotateOptions"
+                ></select>
               </div>
             </div>
 
@@ -199,7 +201,7 @@
 
             <div class="kuiSideBarFormRow">
               <label class="kuiSideBarFormRow__label" for="{ 'defaultYExtents' + $index }">
-                Scale to data bounds
+                Scale to Data Bounds
               </label>
               <div class="kuiSideBarFormRow__control">
                 <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents">

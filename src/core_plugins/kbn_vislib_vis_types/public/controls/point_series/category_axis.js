@@ -18,6 +18,12 @@ module.directive('vislibCategoryAxis', function ($parse, $compile) {
         }
       }
 
+      $scope.rotateOptions = [
+        { name: 'horizontal', value: 0 },
+        { name: 'vertical', value: 90 },
+        { name: 'angled', value: 75 },
+      ];
+
       $scope.$watch('vis.params.categoryAxes[0].position', position => {
         const categoryAxisIsHorizontal = ['top', 'bottom'].includes(position);
         $scope.vis.params.valueAxes.forEach(axis => {

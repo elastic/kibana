@@ -10,9 +10,29 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
     replace: true,
     link: function ($scope) {
       let isCategoryAxisHorizontal = true;
+      $scope.rotateOptions = [
+        { name: 'horizontal', value: 0 },
+        { name: 'vertical', value: 90 },
+        { name: 'angled', value: 75 },
+      ];
+
+
       $scope.$watch('vis.params.categoryAxes[0].position', position => {
         isCategoryAxisHorizontal = ['top', 'bottom'].includes(position);
       });
+
+      $scope.getSeries = function (axis) {
+        const isFirst = $scope.vis.params.valueAxes[0] === axis;
+        const series = _.filter($scope.vis.params.seriesParams, series => {
+          return series.valueAxis === axis.id || (isFirst && !series.valueAxis);
+        });
+        return series.map(series => series.data.label).join(', ');
+      };
+
+      $scope.getSeriesShort = function (axis) {
+        const maxStringLength = 30;
+        return $scope.getSeries(axis).substring(0, maxStringLength);
+      };
 
       $scope.isPositionDisabled = function (position) {
         if (isCategoryAxisHorizontal) {
