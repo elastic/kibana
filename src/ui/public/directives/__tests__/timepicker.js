@@ -47,6 +47,7 @@ const init = function () {
     };
     $parentScope.timefilter = timefilter;
     $parentScope.updateInterval = sinon.spy();
+    $parentScope.updateFilter = sinon.spy();
 
     // Create the element
     $elem = angular.element(
@@ -56,7 +57,8 @@ const init = function () {
       ' mode="timefilter.time.mode"' +
       ' active-tab="timefilter.timepickerActiveTab"' +
       ' interval="timefilter.refreshInterval"' +
-      ' on-interval-select="updateInterval(interval)">' +
+      ' on-interval-select="updateInterval(interval)"' +
+      ' on-filter-select="updateFilter(from, to)">' +
       '</kbn-timepicker>'
     );
 
@@ -170,10 +172,11 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should have a $scope.setQuick() that sets the to and from variables to strings', function (done) {
+    it('should have a $scope.setQuick() that calls handler', function (done) {
       $scope.setQuick('now', 'now');
-      expect($scope.from).to.be('now');
-      expect($scope.to).to.be('now');
+      sinon.assert.calledOnce($parentScope.updateFilter);
+      expect($parentScope.updateFilter.firstCall.args[0]).to.be('now');
+      expect($parentScope.updateFilter.firstCall.args[1]).to.be('now');
       done();
     });
   });
@@ -284,24 +287,25 @@ describe('timepicker directive', function () {
       $scope.relative.count = 1;
       $scope.relative.unit = 's';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-1s');
+      sinon.assert.calledOnce($parentScope.updateFilter);
+      expect($parentScope.updateFilter.getCall(0).args[0]).to.be('now-1s');
 
       $scope.relative.count = 2;
       $scope.relative.unit = 'm';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-2m');
+      expect($parentScope.updateFilter.getCall(1).args[0]).to.be('now-2m');
 
       $scope.relative.count = 3;
       $scope.relative.unit = 'h';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-3h');
+      expect($parentScope.updateFilter.getCall(2).args[0]).to.be('now-3h');
 
       // Enable rounding
       $scope.relative.round = true;
       $scope.relative.count = 7;
       $scope.relative.unit = 'd';
       $scope.applyRelative();
-      expect($scope.from).to.be('now-7d/d');
+      expect($parentScope.updateFilter.getCall(3).args[0]).to.be('now-7d/d');
 
       done();
     });
@@ -370,16 +374,6 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should parse the time of scope.from and scope.to to set its own variables', function (done) {
-      $scope.setQuick('now-30m', 'now');
-      $scope.setMode('absolute');
-      $scope.$digest();
-
-      expect($scope.absolute.from.valueOf()).to.be(moment().subtract(30, 'minutes').valueOf());
-      expect($scope.absolute.to.valueOf()).to.be(moment().valueOf());
-      done();
-    });
-
     it('should update its own variables if timefilter time is updated', function (done) {
       $scope.setMode('absolute');
       $scope.$digest();
@@ -410,9 +404,8 @@ describe('timepicker directive', function () {
     });
 
     it('should only copy its input to scope.from and scope.to when scope.applyAbsolute() is called', function (done) {
-      $scope.setQuick('now-30m', 'now');
-      expect($scope.from).to.be('now-30m');
-      expect($scope.to).to.be('now');
+      $scope.from = 'now-30m';
+      $scope.to = 'now';
 
       $scope.absolute.from = moment('2012-02-01');
       $scope.absolute.to = moment('2012-02-11');
@@ -420,8 +413,8 @@ describe('timepicker directive', function () {
       expect($scope.to).to.be('now');
 
       $scope.applyAbsolute();
-      expect($scope.from.valueOf()).to.be(moment('2012-02-01').valueOf());
-      expect($scope.to.valueOf()).to.be(moment('2012-02-11').valueOf());
+      expect($parentScope.updateFilter.firstCall.args[0]).to.eql(moment('2012-02-01'));
+      expect($parentScope.updateFilter.firstCall.args[1]).to.eql(moment('2012-02-11'));
 
       $scope.$digest();
 
