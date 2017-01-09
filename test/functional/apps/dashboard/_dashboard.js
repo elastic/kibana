@@ -1,5 +1,8 @@
 
 import expect from 'expect.js';
+import {
+  DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
+} from '../../../../src/core_plugins/kibana/public/dashboard/components/panel/lib/panel_state';
 
 import {
   bdd,
@@ -111,14 +114,18 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     });
 
     bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
-        { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
-        { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
-        { dataCol: '10', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization PieChart' },
-        { dataCol: '1', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization TileMap' },
-        { dataCol: '4', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺ VerticalBarChart' },
-        { dataCol: '7', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization MetricChart' }
+      const width = DEFAULT_PANEL_WIDTH;
+      const height = DEFAULT_PANEL_HEIGHT;
+      const visObjects = [
+        { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: 'Visualization漢字 AreaChart' },
+        { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: 'Visualization☺漢字 DataTable' },
+        { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization漢字 LineChart' },
+        { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization PieChart' },
+        { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization TileMap' },
+        { dataCol: width + 1, dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization☺ VerticalBarChart' },
+        { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization MetricChart' }
       ];
+
       return PageObjects.common.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelData()
         .then(function (panelTitles) {
