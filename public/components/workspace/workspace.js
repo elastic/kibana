@@ -7,6 +7,7 @@ import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle.
 
 import Workpad from 'plugins/rework/components/workpad/workpad.js';
 import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar.js';
+import Centered from 'plugins/rework/components/centered/centered.js';
 
 import './workspace.less';
 
@@ -28,7 +29,9 @@ const Workspace = React.createClass({
           </div>
         </LeftSidebar>
 
-        <Workpad></Workpad>
+        <Centered>
+          <Workpad></Workpad>
+        </Centered>
       </div>
     );
   }
