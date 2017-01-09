@@ -7,15 +7,24 @@ const Workpad = React.createClass({
     const { dispatch } = this.props;
   },
   render() {
+    const style = {
+      height: this.props.height,
+      width: this.props.width,
+      backgroundColor: '#fff'
+    };
+
     return (
-      <div className="rework--workpad">
+      <div className="rework--workpad" style={style}>
       </div>
     );
   }
 });
 
 function mapStateToProps(state) {
-  return {};
+  return {
+    height: state.persistent.workpad.height,
+    width: state.persistent.workpad.width
+  };
 }
 
 export default connect(mapStateToProps)(Workpad);
