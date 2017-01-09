@@ -5,11 +5,13 @@ import $ from 'jquery';
 
 describe('kbnGlobalTimepicker', function () {
   let compile;
+
   beforeEach(() => {
     ngMock.module('kibana');
     ngMock.inject(($compile, $rootScope) => {
       compile = () => {
         const $el = $('<kbn-global-timepicker></kbn-global-timepicker>');
+        $el.data('$kbnTopNavController', {}); // Mock the kbnTopNav
         $rootScope.$apply();
         $compile($el)($rootScope);
         return $el;

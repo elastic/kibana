@@ -46,6 +46,7 @@ const init = function () {
       }
     };
     $parentScope.timefilter = timefilter;
+    $parentScope.updateInterval = sinon.spy();
 
     // Create the element
     $elem = angular.element(
@@ -54,7 +55,8 @@ const init = function () {
       ' to="timefilter.time.to"' +
       ' mode="timefilter.time.mode"' +
       ' active-tab="timefilter.timepickerActiveTab"' +
-      ' interval="timefilter.refreshInterval">' +
+      ' interval="timefilter.refreshInterval"' +
+      ' on-interval-select="updateInterval(interval)">' +
       '</kbn-timepicker>'
     );
 
@@ -99,62 +101,32 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
+    it('should have a $scope.setRefreshInterval() that calls handler', function (done) {
       $scope.setRefreshInterval({ value : 10000  });
-      expect($scope.interval).to.have.property('value', 10000);
-      done();
-    });
-
-    it('should set the interval on the courier', function (done) {
-      // Change refresh interval and digest
-      $scope.setRefreshInterval({ value : 1000 });
-      $elem.scope().$digest();
-      expect($courier.searchLooper.loopInterval()).to.be(1000);
-      done();
-    });
-
-    it('should disable the looper when paused', function (done) {
-      $scope.setRefreshInterval({ value : 1000, pause: true });
-      $elem.scope().$digest();
-      expect($courier.searchLooper.loopInterval()).to.be(0);
-      expect($scope.interval.value).to.be(1000);
-      done();
-    });
-
-    it('but keep interval.value set', function (done) {
-      $scope.setRefreshInterval({ value : 1000, pause: true });
-      $elem.scope().$digest();
-      expect($scope.interval.value).to.be(1000);
+      sinon.assert.calledOnce($parentScope.updateInterval);
+      expect($parentScope.updateInterval.firstCall.args[0]).to.have.property('value', 10000);
       done();
     });
 
     it('should unpause when setRefreshInterval is called without pause:true', function (done) {
       $scope.setRefreshInterval({ value : 1000, pause: true });
-      expect($scope.interval.pause).to.be(true);
+      expect($parentScope.updateInterval.getCall(0).args[0]).to.have.property('pause', true);
 
       $scope.setRefreshInterval({ value : 1000, pause: false });
-      expect($scope.interval.pause).to.be(false);
+      expect($parentScope.updateInterval.getCall(1).args[0]).to.have.property('pause', false);
 
       $scope.setRefreshInterval({ value : 1000 });
-      expect($scope.interval.pause).to.be(false);
+      expect($parentScope.updateInterval.getCall(2).args[0]).to.have.property('pause', false);
 
       done();
     });
 
 
     it('should highlight the current active interval', function (done) {
-      $scope.setRefreshInterval({ value: 300000 });
+      $scope.interval = { value: 300000 };
       $elem.scope().$digest();
       expect($elem.find('.refresh-interval-active').length).to.be(1);
       expect($elem.find('.refresh-interval-active').text().trim()).to.be('5 minutes');
-      done();
-    });
-
-    it('should default the interval on the courier with incorrect values', function (done) {
-      // Change refresh interval and digest
-      $scope.setRefreshInterval();
-      $elem.scope().$digest();
-      expect($courier.searchLooper.loopInterval()).to.be(0);
       done();
     });
   });
