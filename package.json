@@ -30,6 +30,7 @@
     "babel-register": "^6.3.13",
     "bootstrap": "^3.3.6",
     "classnames": "^2.2.5",
+    "inline-style-prefixer": "^2.0.5",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.16.1",
     "react": "^15.4.1",
