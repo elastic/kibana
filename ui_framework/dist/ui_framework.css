@@ -1,0 +1,861 @@
+/**
+ * 1. Make sure outline doesn't get hidden beneath adjacent elements.
+ * 2. Override inherited styles (possibly from Bootstrap).
+ */
+* {
+  box-sizing: border-box; }
+
+body {
+  font-family: "Open Sans", Helvetica, Arial, sans-serif; }
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ */
+.kuiButton {
+  display: inline-block;
+  /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 4px 12px 5px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px; }
+  .kuiButton:disabled {
+    cursor: default;
+    pointer-events: none;
+    /* 2 */ }
+  .kuiButton:active:enabled {
+    transform: translateY(1px); }
+  .kuiButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: 1px solid #6EADC1 !important;
+    /* 2 */
+    outline-offset: 2px !important;
+    /* 2 */ }
+
+.kuiButton--iconText .kuiButton__icon:first-child {
+  margin-right: 4px; }
+
+.kuiButton--iconText .kuiButton__icon:last-child {
+  margin-left: 4px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--basic {
+  color: #5a5a5a;
+  background-color: #F2F2F2; }
+  .kuiButton--basic:focus {
+    color: #5a5a5a !important;
+    /* 1 */ }
+  .kuiButton--basic:hover:enabled, .kuiButton--basic:active:enabled {
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #9B9B9B; }
+  .kuiButton--basic:disabled {
+    color: #9B9B9B; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--primary {
+  color: #FFFFFF;
+  background-color: #6EADC1; }
+  .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
+    color: #FFFFFF;
+    background-color: #006E8A; }
+  .kuiButton--primary:disabled {
+    background-color: #B6D6E0; }
+  .kuiButton--primary:focus {
+    color: #FFFFFF !important;
+    /* 1 */ }
+
+.kuiButton--danger {
+  color: #FFFFFF;
+  background-color: #D76051;
+  /**
+   * 1. Override Bootstrap.
+   */ }
+  .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
+    color: #FFFFFF;
+    background-color: #A52E1F; }
+  .kuiButton--danger:disabled {
+    background-color: #efc0ba; }
+  .kuiButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: 1px solid #ff523c !important;
+    /* 2 */
+    outline-offset: 2px !important;
+    /* 2 */
+    color: #FFFFFF !important;
+    /* 1 */ }
+
+.kuiButtonGroup {
+  display: flex;
+  align-items: center; }
+  .kuiButtonGroup .kuiButton + .kuiButton {
+    margin-left: 4px; }
+
+.kuiButtonGroup--united > .kuiButton:not(:first-child):not(:last-child) {
+  border-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:only-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px; }
+
+.kuiButtonGroup--united .kuiButton + .kuiButton {
+  margin-left: 2px; }
+
+/**
+ * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
+ *    ugly default appearance which we can't customize, so our best option is to give Firefox
+ *    control over the checkbox's appearance.
+ * 2. Override default styles (possibly from Bootstrap).
+ */
+.kuiCheckBox {
+  -webkit-appearance: none;
+  /* 1 */
+  background-color: #FFFFFF;
+  border: 1px solid #BEBEBE;
+  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  line-height: 1.5 !important;
+  /* 2 */
+  margin: 0 !important;
+  /* 2 */
+  font: "Open Sans", Helvetica, Arial, sans-serif !important;
+  /* 2 */
+  font-family: "Open Sans", Helvetica, Arial, sans-serif !important;
+  /* 2 */
+  font-size: 10px !important;
+  /* 2 */
+  transition: background-color 0.1s linear; }
+  .kuiCheckBox:before {
+    position: relative;
+    top: -0.05em;
+    left: 0.15em;
+    font-family: FontAwesome;
+    content: "\F00C";
+    font-size: 1em;
+    opacity: 0;
+    color: #ffffff;
+    transition: opacity 0.1s linear; }
+  .kuiCheckBox:checked {
+    border-color: #328CAA;
+    background-color: #328CAA; }
+    .kuiCheckBox:checked:before {
+      opacity: 1; }
+  .kuiCheckBox:focus {
+    z-index: 1;
+    /* 1 */
+    outline: 1px solid #6EADC1 !important;
+    /* 2 */
+    outline-offset: 2px !important;
+    /* 2 */ }
+  .kuiCheckBox:disabled {
+    opacity: 0.3;
+    cursor: not-allowed; }
+
+.kuiTextArea {
+  appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: #191E23;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */ }
+  .kuiTextArea:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiTextArea:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiTextArea:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+
+.kuiTextInput {
+  appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: #191E23;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */ }
+  .kuiTextInput:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiTextInput:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiTextInput:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+
+/**
+ * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
+ *    from FontAwesome someday. When we do migrate away, we can just update this definition.
+ */
+.kuiIcon {
+  display: inline-block;
+  /* 1 */
+  font: normal normal normal 14px/1 FontAwesome;
+  /* 1 */
+  font-size: inherit;
+  /* 1 */
+  text-rendering: auto;
+  /* 1 */
+  -webkit-font-smoothing: antialiased;
+  /* 1 */
+  -moz-osx-font-smoothing: grayscale;
+  /* 1 */ }
+
+.kuiIcon--success {
+  color: #417505; }
+
+.kuiIcon--warning {
+  color: #ffac15; }
+
+.kuiIcon--error {
+  color: #D86051; }
+
+.kuiInfoPanel {
+  padding: 20px;
+  line-height: 1.5; }
+
+.kuiInfoPanel--warning {
+  background-color: #FFF6E4; }
+
+.kuiLink {
+  color: #3CAED2;
+  text-decoration: none; }
+  .kuiLink:visited, .kuiLink:active {
+    color: #3CAED2; }
+  .kuiLink:hover {
+    color: #006E8A;
+    text-decoration: underline; }
+
+.kuiLoadingItems {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
+
+/**
+ * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
+ *    a bit.
+ */
+.kuiLocalBreadcrumbs {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 10px;
+  /* 1 */ }
+
+.kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+  margin-left: 6px; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+    content: '/';
+    user-select: none;
+    margin-right: 4px;
+    color: #5a5a5a; }
+    .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      color: #a5a5a5; }
+
+.kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link {
+  color: #2d2d2d;
+  cursor: default; }
+  .kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link:hover {
+    text-decoration: none; }
+  .theme-dark .kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link {
+    color: #cecece; }
+
+.kuiLocalBreadcrumb__link {
+  font-size: 14px;
+  color: #5a5a5a;
+  text-decoration: none; }
+  .kuiLocalBreadcrumb__link:hover {
+    text-decoration: underline; }
+  .theme-dark .kuiLocalBreadcrumb__link {
+    color: #dedede; }
+
+.kuiLocalBreadcrumb__emphasis {
+  font-weight: 700; }
+
+.kuiLocalDropdown {
+  position: relative;
+  padding: 10px 10px 14px;
+  background-color: #f6f6f6;
+  line-height: 20px; }
+  .theme-dark .kuiLocalDropdown {
+    background-color: #525252; }
+
+.kuiLocalDropdownCloseButton {
+  appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  position: absolute;
+  top: 1px;
+  right: 5px;
+  font-size: 16px;
+  color: #2d2d2d;
+  cursor: pointer;
+  opacity: 0.35; }
+  .kuiLocalDropdownCloseButton:hover {
+    opacity: 1; }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece; }
+
+.kuiLocalDropdownPanels {
+  display: flex; }
+
+.kuiLocalDropdownPanel {
+  flex: 1 1 0%; }
+
+.kuiLocalDropdownPanel--left {
+  margin-right: 30px; }
+
+.kuiLocalDropdownPanel--right {
+  margin-left: 30px; }
+
+.kuiLocalDropdownTitle {
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #2d2d2d; }
+  .theme-dark .kuiLocalDropdownTitle {
+    color: #cecece; }
+
+.kuiLocalDropdownSection {
+  margin-bottom: 16px; }
+  .kuiLocalDropdownSection:last-child {
+    margin-bottom: 0; }
+
+.kuiLocalDropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px; }
+
+.kuiLocalDropdownHeader__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d2d2d; }
+  .theme-dark .kuiLocalDropdownHeader__label {
+    color: #cecece; }
+
+.kuiLocalDropdownHeader__actions {
+  display: flex; }
+
+.kuiLocalDropdownHeader__action {
+  color: #3CAED2;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer; }
+  .kuiLocalDropdownHeader__action + .kuiLocalDropdownHeader__action {
+    margin-left: 10px; }
+  .kuiLocalDropdownHeader__action:hover, .kuiLocalDropdownHeader__action:active {
+    color: #105A73; }
+  .theme-dark .kuiLocalDropdownHeader__action {
+    color: #b7e2ea; }
+    .theme-dark .kuiLocalDropdownHeader__action:hover, .theme-dark .kuiLocalDropdownHeader__action:active {
+      color: #def2f6; }
+
+.kuiLocalDropdownInput {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 5px 15px;
+  font-size: 14px;
+  color: #2d2d2d;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 4px; }
+  .theme-dark .kuiLocalDropdownInput {
+    color: #cecece;
+    background-color: #444444;
+    border-color: #444444; }
+
+.kuiLocalDropdownFormNote {
+  font-size: 14px;
+  color: #737373; }
+  .theme-dark .kuiLocalDropdownFormNote {
+    color: #a2a2a2; }
+
+.kuiLocalDropdownWarning {
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: #2d2d2d;
+  background-color: #e4e4e4; }
+  .theme-dark .kuiLocalDropdownWarning {
+    color: #cecece;
+    background-color: #636363; }
+
+.kuiLocalDropdownHelpText {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #2D2D2D; }
+  .theme-dark .kuiLocalDropdownHelpText {
+    color: #9e9e9e; }
+
+.kuiLocalMenu {
+  display: flex;
+  align-items: center;
+  height: 100%; }
+
+.kuiLocalMenuItem {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  font-size: 14px;
+  background-color: transparent;
+  color: #5a5a5a;
+  border: 0;
+  cursor: pointer; }
+  .kuiLocalMenuItem:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #000000; }
+  .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
+    background-color: #f6f6f6; }
+  .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled {
+    opacity: 0.5;
+    cursor: default; }
+    .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
+      background-color: transparent;
+      color: #5a5a5a; }
+  .theme-dark .kuiLocalMenuItem {
+    color: #dedede; }
+    .theme-dark .kuiLocalMenuItem:hover {
+      background-color: #000000;
+      color: #ffffff; }
+    .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
+      background-color: #525252; }
+    .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
+      background-color: transparent;
+      color: #dedede; }
+
+.kuiLocalMenuItem__icon {
+  margin-right: 5px;
+  margin-bottom: -1px; }
+
+/**
+ * 1. Match height of logo in side bar, but allow it to expand to accommodate
+ *    dropdown.
+ */
+.kuiLocalNav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 70px;
+  /* 1 */
+  color: #2d2d2d;
+  background-color: #e4e4e4; }
+  .theme-dark .kuiLocalNav {
+    color: #cecece;
+    background-color: #333333; }
+
+.kuiLocalNavRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px; }
+
+.kuiLocalNavRow__section {
+  height: 100%; }
+
+.kuiLocalNavRow--secondary {
+  height: 38px;
+  padding: 0 10px; }
+
+.kuiLocalSearch {
+  display: flex;
+  width: 100%;
+  height: 30px; }
+
+.kuiLocalSearchInput {
+  flex: 1 1 100%;
+  padding: 5px 15px;
+  font-size: 14px;
+  color: #2d2d2d;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0; }
+  .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
+    border-color: #e74C3c; }
+  .theme-dark .kuiLocalSearchInput {
+    color: #cecece;
+    background-color: #4e4e4e;
+    border-color: #4e4e4e; }
+    .theme-dark .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
+      border-color: #ff6758; }
+
+.kuiLocalSearchButton {
+  width: 43px;
+  height: 30px;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: #9c9c9c;
+  border: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px; }
+  .theme-dark .kuiLocalSearchButton {
+    color: #ffffff;
+    background-color: #777777; }
+
+/**
+ * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
+ */
+.kuiLocalTabs {
+  display: flex;
+  align-items: flex-end;
+  height: 100%; }
+
+/**
+   * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
+   */
+.kuiLocalTab {
+  padding: 5px 0 6px 0;
+  font-size: 18px;
+  line-height: 22px;
+  /* 1 */
+  color: #5a5a5a;
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer; }
+  .kuiLocalTab:hover, .kuiLocalTab:active {
+    color: #000000; }
+    .theme-dark .kuiLocalTab:hover, .theme-dark .kuiLocalTab:active {
+      color: #ffffff; }
+  .kuiLocalTab.kuiLocalTab-isSelected {
+    color: #000000;
+    border-bottom-color: #000000;
+    cursor: default; }
+    .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
+      color: #ffffff;
+      border-bottom-color: #ffffff; }
+  .kuiLocalTab + .kuiLocalTab {
+    margin-left: 15px; }
+  .theme-dark .kuiLocalTab {
+    color: #dedede; }
+
+.kuiLocalTitle {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 10px;
+  font-size: 14px;
+  font-weight: bold; }
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+.kuiMicroButton {
+  display: inline-block;
+  /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: #9fa3a7;
+  background-color: transparent;
+  font-size: 12px;
+  line-height: 1;
+  /* 2 */ }
+  .kuiMicroButton:hover {
+    color: #191E23; }
+
+.kuiMicroButtonGroup {
+  display: flex; }
+  .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
+    margin-left: 2px; }
+
+.kuiNoItems {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
+
+.kuiPanel {
+  border: 2px solid #E4E4E4; }
+
+.kuiPanel--centered {
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+
+/**
+ * 1. Make seamless transition from ToolBar to Table header.
+ * 1. Make seamless transition from Table to ToolBarFooter header.
+ */
+.kuiControlledTable .kuiTable {
+  border-top: none;
+  /* 1 */ }
+
+.kuiControlledTable .kuiToolBarFooter {
+  border-top: none;
+  /* 2 */ }
+
+.kuiTable {
+  table-layout: fixed;
+  width: 100%;
+  border: 2px solid #E4E4E4;
+  border-collapse: collapse;
+  background-color: #FFFFFF; }
+
+.kuiTableHeaderCell {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 7px 8px 8px;
+  text-align: left;
+  color: #787878; }
+  .kuiTableHeaderCell:last-child {
+    padding-right: 16px; }
+
+/**
+ * 1. Prevent rapid clicking from selecting text.
+ */
+.kuiTableHeaderCell--sortable {
+  user-select: none;
+  /* 1 */
+  cursor: pointer; }
+  .kuiTableHeaderCell--sortable:hover:not(.kuiTableHeaderCell-isSorted) .kuiTableSortIcon {
+    opacity: 0.4; }
+
+.kuiTableHeaderCell--alignRight {
+  text-align: right; }
+
+.kuiTableSortIcon {
+  pointer-events: none; }
+
+.kuiTableRow:hover .kuiTableRowHoverReveal {
+  display: inline-block; }
+
+.kuiTableRowHoverReveal {
+  display: none; }
+
+.kuiTableRowCell {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 7px 8px 8px;
+  text-align: left;
+  color: #191E23;
+  border-top: 2px solid #E4E4E4; }
+  .kuiTableRowCell:last-child {
+    padding-right: 16px; }
+
+/**
+   * 1. Vertically align all children.
+   */
+.kuiTableRowCell__liner {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; }
+  .kuiTableRowCell__liner * > {
+    vertical-align: middle;
+    /* 1 */ }
+
+.kuiTableRowCell--alignRight {
+  text-align: right; }
+  .kuiTableRowCell--alignRight .kuiTableRowCell__liner {
+    text-align: right; }
+
+/**
+ * 1. Rendered width of cell with checkbox inside of it.
+ * 2. Align checkbox with text in other cells.
+ */
+.kuiTableHeaderCell--checkBox,
+.kuiTableRowCell--checkBox {
+  width: 28px;
+  /* 1 */
+  padding-right: 0;
+  line-height: 1; }
+
+.kuiTabs {
+  display: flex;
+  border-bottom: 2px solid #E4E4E4; }
+
+/**
+   * 1. Override button styles (some of which are from Bootstrap).
+   */
+.kuiTab {
+  appearance: none;
+  /* 1 */
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 14px;
+  color: #9fa3a7;
+  background-color: #ffffff;
+  /* 1 */
+  border: 1px solid #E4E4E4;
+  border-bottom: none;
+  border-radius: 0;
+  /* 1 */ }
+  .kuiTab + .kuiTab {
+    border-left: none; }
+  .kuiTab:focus {
+    color: #3CAED2;
+    z-index: 1;
+    outline: 1px solid #6EADC1 !important;
+    /* 1 */ }
+  .kuiTab:hover:not(.kuiTab-isSelected) {
+    color: #006E8A; }
+  .kuiTab:active {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: none;
+    /* 1 */
+    color: #3CAED2 !important; }
+  .kuiTab.kuiTab-isSelected {
+    color: #191E23;
+    background-color: #F2F2F2;
+    cursor: default; }
+
+.kuiToolBar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  height: 50px;
+  background-color: #E4E4E4; }
+  .kuiToolBar .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF; }
+    .kuiToolBar .kuiButton--basic:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiToolBarSection {
+  display: flex;
+  align-items: center;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiToolBarSection:last-child {
+    margin-right: 0; }
+  .kuiToolBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiToolBarFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  height: 40px;
+  background-color: #ffffff;
+  border: 2px solid #E4E4E4; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiToolBarFooterSection {
+  display: flex;
+  align-items: center;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiToolBarFooterSection:first-child {
+    margin-left: 0; }
+  .kuiToolBarFooterSection:last-child {
+    margin-right: 0; }
+  .kuiToolBarFooterSection:only-child {
+    margin-left: auto; }
+  .kuiToolBarFooterSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiToolBarSearch {
+  display: flex;
+  flex: 1 1 auto;
+  max-width: 800px;
+  line-height: 1.5;
+  margin-right: 25px; }
+
+.kuiToolBarSearchBox {
+  flex: 1 1 auto;
+  position: relative; }
+
+.kuiToolBarSearchBox__icon {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 14px;
+  color: #ACACAC; }
+
+/**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
+.kuiToolBarSearchBox__input {
+  width: 100%;
+  min-width: 200px;
+  padding: 5px 12px 6px 28px;
+  background-color: #FFFFFF;
+  color: #191E23;
+  border: 1px solid #FFFFFF;
+  border-radius: 4px;
+  font-size: 14px;
+  border: none;
+  /* 1 */
+  line-height: normal;
+  /* 1 */ }
+  .kuiToolBarSearchBox__input:focus {
+    z-index: 1;
+    /* 1 */
+    outline: 1px solid #6EADC1 !important;
+    /* 2 */
+    outline-offset: 2px !important;
+    /* 2 */ }
+
+/*
+ * 1. We don't want the text to take up two lines and overflow the ToolBar.
+ */
+.kuiToolBarText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
