@@ -19,13 +19,10 @@ module.exports = {
       'dynamic_templates': [{
         'string_fields': {
           'mapping': {
-            'type': 'string',
-            'index': 'analyzed',
+            'type': 'text',
             'fields': {
               'raw': {
-                'index': 'not_analyzed',
-                'type': 'string',
-                'doc_values': true
+                'type': 'keyword',
               }
             }
           },
@@ -52,22 +49,18 @@ module.exports = {
           'type': 'double'
         },
         'referer': {
-          'type': 'string',
-          'index': 'not_analyzed'
+          'type': 'keyword'
         },
         'geo': {
           'properties': {
             'srcdest': {
-              'type': 'string',
-              'index': 'not_analyzed'
+              type: "keyword"
             },
             'dest': {
-              'type': 'string',
-              'index': 'not_analyzed'
+              type: "keyword"
             },
             'src': {
-              'type': 'string',
-              'index': 'not_analyzed'
+              type: "keyword"
             },
             'coordinates': {
               'type': 'geo_point'
@@ -77,16 +70,15 @@ module.exports = {
         'meta': {
           'properties': {
             'related': {
-              'type': 'string'
+              'type': 'text'
             },
             'char': {
-              'type': 'string',
-              'index': 'not_analyzed'
+              type: "keyword"
             },
             'user': {
               'properties': {
                 'firstname': {
-                  'type': 'string'
+                  'type': 'text'
                 },
                 'lastname': {
                   'type': 'integer',
