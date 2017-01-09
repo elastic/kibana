@@ -1,7 +1,4 @@
 import React from 'react';
-import _ from 'lodash';
-import { connect } from 'react-redux';
-import { editorToggle } from 'plugins/rework/state/actions';
 
 export default React.createClass({
   render() {
@@ -17,9 +14,3 @@ export default React.createClass({
     );
   }
 });
-
-function mapStateToProps(state) {
-  return {
-    editor: state.transient.editor
-  };
-}
