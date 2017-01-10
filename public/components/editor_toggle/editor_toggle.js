@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
 import { editorToggle } from 'plugins/rework/state/actions';
-import './editor_toggle.less';
 
 const EditorToggle = React.createClass({
   editorToggle() {
