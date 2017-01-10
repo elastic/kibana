@@ -25,7 +25,7 @@ export default function (Private) {
           return filter.exists.field === value;
         }
 
-        if (_.get(filter, 'query.match')) {
+        if (_.has(filter, 'query.match')) {
           return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
         }
 
