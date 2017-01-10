@@ -27,13 +27,13 @@ import VislibVisualizationsMapProvider from 'ui/vis_maps/visualizations/_map';
 describe('tilemaptest - TileMap Map Tests', function () {
   const $mockMapEl = $('<div>');
   let TileMapMap;
-  let theTileMapSettings;
+  let tilemapSettings;
   const leafletStubs = {};
   const leafletMocks = {};
 
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, tilemapSettings) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     // mock parts of leaflet
     leafletMocks.tileLayer = { on: sinon.stub() };
     leafletMocks.map = { on: sinon.stub() };
@@ -44,12 +44,12 @@ describe('tilemaptest - TileMap Map Tests', function () {
 
     TileMapMap = Private(VislibVisualizationsMapProvider);
 
-    theTileMapSettings = tilemapSettings;
+    tilemapSettings = $injector.get('tilemapSettings');
 
   }));
 
   async function loadTileMapSettings() {
-    await theTileMapSettings.loadSettings();
+    await tilemapSettings.loadSettings();
   }
 
   describe('instantiation', function () {
@@ -65,14 +65,6 @@ describe('tilemaptest - TileMap Map Tests', function () {
 
     it('should create the map', function () {
       expect(createStub.callCount).to.equal(1);
-    });
-
-    it('should add zoom controls', function () {
-      const mapOptions = createStub.firstCall.args[0];
-
-      expect(mapOptions).to.be.an('object');
-      if (mapOptions.zoomControl) expect(mapOptions.zoomControl).to.be.ok();
-      else expect(mapOptions.zoomControl).to.be(undefined);
     });
   });
 
@@ -91,7 +83,7 @@ describe('tilemaptest - TileMap Map Tests', function () {
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
-    it('should create the create leaflet objects', function () {
+    it('should create leaflet objects for tileLayer and map', function () {
       expect(leafletStubs.tileLayer.callCount).to.equal(1);
       expect(leafletStubs.map.callCount).to.equal(1);
 
@@ -109,16 +101,22 @@ describe('tilemaptest - TileMap Map Tests', function () {
 
     it('should call destroy only if a map exists', function () {
       expect(mapStubs.destroy.callCount).to.equal(0);
-      map._createMap({});
+      map._createMap();
       expect(mapStubs.destroy.callCount).to.equal(1);
     });
 
     it('should create a WMS layer if WMS is enabled', function () {
       expect(L.tileLayer.wms.called).to.be(false);
-      map = new TileMapMap($mockMapEl, geoJsonData, {attr: {wms: {enabled: true}}});
-      map._createMap({});
+      map = new TileMapMap($mockMapEl, geoJsonData, { attr: { wms: { enabled: true } } });
+      map._createMap();
       expect(L.tileLayer.wms.called).to.be(true);
-      L.tileLayer.restore();
+    });
+
+    it('should create layer with all options from `tilemapSettings.getOptions()`', () => {
+      sinon.assert.calledOnce(L.tileLayer);
+
+      const leafletOptions = tilemapSettings.getOptions();
+      expect(L.tileLayer.firstCall.args[1]).to.eql(leafletOptions);
     });
   });
 
