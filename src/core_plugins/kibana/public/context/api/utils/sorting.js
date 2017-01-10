@@ -13,7 +13,7 @@ function reverseSortDirective(sortDirective) {
     return {
       [sortDirective]: (sortDirective === '_score' ? 'asc' : 'desc'),
     };
-  } else if (_.isObject(sortDirective)) {
+  } else if (_.isPlainObject(sortDirective)) {
     return _.mapValues(sortDirective, reverseSortDirection);
   } else {
     return sortDirective;
@@ -21,8 +21,10 @@ function reverseSortDirective(sortDirective) {
 }
 
 function reverseSortDirection(sortDirection) {
-  if (_.isObject(sortDirection)) {
-    return sortDirection.order = reverseSortDirection(sortDirection.order);
+  if (_.isPlainObject(sortDirection)) {
+    return _.assign({}, sortDirection, {
+      order: reverseSortDirection(sortDirection.order),
+    });
   } else {
     return (sortDirection === 'asc' ? 'desc' : 'asc');
   }
