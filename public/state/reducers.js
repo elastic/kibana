@@ -11,6 +11,24 @@ function rootReducer(state = {}, action) {
     return setPersistent('workpad', {...state.persistent.workpad, [prop]: value});
   };
 
+  const setPage = (id, prop, value) => {
+    return setPersistent('pages', {
+      ...state.persistent.pages,
+      [id]: {
+        ...state.persistent.pages[id],
+        [prop]: value
+      }});
+  };
+
+  const setElement = (id, prop, value) => {
+    return setPersistent('elements', {
+      ...state.persistent.elements,
+      [id]: {
+        ...state.persistent.elements[id],
+        [prop]: value
+      }});
+  };
+
   switch (action.type) {
     case 'EDITOR_CLOSE':
       return setTransient('editor', false);
@@ -22,6 +40,9 @@ function rootReducer(state = {}, action) {
       return setWorkpad('width', action.payload);
     case 'WORKPAD_PAGE':
       return setWorkpad('page', action.payload);
+
+    case 'ELEMENT_ANGLE':
+      return setElement(action.payload.id, 'angle', action.payload.angle);
 
     default:
       return state;
