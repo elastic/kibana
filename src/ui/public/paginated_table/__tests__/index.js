@@ -47,13 +47,19 @@ describe('paginated table', function () {
     };
   };
 
-  const renderTable = function (cols, rows, perPage, sort) {
+  const renderTable = function (cols, rows, perPage, sort, showBlankRowsAtBottom) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
     $scope.sort = sort || {};
+    $scope.showBlankRowsAtBottom = showBlankRowsAtBottom;
 
-    $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage" sort="sort">')($scope);
+    const template = '<paginated-table columns="cols"'
+      + ' rows="rows"'
+      + ' per-page="perPage"'
+      + ' sort="sort"'
+      + ' show-blank-rows-at-bottom="showBlankRowsAtBottom">';
+    $el = $compile(template)($scope);
 
     $scope.$digest();
   };
@@ -107,6 +113,18 @@ describe('paginated table', function () {
       // add 2 for the first and last page links
       expect($el.find('paginate-controls a').size()).to.be(pageCount + 2);
     });
+
+    it('should not show blank rows on last page when so specified', function () {
+      const rowCount = 7;
+      const perPageCount = 10;
+      const data = makeData(3, rowCount);
+      const pageCount = Math.ceil(rowCount / perPageCount);
+
+      renderTable(data.columns, data.rows, perPageCount, null, false);
+      const tableRows = $el.find('tbody tr');
+      expect(tableRows.size()).to.be(rowCount);
+    });
+
   });
 
   describe('sorting', function () {
