@@ -16,7 +16,9 @@ body {
 .kuiButton {
   display: inline-block;
   /* 1 */
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
   font-size: 14px;
@@ -30,7 +32,8 @@ body {
     pointer-events: none;
     /* 2 */ }
   .kuiButton:active:enabled {
-    transform: translateY(1px); }
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
   .kuiButton:focus {
     z-index: 1;
     /* 1 */
@@ -98,8 +101,14 @@ body {
     /* 1 */ }
 
 .kuiButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center; }
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
   .kuiButtonGroup .kuiButton + .kuiButton {
     margin-left: 4px; }
 
@@ -147,6 +156,7 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
+  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -157,6 +167,7 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #ffffff;
+    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #328CAA;
@@ -175,7 +186,9 @@ body {
     cursor: not-allowed; }
 
 .kuiTextArea {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -184,6 +197,7 @@ body {
   border: 1px solid #DEDEDE;
   color: #191E23;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -201,7 +215,9 @@ body {
     cursor: not-allowed; }
 
 .kuiTextInput {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -210,6 +226,7 @@ body {
   border: 1px solid #DEDEDE;
   color: #191E23;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -280,8 +297,14 @@ body {
  *    a bit.
  */
 .kuiLocalBreadcrumbs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   height: 100%;
   padding-left: 10px;
   /* 1 */ }
@@ -290,7 +313,10 @@ body {
   margin-left: 6px; }
   .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
     content: '/';
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
     margin-right: 4px;
     color: #5a5a5a; }
     .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
@@ -325,7 +351,9 @@ body {
     background-color: #525252; }
 
 .kuiLocalDropdownCloseButton {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   background-color: transparent;
   padding: 4px;
   border: none;
@@ -342,10 +370,16 @@ body {
     color: #cecece; }
 
 .kuiLocalDropdownPanels {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
 
 .kuiLocalDropdownPanel {
-  flex: 1 1 0%; }
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%; }
 
 .kuiLocalDropdownPanel--left {
   margin-right: 30px; }
@@ -366,9 +400,18 @@ body {
     margin-bottom: 0; }
 
 .kuiLocalDropdownHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   margin-bottom: 6px; }
 
 .kuiLocalDropdownHeader__label {
@@ -379,6 +422,9 @@ body {
     color: #cecece; }
 
 .kuiLocalDropdownHeader__actions {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
 
 .kuiLocalDropdownHeader__action {
@@ -434,13 +480,25 @@ body {
     color: #9e9e9e; }
 
 .kuiLocalMenu {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   height: 100%; }
 
 .kuiLocalMenuItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   height: 100%;
   padding: 0 10px;
   font-size: 14px;
@@ -479,9 +537,19 @@ body {
  *    dropdown.
  */
 .kuiLocalNav {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   min-height: 70px;
   /* 1 */
   color: #2d2d2d;
@@ -491,9 +559,18 @@ body {
     background-color: #333333; }
 
 .kuiLocalNavRow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   height: 32px; }
 
 .kuiLocalNavRow__section {
@@ -504,12 +581,18 @@ body {
   padding: 0 10px; }
 
 .kuiLocalSearch {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
   width: 100%;
   height: 30px; }
 
 .kuiLocalSearchInput {
-  flex: 1 1 100%;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 100%;
+      -ms-flex: 1 1 100%;
+          flex: 1 1 100%;
   padding: 5px 15px;
   font-size: 14px;
   color: #2d2d2d;
@@ -547,8 +630,14 @@ body {
  * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
  */
 .kuiLocalTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: flex-end;
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end;
   height: 100%; }
 
 /**
@@ -580,8 +669,14 @@ body {
     color: #dedede; }
 
 .kuiLocalTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   height: 100%;
   padding-left: 10px;
   font-size: 14px;
@@ -595,7 +690,9 @@ body {
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
@@ -608,6 +705,9 @@ body {
     color: #191E23; }
 
 .kuiMicroButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
   .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
     margin-left: 2px; }
@@ -622,9 +722,18 @@ body {
   border: 2px solid #E4E4E4; }
 
 .kuiPanel--centered {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  justify-content: center;
-  align-items: center; }
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
 
 /**
  * 1. Make seamless transition from ToolBar to Table header.
@@ -659,7 +768,10 @@ body {
  * 1. Prevent rapid clicking from selecting text.
  */
 .kuiTableHeaderCell--sortable {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   /* 1 */
   cursor: pointer; }
   .kuiTableHeaderCell--sortable:hover:not(.kuiTableHeaderCell-isSorted) .kuiTableSortIcon {
@@ -716,6 +828,9 @@ body {
   line-height: 1; }
 
 .kuiTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
   border-bottom: 2px solid #E4E4E4; }
 
@@ -723,7 +838,9 @@ body {
    * 1. Override button styles (some of which are from Bootstrap).
    */
 .kuiTab {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   /* 1 */
   cursor: pointer;
   padding: 10px 30px;
@@ -756,8 +873,14 @@ body {
     cursor: default; }
 
 .kuiToolBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  justify-content: space-between;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -772,8 +895,14 @@ body {
  * 1. Put 10px of space between each child.
  */
 .kuiToolBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarSection:last-child {
@@ -783,8 +912,14 @@ body {
     /* 1 */ }
 
 .kuiToolBarFooter {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  justify-content: space-between;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
@@ -794,8 +929,14 @@ body {
  * 1. Put 10px of space between each child.
  */
 .kuiToolBarFooterSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarFooterSection:first-child {
@@ -809,14 +950,23 @@ body {
     /* 1 */ }
 
 .kuiToolBarSearch {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex: 1 1 auto;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   max-width: 800px;
   line-height: 1.5;
   margin-right: 25px; }
 
 .kuiToolBarSearchBox {
-  flex: 1 1 auto;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   position: relative; }
 
 .kuiToolBarSearchBox__icon {

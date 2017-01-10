@@ -1,38 +1,36 @@
 const sass = require('node-sass');
+const postcss = require('postcss');
+const postcssConfig = require('../src/optimize/postcss.config');
+const chokidar = require('chokidar');
+const debounce = require('lodash/function/debounce');
 const platform = require('os').platform();
 
 module.exports = function (grunt) {
-  const watcherCmd = {
-    cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\node-sass' : './node_modules/.bin/node-sass',
-    args: [
-      'ui_framework/components/index.scss',
-      '--watch',
-      '--recursive',
-      'ui_framework/dist/ui_framework.css'
-    ]
-  };
+  grunt.registerTask('uiFramework:start', function () {
+    const done = this.async();
+    Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
+  });
 
-  const serverCmd = {
-    cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server' : './node_modules/.bin/webpack-dev-server',
-    args: [
-      '--config=ui_framework/doc_site/webpack.config.js',
-      '--hot ',
-      '--inline',
-      '--content-base=ui_framework/doc_site/build'
-    ]
-  };
+  function uiFrameworkServerStart() {
+    const serverCmd = {
+      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server' : './node_modules/.bin/webpack-dev-server',
+      args: [
+        '--config=ui_framework/doc_site/webpack.config.js',
+        '--hot ',
+        '--inline',
+        '--content-base=ui_framework/doc_site/build'
+      ],
+      opts: { stdio: 'inherit' }
+    };
 
-  function spawn(task) {
     return new Promise((resolve, reject) => {
-      grunt.util.spawn(task, (error, result, code) => {
-        grunt.log.writeln();
-
+      grunt.util.spawn(serverCmd, (error, result, code) => {
         if (error || code !== 0) {
           const message = result.stderr || result.stdout;
 
           grunt.log.error(message);
 
-          reject();
+          return reject();
         }
 
         grunt.log.writeln(result);
@@ -43,12 +41,36 @@ module.exports = function (grunt) {
     });
   }
 
-  grunt.registerTask('uiFramework:start', function () {
-    const done = this.async();
-    const commands = [watcherCmd, serverCmd].map((cmd) => {
-      return Object.assign({ opts: { stdio: 'inherit' } }, cmd);
-    });
+  function uiFrameworkCompile() {
+    sass.render({
+      file: 'ui_framework/components/index.scss'
+    }, function (error, result) {
+      if (error) {
+        grunt.log.error(error);
+      }
 
-    Promise.all(commands.map(spawn)).then(done);
-  });
+      postcss([postcssConfig])
+        .process(result.css, { from: 'ui_framework/components/index.scss', to: 'ui_framework/dist/ui_framework.css' })
+        .then(result => {
+          grunt.file.write('ui_framework/dist/ui_framework.css', result.css);
+
+          if (result.map) {
+            grunt.file.write('ui_framework/dist/ui_framework.css.map', result.map);
+          }
+        });
+    });
+  }
+
+  function uiFrameworkWatch() {
+    const debouncedCompile = debounce(uiFrameworkCompile, 400, { leading: true });
+
+    return new Promise((resolve, reject) => {
+      debouncedCompile();
+
+      chokidar.watch('ui_framework/components', { ignoreInitial: true }).on('all', (event, path) => {
+        grunt.log.writeln(event, path);
+        debouncedCompile();
+      });
+    });
+  }
 };
