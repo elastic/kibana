@@ -15,7 +15,7 @@ import './workspace.less';
 
 const Workspace = React.createClass({
   render() {
-    const  {editor} = this.props;
+    const  {workpad, pages, elements, dataframes, editor} = this.props;
 
     return (
       <div className="rework--workspace">
@@ -32,7 +32,7 @@ const Workspace = React.createClass({
 
         <Centered>
           <PageControl direction='previous'></PageControl>
-          <Workpad></Workpad>
+          <Workpad workpad={workpad} pages={pages} elements={elements}></Workpad>
           <PageControl direction='next'></PageControl>
         </Centered>
       </div>
@@ -42,7 +42,10 @@ const Workspace = React.createClass({
 
 function mapStateToProps(state) {
   return {
-    editor: state.transient.editor
+    editor: state.transient.editor,
+    workpad: state.persistent.workpad,
+    pages: state.persistent.pages,
+    elements: state.persistent.elements,
   };
 }
 

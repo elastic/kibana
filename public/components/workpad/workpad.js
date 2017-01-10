@@ -4,21 +4,24 @@ import { connect } from 'react-redux';
 import Page from 'plugins/rework/components/page/page';
 import './workpad.less';
 
-const Workpad = React.createClass({
+export default React.createClass({
   render() {
-    const {height, width, currentPage, pages} = this.props;
+    const {workpad, pages, elements, dataframes} = this.props;
+    const {height, width} = workpad;
+    const currentPage = workpad.page;
+    const orderedPages = workpad.pages;
 
     const style = {
-      height: this.props.height,
-      width: this.props.width,
-      backgroundColor: '#fff'
+      height: height,
+      width: width,
     };
 
-    const pageList = _.map(pages, (page, i) => {
+    const pageList = _.map(orderedPages, (pageId, i) => {
       const style = {display: i === currentPage ? 'block' : 'none' };
+      const page = pages[pageId];
       return (
         <div className="rework--workpad-page" key={page.id} style={style}>
-          <Page page={page}></Page>
+          <Page page={page} elements={elements}></Page>
         </div>
       );
     });
@@ -30,15 +33,3 @@ const Workpad = React.createClass({
     );
   }
 });
-
-function mapStateToProps(state) {
-  const {height, width, page, pages} = state.persistent.workpad;
-  return {
-    height: height,
-    width: width,
-    currentPage: page,
-    pages: pages
-  };
-}
-
-export default connect(mapStateToProps)(Workpad);

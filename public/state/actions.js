@@ -7,6 +7,10 @@ export const workpadHeight = createAction('WORKPAD_HEIGHT');
 export const workpadWidth = createAction('WORKPAD_WIDTH');
 export const workpadPage = createAction('WORKPAD_PAGE');
 
+export const elementPosition = createAction('ELEMENT_POSITION');
+export const elementSize = createAction('ELEMENT_POSITION');
+export const elementAngle = createAction('ELEMENT_POSITION');
+
 // You can return a promise here too.
 export function editorToggle(payload) {
   return (dispatch, getState) => {

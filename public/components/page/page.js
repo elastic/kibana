@@ -6,8 +6,13 @@ import Element from 'plugins/rework/components/element/element';
 
 export default React.createClass({
   render() {
-    const {id, props, elements, style} = this.props.page;
-    const elementComponents = _.map(elements, (element) => {
+    const {page, elements} = this.props;
+    const {id, style} = page;
+
+    const orderedElements = page.elements;
+
+    const elementComponents = _.map(orderedElements, (elementId) => {
+      const element = elements[elementId];
       const layout = _.pick(element, ['top', 'left', 'height', 'width']);
       return (
         <PageElement key={element.id} id={element.id} layout={layout} style={element.props._style}>
