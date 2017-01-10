@@ -125,7 +125,6 @@ class BaseOptimizer {
       module: {
         loaders: [
           { test: /\.less$/, loader: makeStyleLoader('less-loader') },
-          { test: /\.scss$/, loader: makeStyleLoader('sass-loader') },
           { test: /\.css$/, loader: makeStyleLoader() },
           { test: /\.jade$/, loader: 'jade-loader' },
           { test: /\.json$/, loader: 'json-loader' },

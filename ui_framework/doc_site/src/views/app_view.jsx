@@ -16,7 +16,7 @@ import {
 } from '../components';
 
 // Inject version into header.
-const pkg = require('json!../../../../../package.json');
+const pkg = require('json!../../../../package.json');
 
 export default class AppView extends Component {
 
