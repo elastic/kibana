@@ -6,11 +6,12 @@ import Interactable from 'plugins/rework/components/interactable/interactable';
 export default React.createClass({
   render() {
     const {id, layout, style} = this.props;
+    layout.transform = `rotate(${layout.angle}deg)`;
     const inlineStyle = Object.assign({}, layout, style, {position: 'absolute'});
     return (
-        <div className="rework--page-element" style={inlineStyle}>
-          {this.props.children}
-        </div>
+      <div className="rework--page-element" style={inlineStyle}>
+        {this.props.children}
+      </div>
     );
   }
 });

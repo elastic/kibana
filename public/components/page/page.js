@@ -13,7 +13,7 @@ export default React.createClass({
 
     const elementComponents = _.map(orderedElements, (elementId) => {
       const element = elements[elementId];
-      const layout = _.pick(element, ['top', 'left', 'height', 'width']);
+      const layout = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
       return (
         <PageElement key={element.id} id={element.id} layout={layout} style={element.props._style}>
           <Element type={element.type} properties={element.props}></Element>
