@@ -1,4 +1,5 @@
 import React from 'react';
+import './page.less';
 
 export default React.createClass({
   render() {
