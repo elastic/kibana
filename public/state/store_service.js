@@ -20,5 +20,8 @@ app.service('$store', (kbnVersion, basePath) => {
     applyMiddleware(thunk)
   );
 
+  // TODO: Sticking this here so I can dispatch events from the console;
+  window.store = store;
+
   return store;
 });
