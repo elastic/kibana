@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
+import CreateFilterProvider from 'ui/agg_types/buckets/create_filter/date_terms';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 
 export default function DateTermsAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const createFilter = Private(CreateFilterProvider);
 
   return new BucketAggType({
     name: 'dateterms',
@@ -15,8 +16,8 @@ export default function DateTermsAggDefinition(Private) {
     ordered: false,
     getKey: function (bucket, key, agg) {
       let prettyKey = key;
-      switch (agg.params.date_term) {
-        case 'month_of_year':
+      switch (agg.params.date_method) {
+        case 'monthOfYear':
           const monthIndex = key - 1;
           prettyKey = moment.monthsShort()[monthIndex];
           break;
@@ -27,8 +28,9 @@ export default function DateTermsAggDefinition(Private) {
       return fieldFormats.getDefaultInstance('string');
     },
     makeLabel: function (agg) {
-      return agg.params.field.displayName + ': ' + agg.params.date_term;
+      return agg.params.field.displayName + ': ' + agg.params.date_method;
     },
+    createFilter: createFilter,
     params: [
       {
         name: 'field',
@@ -39,9 +41,9 @@ export default function DateTermsAggDefinition(Private) {
         }
       },
       {
-        name: 'date_term',
+        name: 'date_method',
         write: _.noop,
-        default: 'day_of_week',
+        default: 'dayOfWeek',
         editor: require('ui/agg_types/controls/date_terms_select.html'),
         controller: function ($scope) {
 
@@ -50,20 +52,8 @@ export default function DateTermsAggDefinition(Private) {
       {
         name: 'script',
         write: function (agg, output) {
-          let dateMethod = 'dayOfWeek';
-          switch (agg.params.date_term) {
-            case 'month_of_year':
-              dateMethod = 'monthOfYear';
-              break;
-            case 'day_of_week':
-              dateMethod = 'dayOfWeek';
-              break;
-            case 'hour_of_day':
-              dateMethod = 'hourOfDay';
-              break;
-          }
           output.params.script = {
-            inline: 'doc[\'' + agg.params.field.name + '\'].date.' + dateMethod,
+            inline: 'doc[\'' + agg.params.field.name + '\'].date.' + agg.params.date_method,
             lang: 'expression'
           };
         }
@@ -72,14 +62,14 @@ export default function DateTermsAggDefinition(Private) {
         name: 'size',
         write: function (agg, output) {
           let size = 10;
-          switch (agg.params.date_term) {
-            case 'month_of_year':
+          switch (agg.params.date_method) {
+            case 'monthOfYear':
               size = 12;
               break;
-            case 'day_of_week':
+            case 'dayOfWeek':
               size = 7;
               break;
-            case 'hour_of_day':
+            case 'hourOfDay':
               size = 24;
               break;
           }
