@@ -4,7 +4,7 @@
 Each set of data loaded to Elasticsearch has an index pattern. In the previous section, the
 Shakespeare data set has an index named `shakespeare`, and the accounts  data set has an index named `bank`. An _index
 pattern_ is a string with optional wildcards that can match multiple indices. For example, in the common logging use
-case, a typical index name contains the date in MM-DD-YYYY format, and an index pattern for May would look something
+case, a typical index name contains the date in YYYY.MM.DD format, and an index pattern for May would look something
 like `logstash-2015.05*`.
 
 For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and
