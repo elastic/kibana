@@ -8,6 +8,8 @@ import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle.
 import Workpad from 'plugins/rework/components/workpad/workpad.js';
 import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar.js';
 import Centered from 'plugins/rework/components/centered/centered.js';
+import PageControl from 'plugins/rework/components/page_control/page_control';
+
 
 import './workspace.less';
 
@@ -29,7 +31,9 @@ const Workspace = React.createClass({
         </LeftSidebar>
 
         <Centered>
+          <PageControl direction='previous'></PageControl>
           <Workpad></Workpad>
+          <PageControl direction='next'></PageControl>
         </Centered>
       </div>
     );

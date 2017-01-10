@@ -15,3 +15,19 @@ export function editorToggle(payload) {
     dispatch(toggleAction);
   };
 };
+
+export function workpadPageNext() {
+  return (dispatch, getState) => {
+    const {page, pages} = getState().persistent.workpad;
+    const newPage = page + 1;
+    if (newPage < pages.length) dispatch(workpadPage(newPage));
+  };
+}
+
+export function workpadPagePrevious() {
+  return (dispatch, getState) => {
+    const {page, pages} = getState().persistent.workpad;
+    const newPage = page - 1;
+    if (newPage >= 0) dispatch(workpadPage(newPage));
+  };
+}

@@ -16,15 +16,13 @@ function rootReducer(state = {}, action) {
       return setTransient('editor', false);
     case 'EDITOR_OPEN':
       return setTransient('editor', true);
-
     case 'WORKPAD_HEIGHT':
-      console.log('DONE');
-      const state = setWorkpad('height', action.payload);
-      return state;
+      return setWorkpad('height', action.payload);
     case 'WORKPAD_WIDTH':
       return setWorkpad('width', action.payload);
     case 'WORKPAD_PAGE':
       return setWorkpad('page', action.payload);
+
     default:
       return state;
   }

@@ -2,12 +2,11 @@ import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import Page from 'plugins/rework/components/page/page';
-
 import './workpad.less';
 
 const Workpad = React.createClass({
   render() {
-    const {height, width, page, pages} = this.props;
+    const {height, width, currentPage, pages} = this.props;
 
     const style = {
       height: this.props.height,
@@ -15,9 +14,14 @@ const Workpad = React.createClass({
       backgroundColor: '#fff'
     };
 
-    const pageList = _.map(pages, (page) => (
-      <Page key={page.id} page={page}></Page>
-    ));
+    const pageList = _.map(pages, (page, i) => {
+      const style = {display: i === currentPage ? 'block' : 'none' };
+      return (
+        <div className="rework--workpad-page" key={page.id} style={style}>
+          <Page page={page}></Page>
+        </div>
+      );
+    });
 
     return (
       <div className="rework--workpad" style={style}>
@@ -32,7 +36,7 @@ function mapStateToProps(state) {
   return {
     height: height,
     width: width,
-    page: page,
+    currentPage: page,
     pages: pages
   };
 }
