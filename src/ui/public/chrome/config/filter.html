@@ -1,7 +1,6 @@
 <kbn-timepicker
-  from="timefilter.time.from"
-  to="timefilter.time.to"
-  mode="timefilter.time.mode"
+  time="timefilter.time"
   active-tab="'filter'"
-  interval="timefilter.refreshInterval">
+  interval="timefilter.refreshInterval"
+  on-select="kbnTopNav.close('filter')">
 </kbn-timepicker>

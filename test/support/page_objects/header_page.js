@@ -102,9 +102,6 @@ export default class HeaderPage {
     })
     .then(() => {
       return this.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return this.clickTimepicker();
     });
   }
 

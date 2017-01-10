@@ -8,20 +8,20 @@
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
-            <li ng-class="{active: mode === 'quick' }">
+            <li ng-class="{active: time.mode === 'quick' }">
               <a ng-click="setMode('quick')">quick</a>
             </li>
-            <li ng-class="{active: mode === 'relative' }">
+            <li ng-class="{active: time.mode === 'relative' }">
               <a ng-click="setMode('relative')">relative</a>
             </li>
-            <li ng-class="{active: mode === 'absolute' }">
+            <li ng-class="{active: time.mode === 'absolute' }">
               <a ng-click="setMode('absolute')">absolute</a>
             </li>
           </ul>
         </div>
 
         <div class="col-md-10">
-          <div ng-switch on="mode" class="container-fluid">
+          <div ng-switch on="time.mode" class="container-fluid">
             <div ng-switch-when="quick">
 
               <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
