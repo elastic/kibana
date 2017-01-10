@@ -70,7 +70,7 @@ export default function HistogramVisType(Private) {
         title: 'Dot Size',
         min: 0,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
       },
       {
         group: 'buckets',

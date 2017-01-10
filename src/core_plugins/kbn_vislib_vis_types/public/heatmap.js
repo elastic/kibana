@@ -65,7 +65,7 @@ export default function HeatmapVisType(Private) {
         title: 'Value',
         min: 1,
         max: 1,
-        aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev'],
+        aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]

@@ -20,15 +20,8 @@ describe('metric vis', function () {
   it('should set the metric label and value', function () {
     $scope.processTableGroups({
       tables: [{
-        columns: [{title: 'Count'}],
-        rows: [[4301021]],
-        aggConfig: function () {
-          return {
-            fieldFormatter: function () {
-              return formatter;
-            }
-          };
-        }
+        columns: [{ title: 'Count' }],
+        rows: [[ { toString: () => formatter(4301021) } ]]
       }]
     });
 
@@ -44,14 +37,7 @@ describe('metric vis', function () {
           {title: '1st percentile of bytes'},
           {title: '99th percentile of bytes'}
         ],
-        rows: [[182, 445842.4634666484]],
-        aggConfig: function () {
-          return {
-            fieldFormatter: function () {
-              return formatter;
-            }
-          };
-        }
+        rows: [[ { toString: () => formatter(182) }, { toString: () => formatter(445842.4634666484) } ]]
       }]
     });
 

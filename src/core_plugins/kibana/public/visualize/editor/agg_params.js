@@ -82,11 +82,18 @@ uiModules
         // build collection of agg params html
         type.params.forEach(function (param, i) {
           let aggParam;
+          let fields;
+          // if field param exists, compute allowed fields
+          if (param.name === 'field') {
+            fields = $aggParamEditorsScope.indexedFields;
+          } else if (param.type === 'field') {
+            fields = $aggParamEditorsScope[`${param.name}Options`] = getIndexedFields(param);
+          }
 
-          if ($aggParamEditorsScope.indexedFields) {
-            const hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
+          if (fields) {
+            const hasIndexedFields = fields.length > 0;
             const isExtraParam = i > 0;
-            if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if their are no indexed fields.
+            if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if there are no indexed fields.
               return;
             }
           }
@@ -132,6 +139,31 @@ uiModules
         .attr(attrs)
         .append(param.editor)
         .get(0);
+      }
+
+      function getIndexedFields(param) {
+        let fields = _.filter($scope.agg.vis.indexPattern.fields.raw, 'aggregatable');
+        const fieldTypes = param.filterFieldTypes;
+
+        if (fieldTypes) {
+          const filter = _.isFunction(fieldTypes) ? fieldTypes.bind(this, $scope.agg.vis) : fieldTypes;
+          fields = $filter('fieldType')(fields, filter);
+          fields = $filter('orderBy')(fields, ['type', 'name']);
+        }
+
+        return new IndexedArray({
+
+          /**
+           * @type {Array}
+           */
+          index: ['name'],
+
+          /**
+           * [group description]
+           * @type {Array}
+           */
+          initialSet: fields
+        });
       }
     }
   };
