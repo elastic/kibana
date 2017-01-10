@@ -8,21 +8,46 @@ export default {
       pages: [
         {
           id: 'foo',
-          type: 'json',
-          props: {
-            _style: {
-              backgroundColor: '#c66'
+          style: {
+            backgroundColor: '#c66'
+          },
+          elements: [
+            {
+              id: '345263-f275g9w-43523-34-2524',
+              type: 'json',
+              height: 100,
+              width: 200,
+              top: 20,
+              left: 30,
+              props: {}
+            },
+            {
+              id: '34785fh2-425-22-22524',
+              type: 'table',
+              height: 100,
+              width: 100,
+              top: 200,
+              left: 200,
+              props: {}
             }
-          }
+          ],
         },
         {
           id: 'bar',
-          type: 'json',
-          props: {
-            _style: {
-              backgroundColor: '#6c6'
+          style: {
+            backgroundColor: '#6c6'
+          },
+          elements: [
+            {
+              id: '43859-34534252452-2345-34-2524',
+              type: 'table',
+              height: 100,
+              width: 100,
+              top: 300,
+              left: 50,
+              props: {}
             }
-          }
+          ],
         }
       ],
       height: 600,
