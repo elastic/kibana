@@ -1,0 +1,49 @@
+@import (reference) "~plugins/rework/main.less";
+
+.reframe--positionable-actions {
+  display: block;
+  position: absolute;
+  color: @kibanaBlue2;
+  top: -35px;
+  left: 50%;
+  margin-left: -12px;
+  width: 75px;
+  text-align: center;
+  line-height: 25px;
+}
+
+.reframe--positionable-action {
+  padding: 2.5px 5px;
+  height: 20px;
+  width: 20px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.reframe--positionable-move {
+  cursor: move;
+}
+
+.reframe--positionable-resize {
+  display: block;
+  position: absolute;
+  height: 10px;
+  width: 10px;
+  background-color: #fff;
+  border: 2px solid @kibanaBlue2;
+  border-radius: 50%;
+
+  &.active, &:hover {
+    background-color: @kibanaBlue2;
+  }
+
+  &-n {top: -4px; left: 50%; margin-left: -4px;}
+  &-e {top: 50%; right: -4px; margin-top: -5px;}
+  &-s {bottom: -4px; left: 50%; margin-left: -4px;}
+  &-w {top: 50%; left: -4px; margin-top: -5px;}
+
+  &-nw {top: -4px; left: -4px;}
+  &-ne {top: -4px; right: -4px;}
+  &-se {bottom: -4px; right: -4px;}
+  &-sw {bottom: -4px; left: -4px;}
+}

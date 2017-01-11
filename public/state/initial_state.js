@@ -32,9 +32,9 @@ export default {
         id: 'element-0',
         type: 'json',
         height: 100,
-        width: 200,
-        top: 20,
-        left: 30,
+        width: 100,
+        top: 0,
+        left: 0,
         angle: 0,
         props: {}
       },
@@ -43,8 +43,8 @@ export default {
         type: 'table',
         height: 100,
         width: 100,
-        top: 200,
-        left: 200,
+        top: 300,
+        left: 300,
         angle: 30,
         props: {}
       },
