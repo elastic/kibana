@@ -12,16 +12,16 @@ export default React.createClass({
 
     rotate(elem, {
       on: this.props.rotate,
-      handle: '.reframe--positionable-rotate-handle'
+      handle: '.rework--positionable-rotate-handle'
     });
 
     resize(elem, {
       on: this.props.resize,
       sides: {
-        left:   '.reframe--positionable-resize-nw, .reframe--positionable-resize-sw, .reframe--positionable-resize-w',
-        top:    '.reframe--positionable-resize-nw, .reframe--positionable-resize-ne, .reframe--positionable-resize-n',
-        right:  '.reframe--positionable-resize-ne, .reframe--positionable-resize-se, .reframe--positionable-resize-e',
-        bottom: '.reframe--positionable-resize-sw, .reframe--positionable-resize-se, .reframe--positionable-resize-s'
+        left:   '.rework--positionable-resize-nw, .rework--positionable-resize-sw, .rework--positionable-resize-w',
+        top:    '.rework--positionable-resize-nw, .rework--positionable-resize-ne, .rework--positionable-resize-n',
+        right:  '.rework--positionable-resize-ne, .rework--positionable-resize-se, .rework--positionable-resize-e',
+        bottom: '.rework--positionable-resize-sw, .rework--positionable-resize-se, .rework--positionable-resize-s'
       }
     });
   },
@@ -41,20 +41,20 @@ export default React.createClass({
         <div className="rework--positionable"
           ref="positionableWrapper"
           style={newStyle}>
-          <div className="reframe--positionable-actions">
-            <div className="reframe--positionable-action reframe--positionable-rotate-handle">
-              <i className="fa fa-undo reframe--positionable-rotate-handle"></i>
+          <div className="rework--positionable-actions">
+            <div className="rework--positionable-action rework--positionable-rotate-handle">
+              <i className="fa fa-undo rework--positionable-rotate-handle"></i>
             </div>
           </div>
 
-          <div className="reframe--positionable-resize reframe--positionable-resize-nw"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-ne"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-se"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-sw"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-n"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-e"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-s"></div>
-          <div className="reframe--positionable-resize reframe--positionable-resize-w"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-nw"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-ne"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-se"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-sw"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-n"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-e"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-s"></div>
+          <div className="rework--positionable-resize rework--positionable-resize-w"></div>
 
           {child}
         </div>
