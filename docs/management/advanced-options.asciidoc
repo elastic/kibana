@@ -58,6 +58,7 @@ values are shown.
 truncation.
 `indexPattern:fieldMapping:lookBack`:: The value of this property sets the number of recent matching patterns to query the
 field mapping for index patterns with names that contain timestamps.
+`indexPattern:placeholder`:: The default placeholder value used when adding a new index pattern to Kibana.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "_default_".
 `format:number:defaultPattern`:: Default numeral format for the "number" format.
