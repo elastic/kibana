@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import Samples from './samples';
+
 module.exports = function (kbnServer, server, config) {
   let lastReport = Date.now();
 
   kbnServer.metrics = new Samples(12);
+  kbnServer.stats = {};
 
   server.plugins['even-better'].monitor.on('ops', function (event) {
     const now = Date.now();
@@ -23,5 +25,16 @@ module.exports = function (kbnServer, server, config) {
       requestsPerSecond: requestsPerSecond
     });
 
+    // Creates a status object for this node
+    kbnServer.stats = {
+      heap: {
+        total: _.get(event, 'psmem.heapTotal'),
+        used: _.get(event, 'psmem.heapUsed'),
+        rss: _.get(event, 'psmem.rss'),
+      },
+      connections: _.get(event, ['concurrents', port]),
+      requests: _.get(event, ['requests', port]),
+    };
   });
 };
+

@@ -28,6 +28,26 @@ export default function (kbnServer, server, config) {
     }
   }));
 
+  // Outputs the status object under /api/_node
+  server.route(wrapAuth({
+    method: 'GET',
+    path: '/api/_node',
+    handler: function (request, reply) {
+      return reply({
+        name: config.get('server.name'),
+        version: config.get('pkg.version'),
+        build: {
+          num: config.get('pkg.buildNum'),
+          sha: config.get('pkg.buildSha'),
+        },
+        uuid: config.get('server.uuid'),
+        heap: kbnServer.stats.heap,
+        connections: kbnServer.stats.connections,
+        requests: kbnServer.stats.requests,
+      });
+    }
+  }));
+
   server.decorate('reply', 'renderStatusPage', async function () {
     const app = kbnServer.uiExports.getHiddenApp('status_page');
     const response = await getResponse(this);
