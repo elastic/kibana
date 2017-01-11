@@ -156,8 +156,6 @@ export const resize = (elem, config) => {
       .keys()
       .value();
 
-    console.log(config.sides, e.target);
-
     const originalTarget = $(e.target);
     const originalEvent = e;
     const originalPointer = {
