@@ -302,7 +302,7 @@ export default function defaultSettingsProvider() {
         'handle. To counter-act this we are testing if storing parts of the URL in ' +
         'sessions storage could help. Please let us know how it goes!'
     },
-    'indexPatternPlaceholder': {
+    'indexPattern:placeholder': {
       value: 'logstash-*',
       description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
     }
