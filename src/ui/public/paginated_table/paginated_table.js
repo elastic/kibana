@@ -53,10 +53,10 @@ uiModules
       };
 
       self.rowsToShow = function (numRowsPerPage, actualNumRowsOnThisPage) {
-        if (($scope.showBlankRows === undefined) || $scope.showBlankRows) {
-          return numRowsPerPage;
-        } else {
+        if ($scope.showBlankRows === false) {
           return actualNumRowsOnThisPage;
+        } else {
+          return numRowsPerPage;
         }
       };
 
