@@ -1,34 +1,18 @@
 import React from 'react';
-import _ from 'lodash';
-import { connect } from 'react-redux';
-import Page from 'plugins/rework/components/page/page';
-import './workpad.less';
 
 export default React.createClass({
   render() {
-    const {workpad, pages, elements, dataframes} = this.props;
-    const {height, width} = workpad;
-    const currentPage = workpad.page;
-    const orderedPages = workpad.pages;
+    const {height, width} = this.props.workpad;
 
     const style = {
       height: height,
       width: width,
+      'box-shadow': '0px 0px 5px 0px rgba(0,0,0,0.5)'
     };
-
-    const pageList = _.map(orderedPages, (pageId, i) => {
-      const style = {display: i === currentPage ? 'block' : 'none' };
-      const page = pages[pageId];
-      return (
-        <div className="rework--workpad-page" key={page.id} style={style}>
-          <Page page={page} elements={elements}></Page>
-        </div>
-      );
-    });
 
     return (
       <div className="rework--workpad" style={style}>
-        {pageList}
+        {this.props.children}
       </div>
     );
   }
