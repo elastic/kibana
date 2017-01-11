@@ -7,11 +7,57 @@
  *    button elements and anchor tags.
  * 2. Fit MicroButton inside of Table rows without pushing them taller.
  */
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ */
 * {
   box-sizing: border-box; }
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
+
+.kuiBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+.kuiBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiBarSection:first-child {
+    margin-left: 0; }
+  .kuiBarSection:last-child {
+    margin-right: 0; }
+  .kuiBarSection:only-child {
+    margin-left: auto;
+    /* 1 */ }
+  .kuiBarSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+  .kuiBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
 
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -970,6 +1016,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -984,9 +1034,6 @@ body {
       color: #a7a7a7;
       background-color: #F3F3F3; }
 
-/**
- * 1. Put 10px of space between each child.
- */
 .kuiToolBarSection {
   display: -webkit-box;
   display: -webkit-flex;
@@ -998,8 +1045,18 @@ body {
           align-items: center;
   margin-left: 25px;
   margin-right: 25px; }
+  .kuiToolBarSection:first-child {
+    margin-left: 0; }
   .kuiToolBarSection:last-child {
     margin-right: 0; }
+  .kuiToolBarSection:only-child {
+    margin-left: auto;
+    /* 1 */ }
+  .kuiToolBarSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
   .kuiToolBarSection > * + * {
     margin-left: 10px;
     /* 1 */ }
@@ -1009,6 +1066,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -1018,9 +1079,6 @@ body {
   background-color: #ffffff;
   border: 2px solid #E4E4E4; }
 
-/**
- * 1. Put 10px of space between each child.
- */
 .kuiToolBarFooterSection {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1037,7 +1095,13 @@ body {
   .kuiToolBarFooterSection:last-child {
     margin-right: 0; }
   .kuiToolBarFooterSection:only-child {
-    margin-left: auto; }
+    margin-left: auto;
+    /* 1 */ }
+  .kuiToolBarFooterSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
   .kuiToolBarFooterSection > * + * {
     margin-left: 10px;
     /* 1 */ }
