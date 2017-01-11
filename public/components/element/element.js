@@ -1,9 +1,8 @@
 import React from 'react';
-import _ from 'lodash';
 
 export default React.createClass({
   render() {
-    const {type, properties} = this.props;
+    const {type, props} = this.props.element;
     return (
       <div className="rework--element">
         <h3>{type}</h3>
