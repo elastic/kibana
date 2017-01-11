@@ -44,7 +44,7 @@ export default function HistogramVisType(Private) {
         title: 'Slice Size',
         min: 1,
         max: 1,
-        aggFilter: ['sum', 'count', 'cardinality'],
+        aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
