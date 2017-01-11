@@ -1,22 +1,16 @@
 import React from 'react';
-import _ from 'lodash';
-import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { editorToggle } from 'plugins/rework/state/actions';
 
-const EditorToggle = React.createClass({
-  editorToggle() {
-    const { dispatch } = this.props;
-    dispatch(editorToggle());
-  },
+export default React.createClass({
   render() {
+    const {toggle, status} = this.props;
     const iconClass = classnames({
-      'fa-chevron-left': this.props.editor,
-      'fa-chevron-right': !this.props.editor,
+      'fa-chevron-left': status,
+      'fa-chevron-right': !status,
       'fa': true
     });
     return (
-        <a className="rework--editor-toggle" onClick={this.editorToggle}>
+        <a className="rework--editor-toggle" onClick={toggle}>
           <div>
             <i className={iconClass}></i>
           </div>
@@ -24,11 +18,3 @@ const EditorToggle = React.createClass({
     );
   }
 });
-
-function mapStateToProps(state) {
-  return {
-    editor: state.transient.editor
-  };
-}
-
-export default connect(mapStateToProps)(EditorToggle);
