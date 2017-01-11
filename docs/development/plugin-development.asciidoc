@@ -8,7 +8,6 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 
 * <<development-plugin-resources>>
 * <<development-uiexports>>
-* <<development-elasticsearch>>
 
 
 include::plugin/development-plugin-resources.asciidoc[]

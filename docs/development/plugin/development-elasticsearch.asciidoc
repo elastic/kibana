@@ -1,5 +1,5 @@
 [[development-elasticsearch]]
-=== Communicating with elasticsearch
+=== Communicating with Elasticsearch
 
 Kibana exposes two clients on the server and browser for communicating with elasticsearch.
 There is an 'admin' client which is used for managing Kibana's state, and a 'data' client for all

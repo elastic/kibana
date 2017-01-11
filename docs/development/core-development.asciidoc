@@ -4,6 +4,7 @@
 * <<development-basepath>>
 * <<development-dependencies>>
 * <<development-modules>>
+* <<development-elasticsearch>>
 
 include::core/development-basepath.asciidoc[]
 
