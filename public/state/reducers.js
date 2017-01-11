@@ -29,20 +29,29 @@ function rootReducer(state = {}, action) {
       }});
   };
 
-  switch (action.type) {
+  const { payload, type } = action;
+  switch (type) {
     case 'EDITOR_CLOSE':
       return setTransient('editor', false);
     case 'EDITOR_OPEN':
       return setTransient('editor', true);
     case 'WORKPAD_HEIGHT':
-      return setWorkpad('height', action.payload);
+      return setWorkpad('height', payload);
     case 'WORKPAD_WIDTH':
-      return setWorkpad('width', action.payload);
+      return setWorkpad('width', payload);
     case 'WORKPAD_PAGE':
-      return setWorkpad('page', action.payload);
+      return setWorkpad('page', payload);
 
     case 'ELEMENT_ANGLE':
-      return setElement(action.payload.id, 'angle', action.payload.angle);
+      return setElement(payload.id, 'angle', payload.value);
+    case 'ELEMENT_HEIGHT':
+      return setElement(payload.id, 'height', payload.value);
+    case 'ELEMENT_WIDTH':
+      return setElement(payload.id, 'width', payload.value);
+    case 'ELEMENT_TOP':
+      return setElement(payload.id, 'top', payload.value);
+    case 'ELEMENT_LEFT':
+      return setElement(payload.id, 'left', payload.value);
 
     default:
       return state;
