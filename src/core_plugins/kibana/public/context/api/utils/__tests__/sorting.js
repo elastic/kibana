@@ -8,7 +8,7 @@ import {
 
 
 describe('context app', function () {
-  describe('reverseQuerySort', function () {
+  describe('function reverseQuerySort', function () {
     it('should reverse all the `sort` property values', function () {
       expect(reverseQuerySort({
         sort: [
@@ -28,7 +28,7 @@ describe('context app', function () {
     });
   });
 
-  describe('reverseSortDirection', function () {
+  describe('function reverseSortDirection', function () {
     it('should reverse a direction given as a string', function () {
       expect(reverseSortDirection('asc')).to.equal('desc');
       expect(reverseSortDirection('desc')).to.equal('asc');
@@ -47,7 +47,7 @@ describe('context app', function () {
     });
   });
 
-  describe('reverseSortDirective', function () {
+  describe('function reverseSortDirective', function () {
     it('should return direction `asc` when given just `_score`', function () {
       expect(reverseSortDirective('_score')).to.deep.equal({ _score: 'asc' });
     });

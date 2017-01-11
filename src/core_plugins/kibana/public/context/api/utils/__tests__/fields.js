@@ -4,7 +4,7 @@ import { addComputedFields } from 'plugins/kibana/context/api/utils/fields';
 
 
 describe('context app', function () {
-  describe('addComputedFields', function () {
+  describe('function addComputedFields', function () {
     it('should add the `script_fields` property defined in the given index pattern', function () {
       const getComputedFields = () => ({
         scriptFields: {
@@ -34,6 +34,13 @@ describe('context app', function () {
 
       expect(addComputedFields({ getComputedFields }, {})).to.have.property('stored_fields')
         .that.is.deep.equal(getComputedFields().storedFields);
+    });
+
+    it('should preserve other properties of the query', function () {
+      const getComputedFields = () => ({});
+
+      expect(addComputedFields({ getComputedFields }, { property1: 'value1' }))
+        .to.have.property('property1', 'value1');
     });
   });
 });
