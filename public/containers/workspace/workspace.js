@@ -42,7 +42,7 @@ const Workspace = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const  {workpad, pages, elements, dataframes, editor} = this.props;
+    const  {workpad, pages, elements, dataframes, editor, resolvedArgs} = this.props;
 
     return (
       <div className="rework--workspace">
@@ -67,6 +67,7 @@ const Workspace = React.createClass({
                   <Page key={pageId} page={page}>
                     {page.elements.map((elementId) => {
                       const element = elements[elementId];
+                      const args = resolvedArgs[elementId];
                       const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
                       const {resizeMove, rotate} = this;
                       return (
@@ -76,7 +77,7 @@ const Workspace = React.createClass({
                           move={resizeMove(elementId)}
                           resize={resizeMove(elementId)}
                           rotate={rotate(elementId)}>
-                          <Element element={element}></Element>
+                          <Element type={element.type} args={args}></Element>
                         </Positionable>
                       );
                     })}
@@ -98,6 +99,7 @@ function mapStateToProps(state) {
     workpad: state.persistent.workpad,
     pages: state.persistent.pages,
     elements: state.persistent.elements,
+    resolvedArgs: state.transient.resolvedArgs
   };
 }
 
