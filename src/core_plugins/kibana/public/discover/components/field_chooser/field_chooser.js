@@ -188,7 +188,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
             schema: 'segment',
             params: {
               field: field.name,
-              size: config.get('discover:aggs:terms:size', 20),
+              size: config.get('discover:aggs:terms:size'),
               orderBy: '2'
             }
           };

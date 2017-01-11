@@ -301,6 +301,12 @@ export default function defaultSettingsProvider() {
       description: 'The URL can sometimes grow to be too large for some browsers to ' +
         'handle. To counter-act this we are testing if storing parts of the URL in ' +
         'sessions storage could help. Please let us know how it goes!'
+    },
+    'discover:aggs:terms:size': {
+      value: 20,
+      type: 'number',
+      description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
+      'button, in the field drop downs, in the discover sidebar.'
     }
   };
 }
