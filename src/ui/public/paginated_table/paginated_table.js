@@ -15,7 +15,7 @@ uiModules
       rows: '=',
       columns: '=',
       perPage: '=?',
-      showBlankRowsAtBottom: '=?',
+      showBlankRows: '=?',
       sortHandler: '=?',
       sort: '=?',
       showSelector: '=?',
@@ -53,7 +53,7 @@ uiModules
       };
 
       self.rowsToShow = function (numRowsPerPage, actualNumRowsOnThisPage) {
-        if (($scope.showBlankRowsAtBottom === undefined) || $scope.showBlankRowsAtBottom) {
+        if (($scope.showBlankRows === undefined) || $scope.showBlankRows) {
           return numRowsPerPage;
         } else {
           return actualNumRowsOnThisPage;

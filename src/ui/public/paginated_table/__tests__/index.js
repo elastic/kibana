@@ -47,18 +47,18 @@ describe('paginated table', function () {
     };
   };
 
-  const renderTable = function (cols, rows, perPage, sort, showBlankRowsAtBottom) {
+  const renderTable = function (cols, rows, perPage, sort, showBlankRows) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
     $scope.sort = sort || {};
-    $scope.showBlankRowsAtBottom = showBlankRowsAtBottom;
+    $scope.showBlankRows = showBlankRows;
 
     const template = '<paginated-table columns="cols"'
       + ' rows="rows"'
       + ' per-page="perPage"'
       + ' sort="sort"'
-      + ' show-blank-rows-at-bottom="showBlankRowsAtBottom">';
+      + ' show-blank-rows="showBlankRows">';
     $el = $compile(template)($scope);
 
     $scope.$digest();
