@@ -13,7 +13,6 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import PersistedStateProvider from 'ui/persisted_state/persisted_state';
-import EventsProvider from 'ui/events';
 
 export default function VisFactory(Notifier, Private) {
   const aggTypes = Private(AggTypesIndexProvider);

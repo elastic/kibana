@@ -9,7 +9,7 @@ import BluebirdPromise from 'bluebird';
 
 import SavedObjectFactory from '../saved_object/saved_object';
 import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
-import DocSourceProvider from '../data_source/doc_source';
+import DocSourceProvider from '../data_source/admin_doc_source';
 
 import { stubMapper } from 'test_utils/stub_mapper';
 
@@ -19,8 +19,10 @@ describe('Saved Object', function () {
 
   let SavedObject;
   let IndexPattern;
-  let esStub;
+  let esAdminStub;
+  let esDataStub;
   let DocSource;
+  let window;
 
   /**
    * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
@@ -29,7 +31,7 @@ describe('Saved Object', function () {
     // Allows the type 'dashboard' to be used.
     // Unfortunately we need to use bluebird here instead of native promises because there is
     // a call to finally.
-    sinon.stub(esStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
+    sinon.stub(esAdminStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
       '.kibana' : {
         'mappings': {
           'dashboard': {}
@@ -38,8 +40,8 @@ describe('Saved Object', function () {
     }));
 
     // Necessary to avoid a timeout condition.
-    sinon.stub(esStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-    sinon.stub(esStub.indices, 'refresh').returns(BluebirdPromise.resolve());
+    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
+    sinon.stub(esAdminStub.indices, 'refresh').returns(BluebirdPromise.resolve());
   }
 
   /**
@@ -66,8 +68,10 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
-    sinon.stub(esStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
-    sinon.stub(esStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(esDataStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(esDataStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
   }
 
   /**
@@ -83,18 +87,112 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (es, Private) {
+  beforeEach(ngMock.module('kibana',
+
+    // The default implementation of safeConfirm uses $timeout which will cause
+    // the test environment to hang.
+    function ($provide) {
+      const overrideSafeConfirm = message => window.confirm(message) ? Promise.resolve() : Promise.reject();
+      $provide.decorator('safeConfirm', () => overrideSafeConfirm);
+    })
+  );
+  beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
     SavedObject = Private(SavedObjectFactory);
     IndexPattern = Private(IndexPatternFactory);
-    esStub = es;
+    esAdminStub = esAdmin;
+    esDataStub = es;
     DocSource = Private(DocSourceProvider);
+    window = $window;
 
     mockEsService();
     stubMapper(Private);
   }));
 
   describe('save', function () {
+    describe('with confirmOverwrite', function () {
+
+      function stubConfirmOverwrite() {
+        window.confirm = sinon.stub().returns(true);
+        sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+      }
+
+      describe('when true', function () {
+        it('requests confirmation and updates on yes response', function () {
+          stubESResponse(getMockedDocResponse('myId'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+            stubConfirmOverwrite();
+
+            savedObject.lastSavedTitle = 'original title';
+            savedObject.title = 'new title';
+            return savedObject.save({ confirmOverwrite : true })
+              .then(() => {
+                expect(window.confirm.called).to.be(true);
+                expect(savedObject.id).to.be('myId');
+                expect(savedObject.isSaving).to.be(false);
+                expect(savedObject.lastSavedTitle).to.be('new title');
+                expect(savedObject.title).to.be('new title');
+              });
+          });
+        });
+
+        it('does not update on no response', function () {
+          stubESResponse(getMockedDocResponse('HI'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
+            window.confirm = sinon.stub().returns(false);
+            sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+            sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+
+            savedObject.lastSavedTitle = 'original title';
+            savedObject.title = 'new title';
+            return savedObject.save({ confirmOverwrite : true })
+              .then(() => {
+                expect(savedObject.id).to.be('HI');
+                expect(savedObject.isSaving).to.be(false);
+                expect(savedObject.lastSavedTitle).to.be('original title');
+                expect(savedObject.title).to.be('new title');
+              });
+          });
+        });
+
+        it('handles doIndex failures', function () {
+          stubESResponse(getMockedDocResponse('myId'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+            stubConfirmOverwrite();
+            esAdminStub.index.restore();
+            esDataStub.index.restore();
+
+            sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.reject());
+            sinon.stub(esDataStub, 'index').returns(BluebirdPromise.reject());
+
+            return savedObject.save({ confirmOverwrite : true })
+              .then(() => {
+                expect(true).to.be(false); // Force failure, the save should not succeed.
+              })
+              .catch(() => {
+                expect(window.confirm.called).to.be(true);
+              });
+          });
+        });
+      });
+
+      it('when false does not request overwrite', function () {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+          sinon.stub(DocSource.prototype, 'doCreate', function () {
+            return BluebirdPromise.reject({ 'origError' : { 'status' : 409 } });
+          });
+
+          stubConfirmOverwrite();
+          return savedObject.save({ confirmOverwrite : false })
+            .then(() => {
+              expect(window.confirm.called).to.be(false);
+            });
+        });
+      });
+    });
+
     describe(' with copyOnSave', function () {
       it('as true creates a copy on save success', function () {
         const mockDocResponse = getMockedDocResponse('myId');

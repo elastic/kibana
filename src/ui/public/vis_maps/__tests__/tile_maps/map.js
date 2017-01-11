@@ -24,14 +24,16 @@ import VislibVisualizationsMapProvider from 'ui/vis_maps/visualizations/_map';
 //   'Heatmap'
 // ];
 
-describe('TileMap Map Tests', function () {
+describe('tilemaptest - TileMap Map Tests', function () {
   const $mockMapEl = $('<div>');
   let TileMapMap;
+  let tilemapSettings;
   const leafletStubs = {};
   const leafletMocks = {};
 
+
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     // mock parts of leaflet
     leafletMocks.tileLayer = { on: sinon.stub() };
     leafletMocks.map = { on: sinon.stub() };
@@ -41,13 +43,22 @@ describe('TileMap Map Tests', function () {
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
     TileMapMap = Private(VislibVisualizationsMapProvider);
+
+    tilemapSettings = $injector.get('tilemapSettings');
+
   }));
+
+  async function loadTileMapSettings() {
+    await tilemapSettings.loadSettings();
+  }
 
   describe('instantiation', function () {
     let map;
     let createStub;
 
-    beforeEach(function () {
+    beforeEach(loadTileMapSettings);
+
+    beforeEach(async function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
@@ -55,19 +66,13 @@ describe('TileMap Map Tests', function () {
     it('should create the map', function () {
       expect(createStub.callCount).to.equal(1);
     });
-
-    it('should add zoom controls', function () {
-      const mapOptions = createStub.firstCall.args[0];
-
-      expect(mapOptions).to.be.an('object');
-      if (mapOptions.zoomControl) expect(mapOptions.zoomControl).to.be.ok();
-      else expect(mapOptions.zoomControl).to.be(undefined);
-    });
   });
 
   describe('createMap', function () {
     let map;
     let mapStubs;
+
+    beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
       mapStubs = {
@@ -78,7 +83,7 @@ describe('TileMap Map Tests', function () {
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
-    it('should create the create leaflet objects', function () {
+    it('should create leaflet objects for tileLayer and map', function () {
       expect(leafletStubs.tileLayer.callCount).to.equal(1);
       expect(leafletStubs.map.callCount).to.equal(1);
 
@@ -96,21 +101,29 @@ describe('TileMap Map Tests', function () {
 
     it('should call destroy only if a map exists', function () {
       expect(mapStubs.destroy.callCount).to.equal(0);
-      map._createMap({});
+      map._createMap();
       expect(mapStubs.destroy.callCount).to.equal(1);
     });
 
     it('should create a WMS layer if WMS is enabled', function () {
       expect(L.tileLayer.wms.called).to.be(false);
       map = new TileMapMap($mockMapEl, geoJsonData, { attr: { wms: { enabled: true } } });
-      map._createMap({});
+      map._createMap();
       expect(L.tileLayer.wms.called).to.be(true);
-      L.tileLayer.restore();
+    });
+
+    it('should create layer with all options from `tilemapSettings.getOptions()`', () => {
+      sinon.assert.calledOnce(L.tileLayer);
+
+      const leafletOptions = tilemapSettings.getOptions();
+      expect(L.tileLayer.firstCall.args[1]).to.eql(leafletOptions);
     });
   });
 
   describe('attachEvents', function () {
     let map;
+
+    beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
@@ -148,12 +161,13 @@ describe('TileMap Map Tests', function () {
     let map;
     let createStub;
 
+    beforeEach(loadTileMapSettings);
+
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');
       createStub = sinon.stub(TileMapMap.prototype, '_createMarkers', _.constant({ addLegend: _.noop }));
       map = new TileMapMap($mockMapEl, geoJsonData, {});
     });
-
     it('should pass the map options to the marker', function () {
       map._addMarkers();
 
@@ -174,6 +188,8 @@ describe('TileMap Map Tests', function () {
 
   describe('getDataRectangles', function () {
     let map;
+
+    beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');

@@ -1,29 +1,16 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
-import marked from 'marked';
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
-
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from './marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from './marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from './marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from './marker_types/heatmap';
-export default function MapFactory(Private, tilemap, $sanitize) {
+import '../lib/tilemap_settings';
 
+export default function MapFactory(Private, tilemapSettings) {
   const defaultMapZoom = 2;
   const defaultMapCenter = [15, 5];
   const defaultMarkerType = 'Scaled Circle Markers';
-
-  const tilemapOptions = tilemap.options;
-  const attribution = $sanitize(marked(tilemapOptions.attribution));
-
-  const mapTiles = {
-    url: tilemap.url,
-    options: _.assign({}, tilemapOptions, { attribution })
-  };
 
   const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -43,6 +30,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
    */
   class TileMapMap {
     constructor(container, chartData, params) {
+
       this._container = $(container).get(0);
       this._chartData = chartData;
 
@@ -52,20 +40,13 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
+
+      const mapOptions = tilemapSettings.getOptions();
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
-      const mapOptions = {
-        minZoom: tilemapOptions.minZoom,
-        maxZoom: tilemapOptions.maxZoom,
-        noWrap: true,
-        maxBounds: L.latLngBounds([-90, -220], [90, 220]),
-        scrollWheelZoom: false,
-        fadeAnimation: false,
-      };
-
-      this._createMap(mapOptions);
+      this._createMap();
     }
 
     addBoundingControl() {
@@ -210,7 +191,6 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       const saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
-
       this._tileLayer.on('load', () => {
         if (!self._events) return;
 
@@ -300,26 +280,51 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       });
     }
 
-    _createMap(mapOptions) {
-      if (this.map) this.destroy();
-
-      // add map tiles layer, using the mapTiles object settings
-      if (this._attr.wms && this._attr.wms.enabled) {
-        _.assign(mapOptions, {
+    _createTileLayer() {
+      const wmsOpts = this._attr.wms || { enabled: false };
+      if (wmsOpts.enabled) {
+        // http://leafletjs.com/reference.html#tilelayer-wms-options
+        return L.tileLayer.wms(wmsOpts.url, {
+          // user settings
+          ...wmsOpts.options,
+          // override the min/maz zoom levels, https://git.io/vMn5o
           minZoom: 1,
-          maxZoom: 18
+          maxZoom: 18,
         });
-        this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
-      } else {
-        this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
       }
 
-      // append tile layers, center and zoom to the map options
-      mapOptions.layers = this._tileLayer;
-      mapOptions.center = this._mapCenter;
-      mapOptions.zoom = this._mapZoom;
+      const tileUrl = tilemapSettings.hasError() ? '' : tilemapSettings.getUrl();
+      const leafletOptions = tilemapSettings.getOptions();
+      return L.tileLayer(tileUrl, leafletOptions);
+    }
 
-      this.map = L.map(this._container, mapOptions);
+    /**
+     *  Create the leaflet Map object. In our implementation this is basically just
+     *  a container for the layer created by `this._createTileLayer()`. User settings
+     *  are passed as options to the layer and inherited by the map so we can keep
+     *  this function pretty generic.
+     *
+     *  The map is responsible for the current center and zoom level though, as those
+     *  are global to each map.
+     *
+     *  @return undefined
+     */
+    _createMap() {
+      if (this.map) this.destroy();
+
+      // expose at `this._tileLayer`, `this._attachEvents()` accesses it this way
+      this._tileLayer = this._createTileLayer();
+
+      // http://leafletjs.com/reference.html#map-options
+      this.map = L.map(this._container, {
+        center: this._mapCenter,
+        zoom: this._mapZoom,
+        layers: [this._tileLayer],
+        maxBounds: L.latLngBounds([-90, -220], [90, 220]),
+        scrollWheelZoom: false,
+        fadeAnimation: true,
+      });
+
       this._attachEvents();
       this._addMarkers();
     }

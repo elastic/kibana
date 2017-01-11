@@ -84,6 +84,12 @@ export default function MapsFactory(Private) {
     }
 
     draw() {
+      // Destroy the charts before they get removed from the DOM on the new
+      // layout render.
+      if(this.charts !== undefined) {
+        this.charts.forEach(chart => chart.destroy());
+      }
+
       this.layout.render();
       // todo: title
       const self = this;
