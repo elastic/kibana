@@ -1,5 +1,4 @@
 import React from 'react';
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
 import { workpadPagePrevious, workpadPageNext } from 'plugins/rework/state/actions';
