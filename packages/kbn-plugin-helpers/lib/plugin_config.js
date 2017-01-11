@@ -1,5 +1,5 @@
 var resolve = require('path').resolve;
-var readFileSync = require('fs').readFileSync;
+var statSync = require('fs').statSync;
 var configFile = require('./config_file');
 
 module.exports = function (root) {
@@ -14,13 +14,13 @@ module.exports = function (root) {
     '{lib,public,server,webpackShims}/**/*',
   ];
 
-  // add dependency files
-  var deps = Object.keys(pkg.dependencies || {});
-  if (deps.length === 1) {
-    buildSourcePatterns.push(`node_modules/${ deps[0] }/**/*`);
-  } else if (deps.length) {
-    buildSourcePatterns.push(`node_modules/{${ deps.join(',') }}/**/*`);
-  }
+  // add shrinkwrap and lock files, if they exist
+  ['npm-shrinkwrap.json', 'yarn.lock']
+    .forEach(function (file) {
+      if (fileExists(resolve(root, file))) {
+        buildSourcePatterns.push(file);
+      }
+    });
 
   return Object.assign({
     root: root,
@@ -32,3 +32,12 @@ module.exports = function (root) {
     version: pkg.version,
   }, config);
 };
+
+function fileExists(path) {
+  try {
+    var stat = statSync(path);
+    return stat.isFile();
+  } catch (e) {
+    return false;
+  }
+}

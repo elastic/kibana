@@ -20,6 +20,7 @@
   "dependencies": {
     "@elastic/eslint-config-kibana": "0.0.2",
     "commander": "^2.9.0",
+    "del": "^2.2.2",
     "gulp-rename": "1.2.2",
     "gulp-zip": "3.1.0",
     "inquirer": "^1.2.2",
@@ -31,7 +32,6 @@
   },
   "devDependencies": {
     "babel-eslint": "4.1.8",
-    "del": "^2.2.2",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
     "jest": "^17.0.3"

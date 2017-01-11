@@ -3,6 +3,7 @@ var resolve = require('path').resolve;
 var inquirer = require('inquirer');
 
 var createBuild = require('./create_build');
+var createPackage = require('./create_package');
 
 module.exports = function (plugin, run, options) {
   options = options || {};
@@ -21,13 +22,23 @@ module.exports = function (plugin, run, options) {
   if (options.buildVersion) buildVersion = options.buildVersion;
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
+  var buildStep;
   if (kibanaVersion === 'kibana') {
-    return askForKibanaVersion().then(function (customKibanaVersion) {
+    buildStep = askForKibanaVersion().then(function (customKibanaVersion) {
       return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
     });
   } else {
-    return createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
+    buildStep = createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
   }
+
+  return buildStep
+    .then(function () {
+      if (options.skipArchive) return;
+      return createPackage(plugin, buildVersion);
+    })
+    .catch(function (err) {
+      console.log('BUILD ACTION FAILED:', err);
+    });
 };
 
 function askForKibanaVersion(cb) {

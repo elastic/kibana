@@ -5,9 +5,12 @@
     "version": "6.0.0"
   },
   "dependencies": {
-    
+
   },
   "devDependencies": {
-    
+
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }
