@@ -152,9 +152,11 @@ export const resize = (elem, config) => {
     setupInteraction('mousedown.reworkResize', elem, e);
     const sides = _.chain(config.sides)
       .mapValues((side) => $(e.target).is(side))
-      .omit((side) => !side)
+      .omitBy((side) => !side)
       .keys()
       .value();
+
+    console.log(config.sides, e.target);
 
     const originalTarget = $(e.target);
     const originalEvent = e;
@@ -184,8 +186,6 @@ export const resize = (elem, config) => {
         top: unrotatedPointer.top - originalPointer.top,
         left: unrotatedPointer.left - originalPointer.left
       };
-
-      console.log(unrotatedPointer, originalPointer);
 
       const result = getInteractionObj(originalTarget, originalEvent, elemPosition, elemSize);
 
