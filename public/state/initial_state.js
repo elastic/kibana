@@ -36,7 +36,7 @@ export default {
         top: 0,
         left: 0,
         angle: 0,
-        props: {
+        args: {
           dataframe: 'dataframe-43524-3246-363',
           _style: 'background-color: #eee; border: 1px solid #000;'
         }
@@ -49,7 +49,7 @@ export default {
         top: 300,
         left: 100,
         angle: 30,
-        props: {
+        args: {
           color: '#BEEB9F'
         }
       },
@@ -61,7 +61,7 @@ export default {
         top: 300,
         left: 50,
         angle: 270,
-        props: {
+        args: {
           color: '#00A388'
         }
       }
