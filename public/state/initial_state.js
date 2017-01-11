@@ -36,29 +36,46 @@ export default {
         top: 0,
         left: 0,
         angle: 0,
-        props: {}
+        props: {
+          dataframe: 'dataframe-43524-3246-363',
+          _style: 'background-color: #eee; border: 1px solid #000;'
+        }
       },
       'element-2': {
         id: 'element-2',
-        type: 'table',
+        type: 'box',
         height: 100,
-        width: 100,
+        width: 200,
         top: 300,
-        left: 300,
+        left: 100,
         angle: 30,
-        props: {}
+        props: {
+          color: '#BEEB9F'
+        }
       },
       'element-1': {
         id: 'element-1',
-        type: 'table',
-        height: 100,
-        width: 100,
+        type: 'box',
+        height: 70,
+        width: 300,
         top: 300,
         left: 50,
         angle: 270,
-        props: {}
+        props: {
+          color: '#00A388'
+        }
       }
     },
-    dataframes: {}
+    storage: {
+      dataframes: {
+        'dataframe-43524-3246-363': {
+          type: 'CSV',
+          value: `"model","segment","price"
+                  "crosstrek","SUV",21000
+                  "impreza","sedan",16000
+                  "outback","SUV",25000`
+        }
+      }
+    }
   },
 };
