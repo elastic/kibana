@@ -96,7 +96,16 @@ export default function PointSeriesVisType(Private) {
         value: 'step-after',
         text: 'stepped',
       }],
-      editor: pointSeriesTemplate
+      editor: pointSeriesTemplate,
+      optionTabs: [
+        {
+          name: 'axes',
+          title: 'Axes',
+          editor: '<div><vislib-category-axis></vislib-category-axis><vislib-value-axes></vislib-value-axes></div>'
+        },
+        { name: 'series', title: 'Series', editor: '<vislib-series></vislib-series>' },
+        { name: 'options', title: 'Other Options', editor: pointSeriesTemplate },
+      ],
     },
     schemas: new Schemas([
       {
