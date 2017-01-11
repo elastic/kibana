@@ -2,6 +2,19 @@ export default {
   app: {}, // Kibana stuff in here
   transient: {
     editor: false,
+    resolvedArgs: {
+      'element-0': {
+        _style: {
+          border: '1px solid #000;',
+        }
+      },
+      'element-1': {
+        color: '#00A388'
+      },
+      'element-2': {
+        color: '#BEEB9F'
+      }
+    }
   }, // Things that don't survive a refresh
   persistent: { // Stuff that should survive, and be serialized and saved
     workpad: {
@@ -37,8 +50,7 @@ export default {
         left: 0,
         angle: 0,
         args: {
-          dataframe: 'dataframe-43524-3246-363',
-          _style: 'background-color: #eee; border: 1px solid #000;'
+          _style: 'border: 1px solid #000;'
         }
       },
       'element-2': {
