@@ -1,7 +1,7 @@
 [[tribe]]
 == Using Kibana with Tribe nodes
 
-Kibana can be configured to connect to a tribe node for data retrieval.  Because tribe nodes can't create indices, Kibana additionally
+Kibana can be configured to connect to a https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-tribe.html[tribe node] for data retrieval.  Because tribe nodes can't create indices, Kibana additionally
 requires a separate connection to a node to maintain state.  When configured, searches and visualizations will retrieve data using
 the tribe node and administrative actions (such as saving a dashboard) will be sent to non-tribe node.
 
@@ -16,6 +16,8 @@ are prefixed with `elasticsearch.tribe` and at a minimum requires a url:
 elasticsearch.url: "<your_administration_node>"
 elasticsearch.tribe.url: "<your_tribe_node>"
 ----
+
+The setting `elasticsearch.url` 
 
 The full list of configurations can be found at <<settings>>.
 
