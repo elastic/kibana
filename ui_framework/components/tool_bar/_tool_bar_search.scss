@@ -1,9 +1,10 @@
 .kuiToolBarSearch {
+  @include barSection;
+
   display: flex;
   flex: 1 1 auto;
   max-width: 800px;
   line-height: $lineHeight;
-  margin-right: $toolBarSectionSpacing * 0.5;
 }
 
 .kuiToolBarSearchBox {

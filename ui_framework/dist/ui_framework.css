@@ -1061,6 +1061,13 @@ body {
     margin-left: 10px;
     /* 1 */ }
 
+/**
+ * 1. Override Bar styles and put Search on the left side.
+ */
+.kuiToolBar--searchOnly .kuiToolBarSearch {
+  margin-left: 0 !important;
+  /* 1 */ }
+
 .kuiToolBarFooter {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1111,13 +1118,34 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px;
+  display: flex;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   max-width: 800px;
-  line-height: 1.5;
-  margin-right: 25px; }
+  line-height: 1.5; }
+  .kuiToolBarSearch:first-child {
+    margin-left: 0; }
+  .kuiToolBarSearch:last-child {
+    margin-right: 0; }
+  .kuiToolBarSearch:only-child {
+    margin-left: auto;
+    /* 1 */ }
+  .kuiToolBarSearch > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+  .kuiToolBarSearch > * + * {
+    margin-left: 10px;
+    /* 1 */ }
 
 .kuiToolBarSearchBox {
   -webkit-box-flex: 1;
