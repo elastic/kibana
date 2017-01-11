@@ -3,7 +3,7 @@
 
 Kibana exposes two clients on the server and browser for communicating with elasticsearch.
 There is an 'admin' client which is used for managing Kibana's state, and a 'data' client for all
-other requests.  The clients use the elasticsearch.js library.
+other requests.  The clients use the https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html[elasticsearch.js library].
 
 [float]
 [[client-server]]
@@ -35,7 +35,7 @@ uiModules.get('kibana')
   es.ping()
   .then(() => esAdmin.ping())
   .catch(err => {
-    console.log('error pinging servers);
+    console.log('error pinging servers');
   });
 });
 ----

@@ -10,3 +10,5 @@ include::core/development-basepath.asciidoc[]
 include::core/development-dependencies.asciidoc[]
 
 include::core/development-modules.asciidoc[]
+
+include::plugin/development-elasticsearch.asciidoc[]
