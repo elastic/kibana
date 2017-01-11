@@ -22,7 +22,10 @@ module.exports = function (kibana) {
           };
         }
       },
-      hacks: [],
+      hacks: [
+        'plugins/rework/elements/json/json',
+        'plugins/rework/elements/box/box',
+      ],
     },
 
     config: function (Joi) {

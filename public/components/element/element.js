@@ -1,11 +1,13 @@
 import React from 'react';
+import elements from 'plugins/rework/elements/elements';
 
 export default React.createClass({
   render() {
     const {type, props} = this.props.element;
+    const ElementContent = elements.byName[type].template;
     return (
       <div className="rework--element">
-        <h3>{type}</h3>
+        <ElementContent args={props}></ElementContent>
       </div>
     );
   }
