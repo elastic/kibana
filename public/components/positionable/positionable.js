@@ -4,8 +4,9 @@ import {move, resize, rotate, remove} from './interaction';
 import './positionable.less';
 
 export default React.createClass({
-  componentDidMount() {
-    const elem = $(this.refs.positionableWrapper);
+  attachHandlers(ref) {
+    const elem = $(ref);
+
     move(elem, {
       on: this.props.move
     });
@@ -25,10 +26,19 @@ export default React.createClass({
       }
     });
   },
+  removeHandlers(elem) {
+    remove($(elem));
+  },
+  componentDidMount() {
+    this.attachHandlers(this.refs.positionableWrapper);
+  },
+  componentWillUnmount() {
+    this.removeHandlers(this.refs.positionableWrapper);
+  },
   render() {
-    const { children, position } = this.props;
+    const { children, position, rotate, resize } = this.props;
 
-    const newChildren = React.Children.map(children, (child) => {
+    const wrappedChildren = React.Children.map(children, (child) => {
       const newStyle = {
         position: 'absolute',
         transform: `rotate(${position.angle}deg)`,
@@ -63,7 +73,7 @@ export default React.createClass({
     });
 
     return (
-      <div>{newChildren}</div>
+      <div>{wrappedChildren}</div>
     );
   }
 });
