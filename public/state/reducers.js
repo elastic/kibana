@@ -56,8 +56,15 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'top', payload.value);
     case 'ELEMENT_LEFT':
       return setElement(payload.id, 'left', payload.value);
-    case 'ELEMENT_SET_RESOLVED':
-      return setTransient('resolvedArgs', {...state.transient.resolvedArgs, [payload.id]: payload.value});
+
+    // Set one resolved argument. We probably don't need the thing above, do we? Grr.
+    case 'ARGUMENT_RESOLVED':
+      return setTransient('resolvedArgs', {
+        ...state.transient.resolvedArgs,
+        [payload.id]: {
+          ...state.transient.resolvedArgs[payload.id],
+          [payload.name]: payload.value
+        }});
 
     default:
       return state;
