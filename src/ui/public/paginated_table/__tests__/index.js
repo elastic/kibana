@@ -54,11 +54,13 @@ describe('paginated table', function () {
     $scope.sort = sort || {};
     $scope.showBlankRows = showBlankRows;
 
-    const template = '<paginated-table columns="cols"'
-      + ' rows="rows"'
-      + ' per-page="perPage"'
-      + ' sort="sort"'
-      + ' show-blank-rows="showBlankRows">';
+    const template = `
+      <paginated-table
+        columns="cols"
+        rows="rows"
+        per-page="perPage"
+        sort="sort"
+        show-blank-rows="showBlankRows">`;
     $el = $compile(template)($scope);
 
     $scope.$digest();
