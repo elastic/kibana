@@ -1,71 +1,91 @@
-<div class="app-container">
-  <div class="kuiLocalNav">
-    <div class="kuiLocalNavRow">
-      <div class="kuiLocalNavRow__section">
-        <div class="kuiLocalBreadcrumbs">
-          <div class="kuiLocalBreadcrumb">
-            <a class="kuiLocalBreadcrumb__link" href="#/discover">Discover</a>
-          </div>
-          <div class="kuiLocalBreadcrumb" ng-bind="contextApp.state.queryParameters.indexPattern.id"></div>
+<div class="kuiLocalNav">
+  <div class="kuiLocalNavRow">
+    <div class="kuiLocalNavRow__section">
+      <div class="kuiLocalBreadcrumbs">
+        <div class="kuiLocalBreadcrumb">
+          <a class="kuiLocalBreadcrumb__link" href="#/discover">Discover</a>
         </div>
-      </div>
-      <div class="kuiLocalNavRow__section">
-        <context-size-picker
-          predecessor-count="contextApp.state.queryParameters.predecessorCount"
-          successor-count="contextApp.state.queryParameters.successorCount"
-          set-predecessor-count="contextApp.actions.fetchGivenPredecessorRows"
-          set-successor-count="contextApp.actions.fetchGivenSuccessorRows"
-        />
-      </div>
-    </div>
-    <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
-      <div class="kuiLocalTabs">
-        <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind-template="Context of {{ contextApp.state.queryParameters.anchorUid }}"></div>
+        <div class="kuiLocalBreadcrumb" ng-bind="contextApp.state.queryParameters.indexPattern.id"></div>
       </div>
     </div>
   </div>
+  <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
+    <div class="kuiLocalTabs">
+      <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind-template="Context of {{ contextApp.state.queryParameters.anchorUid }}"></div>
+    </div>
+  </div>
+</div>
 
-  <div class="container-fluid" role="main">
-    <div class="row">
-      <div class="col-md-12">
-        <context-loading-button
-          disabled="contextApp.derivedState.isLoadingPredecessorRows()"
-          icon="'fa-chevron-up'"
-          ng-click="contextApp.actions.fetchMorePredecessorRows()"
-          ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
-        >
-          Load newer entries
-        </context-loading-button>
-      </div>
+<div class="kuiViewContent kuiViewContentItem" role="main">
+  <!-- Controls -->
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <context-loading-button
+        disabled="contextApp.derivedState.isLoadingPredecessorRows()"
+        icon="'fa-chevron-up'"
+        ng-click="contextApp.actions.fetchMorePredecessorRows()"
+        ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
+      >
+        Load newer entries
+      </context-loading-button>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="discover-overlay" ng-if="contextApp.derivedState.isLoadingAnchorRow()">
-          <h2>Loading...</h2>
-        </div>
-        <div class="discover-table" ng-if="!contextApp.derivedState.isLoadingAnchorRow()" fixed-scroll>
-          <doc-table
-            hits="contextApp.derivedState.rows()"
-            index-pattern="contextApp.state.queryParameters.indexPattern"
-            sorting="contextApp.state.queryParameters.sort"
-            columns="contextApp.state.queryParameters.columns"
-            infinite-scroll="true"
-          >
-          </doc-table>
-        </div>
-      </div>
+
+    <div class="kuiBarSection">
+      <div>Limit to</div>
+      <context-size-picker
+        count="contextApp.state.queryParameters.predecessorCount"
+        set-count="contextApp.actions.fetchGivenPredecessorRows"
+      ></context-size-picker>
+      <div>newer entries</div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <context-loading-button
-          disabled="contextApp.derivedState.isLoadingSuccessorRows()"
-          icon="'fa-chevron-down'"
-          ng-click="contextApp.actions.fetchMoreSuccessorRows()"
-          ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
-        >
-          Load older entries
-        </context-loading-button>
-      </div>
+  </div>
+
+  <!-- Loading feedback -->
+  <div
+    ng-if="contextApp.derivedState.isLoadingAnchorRow()"
+    class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
+  >
+    <div class="kuiLoadingItems">
+      Loading&hellip;
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div
+    ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
+    class="kuiPanel kuiVerticalRhythm"
+  >
+    <div class="discover-table" fixed-scroll>
+      <doc-table
+        hits="contextApp.derivedState.rows()"
+        index-pattern="contextApp.state.queryParameters.indexPattern"
+        sorting="contextApp.state.queryParameters.sort"
+        columns="contextApp.state.queryParameters.columns"
+        infinite-scroll="true"
+      ></doc-table>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <context-loading-button
+        disabled="contextApp.derivedState.isLoadingSuccessorRows()"
+        icon="'fa-chevron-down'"
+        ng-click="contextApp.actions.fetchMoreSuccessorRows()"
+        ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
+      >
+        Load older entries
+      </context-loading-button>
+    </div>
+
+    <div class="kuiBarSection">
+      <div>Limit to</div>
+      <context-size-picker
+        count="contextApp.state.queryParameters.successorCount"
+        set-count="contextApp.actions.fetchGivenSuccessorRows"
+      ></context-size-picker>
+      <div>older entries</div>
     </div>
   </div>
 </div>

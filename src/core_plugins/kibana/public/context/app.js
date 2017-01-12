@@ -3,7 +3,7 @@ import _ from 'lodash';
 import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
-import './components/size_picker';
+import './components/size_picker/size_picker';
 import { bindSelectors } from './utils/selectors';
 import {
   QueryParameterActionsProvider,
@@ -16,7 +16,6 @@ import {
   selectIsLoadingSuccessorRows,
   selectRows,
 } from './query';
-
 
 const module = uiModules.get('apps/context', [
   'kibana',

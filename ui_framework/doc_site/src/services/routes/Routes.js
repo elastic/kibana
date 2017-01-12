@@ -1,6 +1,9 @@
 
 import Slugify from '../string/slugify';
 
+import BarExample
+  from '../../views/bar/bar_example.jsx';
+
 import ButtonExample
   from '../../views/button/button_example.jsx';
 
@@ -33,6 +36,9 @@ import ToolBarExample
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Bar',
+  component: BarExample,
+}, {
   name: 'Button',
   component: ButtonExample,
 }, {

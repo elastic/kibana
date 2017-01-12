@@ -1,6 +1,5 @@
 import uiModules from 'ui/modules';
 import contextLoadingButtonTemplate from './loading_button.html';
-import './loading_button.less';
 
 
 const module = uiModules.get('apps/context', [
