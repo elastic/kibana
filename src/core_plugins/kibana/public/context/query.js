@@ -51,6 +51,8 @@ function QueryActionsProvider($q, es, Private) {
       rows: { anchor },
     } = state;
 
+    state.loadingStatus.successors = 'loading';
+
     return fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
       .then((successorDocuments) => {
         state.loadingStatus.successors = 'loaded';
