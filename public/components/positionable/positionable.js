@@ -47,6 +47,8 @@ export default React.createClass({
             </div>
           </div>
 
+          {child}
+
           <div className="rework--positionable-resize rework--positionable-resize-nw"></div>
           <div className="rework--positionable-resize rework--positionable-resize-ne"></div>
           <div className="rework--positionable-resize rework--positionable-resize-se"></div>
@@ -56,7 +58,6 @@ export default React.createClass({
           <div className="rework--positionable-resize rework--positionable-resize-s"></div>
           <div className="rework--positionable-resize rework--positionable-resize-w"></div>
 
-          {child}
         </div>
       );
     });
