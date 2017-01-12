@@ -4,26 +4,17 @@ import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
 import './components/size_picker';
-import { createDispatchProvider } from './redux_lite/create_dispatch';
-import { createReducerPipeline, scopeReducer } from './redux_lite/reducer_helpers';
-import { bindActionCreators } from './redux_lite/action_creator_helpers';
-import { bindSelectors } from './redux_lite/selector_helpers';
+import { bindSelectors } from './utils/selectors';
 import {
-  QueryParameterActionCreatorsProvider,
+  QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
-  selectPredecessorCount,
-  selectQueryParameters,
-  selectSuccessorCount,
-  updateQueryParameters,
 } from './query_parameters';
 import {
-  QueryActionCreatorsProvider,
+  QueryActionsProvider,
   selectIsLoadingAnchorRow,
   selectIsLoadingPredecessorRows,
   selectIsLoadingSuccessorRows,
   selectRows,
-  updateLoadingStatus,
-  updateQueryResults
 } from './query';
 
 
@@ -51,36 +42,21 @@ module.directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const createDispatch = Private(createDispatchProvider);
-  const queryParameterActionCreators = Private(QueryParameterActionCreatorsProvider);
-  const queryActionCreators = Private(QueryActionCreatorsProvider);
+  const queryParameterActions = Private(QueryParameterActionsProvider);
+  const queryActions = Private(QueryActionsProvider);
 
   this.state = createInitialState();
 
-  this.reducer = createReducerPipeline(
-    scopeReducer('queryParameters', updateQueryParameters),
-    scopeReducer('rows', updateQueryResults),
-    scopeReducer('loadingStatus', updateLoadingStatus),
-  );
+  this.actions = _.mapValues({
+    ...queryParameterActions,
+    ...queryActions,
+  }, (action) => (...args) => action(this.state)(...args));
 
-  this.dispatch = createDispatch(
-    () => this.state,
-    (state) => this.state = state,
-    this.reducer,
-  );
-
-  this.actions = bindActionCreators({
-    ...queryParameterActionCreators,
-    ...queryActionCreators,
-  }, this.dispatch);
-
-  this.selectors = bindSelectors({
+  this.derivedState = bindSelectors({
     isLoadingAnchorRow: selectIsLoadingAnchorRow,
     isLoadingPredecessorRows: selectIsLoadingPredecessorRows,
     isLoadingSuccessorRows: selectIsLoadingSuccessorRows,
-    predecessorCount: selectPredecessorCount,
     rows: selectRows,
-    successorCount: selectSuccessorCount,
   }, () => this.state);
 
   /**
@@ -90,14 +66,14 @@ function ContextAppController($scope, Private) {
     () => _.pick(this, QUERY_PARAMETER_KEYS),
     (newValues) => {
       // break the watch cycle
-      if (!_.isEqual(newValues, selectQueryParameters(this.state))) {
-        this.dispatch(queryActionCreators.fetchAllRowsWithNewQueryParameters(newValues));
+      if (!_.isEqual(newValues, this.state.queryParameters)) {
+        this.actions.fetchAllRowsWithNewQueryParameters(newValues);
       }
     },
   );
 
   $scope.$watchCollection(
-    () => selectQueryParameters(this.state),
+    () => this.state.queryParameters,
     (newValues) => {
       _.assign(this, newValues);
     },

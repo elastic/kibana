@@ -11,8 +11,8 @@
       </div>
       <div class="kuiLocalNavRow__section">
         <context-size-picker
-          predecessor-count="contextApp.selectors.predecessorCount()"
-          successor-count="contextApp.selectors.successorCount()"
+          predecessor-count="contextApp.state.queryParameters.predecessorCount"
+          successor-count="contextApp.state.queryParameters.successorCount"
           set-predecessor-count="contextApp.actions.fetchGivenPredecessorRows"
           set-successor-count="contextApp.actions.fetchGivenSuccessorRows"
         />
@@ -29,10 +29,10 @@
     <div class="row">
       <div class="col-md-12">
         <context-loading-button
-          disabled="contextApp.selectors.isLoadingPredecessorRows()"
+          disabled="contextApp.derivedState.isLoadingPredecessorRows()"
           icon="'fa-chevron-up'"
           ng-click="contextApp.actions.fetchMorePredecessorRows()"
-          ng-if="!contextApp.selectors.isLoadingAnchorRow()"
+          ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
         >
           Load newer entries
         </context-loading-button>
@@ -40,12 +40,12 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="discover-overlay" ng-if="contextApp.selectors.isLoadingAnchorRow()">
+        <div class="discover-overlay" ng-if="contextApp.derivedState.isLoadingAnchorRow()">
           <h2>Loading...</h2>
         </div>
-        <div class="discover-table" ng-if="!contextApp.selectors.isLoadingAnchorRow()" fixed-scroll>
+        <div class="discover-table" ng-if="!contextApp.derivedState.isLoadingAnchorRow()" fixed-scroll>
           <doc-table
-            hits="contextApp.selectors.rows()"
+            hits="contextApp.derivedState.rows()"
             index-pattern="contextApp.state.queryParameters.indexPattern"
             sorting="contextApp.state.queryParameters.sort"
             columns="contextApp.state.queryParameters.columns"
@@ -58,10 +58,10 @@
     <div class="row">
       <div class="col-md-12">
         <context-loading-button
-          disabled="contextApp.selectors.isLoadingSuccessorRows()"
+          disabled="contextApp.derivedState.isLoadingSuccessorRows()"
           icon="'fa-chevron-down'"
           ng-click="contextApp.actions.fetchMoreSuccessorRows()"
-          ng-if="!contextApp.selectors.isLoadingAnchorRow()"
+          ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
         >
           Load older entries
         </context-loading-button>
