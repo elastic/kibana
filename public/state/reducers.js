@@ -46,6 +46,8 @@ function rootReducer(state = {}, action) {
     case 'PAGE_SET':
       return setWorkpad('page', payload);
 
+    case 'ELEMENT_SELECT':
+      return setTransient('selectedElement', payload);
     case 'ELEMENT_ANGLE':
       return setElement(payload.id, 'angle', payload.value);
     case 'ELEMENT_HEIGHT':

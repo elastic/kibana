@@ -7,6 +7,7 @@ import { mutateWithId } from './lib/helpers';
  Exports
 */
 
+export const elementSelect = createAction('ELEMENT_SELECT');
 export const elementHeight = createAction('ELEMENT_HEIGHT', mutateWithId);
 export const elementWidth = createAction('ELEMENT_WIDTH', mutateWithId);
 export const elementTop = createAction('ELEMENT_TOP', mutateWithId);
