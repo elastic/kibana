@@ -2,13 +2,13 @@ import _ from 'lodash';
 import moment from 'moment';
 import { mondayFirstWeekdays } from 'ui/utils/monday_first_weekdays';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import CreateFilterProvider from 'ui/agg_types/buckets/create_filter/date_terms';
+import { CreateDateTermsFilterProvider } from 'ui/agg_types/buckets/create_filter/date_terms';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 
-export default function DateTermsAggDefinition(Private) {
+export const AggTypesBucketsDateTermsProvider = function (Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
-  const createFilter = Private(CreateFilterProvider);
+  const createFilter = Private(CreateDateTermsFilterProvider);
 
   return new BucketAggType({
     name: 'dateterms',
@@ -97,4 +97,4 @@ export default function DateTermsAggDefinition(Private) {
       }
     ]
   });
-}
+};

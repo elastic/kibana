@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { mondayFirstWeekdays } from 'ui/utils/monday_first_weekdays';
 
-export default function createTermsFilterProvider(Private) {
+export const CreateDateTermsFilterProvider = function (Private) {
   return function (aggConfig, key) {
     const dateMethod = aggConfig.params.date_method;
     const field = aggConfig.params.field;
@@ -35,4 +35,4 @@ export default function createTermsFilterProvider(Private) {
       }
     };
   };
-}
+};

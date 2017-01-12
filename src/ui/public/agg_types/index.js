@@ -16,7 +16,7 @@ import AggTypesBucketsHistogramProvider from 'ui/agg_types/buckets/histogram';
 import AggTypesBucketsRangeProvider from 'ui/agg_types/buckets/range';
 import AggTypesBucketsDateRangeProvider from 'ui/agg_types/buckets/date_range';
 import AggTypesBucketsIpRangeProvider from 'ui/agg_types/buckets/ip_range';
-import AggTypesBucketsDateTermsProvider from 'ui/agg_types/buckets/date_terms';
+import { AggTypesBucketsDateTermsProvider } from 'ui/agg_types/buckets/date_terms';
 import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
 import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
 import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
