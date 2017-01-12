@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
+import classnames from 'classnames';
 
 import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar';
 import Editor from 'plugins/rework/components/editor/editor';
@@ -42,8 +43,10 @@ const Workspace = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const  {workpad, pages, elements, dataframes, editor, resolvedArgs} = this.props;
+    const  {workpad, pages, elements, dataframes, editor, resolvedArgs, selectedElement} = this.props;
 
+    // TODO: This entire thing can be broken up into smaller containers.
+    // But for now, its actually *more* readable this way.
     return (
       <div className="rework--workspace">
         <LeftSidebar>
@@ -66,19 +69,29 @@ const Workspace = React.createClass({
                 return (
                   <Page key={pageId} page={page}>
                     {page.elements.map((elementId) => {
+                      const {resizeMove, rotate} = this;
                       const element = elements[elementId];
+                      const selected = elementId === selectedElement ? true : false;
                       const args = resolvedArgs[elementId];
                       const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
-                      const {resizeMove, rotate} = this;
+
+                      // This is really gross because it doesn't actually wrap the element.
+                      // Rather you end up with a bunch of 0 height divs stacked at the top
+                      // of the page. Ew.
+                      const wrapperClasses = classnames({
+                        'rework--workspace-element-wrapper': true,
+                        'rework--workspace-element-wrapper-selected': selected,
+                      });
                       return (
-                        <Positionable
-                          key={elementId}
-                          position={position}
-                          move={resizeMove(elementId)}
-                          resize={resizeMove(elementId)}
-                          rotate={rotate(elementId)}>
-                          <Element type={element.type} args={args}></Element>
-                        </Positionable>
+                        <div key={elementId} className={wrapperClasses}>
+                          <Positionable
+                            position={position}
+                            move={resizeMove(elementId)}
+                            resize={resizeMove(elementId)}
+                            rotate={rotate(elementId)}>
+                            <Element type={element.type} args={args}></Element>
+                          </Positionable>
+                        </div>
                       );
                     })}
                   </Page>
@@ -99,7 +112,8 @@ function mapStateToProps(state) {
     workpad: state.persistent.workpad,
     pages: state.persistent.pages,
     elements: state.persistent.elements,
-    resolvedArgs: state.transient.resolvedArgs
+    resolvedArgs: state.transient.resolvedArgs,
+    selectedElement: state.transient.selectedElement
   };
 }
 

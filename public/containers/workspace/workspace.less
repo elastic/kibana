@@ -8,15 +8,40 @@
   display: flex;
   position: relative;
 
+  .rework--workspace-element-wrapper {
+    .rework--positionable-actions, .rework--positionable-resize {
+      display: none;
+    }
+
+    .rework--positionable {
+      &:hover {
+        box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
+      }
+    }
+
+    &.rework--workspace-element-wrapper-selected {
+
+      .rework--positionable {
+        box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
+      }
+
+      .rework--positionable-actions, .rework--positionable-resize {
+        display: block;
+      }
+    }
+  }
+
+
   .rework--workpad {
+
     .rework--positionable {
       overflow: none;
     }
 
     .rework--element {
+      overflow: hidden;
       height: 100%;
       width: 100%;
-      overflow: auto;
     }
   }
 
