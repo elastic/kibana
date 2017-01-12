@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function (chrome, internals) {
+module.exports = function (chrome, internals) {
   /**
    * ui/chrome Controls API
    *
@@ -29,4 +29,4 @@ export default function (chrome, internals) {
     if (_.isUndefined(internals.visible)) return def;
     return internals.visible;
   };
-}
+};

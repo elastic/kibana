@@ -20,13 +20,12 @@ module.exports = async (kbnServer, server, config) => {
    * @param  {string} process.env.kbnWorkerType
    */
   switch (process.env.kbnWorkerType) {
-    // we use require() here because the different roles have side-effects from being required
     case 'optmzr':
-      await kbnServer.mixin(require('./optmzr_role').mixin);
+      await kbnServer.mixin(require('./optmzr_role'));
       break;
 
     case 'server':
-      await kbnServer.mixin(require('./proxy_role').mixin);
+      await kbnServer.mixin(require('./proxy_role'));
       break;
 
     default:

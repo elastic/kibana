@@ -1,6 +1,6 @@
 import { isAdded, getFilename } from './utils/files_to_commit';
 
-module.exports = function registerCheckAddedFilenames(grunt) {
+export default function registerCheckAddedFilenames(grunt) {
   grunt.registerTask('checkAddedFilenames', function () {
     grunt.task.requires('collectFilesToCommit');
 
@@ -16,4 +16,4 @@ module.exports = function registerCheckAddedFilenames(grunt) {
       grunt.fail.fatal(`Filenames must use snake_case.\n${invalid}`);
     }
   });
-};
+}

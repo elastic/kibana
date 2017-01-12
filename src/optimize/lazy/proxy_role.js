@@ -1,7 +1,8 @@
 import { fromNode } from 'bluebird';
 import { get, once } from 'lodash';
 
-export async function mixin(kbnServer, server, config) {
+module.exports = (kbnServer, server, config) => {
+
   server.route({
     path: '/bundles/{path*}',
     method: 'GET',
@@ -40,4 +41,5 @@ export async function mixin(kbnServer, server, config) {
       }
     });
   });
-}
+
+};

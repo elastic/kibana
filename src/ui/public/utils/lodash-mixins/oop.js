@@ -1,4 +1,4 @@
-export function extend(_) {
+export default function (_) {
 
   // create a property descriptor for properties
   // that won't change

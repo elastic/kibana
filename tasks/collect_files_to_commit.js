@@ -1,7 +1,7 @@
 import filesToCommit from './utils/files_to_commit';
 import { resolve } from 'path';
 
-module.exports = function registerCollectFilesToCommit(grunt) {
+export default function registerCollectFilesToCommit(grunt) {
   const root = grunt.config.get('root');
 
   grunt.registerTask('collectFilesToCommit', function () {
@@ -12,4 +12,4 @@ module.exports = function registerCollectFilesToCommit(grunt) {
     })
     .nodeify(this.async());
   });
-};
+}

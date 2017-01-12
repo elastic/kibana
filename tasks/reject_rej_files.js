@@ -6,7 +6,7 @@ import { startsWith } from 'lodash';
 // This check is intentionally performed on the files in the repo rather than
 // on the files that are to be committed.
 
-module.exports = grunt => {
+export default grunt => {
   grunt.registerTask('rejectRejFiles', 'Reject any git-apply .rej files', () => {
     const ignoredTopLevelDirs = [
       'esvm',

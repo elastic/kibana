@@ -2,7 +2,8 @@ import { bgRed, white } from 'ansicolors';
 import { execSync } from 'child_process';
 import { createInterface } from 'readline';
 
-module.exports = function (grunt) {
+export default function (grunt) {
+
   grunt.registerTask('sterilize', function () {
 
     const cmd = 'git clean -fdx';
@@ -34,4 +35,5 @@ module.exports = function (grunt) {
     });
 
   });
-};
+
+}

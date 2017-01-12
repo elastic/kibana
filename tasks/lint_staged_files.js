@@ -6,7 +6,7 @@ import minimatch from 'minimatch';
 
 const root = resolve(__dirname, '..');
 
-module.exports = function (grunt) {
+export default function (grunt) {
   grunt.registerTask('lintStagedFiles', function () {
     grunt.task.requires('collectFilesToCommit');
 
@@ -43,4 +43,4 @@ module.exports = function (grunt) {
     grunt.config.set('eslint.staged.options.paths', files);
     grunt.task.run(['eslint:staged']);
   });
-};
+}
