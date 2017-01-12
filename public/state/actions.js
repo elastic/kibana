@@ -14,6 +14,9 @@ export const elementTop = createAction('ELEMENT_TOP', mutateWithId);
 export const elementLeft = createAction('ELEMENT_LEFT', mutateWithId);
 export const elementAngle = createAction('ELEMENT_ANGLE', mutateWithId);
 
+// Resolve all arguments on the element
+export const elementResolve = createAction('ELEMENT_RESOLVE');
+
 
 // You can return a promise here too.
 export function editorToggle(payload) {

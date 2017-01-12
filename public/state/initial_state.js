@@ -2,19 +2,7 @@ export default {
   app: {}, // Kibana stuff in here
   transient: {
     editor: false,
-    resolvedArgs: {
-      'element-0': {
-        _style: {
-          border: '1px solid #000;',
-        }
-      },
-      'element-1': {
-        color: '#00A388'
-      },
-      'element-2': {
-        color: '#BEEB9F'
-      }
-    }
+    resolvedArgs: {} // This needs to be populated at startup
   }, // Things that don't survive a refresh
   persistent: { // Stuff that should survive, and be serialized and saved
     workpad: {
