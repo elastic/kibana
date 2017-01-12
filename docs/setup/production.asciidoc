@@ -4,7 +4,6 @@
 * <<configuring-kibana-shield, Using Kibana with X-Pack>>
 * <<enabling-ssl, Enabling SSL>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
-* <<kibana-tribe, Kibana and Tribe Nodes>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -112,10 +111,3 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://localhost:9200"
 --------
-
-[float]
-[[kibana-tribe]]
-=== Kibana and Tribe Nodes
-
-Kibana 5.0 does not support tribe nodes. We are working on a solution that
-addresses this limitation.
