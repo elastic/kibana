@@ -74,8 +74,11 @@
               id="{{ 'seriesValueAxis' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="chart.valueAxis"
-              ng-options="axis.id as axis.id for axis in vis.params.valueAxes"
-            ></select>
+              ng-change="changeValueAxis($index)"
+            >
+              <option ng-repeat="axis in vis.params.valueAxes track by axis.id">{{axis.id}}</option>
+              <option value="new">New Axis ...</option>
+            </select>
           </div>
         </div>
 

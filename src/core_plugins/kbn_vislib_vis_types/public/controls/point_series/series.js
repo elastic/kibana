@@ -54,6 +54,29 @@ module.directive('vislibSeries', function ($parse, $compile) {
         const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
         $scope.savedVis.type = types.length === 1 ? types[0] : 'histogram';
       });
+
+      $scope.addValueAxis = function () {
+        const newAxis = _.cloneDeep($scope.vis.params.valueAxes[0]);
+        newAxis.id = 'ValueAxis-' + $scope.vis.params.valueAxes.reduce((value, axis) => {
+          if (axis.id.substr(0, 10) === 'ValueAxis-') {
+            const num = parseInt(axis.id.substr(10));
+            if (num >= value) value = num + 1;
+          }
+          return value;
+        }, 1);
+
+        $scope.vis.params.valueAxes.push(newAxis);
+        return newAxis;
+      };
+
+      $scope.changeValueAxis = (index) => {
+        const series = $scope.vis.params.seriesParams[index];
+        if (series.valueAxis === 'new') {
+          const axis = $scope.addValueAxis();
+          series.valueAxis = axis.id;
+          $scope.$parent.$parent.sidebar.section = 'axes';
+        }
+      };
     }
   };
 });

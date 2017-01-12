@@ -98,13 +98,13 @@ export default function PointSeriesVisType(Private) {
       }],
       editor: pointSeriesTemplate,
       optionTabs: [
+        { name: 'series', title: 'Series', editor: '<vislib-series></vislib-series>' },
         {
           name: 'axes',
           title: 'Axes',
-          editor: '<div><vislib-category-axis></vislib-category-axis><vislib-value-axes></vislib-value-axes></div>'
+          editor: '<div><vislib-value-axes></vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },
-        { name: 'series', title: 'Series', editor: '<vislib-series></vislib-series>' },
-        { name: 'options', title: 'Other Options', editor: pointSeriesTemplate },
+        { name: 'options', title: 'Settings', editor: pointSeriesTemplate },
       ],
     },
     schemas: new Schemas([

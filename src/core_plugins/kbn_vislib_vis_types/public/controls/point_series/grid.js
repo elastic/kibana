@@ -18,6 +18,8 @@ module.directive('vislibGrid', function ($parse, $compile) {
         }
       }
 
+      $scope.isGridOpen = true;
+
       $scope.$watch('vis.params.categoryAxes[0].position', position => {
         const categoryAxisIsHorizontal = ['top', 'bottom'].includes(position);
         $scope.vis.params.valueAxes.forEach(axis => {
