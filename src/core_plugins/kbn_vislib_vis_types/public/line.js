@@ -102,7 +102,7 @@ export default function PointSeriesVisType(Private) {
       {
         group: 'metrics',
         name: 'metric',
-        title: 'Value Axis',
+        title: 'Y-Axis',
         min: 1,
         defaults: [
           { schema: 'metric', type: 'count' }
@@ -119,7 +119,7 @@ export default function PointSeriesVisType(Private) {
       {
         group: 'buckets',
         name: 'segment',
-        title: 'Category Axis',
+        title: 'X-Axis',
         min: 0,
         max: 1,
         aggFilter: '!geohash_grid'
