@@ -17,7 +17,7 @@ export default {
       'page-0': {
         id: 'page-0',
         style: {
-          backgroundColor: '#c66'
+          backgroundColor: '#fff'
         },
         elements: ['element-0', 'element-2'] // Same deal here. I'm watching you.
       },

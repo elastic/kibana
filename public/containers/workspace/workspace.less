@@ -1,10 +1,13 @@
 @import (reference) "~plugins/rework/main.less";
 
-@rework--editor--background: @kibanaGray5;
+@rework--editor--background: #eee;
+@rework--workspace--background: @kibanaGray6;
+@rework--border: 1px solid @kibanaGray4;
 
 .rework--workspace {
+  padding-left: 1px;
   flex-grow: 1;
-  background: @kibanaGray4;
+  background: @rework--workspace--background;
   display: flex;
   position: relative;
 
@@ -62,15 +65,18 @@
     position: absolute;
     background-color: @rework--editor--background;
     width: 24px;
-    right: -24px;
-    padding: 25px 8px;;
+    right: -23px;
+    padding: 25px 8px 24px 8px;
     color: @text-color;
+    border-right: @rework--border;
+    border-bottom: @rework--border;
   }
 
   .rework--editor--left {
     display: flex;
     flex-grow: 1;
     background-color: @rework--editor--background;
+    border-right: @rework--border;
     width: 350px;
   }
 }
