@@ -23,8 +23,17 @@ module.exports = function (kibana) {
         }
       },
       hacks: [
+        // You must load the argTypes first
+        'plugins/rework/arg_types/string/string',
+        'plugins/rework/arg_types/style/style',
+
+        // Then the elements that use them.
+        // Thus, if an element plugin relies on an arg_type plugin,
+        // it must declare that requirement in the "require" property above. Neat.
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
+
+
       ],
     },
 
