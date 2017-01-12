@@ -14,12 +14,18 @@ import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 import { editorToggle } from 'plugins/rework/state/actions/editor';
-import { elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
+import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
 import './workspace.less';
 
 const Workspace = React.createClass({
+  select(id) {
+    return () => {
+      const {dispatch} = this.props;
+      dispatch(elementSelect(id));
+    };
+  },
   resizeMove(id) {
     return (e) => {
       const {dispatch} = this.props;
@@ -69,7 +75,7 @@ const Workspace = React.createClass({
                 return (
                   <Page key={pageId} page={page}>
                     {page.elements.map((elementId) => {
-                      const {resizeMove, rotate} = this;
+                      const {resizeMove, rotate, select} = this;
                       const element = elements[elementId];
                       const selected = elementId === selectedElement ? true : false;
                       const args = resolvedArgs[elementId];
@@ -89,7 +95,9 @@ const Workspace = React.createClass({
                             move={resizeMove(elementId)}
                             resize={resizeMove(elementId)}
                             rotate={rotate(elementId)}>
-                            <Element type={element.type} args={args}></Element>
+                            <div onMouseUp={select(elementId)} style={{height: '100%'}}>
+                              <Element type={element.type} args={args}></Element>
+                            </div>
                           </Positionable>
                         </div>
                       );
