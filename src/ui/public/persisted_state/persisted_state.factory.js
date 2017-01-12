@@ -1,5 +1,5 @@
 /**
- * @name PersistedStateProvider
+ * @name AngularPersistedState
  *
  * Returns a PersistedState object which uses an EventEmitter instead of
  * the SimpleEmitter. The EventEmitter adds digest loops every time a handler is called
@@ -14,10 +14,20 @@
 
 import EventsProvider from 'ui/events';
 import { PersistedState } from './persisted_state';
+import uiModules from 'ui/modules';
 
-export function PersistedStateProvider(Private) {
+const module = uiModules.get('kibana');
+
+module.factory('PersistedState', ($injector) => {
+  const Private = $injector.get('Private');
   const Events = Private(EventsProvider);
 
-  return (value, path, parent, silent) => new PersistedState(value, path, parent, silent, Events);
-}
+  // Extend PersistedState to override the EmitterClass class with
+  // our Angular friendly version.
+  return class AngularPersistedState extends PersistedState {
+    constructor(value, path, parent, silent) {
+      super(value, path, parent, silent, Events);
+    }
+  };
+});
 

@@ -9,12 +9,19 @@ import toPath from 'lodash/internal/toPath';
 import errors from 'ui/errors';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 
-function parentDelegationMixin(from, to) {
-  _.forOwn(from.prototype, function (method, methodName) {
-    to[methodName] = function () {
-      return from.prototype[methodName].apply(this._parent || this, arguments);
-    };
-  });
+function prepSetParams(key, value, path) {
+  // key must be the value, set the entire state using it
+  if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
+    // setting entire tree, swap the key and value to write to the state
+    value = key;
+    key = undefined;
+  }
+
+  // ensure the value being passed in is never mutated
+  return {
+    value: _.cloneDeep(value),
+    key: key
+  };
 }
 
 export class PersistedState {
@@ -25,24 +32,35 @@ export class PersistedState {
    * @param path
    * @param parent
    * @param silent
-   * @param emitter {SimpleEmitter} - a SimpleEmitter class that this class will extend. Can be used to
+   * @param EmitterClass {SimpleEmitter} - a SimpleEmitter class that this class will extend. Can be used to
    * inherit a custom event emitter. For example, the EventEmitter is an "angular-ized" version
    * for angular components which automatically triggers a digest loop for every registered
    * handler.  TODO: Get rid of the need for EventEmitter by wrapping handlers that require it
    * in a special function that will handler triggering the digest loop.
    */
-  constructor(value, path, parent, silent, emitter = SimpleEmitter) {
-    emitter.call(this);
-    parentDelegationMixin(emitter, this);
+  constructor(value, path, parent, silent, EmitterClass = SimpleEmitter) {
+    EmitterClass.call(this);
 
-    this._emitter = emitter;
+    this._EmitterClass = EmitterClass;
     this._path = this._setPath(path);
     this._parent = parent || false;
 
+    _.forOwn(EmitterClass.prototype, (method, methodName) => {
+      this[methodName] = function () {
+        return EmitterClass.prototype[methodName].apply(this._parent || this, arguments);
+      };
+    });
+
+    // Some validations
     if (this._parent) {
-      validateParent(this._parent, this._path);
-    } else if (!this._path.length) {
-      validateValue(value);
+      if (this._path.length <= 0) {
+        throw new errors.PersistedStateError('PersistedState child objects must contain a path');
+      }
+      if (!(this._parent instanceof PersistedState)) {
+        throw new errors.PersistedStateError('Parent object must be an instance of PersistedState');
+      }
+    } else if (!this._path.length && value && !_.isPlainObject(value)) {
+      throw new errors.PersistedStateError('State value must be a plain object');
     }
 
     value = value || this._getDefault();
@@ -88,7 +106,7 @@ export class PersistedState {
 
   createChild(path, value, silent) {
     this._setChild(this._getIndex(path), value, this._parent || this);
-    return new PersistedState(value, this._getIndex(path), this._parent || this, silent, this._emitter);
+    return new PersistedState(value, this._getIndex(path), this._parent || this, silent, this._EmitterClass);
   }
 
   removeChild(path) {
@@ -251,34 +269,4 @@ export class PersistedState {
 
     return this;
   }
-}
-
-function validateParent(parent, path) {
-  if (path.length <= 0) {
-    throw new errors.PersistedStateError('PersistedState child objects must contain a path');
-  }
-
-  if (parent instanceof PersistedState) return;
-  throw new errors.PersistedStateError('Parent object must be an instance of PersistedState');
-}
-
-function validateValue(value) {
-  const msg = 'State value must be a plain object';
-  if (!value) return;
-  if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
-}
-
-function prepSetParams(key, value, path) {
-  // key must be the value, set the entire state using it
-  if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
-    // setting entire tree, swap the key and value to write to the state
-    value = key;
-    key = undefined;
-  }
-
-  // ensure the value being passed in is never mutated
-  return {
-    value: _.cloneDeep(value),
-    key: key
-  };
 }

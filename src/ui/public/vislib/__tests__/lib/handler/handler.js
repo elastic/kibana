@@ -9,7 +9,7 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
+import 'ui/persisted_state';
 const dateHistogramArray = [
   series,
   columns,
@@ -34,10 +34,10 @@ dateHistogramArray.forEach(function (data, i) {
     ];
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       Handler = Private(VislibLibHandlerHandlerProvider);
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       vis.render(data, persistedState);
     }));
 

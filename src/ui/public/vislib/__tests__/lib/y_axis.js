@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
+import 'ui/persisted_state';
 import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
@@ -94,9 +94,9 @@ function createData(seriesData) {
 describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStateProvider))();
+    persistedState = new ($injector.get('PersistedState'))();
     YAxis = Private(VislibLibYAxisProvider);
     VisConfig = Private(VislibVisConfig);
 

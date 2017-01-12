@@ -6,7 +6,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import VisProvider from 'ui/vis';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
+import 'ui/persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
@@ -74,11 +74,11 @@ describe('No global chart settings', function () {
   let data2;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
     chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
-    persistedState = new (Private(PersistedStateProvider))();
+    persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
@@ -169,10 +169,10 @@ aggArray.forEach(function (dataAgg, i) {
     let data;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
       Vis = Private(VisProvider);
-      persistedState = new (Private(PersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 

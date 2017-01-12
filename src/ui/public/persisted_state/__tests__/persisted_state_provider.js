@@ -4,8 +4,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import errors from 'ui/errors';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
-import EventsProvider from 'ui/events';
+import 'ui/persisted_state';
 
 let PersistedState;
 let Events;
@@ -16,9 +15,8 @@ describe('Persisted State Provider', function () {
   beforeEach(function () {
     ngMock.module('kibana');
 
-    ngMock.inject(function (Private) {
-      PersistedState = Private(PersistedStateProvider);
-      Events = Private(EventsProvider);
+    ngMock.inject(function ($injector) {
+      PersistedState = $injector.get('PersistedState');
     });
   });
 
@@ -28,11 +26,6 @@ describe('Persisted State Provider', function () {
     it('should create an empty state instance', function () {
       persistedState = new PersistedState();
       expect(persistedState.get()).to.eql({});
-    });
-
-    it('should be an event emitter', function () {
-      persistedState = new PersistedState();
-      expect(persistedState._emitter).to.be(Events);
     });
 
     it('should create a state instance with data', function () {

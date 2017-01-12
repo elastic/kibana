@@ -11,7 +11,7 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
+import 'ui/persisted_state';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 const dateHistogramArray = [
@@ -39,10 +39,10 @@ dateHistogramArray.forEach(function (data, i) {
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
-      ngMock.inject(function (Private) {
+      ngMock.inject(function (Private, $injector) {
         Layout = Private(VislibLibLayoutLayoutProvider);
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStateProvider))();
+        persistedState = new ($injector.get('PersistedState'))();
         VisConfig = Private(VislibVisConfig);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;

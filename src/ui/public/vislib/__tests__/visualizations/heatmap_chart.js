@@ -11,7 +11,7 @@ import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { PersistedStateProvider } from 'ui/persisted_state/persisted_state_provider';
+import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -53,9 +53,9 @@ describe('Vislib Heatmap Chart Test Suite', function () {
       }
 
       beforeEach(ngMock.module('kibana'));
-      beforeEach(ngMock.inject(function (Private) {
+      beforeEach(ngMock.inject(function (Private, $injector) {
         vislibVis = Private(FixturesVislibVisFixtureProvider);
-        PersistedState = Private(PersistedStateProvider);
+        PersistedState = $injector.get('PersistedState');
         generateVis();
       }));
 
