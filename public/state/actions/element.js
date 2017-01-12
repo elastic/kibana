@@ -1,7 +1,8 @@
 import { createAction } from 'redux-actions';
 import _ from 'lodash';
 import elements from 'plugins/rework/elements/elements';
-import mutateWithId from './lib/helpers';
+import { mutateWithId } from './lib/helpers';
+
 
 export const elementHeight = createAction('ELEMENT_HEIGHT', mutateWithId);
 export const elementWidth = createAction('ELEMENT_WIDTH', mutateWithId);
@@ -26,3 +27,5 @@ export function elementResolve(id) {
     });
   };
 }
+
+window.elementResolve = elementResolve;

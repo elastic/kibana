@@ -42,7 +42,8 @@ function rootReducer(state = {}, action) {
       return setWorkpad('height', payload);
     case 'WORKPAD_WIDTH':
       return setWorkpad('width', payload);
-    case 'WORKPAD_PAGE':
+
+    case 'PAGE_SET':
       return setWorkpad('page', payload);
 
     case 'ELEMENT_ANGLE':
@@ -55,7 +56,7 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'top', payload.value);
     case 'ELEMENT_LEFT':
       return setElement(payload.id, 'left', payload.value);
-    case 'ELEMENT_RESOLVE_COMMIT':
+    case 'ELEMENT_SET_RESOLVED':
       return setTransient('resolvedArgs', {...state.transient.resolvedArgs, [payload.id]: payload.value});
 
     default:

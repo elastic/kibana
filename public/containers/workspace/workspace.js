@@ -12,9 +12,9 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
-import { editorToggle, workpadPageNext, workpadPagePrevious } from 'plugins/rework/state/actions';
-import { elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions';
-
+import { editorToggle } from 'plugins/rework/state/actions/editor';
+import { elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
+import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
 
 import './workspace.less';
 
@@ -58,7 +58,7 @@ const Workspace = React.createClass({
         </LeftSidebar>
 
         <Centered>
-          <PageControl direction='previous' handler={this.do(workpadPagePrevious)}></PageControl>
+          <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
           <Workpad workpad={workpad}>
             <Stack top={workpad.page}>
               {workpad.pages.map((pageId) => {
@@ -86,7 +86,7 @@ const Workspace = React.createClass({
               })}
             </Stack>
           </Workpad>
-          <PageControl direction='next' handler={this.do(workpadPageNext)}></PageControl>
+          <PageControl direction='next' handler={this.do(pageNext)}></PageControl>
         </Centered>
       </div>
     );
