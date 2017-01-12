@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import AggConfigResult from 'ui/vis/agg_config_result';
 
 import uiModules from 'ui/modules';
 import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
@@ -55,6 +56,7 @@ uiModules
         let value = row[self.sort.columnIndex];
         if (value && value.value != null) value = value.value;
         if (typeof value === 'boolean') value = value ? 0 : 1;
+        if (value instanceof AggConfigResult && value.valueOf() === null) value = false;
         return value;
       }
 
