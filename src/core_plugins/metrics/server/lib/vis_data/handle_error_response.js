@@ -9,7 +9,7 @@ export default panel => error => {
   result[panel.id] = {
     id: panel.id,
     statusCode: error.statusCode,
-    error: errorResponse,
+    error: errorResponse || error,
     series: []
   };
   return result;

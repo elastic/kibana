@@ -19,7 +19,7 @@ const Chart = React.createClass({
     if (props.yaxes && this.props.yaxes) {
       // We need to rerender if the axis change
       const valuesChanged = props.yaxes.some((axis, i) => {
-        return axis.tickFormatter !== this.props.yaxes[i].tickFormatter &&
+        return this.props.yaxes[i] && axis.tickFormatter !== this.props.yaxes[i].tickFormatter &&
           axis.position !== this.props.yaxes[i].position;
       });
       if (props.yaxes.length !== this.props.yaxes.length || valuesChanged) {

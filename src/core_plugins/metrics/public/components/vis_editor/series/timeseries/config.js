@@ -105,6 +105,8 @@ export default React.createClass({
       );
     }
 
+    const disableSeperateYaxis = model.seperate_axis ? false : true;
+
     return (
       <div>
         <div className="vis_editor__series_config-container">
@@ -121,41 +123,52 @@ export default React.createClass({
           </div>
           { type }
           <div className="vis_editor__series_config-row">
+              <div className="vis_editor__label">Offset series time by (1m, 1h, 1w, 1d)</div>
+              <input
+                className="vis_editor__input-grows"
+                type="text"
+                ref="offset_time"
+                onChange={handleTextChange('offset_time')}
+                defaultValue={model.offset_time}/>
               <div className="vis_editor__label">Hide in Legend</div>
               <YesNo
                 value={model.hide_in_legend}
                 name="hide_in_legend"
                 onChange={this.props.onChange}/>
+              <div className="vis_editor__label">Axis Max</div>
               <div className="vis_editor__label">Separate Axis</div>
               <YesNo
                 value={model.seperate_axis}
                 name="seperate_axis"
                 onChange={this.props.onChange}/>
+              <div className="vis_editor__label" style={{ marginLeft: 10 }}>Axis Min</div>
+              <input
+                className="vis_editor__input-grows"
+                type="text"
+                ref="axis_min"
+                disabled={disableSeperateYaxis}
+                onChange={handleTextChange('axis_min')}
+                defaultValue={model.axis_min}/>
+              <div className="vis_editor__label">Axis Max</div>
+              <input
+                className="vis_editor__input-grows"
+                type="text"
+                disabled={disableSeperateYaxis}
+                ref="axis_max"
+                onChange={handleTextChange('axis_max')}
+                defaultValue={model.axis_max}/>
+              <div className="vis_editor__label">Axis Position</div>
+              <div className="vis_editor__row_item">
+                <Select
+                  clearable={false}
+                  disabled={disableSeperateYaxis}
+                  options={positionOptions}
+                  value={model.axis_position}
+                  onChange={handleSelectChange('axis_position')}/>
+              </div>
           </div>
           { model.seperate_axis ? (
             <div className="vis_editor__row" style={{ fontSize: 12 }}>
-                  <div className="vis_editor__label" style={{ marginLeft: 10 }}>Axis Min</div>
-                  <input
-                    className="vis_editor__input-grows"
-                    type="text"
-                    ref="axis_min"
-                    onChange={handleTextChange('axis_min')}
-                    defaultValue={model.axis_min}/>
-                  <div className="vis_editor__label">Axis Max</div>
-                  <input
-                    className="vis_editor__input-grows"
-                    type="text"
-                    ref="axis_max"
-                    onChange={handleTextChange('axis_max')}
-                    defaultValue={model.axis_max}/>
-                  <div className="vis_editor__label">Axis Position</div>
-                  <div className="vis_editor__row_item">
-                    <Select
-                      clearable={false}
-                      options={positionOptions}
-                      value={model.axis_position}
-                      onChange={handleSelectChange('axis_position')}/>
-                  </div>
             </div>
           ) : (<div style={{ display:'none' }}/>) }
         </div>

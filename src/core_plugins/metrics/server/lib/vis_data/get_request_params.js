@@ -4,56 +4,64 @@ import getBucketSize from './get_bucket_size';
 import getBucketsPath from '../get_buckets_path';
 import basicAggs from '../../../public/lib/basic_aggs';
 import bucketTransform from '../bucket_transform';
+import unitToSeconds from '../unit_to_seconds';
 
 export default (req, panel, indices) => {
-  const { bucketSize, intervalString } = getBucketSize(req, panel);
-  const globalFilters = req.payload.filters;
-  const from = moment.utc(req.payload.timerange.min);
-  const to = moment.utc(req.payload.timerange.max);
-  const { index_pattern, time_field, interval } = panel;
-  const params = {
-    index: indices,
-    ignore: [404],
-    timeout: '90s',
-    requestTimeout: 90000,
-    ignoreUnavailable: true,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          must: [],
-          should: [],
-          must_not: []
-        }
-      },
-      aggs: {}
-    }
-  };
-
-  const timerange = { range: {} };
-  timerange.range[time_field] = {
-    gte: from.valueOf(),
-    lte: to.valueOf() - (bucketSize * 1000),
-    format: 'epoch_millis',
-  };
-  params.body.query.bool.must.push(timerange);
-
-  if (globalFilters && !panel.ignore_global_filter) {
-    params.body.query.bool.must = params.body.query.bool.must.concat(globalFilters);
-  }
-
-  if (panel.filter) {
-    params.body.query.bool.must.push({
-      query_string: {
-        query: panel.filter,
-        analyze_wildcard: true
-      }
-    });
-  }
-
-  const aggs = params.body.aggs;
-
+  const bodies = [];
   panel.series.forEach(series => {
+    const { bucketSize, intervalString } = getBucketSize(req, panel);
+    const globalFilters = req.payload.filters;
+    const from = moment.utc(req.payload.timerange.min);
+    const to = moment.utc(req.payload.timerange.max);
+
+    if (/^([\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {
+      const matches = series.offset_time.match(/^([\d]+)([shmdwMy]|ms)$/);
+      if (matches) {
+        const offsetSeconds = Number(matches[1]) * unitToSeconds(matches[2]);
+        from.subtract(offsetSeconds, 's');
+        to.subtract(offsetSeconds, 's');
+      }
+    }
+
+
+    const { index_pattern, time_field, interval } = panel;
+    const params = {
+      index: indices,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            must: [],
+            should: [],
+            must_not: []
+          }
+        },
+        aggs: {}
+      }
+    };
+
+    const timerange = { range: {} };
+    timerange.range[time_field] = {
+      gte: from.valueOf(),
+      lte: to.valueOf() - (bucketSize * 1000),
+      format: 'epoch_millis',
+    };
+    params.body.query.bool.must.push(timerange);
+
+    if (globalFilters && !panel.ignore_global_filter) {
+      params.body.query.bool.must = params.body.query.bool.must.concat(globalFilters);
+    }
+
+    if (panel.filter) {
+      params.body.query.bool.must.push({
+        query_string: {
+          query: panel.filter,
+          analyze_wildcard: true
+        }
+      });
+    }
+
+    const aggs = params.body.aggs;
     aggs[series.id] = {};
     const seriesAgg = aggs[series.id];
 
@@ -67,8 +75,8 @@ export default (req, panel, indices) => {
           analyze_wildcard: true
         }
       };
-    // if it's a terms group by then we need to add the terms agg along
-    // with a metric agg for sorting
+      // if it's a terms group by then we need to add the terms agg along
+      // with a metric agg for sorting
     } else if (series.split_mode === 'terms' && series.terms_field) {
       seriesAgg.terms = {
         field: series.terms_field,
@@ -148,9 +156,17 @@ export default (req, panel, indices) => {
         }
       });
 
+    bodies.push({
+      index: params.index,
+      ignore: [404],
+      timeout: '90s',
+      requestTimeout: 90000,
+      ignoreUnavailable: true,
+    });
+    bodies.push(params.body);
   });
 
-  return params;
+  return { body: bodies };
 
 
 };

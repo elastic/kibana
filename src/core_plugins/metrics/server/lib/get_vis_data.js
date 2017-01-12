@@ -23,8 +23,19 @@ function getPanelData(req) {
     const { index_pattern, time_field } = panel;
     return calculateIndices(req, index_pattern, time_field).then(indices => {
       const params = getRequestParams(req, panel, indices);
-      return callWithRequest(req, 'search', params)
-        .then(handleResponse(panel))
+      return callWithRequest(req, 'msearch', params)
+        .then(resp => {
+          const result = {};
+          result[panel.id] = {
+            id: panel.id,
+            series: resp.responses
+              .map(handleResponse(panel))
+              .reduce((acc, data) => {
+                return acc.concat(data);
+              }, [])
+          };
+          return result;
+        })
         .catch(handleErrorResponse(panel));
     });
   };
