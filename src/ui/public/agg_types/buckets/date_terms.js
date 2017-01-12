@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import mondayFirstWeekdays from 'ui/utils/monday_first_weekdays';
+import { mondayFirstWeekdays } from 'ui/utils/monday_first_weekdays';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import CreateFilterProvider from 'ui/agg_types/buckets/create_filter/date_terms';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
@@ -9,7 +9,6 @@ export default function DateTermsAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const createFilter = Private(CreateFilterProvider);
-  const weekdays = mondayFirstWeekdays();
 
   return new BucketAggType({
     name: 'dateterms',
@@ -25,7 +24,7 @@ export default function DateTermsAggDefinition(Private) {
           break;
         case 'dayOfWeek':
           const dayIndex = key - 1;
-          prettyKey = weekdays[dayIndex];
+          prettyKey = mondayFirstWeekdays[dayIndex];
           break;
       }
       return prettyKey;
@@ -59,7 +58,7 @@ export default function DateTermsAggDefinition(Private) {
         name: 'script',
         write: function (agg, output) {
           output.params.script = {
-            inline: 'doc[\'' + agg.params.field.name + '\'].date.' + agg.params.date_method,
+            inline: `doc['${agg.params.field.name}'].date.${agg.params.date_method}`,
             lang: 'expression'
           };
         }

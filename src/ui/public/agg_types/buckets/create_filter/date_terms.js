@@ -1,12 +1,11 @@
 import moment from 'moment';
-import mondayFirstWeekdays from 'ui/utils/monday_first_weekdays';
+import { mondayFirstWeekdays } from 'ui/utils/monday_first_weekdays';
 
 export default function createTermsFilterProvider(Private) {
   return function (aggConfig, key) {
     const dateMethod = aggConfig.params.date_method;
     const field = aggConfig.params.field;
     const indexPattern = aggConfig.vis.indexPattern;
-    const weekdays = mondayFirstWeekdays();
 
     //convert date strings back into date indexes
     let value = key;
@@ -15,7 +14,7 @@ export default function createTermsFilterProvider(Private) {
         value = moment.monthsShort().indexOf(key) + 1;
         break;
       case 'dayOfWeek':
-        value = weekdays.indexOf(key) + 1;
+        value = mondayFirstWeekdays.indexOf(key) + 1;
         break;
     }
 
@@ -27,7 +26,7 @@ export default function createTermsFilterProvider(Private) {
       },
       script: {
         script: {
-          inline: '(doc[\'' + field.name + '\'].date.' + dateMethod + ') == value',
+          inline: `(doc['${field.name}'].date.${dateMethod}) == value`,
           lang: 'expression',
           params: {
             value: value
