@@ -3,5 +3,6 @@ export default class Element {
     this.name = name;
     this.displayName = props.displayName;
     this.template = props.template;
+    this.args = props.args;
   }
 }
