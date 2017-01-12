@@ -245,6 +245,47 @@ body {
     opacity: 0.3;
     cursor: not-allowed; }
 
+/**
+ * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 2. Make room on right side for the caret.
+ */
+.kuiSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: #191E23;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */ }
+  .kuiSelect:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+
 .kuiTextArea {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1173,17 +1214,12 @@ body {
   border: 1px solid #FFFFFF;
   border-radius: 4px;
   font-size: 14px;
-  border: none;
-  /* 1 */
+  border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */ }
   .kuiToolBarSearchBox__input:focus {
-    z-index: 1;
-    /* 1 */
-    outline: 1px solid #6EADC1 !important;
-    /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    outline: none;
+    border-color: #6EADC1; }
 
 /*
  * 1. We don't want the text to take up two lines and overflow the ToolBar.

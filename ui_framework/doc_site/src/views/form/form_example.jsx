@@ -16,4 +16,8 @@ export default createExample([{
   title: 'CheckBox',
   html: require('./check_box.html'),
   hasDarkTheme: false,
+}, {
+  title: 'Select',
+  html: require('./select.html'),
+  hasDarkTheme: false,
 }]);

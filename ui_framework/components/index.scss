@@ -66,6 +66,11 @@ $toolBarItsemSpacing: 10px;
   outline-offset: 2px !important; /* 2 */
 }
 
+@mixin formControlFocus {
+  outline: none;
+  border-color: $selectedBorderColor;
+}
+
 @mixin formControl {
   appearance: none;
   padding: 3px 12px 4px;
@@ -90,8 +95,7 @@ $toolBarItsemSpacing: 10px;
   }
 
   &:focus {
-    outline: none;
-    border-color: $selectedBorderColor;
+    @include formControlFocus;
   }
 
   &:disabled {

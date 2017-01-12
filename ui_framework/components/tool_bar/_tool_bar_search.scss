@@ -32,10 +32,10 @@
     border: 1px solid #FFFFFF;
     border-radius: $buttonBorderRadius;
     font-size: $fontSize;
-    border: none; /* 1 */
+    border: 1px solid #ffffff;
     line-height: normal; /* 1 */
 
     &:focus {
-      @include focus;
+      @include formControlFocus;
     }
   }
