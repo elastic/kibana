@@ -46,29 +46,8 @@ describe('AggConfigResult', function () {
       expect(results).to.have.property('value', 1024);
       expect(results).to.have.property('key', undefined);
     });
-
-    describe('value field conversion', () => {
-      it('should convert value to primitive (`false`) if set with `null`', function () {
-        const vis = new Vis(indexPattern, {
-          type: 'histogram',
-          aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
-        });
-        const aggConfig = vis.aggs.byTypeName.terms[0];
-        const results = new AggConfigResult(aggConfig, null, null, 'apache');
-        expect(results).to.have.property('value', false);
-      });
-
-      it('should not convert value if given false-y primitive', function () {
-        const vis = new Vis(indexPattern, {
-          type: 'histogram',
-          aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
-        });
-        const aggConfig = vis.aggs.byTypeName.terms[0];
-        const results = new AggConfigResult(aggConfig, null, 0, 'apache');
-        expect(results).to.have.property('value', 0);
-      });
-    });
   });
+
 
   describe('hierarchical', function () {
     describe('getPath()', function () {

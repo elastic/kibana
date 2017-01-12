@@ -3,7 +3,7 @@ define(function () {
 
   function AggConfigResult(aggConfig, parent, value, key) {
     this.key = key;
-    this.value = value === null ? false : value; // restrict to primitive for sorting in Angular
+    this.value = value;
     this.aggConfig = aggConfig;
     this.$parent = parent;
     this.$order = ++i;
