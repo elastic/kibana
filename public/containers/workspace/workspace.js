@@ -49,7 +49,8 @@ const Workspace = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const  {workpad, pages, elements, dataframes, editor, resolvedArgs, selectedElement} = this.props;
+    const  {workpad, pages, elements, dataframes, editor, resolvedArgs, selectedElementId} = this.props;
+    const selectedElement = elements[selectedElementId];
 
     // TODO: This entire thing can be broken up into smaller containers.
     // But for now, its actually *more* readable this way.
@@ -58,7 +59,7 @@ const Workspace = React.createClass({
         <LeftSidebar>
           {!editor ? null : (
             <div className="rework--editor--left">
-              <Editor></Editor>
+              <Editor element={selectedElement}></Editor>
             </div>
           )}
           <div className="rework--editor-toggle--left">
@@ -77,7 +78,7 @@ const Workspace = React.createClass({
                     {page.elements.map((elementId) => {
                       const {resizeMove, rotate, select} = this;
                       const element = elements[elementId];
-                      const selected = elementId === selectedElement ? true : false;
+                      const selected = elementId === selectedElementId ? true : false;
                       const args = resolvedArgs[elementId];
                       const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
