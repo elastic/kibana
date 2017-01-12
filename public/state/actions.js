@@ -1,4 +1,7 @@
 import { createAction } from 'redux-actions';
+import _ from 'lodash';
+import elements from 'plugins/rework/elements/elements';
+
 
 export const editorClose = createAction('EDITOR_CLOSE');
 export const editorOpen = createAction('EDITOR_OPEN');
@@ -15,8 +18,7 @@ export const elementLeft = createAction('ELEMENT_LEFT', mutateWithId);
 export const elementAngle = createAction('ELEMENT_ANGLE', mutateWithId);
 
 // Resolve all arguments on the element
-export const elementResolve = createAction('ELEMENT_RESOLVE');
-
+export const elementResolveCommit = createAction('ELEMENT_RESOLVE_COMMIT', mutateWithId);
 
 // You can return a promise here too.
 export function editorToggle(payload) {
@@ -42,3 +44,20 @@ export function workpadPagePrevious() {
     if (newPage >= 0) dispatch(workpadPage(newPage));
   };
 }
+
+export function elementResolve(id) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const element = state.persistent.elements[id];
+    const argDefinitions = elements.byName[element.type].args;
+    const argPromises = _.map(argDefinitions, (argDef) => argDef.type.resolve(element.args[argDef.name]));
+
+    Promise.all(argPromises).then((argValues) => {
+      const argNames = _.map(argDefinitions, 'name');
+      const resolvedArgs = _.zipObject(argNames, argValues);
+      dispatch(elementResolveCommit(id, resolvedArgs));
+    });
+  };
+}
+
+window.elementResolve = elementResolve;

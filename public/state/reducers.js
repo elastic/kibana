@@ -32,16 +32,6 @@ function rootReducer(state = {}, action) {
       }});
   };
 
-  // TODO: Move the resolving to an action.
-  const resolveElement = (id) => {
-    const element = state.persistent.elements[id];
-    const argDefinitions = elements.byName[element.type].args;
-    const argNames = _.map(argDefinitions, 'name');
-    const argValues = _.map(argDefinitions, (argDef) => argDef.type.resolve(element.args[argDef.name]));
-    const resolvedArgs = _.zipObject(argNames, argValues);
-    return setTransient('resolvedArgs', {...state.transient.resolvedArgs, [id]: resolvedArgs});
-  };
-
   const { payload, type } = action;
   switch (type) {
     case 'EDITOR_CLOSE':
@@ -65,8 +55,8 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'top', payload.value);
     case 'ELEMENT_LEFT':
       return setElement(payload.id, 'left', payload.value);
-    case 'ELEMENT_RESOLVE':
-      return resolveElement(payload);
+    case 'ELEMENT_RESOLVE_COMMIT':
+      return setTransient('resolvedArgs', {...state.transient.resolvedArgs, [payload.id]: payload.value});
 
     default:
       return state;

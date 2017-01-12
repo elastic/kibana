@@ -14,8 +14,9 @@ elements.push(new Element('json', {
     })
   ],
   template: ({args}) => {
+    const style = Object.assign({}, args._style, {height: '100%', width: '100%'});
     return (
-      <div style={args._style}>
+      <div style={style}>
         <pre>
           {JSON.stringify(args, null, ' ')}
         </pre>
