@@ -277,7 +277,7 @@ possible (which is almost everywhere):
 ```js
 // good
 import { mapValues } from 'lodash';
-export default mapValues;
+export mapValues;
 
 // bad
 const _ = require('lodash');
@@ -319,6 +319,20 @@ import sibling from '../foo';
 // bad
 import inFoo from 'foo/child';
 import inSibling from '../foo/child';
+```
+
+## Use named exports only
+
+Favor named exports over default exports.  See (#8641)[https://github.com/elastic/kibana/issues/8641] for more background on this decision.
+
+```js
+// good
+import { foo } from 'foo';
+export foo;
+
+// bad
+import myDefaultModule from 'foo/child';
+export default myDefaultModule;
 ```
 
 ## Global definitions
