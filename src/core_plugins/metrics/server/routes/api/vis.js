@@ -7,13 +7,7 @@ export default (server) => {
     path: '/api/metrics/vis/data',
     method: 'POST',
     handler: (req, reply) => {
-      const reqs = req.payload.panels.map(getVisData(req));
-      return Promise.all(reqs)
-        .then(res => {
-          return res.reduce((acc, data) => {
-            return _.assign({}, acc, data);
-          }, {});
-        })
+      return getVisData(req)
         .then(reply)
         .catch(err => {
           console.error(err.stack);
