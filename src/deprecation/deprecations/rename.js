@@ -1,4 +1,4 @@
-import { get, isUndefined, isNull, noop, set } from 'lodash';
+import { get, isUndefined, noop, set } from 'lodash';
 import { unset } from '../../utils';
 
 export default function (oldKey, newKey) {
