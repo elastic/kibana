@@ -13,6 +13,8 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
+import ElementResolver from 'plugins/rework/containers/element_resolver/element_resolver';
+
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
@@ -79,7 +81,6 @@ const Workspace = React.createClass({
                       const {resizeMove, rotate, select} = this;
                       const element = elements[elementId];
                       const selected = elementId === selectedElement ? true : false;
-                      const args = resolvedArgs[elementId];
                       const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
                       // This is really gross because it doesn't actually wrap the element.
@@ -97,7 +98,9 @@ const Workspace = React.createClass({
                             resize={resizeMove(elementId)}
                             rotate={rotate(elementId)}>
                             <div onMouseUp={select(elementId)} style={{height: '100%'}}>
-                              <Element type={element.type} args={args}></Element>
+                              <ElementResolver id={elementId} args={element.args}>
+                                <Element type={element.type} args={resolvedArgs[elementId]}></Element>
+                              </ElementResolver>
                             </div>
                           </Positionable>
                         </div>
