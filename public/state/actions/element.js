@@ -1,21 +1,21 @@
 import { createAction } from 'redux-actions';
 import _ from 'lodash';
 import elements from 'plugins/rework/elements/elements';
-import { mutateWithId } from './lib/helpers';
+import { mutateElement, mutateArgument } from './lib/helpers';
 
 /*
  Exports
 */
 
 export const elementSelect = createAction('ELEMENT_SELECT');
-export const elementHeight = createAction('ELEMENT_HEIGHT', mutateWithId);
-export const elementWidth = createAction('ELEMENT_WIDTH', mutateWithId);
-export const elementTop = createAction('ELEMENT_TOP', mutateWithId);
-export const elementLeft = createAction('ELEMENT_LEFT', mutateWithId);
-export const elementAngle = createAction('ELEMENT_ANGLE', mutateWithId);
-export const argumentResolved = createAction('ARGUMENT_RESOLVED', (id, name, value) => {
-  return {id: id, name: name, value: value};
-});
+export const elementHeight = createAction('ELEMENT_HEIGHT', mutateElement);
+export const elementWidth = createAction('ELEMENT_WIDTH', mutateElement);
+export const elementTop = createAction('ELEMENT_TOP', mutateElement);
+export const elementLeft = createAction('ELEMENT_LEFT', mutateElement);
+export const elementAngle = createAction('ELEMENT_ANGLE', mutateElement);
+
+export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
+export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
 
 // Resolve all arguments at the same time
 export function elementResolve(elementId) {
@@ -34,11 +34,18 @@ export function elementResolve(elementId) {
   };
 }
 
+export function argumentSet(elementId, name, value) {
+  return (dispatch) => {
+    dispatch(argumentUnresolved(elementId, name, value));
+    dispatch(argumentResolve(elementId, name));
+  };
+}
+
 // Resolve one argument
-export function argumentResolve(elementId, argName) {
+export function argumentResolve(elementId, name) {
   return (dispatch, getState) => {
-    Promise.resolve(resolveArgument(getState(), elementId, argName)).then(argValue => {
-      dispatch(argumentResolved(elementId, argName, argValue));
+    Promise.resolve(resolveArgument(getState(), elementId, name)).then(argValue => {
+      dispatch(argumentResolved(elementId, name, argValue));
     });
   };
 }
@@ -53,10 +60,10 @@ function getArgDefinitions(state, elementId) {
   return argDefinitions;
 }
 
-function resolveArgument(state, elementId, argName) {
+function resolveArgument(state, elementId, name) {
   const element = state.persistent.elements[elementId];
-  const argDef = _.find(getArgDefinitions(state, elementId), {name: argName});
-  return argDef.type.resolve(element.args[argName]);
+  const argDef = _.find(getArgDefinitions(state, elementId), {name: name});
+  return argDef.type.resolve(element.args[name]);
 }
 
-window.elementResolve = elementResolve;
+window.argumentSet = argumentSet;

@@ -68,6 +68,18 @@ function rootReducer(state = {}, action) {
           [payload.name]: payload.value
         }});
 
+    // Soooo hideous
+    case 'ARGUMENT_UNRESOLVED':
+      return setPersistent('elements', {
+        ...state.persistent.elements,
+        [payload.id]: {
+          ...state.persistent.elements[payload.id],
+          args: {
+            ...state.persistent.elements[payload.id].args,
+            [payload.name]: payload.value
+          }
+        }});
+
     default:
       return state;
   }
