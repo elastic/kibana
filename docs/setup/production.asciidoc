@@ -73,7 +73,7 @@ default `verificationMode` option of `full`.
 ----
 # If you need to provide a CA certificate for your Elasticsearch instance, put
 # the path of the pem file here.
-elasticsearch.ssl.certificateAuthorities: /path/to/your/ca/cacert.pem
+elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/ca/cacert.pem" ]
 ----
 
 [float]
