@@ -72,15 +72,22 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-Scripted fields use the Lucene expression syntax. For more information,
-see {es-ref}modules-scripting-expression.html[
-Lucene Expressions Scripts].
+When you define a scripted field in Kibana, you have a choice of scripting languages. Starting with 5.0, the default 
+options are {es-ref}modules-scripting-expression.html[Lucene expressions] and {es-ref}modules-scripting-painless.html[Painless]. 
+While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended 
+because they cannot be sufficiently {es-ref}modules-scripting-security.html[sandboxed].
+
+WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those 
+scripting languages will be removed in the future. 
 
 You can reference any single value numeric field in your expressions, for example:
 
 ----
 doc['field_name'].value
 ----
+
+For more background on scripted fields and additional examples, refer to this blog: 
+https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in Kibana scripted fields]
 
 [float]
 [[create-scripted-field]]
@@ -97,9 +104,6 @@ To create a scripted field:
 
 For more information about scripted fields in Elasticsearch, see
 {es-ref}modules-scripting.html[Scripting].
-
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{es-ref}modules-scripting.html[dynamic Groovy scripting].
 
 [float]
 [[update-scripted-field]]
