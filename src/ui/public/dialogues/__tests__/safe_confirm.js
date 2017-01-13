@@ -1,7 +1,8 @@
-import sinon from 'sinon';
+import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-describe('ui/safe_confirm', function () {
+
+describe.only('ui/dialogues/safe_confirm', function () {
 
   let $rootScope;
   let $window;
@@ -11,16 +12,10 @@ describe('ui/safe_confirm', function () {
   let promise;
 
   beforeEach(function () {
-    ngMock.module('kibana', function ($provide) {
-      $provide.value('$window', {
-        confirm: sinon.stub().returns(true)
-      });
-    });
-
+    ngMock.module('kibana');
     ngMock.inject(function ($injector) {
       safeConfirm = $injector.get('safeConfirm');
       $rootScope = $injector.get('$rootScope');
-      $window = $injector.get('$window');
       $timeout = $injector.get('$timeout');
     });
 
@@ -29,10 +24,17 @@ describe('ui/safe_confirm', function () {
     promise = safeConfirm(message);
   });
 
+  afterEach(function () {
+    const confirmationDialogElement = document.querySelector('.confirm-dialogue');
+    if (confirmationDialogElement) {
+      const okayButton = confirmationDialogElement.getElementsByTagName('button')[0];
+
+      $rootScope.$digest();
+      angular.element(okayButton).click();
+    }
+  });
+
   context('before timeout completes', function () {
-    it('$window.confirm is not invoked', function () {
-      expect($window.confirm.called).to.be(false);
-    });
     it('returned promise is not resolved', function () {
       let isResolved = false;
       function markAsResolved() {
@@ -45,9 +47,13 @@ describe('ui/safe_confirm', function () {
   });
 
   context('after timeout completes', function () {
-    it('$window.confirm is invoked with message', function () {
+    it('confirmation dialog is loaded to dom with message', function () {
       $timeout.flush();
-      expect($window.confirm.calledWith(message)).to.be(true);
+      const confirmationDialogElement = document.querySelector('.confirm-dialogue');
+      expect(!!confirmationDialogElement).to.be(true);
+      const htmlString = confirmationDialogElement.innerHTML;
+
+      expect(htmlString.indexOf(message)).to.be.greaterThan(0);
     });
 
     context('when confirmed', function () {
@@ -55,10 +61,15 @@ describe('ui/safe_confirm', function () {
         $timeout.flush();
 
         let value;
-        promise.then(function (v) {
+        promise.then((v) => {
           value = v;
         });
-        $rootScope.$apply();
+
+        const confirmationDialogElement = document.querySelector('.confirm-dialogue');
+        const okayButton = confirmationDialogElement.getElementsByTagName('button')[0];
+
+        $rootScope.$digest();
+        angular.element(okayButton).click();
 
         expect(value).to.be(true);
       });
@@ -66,14 +77,15 @@ describe('ui/safe_confirm', function () {
 
     context('when canceled', function () {
       it('promise is rejected with false', function () {
-        $window.confirm.returns(false); // must be set before $timeout.flush()
         $timeout.flush();
 
         let value;
-        promise.then(null, function (v) {
-          value = v;
-        });
-        $rootScope.$apply();
+        promise.then(null, (v) => { value = v; });
+        const confirmationDialogElement = document.querySelector('.confirm-dialogue');
+        const noButton = confirmationDialogElement.getElementsByTagName('button')[1];
+
+        $rootScope.$digest();
+        angular.element(noButton).click();
 
         expect(value).to.be(false);
       });

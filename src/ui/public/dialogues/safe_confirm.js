@@ -3,28 +3,27 @@ uiModules.get('kibana')
 
 /*
  * Angular doesn't play well with thread blocking calls such as
- * window.confirm() unless those calls are specifically handled inside a call
+ * unless those calls are specifically handled inside a call
  * to $timeout(). Rather than litter the code with that implementation
  * detail, safeConfirm() can be used.
  *
- * WARNING: safeConfirm differs from a native call to window.confirm in that
- * it only blocks the thread beginning on the next tick. For that reason, a
+ * WARNING: safeConfirm only blocks the thread beginning on the next tick. For that reason, a
  * promise is returned so consumers can handle the control flow.
  *
  * Usage:
- *  safeConfirm('This message will be passed to window.confirm()').then(
+ *  safeConfirm('This message will be shown in a modal dialog').then(
  *    function () {
- *      // user clicked confirm
+ *      // user clicked the okay button
  *    },
  *    function () {
  *      // user canceled the confirmation
  *    }
  *  );
  */
-.factory('safeConfirm', function ($window, $timeout, $q) {
+.factory('safeConfirm', function ($window, $timeout, $q, showConfirmDialogue) {
   return function safeConfirm(message) {
     return $timeout(function () {
-      return $window.confirm(message) || $q.reject(false);
+      return showConfirmDialogue(message) || $q.reject(false);
     });
   };
 });

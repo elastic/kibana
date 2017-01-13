@@ -1,0 +1,30 @@
+@import "~ui/styles/variables";
+
+.confirm-dialogue {
+  z-index: 10;
+  position: absolute;
+  background-color: white;
+  left: 40%;
+  top: 30%;
+  width: 400px;
+  padding: 15px 15px 0px 15px;
+
+  .message {
+    padding: 0px 0px 5px 0px;
+  }
+
+  .form-group {
+    float: right;
+  }
+}
+
+.disable-app-layer {
+  z-index: 9;
+  position: absolute;
+  opacity: .5;
+  background-color: @kibanaGray1;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
