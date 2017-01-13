@@ -72,7 +72,7 @@ export default panel => resp => {
                 points: { show: false }
               });
             } else {
-              result.series.push({
+              result.push({
                 id: `${percentile.id}:${term.key}`,
                 color: color.hexString(),
                 label,
@@ -83,7 +83,7 @@ export default panel => resp => {
           });
         } else {
           const data = term.timeseries.buckets.map(mapBucket(metric));
-          result.series.push({
+          result.push({
             id: `${series.id}:${term.key}`,
             label: term.key,
             color: color.hexString(),
@@ -108,14 +108,14 @@ export default panel => resp => {
           }
           const upperData = buckets.map(mapBucketByMode('upper'));
           const lowerData = buckets.map(mapBucketByMode('lower'));
-          result.series.push({
+          result.push({
             id: `${series.id}:lower`,
             lines: { show: true, fill: false, lineWidth: 0 },
             points: { show: false },
             color: series.color,
             data: lowerData
           });
-          result.series.push({
+          result.push({
             id: `${series.id}:upper`,
             label: series.label || calculateLabel(metric, series.metrics),
             color: series.color,
@@ -124,12 +124,12 @@ export default panel => resp => {
             fillBetween: `${series.id}:lower`,
             data: upperData
           });
-        } else {
+        } else if(buckets) {
           const data = buckets.map(bucket => {
             const sibBucket = _.get(aggs, `${series.id}`);
             return [bucket.key, getSiblingAggValue(sibBucket, metric)];
           });
-          result.series.push({
+          result.push({
             id: series.id,
             label: series.label || calculateLabel(metric, series.metrics),
             color: series.color,
@@ -140,7 +140,7 @@ export default panel => resp => {
       } else if (metric.type === 'std_deviation' && metric.mode === 'band') {
         const upper = buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
         const lower = buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
-        result.series.push({
+        result.push({
           id: `${series.id}:upper`,
           label: series.label || calculateLabel(metric, series.metrics),
           color: series.color,
@@ -149,7 +149,7 @@ export default panel => resp => {
           fillBetween: `${series.id}:lower`,
           data: upper
         });
-        result.series.push({
+        result.push({
           id: `${series.id}:lower`,
           color: series.color,
           lines: { show: true, fill: false, lineWidth: 0 },

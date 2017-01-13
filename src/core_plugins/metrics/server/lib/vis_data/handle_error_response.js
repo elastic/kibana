@@ -1,4 +1,5 @@
 export default panel => error => {
+  console.log(error);
   const result = {};
   let errorResponse;
   try {
