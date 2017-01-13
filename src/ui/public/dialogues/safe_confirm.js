@@ -1,29 +1,34 @@
-import uiModules from 'ui/modules';
-uiModules.get('kibana')
+import confirmDialogueContainerTemplate from './confirm_dialogue_container.html';
 
-/*
- * Angular doesn't play well with thread blocking calls such as
- * unless those calls are specifically handled inside a call
- * to $timeout(). Rather than litter the code with that implementation
- * detail, safeConfirm() can be used.
+/**
+ * Shows a modal confirmation dialogue with the given message.
  *
- * WARNING: safeConfirm only blocks the thread beginning on the next tick. For that reason, a
- * promise is returned so consumers can handle the control flow.
- *
- * Usage:
- *  safeConfirm('This message will be shown in a modal dialog').then(
- *    function () {
- *      // user clicked the okay button
- *    },
- *    function () {
- *      // user canceled the confirmation
- *    }
- *  );
+ * @param {String} message
+ * @param {String} confirmButtonText - Text to show for the button that will resolve the returned promise
+ * @param {String} cancelButtonText - Text to show for the button that will reject the returned promise
+ * @param {Promise} Promise - a promise class.
+ * @param {ModalDialogue} ModalDialogue service
+ * @return {Promise<boolean>} Returns an angular promise that will be resolved to true if the user
+ * clicks the yes/okay button and rejected if the user clicks the no/cancel button.
  */
-.factory('safeConfirm', function ($window, $timeout, $q, showConfirmDialogue) {
-  return function safeConfirm(message) {
-    return $timeout(function () {
-      return showConfirmDialogue(message) || $q.reject(false);
-    });
-  };
-});
+export function safeConfirm(message, confirmButtonText, cancelButtonText, Promise, ModalDialogue) {
+  return new Promise((resolve, reject) => {
+    let modalDialogue = undefined;
+
+    const dialogueScope = {
+      onConfirm: () => {
+        modalDialogue.destroy();
+        resolve(true);
+      },
+      onCancel: () => {
+        modalDialogue.destroy();
+        reject(false);
+      },
+      message,
+      confirmButtonText,
+      cancelButtonText
+    };
+
+    modalDialogue = new ModalDialogue(confirmDialogueContainerTemplate, dialogueScope);
+  });
+}

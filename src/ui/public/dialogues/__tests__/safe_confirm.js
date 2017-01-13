@@ -2,7 +2,7 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-describe.only('ui/dialogues/safe_confirm', function () {
+describe('ui/dialogues/safe_confirm', function () {
 
   let $rootScope;
   let $window;
@@ -25,10 +25,8 @@ describe.only('ui/dialogues/safe_confirm', function () {
   });
 
   afterEach(function () {
-    const confirmationDialogElement = document.querySelector('.confirm-dialogue');
-    if (confirmationDialogElement) {
-      const okayButton = confirmationDialogElement.getElementsByTagName('button')[0];
-
+    const okayButton = document.body.find('[data-test-subj=confirm-dialog-okay-button]');
+    if (okayButton) {
       $rootScope.$digest();
       angular.element(okayButton).click();
     }
@@ -47,11 +45,11 @@ describe.only('ui/dialogues/safe_confirm', function () {
   });
 
   context('after timeout completes', function () {
-    it('confirmation dialog is loaded to dom with message', function () {
+    it('confirmation dialogue is loaded to dom with message', function () {
       $timeout.flush();
-      const confirmationDialogElement = document.querySelector('.confirm-dialogue');
-      expect(!!confirmationDialogElement).to.be(true);
-      const htmlString = confirmationDialogElement.innerHTML;
+      const confirmationDialogueElement = document.body.find('[data-test-subj=confirm-dialog]');
+      expect(!!confirmationDialogueElement).to.be(true);
+      const htmlString = confirmationDialogueElement.innerHTML;
 
       expect(htmlString.indexOf(message)).to.be.greaterThan(0);
     });
@@ -64,9 +62,7 @@ describe.only('ui/dialogues/safe_confirm', function () {
         promise.then((v) => {
           value = v;
         });
-
-        const confirmationDialogElement = document.querySelector('.confirm-dialogue');
-        const okayButton = confirmationDialogElement.getElementsByTagName('button')[0];
+        const okayButton = document.body.find('[data-test-subj=confirm-dialog-okay-button]');
 
         $rootScope.$digest();
         angular.element(okayButton).click();
@@ -81,8 +77,7 @@ describe.only('ui/dialogues/safe_confirm', function () {
 
         let value;
         promise.then(null, (v) => { value = v; });
-        const confirmationDialogElement = document.querySelector('.confirm-dialogue');
-        const noButton = confirmationDialogElement.getElementsByTagName('button')[1];
+        const noButton = document.body.find('[data-test-subj=confirm-dialog-cancel-button]');
 
         $rootScope.$digest();
         angular.element(noButton).click();
