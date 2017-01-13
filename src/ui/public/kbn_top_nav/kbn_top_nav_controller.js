@@ -4,7 +4,7 @@ import chrome from 'ui/chrome';
 import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
 
-export default function ($compile) {
+export default function ($compile, $location) {
   return class KbnTopNavController {
     constructor(opts = []) {
       if (opts instanceof KbnTopNavController) {
@@ -18,6 +18,7 @@ export default function ($compile) {
         interval: intervalTemplate,
         filter: filterTemplate,
       };
+      this.controllers = [];
 
       this.addItems(opts);
     }
@@ -33,8 +34,11 @@ export default function ($compile) {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
-        if (!opt.hideButton()) this.menuItems.push(opt);
+        if (!opt.hideButton($location.path())) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
+        if (opt.controller) {
+          this.controllers[opt.key] = opt.controller;
+        }
       });
     }
 
@@ -107,6 +111,9 @@ export default function ($compile) {
       }
 
       const $childScope = $scope.$new();
+      if (this.controllers[currentKey]) {
+        $childScope.controller = this.controllers[currentKey];
+      }
       const $el = $element.find('#template_wrapper').html(templateToRender).contents();
       $compile($el)($childScope);
 
