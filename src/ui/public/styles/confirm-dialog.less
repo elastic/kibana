@@ -1,30 +1,34 @@
 @import "~ui/styles/variables";
 
 .confirm-dialogue {
-  z-index: 10;
-  position: absolute;
   background-color: white;
-  left: 40%;
-  top: 30%;
   width: 400px;
-  padding: 15px 15px 0px 15px;
+  padding: 15px;
+}
 
-  .message {
-    padding: 0px 0px 5px 0px;
-  }
+.confirm-dialogue__message {
+  padding: 0px 0px 5px 0px;
+}
 
-  .form-group {
-    float: right;
+.confirm-dialogue__actions {
+  display: flex;
+  justify-content: flex-end;
+
+  > * + * {
+    margin-left: 5px;
   }
 }
 
 .disable-app-layer {
-  z-index: 9;
-  position: absolute;
-  opacity: .5;
-  background-color: @kibanaGray1;
-  height: 100%;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.3);
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
+  padding-bottom: 10vh;
 }
