@@ -57,6 +57,8 @@ export default React.createClass({
             </div>
           </div>
 
+          <div className="rework--positionable-meta"></div>
+
           {child}
 
           <div className="rework--positionable-resize rework--positionable-resize-nw"></div>

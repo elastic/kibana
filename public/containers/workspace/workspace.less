@@ -16,15 +16,13 @@
       display: none;
     }
 
-    .rework--positionable {
-      &:hover {
-        box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
-      }
+    .rework--positionable:hover .rework--positionable-meta {
+      box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
     }
 
     &.rework--workspace-element-wrapper-selected {
 
-      .rework--positionable {
+      .rework--positionable-meta {
         box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
       }
 
