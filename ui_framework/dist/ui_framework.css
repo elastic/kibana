@@ -760,7 +760,7 @@ body {
   line-height: 1.5;
   padding: 7px 8px 8px;
   text-align: left;
-  color: #787878; }
+  color: #a7a7a7; }
   .kuiTableHeaderCell:last-child {
     padding-right: 16px; }
 
@@ -796,7 +796,7 @@ body {
   padding: 7px 8px 8px;
   text-align: left;
   color: #191E23;
-  border-top: 2px solid #E4E4E4; }
+  border-top: 1px solid #E4E4E4; }
   .kuiTableRowCell:last-child {
     padding-right: 16px; }
 
