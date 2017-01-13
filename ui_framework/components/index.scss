@@ -50,7 +50,7 @@ $formTransitionTiming: 0.1s linear;
 $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
 
-@mixin darkTheme() {
+@mixin darkTheme {
   .theme-dark & {
     @content;
   }
@@ -159,6 +159,28 @@ $toolBarItsemSpacing: 10px;
 
   & > * + * {
     margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+}
+
+@mixin buttonOnReverseBackground {
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    &:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}
+
+@mixin selectOnReverseBackground {
+  .kuiSelect {
+    border-color: #ffffff;
+
+    &:focus {
+      @include formControlFocus;
+    }
   }
 }
 

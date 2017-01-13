@@ -1,6 +1,7 @@
 .kuiToolBar {
   @include bar;
   @include buttonOnReverseBackground;
+  @include selectOnReverseBackground;
 
   padding: 10px;
   height: 50px;

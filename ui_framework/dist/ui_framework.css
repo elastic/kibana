@@ -1074,6 +1074,11 @@ body {
     .kuiToolBar .kuiButton--basic:disabled {
       color: #a7a7a7;
       background-color: #F3F3F3; }
+  .kuiToolBar .kuiSelect {
+    border-color: #ffffff; }
+    .kuiToolBar .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -1154,6 +1159,9 @@ body {
     margin-left: 10px;
     /* 1 */ }
 
+/**
+ * 1. Put 10px of space between each child.
+ */
 .kuiToolBarSearch {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1165,7 +1173,6 @@ body {
           align-items: center;
   margin-left: 25px;
   margin-right: 25px;
-  display: flex;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
@@ -1176,14 +1183,6 @@ body {
     margin-left: 0; }
   .kuiToolBarSearch:last-child {
     margin-right: 0; }
-  .kuiToolBarSearch:only-child {
-    margin-left: auto;
-    /* 1 */ }
-  .kuiToolBarSearch > * {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1 0 auto;
-        -ms-flex: 1 0 auto;
-            flex: 1 0 auto; }
   .kuiToolBarSearch > * + * {
     margin-left: 10px;
     /* 1 */ }
