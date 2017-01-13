@@ -20,7 +20,7 @@
 
 .kuiTableHeaderCell {
   @include tableCell;
-  color: #787878;
+  color: #a7a7a7;
 }
 
 /**
@@ -60,7 +60,7 @@
 .kuiTableRowCell {
   @include tableCell;
   color: $fontColor;
-  border-top: $tableBorder;
+  border-top: $tableRowBorder;
 }
 
   /**
