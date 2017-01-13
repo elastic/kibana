@@ -43,6 +43,7 @@ angularApi(chrome, internals);
 controlsApi(chrome, internals);
 templateApi(chrome, internals);
 themeApi(chrome, internals);
+require('./api/translations')(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();
