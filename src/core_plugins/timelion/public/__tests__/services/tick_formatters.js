@@ -130,10 +130,25 @@ describe('Tick Formatters', function () {
             prefix: 'prefix',
             suffix: 'suffix'
           }
-        }
+        },
+        tickDecimals: 1
       };
 
       expect(customFormatter(10.2, axis)).to.equal('prefix10.2suffix');
+    });
+
+    it('correctly renders small values', function () {
+      const axis = {
+        options: {
+          units: {
+            prefix: 'prefix',
+            suffix: 'suffix'
+          }
+        },
+        tickDecimals: 3
+      };
+
+      expect(customFormatter(0.00499999999999999, axis)).to.equal('prefix0.005suffix');
     });
   });
 });

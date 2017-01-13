@@ -1,5 +1,23 @@
 define(function (require) {
 
+  function baseTickFormatter(value, axis) {
+    const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
+    const formatted = '' + Math.round(value * factor) / factor;
+
+    // If tickDecimals was specified, ensure that we have exactly that
+    // much precision; otherwise default to the value's own precision.
+
+    if (axis.tickDecimals != null) {
+      const decimal = formatted.indexOf('.');
+      const precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+      if (precision < axis.tickDecimals) {
+        return (precision ? formatted : formatted + '.') + ('' + factor).substr(1, axis.tickDecimals - precision);
+      }
+    }
+
+    return formatted;
+  }
+
   return function ticketFormatters() {
     const formatters =  {
       'bits': function (val, axis) {
@@ -42,9 +60,10 @@ define(function (require) {
         return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
       },
       'custom': function (val, axis) {
+        const formattedVal = baseTickFormatter(val, axis);
         const prefix = axis.options.units.prefix;
         const suffix = axis.options.units.suffix;
-        return prefix + val + suffix;
+        return prefix + formattedVal + suffix;
       }
     };
 
