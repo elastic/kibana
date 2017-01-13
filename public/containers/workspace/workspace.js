@@ -63,7 +63,7 @@ const Workspace = React.createClass({
         <LeftSidebar>
           {!editor ? null : (
             <div className="rework--editor--left">
-              <Editor element={selectedElement}></Editor>
+              <Editor element={currentElement}></Editor>
             </div>
           )}
           <div className="rework--editor-toggle--left">
@@ -71,10 +71,9 @@ const Workspace = React.createClass({
           </div>
         </LeftSidebar>
 
-        <Centered>
+        <Centered onMouseDown={this.select(null)}>
           <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
           <Workpad workpad={workpad}>
-            <div style={{height: '100%'}} onMouseDown={this.select(null)}>
               <Stack top={workpad.page}>
                 {workpad.pages.map((pageId) => {
                   const page = pages[pageId];
@@ -111,7 +110,6 @@ const Workspace = React.createClass({
                   );
                 })}
               </Stack>
-            </div>
           </Workpad>
           <PageControl direction='next' handler={this.do(pageNext)}></PageControl>
         </Centered>
