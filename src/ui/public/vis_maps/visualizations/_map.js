@@ -40,11 +40,11 @@ export default function MapFactory(Private, tilemapSettings) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-
-      const mapOptions = tilemapSettings.getOptions();
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
-      this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
+
+      const mapZoptionsomO = tilemapSettings.getMapZoomOptions(this._isWMSEnabled());
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapZoptionsomO.maxZoom), mapZoptionsomO.minZoom);
+      this._mapCenter = params.center || defaultMapCenter;
 
       this._createMap();
     }
@@ -280,9 +280,13 @@ export default function MapFactory(Private, tilemapSettings) {
       });
     }
 
+    _isWMSEnabled() {
+      return this._attr.wms ? this._attr.wms.enabled : false;
+    }
+
     _createTileLayer() {
-      const wmsOpts = this._attr.wms || { enabled: false };
-      if (wmsOpts.enabled) {
+      if (this._isWMSEnabled()) {
+        const wmsOpts = this._attr.wms;
         // http://leafletjs.com/reference.html#tilelayer-wms-options
         return L.tileLayer.wms(wmsOpts.url, {
           // user settings
@@ -294,7 +298,7 @@ export default function MapFactory(Private, tilemapSettings) {
       }
 
       const tileUrl = tilemapSettings.hasError() ? '' : tilemapSettings.getUrl();
-      const leafletOptions = tilemapSettings.getOptions();
+      const leafletOptions = tilemapSettings.getTMSOptions();
       return L.tileLayer(tileUrl, leafletOptions);
     }
 

@@ -50,7 +50,7 @@ uiModules.get('kibana')
 
         //initialize settings with the default of the configuration
         this._url = tilemapsConfig.deprecated.config.url;
-        this._options = optionsFromConfig;
+        this._tmsOptions = optionsFromConfig;
 
         this._invalidateSettings();
 
@@ -75,7 +75,7 @@ uiModules.get('kibana')
             const manifest = response.data;
             this._error = null;
 
-            this._options = {
+            this._tmsOptions = {
               attribution: $sanitize(marked(manifest.services[0].attribution)),
               minZoom: manifest.services[0].minZoom,
               maxZoom: manifest.services[0].maxZoom,
@@ -102,7 +102,7 @@ uiModules.get('kibana')
       }
 
       /**
-       * Must be called before getUrl/getOptions can be called.
+       * Must be called before getUrl/getTMSOptions/getMapOptions can be called.
        */
       loadSettings() {
         return this._loadSettings();
@@ -149,12 +149,37 @@ uiModules.get('kibana')
        * Get the options of the default TMS
        * @return {{}}
        */
-      getOptions() {
+      getTMSOptions() {
         if (!this._settingsInitialized) {
           throw new Error('Cannot retrieve options before calling .loadSettings first');
         }
-        return this._options;
+        return this._tmsOptions;
       }
+
+
+      /**
+       * @return {{maxZoom: (*|number), minZoom: (*|number)}}
+       */
+      getMapZoomOptions(isWMSEnabled) {
+        //if WMS is enabled, we do not want to use the zoom-configuration from the manifest.
+        if (isWMSEnabled) {
+          return {
+            maxZoom: optionsFromConfig.maxZoom,
+            minZoom: optionsFromConfig.minZoom
+          };
+        }
+
+        //Otherwise, we use the settings from the yml.
+        //note that it is no longer possible to only override the zoom-settings, since all options are read from the manifest
+        //by default.
+        //For a custom configuration, users will need to override tilemap.url as well.
+        return {
+          maxZoom: this._tmsOptions.maxZoom,
+          minZoom: this._tmsOptions.minZoom
+        };
+
+      }
+
 
       /**
        * Checks if there was an error during initialization of the parameters
