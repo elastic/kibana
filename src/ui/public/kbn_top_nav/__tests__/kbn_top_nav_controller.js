@@ -6,9 +6,13 @@ import KbnTopNavControllerProvider from '../kbn_top_nav_controller';
 
 describe('KbnTopNavController', function () {
   let KbnTopNavController;
+  let $location;
+  let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (_$location_, _$rootScope_, Private) {
+    $location = _$location_;
+    $rootScope = _$rootScope_;
     KbnTopNavController = Private(KbnTopNavControllerProvider);
   }));
 
@@ -92,6 +96,25 @@ describe('KbnTopNavController', function () {
         ]);
 
         expect(controller.menuItems).to.have.length(1);
+      });
+
+      it('exclude/include opts depending on the location', function () {
+        const opts = [
+          { key: 'foo', hideButton: path => path === '/one' },
+          { key: '1234', hideButton: path => path === '/two' },
+        ];
+
+        $location.path('one');
+        $rootScope.$apply();
+        let controller = new KbnTopNavController(opts);
+        expect(controller.menuItems).to.have.length(1);
+        expect(controller.menuItems[0].key).to.be('1234');
+
+        $location.path('two');
+        $rootScope.$apply();
+        controller = new KbnTopNavController(opts);
+        expect(controller.menuItems).to.have.length(1);
+        expect(controller.menuItems[0].key).to.be('foo');
       });
     });
 
