@@ -71,10 +71,6 @@ The minimum value is 100.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
 `console.enabled`:: *Default: true* Set to false to disable Console.  Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.
-`console.proxyFilter`:: *Default: `.*`* A list of regular expressions that are used to validate any outgoing request from Console. If none of these match, the request will be rejected.
-`console.proxyConfig`:: A list of configuration options that are based on the proxy target. Use this to set custom timeouts or SSL settings for specific hosts. This is done by defining a set of `match` criteria using wildcards/globs which will be checked against each request. The configuration from all matching rules will then be merged together to configure the proxy used for that request.
-+
-The valid match keys are `match.protocol`, `match.host`, `match.port`, and `match.path`. All of these keys default to `*`, which means they will match any value. See <<configuring-console>> for an example.
 
 `elasticsearch.tribe.url:`:: Optional URL of the Elasticsearch tribe instance to use for all your
 queries.
