@@ -1,14 +1,19 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import 'plugins/kibana/dashboard/services/get_object_loaders_for_dashboard.factory';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
+import { loadSavedObject } from 'plugins/kibana/dashboard/components/panel/lib/load_saved_object';
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
+.directive('dashboardPanel', function ($injector) {
+  const Private = $injector.get('Private');
+  const Notifier = $injector.get('Notifier');
+  const getObjectLoadersForDashboard = $injector.get('getObjectLoadersForDashboard');
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
@@ -73,49 +78,6 @@ uiModules
       if (!$scope.panel.id || !$scope.panel.type) return;
 
       /**
-       * Retrieves the saved object represented by the panel and returns it, along with the appropriate
-       * edit Url.
-       * @returns {Promise.<{savedObj: SavedObject, editUrl: String}>}
-       */
-      function loadSavedObject() {
-        /**
-         * The appropriate loader for the panel type.
-         * @type {SavedObjectLoader}
-         */
-        let loader;
-        /**
-         * A custom function that will run after loading the saved object, specific to the type.
-         * @type {function}
-         */
-        let postLoadInit;
-
-        if ($scope.panel.type === 'search') {
-          loader = savedSearches;
-          postLoadInit = savedObj => {
-            // This causes changes to a saved search to be hidden, but also allows
-            // the user to locally modify and save changes to a saved search only in a dashboard.
-            // See https://github.com/elastic/kibana/issues/9523 for more details.
-            $scope.panel.columns = $scope.panel.columns || savedObj.columns;
-            $scope.panel.sort = $scope.panel.sort || savedObj.sort;
-            return savedObj;
-          };
-        } else if ($scope.panel.type === 'visualization') {
-          loader = savedVisualizations;
-          postLoadInit = savedObj => {
-            savedObj.vis.listeners.click = $scope.getVisClickHandler();
-            savedObj.vis.listeners.brush = $scope.getVisBrushHandler();
-            return savedObj;
-          };
-        } else {
-          throw `Unexpected panel type ${$scope.panel.type}. We currently only support search or visualization types`;
-        }
-
-        return loader.get($scope.panel.id)
-          .then(postLoadInit)
-          .then(savedObj => ({ savedObj, editUrl: loader.urlFor($scope.panel.id) }));
-      }
-
-      /**
        * Initializes the panel for the saved object.
        * @param {{savedObj: SavedObject, editUrl: String}} savedObjectInfo
        */
@@ -134,12 +96,20 @@ uiModules
 
         if ($scope.savedObj.vis) {
           $scope.savedObj.vis.setUiState($scope.uiState);
+          $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
+          $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();
         }
 
         $scope.filter = function (field, value, operator) {
           const index = $scope.savedObj.searchSource.get('index').id;
           filterManager.add(field, value, operator, index);
         };
+
+        // This causes changes to a saved search to be hidden, but also allows
+        // the user to locally modify and save changes to a saved search only in a dashboard.
+        // See https://github.com/elastic/kibana/issues/9523 for more details.
+        $scope.panel.columns = $scope.panel.columns || $scope.savedObj.columns;
+        $scope.panel.sort = $scope.panel.sort || $scope.savedObj.sort;
 
         // If the user updates the sort direction or columns in a saved search, we want to save that
         // to the ui state so the share url will show our temporary modifications.
@@ -152,7 +122,7 @@ uiModules
         });
       }
 
-      loadSavedObject()
+      loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
         .then(initializePanel)
         .catch(function (e) {
           $scope.error = e.message;
