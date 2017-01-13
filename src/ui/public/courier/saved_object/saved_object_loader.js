@@ -99,6 +99,19 @@ export class SavedObjectLoader {
       body,
       size
     })
+      .catch(err => {
+        // attempt to mimic simple_query_string, swallow formatting error
+        if (err.statusCode === 400) {
+          return {
+            hits: {
+              total: 0,
+              hits: [],
+            }
+          };
+        }
+
+        throw err;
+      })
       .then((resp) => {
         return {
           total: resp.hits.total,
