@@ -89,13 +89,13 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         const column = $($event.target).data().column;
         const field = $scope.indexPattern.fields.byName[column];
         $scope.indexPattern.popularizeField(field, 1);
-        const flattened = $scope.indexPattern.flattenHit($scope.row);
-        filterManager.add(field, flattened[column], type, $scope.indexPattern.id);
+        filterManager.add(field, $scope.flattenedRow[column], type, $scope.indexPattern.id);
       };
 
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
         const indexPattern = $scope.indexPattern;
+        $scope.flattenedRow = indexPattern.flattenHit(row);
 
         // We just create a string here because its faster.
         const newHtmls = [
@@ -113,9 +113,8 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         }
 
         $scope.columns.forEach(function (column) {
-          const flattenedRow = indexPattern.flattenHit(row);
           const isFilterable =
-            flattenedRow[column] === undefined
+            $scope.flattenedRow[column] === undefined
             ? false
             : !mapping[column]
             ? false
