@@ -27,7 +27,8 @@ require('ui/chrome')
     require('./src/kb_tests.js');
     require('./src/mapping_tests.js');
     require('./src/editor_tests.js');
-    require('./src/tokenization_tests.js');
+    require('./src/input_tokenization_tests.js');
+    require('./src/output_tokenization_tests.js');
     require('./src/integration_tests.js');
 
     console.log('all tests loaded');
