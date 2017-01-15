@@ -12,6 +12,13 @@ export default createExample([{
   html: require('./button_basic.html'),
   hasDarkTheme: false,
 }, {
+  title: 'Hollow Button',
+  description: (
+    <p>Use the hollow Button when presenting a neutral action, e.g. a "Cancel" button.</p>
+  ),
+  html: require('./button_hollow.html'),
+  hasDarkTheme: false,
+}, {
   title: 'Primary Button',
   description: (
     <p>Use the primary Button to represent the most common action. Generally, there won't be a need to present more than one of these at a time.</p>
