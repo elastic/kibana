@@ -5,7 +5,7 @@
   left: 0;
   bottom: 0;
   width: $guideSideNavWidth;
-  padding: 0 20px 30px 80px;
+  padding: 0 0 30px 80px;
   overflow: auto;
   background-color: #ffffff;
   z-index: 100;
@@ -13,7 +13,7 @@
   @include scrollbar;
 
   @include whenNarrowerThan($normalBreakpoint) {
-    padding: 0 20px 30px 20px;
+    padding: 0 0 30px 20px;
     width: $guideSideNavSmallWidth;
   }
 }

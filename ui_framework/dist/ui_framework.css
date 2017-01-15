@@ -2,6 +2,11 @@
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
  */
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
 * {
   box-sizing: border-box; }
 
@@ -99,6 +104,15 @@ body {
     /* 2 */
     color: #FFFFFF !important;
     /* 1 */ }
+
+.kuiButton--hollow {
+  color: #3CAED2;
+  background-color: transparent; }
+  .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
+    color: #006E8A;
+    text-decoration: underline; }
+  .kuiButton--hollow:disabled {
+    color: #dddddd; }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -682,11 +696,6 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
-/**
- * 1. Setting to inline-block guarantees the same height when applied to both
- *    button elements and anchor tags.
- * 2. Fit MicroButton inside of Table rows without pushing them taller.
- */
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -698,9 +707,9 @@ body {
   border: 1px solid transparent;
   color: #9fa3a7;
   background-color: transparent;
-  font-size: 12px;
   line-height: 1;
-  /* 2 */ }
+  /* 2 */
+  font-size: 12px; }
   .kuiMicroButton:hover {
     color: #191E23; }
 
@@ -711,6 +720,90 @@ body {
   display: flex; }
   .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
     margin-left: 2px; }
+
+.kuiModalOverlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-bottom: 10vh;
+  background-color: rgba(0, 0, 0, 0.3); }
+
+.kuiModal {
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #6EADC1;
+  border-radius: 4px;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25); }
+
+.kuiModalHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px;
+  border-bottom: 2px solid #E4E4E4; }
+
+.kuiModalHeader__title {
+  font-size: 18px; }
+
+.kuiModalHeaderCloseButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: #9fa3a7;
+  background-color: transparent;
+  line-height: 1;
+  /* 2 */
+  font-size: 18px; }
+  .kuiModalHeaderCloseButton:hover {
+    color: #191E23; }
+
+.kuiModalBody {
+  padding: 20px 10px; }
+
+.kuiModalBodyText {
+  font-size: 14px; }
+
+.kuiModalFooter {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  padding: 0 10px 10px; }
+  .kuiModalFooter > * + * {
+    margin-left: 5px; }
 
 .kuiNoItems {
   padding: 30px;
