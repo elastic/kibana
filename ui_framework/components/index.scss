@@ -30,6 +30,7 @@ $buttonBorderRadius: 4px;
 $successColor: #417505;
 $warningColor: #ffac15;
 $errorColor: #D86051;
+$focusColor: #6EADC1;
 $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
 $linkColor: #3CAED2;
@@ -55,7 +56,7 @@ $formTransitionTiming: 0.1s linear;
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
  */
-@mixin focus($color: #6EADC1) {
+@mixin focus($color: $focusColor) {
   z-index: 1; /* 1 */
   outline: 1px solid $color !important; /* 2 */
   outline-offset: 2px !important; /* 2 */
@@ -95,6 +96,26 @@ $formTransitionTiming: 0.1s linear;
   }
 }
 
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+@mixin microButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: $subduedFontColor;
+  background-color: transparent;
+  line-height: 1; /* 2 */
+
+  &:hover {
+    color: $fontColor;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -111,6 +132,7 @@ body {
 @import "loading_items/index";
 @import "local_nav/index";
 @import "micro_button/index";
+@import "modal/index";
 @import "no_items/index";
 @import "panel/index";
 @import "table/index";
