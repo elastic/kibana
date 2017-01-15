@@ -105,6 +105,15 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+.kuiButton--hollow {
+  color: #3CAED2;
+  background-color: transparent; }
+  .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
+    color: #006E8A;
+    text-decoration: underline; }
+  .kuiButton--hollow:disabled {
+    color: #dddddd; }
+
 .kuiButtonGroup {
   display: -webkit-box;
   display: -webkit-flex;

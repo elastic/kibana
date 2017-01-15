@@ -3,7 +3,7 @@
 const $showModalOverlayButton = $('[data-id="showModalOverlay"]');
 const $modalOverlay = $('.kuiModalOverlay');
 const $modalOverlayCloseButton = $('.kuiModalOverlay .kuiModalHeaderCloseButton');
-const $modalOverlayCancelButton = $('.kuiModalOverlay .kuiButton--basic');
+const $modalOverlayCancelButton = $('.kuiModalOverlay .kuiButton--hollow');
 const $modalOverlayConfirmButton = $('.kuiModalOverlay .kuiButton--primary');
 
 if (!$showModalOverlayButton.length) {
