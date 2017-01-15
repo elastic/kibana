@@ -109,6 +109,21 @@
   }
 }
 
+.kuiButton--hollow {
+  color: $linkColor;
+  background-color: transparent;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: $linkHoverColor;
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: #dddddd;
+  }
+}
+
 @mixin buttonOnReverseBackground {
   .kuiButton--basic {
     color: #5a5a5a;

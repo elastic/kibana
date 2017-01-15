@@ -16,6 +16,9 @@ import InfoPanelExample
 import LinkExample
   from '../../views/link/link_example.jsx';
 
+import ModalExample
+  from '../../views/modal/modal_example.jsx';
+
 import LocalNavExample
   from '../../views/local_nav/local_nav_example.jsx';
 
@@ -53,6 +56,9 @@ const components = [{
 }, {
   name: 'MicroButton',
   component: MicroButtonExample,
+}, {
+  name: 'Modal',
+  component: ModalExample,
 }, {
   name: 'Table',
   component: TableExample,
