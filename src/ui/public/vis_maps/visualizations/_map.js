@@ -42,8 +42,8 @@ export default function MapFactory(Private, tilemapSettings) {
       this._geoJson = _.get(this._chartData, 'geoJson');
       this._attr = params.attr || {};
 
-      const mapZoptionsomO = tilemapSettings.getMapZoomOptions(this._isWMSEnabled());
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapZoptionsomO.maxZoom), mapZoptionsomO.minZoom);
+      const mapZoomOptions = tilemapSettings.getMapZoomOptions(this._isWMSEnabled());
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapZoomOptions.maxZoom), mapZoomOptions.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
 
       this._createMap();
