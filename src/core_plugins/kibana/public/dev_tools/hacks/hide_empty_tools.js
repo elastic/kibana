@@ -1,3 +1,4 @@
+import modules from 'ui/modules';
 import chrome from 'ui/chrome';
 import DevToolsRegistryProvider from 'ui/registry/dev_tools';
 
@@ -8,3 +9,5 @@ export function hideEmptyDevTools(Private) {
     navLink.hidden = true;
   }
 }
+
+modules.get('kibana').run(hideEmptyDevTools);
