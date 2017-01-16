@@ -2,14 +2,7 @@ import _ from 'lodash';
 
 
 const MIN_CONTEXT_SIZE = 0;
-const QUERY_PARAMETER_KEYS = [
-  'anchorUid',
-  'columns',
-  'indexPattern',
-  'predecessorCount',
-  'successorCount',
-  'sort',
-];
+const QUERY_PARAMETER_KEYS = Object.keys(createInitialQueryParametersState());
 
 function QueryParameterActionsProvider(config) {
   const defaultSizeStep = parseInt(config.get('context:step'), 10);
@@ -52,8 +45,20 @@ function QueryParameterActionsProvider(config) {
   };
 }
 
+function createInitialQueryParametersState() {
+  return {
+    anchorUid: null,
+    columns: [],
+    indexPattern: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+  };
+}
+
 
 export {
+  createInitialQueryParametersState,
   QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
 };

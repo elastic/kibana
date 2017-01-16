@@ -6,6 +6,7 @@ import './components/loading_button';
 import './components/size_picker/size_picker';
 import { bindSelectors } from './utils/selectors';
 import {
+  createInitialQueryParametersState,
   QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
 } from './query_parameters';
@@ -81,14 +82,7 @@ function ContextAppController($scope, Private) {
 
 function createInitialState() {
   return {
-    queryParameters: {
-      anchorUid: null,
-      columns: [],
-      indexPattern: null,
-      predecessorCount: 0,
-      successorCount: 0,
-      sort: [],
-    },
+    queryParameters: createInitialQueryParametersState(),
     rows: {
       anchor: null,
       predecessors: [],
