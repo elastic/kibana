@@ -22,9 +22,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
-
-
-
+      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       app: {
         id: 'kibana',
         title: 'Kibana',
