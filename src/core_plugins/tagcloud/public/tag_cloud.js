@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
-import { EventEmitter } from 'events';
+import {EventEmitter} from 'events';
 
 const ORIENTATIONS = {
   'single': () => 0,
@@ -51,7 +51,7 @@ class TagCloud extends EventEmitter {
     this._words = null;
 
     //UTIL
-    this._timeoutHandle = null;
+    this._setTimeoutId = null;
     this._pendingJob = null;
     this._layoutIsUpdating = null;
     this._allInViewBox = false;
@@ -101,7 +101,7 @@ class TagCloud extends EventEmitter {
   }
 
   destroy() {
-    clearTimeout(this._timeoutHandle);
+    clearTimeout(this._setTimeoutId);
     this._element.innerHTML = '';
   }
 
@@ -116,16 +116,22 @@ class TagCloud extends EventEmitter {
     this._svgGroup.attr('height', this._size[1]);
   }
 
+  _isJobRunning() {
+    return (this._setTimeoutId || this._layoutIsUpdating || this._DOMisUpdating);
+  }
+
   async _processPendingJob() {
 
     if (!this._pendingJob) {
       return;
     }
 
-    if (this._timeoutHandle || this._layoutIsUpdating || this._DOMisUpdating) {
+    if (this._isJobRunning()) {
       return;
     }
 
+
+    this._completedJob = null;
     const job = await this._pickPendingJob();
     if (job.words.length) {
       if (job.refreshLayout) {
@@ -142,11 +148,11 @@ class TagCloud extends EventEmitter {
     } else {
       this._emptyDOM(job);
     }
-    this._currentJob = job;
 
     if (this._pendingJob) {
-      this._processPendingJob();
+      this._processPendingJob();//pick up next job
     } else {
+      this._completedJob = job;
       this.emit('renderComplete');
     }
 
@@ -154,10 +160,10 @@ class TagCloud extends EventEmitter {
 
   async _pickPendingJob() {
     return await new Promise((resolve) => {
-      this._timeoutHandle = setTimeout(async() => {
+      this._setTimeoutId = setTimeout(async() => {
         const job = this._pendingJob;
         this._pendingJob = null;
-        this._timeoutHandle = null;
+        this._setTimeoutId = null;
         resolve(job);
       }, 0);
     });
@@ -174,7 +180,8 @@ class TagCloud extends EventEmitter {
 
   async _updateDOM(job) {
 
-    if (this._pendingJob || this._timeoutHandle) {//a new configuration is coming, no need to update the DOM
+    const canSkipDomUpdate = this._pendingJob || this._setTimeoutId;
+    if (canSkipDomUpdate) {
       this._DOMisUpdating = false;
       return;
     }
@@ -260,6 +267,7 @@ class TagCloud extends EventEmitter {
   _makeNewJob() {
     return {
       refreshLayout: true,
+      size: this._size.slice(),
       words: this._words.map(toWordTag)
     };
   }
@@ -267,7 +275,8 @@ class TagCloud extends EventEmitter {
   _makeJobPreservingLayout() {
     return {
       refreshLayout: false,
-      words: this._currentJob.words.map(tag => {
+      size: this._size.slice(),
+      words: this._completedJob.words.map(tag => {
         return {
           x: tag.x,
           y: tag.y,
@@ -286,7 +295,9 @@ class TagCloud extends EventEmitter {
     }
 
     this._updateContainerSize();
-    this._pendingJob = (!keepLayout || !this._currentJob || this._pendingJob) ? this._makeNewJob() : this._makeJobPreservingLayout();
+
+    const canReuseLayout = keepLayout && !this._isJobRunning() && this._completedJob;
+    this._pendingJob = (canReuseLayout) ? this._makeJobPreservingLayout() : this._makeNewJob();
     this._processPendingJob();
   }
 
@@ -295,7 +306,7 @@ class TagCloud extends EventEmitter {
 
     const mapSizeToFontSize = this._makeTextSizeMapper();
     const tagCloudLayoutGenerator = d3TagCloud();
-    tagCloudLayoutGenerator.size(this._size);
+    tagCloudLayoutGenerator.size(job.size);
     tagCloudLayoutGenerator.padding(this._padding);
     tagCloudLayoutGenerator.rotate(ORIENTATIONS[this._orientation]);
     tagCloudLayoutGenerator.font(this._fontFamily);
@@ -325,7 +336,7 @@ class TagCloud extends EventEmitter {
    */
   getDebugInfo() {
     const debug = {};
-    debug.positions = this._currentJob ? this._currentJob.words.map(tag => {
+    debug.positions = this._completedJob ? this._completedJob.words.map(tag => {
       return {
         text: tag.text,
         x: tag.x,
@@ -342,14 +353,14 @@ class TagCloud extends EventEmitter {
 
 }
 
-TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
+TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
 
 function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
-  return { value: word.value, text: word.text };
+  return {value: word.value, text: word.text};
 }
 
 
