@@ -5,8 +5,6 @@ import ngMock from 'ng_mock';
 describe('ui/modals/safe_confirm', function () {
 
   let $rootScope;
-  let $window;
-  let $timeout;
   let message;
   let safeConfirm;
   let promise;
@@ -16,7 +14,6 @@ describe('ui/modals/safe_confirm', function () {
     ngMock.inject(function ($injector) {
       safeConfirm = $injector.get('safeConfirm');
       $rootScope = $injector.get('$rootScope');
-      $timeout = $injector.get('$timeout');
     });
 
     message = 'woah';
@@ -25,7 +22,7 @@ describe('ui/modals/safe_confirm', function () {
   });
 
   afterEach(function () {
-    const confirmButton = document.body.find('[data-test-subj=confirmModalConfirmButton]');
+    const confirmButton = angular.element(document.body).find('[data-test-subj=confirmModalConfirmButton]');
     if (confirmButton) {
       $rootScope.$digest();
       angular.element(confirmButton).click();
@@ -39,50 +36,47 @@ describe('ui/modals/safe_confirm', function () {
         isResolved = true;
       }
       promise.then(markAsResolved, markAsResolved);
-      $rootScope.$apply(); // attempt to resolve the promise, but this won't flush $timeout promises
+      $rootScope.$apply();
       expect(isResolved).to.be(false);
     });
   });
 
   context('after timeout completes', function () {
     it('confirmation dialogue is loaded to dom with message', function () {
-      $timeout.flush();
-      const confirmationDialogueElement = document.body.find('[data-test-subj=confirmModal]');
+      $rootScope.$digest();
+      const confirmationDialogueElement = angular.element(document.body).find('[data-test-subj=confirmModal]');
       expect(!!confirmationDialogueElement).to.be(true);
-      const htmlString = confirmationDialogueElement.innerHTML;
+      const htmlString = confirmationDialogueElement[0].innerHTML;
 
       expect(htmlString.indexOf(message)).to.be.greaterThan(0);
     });
 
     context('when confirmed', function () {
       it('promise is fulfilled with true', function () {
-        $timeout.flush();
 
-        let value;
-        promise.then((v) => {
-          value = v;
+        let confirmed = false;
+        promise.then(() => {
+          confirmed = true;
         });
-        const confirmButton = document.body.find('[data-test-subj=confirmModalConfirmButton]');
+        const confirmButton = angular.element(document.body).find('[data-test-subj=confirmModalConfirmButton]');
 
         $rootScope.$digest();
-        angular.element(confirmButton).click();
+        confirmButton.click();
 
-        expect(value).to.be(true);
+        expect(confirmed).to.be(true);
       });
     });
 
     context('when canceled', function () {
       it('promise is rejected with false', function () {
-        $timeout.flush();
-
-        let value;
-        promise.then(null, (v) => { value = v; });
-        const noButton = document.body.find('[data-test-subj=confirmModalCancelButton]');
+        let rejected = false;
+        promise.then(null, () => { rejected = true; });
+        const noButton = angular.element(document.body).find('[data-test-subj=confirmModalCancelButton]');
 
         $rootScope.$digest();
-        angular.element(noButton).click();
+        noButton.click();
 
-        expect(value).to.be(false);
+        expect(rejected).to.be(true);
       });
     });
   });
