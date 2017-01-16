@@ -79,6 +79,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       }
 
+      /**
+       * @param filter {Object}
+       * @returns {boolean} True if the given filter is a query filter (e.g. should go in
+       * the query bar and not in the filter bar)
+       */
       const matchQueryFilter = function (filter) {
         return filter.query && filter.query.query_string && !filter.meta;
       };
@@ -97,6 +102,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
       };
 
+      let savedDashTimeFrom = dash.timeFrom;
+      let savedDashTimeTo = dash.timeTo;
+      let savedDashFilters = _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter);
+      let savedDashQuery = stateDefaults.query;
+
       let stateMonitor;
       const $state = $scope.state = new AppState(stateDefaults);
       const $uiState = $scope.uiState = $state.makeStateful('uiState');
@@ -108,7 +118,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
+      // A hashkey in the filter array will ruin our comparison, so we need to get rid of it.
+      const cleanFiltersForComparison = (filters) => _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
+      const filterMismatch = () =>
+        !_.isEqual(cleanFiltersForComparison($state.filters), cleanFiltersForComparison(savedDashFilters)) ||
+        !_.isEqual($state.query, savedDashQuery);
+      const timeMismatch = () => savedDashTimeFrom !== timefilter.time.from || savedDashTimeTo !== timefilter.time.to;
+
       const changeViewMode = (newMode) => {
+        const defaultFiltersChanged = filterMismatch() || (dash.timeRestore && timeMismatch());
+
         if ($appStatus.dirty && newMode === DashboardViewMode.VIEW) {
           safeConfirm('You have unsaved changes to your dashboard that will be lost if you continue without saving.' +
                       '\n\nDo you wish to continue?')
@@ -118,6 +137,38 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         } else {
           $scope.dashboardViewMode = newMode;
           $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+        }
+
+        if (newMode === DashboardViewMode.EDIT) {
+          // watch for state changes and update the appStatus.dirty value
+          stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+          stateMonitor.onChange(status => { $appStatus.dirty = status.dirty; });
+        } else {
+          if (stateMonitor) stateMonitor.destroy();
+        }
+
+        if (newMode === DashboardViewMode.EDIT && dash.id && defaultFiltersChanged) {
+          safeConfirm('Your current filters are different than those stored with your dashboard. ' +
+            'Would you like to revert to what is stored with your dashboard?')
+            .then(() => {
+              stateDefaults.filters = $state.filters = savedDashFilters.slice();
+              stateDefaults.query = $state.query = savedDashQuery;
+              if (dash.timeRestore) {
+                $scope.timefilter.time.from = savedDashTimeFrom;
+                $scope.timefilter.time.to = savedDashTimeTo;
+              }
+
+              // We need to recreate the stateMonitor with the new defaults.
+              if (stateMonitor) stateMonitor.destroy();
+              stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+              stateMonitor.onChange(status => { $appStatus.dirty = status.dirty; });
+
+              $appStatus.dirty = false;
+            }, () => {
+              // Something changed from the default and we are porting the edits over to the dashboard.
+              // Make sure we update dirty state.
+              $appStatus.dirty = true;
+            });
         }
       };
 
@@ -143,14 +194,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         initPanelIndexes();
 
-        // watch for state changes and update the appStatus.dirty value
-        stateMonitor = stateMonitorFactory.create($state, stateDefaults);
-        stateMonitor.onChange((status) => {
-          $appStatus.dirty = status.dirty;
-        });
-
         $scope.$on('$destroy', () => {
-          stateMonitor.destroy();
+          if (stateMonitor) stateMonitor.destroy();
           dash.destroy();
 
           // Remove dark theme to keep it from affecting the appearance of other apps.
@@ -253,6 +298,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
               kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
+
+              // Reset dashboard defaults for determining if view mode filters differ from dashboard.
+              savedDashFilters = $state.filters;
+              savedDashQuery = $state.query;
+              savedDashTimeFrom = timefilter.time.from;
+              savedDashTimeTo = timefilter.time.to;
             }
           }
         })
