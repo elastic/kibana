@@ -132,7 +132,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           safeConfirm('You have unsaved changes to your dashboard that will be lost if you continue without saving.' +
                       '\n\nDo you wish to continue?')
             .then(() => {
-              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
+              if (dash.id) {
+                kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
+              } else {
+                kbnUrl.change(`/dashboard?${DashboardConstants.VIEW_MODE_PARAM}=${newMode}`);
+              }
             }).catch();
         } else {
           $scope.dashboardViewMode = newMode;
@@ -173,7 +177,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       // Brand new dashboards are defaulted to edit mode, existing ones default to view mode.
-      changeViewMode(dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
+      const defaultMode =
+          $route.current.params[DashboardConstants.VIEW_MODE_PARAM] ||
+          dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT;
+      // To avoid view mode being a part of the state, we need to remove it from the url.
+      kbnUrl.removeParam(DashboardConstants.VIEW_MODE_PARAM);
+      changeViewMode(defaultMode);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
