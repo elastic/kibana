@@ -43,7 +43,7 @@ export default function MapFactory(Private, tilemapSettings) {
       this._attr = params.attr || {};
 
       const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(this._isWMSEnabled());
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, minZoom), maxZoom);
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, maxZoom), minZoom);
       this._mapCenter = params.center || defaultMapCenter;
 
       this._createMap();
