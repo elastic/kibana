@@ -94,7 +94,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     });
 
     it('should get options', async function () {
-      const options = tilemapSettings.getOptions();
+      const options = tilemapSettings.getTMSOptions();
       expect(options).to.have.property('minZoom', 0);
       expect(options).to.have.property('maxZoom', 12);
       expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped

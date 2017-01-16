@@ -40,11 +40,11 @@ export default function MapFactory(Private, tilemapSettings) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
-
-      const mapOptions = tilemapSettings.getOptions();
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
-      this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
+
+      const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(this._isWMSEnabled());
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, maxZoom), minZoom);
+      this._mapCenter = params.center || defaultMapCenter;
 
       this._createMap();
     }
@@ -283,21 +283,25 @@ export default function MapFactory(Private, tilemapSettings) {
       });
     }
 
+    _isWMSEnabled() {
+      return this._attr.wms ? this._attr.wms.enabled : false;
+    }
+
     _createTileLayer() {
-      const wmsOpts = this._attr.wms || { enabled: false };
-      if (wmsOpts.enabled) {
+      if (this._isWMSEnabled()) {
+        const wmsOpts = this._attr.wms;
+        const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
         // http://leafletjs.com/reference.html#tilelayer-wms-options
         return L.tileLayer.wms(wmsOpts.url, {
           // user settings
           ...wmsOpts.options,
-          // override the min/maz zoom levels, https://git.io/vMn5o
-          minZoom: 1,
-          maxZoom: 18,
+          minZoom: minZoom,
+          maxZoom: maxZoom,
         });
       }
 
       const tileUrl = tilemapSettings.hasError() ? '' : tilemapSettings.getUrl();
-      const leafletOptions = tilemapSettings.getOptions();
+      const leafletOptions = tilemapSettings.getTMSOptions();
       return L.tileLayer(tileUrl, leafletOptions);
     }
 
