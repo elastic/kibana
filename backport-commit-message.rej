@@ -1,0 +1,35 @@
+Use correct WMS zoom settings
+
+Backports PR #9868
+
+**Commit 1:**
+Use .yml settings for [min|max]Zoom
+
+When the baselayer is a WMS layer, we cannot just discard the min/max zoom options from the .yml. In the WMS case, the [min|maxZoom] options from the manifest are irrelevant.
+
+* Original sha: a23f8c5baadb47bd1efd7490cc8ddfe4a5ccbc58
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-13T20:57:36Z
+
+**Commit 2:**
+fix typo
+
+* Original sha: 55f871aa3344604373596661a17680920b507d45
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-16T15:29:10Z
+
+**Commit 3:**
+use hardcoded zoom-values for WMS, just as in pre 5.2
+
+* Original sha: 88d513b606e191e0adcd1f14859dbc145b3adfb8
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-16T22:24:27Z
+
+**Commit 4:**
+improve clarity
+
+* Original sha: 6c25c79bd788c98c1c5f9a534c0cf2414a3ced01
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-16T22:40:05Z
+
+**Commit 5:**
+fix typo
+
+* Original sha: d7debaa4f792e9a88dd9cd870a9800ad873e0a34
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2017-01-16T22:44:13Z
