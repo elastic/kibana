@@ -1,19 +1,19 @@
 <div class="disable-app-layer">
-  <div class="confirm-dialogue" data-test-subj="confirm-dialog">
+  <div class="confirm-dialogue" data-test-subj="confirmModal">
     <div class="confirm-dialogue__message">
       {{message}}
     </div>
     <div class="confirm-dialogue__actions">
       <button
         class="kuiButton kuiButton--primary"
-        data-test-subj="confirm-dialog-okay-button"
+        data-test-subj="confirmModalConfirmButton"
         ng-click="onConfirm()"
       >
         {{confirmButtonText}}
       </button>
       <button
         class="kuiButton kuiButton--basic"
-        data-test-subj="confirm-dialog-cancel-button"
+        data-test-subj="confirmModalCancelButton"
         ng-click="onCancel()"
       >
         {{cancelButtonText}}

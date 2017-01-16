@@ -2,7 +2,7 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-describe('ui/dialogues/safe_confirm', function () {
+describe('ui/modals/safe_confirm', function () {
 
   let $rootScope;
   let $window;
@@ -25,10 +25,10 @@ describe('ui/dialogues/safe_confirm', function () {
   });
 
   afterEach(function () {
-    const okayButton = document.body.find('[data-test-subj=confirm-dialog-okay-button]');
-    if (okayButton) {
+    const confirmButton = document.body.find('[data-test-subj=confirmModalConfirmButton]');
+    if (confirmButton) {
       $rootScope.$digest();
-      angular.element(okayButton).click();
+      angular.element(confirmButton).click();
     }
   });
 
@@ -47,7 +47,7 @@ describe('ui/dialogues/safe_confirm', function () {
   context('after timeout completes', function () {
     it('confirmation dialogue is loaded to dom with message', function () {
       $timeout.flush();
-      const confirmationDialogueElement = document.body.find('[data-test-subj=confirm-dialog]');
+      const confirmationDialogueElement = document.body.find('[data-test-subj=confirmModal]');
       expect(!!confirmationDialogueElement).to.be(true);
       const htmlString = confirmationDialogueElement.innerHTML;
 
@@ -62,10 +62,10 @@ describe('ui/dialogues/safe_confirm', function () {
         promise.then((v) => {
           value = v;
         });
-        const okayButton = document.body.find('[data-test-subj=confirm-dialog-okay-button]');
+        const confirmButton = document.body.find('[data-test-subj=confirmModalConfirmButton]');
 
         $rootScope.$digest();
-        angular.element(okayButton).click();
+        angular.element(confirmButton).click();
 
         expect(value).to.be(true);
       });
@@ -77,7 +77,7 @@ describe('ui/dialogues/safe_confirm', function () {
 
         let value;
         promise.then(null, (v) => { value = v; });
-        const noButton = document.body.find('[data-test-subj=confirm-dialog-cancel-button]');
+        const noButton = document.body.find('[data-test-subj=confirmModalCancelButton]');
 
         $rootScope.$digest();
         angular.element(noButton).click();

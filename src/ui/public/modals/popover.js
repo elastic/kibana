@@ -1,9 +1,11 @@
 import angular from 'angular';
 
+/**
+ * Appends the element to the dom on instantiation, and removes it when destroy is called.
+ */
 export class Popover {
   constructor(element) {
     this.element = element;
-    // document.body.appendChild(this.element);
     angular.element(document.body).append(this.element);
   }
 
@@ -11,7 +13,6 @@ export class Popover {
    * Removes the element from the dom.
    */
   destroy() {
-    // document.body.removeChild(this.element);
     this.element.remove();
   }
 }

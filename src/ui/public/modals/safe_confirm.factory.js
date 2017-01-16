@@ -4,9 +4,7 @@ import 'ui/modals';
 const module = uiModules.get('kibana');
 
 module.factory('safeConfirm', function ($timeout, Promise, confirmModal) {
-  return (message) => $timeout(() => {
-    return new Promise((resolve, reject) => {
-      confirmModal(message, resolve, reject, 'Yes', 'No');
-    });
+  return (message) => new Promise((resolve, reject) => {
+    confirmModal(message, resolve, reject, 'Okay', 'Cancel');
   });
 });

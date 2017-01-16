@@ -21,7 +21,6 @@ import 'ui/persisted_log';
 import 'ui/private';
 import 'ui/promises';
 import 'ui/modals';
-import 'ui/safe_confirm';
 import 'ui/state_management/app_state';
 import 'ui/state_management/global_state';
 import 'ui/storage';
