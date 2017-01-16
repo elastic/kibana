@@ -17,11 +17,11 @@ module.directive('vislibSeries', function ($parse, $compile) {
           type: last ? last.type : 'line',
           drawLinesBetweenPoints: true,
           showCircles: true,
-          smoothLines: false,
+          interpolate: 'linear',
           data: {
             label: label
           },
-          valueAxis: ''
+          valueAxis: $scope.vis.params.valueAxes[0].id
         };
       }
 

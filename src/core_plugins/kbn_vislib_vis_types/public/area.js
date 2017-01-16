@@ -60,14 +60,7 @@ export default function PointSeriesVisType(Private) {
             title: {}
           }
         ],
-        seriesParams: [{
-          show: true,
-          type: 'area',
-          mode: 'stacked',
-          data: {
-            label: 'Count'
-          }
-        }],
+        seriesParams: [],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
