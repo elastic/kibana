@@ -371,6 +371,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.showEditHelpText = () => {
         return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.EDIT;
       };
+
+      $scope.showViewHelpText = () => {
+        return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.VIEW;
+      };
     }
   };
 });
