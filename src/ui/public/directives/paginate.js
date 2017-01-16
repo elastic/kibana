@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import uiModules from 'ui/modules';
-import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
+
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { PaginatedControls } from 'ui/paginated_table/paginated_controls';
 
 const PER_PAGE_DEFAULT = 10;
 
@@ -191,6 +194,26 @@ uiModules.get('kibana')
   // this directive is automatically added by paginate if not found within it's $el
   return {
     restrict: 'E',
-    template: paginateControlsTemplate
+    template: '<div id="paginate-controls"></div>',
+    link: function ($scope, $element) {
+
+      const domNode = $element.get()[0];
+      function renderPaginatedControls() {
+        const { page, paginate, otherPages, showSelector } = $scope;
+
+        const props = {
+          page,
+          paginate,
+          otherPages,
+          showSelector,
+          onPerPageSizeChange: (newPageSize) => { $scope.paginate.perPage = newPageSize; }
+        };
+
+        render(<PaginatedControls {...props} />, domNode);
+      }
+
+      $scope.$watchMulti(['page', 'paginate', 'otherPages', 'showSelector'], renderPaginatedControls);
+      $scope.$on('$destroy', () => unmountComponentAtNode(domNode));
+    }
   };
 });

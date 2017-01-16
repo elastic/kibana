@@ -150,6 +150,8 @@
     "postcss-loader": "1.2.1",
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
+    "react": "15.3.2",
+    "react-dom": "15.3.2",
     "request": "2.61.0",
     "rimraf": "2.4.3",
     "rison-node": "1.0.0",
