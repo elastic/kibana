@@ -160,12 +160,13 @@ uiModules.get('kibana')
       /**
        * @return {{maxZoom: (*|number), minZoom: (*|number)}}
        */
-      getMapZoomOptions(isWMSEnabled) {
-        //if WMS is enabled, we do not want to use the zoom-configuration from the manifest.
+      getMinMaxZoom(isWMSEnabled) {
+
+        //for backward compatibilty, we preserve the 1-18 setting. https://git.io/vMn5o
         if (isWMSEnabled) {
           return {
-            maxZoom: optionsFromConfig.maxZoom,
-            minZoom: optionsFromConfig.minZoom
+            minZoom: 1,
+            maxZoom: 18
           };
         }
 
@@ -174,8 +175,8 @@ uiModules.get('kibana')
         //by default.
         //For a custom configuration, users will need to override tilemap.url as well.
         return {
-          maxZoom: this._tmsOptions.maxZoom,
-          minZoom: this._tmsOptions.minZoom
+          minZoom: this._tmsOptions.minZoom,
+          maxZoom: this._tmsOptions.maxZoom
         };
 
       }
@@ -195,7 +196,7 @@ uiModules.get('kibana')
       /**
        * Make this a method to allow for overrides by test code
        */
-      _getTileServiceManifest(manifestUrl, additionalQueryParams) {
+      _getTileServiceManifest(manifestUrl) {
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),
           method: 'GET'

@@ -42,8 +42,8 @@ export default function MapFactory(Private, tilemapSettings) {
       this._geoJson = _.get(this._chartData, 'geoJson');
       this._attr = params.attr || {};
 
-      const mapZoomOptions = tilemapSettings.getMapZoomOptions(this._isWMSEnabled());
-      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, mapZoomOptions.maxZoom), mapZoomOptions.minZoom);
+      const minMaxZoom = tilemapSettings.getMinMaxZoom(this._isWMSEnabled());
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, minMaxZoom.maxZoom), minMaxZoom.minZoom);
       this._mapCenter = params.center || defaultMapCenter;
 
       this._createMap();
@@ -287,13 +287,13 @@ export default function MapFactory(Private, tilemapSettings) {
     _createTileLayer() {
       if (this._isWMSEnabled()) {
         const wmsOpts = this._attr.wms;
+        const minMaxZoom = tilemapSettings.getMinMaxZoom(true);
         // http://leafletjs.com/reference.html#tilelayer-wms-options
         return L.tileLayer.wms(wmsOpts.url, {
           // user settings
           ...wmsOpts.options,
-          // override the min/maz zoom levels, https://git.io/vMn5o
-          minZoom: 1,
-          maxZoom: 18,
+          minZoom: minMaxZoom.minZoom,
+          maxZoom: minMaxZoom.maxZoom,
         });
       }
 
