@@ -128,7 +128,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const changeViewMode = (newMode) => {
         const defaultFiltersChanged = filterMismatch() || (dash.timeRestore && timeMismatch());
 
-        if ($appStatus.dirty && newMode === DashboardViewMode.VIEW) {
+        // Time changes don't propagate to stateMonitor so we must track that dirty state manually.
+        if (($appStatus.dirty || (dash.timeRestore && timeMismatch())) &&
+            newMode === DashboardViewMode.VIEW) {
           safeConfirm('You have unsaved changes to your dashboard that will be lost if you continue without saving.' +
                       '\n\nDo you wish to continue?')
             .then(() => {
