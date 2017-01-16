@@ -192,7 +192,10 @@ export default function MapFactory(Private, tilemapSettings) {
 
       this._tileLayer.on('tileload', saturateTiles);
       this._tileLayer.on('load', () => {
-        if (!self._events) return;
+
+        if (!self._events) {
+          return;
+        }
 
         self._events.emit('rendered', {
           chart: self._chartData,
