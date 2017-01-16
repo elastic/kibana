@@ -53,7 +53,7 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
     });
 
     it('should get options', function () {
-      const options = tilemapSettings.getOptions();
+      const options = tilemapSettings.getTMSOptions();
       expect(options).to.have.property('minZoom');
       expect(options).to.have.property('maxZoom');
       expect(options).to.have.property('attribution');
