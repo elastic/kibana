@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
-import {EventEmitter} from 'events';
+import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
   'single': () => 0,
@@ -252,7 +252,7 @@ class TagCloud extends EventEmitter {
       });
 
     });
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
@@ -353,14 +353,14 @@ class TagCloud extends EventEmitter {
 
 }
 
-TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
+TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
 function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
-  return {value: word.value, text: word.text};
+  return { value: word.value, text: word.text };
 }
 
 
