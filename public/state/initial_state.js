@@ -44,14 +44,14 @@ export default {
       },
       'element-2': {
         id: 'element-2',
-        type: 'box',
-        height: 100,
-        width: 200,
-        top: 300,
-        left: 100,
-        angle: 30,
+        type: 'table',
+        height: 300,
+        width: 400,
+        top: 200,
+        left: 20,
+        angle: 0,
         args: {
-          color: '#BEEB9F'
+          dataframe: 'dataframe-1'
         }
       },
       'element-1': {
@@ -61,7 +61,7 @@ export default {
         width: 300,
         top: 300,
         left: 50,
-        angle: 270,
+        angle: 30,
         args: {
           color: '#00A388'
         }
@@ -69,12 +69,23 @@ export default {
     },
     storage: {
       dataframes: {
-        'dataframe-43524-3246-363': {
-          type: 'CSV',
-          value: `"model","segment","price"
-                  "crosstrek","SUV",21000
-                  "impreza","sedan",16000
-                  "outback","SUV",25000`
+        'dataframe-0': {
+          name: 'Cars',
+          type: 'csv',
+          value: {
+            csv: `"model","segment","price"
+                    "crosstrek","SUV",21000
+                    "impreza","sedan",16000
+                    "outback","SUV",25000`
+          }
+        },
+        'dataframe-1': {
+          name: 'Static',
+          type: 'timelion',
+          value: {
+            expression: '.static(5:10:2:10:23:11:12:13:14)',
+            interval: 'auto'
+          }
         }
       }
     }
