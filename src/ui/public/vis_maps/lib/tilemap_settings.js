@@ -86,10 +86,7 @@ uiModules.get('kibana')
             };
 
             this._url = unescapeTemplateVars(extendUrl(service.url, {
-              query: {
-                ...(service.query_parameters || {}),
-                ...this._queryParams
-              }
+              query: this._queryParams
             }));
 
             this._settingsInitialized = true;
