@@ -4,7 +4,7 @@ import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import {argumentSet} from 'plugins/rework/state/actions/element';
 import ArgumentForm from 'plugins/rework/components/argument_form/argument_form';
-import './editor.less';
+import './element_editor.less';
 
 const Editor = React.createClass({
   render() {

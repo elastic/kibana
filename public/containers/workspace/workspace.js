@@ -63,11 +63,13 @@ const Workspace = React.createClass({
     return (
       <div className="rework--workspace">
         <LeftSidebar>
+
           {!editor ? null : (
             <div className="rework--editor--left">
               <ElementEditor element={currentElement}></ElementEditor>
             </div>
           )}
+
           <div className="rework--editor-toggle--left">
             <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
           </div>
