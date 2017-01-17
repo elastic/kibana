@@ -36,7 +36,8 @@ UiModules
         assign(timefilter.time, timeNavigation.stepBackward(timefilter.getBounds()));
       };
 
-      $scope.updateFilter = function (from, to) {
+      $scope.updateFilter = function (from, to, mode) {
+        timefilter.time.mode = mode;
         timefilter.time.from = from;
         timefilter.time.to = to;
         kbnTopNav.close('filter');
