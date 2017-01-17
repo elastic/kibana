@@ -82,7 +82,7 @@ uiModules.get('kibana')
               attribution: $sanitize(marked(service.attribution)),
               minZoom: service.minZoom,
               maxZoom: service.maxZoom,
-              subdomains: []
+              subdomains: service.subdomains || []
             };
 
             this._url = unescapeTemplateVars(extendUrl(service.url, {
