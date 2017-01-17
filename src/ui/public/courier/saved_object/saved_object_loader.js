@@ -83,7 +83,7 @@ export class SavedObjectLoader {
       body = {
         query: {
           query_string: {
-            query: /^[\w]*$/.test(searchString) ? `${searchString}*` : searchString,
+            query: /^\w+$/.test(searchString) ? `${searchString}*` : searchString,
             fields: ['title^3', 'description'],
             default_operator: 'AND'
           }
