@@ -1,0 +1,26 @@
+@import "../../dist/ui_framework.css";
+@import "./views/app";
+@import "./components/guide_code_viewer/guide_code_viewer";
+@import "./components/guide_nav/guide_nav";
+@import "./components/guide_page/guide_page";
+@import "./components/guide_page_section/guide_page_section";
+@import "./components/guide_page_side_nav/guide_page_side_nav";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/**
+ * 1. Insane line-height makes it easier to notice when components are relying
+ *    on styles inherited from body.
+ */
+body {
+  background: #ffffff;
+  line-height: 40px; /* 1 */
+  margin: 0;
+}

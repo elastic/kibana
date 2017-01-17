@@ -3,40 +3,57 @@ import ngMock from 'ng_mock';
 import url from 'url';
 
 describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
-  let theTileMapSettings;
-  let theTilemapsConfig;
+  let tilemapSettings;
+  let tilemapsConfig;
+  let loadSettings;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, tilemapSettings, tilemapsConfig) {
-    theTileMapSettings = tilemapSettings;
-    theTilemapsConfig = tilemapsConfig;
-    theTilemapsConfig.deprecated.isOverridden = true;
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.decorator('tilemapsConfig', () => ({
+      manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest',
+      deprecated: {
+        isOverridden: true,
+        config: {
+          url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana_tests',
+          options: {
+            minZoom: 1,
+            maxZoom: 10,
+            attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
+          }
+        },
+      }
+    }));
   }));
 
+  beforeEach(ngMock.inject(function ($injector, $rootScope) {
+    tilemapSettings = $injector.get('tilemapSettings');
+    tilemapsConfig = $injector.get('tilemapsConfig');
+
+    loadSettings = () => {
+      tilemapSettings.loadSettings();
+      $rootScope.$digest();
+    };
+  }));
 
   describe('getting settings', function () {
-
-    beforeEach(async function () {
-      await theTileMapSettings.loadSettings();
+    beforeEach(function () {
+      loadSettings();
     });
 
-    it('should get url', async function () {
+    it('should get url', function () {
 
-      const mapUrl = theTileMapSettings.getUrl();
-      expect(mapUrl.indexOf('{x}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{y}') > -1).to.be.ok();
-      expect(mapUrl.indexOf('{z}') > -1).to.be.ok();
+      const mapUrl = tilemapSettings.getUrl();
+      expect(mapUrl).to.contain('{x}');
+      expect(mapUrl).to.contain('{y}');
+      expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.host.endsWith('elastic.co')).to.be.ok();
-      expect(urlObject.query).to.have.property('my_app_name');
-      expect(urlObject.query).to.have.property('my_app_version');
-      expect(urlObject.query).to.have.property('elastic_tile_service_tos');
+      expect(urlObject.hostname).to.be('tiles.elastic.co');
+      expect(urlObject.query).to.have.property('my_app_name', 'kibana_tests');
 
     });
 
-    it('should get options', async function () {
-      const options = theTileMapSettings.getOptions();
+    it('should get options', function () {
+      const options = tilemapSettings.getTMSOptions();
       expect(options).to.have.property('minZoom');
       expect(options).to.have.property('maxZoom');
       expect(options).to.have.property('attribution');

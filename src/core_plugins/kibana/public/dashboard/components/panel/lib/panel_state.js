@@ -1,5 +1,5 @@
-export const DEFAULT_PANEL_WIDTH = 3;
-export const DEFAULT_PANEL_HEIGHT = 2;
+export const DEFAULT_PANEL_WIDTH = 6;
+export const DEFAULT_PANEL_HEIGHT = 3;
 
 /**
  * Represents a panel on a grid. Keeps track of position in the grid and what visualization it

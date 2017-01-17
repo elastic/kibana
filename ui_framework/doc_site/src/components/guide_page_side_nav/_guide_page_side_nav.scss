@@ -1,0 +1,48 @@
+
+.guidePageSideNav {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  bottom: 0;
+  width: $guideSideNavWidth;
+  padding: 0 0 30px 80px;
+  overflow: auto;
+  background-color: #ffffff;
+  z-index: 100;
+
+  @include scrollbar;
+
+  @include whenNarrowerThan($normalBreakpoint) {
+    padding: 0 0 30px 20px;
+    width: $guideSideNavSmallWidth;
+  }
+}
+
+  .guidePageSideNav__title {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-size: 22px;
+    line-height: $guideLineHeight;
+    border-bottom: 1px solid #d6d6d6;
+    opacity: 0.8;
+  }
+
+  .guidePageSideNavMenu {
+    line-height: $guideLineHeight;
+  }
+
+    .guidePageSideNavMenu__item {
+      & + & {
+        margin-top: 6px;
+      }
+    }
+
+      .guidePageSideNavMenu__itemLink {
+        cursor: pointer;
+        color: #6b7490;
+        text-decoration: none;
+
+        &:hover {
+          color: #2b52cc;
+        }
+      }
