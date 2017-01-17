@@ -140,7 +140,8 @@ body {
   color: #FFFFFF;
   background-color: #6EADC1; }
   .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:disabled {
     background-color: #B6D6E0; }
@@ -148,14 +149,15 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #FFFFFF;
-  background-color: #D76051;
-  /**
-   * 1. Override Bootstrap.
-   */ }
+  background-color: #D76051; }
   .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #A52E1F; }
   .kuiButton--danger:disabled {
     background-color: #efc0ba; }
@@ -169,14 +171,19 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--hollow {
   color: #3CAED2;
   background-color: transparent; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
-    color: #006E8A;
+    color: #006E8A !important;
+    /* 1 */
     text-decoration: underline; }
   .kuiButton--hollow:disabled {
-    color: #dddddd; }
+    color: #dddddd !important;
+    /* 1 */ }
 
 .kuiButtonGroup {
   display: -webkit-box;
