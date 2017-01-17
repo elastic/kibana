@@ -2,7 +2,7 @@ import React from 'react';
 import elements from 'plugins/rework/elements/elements';
 import Loading from 'plugins/rework/components/loading/loading';
 
-export default React.createClass({
+class Element extends React.PureComponent {
   render() {
     const {type, args} = this.props;
     const ElementContent = args ? elements.byName[type].template : () => (<Loading />);
@@ -12,4 +12,6 @@ export default React.createClass({
       </div>
     );
   }
-});
+}
+
+export default Element;
