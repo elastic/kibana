@@ -17,7 +17,10 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     };
 
     const options = Object.assign(defaultOptions, customOptions);
-    if (modalPopover) throw new Error('Ah ah ah, only one modal, buddy!');
+    if (modalPopover) {
+      throw new Error('You\'ve called confirmModal but there\'s already a modal open. ' +
+        'You can only have one modal open at a time.');
+    }
 
     const confirmScope = $rootScope.$new();
 
