@@ -72,19 +72,22 @@ uiModules.get('kibana')
 
           return this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams)
           .then(response => {
-            const manifest = response.data;
-            this._error = null;
+            const service = _.get(response, 'data.services[0]');
+            if (!service) {
+              throw new Error('Manifest response does not include sufficient service data.');
+            }
 
+            this._error = null;
             this._tmsOptions = {
-              attribution: $sanitize(marked(manifest.services[0].attribution)),
-              minZoom: manifest.services[0].minZoom,
-              maxZoom: manifest.services[0].maxZoom,
+              attribution: $sanitize(marked(service.attribution)),
+              minZoom: service.minZoom,
+              maxZoom: service.maxZoom,
               subdomains: []
             };
 
-            this._url = unescapeTemplateVars(extendUrl(manifest.services[0].url, {
+            this._url = unescapeTemplateVars(extendUrl(service.url, {
               query: {
-                ...(manifest.services[0].query_parameters || {}),
+                ...(service.query_parameters || {}),
                 ...this._queryParams
               }
             }));
