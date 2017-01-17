@@ -1,34 +1,12 @@
 .kuiToolBarFooter {
-  display: flex;
-  justify-content: space-between;
+  @include bar;
+
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
   border: $tableBorder;
 }
 
-/**
- * 1. Put 10px of space between each child.
- */
 .kuiToolBarFooterSection {
-  display: flex;
-  align-items: center;
-  margin-left: $toolBarSectionSpacing * 0.5;
-  margin-right: $toolBarSectionSpacing * 0.5;
-
-  &:first-child {
-    margin-left: 0;
-  }
-
-  &:last-child {
-    margin-right: 0;
-  }
-
-  &:only-child {
-    margin-left: auto;
-  }
-
-  & > * + * {
-    margin-left: $toolBarItsemSpacing; /* 1 */
-  }
+  @include barSection;
 }

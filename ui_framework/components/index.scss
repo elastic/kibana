@@ -35,18 +35,22 @@ $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
 $linkColor: #3CAED2;
 $linkHoverColor: #006E8A;
-$panelColor: #E4E4E4;
+$standoutBackgroundColor: #E4E4E4;
 $selectedBorderColor: #6EADC1;
 $errorBorderColor: $errorColor;
 
 // Borders
-$tableBorder: 2px solid $panelColor;
-$tableRowBorder: 1px solid $panelColor;
+$tableBorder: 2px solid $standoutBackgroundColor;
+$tableRowBorder: 1px solid $standoutBackgroundColor;
 
 // Timing
 $formTransitionTiming: 0.1s linear;
 
-@mixin darkTheme() {
+// Bar
+$toolBarSectionSpacing: 50px;
+$toolBarItsemSpacing: 10px;
+
+@mixin darkTheme {
   .theme-dark & {
     @content;
   }
@@ -60,6 +64,11 @@ $formTransitionTiming: 0.1s linear;
   z-index: 1; /* 1 */
   outline: 1px solid $color !important; /* 2 */
   outline-offset: 2px !important; /* 2 */
+}
+
+@mixin formControlFocus {
+  outline: none;
+  border-color: $selectedBorderColor;
 }
 
 @mixin formControl {
@@ -86,8 +95,7 @@ $formTransitionTiming: 0.1s linear;
   }
 
   &:focus {
-    outline: none;
-    border-color: $selectedBorderColor;
+    @include formControlFocus;
   }
 
   &:disabled {
@@ -116,6 +124,66 @@ $formTransitionTiming: 0.1s linear;
   }
 }
 
+@mixin bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ */
+@mixin barSection {
+  display: flex;
+  align-items: center;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &:only-child {
+    margin-left: auto; /* 1 */
+  }
+
+  & > * {
+    flex: 1 0 auto;
+  }
+
+  & > * + * {
+    margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+}
+
+@mixin buttonOnStandoutBackground {
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    &:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}
+
+@mixin selectOnStandoutBackground {
+  .kuiSelect {
+    border-color: #ffffff;
+
+    &:focus {
+      @include formControlFocus;
+    }
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -124,6 +192,7 @@ body {
   font-family: $font;
 }
 
+@import "bar/index";
 @import "button/index";
 @import "form/index";
 @import "icon/index";
