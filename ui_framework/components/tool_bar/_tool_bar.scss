@@ -1,11 +1,11 @@
 .kuiToolBar {
   @include bar;
-  @include buttonOnReverseBackground;
-  @include selectOnReverseBackground;
+  @include buttonOnStandoutBackground;
+  @include selectOnStandoutBackground;
 
   padding: 10px;
   height: 50px;
-  background-color: $panelColor;
+  background-color: $standoutBackgroundColor;
 }
 
 .kuiToolBarSection {

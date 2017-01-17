@@ -35,13 +35,13 @@ $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
 $linkColor: #3CAED2;
 $linkHoverColor: #006E8A;
-$panelColor: #E4E4E4;
+$standoutBackgroundColor: #E4E4E4;
 $selectedBorderColor: #6EADC1;
 $errorBorderColor: $errorColor;
 
 // Borders
-$tableBorder: 2px solid $panelColor;
-$tableRowBorder: 1px solid $panelColor;
+$tableBorder: 2px solid $standoutBackgroundColor;
+$tableRowBorder: 1px solid $standoutBackgroundColor;
 
 // Timing
 $formTransitionTiming: 0.1s linear;
@@ -162,7 +162,7 @@ $toolBarItsemSpacing: 10px;
   }
 }
 
-@mixin buttonOnReverseBackground {
+@mixin buttonOnStandoutBackground {
   .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF;
@@ -174,7 +174,7 @@ $toolBarItsemSpacing: 10px;
   }
 }
 
-@mixin selectOnReverseBackground {
+@mixin selectOnStandoutBackground {
   .kuiSelect {
     border-color: #ffffff;
 
