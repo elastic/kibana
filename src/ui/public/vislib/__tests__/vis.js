@@ -9,7 +9,6 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
-import 'ui/persisted_state';
 
 const dataArray = [
   series,
