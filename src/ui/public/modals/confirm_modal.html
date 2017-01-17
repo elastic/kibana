@@ -1,6 +1,15 @@
-<div class="kuiModal" style="width: 450px" data-test-subj="confirmModal">
-  <div class="kuiModalBody">
-    <div class="kuiModalBodyText">
+
+  <div class="kuiModal" style="width: 450px" data-test-subj="confirmModal">
+    <div class="kuiModalHeader" ng-if="title">
+      <div class="kuiModalHeader__title">
+       {{title}}
+      </div>
+
+      <div class="kuiModalHeaderCloseButton kuiIcon fa-times"ng-click="onClose()"></div>
+    </div>
+
+    <div class="kuiModalBody">
+      <div class="kuiModalBodyText">
       {{message}}
     </div>
   </div>

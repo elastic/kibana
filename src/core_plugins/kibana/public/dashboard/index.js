@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { noop } from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/courier';
@@ -57,7 +58,7 @@ uiRoutes
   }
 });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, safeConfirm) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, confirmModal) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
@@ -118,6 +119,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
+      $scope.queryEdited = () => $scope.dashboardViewMode === DashboardViewMode.EDIT && !_.isEqual($state.query, savedDashQuery);
+
       // A hashkey in the filter array will ruin our comparison, so we need to get rid of it.
       const cleanFiltersForComparison = (filters) => _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
       const filterMismatch = () =>
@@ -131,27 +134,30 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         // Time changes don't propagate to stateMonitor so we must track that dirty state manually.
         if (($appStatus.dirty || (dash.timeRestore && timeMismatch())) &&
             newMode === DashboardViewMode.VIEW) {
-          safeConfirm(
-              'Warning! You have unsaved changes to your dashboard. You can save them or exit without saving and lose your changes.',
-              'Save dashboard',
-              'Lose changes')
-            .then(() => {
-              $scope.save().then(() => {
-                if (stateMonitor) stateMonitor.destroy();
-                if (dash.id) {
-                  kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
-                } else {
-                  kbnUrl.change(`/dashboard?${DashboardConstants.VIEW_MODE_PARAM}=${newMode}`);
-                }
-              });
-            }).catch(() => {
-              if (dash.id) {
-                kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
-              } else {
-                kbnUrl.change(`/dashboard?${DashboardConstants.VIEW_MODE_PARAM}=${newMode}`);
-              }
-            });
-        } else {
+
+
+          const exitEditMode = () => {
+            if (dash.id) {
+              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
+            } else {
+              kbnUrl.change(`/dashboard?${DashboardConstants.VIEW_MODE_PARAM}=${newMode}`);
+            }
+          };
+
+          const saveAndExitEditMode = () => $scope.save().then(exitEditMode);
+
+          confirmModal(
+            'You have unsaved changes to your dashboard. You can save them or exit without saving and lose your changes.',
+            saveAndExitEditMode,
+            exitEditMode,
+            noop,
+            'Save dashboard',
+            'Lose changes',
+            'Warning');
+          return;
+        }
+
+        const doModeSwitch = () => {
           $scope.dashboardViewMode = newMode;
           $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
           if (newMode === DashboardViewMode.EDIT) {
@@ -160,37 +166,39 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             stateMonitor.onChange(status => {
               $appStatus.dirty = status.dirty;
             });
-          } else {
-            if (stateMonitor) stateMonitor.destroy();
           }
-        }
+        };
 
         if (newMode === DashboardViewMode.EDIT && dash.id && defaultFiltersChanged) {
-          safeConfirm(
-              'Your current filters, query and/or time range are different than those stored with your dashboard.',
-              'Load dashboard filters',
-              'Use my current filters')
-            .then(() => {
-              stateDefaults.filters = $state.filters = savedDashFilters.slice();
-              stateDefaults.query = $state.query = savedDashQuery;
-              if (dash.timeRestore) {
-                $scope.timefilter.time.from = savedDashTimeFrom;
-                $scope.timefilter.time.to = savedDashTimeTo;
-              }
+          const onLoadSavedFilters = () => {
+            stateDefaults.filters = $state.filters = savedDashFilters.slice();
+            stateDefaults.query = $state.query = savedDashQuery;
+            if (dash.timeRestore) {
+              $scope.timefilter.time.from = savedDashTimeFrom;
+              $scope.timefilter.time.to = savedDashTimeTo;
+            }
 
-              // We need to recreate the stateMonitor with the new defaults.
-              if (stateMonitor) stateMonitor.destroy();
-              stateMonitor = stateMonitorFactory.create($state, stateDefaults);
-              stateMonitor.onChange(status => { $appStatus.dirty = status.dirty; });
+            // We need to recreate the stateMonitor with the new defaults.
+            if (stateMonitor) stateMonitor.destroy();
+            stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+            stateMonitor.onChange(status => { $appStatus.dirty = status.dirty; });
 
-              $appStatus.dirty = false;
+            $appStatus.dirty = false;
 
-              $scope.filterResults();
-            }, () => {
-              // Something changed from the default and we are porting the edits over to the dashboard.
-              // Make sure we update dirty state.
-              $appStatus.dirty = true;
-            });
+            $scope.filterResults();
+            doModeSwitch();
+          };
+
+          confirmModal(
+            'Your current filters, query and/or time range are different than those stored with your dashboard.',
+            onLoadSavedFilters,
+            () => { doModeSwitch(); $appStatus.dirty = true; },
+            noop,
+            'Load dashboard filters',
+            'Use current filters',
+            'Filter conflict detected');
+        } else {
+          doModeSwitch();
         }
       };
 
