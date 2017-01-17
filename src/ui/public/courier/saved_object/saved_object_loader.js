@@ -78,11 +78,12 @@ export class SavedObjectLoader {
    */
   find(searchString, size = 100) {
     let body;
+
     if (searchString) {
       body = {
         query: {
-          simple_query_string: {
-            query: searchString + '*',
+          query_string: {
+            query: /^\w+$/.test(searchString) ? `${searchString}*` : searchString,
             fields: ['title^3', 'description'],
             default_operator: 'AND'
           }
@@ -98,6 +99,19 @@ export class SavedObjectLoader {
       body,
       size
     })
+      .catch(err => {
+        // attempt to mimic simple_query_string, swallow formatting error
+        if (err.statusCode === 400) {
+          return {
+            hits: {
+              total: 0,
+              hits: [],
+            }
+          };
+        }
+
+        throw err;
+      })
       .then((resp) => {
         return {
           total: resp.hits.total,
