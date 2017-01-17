@@ -63,7 +63,7 @@ function getArgDefinitions(state, elementId) {
 function resolveArgument(state, elementId, name) {
   const element = state.persistent.elements[elementId];
   const argDef = _.find(getArgDefinitions(state, elementId), {name: name});
-  return argDef.type.resolve(element.args[name]);
+  return argDef.type.resolve(element.args[name], state);
 }
 
 window.argumentSet = argumentSet;

@@ -10,7 +10,7 @@ argTypes.push(new ArgType('style', {
     const storeValue = (e) => commit(e.target.value);
     return (<textarea className="form-control" onChange={storeValue} value={value}></textarea>);
   },
-  resolve: (value) => {
+  resolve: (value, state) => {
     try {
       return transform(value);
     } catch (e) {

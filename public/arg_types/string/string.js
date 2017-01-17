@@ -8,7 +8,7 @@ argTypes.push(new ArgType('string', {
     const storeValue = (e) => commit(e.target.value);
     return (<input className="form-control" onChange={storeValue} value={value}></input>);
   },
-  resolve: (value) => {
+  resolve: (value, state) => {
     return value;
   }
 }));
