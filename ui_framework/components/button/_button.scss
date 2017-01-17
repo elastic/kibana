@@ -123,15 +123,3 @@
     color: #dddddd;
   }
 }
-
-@mixin buttonOnReverseBackground {
-  .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF;
-
-    &:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3;
-    }
-  }
-}
