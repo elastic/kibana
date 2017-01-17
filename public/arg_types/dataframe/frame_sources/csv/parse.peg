@@ -1,0 +1,26 @@
+// Parse.js is generated from this
+
+start
+  = [\n\r]* init:line rest:([\n\r]+ d:line { return d; })* [\n\r]* {
+   rest.unshift(init);
+   return rest;
+  }
+
+line
+  = init:field rest:("," text:field { return text; })*
+    & { return !!init || rest.length; }
+    {
+     rest.unshift(init);
+     return rest;
+    }
+
+field
+  = '"' text:c* '"' { return text.join(''); }
+  / text:[^\n\r,]* {
+   var possible = text.join('');
+   return isNaN(Number(possible)) ? possible : Number(possible);
+  }
+
+c
+  = '"' '"' { return '"'; }
+  / [^"]
