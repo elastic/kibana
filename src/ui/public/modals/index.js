@@ -1,3 +1,3 @@
-import './confirm_modal.factory';
-import './safe_confirm.factory';
+import './confirm_modal';
+import './safe_confirm';
 

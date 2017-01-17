@@ -5,6 +5,12 @@ const module = uiModules.get('kibana');
 
 module.factory('safeConfirm', function ($timeout, Promise, confirmModal) {
   return (message) => new Promise((resolve, reject) => {
-    confirmModal(message, resolve, reject, 'Okay', 'Cancel');
+    const confirmOptions = {
+      onConfirm: resolve,
+      onCancel: reject,
+      confirmButtonText: 'Okay',
+      cancelButtonText: 'Cancel'
+    };
+    confirmModal(message, confirmOptions);
   });
 });
