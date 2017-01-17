@@ -1,6 +1,7 @@
 
 import Common from './common';
 import ConsolePage from './console_page';
+import ContextPage from './context_page';
 import DashboardPage from './dashboard_page';
 import DiscoverPage from './discover_page';
 import HeaderPage from './header_page';
@@ -11,6 +12,7 @@ import MonitoringPage from './monitoring_page';
 
 const common = new Common();
 const consolePage = new ConsolePage();
+const contextPage = new ContextPage();
 const dashboardPage = new DashboardPage();
 const discoverPage = new DiscoverPage();
 const headerPage = new HeaderPage();
@@ -31,6 +33,7 @@ class PageObjects {
     this.remote = remote;
     common.init(remote);
     consolePage.init(remote);
+    contextPage.init(remote);
     dashboardPage.init(remote);
     discoverPage.init(remote);
     headerPage.init(remote);
@@ -53,6 +56,10 @@ class PageObjects {
 
   get console() {
     return this.assertInitialized() && consolePage;
+  }
+
+  get context() {
+    return this.assertInitialized() && contextPage;
   }
 
   get dashboard() {
