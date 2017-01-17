@@ -2,11 +2,57 @@
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
  */
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ */
 * {
   box-sizing: border-box; }
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
+
+.kuiBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+.kuiBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiBarSection:first-child {
+    margin-left: 0; }
+  .kuiBarSection:last-child {
+    margin-right: 0; }
+  .kuiBarSection:only-child {
+    margin-left: auto;
+    /* 1 */ }
+  .kuiBarSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+  .kuiBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
 
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -183,6 +229,47 @@ body {
     /* 2 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
+    cursor: not-allowed; }
+
+/**
+ * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 2. Make room on right side for the caret.
+ */
+.kuiSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: #191E23;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */ }
+  .kuiSelect:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
     cursor: not-allowed; }
 
 .kuiTextArea {
@@ -877,6 +964,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -890,10 +981,12 @@ body {
     .kuiToolBar .kuiButton--basic:disabled {
       color: #a7a7a7;
       background-color: #F3F3F3; }
+  .kuiToolBar .kuiSelect {
+    border-color: #ffffff; }
+    .kuiToolBar .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
-/**
- * 1. Put 10px of space between each child.
- */
 .kuiToolBarSection {
   display: -webkit-box;
   display: -webkit-flex;
@@ -905,17 +998,38 @@ body {
           align-items: center;
   margin-left: 25px;
   margin-right: 25px; }
+  .kuiToolBarSection:first-child {
+    margin-left: 0; }
   .kuiToolBarSection:last-child {
     margin-right: 0; }
+  .kuiToolBarSection:only-child {
+    margin-left: auto;
+    /* 1 */ }
+  .kuiToolBarSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
   .kuiToolBarSection > * + * {
     margin-left: 10px;
     /* 1 */ }
+
+/**
+ * 1. Override Bar styles and put Search on the left side.
+ */
+.kuiToolBar--searchOnly .kuiToolBarSearch {
+  margin-left: 0 !important;
+  /* 1 */ }
 
 .kuiToolBarFooter {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -925,9 +1039,6 @@ body {
   background-color: #ffffff;
   border: 2px solid #E4E4E4; }
 
-/**
- * 1. Put 10px of space between each child.
- */
 .kuiToolBarFooterSection {
   display: -webkit-box;
   display: -webkit-flex;
@@ -944,23 +1055,44 @@ body {
   .kuiToolBarFooterSection:last-child {
     margin-right: 0; }
   .kuiToolBarFooterSection:only-child {
-    margin-left: auto; }
+    margin-left: auto;
+    /* 1 */ }
+  .kuiToolBarFooterSection > * {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
   .kuiToolBarFooterSection > * + * {
     margin-left: 10px;
     /* 1 */ }
 
+/**
+ * 1. Put 10px of space between each child.
+ */
 .kuiToolBarSearch {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   max-width: 800px;
-  line-height: 1.5;
-  margin-right: 25px; }
+  line-height: 1.5; }
+  .kuiToolBarSearch:first-child {
+    margin-left: 0; }
+  .kuiToolBarSearch:last-child {
+    margin-right: 0; }
+  .kuiToolBarSearch > * + * {
+    margin-left: 10px;
+    /* 1 */ }
 
 .kuiToolBarSearchBox {
   -webkit-box-flex: 1;
@@ -988,17 +1120,12 @@ body {
   border: 1px solid #FFFFFF;
   border-radius: 4px;
   font-size: 14px;
-  border: none;
-  /* 1 */
+  border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */ }
   .kuiToolBarSearchBox__input:focus {
-    z-index: 1;
-    /* 1 */
-    outline: 1px solid #6EADC1 !important;
-    /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    outline: none;
+    border-color: #6EADC1; }
 
 /*
  * 1. We don't want the text to take up two lines and overflow the ToolBar.
