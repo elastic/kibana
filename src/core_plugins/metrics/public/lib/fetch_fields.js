@@ -6,7 +6,10 @@ export default (
   return $scope => (indexPattern = '*') => {
     $http.get(`../api/metrics/fields?index=${indexPattern}`)
       .success(resp => {
-        $scope.fields = resp;
+        if (!$scope.fields) $scope.fields = {};
+        if (resp.length && indexPattern) {
+          $scope.fields[indexPattern] = resp;
+        }
       })
       .error(resp => {
         $scope.visData = {};

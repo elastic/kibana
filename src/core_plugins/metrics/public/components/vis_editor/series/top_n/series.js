@@ -7,7 +7,6 @@ import AddDeleteButtons from 'plugins/metrics/components/add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
 import Tooltip from 'plugins/metrics/components/tooltip';
-import FieldSelect from 'plugins/metrics/components/vis_editor/aggs/field_select';
 import MetricSelect from 'plugins/metrics/components/vis_editor/aggs/metric_select';
 import createSelectHandler from 'plugins/metrics/lib/create_select_handler';
 import createTextHandler from 'plugins/metrics/lib/create_text_handler';
@@ -24,12 +23,12 @@ export default React.createClass({
 
   renderRow(row, index, items) {
     const { props } = this;
-    const { model, fields } = props;
+    const { panel, model, fields } = props;
     return (
       <Agg
         key={row.id}
         sortData={row.id}
-        panelType={model.type}
+        panel={panel}
         siblings={items}
         model={row}
         onAdd={handleAdd.bind(null, props, newMetricAggFn)}
@@ -42,6 +41,7 @@ export default React.createClass({
 
   render() {
     const {
+      panel,
       model,
       fields,
       onAdd,
@@ -88,6 +88,7 @@ export default React.createClass({
                 <Split
                   onChange={this.props.handleChange}
                   fields={fields}
+                  panel={panel}
                   model={model}/>
               </div>
             </div>

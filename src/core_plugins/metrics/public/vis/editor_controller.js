@@ -36,7 +36,7 @@ app.controller('MetricsEditorController', (
     trailing: true
   });
 
-  const debouncedFetchFields = _.debounce(() => fetchFields($scope)($scope.model.index_pattern), 300, {
+  const debouncedFetchFields = _.debounce(fetchFields($scope), 300, {
     leading: false,
     trailing: true
   });
@@ -51,7 +51,15 @@ app.controller('MetricsEditorController', (
     const visAppScope = angular.element($('visualize-app')).scope();
     visAppScope.stageEditableVis();
     debouncedFetch();
-    if (newValue.index_pattern !== oldValue.index_pattern) debouncedFetchFields();
+
+    // Fetch any missing index patterns
+    if (!$scope.fields[newValue.index_pattern]) debouncedFetchFields(newValue.index_pattern);
+    newValue.series.forEach(series => {
+      if (series.override_index_pattern &&
+        !$scope.fields[series.series_index_pattern]) {
+        debouncedFetchFields(series.series_index_pattern);
+      }
+    });
   });
 
   // If the model doesn't exist we need to either intialize it with a copy from

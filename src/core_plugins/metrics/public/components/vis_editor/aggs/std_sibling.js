@@ -11,7 +11,7 @@ import createTextHandler from '../../../lib/create_text_handler';
 
 export default React.createClass({
   render() {
-    const { model, siblings, panelType } = this.props;
+    const { model, siblings, panel } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -54,7 +54,7 @@ export default React.createClass({
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panelType}
+            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>

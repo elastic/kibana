@@ -60,7 +60,7 @@ export default React.createClass({
     let view;
     if (selectedTab === 'markdown') {
       view = (<MarkdownEditor {...this.props}/>);
-    } else if (selectedTab === 'series') {
+    } else if (selectedTab === 'data') {
       view = (<SeriesEditor {...this.props}/>);
     } else {
       view = (
@@ -120,8 +120,8 @@ export default React.createClass({
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
             onClick={e => this.switchTab('markdown')}>Markdown</div>
-          <div className={`kbnTabs__tab${selectedTab === 'series' && '-active' || ''}`}
-            onClick={e => this.switchTab('series')}>Variables</div>
+          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={e => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={e => this.switchTab('options')}>Panel Options</div>
         </div>

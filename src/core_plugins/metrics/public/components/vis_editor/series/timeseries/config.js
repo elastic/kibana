@@ -4,6 +4,7 @@ import DataFormatPicker from 'plugins/metrics/components/vis_editor/data_format_
 import createSelectHandler from 'plugins/metrics/lib/create_select_handler';
 import YesNo from 'plugins/metrics/components/yes_no';
 import createTextHandler from 'plugins/metrics/lib/create_text_handler';
+import IndexPattern from 'plugins/metrics/components/vis_editor/index_pattern';
 
 export default React.createClass({
   render() {
@@ -135,7 +136,8 @@ export default React.createClass({
                 value={model.hide_in_legend}
                 name="hide_in_legend"
                 onChange={this.props.onChange}/>
-              <div className="vis_editor__label">Axis Max</div>
+          </div>
+          <div className="vis_editor__series_config-row">
               <div className="vis_editor__label">Separate Axis</div>
               <YesNo
                 value={model.seperate_axis}
@@ -167,10 +169,19 @@ export default React.createClass({
                   onChange={handleSelectChange('axis_position')}/>
               </div>
           </div>
-          { model.seperate_axis ? (
-            <div className="vis_editor__row" style={{ fontSize: 12 }}>
-            </div>
-          ) : (<div style={{ display:'none' }}/>) }
+          <div className="vis_editor__series_config-row">
+            <div className="vis_editor__label">Override Index Pattern</div>
+            <YesNo
+              value={model.override_index_pattern}
+              name="override_index_pattern"
+              onChange={this.props.onChange}/>
+            <IndexPattern
+              {...this.props}
+              prefix="series_"
+              className="vis_editor__row_item vis_editor__row"
+              disabled={!model.override_index_pattern}
+              with-interval={true} />
+          </div>
         </div>
       </div>
     );

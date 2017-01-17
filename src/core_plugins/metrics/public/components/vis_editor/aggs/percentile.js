@@ -114,11 +114,12 @@ export default React.createClass({
   },
 
   render() {
-    const { model, panelType, fields } = this.props;
+    const { model, panel, fields } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const handleNumberChange = createNumberHandler(handleChange);
+    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
 
     return (
       <AggRow {...this.props}>
@@ -128,7 +129,7 @@ export default React.createClass({
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
                 siblings={this.props.siblings}
-                panelType={panelType}
+                panelType={panel.type}
                 value={model.type}
                 onChange={handleSelectChange('type')}/>
             </div>
@@ -138,6 +139,7 @@ export default React.createClass({
                 fields={fields}
                 type={model.type}
                 restrict="numeric"
+                indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}/>
             </div>

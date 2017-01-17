@@ -8,7 +8,7 @@ import createSelectHandler from '../../../lib/create_select_handler';
 export default React.createClass({
 
   render() {
-    const { model, panelType, fields } = this.props;
+    const { model, panel, fields } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -17,13 +17,15 @@ export default React.createClass({
       restrict = 'string';
     }
 
+    const indexPattern = model.override_index_pattern || model.series_index_pattern || panel.index_pattern;
+
     return (
       <AggRow {...this.props}>
         <div className="vis_editor__item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panelType}
+            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>
@@ -33,6 +35,7 @@ export default React.createClass({
             fields={fields}
             type={model.type}
             restrict={restrict}
+            indexPattern={indexPattern}
             value={model.field}
             onChange={handleSelectChange('field')}/>
         </div>) : (<div style={{ display: 'none' }}/>) }

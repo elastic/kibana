@@ -47,8 +47,8 @@ export default sortable(React.createClass({
   },
 
   render() {
-    const { panelType } = this.props;
-    const Component = lookup[panelType];
+    const { panel } = this.props;
+    const Component = lookup[panel.type];
     if (Component) {
       const params = {
         switchTab: this.switchTab,
@@ -59,6 +59,6 @@ export default sortable(React.createClass({
       };
       return (<Component {...params}/>);
     }
-    return (<div>Missing Series component for panel type: {panelType}</div>);
+    return (<div>Missing Series component for panel type: {panel.type}</div>);
   }
 }));

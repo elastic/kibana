@@ -21,7 +21,7 @@ export default React.createClass({
   },
 
   render() {
-    const { model, panelType, siblings } = this.props;
+    const { model, panel, siblings } = this.props;
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange, this.refs);
@@ -33,7 +33,7 @@ export default React.createClass({
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
               siblings={this.props.siblings}
-              panelType={panelType}
+              panelType={panel.type}
               value={model.type}
               onChange={handleSelectChange('type')}/>
             <div className="vis_editor__row_item" style={{ margin: '10px 0' }}>

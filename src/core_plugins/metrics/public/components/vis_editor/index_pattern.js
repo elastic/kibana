@@ -5,32 +5,47 @@ import createSelectHandler from '../../lib/create_select_handler';
 import createTextHandler from '../../lib/create_text_handler';
 export default React.createClass({
 
+  getDefaultProps() {
+    return {
+      prefix: '',
+      disabled: false,
+      className: 'vis_editor__row'
+    };
+  },
+
   render() {
-    const { model, fields } = this.props;
+    const { model, fields, prefix } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const timeFieldName = `${prefix}time_field`;
+    const indexPatternName = `${prefix}index_pattern`;
+    const intervalName = `${prefix}interval`;
     return (
-      <div className="vis_editor__row">
+      <div className={this.props.className}>
         <div className="vis_editor__label">Index Pattern</div>
         <input
           className="vis_editor__input"
-          ref="index_pattern"
-          onChange={handleTextChange('index_pattern', '*')}
-          defaultValue={model.index_pattern || '*'}/>
+          ref={indexPatternName}
+          disabled={this.props.disabled}
+          onChange={handleTextChange(indexPatternName, '*')}
+          defaultValue={model[indexPatternName] || '*'}/>
         <div className="vis_editor__label">Time Field</div>
         <div className="vis_editor__index_pattern-fields">
           <FieldSelect
             restrict="date"
-            value={model.time_field}
-            onChange={handleSelectChange('time_field')}
+            value={model[timeFieldName]}
+            disabled={this.props.disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
             fields={fields}/>
         </div>
         <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y)</div>
         <input
           className="vis_editor__input"
-          ref="interval"
-          onChange={handleTextChange('interval', 'auto')}
-          defaultValue={model.interval || 'auto'}/>
+          ref={intervalName}
+          disabled={this.props.disabled}
+          onChange={handleTextChange(intervalName, 'auto')}
+          defaultValue={model[intervalName] || 'auto'}/>
       </div>
     );
   }

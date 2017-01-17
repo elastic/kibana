@@ -47,7 +47,7 @@ export default React.createClass({
         key={row.id}
         sortData={row.id}
         model={row}
-        panelType={model.type}
+        panel={model}
         onClone={() => this.handleClone(row)}
         onAdd={handleAdd.bind(null, props, newSeriesFn)}
         onDelete={handleDelete.bind(null, props, row)}

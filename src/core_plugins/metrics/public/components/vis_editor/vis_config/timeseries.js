@@ -9,7 +9,7 @@ import ColorPicker from '../color_picker';
 import YesNo from 'plugins/metrics/components/yes_no';
 export default React.createClass({
   getInitialState() {
-    return { selectedTab: 'series' };
+    return { selectedTab: 'data' };
   },
 
   switchTab(selectedTab) {
@@ -31,7 +31,7 @@ export default React.createClass({
       { label: 'Bottom', value: 'bottom' }
     ];
     let view;
-    if (selectedTab === 'series') {
+    if (selectedTab === 'data') {
       view = (<SeriesEditor {...this.props}/>);
     } else {
       view = (
@@ -102,8 +102,8 @@ export default React.createClass({
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'series' && '-active' || ''}`}
-            onClick={e => this.switchTab('series')}>Series</div>
+          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={e => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={e => this.switchTab('options')}>Panel Options</div>
         </div>

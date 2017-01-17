@@ -93,7 +93,7 @@ module.exports = {
       }
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
-    if (bucket.unit) body.derivative.unit = /\d+\w/.test(bucket.unit) ? bucket.unit : bucketSize;
+    if (bucket.unit) body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
     return body;
   },
 

@@ -20,7 +20,7 @@ export default React.createClass({
   },
 
   getInitialState() {
-    return { selectedTab: 'series' };
+    return { selectedTab: 'data' };
   },
 
   switchTab(selectedTab) {
@@ -37,7 +37,7 @@ export default React.createClass({
       { label: 'Left', value: 'left' }
     ];
     let view;
-    if (selectedTab === 'series') {
+    if (selectedTab === 'data') {
       view = (<SeriesEditor limit={2} colorPicker={false} {...this.props}/>);
     } else {
       view = (
@@ -70,8 +70,8 @@ export default React.createClass({
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'series' && '-active' || ''}`}
-            onClick={e => this.switchTab('series')}>Series</div>
+          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={e => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={e => this.switchTab('options')}>Panel Options</div>
         </div>

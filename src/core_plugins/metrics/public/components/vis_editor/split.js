@@ -24,12 +24,13 @@ export default React.createClass({
   },
 
   render() {
-    const { model } = this.props;
+    const { model, panel } = this.props;
     const modeOptions = [
       { label: 'Everything', value: 'everything' },
       { label: 'Filter', value: 'filter' },
       { label: 'Terms', value: 'terms' }
     ];
+    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
     const modeSelect = (
       <div className="vis_editor__split-selects">
         <Select
@@ -64,6 +65,7 @@ export default React.createClass({
           <div className="vis_editor__item">
             <FieldSelect
               restrict="string"
+              IndexPattern={indexPattern}
               onChange={this.handleSelectChange('terms_field')}
               value={model.terms_field}
               fields={this.props.fields} />

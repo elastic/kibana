@@ -11,7 +11,7 @@ import createTextHandler from '../../../lib/create_text_handler';
 export default React.createClass({
 
   render() {
-    const { model, panelType, fields } = this.props;
+    const { model, panel, fields } = this.props;
 
     const modeOptions = [
       { label: 'Raw', value: 'raw' },
@@ -24,13 +24,15 @@ export default React.createClass({
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange, this.refs);
 
+    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
+
     return (
       <AggRow {...this.props}>
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panelType}
+            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>
@@ -40,6 +42,7 @@ export default React.createClass({
             fields={fields}
             type={model.type}
             restrict="numeric"
+            indexPattern={indexPattern}
             value={model.field}
             onChange={handleSelectChange('field')}/>
         </div>
