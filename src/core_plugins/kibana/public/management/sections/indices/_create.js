@@ -22,8 +22,7 @@ uiModules.get('apps/management')
 
   // this and child scopes will write pattern vars here
   const index = $scope.index = {
-    name: 'logstash-*',
-
+    name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
     notExpandable: false,

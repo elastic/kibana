@@ -117,11 +117,13 @@ uiModules
         }
       }
 
-      $scope.$watch(debounce(checkWidth, 100));
+      const debouncedCheckWidth = debounce(checkWidth, 100);
+      $scope.$watch(debouncedCheckWidth);
 
       // cleanup when the scope is destroyed
       $scope.$on('$destroy', function () {
         cleanUp();
+        debouncedCheckWidth.cancel();
         $scroller = $window = null;
       });
     }

@@ -8,6 +8,7 @@ import getComputedFields from 'ui/index_patterns/_get_computed_fields';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+
 export default function (Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);

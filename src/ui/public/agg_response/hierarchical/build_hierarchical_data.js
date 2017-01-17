@@ -18,7 +18,6 @@ export default function buildHierarchicalDataProvider(Private, Notifier) {
     // Create a refrenece to the buckets
     let buckets = vis.aggs.bySchemaGroup.buckets;
 
-
     // Find the metric so it's easier to reference.
     // TODO: Change this to support multiple metrics.
     const metric = vis.aggs.bySchemaGroup.metrics[0];
@@ -51,7 +50,7 @@ export default function buildHierarchicalDataProvider(Private, Notifier) {
     }
 
     const firstAgg = buckets[0];
-    const aggData = resp.aggregations[firstAgg.id];
+    const aggData = resp.aggregations ? resp.aggregations[firstAgg.id] : null;
 
     if (!firstAgg._next && firstAgg.schema.name === 'split') {
       notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');

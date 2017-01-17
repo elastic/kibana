@@ -10,7 +10,7 @@
       >
         <span
           ng-show="dash.id"
-          ng-bind="dash.lastSavedTitle"
+          ng-bind="getDashTitle()"
         ></span>
       </div>
 
@@ -54,10 +54,18 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div ng-show="!state.panels.length" class="text-center start-screen">
+  <div ng-show="showEditHelpText()" class="text-center start-screen">
     <h2>Ready to get started?</h2>
     <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize" title="Visualize">"Visualize"</a> tab to create your first visualization.</p>
   </div>
 
-  <dashboard-grid></dashboard-grid>
+  <dashboard-grid ng-if="!hasExpandedPanel()"></dashboard-grid>
+
+  <dashboard-panel ng-if="hasExpandedPanel()"
+                   panel="expandedPanel"
+                   is-full-screen-mode="!chrome.getVisible()"
+                   state="state"
+                   is-expanded="true"
+                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
+                   parent-ui-state="uiState">
 </dashboard-app>

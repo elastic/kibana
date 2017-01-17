@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import $ from 'jquery';
 import d3 from 'd3';
 import MapsConfigProvider from './lib/maps_config';
 import TileMapChartProvider from './visualizations/tile_map';
@@ -84,11 +85,20 @@ export default function MapsFactory(Private) {
     }
 
     draw() {
+      // Destroy the charts before they get removed from the DOM on the new
+      // layout render.
+      if(this.charts !== undefined) {
+        this.charts.forEach(chart => chart.destroy());
+      }
+
       this.layout.render();
-      // todo: title
       const self = this;
       this.charts = [];
-      d3.select(this.el).selectAll('.chart').each(function (chartData) {
+
+
+      let loadedCount = 0;
+      const chartSelection = d3.select(this.el).selectAll('.chart');
+      chartSelection.each(function (chartData) {
         const chart = new TileMapChart(self, this, chartData);
 
         self.activeEvents().forEach(function (event) {
@@ -97,6 +107,13 @@ export default function MapsFactory(Private) {
 
         self.charts.push(chart);
         chart.render();
+
+        chart.events.on('rendered', function () {
+          loadedCount++;
+          if (loadedCount === chartSelection.length) {
+            $(self.el).trigger('renderComplete');
+          }
+        });
       });
     }
 

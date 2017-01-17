@@ -21,8 +21,10 @@ module.exports = function dashboardContext(Private, getAppState) {
 
       if (filter.meta.disabled) return;
       if (filter.meta.negate) {
+        bool.must_not = bool.must_not || [];
         bool.must_not.push(esFilter.query || esFilter);
       } else {
+        bool.must = bool.must || [];
         bool.must.push(esFilter.query || esFilter);
       }
     });

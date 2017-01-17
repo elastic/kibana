@@ -71,18 +71,18 @@ class BaseOptimizer {
 
     const makeStyleLoader = preprocessor => {
       let loaders = [
-        loaderWithSourceMaps('css-loader')
+        loaderWithSourceMaps('css-loader?autoprefixer=false'),
+        {
+          name: 'postcss-loader',
+          query: {
+            config: require.resolve('./postcss.config')
+          }
+        },
       ];
 
       if (preprocessor) {
         loaders = [
           ...loaders,
-          {
-            name: 'postcss-loader',
-            query: {
-              config: require.resolve('./postcss.config')
-            }
-          },
           loaderWithSourceMaps(preprocessor)
         ];
       }
@@ -125,7 +125,6 @@ class BaseOptimizer {
       module: {
         loaders: [
           { test: /\.less$/, loader: makeStyleLoader('less-loader') },
-          { test: /\.scss$/, loader: makeStyleLoader('sass-loader') },
           { test: /\.css$/, loader: makeStyleLoader() },
           { test: /\.jade$/, loader: 'jade-loader' },
           { test: /\.json$/, loader: 'json-loader' },

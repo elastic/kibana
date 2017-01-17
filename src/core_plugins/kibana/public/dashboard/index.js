@@ -17,7 +17,10 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_dashboard_register';
+import { getTopNavConfig } from './get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
+import { DashboardConstants } from './dashboard_constants';
+
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
@@ -104,37 +107,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.topNavMenu = [{
-        key: 'new',
-        description: 'New Dashboard',
-        run: function () { kbnUrl.change('/dashboard', {}); },
-        testId: 'dashboardNewButton',
-      }, {
-        key: 'add',
-        description: 'Add a panel to the dashboard',
-        template: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
-        testId: 'dashboardAddPanelButton',
-      }, {
-        key: 'save',
-        description: 'Save Dashboard',
-        template: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
-        testId: 'dashboardSaveButton',
-      }, {
-        key: 'open',
-        description: 'Open Saved Dashboard',
-        template: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
-        testId: 'dashboardOpenButton',
-      }, {
-        key: 'share',
-        description: 'Share Dashboard',
-        template: require('plugins/kibana/dashboard/partials/share.html'),
-        testId: 'dashboardShareButton',
-      }, {
-        key: 'options',
-        description: 'Options',
-        template: require('plugins/kibana/dashboard/partials/options.html'),
-        testId: 'dashboardOptionsButton',
-      }];
+      $scope.topNavMenu = getTopNavConfig(kbnUrl);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -208,6 +181,17 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.addApplicationClass(theme);
       }
 
+      $scope.expandedPanel = null;
+      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
+      $scope.toggleExpandPanel = (panelIndex) => {
+        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
+          $scope.expandedPanel = null;
+        } else {
+          $scope.expandedPanel =
+            $scope.state.panels.find((panel) => panel.panelIndex === panelIndex);
+        }
+      };
+
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
         updateQueryOnRootSource();
@@ -216,6 +200,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // update data when filters fire fetch event
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+
+      $scope.getDashTitle = function () {
+        return dash.lastSavedTitle;
+      };
 
       $scope.newDashboard = function () {
         kbnUrl.change('/dashboard', {});
@@ -275,6 +263,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
       };
 
+      if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
+        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
+        kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+        kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
+      }
+
+      const addNewVis = function addNewVis() {
+        kbnUrl.change(`/visualize?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
+      };
+
       $scope.addSearch = function (hit) {
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
@@ -286,11 +284,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
+        addNewVis,
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
 
       init();
+
+      $scope.showEditHelpText = () => {
+        return !$scope.state.panels.length;
+      };
     }
   };
 });

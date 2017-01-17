@@ -3,7 +3,7 @@ const createDateAgg = require('./create_date_agg');
 
 module.exports =  function buildRequest(config, tlConfig) {
 
-  const bool = { must: [], must_not: [] };
+  const bool = { must: [] };
 
   const timeFilter = { range:{} };
   timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
@@ -11,7 +11,7 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter') || {};
+    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
   }
 
   const aggs = {

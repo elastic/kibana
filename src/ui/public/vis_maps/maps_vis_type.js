@@ -7,7 +7,6 @@ export default function MapsVisTypeFactory(Private) {
   const VisType = Private(VisVisTypeProvider);
   const MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
 
-
   _.class(MapsVisType).inherits(VisType);
   function MapsVisType(opts = {}) {
     MapsVisType.Super.call(this, opts);
