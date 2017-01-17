@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 
 import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar';
-import Editor from 'plugins/rework/components/editor/editor';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
 import PageControl from 'plugins/rework/components/page_control/page_control';
@@ -13,7 +12,10 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
+
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
+import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
+
 
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
@@ -63,7 +65,7 @@ const Workspace = React.createClass({
         <LeftSidebar>
           {!editor ? null : (
             <div className="rework--editor--left">
-              <Editor element={currentElement}></Editor>
+              <ElementEditor element={currentElement}></ElementEditor>
             </div>
           )}
           <div className="rework--editor-toggle--left">
