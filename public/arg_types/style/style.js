@@ -1,6 +1,7 @@
 import React from 'react';
 import ArgType from 'plugins/rework/arg_types/arg_type';
 import argTypes from 'plugins/rework/arg_types/arg_types';
+import transform from './transform';
 
 argTypes.push(new ArgType('style', {
   default: {},
@@ -10,6 +11,10 @@ argTypes.push(new ArgType('style', {
     return (<textarea className="form-control" onChange={storeValue} value={value}></textarea>);
   },
   resolve: (value) => {
-    return {border: '5px solid #000'};
+    try {
+      return transform(value);
+    } catch (e) {
+      return {};
+    }
   }
 }));
