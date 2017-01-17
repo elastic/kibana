@@ -94,7 +94,8 @@ module.exports = function (kibana) {
           order: 9001,
           url: '/app/kibana#/dev_tools',
           description: 'development tools',
-          icon: 'plugins/kibana/assets/wrench.svg'
+          icon: 'plugins/kibana/assets/wrench.svg',
+          linkToLastSubUrl: false
         }, {
           id: 'kibana:management',
           title: 'Management',
