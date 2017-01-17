@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
-import 'plugins/kibana/dashboard/services/get_object_loaders_for_dashboard.factory';
+import 'plugins/kibana/dashboard/services/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
@@ -10,12 +10,7 @@ import { loadSavedObject } from 'plugins/kibana/dashboard/components/panel/lib/l
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function ($injector) {
-  const Private = $injector.get('Private');
-  const Notifier = $injector.get('Notifier');
-  const getObjectLoadersForDashboard = $injector.get('getObjectLoadersForDashboard');
-  const savedVisualizations = $injector.get('savedVisualizations');
-  const savedSearches = $injector.get('savedSearches');
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
