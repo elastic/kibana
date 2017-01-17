@@ -124,10 +124,15 @@ $toolBarItsemSpacing: 10px;
   }
 }
 
+/**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
 @mixin bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 30px; /* 1 */
 }
 
 /**
