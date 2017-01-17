@@ -8,7 +8,7 @@
 export function loadSavedObject(loaders, panel) {
   const loader = loaders.find((loader) => loader.type === panel.type);
   if (!loader) {
-    throw `No loader for object of type ${panel.type}`;
+    throw new Error(`No loader for object of type ${panel.type}`);
   }
   return loader.get(panel.id)
     .then(savedObj => ({ savedObj, editUrl: loader.urlFor(panel.id) }));
