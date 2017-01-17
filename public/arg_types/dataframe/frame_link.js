@@ -9,7 +9,7 @@ const LinkFrame = React.createClass({
       <option key={key} value={key}>{value.name}</option>
     ));
     return (
-      <select value={value} onChange={select}>
+      <select className="form-control" value={value} onChange={select}>
         {options}
       </select>
     );
