@@ -23,15 +23,21 @@ module.exports = function (kibana) {
         }
       },
       hacks: [
-        // You must load the argTypes first
+        // Dataframes first
+        'plugins/rework/arg_types/dataframe/frame_sources/csv/csv',
+        'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion',
+
+        // Then argument types
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/style/style',
+        'plugins/rework/arg_types/dataframe/dataframe',
 
         // Then the elements that use them.
         // Thus, if an element plugin relies on an arg_type plugin,
         // it must declare that requirement in the "require" property above. Neat.
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
+        'plugins/rework/elements/table/table',
 
 
       ],
