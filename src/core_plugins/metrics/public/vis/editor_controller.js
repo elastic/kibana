@@ -27,6 +27,13 @@ app.controller('MetricsEditorController', (
     }
   });
 
+  $scope.editorTop = '70px';
+  $scope.$watch(() => {
+    return $('.toaster-container').length && $('.toaster-container').height() || 0;
+  }, newValue => {
+    $scope.editorTop = `${newValue + 70}px`;
+  });
+
   $scope.$on('$destory', globalNavUnsub);
 
   const debouncedFetch = _.debounce(() => {
