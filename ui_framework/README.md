@@ -3,7 +3,7 @@
 ## Development
 
 * Start development server `npm run uiFramework:start`.
-* View docs on `http://localhost:8080/`.
+* View docs on `http://localhost:8020/`.
 
 ## What is this?
 
