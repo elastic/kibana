@@ -7,8 +7,8 @@ function getParams(req, indexPattern, timeField) {
 
   const indexConstraints = {};
   indexConstraints[timeField] = {
-    max_value: { gte: to.toISOString() },
-    min_value: { lte: from.toISOString() }
+    max_value: { gte: from.toISOString() },
+    min_value: { lte: to.toISOString() }
   };
 
   return {
@@ -36,7 +36,6 @@ function calculateIndices(req, indexPattern = '*', timeField = '@timestamp') {
   const { server } = req;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const params = getParams(req, indexPattern, timeField);
-
   return callWithRequest(req, 'fieldStats', params)
     .then(handleResponse);
 }

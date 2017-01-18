@@ -5,11 +5,16 @@ import getBucketsPath from '../get_buckets_path';
 import basicAggs from '../../../public/lib/basic_aggs';
 import bucketTransform from '../bucket_transform';
 import unitToSeconds from '../unit_to_seconds';
+import calculateIndices from '../calculate_indices';
 
-export default (req, panel, indices) => {
-  const bodies = [];
-  panel.series.forEach(series => {
-    const { bucketSize, intervalString } = getBucketSize(req, panel);
+export default (req, panel, series) => {
+  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const timeField = series.override_index_pattern && series.series_time_field || panel.time_field;
+  const interval = series.override_index_pattern && series.series_interval || panel.interval;
+
+  return calculateIndices(req, indexPattern, timeField).then(indices => {
+    const bodies = [];
+    const { bucketSize, intervalString } = getBucketSize(req, interval);
     const globalFilters = req.payload.filters;
     const from = moment.utc(req.payload.timerange.min);
     const to = moment.utc(req.payload.timerange.max);
@@ -23,8 +28,6 @@ export default (req, panel, indices) => {
       }
     }
 
-
-    const { index_pattern, time_field, interval } = panel;
     const params = {
       index: indices,
       body: {
@@ -41,7 +44,7 @@ export default (req, panel, indices) => {
     };
 
     const timerange = { range: {} };
-    timerange.range[time_field] = {
+    timerange.range[timeField] = {
       gte: from.valueOf(),
       lte: to.valueOf() - (bucketSize * 1000),
       format: 'epoch_millis',
@@ -95,7 +98,7 @@ export default (req, panel, indices) => {
           filter: { range: {} },
           aggs: { SORT: fn(metric) }
         };
-        seriesAgg.aggs[sortAggKey].filter.range[time_field] = {
+        seriesAgg.aggs[sortAggKey].filter.range[timeField] = {
           gte: to.valueOf() - (bucketSize * 1500),
           lte: to.valueOf(),
           format: 'epoch_millis',
@@ -113,7 +116,7 @@ export default (req, panel, indices) => {
     seriesAgg.aggs = _.assign({}, seriesAgg.aggs || {}, {
       timeseries: {
         date_histogram: {
-          field: time_field,
+          field: timeField,
           interval: intervalString,
           min_doc_count: 0,
           extended_bounds: {
@@ -164,9 +167,6 @@ export default (req, panel, indices) => {
       ignoreUnavailable: true,
     });
     bodies.push(params.body);
+    return { body: bodies };
   });
-
-  return { body: bodies };
-
-
 };

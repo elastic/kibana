@@ -1,8 +1,7 @@
 import calculateAuto from '../../../public/visualizations/lib/calculate_auto';
 import moment from 'moment';
 import unitToSeconds from '../unit_to_seconds';
-export default (req, panel) => {
-  const { interval } = panel;
+export default (req, interval) => {
   const from = moment.utc(req.payload.timerange.min);
   const to = moment.utc(req.payload.timerange.max);
   const duration = moment.duration(to.valueOf() - from.valueOf(), 'ms');
