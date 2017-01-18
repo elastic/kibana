@@ -93,6 +93,15 @@ uiModules.get('kibana')
           })
           .catch(e => {
             this._settingsInitialized = true;
+
+            if (!e) {
+              e = new Error('Unkown error');
+            }
+
+            if (!(e instanceof Error)) {
+              e = new Error(e.data || `status ${e.statusText || e.status}`);
+            }
+
             this._error = new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
           })
           .then(() => {
