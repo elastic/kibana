@@ -18,7 +18,9 @@ module.exports = function (grunt) {
         '--config=ui_framework/doc_site/webpack.config.js',
         '--hot ',
         '--inline',
-        '--content-base=ui_framework/doc_site/build'
+        '--content-base=ui_framework/doc_site/build',
+        '--host=0.0.0.0',
+        '--port=8020',
       ],
       opts: { stdio: 'inherit' }
     };
