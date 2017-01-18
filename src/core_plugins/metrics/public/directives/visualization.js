@@ -6,6 +6,7 @@ import Visualization from '../components/vis_editor/visualization';
 import addScope from '../lib/add_scope';
 import modules from 'ui/modules';
 import moment from 'moment';
+import createBrushHandler from '../lib/create_brush_handler';
 const app = modules.get('apps/metrics/directives');
 app.directive('metricsVisualization', (timefilter) => {
   return {
@@ -13,11 +14,7 @@ app.directive('metricsVisualization', (timefilter) => {
     link: ($scope, $el, $attrs) => {
       const addToState = ['model', 'visData', 'backgroundColor'];
       const Component = addScope(Visualization, $scope, addToState);
-      const handleBrush = (ranges) => {
-        timefilter.time.from = moment(ranges.xaxis.from).toISOString();
-        timefilter.time.to = moment(ranges.xaxis.to).toISOString();
-        timefilter.time.mode = 'absolute';
-      };
+      const handleBrush = createBrushHandler($scope, timefilter);
       render(<Component onBrush={handleBrush} className="dashboard__visualization"/>, $el[0]);
       $scope.$on('$destroy', () => unmountComponentAtNode($el[0]));
 

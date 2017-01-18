@@ -38,14 +38,6 @@ export default React.createClass({
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
-    // if (dashboard.doc.background_color) {
-    //   style.backgroundColor = dashboard.doc.background_color;
-    // }
-    // if (dashboard.doc.panel_margin) {
-    //   style.padding = dashboard.doc.panel_margin;
-    // }
-    // const visBackgroundColor = dashboard.doc.default_panel_color ||
-    //   dashboard.doc.background_color;
     const visBackgroundColor = '#FFF';
     return (
       <div>
