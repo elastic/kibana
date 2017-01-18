@@ -13,12 +13,14 @@ import {
   handleDelete,
   handleChange
 } from 'plugins/metrics/lib/collection_actions';
+import seriesChangeHandler from 'plugins/metrics/components/vis_editor/lib/series_change_handler';
 
 export default React.createClass({
 
   renderRow(row, index, items) {
     const { props } = this;
     const { panel, model, fields } = props;
+    const changeHandler = seriesChangeHandler(props, items);
     return (
       <Agg
         key={row.id}
@@ -28,7 +30,7 @@ export default React.createClass({
         model={row}
         onAdd={handleAdd.bind(null, props, newMetricAggFn)}
         onDelete={handleDelete.bind(null, props, row)}
-        onChange={handleChange.bind(null, props)}
+        onChange={changeHandler}
         disableDelete={items.length < 2}
         fields={fields}/>
     );

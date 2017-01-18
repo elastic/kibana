@@ -12,6 +12,7 @@ import createSelectHandler from 'plugins/metrics/lib/create_select_handler';
 import createTextHandler from 'plugins/metrics/lib/create_text_handler';
 import createNumberHandler from 'plugins/metrics/lib/create_number_handler';
 import Split from 'plugins/metrics/components/vis_editor/split';
+import seriesChangeHandler from 'plugins/metrics/components/vis_editor/lib/series_change_handler';
 
 import {
   handleAdd,
@@ -24,6 +25,7 @@ export default React.createClass({
   renderRow(row, index, items) {
     const { props } = this;
     const { panel, model, fields } = props;
+    const changeHandler = seriesChangeHandler(props, items);
     return (
       <Agg
         key={row.id}
@@ -33,7 +35,7 @@ export default React.createClass({
         model={row}
         onAdd={handleAdd.bind(null, props, newMetricAggFn)}
         onDelete={handleDelete.bind(null, props, row)}
-        onChange={handleChange.bind(null, props)}
+        onChange={changeHandler}
         disableDelete={items.length < 2}
         fields={fields}/>
     );
