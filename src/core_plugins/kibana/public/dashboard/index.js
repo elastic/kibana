@@ -202,7 +202,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
       $scope.getDashTitle = function () {
-        return dash.lastSavedTitle;
+        return dash.lastSavedTitle || `${dash.title} (unsaved)`;
       };
 
       $scope.newDashboard = function () {
