@@ -1,12 +1,14 @@
 <kbn-management-app section="kibana" class="kuiView">
   <kbn-management-objects class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
-    <div class="kuiViewContentItem kuiSubHeader">
-      <h1 class="kuiTitle">
-        Edit Saved Objects
-      </h1>
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit Saved Objects
+        </h1>
+      </div>
 
-      <div>
+      <div class="kuiBarSection">
         <button
           class="kuiButton kuiButton--basic kuiButton--iconText"
           ng-click="exportAll()"
