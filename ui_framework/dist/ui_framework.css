@@ -8,6 +8,10 @@
  * 2. Fit MicroButton inside of Table rows without pushing them taller.
  */
 /**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
+/**
  * 1. Put 10px of space between each child.
  * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
  *    wouldn't use the Bar in the first place.
@@ -33,7 +37,9 @@ body {
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
-          justify-content: space-between; }
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */ }
 
 .kuiBarSection {
   display: -webkit-box;
@@ -140,7 +146,8 @@ body {
   color: #FFFFFF;
   background-color: #6EADC1; }
   .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:disabled {
     background-color: #B6D6E0; }
@@ -148,14 +155,15 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #FFFFFF;
-  background-color: #D76051;
-  /**
-   * 1. Override Bootstrap.
-   */ }
+  background-color: #D76051; }
   .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #A52E1F; }
   .kuiButton--danger:disabled {
     background-color: #efc0ba; }
@@ -169,14 +177,19 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--hollow {
   color: #3CAED2;
   background-color: transparent; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
-    color: #006E8A;
+    color: #006E8A !important;
+    /* 1 */
     text-decoration: underline; }
   .kuiButton--hollow:disabled {
-    color: #dddddd; }
+    color: #dddddd !important;
+    /* 1 */ }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -1082,6 +1095,8 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -1159,6 +1174,8 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
