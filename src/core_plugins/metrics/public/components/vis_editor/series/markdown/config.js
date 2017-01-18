@@ -3,6 +3,8 @@ import Select from 'react-select';
 import DataFormatPicker from 'plugins/metrics/components/vis_editor/data_format_picker';
 import createSelectHandler from 'plugins/metrics/lib/create_select_handler';
 import createTextHandler from 'plugins/metrics/lib/create_text_handler';
+import YesNo from 'plugins/metrics/components/yes_no';
+import IndexPattern from 'plugins/metrics/components/vis_editor/index_pattern';
 
 export default React.createClass({
   render() {
@@ -30,6 +32,19 @@ export default React.createClass({
               ref="offset_time"
               onChange={handleTextChange('offset_time')}
               defaultValue={model.offset_time}/>
+          </div>
+          <div className="vis_editor__series_config-row">
+            <div className="vis_editor__label">Override Index Pattern</div>
+            <YesNo
+              value={model.override_index_pattern}
+              name="override_index_pattern"
+              onChange={this.props.onChange}/>
+            <IndexPattern
+              {...this.props}
+              prefix="series_"
+              className="vis_editor__row_item vis_editor__row"
+              disabled={!model.override_index_pattern}
+              with-interval={true} />
           </div>
         </div>
       </div>
