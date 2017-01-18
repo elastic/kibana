@@ -38,6 +38,7 @@ module.factory('confirmModal', function ($rootScope, $compile) {
 
     const modalInstance = $compile(template)(confirmScope);
     modalPopover = new ModalOverlay(modalInstance);
+    modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
 
     function destroy() {
       modalPopover.destroy();
