@@ -8,6 +8,7 @@ import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
 import Tooltip from 'plugins/metrics/components/tooltip';
 import Split from 'plugins/metrics/components/vis_editor/split';
+import { isBasicAgg } from 'plugins/metrics/components/vis_editor/lib/agg_lookup';
 import {
   handleAdd,
   handleDelete,
@@ -19,6 +20,22 @@ export default React.createClass({
   renderRow(row, index, items) {
     const { props } = this;
     const { model, panel, fields } = props;
+    const changeHandler = doc => {
+      // If we only have one sibling and the user changes to a pipeline
+      // agg we are going to add the pipeline instead of changing the
+      // current item.
+      if (items.length === 1 && !isBasicAgg(doc)) {
+        handleAdd.call(null, props, () => {
+          const metric = newMetricAggFn();
+          metric.type = doc.type;
+          const incompatPipelines = ['calculation', 'series_agg'];
+          if (!_.contains(incompatPipelines, doc.type)) metric.field = doc.id;
+          return metric;
+        });
+      } else {
+        handleChange.call(null, props, doc);
+      }
+    };
     return (
       <Agg
         key={row.id}
@@ -28,7 +45,7 @@ export default React.createClass({
         model={row}
         onAdd={handleAdd.bind(null, props, newMetricAggFn)}
         onDelete={handleDelete.bind(null, props, row)}
-        onChange={handleChange.bind(null, props)}
+        onChange={changeHandler}
         disableDelete={items.length < 2}
         fields={fields}/>
     );

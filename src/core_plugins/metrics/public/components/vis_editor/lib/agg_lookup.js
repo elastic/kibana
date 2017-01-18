@@ -46,18 +46,16 @@ const byType = {
   top_10: _.omit(lookup, pipeline)
 };
 
-function isBasicAgg(item) {
+export function isBasicAgg(item) {
   return _.includes(Object.keys(byType.top_10), item.type);
 }
 
 export function createOptions(type = '_all', siblings = []) {
   let aggs = byType[type];
   if (!aggs)  aggs = byType._all;
-  let enablePipelines = siblings.some(isBasicAgg);
-  if (siblings.length <= 1) enablePipelines = false;
   return _(aggs)
     .map((label, value) => {
-      const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
+      const disabled = false;
       return { label, value, disabled };
     })
     .sortBy('label')
