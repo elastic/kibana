@@ -1,11 +1,12 @@
 import angular from 'angular';
-import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'ui/directives/confirm_click';
 import 'plugins/kibana/discover/index';
+import sinon from 'auto-release-sinon';
 
+let $window;
 
 let $parentScope;
 
@@ -13,13 +14,17 @@ let $scope;
 
 let $elem;
 
-let init = function (text) {
+const init = function (confirm) {
   // Load the application
-  ngMock.module('kibana');
+  ngMock.module('kibana', function ($provide) {
+    $window = {
+      confirm: sinon.stub().returns(confirm)
+    };
+    $provide.value('$window', $window);
+  });
 
   // Create the scope
   ngMock.inject(function ($rootScope, $compile) {
-
     // Give us a scope
     $parentScope = $rootScope;
 
@@ -71,21 +76,11 @@ describe('confirmClick directive', function () {
 
 
   describe('confirmed', function () {
-    let confirmed;
-
-    beforeEach(function () {
-      init();
-      confirmed = sinon.stub(window, 'confirm');
-      confirmed.returns(true);
-    });
-
-    afterEach(function () {
-      window.confirm.restore();
-    });
+    beforeEach(() => init(true));
 
     it('should trigger window.confirm when clicked', function (done) {
       $elem.click();
-      expect(confirmed.called).to.be(true);
+      expect($window.confirm.called).to.be(true);
       done();
     });
 
@@ -98,17 +93,7 @@ describe('confirmClick directive', function () {
   });
 
   describe('not confirmed', function () {
-    let confirmed;
-
-    beforeEach(function () {
-      init();
-      confirmed = sinon.stub(window, 'confirm');
-      confirmed.returns(false);
-    });
-
-    afterEach(function () {
-      window.confirm.restore();
-    });
+    beforeEach(() => init(false));
 
     it('should not run the click function when canceled', function (done) {
       $elem.click();
