@@ -107,6 +107,7 @@ $toolBarItsemSpacing: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 30px; /* 1 */
 }
 
 /**

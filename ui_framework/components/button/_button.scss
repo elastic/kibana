@@ -73,7 +73,7 @@
 
   &:hover:enabled,
   &:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important; /* 1 */
     background-color: #006E8A;
   }
 
@@ -86,13 +86,16 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051;
 
   &:hover:enabled,
   &:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important; /* 1 */
     background-color: #A52E1F;
   }
 
@@ -100,11 +103,9 @@
     background-color: #efc0ba;
   }
 
-  /**
-   * 1. Override Bootstrap.
-   */
   &:focus {
     @include focus(#ff523c);
     color: #FFFFFF !important; /* 1 */
   }
 }
+
