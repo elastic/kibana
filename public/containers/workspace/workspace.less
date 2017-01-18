@@ -4,8 +4,17 @@
 @rework--workspace--background: @kibanaGray6;
 @rework--border: 1px solid @kibanaGray4;
 
+.rework--application {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.rework--header {
+  height: 70px;
+}
+
 .rework--workspace {
-  padding-left: 1px;
   flex-grow: 1;
   background: @rework--workspace--background;
   display: flex;
@@ -88,6 +97,7 @@
   }
 
   .rework--editor--left {
+    width: 400px;
     display: flex;
     flex-grow: 1;
     background-color: @rework--editor--background;

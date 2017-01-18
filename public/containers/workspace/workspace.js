@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
 
+import TopNav from 'plugins/rework/components/top_nav/top_nav';
 import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
@@ -61,63 +62,68 @@ const Workspace = React.createClass({
     // TODO: This entire thing can be broken up into smaller containers.
     // But for now, its actually *more* readable this way.
     return (
-      <div className="rework--workspace">
-        <LeftSidebar>
+      <div className="rework--application">
+        <div className="rework--header"></div>
+        <div className="rework--workspace">
 
-          {!editor ? null : (
-            <div className="rework--editor--left">
-              <ElementEditor element={currentElement}></ElementEditor>
+          <LeftSidebar>
+
+            {!editor ? null : (
+              <div className="rework--editor--left">
+                <ElementEditor element={currentElement}></ElementEditor>
+              </div>
+            )}
+
+            <div className="rework--editor-toggle--left">
+              <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
             </div>
-          )}
+          </LeftSidebar>
 
-          <div className="rework--editor-toggle--left">
-            <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
-          </div>
-        </LeftSidebar>
+          <Centered onMouseDown={this.select(null)}>
+            <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
+            <Workpad workpad={workpad}>
+                <Stack top={workpad.page}>
+                  {workpad.pages.map((pageId) => {
+                    const page = pages[pageId];
+                    return (
+                      <Page key={pageId} page={page}>
+                        {page.elements.map((elementId) => {
+                          const element = elements[elementId];
+                          const selected = elementId === selectedElement ? true : false;
+                          const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
-        <Centered onMouseDown={this.select(null)}>
-          <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
-          <Workpad workpad={workpad}>
-              <Stack top={workpad.page}>
-                {workpad.pages.map((pageId) => {
-                  const page = pages[pageId];
-                  return (
-                    <Page key={pageId} page={page}>
-                      {page.elements.map((elementId) => {
-                        const element = elements[elementId];
-                        const selected = elementId === selectedElement ? true : false;
-                        const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
+                          // This is really gross because it doesn't actually wrap the element.
+                          // Rather you end up with a bunch of 0 height divs stacked at the top
+                          // of the page. Ew.
+                          const wrapperClasses = classnames({
+                            'rework--workspace-element-header': true,
+                            'rework--workspace-element-header-selected': selected,
+                          });
+                          return (
+                            <div key={elementId} className={wrapperClasses}>
+                              <ElementWrapper id={elementId} args={element.args}>
+                                <Positionable
+                                  position={position}
+                                  move={resizeMove(elementId)}
+                                  resize={resizeMove(elementId)}
+                                  rotate={rotate(elementId)}>
+                                    <Element type={element.type} args={resolvedArgs[elementId]}></Element>
+                                </Positionable>
+                              </ElementWrapper>
 
-                        // This is really gross because it doesn't actually wrap the element.
-                        // Rather you end up with a bunch of 0 height divs stacked at the top
-                        // of the page. Ew.
-                        const wrapperClasses = classnames({
-                          'rework--workspace-element-header': true,
-                          'rework--workspace-element-header-selected': selected,
-                        });
-                        return (
-                          <div key={elementId} className={wrapperClasses}>
-                            <ElementWrapper id={elementId} args={element.args}>
-                              <Positionable
-                                position={position}
-                                move={resizeMove(elementId)}
-                                resize={resizeMove(elementId)}
-                                rotate={rotate(elementId)}>
-                                  <Element type={element.type} args={resolvedArgs[elementId]}></Element>
-                              </Positionable>
-                            </ElementWrapper>
-
-                          </div>
-                        );
-                      })}
-                    </Page>
-                  );
-                })}
-              </Stack>
-          </Workpad>
-          <PageControl direction='next' handler={this.do(pageNext)}></PageControl>
-        </Centered>
+                            </div>
+                          );
+                        })}
+                      </Page>
+                    );
+                  })}
+                </Stack>
+            </Workpad>
+            <PageControl direction='next' handler={this.do(pageNext)}></PageControl>
+          </Centered>
+        </div>
       </div>
+
     );
   }
 });
