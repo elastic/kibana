@@ -106,7 +106,7 @@ export default React.createClass({
             <div className={metricsClassName}
               onClick={e => this.props.switchTab('metrics')}>Metrics</div>
             <div className={optionsClassname}
-              onClick={e => this.props.switchTab('options')}>Series Options</div>
+              onClick={e => this.props.switchTab('options')}>Options</div>
           </div>
           {seriesBody}
         </div>
