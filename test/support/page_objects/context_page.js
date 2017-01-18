@@ -28,6 +28,10 @@ export default class DiscoverPage {
     await this.remote.refresh();
   }
 
+  waitForDocTable() {
+    return PageObjects.common.try(() => PageObjects.common.findTestSubject('docTable'));
+  }
+
   async getDocTableHeaderTexts() {
     const tableHeaderElements = await this.remote.findAllByCssSelector(
       '[data-test-subj="docTable"] thead th'
@@ -37,5 +41,27 @@ export default class DiscoverPage {
     ));
 
     return tableHeaderTexts;
+  }
+
+  getDocTableBodyRows() {
+    return this.remote.findAllByCssSelector(
+      '[data-test-subj="docTableRow"]'
+    );
+  }
+
+  getPredecessorCountPicker() {
+    return PageObjects.common.findTestSubject('predecessorCountPicker');
+  }
+
+  getSuccessorCountPicker() {
+    return PageObjects.common.findTestSubject('successorCountPicker');
+  }
+
+  getPredecessorLoadMoreButton() {
+    return PageObjects.common.findTestSubject('predecessorLoadMoreButton');
+  }
+
+  getSuccessorLoadMoreButton() {
+    return PageObjects.common.findTestSubject('predecessorLoadMoreButton');
   }
 }

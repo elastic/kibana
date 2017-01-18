@@ -1,9 +1,10 @@
 
 import {
   bdd,
+  defaultTimeout,
+  elasticDump,
   remote,
   scenarioManager,
-  defaultTimeout
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -14,6 +15,7 @@ bdd.describe('context app', function () {
   bdd.before(async function () {
     await PageObjects.remote.setWindowSize(1200,800);
     await scenarioManager.loadIfEmpty('logstashFunctional');
+    await elasticDump.elasticLoad('visualize','.kibana');
     await PageObjects.common.navigateToApp('discover');
   });
 

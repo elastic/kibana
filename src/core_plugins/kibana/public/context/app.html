@@ -21,6 +21,7 @@
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
       <context-loading-button
+        data-test-subj="predecessorLoadMoreButton"
         disabled="contextApp.derivedState.isLoadingPredecessorRows()"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
@@ -34,6 +35,7 @@
       <div>Limit to</div>
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
+        data-test-subj="predecessorCountPicker"
         set-count="contextApp.actions.fetchGivenPredecessorRows"
       ></context-size-picker>
       <div>newer entries</div>
@@ -70,6 +72,7 @@
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
       <context-loading-button
+        data-test-subj="successorLoadMoreButton"
         disabled="contextApp.derivedState.isLoadingSuccessorRows()"
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
@@ -83,6 +86,7 @@
       <div>Limit to</div>
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
+        data-test-subj="successorCountPicker"
         set-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
       <div>older entries</div>
