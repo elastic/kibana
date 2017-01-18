@@ -2,7 +2,6 @@ import _ from 'lodash';
 
 import { fetchAnchor } from './api/anchor';
 import { fetchPredecessors, fetchSuccessors } from './api/context';
-import { createSelector } from './utils/selectors';
 import { QueryParameterActionsProvider } from './query_parameters';
 
 
@@ -94,6 +93,14 @@ function QueryActionsProvider($q, es, Private) {
     return fetchSuccessorRows(state)();
   };
 
+  const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) => (
+    state.rows.all = [
+      ...(predecessorRows || []),
+      ...(anchorRow ? [anchorRow] : []),
+      ...(successorRows || []),
+    ]
+  );
+
   return {
     fetchAllRows,
     fetchAllRowsWithNewQueryParameters,
@@ -104,40 +111,10 @@ function QueryActionsProvider($q, es, Private) {
     fetchMoreSuccessorRows,
     fetchPredecessorRows,
     fetchSuccessorRows,
+    setAllRows,
   };
 }
 
-const selectIsLoadingAnchorRow = createSelector([
-  (state) => state.loadingStatus.anchor,
-], (anchorLoadingStatus) => (
-  _.includes(['loading', 'uninitialized'], anchorLoadingStatus)
-));
-
-const selectIsLoadingPredecessorRows = createSelector([
-  (state) => state.loadingStatus.predecessors,
-], (predecessorsLoadingStatus) => (
-  _.includes(['loading', 'uninitialized'], predecessorsLoadingStatus)
-));
-
-const selectIsLoadingSuccessorRows = createSelector([
-  (state) => state.loadingStatus.successors,
-], (successorsLoadingStatus) => (
-  _.includes(['loading', 'uninitialized'], successorsLoadingStatus)
-));
-
-const selectRows = createSelector([
-  (state) => state.rows.predecessors,
-  (state) => state.rows.anchor,
-  (state) => state.rows.successors,
-], (predecessorRows, anchorRow, successorRows) => (
-  [...predecessorRows, ...(anchorRow ? [anchorRow] : []), ...successorRows]
-));
-
-
 export {
   QueryActionsProvider,
-  selectIsLoadingAnchorRow,
-  selectIsLoadingPredecessorRows,
-  selectIsLoadingSuccessorRows,
-  selectRows,
 };

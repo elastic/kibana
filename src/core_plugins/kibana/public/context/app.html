@@ -22,10 +22,9 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="predecessorLoadMoreButton"
-        disabled="contextApp.derivedState.isLoadingPredecessorRows()"
+        disabled="contextApp.state.loadingStatus.predecessors !== 'loaded'"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
-        ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
       >
         Load newer entries
       </context-loading-button>
@@ -44,7 +43,7 @@
 
   <!-- Loading feedback -->
   <div
-    ng-if="contextApp.derivedState.isLoadingAnchorRow()"
+    ng-if="contextApp.state.loadingStatus.anchor !== 'loaded'"
     class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
   >
     <div class="kuiLoadingItems">
@@ -54,12 +53,12 @@
 
   <!-- Table -->
   <div
-    ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
+    ng-if="contextApp.state.loadingStatus.anchor === 'loaded'"
     class="kuiPanel kuiVerticalRhythm"
   >
     <div class="discover-table" fixed-scroll>
       <doc-table
-        hits="contextApp.derivedState.rows()"
+        hits="contextApp.state.rows.all"
         index-pattern="contextApp.state.queryParameters.indexPattern"
         sorting="contextApp.state.queryParameters.sort"
         columns="contextApp.state.queryParameters.columns"
@@ -73,10 +72,9 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="successorLoadMoreButton"
-        disabled="contextApp.derivedState.isLoadingSuccessorRows()"
+        disabled="contextApp.state.loadingStatus.successors !== 'loaded'"
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
-        ng-if="!contextApp.derivedState.isLoadingAnchorRow()"
       >
         Load older entries
       </context-loading-button>

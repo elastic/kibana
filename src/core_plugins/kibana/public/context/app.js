@@ -4,19 +4,12 @@ import uiModules from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
 import './components/size_picker/size_picker';
-import { bindSelectors } from './utils/selectors';
 import {
   createInitialQueryParametersState,
   QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
 } from './query_parameters';
-import {
-  QueryActionsProvider,
-  selectIsLoadingAnchorRow,
-  selectIsLoadingPredecessorRows,
-  selectIsLoadingSuccessorRows,
-  selectRows,
-} from './query';
+import { QueryActionsProvider } from './query';
 
 const module = uiModules.get('apps/context', [
   'kibana',
@@ -52,12 +45,11 @@ function ContextAppController($scope, Private) {
     ...queryActions,
   }, (action) => (...args) => action(this.state)(...args));
 
-  this.derivedState = bindSelectors({
-    isLoadingAnchorRow: selectIsLoadingAnchorRow,
-    isLoadingPredecessorRows: selectIsLoadingPredecessorRows,
-    isLoadingSuccessorRows: selectIsLoadingSuccessorRows,
-    rows: selectRows,
-  }, () => this.state);
+  $scope.$watchGroup([
+    () => this.state.rows.predecessors,
+    () => this.state.rows.anchor,
+    () => this.state.rows.successors,
+  ], _.spread(this.actions.setAllRows));
 
   /**
    * Sync query parameters to arguments
@@ -84,6 +76,7 @@ function createInitialState() {
   return {
     queryParameters: createInitialQueryParametersState(),
     rows: {
+      all: [],
       anchor: null,
       predecessors: [],
       successors: [],
