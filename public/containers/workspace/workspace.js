@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 
 import TopNav from 'plugins/rework/components/top_nav/top_nav';
-import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar';
+import DropDown from 'plugins/rework/components/drop_down/drop_down';
+import Sidebar from 'plugins/rework/components/sidebar/sidebar';
+
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
 import PageControl from 'plugins/rework/components/page_control/page_control';
@@ -13,7 +15,7 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
-
+import DataframeDropdown from 'plugins/rework/containers/dataframe_dropdown/dataframe_dropdown';
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
 
@@ -55,7 +57,7 @@ const Workspace = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const  {workpad, pages, elements, dataframes, editor, resolvedArgs, selectedElement} = this.props;
+    const  {workpad, pages, elements, dataframes, editor, elementCache, selectedElement} = this.props;
     const {resizeMove, rotate, select} = this;
     const currentElement = elements[selectedElement];
 
@@ -63,11 +65,21 @@ const Workspace = React.createClass({
     // But for now, its actually *more* readable this way.
     return (
       <div className="rework--application">
-        <div className="rework--header"></div>
+        <TopNav>
+          <div className="rework--top-nav-top">
+            <span className="rework--workpad-name">{workpad.name}</span>
+          </div>
+          <div className="rework--top-nav-bottom">
+            <a className="fa fa-database rework--nav-button"></a>
+          </div>
+        </TopNav>
+        <DropDown>
+          <DataframeDropdown></DataframeDropdown>
+        </DropDown>
+
         <div className="rework--workspace">
 
-          <LeftSidebar>
-
+          <Sidebar position="left">
             {!editor ? null : (
               <div className="rework--editor--left">
                 <ElementEditor element={currentElement}></ElementEditor>
@@ -77,7 +89,10 @@ const Workspace = React.createClass({
             <div className="rework--editor-toggle--left">
               <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
             </div>
-          </LeftSidebar>
+            <div className="rework--editor-toggle--left">
+              <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
+            </div>
+          </Sidebar>
 
           <Centered onMouseDown={this.select(null)}>
             <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
@@ -107,7 +122,7 @@ const Workspace = React.createClass({
                                   move={resizeMove(elementId)}
                                   resize={resizeMove(elementId)}
                                   rotate={rotate(elementId)}>
-                                    <Element type={element.type} args={resolvedArgs[elementId]}></Element>
+                                    <Element type={element.type} args={elementCache[elementId]}></Element>
                                 </Positionable>
                               </ElementWrapper>
 
@@ -134,7 +149,7 @@ function mapStateToProps(state) {
     workpad: state.persistent.workpad,
     pages: state.persistent.pages,
     elements: state.persistent.elements,
-    resolvedArgs: state.transient.resolvedArgs,
+    elementCache: state.transient.elementCache,
     selectedElement: state.transient.selectedElement
   };
 }

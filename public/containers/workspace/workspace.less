@@ -1,6 +1,6 @@
 @import (reference) "~plugins/rework/main.less";
 
-@rework--editor--background: #eee;
+@rework--editor--background: #f1f1f1;
 @rework--workspace--background: @kibanaGray6;
 @rework--border: 1px solid @kibanaGray4;
 
@@ -10,8 +10,10 @@
   flex-grow: 1;
 }
 
-.rework--header {
-  height: 70px;
+.rework--dropdown {
+  background-color: @rework--editor--background;
+  border-bottom: @rework--border;
+  max-height: 400px;
 }
 
 .rework--workspace {
@@ -85,16 +87,20 @@
     }
   }
 
-  .rework--editor-toggle--left .rework--editor-toggle {
+  .rework--editor-toggle--left {
     display: block;
     position: absolute;
     background-color: @rework--editor--background;
-    width: 24px;
     right: -23px;
-    padding: 25px 8px 24px 8px;
-    color: @text-color;
     border-right: @rework--border;
     border-bottom: @rework--border;
+
+    a {
+      display: block;
+      padding: 25px 8px 24px 8px;
+      width: 24px;
+      color: @text-color;
+    }
   }
 
   .rework--editor--left {
