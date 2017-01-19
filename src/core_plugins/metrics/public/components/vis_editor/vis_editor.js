@@ -3,7 +3,7 @@ import _ from 'lodash';
 import SeriesEditor from './series_editor';
 import VisEditorVisualization from './vis_editor_visualization';
 import VisPicker from './vis_picker';
-import VisConfig from './vis_config';
+import PanelConfig from './panel_config';
 import replaceVars from '../../lib/replace_vars';
 export default React.createClass({
 
@@ -23,7 +23,7 @@ export default React.createClass({
           <VisEditorVisualization
             {...this.props}
             onChange={this.handleChange} />
-          <VisConfig
+          <PanelConfig
             {...this.props}
             onChange={this.handleChange} />
         </div>
