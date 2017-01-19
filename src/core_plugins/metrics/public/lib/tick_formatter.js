@@ -1,4 +1,4 @@
-import numeral from 'numeral';
+import numeral from '@spalger/numeral';
 import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
 
@@ -25,7 +25,7 @@ export default (format = '0,0.[00]', template = '{{value}}') => {
     try {
       return render({ value });
     } catch (e) {
-      return value;
+      return String(value);
     }
   };
 };

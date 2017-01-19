@@ -1,7 +1,6 @@
 import getLastValue from './get_last_value';
 import flot from './flot';
 import events from './events';
-import calculateAuto from './calculate_auto';
 
 import Timeseries from './timeseries';
 import Metric from './metric';
@@ -22,5 +21,4 @@ export default {
   getLastValue,
   flot,
   events,
-  calculateAuto,
 };

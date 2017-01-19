@@ -1,4 +1,4 @@
-import calculateAuto from '../../../public/visualizations/lib/calculate_auto';
+import calculateAuto from '../calculate_auto';
 import moment from 'moment';
 import unitToSeconds from '../unit_to_seconds';
 export default (req, interval) => {

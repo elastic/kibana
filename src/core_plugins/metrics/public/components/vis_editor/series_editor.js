@@ -35,7 +35,7 @@ export default React.createClass({
   },
 
   handleClone(series) {
-    const newSeries = reIdSeries(_.cloneDeep(series));
+    const newSeries = reIdSeries(series);
     handleAdd.call(null, this.props, () => newSeries);
   },
 

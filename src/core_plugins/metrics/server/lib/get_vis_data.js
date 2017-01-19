@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
 import Color from 'color';
-import calculateAuto from '../../public/visualizations/lib/calculate_auto';
 import calculateLabel from '../../public/components/vis_editor/lib/calculate_label';
 import basicAggs from '../../public/lib/basic_aggs';
 import bucketTransform from './bucket_transform';
