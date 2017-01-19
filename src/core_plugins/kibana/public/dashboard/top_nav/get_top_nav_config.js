@@ -36,7 +36,7 @@ function getAddConfig() {
     key: 'add',
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
-    template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+    template: require('plugins/kibana/dashboard/top_nav/add_visualization.html')
   };
 }
 
@@ -48,7 +48,7 @@ function getSaveConfig() {
     key: 'save',
     description: 'Save Dashboard',
     testId: 'dashboardSaveButton',
-    template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
+    template: require('plugins/kibana/dashboard/top_nav/save_dashboard.html')
   };
 }
 
@@ -60,7 +60,7 @@ function getOpenConfig() {
     key: 'open',
     description: 'Open Saved Dashboard',
     testId: 'dashboardOpenButton',
-    template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+    template: require('plugins/kibana/dashboard/top_nav/open_dashboard.html')
   };
 }
 
@@ -72,7 +72,7 @@ function getShareConfig() {
     key: 'share',
     description: 'Share Dashboard',
     testId: 'dashboardShareButton',
-    template: require('plugins/kibana/dashboard/partials/share.html')
+    template: require('plugins/kibana/dashboard/top_nav/share.html')
   };
 }
 
@@ -84,6 +84,6 @@ function getOptionsConfig() {
     key: 'options',
     description: 'Options',
     testId: 'dashboardOptionsButton',
-    template: require('plugins/kibana/dashboard/partials/options.html')
+    template: require('plugins/kibana/dashboard/top_nav/options.html')
   };
 }

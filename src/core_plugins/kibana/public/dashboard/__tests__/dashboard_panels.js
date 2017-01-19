@@ -2,7 +2,7 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/dashboard/services/_saved_dashboard';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../components/panel/lib/panel_state';
+import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../panels/panel_state';
 
 describe('dashboard panels', function () {
   let $scope;

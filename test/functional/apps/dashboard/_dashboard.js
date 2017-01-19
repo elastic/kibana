@@ -2,7 +2,7 @@
 import expect from 'expect.js';
 import {
   DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
-} from '../../../../src/core_plugins/kibana/public/dashboard/components/panel/lib/panel_state';
+} from '../../../../src/core_plugins/kibana/public/dashboard/panels/panel_state';
 
 import {
   bdd,
