@@ -1,22 +1,52 @@
+import { DashboardViewMode } from './dashboard_view_mode';
 
 /**
+ * @param {DashboardMode} dashboardMode.
  * @param kbnUrl - used to change the url.
- * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration.
- * Note that order matters and the top nav will be displayed in the same order.
+ * @param {function} modeChange - a function to trigger a dashboard mode change.
+ * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration, based on the
+ * mode.
  */
-export function getTopNavConfig(kbnUrl) {
-  return [
-    getNewConfig(kbnUrl),
-    getAddConfig(),
-    getSaveConfig(),
-    getOpenConfig(),
-    getShareConfig(),
-    getOptionsConfig()];
+export function getTopNavConfig(dashboardMode, kbnUrl, modeChange) {
+  switch (dashboardMode) {
+    case DashboardViewMode.VIEW:
+      return [getNewConfig(kbnUrl), getOpenConfig(), getShareConfig(), getEditConfig(modeChange)];
+    case DashboardViewMode.EDIT:
+      return [getNewConfig(kbnUrl), getOpenConfig(), getAddConfig(), getSaveConfig(), getOptionsConfig(), getViewConfig(modeChange)];
+    default:
+      return [];
+  }
 }
 
 /**
- *
- * @param kbnUrl
+ * @returns {kbnTopNavConfig}
+ */
+function getEditConfig(modeChange) {
+  return {
+    key: 'edit',
+    description: 'Switch to edit mode',
+    testId: 'dashboardEditMode',
+    run: () => {
+      modeChange(DashboardViewMode.EDIT);
+    }
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getViewConfig(modeChange) {
+  return {
+    key: 'stop editing',
+    description: 'Stop editing and switch to view only mode',
+    testId: 'dashboardViewOnlyMode',
+    run: () => {
+      modeChange(DashboardViewMode.VIEW);
+    }
+  };
+}
+
+/**
  * @returns {kbnTopNavConfig}
  */
 function getNewConfig(kbnUrl) {

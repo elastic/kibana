@@ -12,8 +12,10 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     const defaultOptions = {
       onConfirm: noop,
       onCancel: noop,
+      onClose: undefined,
       confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel'
+      cancelButtonText: 'Cancel',
+      title: undefined
     };
 
     const options = Object.assign(defaultOptions, customOptions);
@@ -24,6 +26,7 @@ module.factory('confirmModal', function ($rootScope, $compile) {
 
     const confirmScope = $rootScope.$new();
 
+    confirmScope.title = options.title;
     confirmScope.message = message;
     confirmScope.confirmButtonText = options.confirmButtonText;
     confirmScope.cancelButtonText = options.cancelButtonText;
@@ -34,6 +37,10 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     confirmScope.onCancel = () => {
       destroy();
       options.onCancel();
+    };
+    confirmScope.onClose = () => {
+      destroy();
+      options.onClose();
     };
 
     const modalInstance = $compile(template)(confirmScope);
