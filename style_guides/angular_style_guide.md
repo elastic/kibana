@@ -124,12 +124,12 @@ coupled to the angular application itself.
       scope: {
         caption: '=',        // INPUT
         isSortColumn: '=',   // INPUT
-        setSortColumn: '=',  // EFFECT
+        onChangeSorting: '=',  // EFFECT
       },
       template: `<th
         ng-class="{ 'tableHeader--sortColumn': tableHeader.isSortColumn() }"
         ng-bind="tableHeader.caption"
-        ng-click="tableHeader.sort()"
+        ng-click="tableHeader.onChangeSorting()"
       ></th>`,
     };
   });
@@ -193,13 +193,49 @@ coupled to the angular application itself.
       scope: {
         caption: '=',        // RECOMMENDED: let the parent pass the specific
         isSortColumn: '=',   // attributes required for this directive's purpose
-        setSortColumn: '=',
+        onChangeSorting: '=',
       },
       template: `<th
         ng-bind="tableHeader.caption"
         ng-class="{ 'tableHeader--sortColumn': tableHeader.isSortColumn }"
-        ng-click="tableHeader.setSortColumn('asc')"
+        ng-click="tableHeader.onChangeSorting('asc')"
       ></th>`,
     };
   });
   ```
+
+### Name attributes consistently
+
+  - Prefix attributes with values of boolean type with `is` or `has`.
+
+    ```html
+    /* avoid */
+    <time-picker expand="true">
+
+    <time-picker icon="false">
+    ```
+
+    ```html
+    /* recommended */
+    <time-picker isExpanded="true">
+
+    <time-picker hasIcon="false">
+    ```
+
+  - Prefix callback attributes with `on` and choose a name that indicates the
+    source of the action.
+
+    *Why?*: The `on` prefix clearly distiguishes the effect callbacks from the
+    input attributes. It also focuses the name on the concern of the ui
+    component and does not imply knowledge about the consequences, which are
+    determined by the parent that passes the callback.
+
+    ```html
+    /* avoid */
+    <time-picker set-start-date="query.loadWithStartDate">
+    ```
+
+    ```html
+    /* recommended */
+    <time-picker on-change-start="query.loadWithStartDate">
+    ```
