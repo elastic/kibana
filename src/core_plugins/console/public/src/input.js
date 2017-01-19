@@ -176,6 +176,15 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
               }
             }
 
+            var warnings = xhr.getResponseHeader("warning");
+            if (warnings) {
+              warnings = _.map(warnings.split(", "), function (warning) {
+                  return "#! Deprecation: " + warning;
+              });
+              value = warnings.join("\n") + "\n" + value;
+            }
+
+
             if (isMultiRequest) {
               value = "# " + req.method + " " + req.url + "\n" + value;
             }
