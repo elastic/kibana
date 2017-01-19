@@ -119,13 +119,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.queryEdited = () => $scope.dashboardViewMode === DashboardViewMode.EDIT && !_.isEqual($state.query, savedDashQuery);
-
       // A hashkey in the filter array will ruin our comparison, so we need to get rid of it.
       const cleanFiltersForComparison = (filters) => _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
       const filterMismatch = () =>
         !_.isEqual(cleanFiltersForComparison($state.filters), cleanFiltersForComparison(savedDashFilters)) ||
         !_.isEqual($state.query, savedDashQuery);
+
       const timeMismatch = () => savedDashTimeFrom !== timefilter.time.from || savedDashTimeTo !== timefilter.time.to;
 
       const changeViewMode = (newMode) => {
@@ -153,7 +152,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             noop,
             'Save dashboard',
             'Lose changes',
-            'Warning');
+            'Unsaved changes');
           return;
         }
 

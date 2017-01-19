@@ -120,7 +120,7 @@ module.directive('kbnTopNav', function (Private) {
 
       const getTopNavConfig = () => _.get($scope, $attrs.config, []);
 
-      $scope.$watch(getTopNavConfig, initTopNavForConfigChanges);
+      $scope.$watch(getTopNavConfig, initTopNavForConfigChanges, true);
 
       initTopNavForConfigChanges(getTopNavConfig(), null);
       return $scope.kbnTopNav;
