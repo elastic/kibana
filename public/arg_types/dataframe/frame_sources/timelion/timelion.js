@@ -3,6 +3,7 @@ import _ from 'lodash';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 
+import TimelionExpression from 'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion_expression';
 import fetch from 'isomorphic-fetch';
 import moment from 'moment';
 
@@ -66,15 +67,31 @@ frameSources.push(new FrameSource('timelion', {
     });
 
   },
-  /*
-  form: ({value, commit, run}) => {
-    const {expression, interval} = value;
-    return (
-      <form className="reframe--timelion form-inline" onSubmit={run}>
-        <TimelionExpression onChange={commit('expression')} expression={expression}></TimelionExpression>
-        <button className="btn" type="submit"><i className="fa fa-play"></i></button>
-      </form>
-    );
-  },
-  */
+  form: React.createClass({
+    getInitialState() {
+      return {expression: this.props.value.expression, interval: this.props.value.interval};
+    },
+    typing(prop) {
+      return (value) => {
+        this.setState(_.assign({}, this.state, {[prop]: value}));
+      };
+    },
+    done() {
+      this.commit();
+    },
+    run() {
+
+    },
+    render() {
+      const {expression, interval} = this.state;
+      return (
+        <div className="reframe--timelion">
+          <form className="reframe--timelion form-inline" onSubmit={this.run}>
+            <TimelionExpression onChange={this.typing('expression')} expression={expression}></TimelionExpression>
+            <button className="btn" type="submit"><i className="fa fa-play"></i></button>
+          </form>
+        </div>
+      );
+    }
+  })
 }));

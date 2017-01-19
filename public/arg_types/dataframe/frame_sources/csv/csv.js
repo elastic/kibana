@@ -38,10 +38,24 @@ frameSources.push(new FrameSource('csv', {
   // Make sure to call commit('someProperty') to tell reframe you have a saveable change.
   // Simply use onChange={commit('someProperty')} as your default. Think of it as ng-model, sort of.
   // The data will go "up" using commit, and come back down on the value attribute.
-  form: ({value, commit}) => (
-    <div className="reframe--csv">
-      <div className="reframe--csv--character-count">Length: {_.get(value, 'csv.length')}</div>
-      <textarea className="form-control" rows="10" onChange={commit('csv')} value={value.csv}></textarea>
-    </div>
-  )
+  form: React.createClass({
+    getInitialState() {
+      return {csv: this.props.value.csv};
+    },
+    typing(e) {
+      this.setState(_.assign({}, this.state, {csv: e.target.value}));
+    },
+    done() {
+      this.commit();
+    },
+    render() {
+      const {csv} = this.state;
+      return (
+        <div className="reframe--csv">
+          <div className="reframe--csv--character-count">Length: {_.get(csv, 'length')}</div>
+          <textarea className="form-control" rows="10" onChange={this.typing} value={csv}></textarea>
+        </div>
+      );
+    }
+  })
 }));
