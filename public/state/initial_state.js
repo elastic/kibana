@@ -3,10 +3,14 @@ export default {
   transient: {
     editor: true,
     selectedElement: null,
-    resolvedArgs: {} // This needs to be populated at startup
+    // In the absense of a manually managed cache, we cache arguments here
+    elementCache: {},
+    // Anything pushed here needs to be cleaned up by whatever put it here
+    unmanagedCache: {}
   }, // Things that don't survive a refresh
   persistent: { // Stuff that should survive, and be serialized and saved
     workpad: {
+      name: 'Headwind',
       id: 'workpad-485723-3425-2345324',
       pages: ['page-0', 'page-1'], // In theory you could reference a page multiple times, but you know, don't.
       height: 600,
@@ -69,17 +73,17 @@ export default {
     },
     storage: {
       dataframes: {
-        'dataframe-0': {
+        'dataframe-1': {
           name: 'Cars',
           type: 'csv',
           value: {
-            csv: `"model","segment","price"
-                    "crosstrek","SUV",21000
-                    "impreza","sedan",16000
-                    "outback","SUV",25000`
+            csv:'"model","segment","price"\n' +
+                '"crosstrek","SUV",21000\n' +
+                '"impreza","sedan",16000\n' +
+                '"outback","SUV",25000\n'
           }
         },
-        'dataframe-1': {
+        'dataframe-0': {
           name: 'Static',
           type: 'timelion',
           value: {

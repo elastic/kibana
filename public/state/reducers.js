@@ -61,10 +61,10 @@ function rootReducer(state = {}, action) {
 
     // Set one resolved argument. We probably don't need the thing above, do we? Grr.
     case 'ARGUMENT_RESOLVED':
-      return setTransient('resolvedArgs', {
-        ...state.transient.resolvedArgs,
+      return setTransient('elementCache', {
+        ...state.transient.elementCache,
         [payload.id]: {
-          ...state.transient.resolvedArgs[payload.id],
+          ...state.transient.elementCache[payload.id],
           [payload.name]: payload.value
         }});
 
