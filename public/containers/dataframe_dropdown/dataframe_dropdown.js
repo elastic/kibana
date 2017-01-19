@@ -12,8 +12,8 @@ const DataframeDropdown = React.createClass({
   selectDataframe(value) {
     this.setState(_.assign({}, this.state, {selected: value}));
   },
-  confirm(e) {
-    console.log(e);
+  commit(value) {
+    console.log(value);
   },
   render() {
     const {dataframes} = this.props;
@@ -22,7 +22,7 @@ const DataframeDropdown = React.createClass({
     return (
       <div className="rework--dataframe-dropdown" style={{width: '100%', overflow: 'auto'}}>
         <DataframeSelector dataframes={dataframes} onChange={this.selectDataframe} selected={selected}></DataframeSelector>
-        <DataframeEditor dataframe={dataframes[selected]}></DataframeEditor>
+        <DataframeEditor dataframe={dataframes[selected]} commit={this.commit}></DataframeEditor>
       </div>
     );
   }

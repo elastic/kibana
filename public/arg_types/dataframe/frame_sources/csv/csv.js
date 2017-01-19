@@ -43,10 +43,10 @@ frameSources.push(new FrameSource('csv', {
       return {csv: this.props.value.csv};
     },
     typing(e) {
-      this.setState(_.assign({}, this.state, {csv: e.target.value}));
-    },
-    done() {
-      this.commit();
+      const {commit} = this.props;
+      const value = {csv: e.target.value};
+      this.setState(_.assign({}, this.state, value));
+      commit(value);
     },
     render() {
       const {csv} = this.state;
