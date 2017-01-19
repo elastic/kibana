@@ -1,9 +1,9 @@
 import React from 'react';
-import timeseries from './vis_config/timeseries';
-import metric from './vis_config/metric';
-import topN from './vis_config/top_n';
-import gauge from './vis_config/gauge';
-import markdown from './vis_config/markdown';
+import timeseries from './panel_config/timeseries';
+import metric from './panel_config/metric';
+import topN from './panel_config/top_n';
+import gauge from './panel_config/gauge';
+import markdown from './panel_config/markdown';
 
 const types = {
   timeseries,
@@ -20,6 +20,6 @@ export default React.createClass({
     if (component) {
       return React.createElement(component, this.props);
     }
-    return (<div>Missing Vis Config for {model.type}</div>);
+    return (<div>Missing Panel Config for {model.type}</div>);
   }
 });
