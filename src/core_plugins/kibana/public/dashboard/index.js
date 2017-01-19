@@ -20,6 +20,8 @@ import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_
 import { getTopNavConfig } from './get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 import { DashboardConstants } from './dashboard_constants';
+import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
@@ -56,7 +58,10 @@ uiRoutes
   }
 });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, Private) {
+  const brushEvent = Private(UtilsBrushEventProvider);
+  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
@@ -181,6 +186,20 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.addApplicationClass(theme);
       }
 
+
+      /**
+       * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
+       * be generated from the parent (why, I don't know yet).
+       * @param path {String} - the unique path for this ui state.
+       * @param uiState {Object} - the uiState for the child.
+       * @returns {Object}
+       */
+      $scope.createChildUiState = function createChildUiState(path, uiState) {
+        return $scope.uiState.createChild(path, uiState, true);
+      };
+
+      $scope.brushEvent = brushEvent;
+      $scope.filterBarClickHandler = filterBarClickHandler;
       $scope.expandedPanel = null;
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.toggleExpandPanel = (panelIndex) => {
@@ -219,6 +238,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $state.save();
 
         const timeRestoreObj = _.pick(timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
+
         dash.panelsJSON = angular.toJson($state.panels);
         dash.uiStateJSON = angular.toJson($uiState.getChanges());
         dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;

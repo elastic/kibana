@@ -104,6 +104,13 @@ export class PersistedState {
     if (!_.isEqual(currentValue, origValue)) this.emit('change');
   }
 
+  /**
+   *
+   * @param path {String}
+   * @param value {Object} The uiState to store.
+   * @param silent {Boolean}
+   * @returns {PersistedState}
+   */
   createChild(path, value, silent) {
     this._setChild(this._getIndex(path), value, this._parent || this);
     return new PersistedState(value, this._getIndex(path), this._parent || this, silent, this._EmitterClass);
