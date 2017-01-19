@@ -61,8 +61,10 @@
   <dashboard-panel ng-if="hasExpandedPanel()"
                    panel="expandedPanel"
                    is-full-screen-mode="!chrome.getVisible()"
-                   state="state"
                    is-expanded="true"
-                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
-                   parent-ui-state="uiState">
+                   get-vis-click-handler="filterBarClickHandler(state)"
+                   get-vis-brush-handler="brushEvent(state)"
+                   save-state="state.save()"
+                   create-child-ui-state="createChildUiState(path, uiState)"
+                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
 </dashboard-app>
