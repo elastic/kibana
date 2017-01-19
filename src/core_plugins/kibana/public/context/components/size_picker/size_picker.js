@@ -11,7 +11,7 @@ module.directive('contextSizePicker', function ContextSizePicker() {
   return {
     bindToController: true,
     controller: ContextSizePickerController,
-    controllerAs: 'vm',
+    controllerAs: 'contextSizePicker',
     replace: true,
     restrict: 'E',
     scope: {
@@ -24,9 +24,7 @@ module.directive('contextSizePicker', function ContextSizePicker() {
 
 
 function ContextSizePickerController() {
-  const vm = this;
-
-  vm.getOrSetCount = (count) => (
-    _.isUndefined(count) ? vm.count : vm.setCount(count)
+  this.getOrSetCount = (count) => (
+    _.isUndefined(count) ? this.count : this.setCount(count)
   );
 }
