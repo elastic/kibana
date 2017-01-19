@@ -121,13 +121,26 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // A hashkey in the filter array will ruin our comparison, so we need to get rid of it.
       const cleanFiltersForComparison = (filters) => _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
-      const queryMismatch = () => dash.timeRestore && !_.isEqual($state.query, savedDashQuery);
+      const queryMismatch = () => !_.isEqual($state.query, savedDashQuery);
       const filterBarMismatch = () =>
         !_.isEqual(cleanFiltersForComparison($state.filters), cleanFiltersForComparison(savedDashFilters));
 
-      const timeMismatch = () => savedDashTimeFrom !== timefilter.time.from || savedDashTimeTo !== timefilter.time.to;
+      const timeMismatch = () => dash.timeRestore && (savedDashTimeFrom !== timefilter.time.from || savedDashTimeTo !== timefilter.time.to);
 
       const changeViewMode = (newMode) => {
+
+        const changedFilters = [];
+        if (filterBarMismatch()) { changedFilters.push('filter'); }
+        if (queryMismatch()) { changedFilters.push('query'); }
+        if (timeMismatch()) { changedFilters.push('time range'); }
+
+        const isPlural = changedFilters.length > 1;
+        const lastEntry = isPlural ? `, and ${changedFilters[changedFilters.length - 1]}` : '';
+        if (isPlural) changedFilters.splice(-1, 1);
+        const changedFilterList = `${changedFilters.join(', ')}${lastEntry}`;
+
+        const unsavedFilterListMessage = changedFilterList ? `, including changes to your ${changedFilterList}` : '';
+
         // Time changes don't propagate to stateMonitor so we must track that dirty state manually.
         if (($appStatus.dirty || (dash.timeRestore && timeMismatch())) &&
             // Don't warn if loading the dashboard for the first time.
@@ -144,7 +157,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           const saveAndExitEditMode = () => $scope.save().then(exitEditMode);
 
           confirmModal(
-            'You have unsaved changes to your dashboard. You can save them or exit without saving and lose your changes.',
+            `You have unsaved changes${unsavedFilterListMessage}. You can save them or exit without saving and lose your changes.`,
             {
               onConfirm: saveAndExitEditMode,
               onCancel: exitEditMode,
@@ -168,12 +181,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           }
         };
 
-        const changedFilters = [];
-        if (filterBarMismatch()) { changedFilters.push('filter'); }
-        if (queryMismatch()) { changedFilters.push('query'); }
-        if (timeMismatch()) { changedFilters.push('time range'); }
-
-        if (newMode === DashboardViewMode.EDIT && dash.id && changedFilters.length > 0) {
+        if (newMode === DashboardViewMode.EDIT && dash.id && changedFilterList.length > 0) {
           const onLoadSavedFilters = () => {
             stateDefaults.filters = $state.filters = savedDashFilters.slice();
             stateDefaults.query = $state.query = savedDashQuery;
@@ -193,12 +201,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             doModeSwitch();
           };
 
-          const isPlural = changedFilters.length > 1;
-          const lastEntry = isPlural ? `, and ${changedFilters[changedFilters.length - 1]}` : '';
-          if (isPlural) changedFilters.splice(-1, 1);
-          const filterList = `${changedFilters.join(', ')}${lastEntry} ${isPlural ? 'are' : 'is'}`;
+          const thoseOrThat = isPlural ? 'those' : 'that';
+          const isOrAre = isPlural ? 'are' : 'is';
           confirmModal(
-            `Your current ${filterList} different than ${isPlural ? 'those' : 'that'} stored with your dashboard.`,
+            `Your current ${changedFilterList} ${isOrAre} different than ${thoseOrThat} stored with your dashboard.`,
             {
               onConfirm: onLoadSavedFilters,
               onCancel: () => { doModeSwitch(); $appStatus.dirty = true; },
