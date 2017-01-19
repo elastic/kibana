@@ -121,19 +121,17 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // A hashkey in the filter array will ruin our comparison, so we need to get rid of it.
       const cleanFiltersForComparison = (filters) => _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
-      const filterMismatch = () =>
-        !_.isEqual(cleanFiltersForComparison($state.filters), cleanFiltersForComparison(savedDashFilters)) ||
-        !_.isEqual($state.query, savedDashQuery);
+      const queryMismatch = () => dash.timeRestore && !_.isEqual($state.query, savedDashQuery);
+      const filterBarMismatch = () =>
+        !_.isEqual(cleanFiltersForComparison($state.filters), cleanFiltersForComparison(savedDashFilters));
 
       const timeMismatch = () => savedDashTimeFrom !== timefilter.time.from || savedDashTimeTo !== timefilter.time.to;
 
       const changeViewMode = (newMode) => {
-        const defaultFiltersChanged = filterMismatch() || (dash.timeRestore && timeMismatch());
-
         // Time changes don't propagate to stateMonitor so we must track that dirty state manually.
         if (($appStatus.dirty || (dash.timeRestore && timeMismatch())) &&
-            newMode === DashboardViewMode.VIEW) {
-
+            // Don't warn if loading the dashboard for the first time.
+            newMode === DashboardViewMode.VIEW && $scope.dashboardViewMode === DashboardViewMode.EDIT) {
 
           const exitEditMode = () => {
             if (dash.id) {
@@ -168,7 +166,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           }
         };
 
-        if (newMode === DashboardViewMode.EDIT && dash.id && defaultFiltersChanged) {
+        const changedFilters = [];
+        if (filterBarMismatch()) { changedFilters.push('filters'); }
+        if (queryMismatch()) { changedFilters.push('query'); }
+        if (timeMismatch()) { changedFilters.push('time range'); }
+
+        if (newMode === DashboardViewMode.EDIT && dash.id && changedFilters.length > 0) {
           const onLoadSavedFilters = () => {
             stateDefaults.filters = $state.filters = savedDashFilters.slice();
             stateDefaults.query = $state.query = savedDashQuery;
@@ -188,14 +191,18 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             doModeSwitch();
           };
 
+          const isPlural = changedFilters.length > 1;
+          const lastEntry = isPlural ? `, and ${changedFilters[changedFilters.length - 1]}` : '';
+          if (isPlural) changedFilters.splice(-1, 1);
+          const filterList = `${changedFilters.join(', ')}${lastEntry} ${isPlural ? 'are' : 'is'}`;
           confirmModal(
-            'Your current filters, query and/or time range are different than those stored with your dashboard.',
+            `Your current ${filterList} different than ${isPlural ? 'those' : 'that'} stored with your dashboard.`,
             onLoadSavedFilters,
             () => { doModeSwitch(); $appStatus.dirty = true; },
             noop,
-            'Load dashboard filters',
-            'Use current filters',
-            'Filter conflict detected');
+            'Load dashboard defaults',
+            'Use current values',
+            'Conflict detected');
         } else {
           doModeSwitch();
         }
