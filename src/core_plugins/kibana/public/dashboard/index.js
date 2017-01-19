@@ -7,7 +7,7 @@ import 'ui/notify';
 import 'ui/typeahead';
 import 'ui/share';
 import 'plugins/kibana/dashboard/grid';
-import 'plugins/kibana/dashboard/panel/dashboard_panel';
+import 'plugins/kibana/dashboard/panel/panel';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';

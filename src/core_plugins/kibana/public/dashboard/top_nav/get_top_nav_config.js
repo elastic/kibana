@@ -36,7 +36,7 @@ function getAddConfig() {
     key: 'add',
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
-    template: require('plugins/kibana/dashboard/top_nav/add_visualization.html')
+    template: require('plugins/kibana/dashboard/top_nav/add_panel.html')
   };
 }
 
@@ -48,7 +48,7 @@ function getSaveConfig() {
     key: 'save',
     description: 'Save Dashboard',
     testId: 'dashboardSaveButton',
-    template: require('plugins/kibana/dashboard/top_nav/save_dashboard.html')
+    template: require('plugins/kibana/dashboard/top_nav/save.html')
   };
 }
 
@@ -60,7 +60,7 @@ function getOpenConfig() {
     key: 'open',
     description: 'Open Saved Dashboard',
     testId: 'dashboardOpenButton',
-    template: require('plugins/kibana/dashboard/top_nav/open_dashboard.html')
+    template: require('plugins/kibana/dashboard/top_nav/open.html')
   };
 }
 
