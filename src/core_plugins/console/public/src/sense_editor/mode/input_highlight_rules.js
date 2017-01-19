@@ -26,8 +26,9 @@ var InputHighlightRules = function () {
   /*jshint -W015 */
   this.$rules = {
     "start": mergeTokens([
-        {token: "comment", regex: /^#.*$/},
-        {token: "paren.lparen", regex: "{", next: "json", push: true}
+        { "token": "warning", "regex": "#!.*$" },
+        { token: "comment", regex: /^#.*$/ },
+        { token: "paren.lparen", regex: "{", next: "json", push: true }
       ],
       addEOL(["method"], /([a-zA-Z]+)/, "start", "method_sep")
       ,

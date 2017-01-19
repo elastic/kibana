@@ -287,5 +287,5 @@ module.exports = _.assign(mappingObj, {
   loadAliases: loadAliases,
   expandAliases: expandAliases,
   clear: clear,
-  retrieveAutocompleteInfoFromServer: retrieveAutocompleteInfoFromServer
+  startRetrievingAutoCompleteInfo: autocomplete_retriever
 });

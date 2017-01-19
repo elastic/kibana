@@ -7,7 +7,7 @@ var token_iterator = ace.require("ace/token_iterator");
 var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
 
-module("Tokenization", {
+module("Input Tokenization", {
   setup: function () {
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
     input.$el.show();
