@@ -77,13 +77,19 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       $location.search(search).replace();
     }
 
-    if (risonEncoded) {
-      search[this._urlParam] = this.toQueryParam(risonEncoded);
-      $location.search(search).replace();
-      return risonEncoded;
+    if (!risonEncoded) {
+      return null;
     }
 
-    return null;
+    if (this.isHashingEnabled()) {
+      // RISON can find its way into the URL any number of ways, including the navbar links or
+      // shared urls with the entire state embedded. These values need to be translated into
+      // hashes and replaced in the browser history when state-hashing is enabled
+      search[this._urlParam] = this.toQueryParam(risonEncoded);
+      $location.search(search).replace();
+    }
+
+    return risonEncoded;
   };
 
   /**
@@ -209,13 +215,17 @@ export default function StateProvider(Private, $rootScope, $location, config) {
     return rison.encode(this._parseQueryParamValue(hash));
   };
 
+  State.prototype.isHashingEnabled = function () {
+    return !!config.get('state:storeInSessionStorage');
+  };
+
   /**
    *  Produce the hash version of the state in it's current position
    *
    *  @return {string}
    */
   State.prototype.toQueryParam = function (state = this.toObject()) {
-    if (!config.get('state:storeInSessionStorage')) {
+    if (!this.isHashingEnabled()) {
       return rison.encode(state);
     }
 
