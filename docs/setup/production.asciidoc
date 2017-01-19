@@ -112,6 +112,15 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://localhost:9200"
 --------
+. Check your transport and HTTP host configs. Kibana wants to connect to localhost:9200, but your client node needs to be reachable to the other members of the cluster on the transport port.
+--------
+network.host: localhost
+http.port: 9200
+
+# by default transport.host refers to network.host
+transport.host: <external ip>
+transport.tcp.port: 9300 - 9400
+--------
 
 [float]
 [[kibana-tribe]]
