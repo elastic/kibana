@@ -145,12 +145,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
           confirmModal(
             'You have unsaved changes to your dashboard. You can save them or exit without saving and lose your changes.',
-            saveAndExitEditMode,
-            exitEditMode,
-            noop,
-            'Save dashboard',
-            'Lose changes',
-            'Unsaved changes');
+            {
+              onConfirm: saveAndExitEditMode,
+              onCancel: exitEditMode,
+              onClose: noop,
+              confirmButtonText: 'Save dashboard',
+              cancelButtonText: 'Lose changes',
+              title: 'Unsaved changes'
+            });
           return;
         }
 
@@ -167,7 +169,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         };
 
         const changedFilters = [];
-        if (filterBarMismatch()) { changedFilters.push('filters'); }
+        if (filterBarMismatch()) { changedFilters.push('filter'); }
         if (queryMismatch()) { changedFilters.push('query'); }
         if (timeMismatch()) { changedFilters.push('time range'); }
 
@@ -197,12 +199,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           const filterList = `${changedFilters.join(', ')}${lastEntry} ${isPlural ? 'are' : 'is'}`;
           confirmModal(
             `Your current ${filterList} different than ${isPlural ? 'those' : 'that'} stored with your dashboard.`,
-            onLoadSavedFilters,
-            () => { doModeSwitch(); $appStatus.dirty = true; },
-            noop,
-            'Load dashboard defaults',
-            'Use current values',
-            'Conflict detected');
+            {
+              onConfirm: onLoadSavedFilters,
+              onCancel: () => { doModeSwitch(); $appStatus.dirty = true; },
+              onClose: noop,
+              confirmButtonText: 'Load dashboard defaults',
+              cancelButtonText: 'Use current values',
+              title: 'Conflict detected'
+            });
         } else {
           doModeSwitch();
         }
