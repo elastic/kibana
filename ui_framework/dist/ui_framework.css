@@ -3,9 +3,21 @@
  * 2. Override inherited styles (possibly from Bootstrap).
  */
 /**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+/**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
+/**
  * 1. Put 10px of space between each child.
  * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
  *    wouldn't use the Bar in the first place.
+ * 3. Children in the middle should center their content.
+ * 4. Fix an IE bug which causes the last child to overflow the container.
+ * 5. Fixing this bug means we now need to align the children to the right.
  */
 * {
   box-sizing: border-box; }
@@ -25,7 +37,9 @@ body {
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
-          justify-content: space-between; }
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */ }
 
 .kuiBarSection {
   display: -webkit-box;
@@ -36,12 +50,32 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
+  .kuiBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
   .kuiBarSection:first-child {
     margin-left: 0; }
   .kuiBarSection:last-child {
-    margin-right: 0; }
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
   .kuiBarSection:only-child {
     margin-left: auto;
     /* 1 */ }
@@ -112,7 +146,8 @@ body {
   color: #FFFFFF;
   background-color: #6EADC1; }
   .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:disabled {
     background-color: #B6D6E0; }
@@ -120,14 +155,15 @@ body {
     color: #FFFFFF !important;
     /* 1 */ }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #FFFFFF;
-  background-color: #D76051;
-  /**
-   * 1. Override Bootstrap.
-   */ }
+  background-color: #D76051; }
   .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+    /* 1 */
     background-color: #A52E1F; }
   .kuiButton--danger:disabled {
     background-color: #efc0ba; }
@@ -139,6 +175,20 @@ body {
     outline-offset: 2px !important;
     /* 2 */
     color: #FFFFFF !important;
+    /* 1 */ }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--hollow {
+  color: #3CAED2;
+  background-color: transparent; }
+  .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+  .kuiButton--hollow:disabled {
+    color: #dddddd !important;
     /* 1 */ }
 
 .kuiButtonGroup {
@@ -224,6 +274,47 @@ body {
     /* 2 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
+    cursor: not-allowed; }
+
+/**
+ * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 2. Make room on right side for the caret.
+ */
+.kuiSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  color: #191E23;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */ }
+  .kuiSelect:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
     cursor: not-allowed; }
 
 .kuiTextArea {
@@ -723,11 +814,6 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
-/**
- * 1. Setting to inline-block guarantees the same height when applied to both
- *    button elements and anchor tags.
- * 2. Fit MicroButton inside of Table rows without pushing them taller.
- */
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -739,9 +825,9 @@ body {
   border: 1px solid transparent;
   color: #9fa3a7;
   background-color: transparent;
-  font-size: 12px;
   line-height: 1;
-  /* 2 */ }
+  /* 2 */
+  font-size: 12px; }
   .kuiMicroButton:hover {
     color: #191E23; }
 
@@ -752,6 +838,90 @@ body {
   display: flex; }
   .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
     margin-left: 2px; }
+
+.kuiModalOverlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-bottom: 10vh;
+  background-color: rgba(0, 0, 0, 0.3); }
+
+.kuiModal {
+  line-height: 1.5;
+  background-color: #ffffff;
+  border: 1px solid #6EADC1;
+  border-radius: 4px;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25); }
+
+.kuiModalHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px;
+  border-bottom: 2px solid #E4E4E4; }
+
+.kuiModalHeader__title {
+  font-size: 18px; }
+
+.kuiModalHeaderCloseButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: #9fa3a7;
+  background-color: transparent;
+  line-height: 1;
+  /* 2 */
+  font-size: 18px; }
+  .kuiModalHeaderCloseButton:hover {
+    color: #191E23; }
+
+.kuiModalBody {
+  padding: 20px 10px; }
+
+.kuiModalBodyText {
+  font-size: 14px; }
+
+.kuiModalFooter {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  padding: 0 10px 10px; }
+  .kuiModalFooter > * + * {
+    margin-left: 5px; }
 
 .kuiNoItems {
   padding: 30px;
@@ -789,7 +959,6 @@ body {
   /* 2 */ }
 
 .kuiTable {
-  table-layout: fixed;
   width: 100%;
   border: 2px solid #E4E4E4;
   border-collapse: collapse;
@@ -801,7 +970,7 @@ body {
   line-height: 1.5;
   padding: 7px 8px 8px;
   text-align: left;
-  color: #787878; }
+  color: #a7a7a7; }
   .kuiTableHeaderCell:last-child {
     padding-right: 16px; }
 
@@ -837,7 +1006,7 @@ body {
   padding: 7px 8px 8px;
   text-align: left;
   color: #191E23;
-  border-top: 2px solid #E4E4E4; }
+  border-top: 1px solid #E4E4E4; }
   .kuiTableRowCell:last-child {
     padding-right: 16px; }
 
@@ -926,6 +1095,8 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -935,6 +1106,11 @@ body {
     .kuiToolBar .kuiButton--basic:disabled {
       color: #a7a7a7;
       background-color: #F3F3F3; }
+  .kuiToolBar .kuiSelect {
+    border-color: #ffffff; }
+    .kuiToolBar .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -945,18 +1121,45 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
+  .kuiToolBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
   .kuiToolBarSection:first-child {
     margin-left: 0; }
   .kuiToolBarSection:last-child {
-    margin-right: 0; }
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
   .kuiToolBarSection:only-child {
     margin-left: auto;
     /* 1 */ }
   .kuiToolBarSection > * + * {
     margin-left: 10px;
     /* 1 */ }
+
+/**
+ * 1. Override Bar styles and put Search on the left side.
+ */
+.kuiToolBar--searchOnly .kuiToolBarSearch {
+  margin-left: 0 !important;
+  /* 1 */ }
 
 .kuiToolBarFooter {
   display: -webkit-box;
@@ -971,6 +1174,8 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
@@ -985,12 +1190,32 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
+  .kuiToolBarFooterSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
   .kuiToolBarFooterSection:first-child {
     margin-left: 0; }
   .kuiToolBarFooterSection:last-child {
-    margin-right: 0; }
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
   .kuiToolBarFooterSection:only-child {
     margin-left: auto;
     /* 1 */ }
@@ -998,18 +1223,33 @@ body {
     margin-left: 10px;
     /* 1 */ }
 
+/**
+ * 1. Put 10px of space between each child.
+ */
 .kuiToolBarSearch {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   max-width: 800px;
-  line-height: 1.5;
-  margin-right: 25px; }
+  line-height: 1.5; }
+  .kuiToolBarSearch:first-child {
+    margin-left: 0; }
+  .kuiToolBarSearch:last-child {
+    margin-right: 0; }
+  .kuiToolBarSearch > * + * {
+    margin-left: 10px;
+    /* 1 */ }
 
 .kuiToolBarSearchBox {
   -webkit-box-flex: 1;
@@ -1037,17 +1277,12 @@ body {
   border: 1px solid #FFFFFF;
   border-radius: 4px;
   font-size: 14px;
-  border: none;
-  /* 1 */
+  border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */ }
   .kuiToolBarSearchBox__input:focus {
-    z-index: 1;
-    /* 1 */
-    outline: 1px solid #6EADC1 !important;
-    /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    outline: none;
+    border-color: #6EADC1; }
 
 /*
  * 1. We don't want the text to take up two lines and overflow the ToolBar.

@@ -41,6 +41,15 @@ describe('fieldCalculator', function () {
         .to.throwError();
     });
 
+    it('should handle values with dots in them', function () {
+      values = ['0', '0.........', '0.......,.....'];
+      params = {};
+      groups = fieldCalculator._groupValues(values, params);
+      expect(groups[values[0]].count).to.be(1);
+      expect(groups[values[1]].count).to.be(1);
+      expect(groups[values[2]].count).to.be(1);
+    });
+
     it('should have a a key for value in the array when not grouping array terms', function () {
       expect(_.keys(groups).length).to.be(3);
       expect(groups.foo).to.be.a(Object);

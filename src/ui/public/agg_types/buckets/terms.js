@@ -103,6 +103,8 @@ export default function TermsAggDefinition(Private) {
           };
 
           function updateOrderAgg() {
+            // abort until we get the responseValueAggs
+            if (!$scope.responseValueAggs) return;
             const agg = $scope.agg;
             const params = agg.params;
             const orderBy = params.orderBy;
@@ -110,8 +112,6 @@ export default function TermsAggDefinition(Private) {
 
             // setup the initial value of orderBy
             if (!orderBy && prevOrderBy === INIT) {
-              // abort until we get the responseValueAggs
-              if (!$scope.responseValueAggs) return;
               let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
               if (!respAgg) {
                 respAgg = { id: '_term' };

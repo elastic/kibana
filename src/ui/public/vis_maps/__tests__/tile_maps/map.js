@@ -115,7 +115,7 @@ describe('tilemaptest - TileMap Map Tests', function () {
     it('should create layer with all options from `tilemapSettings.getOptions()`', () => {
       sinon.assert.calledOnce(L.tileLayer);
 
-      const leafletOptions = tilemapSettings.getOptions();
+      const leafletOptions = tilemapSettings.getTMSOptions();
       expect(L.tileLayer.firstCall.args[1]).to.eql(leafletOptions);
     });
   });

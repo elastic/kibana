@@ -175,7 +175,7 @@ export default function (kibana) {
 
     uiExports: {
       apps: apps,
-
+      hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
 
       injectDefaultVars(server, options) {
