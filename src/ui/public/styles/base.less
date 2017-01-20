@@ -490,6 +490,16 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
+  position: relative;
+
+  .table-cell-filter {
+    position: absolute;
+    background-color: @table-cell-hover-bg;
+    white-space: nowrap;
+    right: 0;
+    top: 5px;
+    visibility: hidden;
+  }
 }
 
   .cell-hover-show {
@@ -499,7 +509,11 @@ style-compile {
 
 .cell-hover:hover {
   background-color: @table-cell-hover-hover-bg;
-  cursor: cell;
+
+  .table-cell-filter {
+    visibility: visible;
+    background-color: @table-cell-hover-hover-bg;
+  }
 
   .cell-hover-show {
     visibility: visible;

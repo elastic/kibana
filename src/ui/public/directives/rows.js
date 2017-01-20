@@ -18,15 +18,33 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
         const createAggConfigResultCell = function (aggConfigResult) {
-          const $cell = $(document.createElement('td'));
+          const $cell = $(
+            `<td>
+              <span class="table-cell-filter">
+                <span
+                  ng-click="clickHandler($event, false)"
+                  class="fa fa-search-plus"
+                  tooltip="Filter for value"
+                  tooltip-append-to-body="1"
+                ></span>
+
+                <span
+                  ng-click="clickHandler($event, true)"
+                  class="fa fa-search-minus"
+                  tooltip="Filter out value"
+                  tooltip-append-to-body="1"
+                ></span>
+              </span>
+            </td>`
+          );
+
           const $state = getAppState();
           const clickHandler = filterBarClickHandler($state);
           $cell.scope = $scope.$new();
           $cell.addClass('cell-hover');
-          $cell.attr('ng-click', 'clickHandler($event)');
-          $cell.scope.clickHandler = function (event) {
+          $cell.scope.clickHandler = function (event, negate) {
             if ($(event.target).is('a')) return; // Don't add filter if a link was clicked
-            clickHandler({ point: { aggConfigResult: aggConfigResult } });
+            clickHandler({ point: { aggConfigResult: aggConfigResult }, negate: negate });
           };
           return $compile($cell)($cell.scope);
         };
@@ -48,9 +66,9 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           }
 
           if (contents.scope) {
-            $cell = $compile($cell.html(contents.markup))(contents.scope);
+            $cell = $compile($cell.prepend(contents.markup))(contents.scope);
           } else {
-            $cell.html(contents.markup);
+            $cell.prepend(contents.markup);
           }
 
           if (contents.attr) {
@@ -58,9 +76,9 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           }
         } else {
           if (contents === '') {
-            $cell.html('&nbsp;');
+            $cell.prepend('&nbsp;');
           } else {
-            $cell.html(contents);
+            $cell.prepend(contents);
           }
         }
 
