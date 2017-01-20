@@ -27,6 +27,7 @@ const DataframeDropdown = React.createClass({
 
     return (
       <div className="rework--dataframe-dropdown" style={{width: '100%', overflow: 'auto'}}>
+        <label>Edit Dataframe</label>
         <DataframeSelector dataframes={dataframes} onChange={this.selectDataframe} selected={selected}></DataframeSelector>
         <DataframeEditor dataframe={dataframe} commit={this.commit}></DataframeEditor>
       </div>

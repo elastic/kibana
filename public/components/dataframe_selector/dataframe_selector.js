@@ -13,7 +13,6 @@ export default React.createClass({
     ));
     return (
       <div className="rework--dataframe-selector">
-        <label>Dataframe</label>
         <select className="form-control" onChange={this.select} value={selected}>
           {options}
         </select>
