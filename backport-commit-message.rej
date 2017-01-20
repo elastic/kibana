@@ -1,0 +1,31 @@
+Restructure dashboard files and folders
+
+Backports PR #9969
+
+**Commit 1:**
+Restructure dashboard files and folders
+
+* Original sha: 1c01e7827838106a378053653e7784043db57b32
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-19T20:48:58Z
+
+**Commit 2:**
+Try to stay DRY
+
+avoid duplicate ‘dashboard’ naming when unnecessary
+
+* Original sha: 4e85e79e56ce90f6f45f51699e1eb60baa3cb2c2
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-19T20:56:20Z
+
+**Commit 3:**
+rename index => dashboard and add an index.js with imports
+
+rename style
+
+* Original sha: 423a2725ccc585bc9a6edd581180da0eb49e4492
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-20T13:44:05Z
+
+**Commit 4:**
+un-dig
+
+* Original sha: e29bf87fc940dc8a78498bb777bf239ea41039b3
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-20T14:18:27Z
