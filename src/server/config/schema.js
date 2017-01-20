@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { get } from 'lodash';
-import { randomBytes } from 'crypto';
+import { randomBytes, constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';
@@ -53,7 +53,8 @@ module.exports = () => Joi.object({
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()),
       clientAuthentication: Joi.string().valid('none', 'required').default('none'),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2'))
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
       is: true,

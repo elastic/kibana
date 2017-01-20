@@ -3,7 +3,6 @@ import { format as formatUrl } from 'url';
 import httpolyglot from 'httpolyglot';
 import { map } from 'lodash';
 import secureOptions from './secure_options';
-import tlsCiphers from './tls_ciphers';
 
 const getClientAuthenticationHttpOptions = (clientAuthentication) => {
   switch (clientAuthentication) {
@@ -62,7 +61,7 @@ export default function (kbnServer, server, config) {
       ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
       passphrase: config.get('server.ssl.keyPassphrase'),
 
-      ciphers: tlsCiphers,
+      ciphers: config.get('server.ssl.cipherSuites').join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
       honorCipherOrder: true,
       requestCert,
