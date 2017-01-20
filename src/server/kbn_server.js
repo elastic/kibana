@@ -19,9 +19,9 @@ module.exports = class KbnServer {
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
+      require('./config/deprecation_warnings'),
       require('./warnings'),
       require('./status'),
-      require('./config/deprecation_warnings'),
 
       // writes pid file
       require('./pid'),
