@@ -1,17 +1,17 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
+import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 
 const LinkFrame = React.createClass({
   render() {
     const {dataframes, select, value} = this.props;
-    const options = _.map(dataframes, (value, key) => (
-      <option key={key} value={key}>{value.name}</option>
-    ));
     return (
-      <select className="form-control" value={value} onChange={select}>
-        {options}
-      </select>
+      <DataframeSelector
+        onChange={select}
+        dataframes={dataframes}
+        selected={value}>
+      </DataframeSelector>
     );
   }
 });

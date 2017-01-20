@@ -10,13 +10,14 @@ argTypes.push(new ArgType('dataframe', {
   default: '',
   help: 'The source of data to link to this element',
   form: ({commit, value}) => {
-    const storeValue = (e) => commit(e.target.value);
-    return (<FrameLink value={value} select={storeValue}></FrameLink>);
+    return (<FrameLink value={value} select={commit}></FrameLink>);
   },
   resolve: (value, state) => {
     const resolvedFrame = state.transient.dataframeCache[value];
 
-    if (!resolvedFrame) return {type: 'dataframe', columns: [], rows: []};
+    if (!resolvedFrame) {
+      return {type: 'dataframe', columns: [], rows: []};
+    }
     return resolvedFrame;
   }
 }));
