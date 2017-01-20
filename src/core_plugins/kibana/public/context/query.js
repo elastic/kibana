@@ -5,7 +5,7 @@ import { fetchPredecessors, fetchSuccessors } from './api/context';
 import { QueryParameterActionsProvider } from './query_parameters';
 
 
-function QueryActionsProvider($q, es, Private) {
+function QueryActionsProvider(es, Private, Promise) {
   const {
     increasePredecessorCount,
     increaseSuccessorCount,
@@ -20,7 +20,9 @@ function QueryActionsProvider($q, es, Private) {
 
     state.loadingStatus.anchor = 'loading';
 
-    return fetchAnchor(es, indexPattern, anchorUid, _.zipObject([sort]))
+    return Promise.try(() => (
+      fetchAnchor(es, indexPattern, anchorUid, _.zipObject([sort]))
+    ))
       .then((anchorDocument) => {
         state.loadingStatus.anchor = 'loaded';
         state.rows.anchor = anchorDocument;
@@ -36,7 +38,9 @@ function QueryActionsProvider($q, es, Private) {
 
     state.loadingStatus.predecessors = 'loading';
 
-    return fetchPredecessors(es, indexPattern, anchor, _.zipObject([sort]), predecessorCount)
+    return Promise.try(() => (
+      fetchPredecessors(es, indexPattern, anchor, _.zipObject([sort]), predecessorCount)
+    ))
       .then((predecessorDocuments) => {
         state.loadingStatus.predecessors = 'loaded';
         state.rows.predecessors = predecessorDocuments;
@@ -52,7 +56,9 @@ function QueryActionsProvider($q, es, Private) {
 
     state.loadingStatus.successors = 'loading';
 
-    return fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
+    return Promise.try(() => (
+      fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
+    ))
       .then((successorDocuments) => {
         state.loadingStatus.successors = 'loaded';
         state.rows.successors = successorDocuments;
@@ -61,8 +67,8 @@ function QueryActionsProvider($q, es, Private) {
   };
 
   const fetchAllRows = (state) => () => (
-    fetchAnchorRow(state)()
-      .then(() => $q.all([
+    Promise.try(fetchAnchorRow(state))
+      .then(() => Promise.all([
         fetchPredecessorRows(state)(),
         fetchSuccessorRows(state)(),
       ]))
