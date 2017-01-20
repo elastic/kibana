@@ -1,2 +1,4 @@
-export const mutateElement = (id, value) => {return {id: id, value: value};};
-export const mutateArgument = (id, name, value) => {return {id: id, name, value: value};};
+export const mutateWithId = (id, value) => {return {id, value};};
+export const mutateWithIdAndName = (id, name, value) => {return {id, name, value};};
+export const mutateElement = mutateWithId;
+export const mutateArgument = mutateWithIdAndName;

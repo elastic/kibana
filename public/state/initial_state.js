@@ -1,13 +1,13 @@
 export default {
   app: {}, // Kibana stuff in here
-  transient: {
+  transient: { // Things that don't survive a refresh
     editor: true,
     selectedElement: null,
-    // In the absense of a manually managed cache, we cache arguments here
+    // Element arguments are cached up here.
     elementCache: {},
-    // Anything pushed here needs to be cleaned up by whatever put it here
-    unmanagedCache: {}
-  }, // Things that don't survive a refresh
+    // Dataframes get written here on resolution
+    dataframeCache: {},
+  },
   persistent: { // Stuff that should survive, and be serialized and saved
     workpad: {
       name: 'Headwind',
@@ -71,25 +71,25 @@ export default {
         }
       }
     },
-    storage: {
-      dataframes: {
-        'dataframe-1': {
-          name: 'Cars',
-          type: 'csv',
-          value: {
-            csv:'"model","segment","price"\n' +
-                '"crosstrek","SUV",21000\n' +
-                '"impreza","sedan",16000\n' +
-                '"outback","SUV",25000\n'
-          }
-        },
-        'dataframe-0': {
-          name: 'Static',
-          type: 'timelion',
-          value: {
-            expression: '.static(5:10:2:10:23:11:12:13:14)',
-            interval: 'auto'
-          }
+    dataframes: {
+      'dataframe-1': {
+        id: 'dataframe-1',
+        name: 'Cars',
+        type: 'csv',
+        value: {
+          csv:'"model","segment","price"\n' +
+              '"crosstrek","SUV",21000\n' +
+              '"impreza","sedan",16000\n' +
+              '"outback","SUV",25000\n'
+        }
+      },
+      'dataframe-0': {
+        id: 'dataframe-0',
+        name: 'Static',
+        type: 'timelion',
+        value: {
+          expression: '.static(5:10:2:10:23:11:12:13:14)',
+          interval: 'auto'
         }
       }
     }

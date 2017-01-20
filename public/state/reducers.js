@@ -32,6 +32,15 @@ function rootReducer(state = {}, action) {
       }});
   };
 
+  const setDataframe = (id, prop, value) => {
+    return setPersistent('elements', {
+      ...state.persistent.elements,
+      [id]: {
+        ...state.persistent.elements[id],
+        [prop]: value
+      }});
+  };
+
   const { payload, type } = action;
   switch (type) {
     case 'EDITOR_CLOSE':
@@ -58,6 +67,16 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'top', payload.value);
     case 'ELEMENT_LEFT':
       return setElement(payload.id, 'left', payload.value);
+
+    case 'DATAFRAME_UNRESOLVED':
+      return setPersistent('dataframes', {
+        ...state.persistent.dataframes,
+        [payload.id]: payload});
+
+    case 'DATAFRAME_RESOLVED':
+      return setTransient('dataframeCache', {
+        ...state.transient.dataframeCache,
+        [payload.id]: payload.value});
 
     // Set one resolved argument. We probably don't need the thing above, do we? Grr.
     case 'ARGUMENT_RESOLVED':
