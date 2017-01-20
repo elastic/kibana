@@ -40,10 +40,11 @@ function ContextAppController($scope, Private) {
 
   this.state = createInitialState();
 
-  this.actions = _.mapValues({
-    ...queryParameterActions,
-    ...queryActions,
-  }, (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues(Object.assign(
+    {},
+    queryParameterActions,
+    queryActions,
+  ), (action) => (...args) => action(this.state)(...args));
 
   $scope.$watchGroup([
     () => this.state.rows.predecessors,

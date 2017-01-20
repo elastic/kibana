@@ -30,10 +30,11 @@ function QueryParameterActionsProvider(config) {
   );
 
   const setQueryParameters = (state) => (queryParameters) => (
-    state.queryParameters = {
-      ...state.queryParameters,
-      ...(_.pick(queryParameters, QUERY_PARAMETER_KEYS)),
-    }
+    state.queryParameters = Object.assign(
+      {},
+      state.queryParameters,
+      _.pick(queryParameters, QUERY_PARAMETER_KEYS),
+    )
   );
 
   return {
