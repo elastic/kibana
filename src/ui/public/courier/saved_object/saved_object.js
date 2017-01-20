@@ -19,7 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 
-export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
+export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
   const DocSource = Private(DocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
@@ -282,7 +282,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
           if (_.get(err, 'origError.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
-            return safeConfirm(confirmMessage)
+            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
               .then(() => docSource.doIndex(source))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }

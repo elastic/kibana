@@ -14,7 +14,7 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, safeConfirm) {
+export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
@@ -337,7 +337,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         }
         const confirmMessage = 'Are you sure you want to overwrite this?';
 
-        return safeConfirm(confirmMessage)
+        return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
         .then(() => Promise
           .try(() => {
             const cached = patternCache.get(this.id);

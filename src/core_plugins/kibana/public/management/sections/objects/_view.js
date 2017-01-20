@@ -13,7 +13,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjectsView', function (kbnIndex, Notifier) {
+.directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
   return {
     restrict: 'E',
     controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
@@ -163,15 +163,24 @@ uiModules.get('apps/management')
        * @returns {type} description
        */
       $scope.delete = function () {
-        esAdmin.delete({
-          index: kbnIndex,
-          type: service.type,
-          id: $routeParams.id
-        })
-        .then(function (resp) {
-          return redirectHandler('deleted');
-        })
-        .catch(notify.fatal);
+        function doDelete() {
+          esAdmin.delete({
+            index: kbnIndex,
+            type: service.type,
+            id: $routeParams.id
+          })
+            .then(function (resp) {
+              return redirectHandler('deleted');
+            })
+            .catch(notify.fatal);
+        }
+        const confirmModalOptions = {
+          onConfirm: doDelete,
+          confirmButtonText: 'Delete'
+        };
+        confirmModal(
+          'Are you sure want to delete this object? This action is irreversible!',
+          confirmModalOptions);
       };
 
       $scope.submit = function () {
