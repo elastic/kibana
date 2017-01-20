@@ -1,3 +1,4 @@
+
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
@@ -22,7 +23,7 @@ import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import { FilterUtils } from './lib/filter_utils';
+import { FilterUtils } from './filter_utils';
 
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
@@ -36,28 +37,28 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 uiRoutes
-.defaults(/dashboard/, {
-  requireDefaultIndex: true
-})
-.when('/dashboard', {
-  template: indexTemplate,
-  resolve: {
-    dash: function (savedDashboards, config) {
-      return savedDashboards.get();
+  .defaults(/dashboard/, {
+    requireDefaultIndex: true
+  })
+  .when('/dashboard', {
+    template: indexTemplate,
+    resolve: {
+      dash: function (savedDashboards, config) {
+        return savedDashboards.get();
+      }
     }
-  }
-})
-.when('/dashboard/:id', {
-  template: indexTemplate,
-  resolve: {
-    dash: function (savedDashboards, Notifier, $route, $location, courier) {
-      return savedDashboards.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        'dashboard' : '/dashboard'
-      }));
+  })
+  .when('/dashboard/:id', {
+    template: indexTemplate,
+    resolve: {
+      dash: function (savedDashboards, Notifier, $route, $location, courier) {
+        return savedDashboards.get($route.current.params.id)
+          .catch(courier.redirectWhenMissing({
+            'dashboard' : '/dashboard'
+          }));
+      }
     }
-  }
-});
+  });
 
 app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, Private) {
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -239,19 +240,19 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dash.optionsJSON = angular.toJson($state.options);
 
         dash.save()
-        .then(function (id) {
-          stateMonitor.setInitialState($state.toJSON());
-          $scope.kbnTopNav.close('save');
-          if (id) {
-            notify.info('Saved Dashboard as "' + dash.title + '"');
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
-            } else {
-              docTitle.change(dash.lastSavedTitle);
+          .then(function (id) {
+            stateMonitor.setInitialState($state.toJSON());
+            $scope.kbnTopNav.close('save');
+            if (id) {
+              notify.info('Saved Dashboard as "' + dash.title + '"');
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
+              } else {
+                docTitle.change(dash.lastSavedTitle);
+              }
             }
-          }
-        })
-        .catch(notify.fatal);
+          })
+          .catch(notify.fatal);
       };
 
       let pendingVis = _.size($state.panels);
