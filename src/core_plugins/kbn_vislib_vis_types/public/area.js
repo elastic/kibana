@@ -34,7 +34,8 @@ export default function PointSeriesVisType(Private) {
               type: 'linear'
             },
             labels: {
-              show: true
+              show: true,
+              truncate: 100
             },
             title: {}
           }
@@ -42,6 +43,7 @@ export default function PointSeriesVisType(Private) {
         valueAxes: [
           {
             id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
             type: 'value',
             position: 'left',
             show: true,
@@ -60,7 +62,18 @@ export default function PointSeriesVisType(Private) {
             title: {}
           }
         ],
-        seriesParams: [],
+        seriesParams: [{
+          show: 'true',
+          type: 'area',
+          mode: 'stacked',
+          data: {
+            label: 'Count'
+          },
+          drawLinesBetweenPoints: true,
+          showCircles: true,
+          interpolate: 'linear',
+          valueAxis: 'ValueAxis-1'
+        }],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
@@ -91,13 +104,13 @@ export default function PointSeriesVisType(Private) {
       }],
       editor: pointSeriesTemplate,
       optionTabs: [
-        { name: 'series', title: 'Series', editor: '<vislib-series></vislib-series>' },
-        {
-          name: 'axes',
-          title: 'Axes',
-          editor: '<div><vislib-value-axes></vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
-        },
         { name: 'options', title: 'Settings', editor: pointSeriesTemplate },
+        {
+          name: 'advanced',
+          title: 'Advanced',
+          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
+          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
+        },
       ],
     },
     schemas: new Schemas([

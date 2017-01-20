@@ -29,7 +29,7 @@
           class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
-          {{axis.id}}
+          {{axis.name}}
         </span>
       </div>
 
@@ -80,6 +80,7 @@
             <select
               id="{{ 'valueAxisPosition' + $index }}"
               class="kuiSelect kuiSideBarSelect"
+              ng-change="updateAxisName(axis)"
               ng-model="axis.position"
               ng-options="mode disable when isPositionDisabled(mode) for mode in vis.type.params.positions"
             ></select>
@@ -262,4 +263,6 @@
       </div>
     </div>
   </div>
+
+  <div style="height: 10px"></div>
 </div>

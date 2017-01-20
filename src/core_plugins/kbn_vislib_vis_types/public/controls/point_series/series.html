@@ -1,7 +1,7 @@
 <div class="kuiSideBarSection">
   <div class="kuiSideBarSectionTitle">
     <div class="kuiSideBarSectionTitle__text">
-      Series
+      Metrics
     </div>
   </div>
 
@@ -28,14 +28,6 @@
     <div ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
       <!-- General -->
       <div class="kuiSideBarSection">
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="showCursor">
-            Show
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="showCursor" type="checkbox" ng-model="chart.show">
-          </div>
-        </div>
 
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
@@ -76,8 +68,8 @@
               ng-model="chart.valueAxis"
               ng-change="changeValueAxis($index)"
             >
-              <option ng-repeat="axis in vis.params.valueAxes track by axis.id">{{axis.id}}</option>
-              <option value="new">New Axis ...</option>
+              <option ng-repeat="axis in vis.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
+
             </select>
           </div>
         </div>
@@ -121,4 +113,6 @@
       </div>
     </div>
   </div>
+
+  <div style="height: 10px"></div>
 </div>

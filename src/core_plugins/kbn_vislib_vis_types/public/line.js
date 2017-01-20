@@ -33,6 +33,7 @@ export default function PointSeriesVisType(Private) {
             },
             labels: {
               show: true,
+              truncate: 100
             },
             title: {}
           }
@@ -40,6 +41,7 @@ export default function PointSeriesVisType(Private) {
         valueAxes: [
           {
             id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
             type: 'value',
             position: 'left',
             show: true,

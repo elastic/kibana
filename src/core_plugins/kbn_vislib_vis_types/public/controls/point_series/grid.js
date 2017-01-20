@@ -9,26 +9,8 @@ module.directive('vislibGrid', function ($parse, $compile) {
     template: vislibGridTemplate,
     replace: true,
     link: function ($scope) {
-      function mapPosition(position) {
-        switch (position) {
-          case 'bottom': return 'left';
-          case 'top': return 'right';
-          case 'left': return 'bottom';
-          case 'right': return 'top';
-        }
-      }
 
       $scope.isGridOpen = true;
-
-      $scope.$watch('vis.params.categoryAxes[0].position', position => {
-        const categoryAxisIsHorizontal = ['top', 'bottom'].includes(position);
-        $scope.vis.params.valueAxes.forEach(axis => {
-          const axisIsHorizontal = ['top', 'bottom'].includes(axis.position);
-          if (axisIsHorizontal === categoryAxisIsHorizontal) {
-            axis.position = mapPosition(axis.position);
-          }
-        });
-      });
     }
   };
 });

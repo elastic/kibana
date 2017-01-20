@@ -20,6 +20,15 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
         }
       }
 
+      function mapPositionOposite(position) {
+        switch (position) {
+          case 'bottom': return 'top';
+          case 'top': return 'bottom';
+          case 'left': return 'right';
+          case 'right': return 'left';
+        }
+      }
+
       $scope.rotateOptions = [
         { name: 'horizontal', value: 0 },
         { name: 'vertical', value: 90 },
@@ -32,6 +41,7 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
           const axisIsHorizontal = ['top', 'bottom'].includes(axis.position);
           if (axisIsHorizontal === isCategoryAxisHorizontal) {
             axis.position = mapPosition(axis.position);
+            $scope.updateAxisName(axis);
           }
         });
       });
@@ -57,10 +67,21 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
       };
 
       $scope.addValueAxis = function () {
-        const newAxis = _.cloneDeep($scope.vis.params.valueAxes[0]);
+        const firstAxis = $scope.vis.params.valueAxes[0];
+        const newAxis = _.cloneDeep(firstAxis);
         newAxis.id = 'ValueAxis-' + $scope.vis.params.valueAxes.reduce((value, axis) => {
           if (axis.id.substr(0, 10) === 'ValueAxis-') {
             const num = parseInt(axis.id.substr(10));
+            if (num >= value) value = num + 1;
+          }
+          return value;
+        }, 1);
+
+        newAxis.position = mapPositionOposite(firstAxis.position);
+        const axisName = _.capitalize(newAxis.position) + 'Axis-';
+        newAxis.name = axisName + $scope.vis.params.valueAxes.reduce((value, axis) => {
+          if (axis.name.substr(0, axisName.length) === axisName) {
+            const num = parseInt(axis.name.substr(axisName.length));
             if (num >= value) value = num + 1;
           }
           return value;
@@ -82,6 +103,17 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
           delete axis.scale.min;
           delete axis.scale.max;
         }
+      };
+
+      $scope.updateAxisName = function (axis) {
+        const axisName = _.capitalize(axis.position) + 'Axis-';
+        axis.name = axisName + $scope.vis.params.valueAxes.reduce((value, axis) => {
+          if (axis.name.substr(0, axisName.length) === axisName) {
+            const num = parseInt(axis.name.substr(axisName.length));
+            if (num >= value) value = num + 1;
+          }
+          return value;
+        }, 1);
       };
 
       const lastAxisTitles = {};

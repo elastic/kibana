@@ -20,7 +20,7 @@
     <div class="kuiSideBarSection">
       <div class="kuiSideBarFormRow">
         <label class="kuiSideBarFormRow__label" for="showCategoryLines">
-          Category Lines
+          X-Axis Lines
         </label>
         <div class="kuiSideBarFormRow__control">
           <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="vis.params.grid.categoryLines">
@@ -29,14 +29,14 @@
 
       <div class="kuiSideBarFormRow">
         <label class="kuiSideBarFormRow__label" for="gridAxis">
-          Value Axis Lines
+          Y-Axis Lines
         </label>
         <div class="kuiSideBarFormRow__control">
           <select
             id="gridAxis"
             class="kuiSelect kuiSideBarSelect"
             ng-model="vis.params.grid.valueAxis"
-            ng-options="axis.id as axis.id for axis in vis.params.valueAxes"
+            ng-options="axis.id as axis.name for axis in vis.params.valueAxes"
           >
             <option value="">Don't show</option>
           </select>
