@@ -76,6 +76,8 @@ const Workspace = React.createClass({
           </div>
           <div className="rework--top-nav-bottom">
             <a className="fa fa-database rework--nav-button" onClick={this.dropdown('dataframe')}></a>
+            <a className="fa fa-plus-circle rework--nav-button" onClick={this.dropdown('element')}></a>
+
           </div>
         </TopNav>
         <DropDown></DropDown>

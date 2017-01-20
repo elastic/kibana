@@ -1,10 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
+import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import './drop_down.less';
 import classnames from 'classnames';
 
 const DropDown = React.createClass({
+  elementAdd(elementType) {
+    console.log(elementType);
+  },
   render() {
     const {dropdown} = this.props;
     const style = {
@@ -16,6 +20,8 @@ const DropDown = React.createClass({
       switch (dropdown) {
         case 'dataframe':
           return (<DataframeDialog></DataframeDialog>);
+        case 'element':
+          return (<ElementAddDialog onSelect={this.elementAdd}></ElementAddDialog>);
         default:
           return null;
       }
