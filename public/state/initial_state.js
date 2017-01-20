@@ -3,12 +3,13 @@ export default {
   transient: { // Things that don't survive a refresh
     editor: true,
     selectedElement: null,
+    dropdown: null,
     // Element arguments are cached up here.
     elementCache: {},
     // Dataframes get written here on resolution
     dataframeCache: {},
   },
-  persistent: { // Stuff that should survive, and be serialized and saved
+  persistent: { // Stuff that should survive, be serialized and be saved
     workpad: {
       name: 'Headwind',
       id: 'workpad-485723-3425-2345324',

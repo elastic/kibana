@@ -32,17 +32,11 @@ function rootReducer(state = {}, action) {
       }});
   };
 
-  const setDataframe = (id, prop, value) => {
-    return setPersistent('elements', {
-      ...state.persistent.elements,
-      [id]: {
-        ...state.persistent.elements[id],
-        [prop]: value
-      }});
-  };
-
   const { payload, type } = action;
   switch (type) {
+
+    case 'DROPDOWN_TOGGLE':
+      return setTransient('dropdown', payload === state.transient.dropdown ? null : payload);
     case 'EDITOR_CLOSE':
       return setTransient('editor', false);
     case 'EDITOR_OPEN':

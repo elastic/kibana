@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 
 import TopNav from 'plugins/rework/components/top_nav/top_nav';
-import DropDown from 'plugins/rework/components/drop_down/drop_down';
+import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Sidebar from 'plugins/rework/components/sidebar/sidebar';
 
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
@@ -15,11 +15,10 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
-import DataframeDropdown from 'plugins/rework/containers/dataframe_dropdown/dataframe_dropdown';
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
 
-
+import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
@@ -27,6 +26,12 @@ import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, el
 import './workspace.less';
 
 const Workspace = React.createClass({
+  dropdown(name) {
+    return () => {
+      const {dispatch} = this.props;
+      dispatch(dropdownToggle(name));
+    };
+  },
   select(id) {
     return (e) => {
       e.stopPropagation();
@@ -70,12 +75,10 @@ const Workspace = React.createClass({
             <span className="rework--workpad-name">{workpad.name}</span>
           </div>
           <div className="rework--top-nav-bottom">
-            <a className="fa fa-database rework--nav-button"></a>
+            <a className="fa fa-database rework--nav-button" onClick={this.dropdown('dataframe')}></a>
           </div>
         </TopNav>
-        <DropDown>
-          <DataframeDropdown></DataframeDropdown>
-        </DropDown>
+        <DropDown></DropDown>
 
         <div className="rework--workspace">
 

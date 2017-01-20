@@ -5,7 +5,7 @@ import DataframeSelector from 'plugins/rework/components/dataframe_selector/data
 import DataframeEditor from 'plugins/rework/components/dataframe_editor/dataframe_editor';
 import {dataframeSet} from 'plugins/rework/state/actions/dataframe';
 
-const DataframeDropdown = React.createClass({
+const DataframeDialog = React.createClass({
   getInitialState() {
     const {selected, dataframes} = this.props;
     return {selected: selected || _.keys(dataframes)[0]};
@@ -41,4 +41,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(DataframeDropdown);
+export default connect(mapStateToProps)(DataframeDialog);
