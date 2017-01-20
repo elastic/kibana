@@ -18,7 +18,7 @@ const LinkFrame = React.createClass({
 
 function mapStateToProps(state) {
   return {
-    dataframes: state.persistent.storage.dataframes
+    dataframes: state.persistent.dataframes
   };
 }
 
