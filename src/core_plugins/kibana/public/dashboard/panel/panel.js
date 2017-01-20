@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
-import 'plugins/kibana/dashboard/services/get_object_loaders_for_dashboard';
+import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
-import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
-import { loadSavedObject } from 'plugins/kibana/dashboard/components/panel/lib/load_saved_object';
+import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
 
 uiModules
 .get('app/dashboard')

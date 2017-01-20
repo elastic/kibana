@@ -3,8 +3,8 @@ import $ from 'jquery';
 import Binder from 'ui/binder';
 import 'gridster';
 import uiModules from 'ui/modules';
-import { PanelUtils } from 'plugins/kibana/dashboard/components/panel/lib/panel_utils';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
+import { PanelUtils } from 'plugins/kibana/dashboard/panel/panel_utils';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 const app = uiModules.get('app/dashboard');
 
