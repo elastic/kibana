@@ -4,6 +4,7 @@ import Binder from 'ui/binder';
 import 'gridster';
 import uiModules from 'ui/modules';
 import { PanelUtils } from 'plugins/kibana/dashboard/components/panel/lib/panel_utils';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 
 const app = uiModules.get('app/dashboard');
 
@@ -149,11 +150,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         return panel;
       }
 
-      // tell gridster to remove the panel, and cleanup our metadata
+      // Tell gridster to remove the panel, and cleanup our metadata
       function removePanel(panel, silent) {
         // remove from grister 'silently' (don't reorganize after)
         gridster.remove_widget(panel.$el, silent);
         panel.$el.removeData('panel');
+        $scope.uiState.removeChild(getPersistedStateId(panel));
       }
 
       // tell gridster to add the panel, and create additional meatadata like $scope
@@ -166,10 +168,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   remove="removePanelFromState(${panel.panelIndex})"
                   panel="getPanelByPanelIndex(${panel.panelIndex})"
                   is-full-screen-mode="!chrome.getVisible()"
-                  state="state"
                   is-expanded="false"
+                  get-vis-click-handler="filterBarClickHandler(state)"
+                  get-vis-brush-handler="brushEvent(state)"
+                  save-state="state.save()"
                   toggle-expand="toggleExpandPanel(${panel.panelIndex})"
-                  parent-ui-state="uiState">
+                  create-child-ui-state="createChildUiState(path, uiState)">
             </li>`;
         panel.$el = $compile(panelHtml)($scope);
 
