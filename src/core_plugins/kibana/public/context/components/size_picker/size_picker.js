@@ -16,6 +16,7 @@ module.directive('contextSizePicker', function ContextSizePicker() {
     restrict: 'E',
     scope: {
       count: '=',
+      isDisabled: '=',
       onChangeCount: '=',
     },
     template: contextSizePickerTemplate,
