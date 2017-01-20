@@ -43,11 +43,21 @@
 
   <!-- Loading feedback -->
   <div
-    ng-if="contextApp.state.loadingStatus.anchor !== 'loaded'"
+    ng-if="['uninitialized', 'loading'].includes(contextApp.state.loadingStatus.anchor)"
     class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
   >
     <div class="kuiLoadingItems">
       Loading&hellip;
+    </div>
+  </div>
+
+  <!-- Error feedback -->
+  <div
+    ng-if="contextApp.state.loadingStatus.anchor === 'failed'"
+    class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
+  >
+    <div class="kuiLoadingItems">
+      Failed to load the anchor document
     </div>
   </div>
 

@@ -12,7 +12,7 @@ async function fetchAnchor(es, indexPattern, uid, sort) {
   });
 
   if (_.get(response, ['hits', 'total'], 0) < 1) {
-    throw new Error('Failed to load anchor row.');
+    throw new Error('Failed to load anchor document.');
   }
 
   return Object.assign(

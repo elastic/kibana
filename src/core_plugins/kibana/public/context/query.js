@@ -5,7 +5,7 @@ import { fetchPredecessors, fetchSuccessors } from './api/context';
 import { QueryParameterActionsProvider } from './query_parameters';
 
 
-function QueryActionsProvider(es, Private, Promise) {
+function QueryActionsProvider(es, Notifier, Private, Promise) {
   const {
     increasePredecessorCount,
     increaseSuccessorCount,
@@ -14,20 +14,34 @@ function QueryActionsProvider(es, Private, Promise) {
     setSuccessorCount,
   } = Private(QueryParameterActionsProvider);
 
+  const notifier = new Notifier({
+    location: 'Context',
+  });
+
+  const setLoadingStatus = (state) => (subject, status) => (
+    state.loadingStatus[subject] = status
+  );
 
   const fetchAnchorRow = (state) => () => {
     const { queryParameters: { indexPattern, anchorUid, sort } } = state;
 
-    state.loadingStatus.anchor = 'loading';
+    setLoadingStatus(state)('anchor', 'loading');
 
     return Promise.try(() => (
       fetchAnchor(es, indexPattern, anchorUid, _.zipObject([sort]))
     ))
-      .then((anchorDocument) => {
-        state.loadingStatus.anchor = 'loaded';
-        state.rows.anchor = anchorDocument;
-        return anchorDocument;
-      });
+      .then(
+        (anchorDocument) => {
+          setLoadingStatus(state)('anchor', 'loaded');
+          state.rows.anchor = anchorDocument;
+          return anchorDocument;
+        },
+        (error) => {
+          setLoadingStatus(state)('anchor', 'failed');
+          notifier.error(error);
+          throw error;
+        }
+      );
   };
 
   const fetchPredecessorRows = (state) => () => {
@@ -36,16 +50,23 @@ function QueryActionsProvider(es, Private, Promise) {
       rows: { anchor },
     } = state;
 
-    state.loadingStatus.predecessors = 'loading';
+    setLoadingStatus(state)('predecessors', 'loading');
 
     return Promise.try(() => (
       fetchPredecessors(es, indexPattern, anchor, _.zipObject([sort]), predecessorCount)
     ))
-      .then((predecessorDocuments) => {
-        state.loadingStatus.predecessors = 'loaded';
-        state.rows.predecessors = predecessorDocuments;
-        return predecessorDocuments;
-      });
+      .then(
+        (predecessorDocuments) => {
+          setLoadingStatus(state)('predecessors', 'loaded');
+          state.rows.predecessors = predecessorDocuments;
+          return predecessorDocuments;
+        },
+        (error) => {
+          setLoadingStatus(state)('predecessors', 'failed');
+          notifier.error(error);
+          throw error;
+        },
+      );
   };
 
   const fetchSuccessorRows = (state) => () => {
@@ -54,16 +75,23 @@ function QueryActionsProvider(es, Private, Promise) {
       rows: { anchor },
     } = state;
 
-    state.loadingStatus.successors = 'loading';
+    setLoadingStatus(state)('successors', 'loading');
 
     return Promise.try(() => (
       fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
     ))
-      .then((successorDocuments) => {
-        state.loadingStatus.successors = 'loaded';
-        state.rows.successors = successorDocuments;
-        return successorDocuments;
-      });
+      .then(
+        (successorDocuments) => {
+          setLoadingStatus(state)('successors', 'loaded');
+          state.rows.successors = successorDocuments;
+          return successorDocuments;
+        },
+        (error) => {
+          setLoadingStatus(state)('successors', 'failed');
+          notifier.error(error);
+          throw error;
+        },
+      );
   };
 
   const fetchAllRows = (state) => () => (
