@@ -83,6 +83,7 @@ export default {
               '"outback","SUV",25000\n'
         }
       },
+      /*
       'dataframe-0': {
         id: 'dataframe-0',
         name: 'Static',
@@ -92,6 +93,7 @@ export default {
           interval: 'auto'
         }
       }
+      */
     }
   },
 };

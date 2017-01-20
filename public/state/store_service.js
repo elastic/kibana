@@ -1,6 +1,7 @@
 import React from 'react';
 import modules from 'ui/modules';
 import { createStore, applyMiddleware } from 'redux';
+import onStart from './on_start';
 import thunk from 'redux-thunk';
 import rootReducer from './reducers';
 import initialState from './initial_state';
@@ -22,6 +23,8 @@ app.service('$store', (kbnVersion, basePath) => {
 
   // TODO: Sticking this here so I can dispatch events from the console;
   window.store = store;
+
+  onStart(store);
 
   return store;
 });

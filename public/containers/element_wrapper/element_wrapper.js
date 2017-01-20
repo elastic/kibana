@@ -1,13 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { elementResolve, argumentResolve, elementSelect } from 'plugins/rework/state/actions/element';
-
-
-/*
-  This pseudo element interacts with state to writing the resolved
-  value of arguments to the transient resolvedArg object.
-*/
+import { elementSelect } from 'plugins/rework/state/actions/element';
 
 const ElementWrapper = React.createClass({
   select(id) {
@@ -16,10 +10,6 @@ const ElementWrapper = React.createClass({
       const {dispatch} = this.props;
       dispatch(elementSelect(id));
     };
-  },
-  componentWillMount() {
-    const {dispatch, id, args} = this.props;
-    dispatch(elementResolve(id));
   },
   render() {
     const {id} = this.props;
