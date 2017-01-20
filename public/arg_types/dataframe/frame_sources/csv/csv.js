@@ -20,7 +20,12 @@ frameSources.push(new FrameSource('csv', {
       rows: []
     };
 
-    const parsedArrays = parse(value.csv);
+    let parsedArrays;
+    try {
+      parsedArrays = parse(value.csv);
+    } catch (e) {
+      return;
+    }
 
     const keys = parsedArrays.shift();
     dataframe.rows = _.map(parsedArrays, (values) => _.zipObject(keys, values));
