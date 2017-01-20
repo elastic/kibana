@@ -13,12 +13,14 @@ module.exports = function (grunt) {
 
   function uiFrameworkServerStart() {
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server' : './node_modules/.bin/webpack-dev-server',
+      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=ui_framework/doc_site/webpack.config.js',
         '--hot ',
         '--inline',
-        '--content-base=ui_framework/doc_site/build'
+        '--content-base=ui_framework/doc_site/build',
+        '--host=0.0.0.0',
+        '--port=8020',
       ],
       opts: { stdio: 'inherit' }
     };

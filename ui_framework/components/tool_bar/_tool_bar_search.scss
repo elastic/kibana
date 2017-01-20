@@ -1,9 +1,27 @@
+/**
+ * 1. Put 10px of space between each child.
+ */
 .kuiToolBarSearch {
   display: flex;
+  align-items: center;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & > * + * {
+    margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+
   flex: 1 1 auto;
   max-width: 800px;
   line-height: $lineHeight;
-  margin-right: $toolBarSectionSpacing * 0.5;
 }
 
 .kuiToolBarSearchBox {
@@ -31,10 +49,10 @@
     border: 1px solid #FFFFFF;
     border-radius: $buttonBorderRadius;
     font-size: $fontSize;
-    border: none; /* 1 */
+    border: 1px solid #ffffff;
     line-height: normal; /* 1 */
 
     &:focus {
-      @include focus;
+      @include formControlFocus;
     }
   }

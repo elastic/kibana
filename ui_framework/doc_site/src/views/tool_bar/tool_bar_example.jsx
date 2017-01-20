@@ -12,6 +12,10 @@ export default createExample([{
   html: require('./tool_bar.html'),
   hasDarkTheme: false,
 }, {
+  title: 'ToolBar with Search only',
+  html: require('./tool_bar_search_only.html'),
+  hasDarkTheme: false,
+}, {
   title: 'ToolBarFooter',
   description: (
     <p>Use the ToolBarFooter in conjunction with the ToolBar. It can surface secondary controls or a subset of the primary controls.</p>
