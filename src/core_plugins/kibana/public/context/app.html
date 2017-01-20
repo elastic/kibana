@@ -35,7 +35,7 @@
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
         data-test-subj="predecessorCountPicker"
-        set-count="contextApp.actions.fetchGivenPredecessorRows"
+        on-change-count="contextApp.actions.fetchGivenPredecessorRows"
       ></context-size-picker>
       <div>newer entries</div>
     </div>
@@ -85,7 +85,7 @@
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
         data-test-subj="successorCountPicker"
-        set-count="contextApp.actions.fetchGivenSuccessorRows"
+        on-change-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
       <div>older entries</div>
     </div>

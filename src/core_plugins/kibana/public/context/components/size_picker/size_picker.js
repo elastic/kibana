@@ -16,7 +16,7 @@ module.directive('contextSizePicker', function ContextSizePicker() {
     restrict: 'E',
     scope: {
       count: '=',
-      setCount: '=',
+      onChangeCount: '=',
     },
     template: contextSizePickerTemplate,
   };
@@ -25,6 +25,6 @@ module.directive('contextSizePicker', function ContextSizePicker() {
 
 function ContextSizePickerController() {
   this.getOrSetCount = (count) => (
-    _.isUndefined(count) ? this.count : this.setCount(count)
+    _.isUndefined(count) ? this.count : this.onChangeCount(count)
   );
 }
