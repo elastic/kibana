@@ -9,15 +9,15 @@ import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 import routeBasedNotifierProvider from 'ui/route_based_notifier';
 
 export default function TermsAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
-  let AggConfig = Private(VisAggConfigProvider);
-  let Schemas = Private(VisSchemasProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
+  const AggConfig = Private(VisAggConfigProvider);
+  const Schemas = Private(VisSchemasProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
   const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev'];
-  let orderAggSchema = (new Schemas([
+  const orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
@@ -28,7 +28,7 @@ export default function TermsAggDefinition(Private) {
 
   function isNotType(type) {
     return function (agg) {
-      let field = agg.params.field;
+      const field = agg.params.field;
       return !field || field.type !== type;
     };
   }
@@ -37,7 +37,7 @@ export default function TermsAggDefinition(Private) {
     name: 'terms',
     title: 'Terms',
     makeLabel: function (agg) {
-      let params = agg.params;
+      const params = agg.params;
       return agg.getFieldDisplayName() + ': ' + params.order.display;
     },
     createFilter: createFilter,
@@ -76,7 +76,7 @@ export default function TermsAggDefinition(Private) {
         makeOrderAgg: function (termsAgg, state) {
           state = state || {};
           state.schema = orderAggSchema;
-          let orderAgg = new AggConfig(termsAgg.vis, state);
+          const orderAgg = new AggConfig(termsAgg.vis, state);
           orderAgg.id = termsAgg.id + '-orderAgg';
           return orderAgg;
         },
@@ -89,7 +89,7 @@ export default function TermsAggDefinition(Private) {
             }
           };
 
-          let INIT = {}; // flag to know when prevOrderBy has changed
+          const INIT = {}; // flag to know when prevOrderBy has changed
           let prevOrderBy = INIT;
 
           $scope.$watch('responseValueAggs', updateOrderAgg);
@@ -103,15 +103,15 @@ export default function TermsAggDefinition(Private) {
           };
 
           function updateOrderAgg() {
-            let agg = $scope.agg;
-            let params = agg.params;
-            let orderBy = params.orderBy;
-            let paramDef = agg.type.params.byName.orderAgg;
+            // abort until we get the responseValueAggs
+            if (!$scope.responseValueAggs) return;
+            const agg = $scope.agg;
+            const params = agg.params;
+            const orderBy = params.orderBy;
+            const paramDef = agg.type.params.byName.orderAgg;
 
             // setup the initial value of orderBy
             if (!orderBy && prevOrderBy === INIT) {
-              // abort until we get the responseValueAggs
-              if (!$scope.responseValueAggs) return;
               let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
               if (!respAgg) {
                 respAgg = { id: '_term' };
@@ -138,9 +138,9 @@ export default function TermsAggDefinition(Private) {
           }
         },
         write: function (agg, output) {
-          let vis = agg.vis;
-          let dir = agg.params.order.val;
-          let order = output.params.order = {};
+          const vis = agg.vis;
+          const dir = agg.params.order.val;
+          const order = output.params.order = {};
 
           let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
@@ -164,7 +164,7 @@ export default function TermsAggDefinition(Private) {
             return;
           }
 
-          let orderAggId = orderAgg.id;
+          const orderAggId = orderAgg.id;
           if (orderAgg.parentId) {
             orderAgg = vis.aggs.byId[orderAgg.parentId];
           }
@@ -190,4 +190,4 @@ export default function TermsAggDefinition(Private) {
       }
     ]
   });
-};
+}
