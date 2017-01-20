@@ -12,13 +12,13 @@ import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
-import PersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedState } from 'ui/persisted_state';
 
 export default function VisFactory(Notifier, Private) {
-  let aggTypes = Private(AggTypesIndexProvider);
-  let visTypes = Private(RegistryVisTypesProvider);
-  let AggConfigs = Private(VisAggConfigsProvider);
-  const PersistedState = Private(PersistedStateProvider);
+
+  const aggTypes = Private(AggTypesIndexProvider);
+  const visTypes = Private(RegistryVisTypesProvider);
+  const AggConfigs = Private(VisAggConfigsProvider);
 
   let notify = new Notifier({
     location: 'Vis'
