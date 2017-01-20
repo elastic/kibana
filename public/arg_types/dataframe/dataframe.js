@@ -14,13 +14,9 @@ argTypes.push(new ArgType('dataframe', {
     return (<FrameLink value={value} select={storeValue}></FrameLink>);
   },
   resolve: (value, state) => {
-    const unresolvedFrame = state.persistent.storage.dataframes[value];
+    const resolvedFrame = state.transient.dataframeCache[value];
 
-    if (!unresolvedFrame) return {type: 'dataframe', columns: [], rows: []};
-
-    const type = unresolvedFrame.type;
-    const frameSource = frameSources.byName[type];
-
-    return frameSource.toDataframe(unresolvedFrame.value);
+    if (!resolvedFrame) return {type: 'dataframe', columns: [], rows: []};
+    return resolvedFrame;
   }
 }));
