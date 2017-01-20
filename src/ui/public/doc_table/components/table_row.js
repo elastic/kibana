@@ -113,12 +113,10 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         }
 
         $scope.columns.forEach(function (column) {
-          const isFilterable =
-            $scope.flattenedRow[column] === undefined
-            ? false
-            : !mapping[column]
-            ? false
-            : mapping[column].filterable;
+          const isFilterable = $scope.flattenedRow[column] !== undefined
+            && mapping[column]
+            && mapping[column].filterable;
+
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
