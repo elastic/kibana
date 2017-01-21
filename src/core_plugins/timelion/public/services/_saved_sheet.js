@@ -50,5 +50,7 @@ module.factory('SavedSheet', function (courier, config) {
     version: 'integer'
   };
 
+  SavedSheet.fieldOrder = ['title', 'description'];
+
   return SavedSheet;
 });

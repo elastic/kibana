@@ -61,6 +61,8 @@ uiModules
     version: 'integer'
   };
 
+  SavedVis.fieldOrder = ['title', 'description'];
+
   SavedVis.searchSource = true;
 
   SavedVis.prototype._afterEsResp = function () {

@@ -67,6 +67,8 @@ module.factory('SavedDashboard', function (courier, config) {
     }
   };
 
+  SavedDashboard.fieldOrder = ['title', 'description'];
+
   SavedDashboard.searchsource = true;
 
   return SavedDashboard;

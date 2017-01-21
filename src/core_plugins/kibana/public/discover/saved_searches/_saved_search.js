@@ -39,6 +39,8 @@ module.factory('SavedSearch', function (courier) {
     version: 'integer'
   };
 
+  SavedSearch.fieldOrder = ['title', 'description'];
+
   SavedSearch.searchSource = true;
 
   return SavedSearch;
