@@ -41,7 +41,7 @@ uiModules.get('kibana')
       }
     },
     controllerAs: 'paginate',
-    controller: function ($scope) {
+    controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
 
@@ -96,6 +96,10 @@ uiModules.get('kibana')
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
         }
+      };
+
+      self.goToTop = function () {
+        $document.scrollTop(0);
       };
 
       self.renderList = function () {

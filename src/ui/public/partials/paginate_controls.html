@@ -1,3 +1,7 @@
+<div class="top-link" ng-if="linkToTop">
+  <a ng-click="paginate.goToTop()">^ Top</a>
+</div>
+
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
     <li ng-style="{'visibility':'hidden'}" ng-if="page.first">

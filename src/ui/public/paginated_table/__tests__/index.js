@@ -47,12 +47,13 @@ describe('paginated table', function () {
     };
   };
 
-  const renderTable = function (cols, rows, perPage, sort, showBlankRows) {
+  const renderTable = function (cols, rows, perPage, sort, showBlankRows, linkToTop) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
     $scope.sort = sort || {};
     $scope.showBlankRows = showBlankRows;
+    $scope.linkToTop = linkToTop;
 
     const template = `
       <paginated-table
@@ -60,6 +61,7 @@ describe('paginated table', function () {
         rows="rows"
         per-page="perPage"
         sort="sort"
+        link-to-top="linkToTop"
         show-blank-rows="showBlankRows">`;
     $el = $compile(template)($scope);
 
@@ -125,6 +127,22 @@ describe('paginated table', function () {
       renderTable(data.columns, data.rows, perPageCount, null, false);
       const tableRows = $el.find('tbody tr');
       expect(tableRows.size()).to.be(rowCount);
+    });
+
+    it('should not show link to top when not set', function () {
+      const data = makeData(5, 5);
+      renderTable(data.columns, data.rows, 10, null, false);
+
+      const linkToTop = $el.find('.top-link');
+      expect(linkToTop.size()).to.be(0);
+    });
+
+    it('should show link to top when set', function () {
+      const data = makeData(5, 5);
+      renderTable(data.columns, data.rows, 10, null, false, true);
+
+      const linkToTop = $el.find('.top-link');
+      expect(linkToTop.size()).to.be(1);
     });
 
   });
