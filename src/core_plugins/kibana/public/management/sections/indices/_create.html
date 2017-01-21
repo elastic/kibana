@@ -62,13 +62,6 @@
             </select>
           </div>
 
-          <div class="form-group time-and-pattern">
-            <label ng-if="index.isTimeBased">
-              <input ng-model="index.nameIsPattern" type="checkbox">
-              Use event times to create index names <small>[DEPRECATED]</small>
-            </label>
-          </div>
-
           <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
             <div class="alert alert-warning">
               <h4>Time-interval based index patterns are deprecated!</h4>
@@ -124,6 +117,13 @@
               (e.g. <em>logstash-2015.12.21</em>) that fall within the current
               time range.
             </p>
+          </div>
+
+          <div class="form-group time-and-pattern">
+            <label ng-if="index.isTimeBased">
+              <input ng-model="index.nameIsPattern" type="checkbox">
+              Use event times to create index names <small>[DEPRECATED]</small>
+            </label>
           </div>
 
           <section>
