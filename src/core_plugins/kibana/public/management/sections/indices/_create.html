@@ -42,7 +42,7 @@
             </label>
           </div>
 
-          <div class="form-group" ng-if="index.isTimeBased && !index.fetchFieldsError">
+          <div class="form-group" ng-if="index.isTimeBased">
             <label>
               Time-field name
               &nbsp;
@@ -54,7 +54,7 @@
             </label>
             <select
               required
-              ng-if="!index.fetchFieldsError"
+              ng-disabled="index.fetchFieldsError"
               ng-options="field.name for field in index.dateFields"
               ng-model="index.timeField"
               auto-select-if-only-one="index.dateFields"
