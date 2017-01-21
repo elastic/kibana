@@ -6,9 +6,6 @@ import './drop_down.less';
 import classnames from 'classnames';
 
 const DropDown = React.createClass({
-  elementAdd(elementType) {
-    console.log(elementType);
-  },
   render() {
     const {dropdown} = this.props;
     const style = {
@@ -21,7 +18,7 @@ const DropDown = React.createClass({
         case 'dataframe':
           return (<DataframeDialog></DataframeDialog>);
         case 'element':
-          return (<ElementAddDialog onSelect={this.elementAdd}></ElementAddDialog>);
+          return (<ElementAddDialog></ElementAddDialog>);
         default:
           return null;
       }

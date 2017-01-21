@@ -23,6 +23,15 @@ function rootReducer(state = {}, action) {
       }});
   };
 
+  const addElement = (element, pageId) => {
+    const result = setPersistent('elements', {
+      ...state.persistent.elements,
+      [element.id]: element});
+
+    result.persistent.pages[pageId].elements.unshift(element.id);
+    return result;
+  };
+
   const setElement = (id, prop, value) => {
     return setPersistent('elements', {
       ...state.persistent.elements,
@@ -48,6 +57,10 @@ function rootReducer(state = {}, action) {
 
     case 'PAGE_SET':
       return setWorkpad('page', payload);
+
+    case 'ELEMENT_ADD':
+      // payload.page. hrm.
+      return addElement(payload.element, payload.pageId);
 
     case 'ELEMENT_SELECT':
       return setTransient('selectedElement', payload);

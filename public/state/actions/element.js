@@ -1,7 +1,8 @@
 import { createAction } from 'redux-actions';
 import _ from 'lodash';
-import elements from 'plugins/rework/elements/elements';
+import elementTypes from 'plugins/rework/elements/elements';
 import { mutateElement, mutateArgument } from './lib/helpers';
+import { getElementTemplate } from '../templates';
 
 /*
  Exports
@@ -16,6 +17,17 @@ export const elementAngle = createAction('ELEMENT_ANGLE', mutateElement);
 
 export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
+
+export function elementAdd(type, pageId) {
+  return (dispatch, getState) => {
+    const elementType = elementTypes.byName[type];
+    const args = _.fromPairs(_.map(elementType.args, arg => [arg.name, arg.default]));
+    const element = getElementTemplate({type: elementType.name, args: args});
+    const action = createAction('ELEMENT_ADD', (element, pageId) => {return {element, pageId};});
+    dispatch(action(element, pageId));
+    dispatch(elementResolve(element.id));
+  };
+}
 
 // Resolve all arguments at the same time
 export function elementResolve(elementId) {
@@ -56,7 +68,7 @@ export function argumentResolve(elementId, name) {
 
 function getArgDefinitions(state, elementId) {
   const element = state.persistent.elements[elementId];
-  const argDefinitions = elements.byName[element.type].args;
+  const argDefinitions = elementTypes.byName[element.type].args;
   return argDefinitions;
 }
 
