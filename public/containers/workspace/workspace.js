@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import TopNav from 'plugins/rework/components/top_nav/top_nav';
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Sidebar from 'plugins/rework/components/sidebar/sidebar';
+import NavButton from 'plugins/rework/components/nav_button/nav_button';
 
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
@@ -75,8 +76,14 @@ const Workspace = React.createClass({
             <span className="rework--workpad-name">{workpad.name}</span>
           </div>
           <div className="rework--top-nav-bottom">
-            <a className="fa fa-database rework--nav-button" onClick={this.dropdown('dataframe')}></a>
-            <a className="fa fa-plus-circle rework--nav-button" onClick={this.dropdown('element')}></a>
+            <NavButton
+              tooltip="Dataframes"
+              className="fa fa-database"
+              onClick={this.dropdown('dataframe')}></NavButton>
+            <NavButton
+              tooltip="Add Element"
+              className="fa fa-plus-circle"
+              onClick={this.dropdown('element')}></NavButton>
 
           </div>
         </TopNav>

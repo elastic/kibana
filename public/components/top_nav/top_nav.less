@@ -1,22 +1,24 @@
 @import (reference) "~plugins/rework/main.less";
 
+@rework--top-nav--background: #eaeaea;
+@rework--top-nav--section-height: 35px;
+
 .rework--top-nav {
   height: 70px;
-  background-color: #eaeaea;
   z-index: 1;
   border-bottom: 1px solid @kibanaGray4;
+  background-color: @rework--top-nav--background;
 }
 
 .rework--workpad-name {
   font-size: 20px;
   font-weight: 100;
-}
-
-.rework--nav-button {
-  color: @text-color;
+  display: inline-block;
+  line-height: @rework--top-nav--section-height;
+  padding-left: 10px;
 }
 
 .rework--top-nav-top, .rework--top-nav-bottom {
-  padding: 5px 10px;
-  height: 35px;
+  height: @rework--top-nav--section-height;
+  padding: 0px 10px;
 }
