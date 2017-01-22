@@ -21,7 +21,11 @@ export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument
 export function elementAdd(type, pageId) {
   return (dispatch, getState) => {
     const elementType = elementTypes.byName[type];
-    const args = _.fromPairs(_.map(elementType.args, arg => [arg.name, arg.default]));
+    const args = _.fromPairs(
+      _.map(elementType.args, arg => {
+        const argDefault = _.isFunction(arg.default) ? arg.default(getState()) : arg.default;
+        return [arg.name, argDefault];
+      }));
     const element = getElementTemplate({type: elementType.name, args: args});
     const action = createAction('ELEMENT_ADD', (element, pageId) => {return {element, pageId};});
     dispatch(action(element, pageId));
