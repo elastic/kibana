@@ -1,0 +1,19 @@
+@import (reference) "~plugins/rework/main.less";
+
+@rework--top-nav--section-height: 35px;
+
+.rework--nav-button {
+  display: inline-block;
+
+  & > a {
+    color: lighten(@text-color, 20%);
+    line-height: @rework--top-nav--section-height;
+    padding: 0px 10px;
+
+    &:hover {
+      color: @text-color;
+    }
+  }
+
+
+}
