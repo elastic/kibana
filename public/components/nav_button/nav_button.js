@@ -2,6 +2,7 @@ import React from 'react';
 import './nav_button.less';
 import classnames from 'classnames';
 import ReactTooltip from 'react-tooltip';
+import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 
 export default React.createClass({
   render() {
@@ -9,19 +10,14 @@ export default React.createClass({
 
     return (
       <div className='rework--nav-button'>
-        <a
-          data-tip={tooltip}
-          className={className}
-          onClick={onClick}
-          >
-          {this.props.children}
-        </a>
-        <ReactTooltip
-          class="rework--tooltip"
-          type='dark'
-          effect='solid'
-          event='mouseover'
-          eventOff='click mouseout'/>
+        <Tooltip content={tooltip}>
+          <a
+            className={className}
+            onClick={onClick}
+            >
+            {this.props.children}
+          </a>
+        </Tooltip>
       </div>
     );
   }
