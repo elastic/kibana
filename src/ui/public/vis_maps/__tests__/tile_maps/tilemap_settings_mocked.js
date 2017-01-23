@@ -90,6 +90,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
       expect(urlObject).to.have.property('hostname', 'proxy-tiles.elastic.co');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
+      expect(urlObject.query).to.have.property('my_app_version');
 
     });
 
@@ -137,7 +138,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     it('merges query params into manifest request', () => {
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapsConfig.manifestServiceUrl = 'http://test.com/manifest?v=1';
-      loadSettings('http://test.com/manifest?v=1&foo=bar');
+      loadSettings('http://test.com/manifest?v=1&my_app_version=1.2.3&foo=bar');
     });
 
   });
