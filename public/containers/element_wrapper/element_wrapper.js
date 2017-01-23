@@ -14,7 +14,7 @@ const ElementWrapper = React.createClass({
   render() {
     const {id} = this.props;
     return (
-      <div style={{height: '100%'}} tabIndex="0" onFocus={this.select(id)} className="rework--element-wrapper">
+      <div style={{height: '100%'}} tabIndex="0" onFocus={this.select(id)} id={id} className="rework--element-wrapper">
         {this.props.children}
       </div>
     );
