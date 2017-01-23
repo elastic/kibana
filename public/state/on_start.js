@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import {dataframeResolve} from './actions/dataframe';
-import {elementResolve} from './actions/element';
+import {workpadInit} from './actions/workpad';
 import fetch from 'isomorphic-fetch';
 import moment from 'moment';
 
@@ -32,8 +31,8 @@ export default function (store) {
   const {getState, dispatch} = store;
   const safeSave = _.debounce(saveOnChange, 1000, {maxWait: 5000});
 
-  resolveElements();
-  resolveDataframes();
+  dispatch(workpadInit());
+
   store.subscribe(safeSave);
 
   function propDidChange(previousState, currentState, prop) {
@@ -60,15 +59,4 @@ export default function (store) {
       console.log(resp);
     });
   }
-
-  function resolveDataframes() {
-    const ids = _.keys(getState().persistent.dataframes);
-    _.each(ids, id => dispatch(dataframeResolve(id)));
-  }
-
-  function resolveElements() {
-    const ids = _.keys(getState().persistent.elements);
-    _.each(ids, id => dispatch(elementResolve(id)));
-  }
-
 }

@@ -33,6 +33,13 @@ export function elementAdd(type, pageId) {
   };
 }
 
+export function elementResolveAll() {
+  return (dispatch, getState) => {
+    const ids = _.keys(getState().persistent.elements);
+    _.each(ids, id => dispatch(elementResolve(id)));
+  };
+}
+
 // Resolve all arguments at the same time
 export function elementResolve(elementId) {
   return (dispatch, getState) => {

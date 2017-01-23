@@ -16,6 +16,13 @@ export function dataframeSet(dataframe) {
   };
 }
 
+export function dataframeResolveAll() {
+  return (dispatch, getState) => {
+    const ids = _.keys(getState().persistent.dataframes);
+    _.each(ids, id => dispatch(dataframeResolve(id)));
+  };
+}
+
 export function dataframeResolve(id) {
   return (dispatch, getState) => {
     const dataframe = getState().persistent.dataframes[id];
