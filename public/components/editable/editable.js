@@ -12,7 +12,7 @@ export default React.createClass({
     }
   },
   render() {
-    const {value, onChange, className} = this.props;
+    const {value, onChange, className, style} = this.props;
 
     return (
       <input
@@ -21,6 +21,7 @@ export default React.createClass({
         className={['form-control rework--editable', className].join(' ')}
         value={value}
         onChange={this.change}
+        style={style}
         onKeyPress={this.handleKeyPress}/>
     );
   }
