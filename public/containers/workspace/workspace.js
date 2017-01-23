@@ -24,7 +24,7 @@ import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
-import { workpadName } from 'plugins/rework/state/actions/workpad';
+import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
 
 import './workspace.less';
 
@@ -32,6 +32,10 @@ const Workspace = React.createClass({
   nameWorkpad(value) {
     const {dispatch} = this.props;
     dispatch(workpadName(value));
+  },
+  newWorkpad() {
+    const {dispatch} = this.props;
+    dispatch(workpadNew());
   },
   dropdown(name) {
     return () => {
@@ -90,6 +94,10 @@ const Workspace = React.createClass({
               tooltip="Add Element"
               className="fa fa-plus-circle"
               onClick={this.dropdown('element')}></NavButton>
+            <NavButton
+              tooltip="New Workpad"
+              className="fa fa-star"
+              onClick={this.newWorkpad}></NavButton>
 
           </div>
         </TopNav>
