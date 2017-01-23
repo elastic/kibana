@@ -8,9 +8,9 @@ const module = uiModules.get('kibana');
 /**
  * @typedef {Object} ConfirmModalOptions
  * @property {String} confirmButtonText
- * @property {String} cancelButtonText
+ * @property {String=} cancelButtonText
  * @property {function} onConfirm
- * @property {function} onCancel
+ * @property {function=} onCancel
  */
 
 module.factory('confirmModal', function ($rootScope, $compile) {
@@ -18,16 +18,17 @@ module.factory('confirmModal', function ($rootScope, $compile) {
 
   /**
    * @param {String} message - the message to show in the body of the confirmation dialog.
-   * @param {ConfirmModalOptions=} - Optional custom options to further customize the
-   * dialog.
+   * @param {ConfirmModalOptions} - Options to further customize the dialog.
    */
-  return function confirmModal(message, customOptions = {}) {
+  return function confirmModal(message, customOptions) {
     const defaultOptions = {
-      onConfirm: noop,
       onCancel: noop,
-      confirmButtonText: 'Confirm',
       cancelButtonText: 'Cancel'
     };
+
+    if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
+      throw 'Please specify confirmation button text and onConfirm action';
+    }
 
     const options = Object.assign(defaultOptions, customOptions);
     if (modalPopover) {

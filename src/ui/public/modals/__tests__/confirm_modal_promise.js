@@ -19,7 +19,7 @@ describe('ui/modals/confirm_modal_promise', function () {
 
     message = 'woah';
 
-    promise = confirmModalPromise(message);
+    promise = confirmModalPromise(message, { confirmButtonText: 'click me' });
   });
 
   afterEach(function () {
@@ -79,6 +79,17 @@ describe('ui/modals/confirm_modal_promise', function () {
 
         expect(cancelCallback.called).to.be(true);
         expect(confirmCallback.called).to.be(false);
+      });
+    });
+
+    context('error is thrown', function () {
+      it('when no confirm button text is used', function () {
+        try {
+          confirmModalPromise(message);
+          expect(false).to.be(true);
+        } catch (error) {
+          expect(error).to.not.be(undefined);
+        }
       });
     });
   });
