@@ -33,6 +33,15 @@ function rootReducer(state = {}, action) {
     return result;
   };
 
+  const addPage = (page) => {
+    const result = setPersistent('pages', {
+      ...state.persistent.pages,
+      [page.id]: page});
+
+    result.persistent.workpad.pages.push(page.id);
+    return result;
+  };
+
   const setElement = (id, prop, value) => {
     return setPersistent('elements', {
       ...state.persistent.elements,
@@ -70,6 +79,8 @@ function rootReducer(state = {}, action) {
 
     case 'PAGE_SET':
       return setWorkpad('page', payload);
+    case 'PAGE_ADD':
+      return addPage(payload);
 
     case 'ELEMENT_ADD':
       // payload.page. hrm.

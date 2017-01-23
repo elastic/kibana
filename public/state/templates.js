@@ -16,3 +16,13 @@ export const getElementTemplate = (props) => {
   const element = Object.assign({}, template, props);
   return element;
 };
+
+export const getPageTemplate = () => {
+  return {
+    id: uuid(),
+    style: {
+      backgroundColor: '#fff'
+    },
+    elements: [] // Same deal here. I'm watching you.
+  };
+};
