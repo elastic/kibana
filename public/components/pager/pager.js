@@ -1,12 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import Centered from 'plugins/rework/components/centered/centered.js';
 
+import './pager.less';
 
-import './page_control.less';
-
-const PageControl = React.createClass({
+export default React.createClass({
   render() {
     const { direction, handler } = this.props;
 
@@ -27,11 +25,3 @@ const PageControl = React.createClass({
     );
   }
 });
-
-function mapStateToProps(state) {
-  return {
-    page: state.transient.editor
-  };
-}
-
-export default connect(mapStateToProps)(PageControl);

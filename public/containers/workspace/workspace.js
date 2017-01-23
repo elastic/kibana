@@ -11,7 +11,7 @@ import Editable from 'plugins/rework/components/editable/editable';
 
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
-import PageControl from 'plugins/rework/components/page_control/page_control';
+import Pager from 'plugins/rework/components/pager/pager';
 import Workpad from 'plugins/rework/components/workpad/workpad';
 import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
@@ -121,7 +121,7 @@ const Workspace = React.createClass({
           </Sidebar>
 
           <Centered onMouseDown={this.select(null)}>
-            <PageControl direction='previous' handler={this.do(pagePrevious)}></PageControl>
+            <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
             <Workpad workpad={workpad}>
                 <Stack top={workpad.page}>
                   {workpad.pages.map((pageId) => {
@@ -160,7 +160,7 @@ const Workspace = React.createClass({
                   })}
                 </Stack>
             </Workpad>
-            <PageControl direction='next' handler={this.do(pageNext)}></PageControl>
+            <Pager direction='next' handler={this.do(pageNext)}></Pager>
           </Centered>
         </div>
       </div>
