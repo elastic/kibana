@@ -21,8 +21,7 @@ uiRoutes.afterSetupWork(function (tilemapSettings) {
 });
 
 uiModules.get('kibana')
-  .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize) {
-
+  .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize, kbnVersion) {
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
@@ -46,7 +45,7 @@ uiModules.get('kibana')
       constructor() {
 
         this._queryParams = {
-          my_app_version: tilemapsConfig.my_app_version
+          my_app_version: kbnVersion
         };
         this._error = null;
 
