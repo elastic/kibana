@@ -132,7 +132,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     it('merges query params into manifest request', () => {
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapsConfig.manifestServiceUrl = 'http://test.com/manifest?v=1';
-      loadSettings('http://test.com/manifest?v=1&foo=bar');
+      loadSettings('http://test.com/manifest?v=1&my_app_version=1.2.3&foo=bar');
     });
 
   });
