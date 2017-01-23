@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import Visualization from '../components/vis_editor/visualization';
+import Visualization from '../components/visualization';
 import addScope from '../lib/add_scope';
 import modules from 'ui/modules';
 import moment from 'moment';

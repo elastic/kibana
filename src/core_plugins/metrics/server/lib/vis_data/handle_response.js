@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Color from 'color';
 import getAggValue from '../get_agg_value';
 import getSiblingAggValue from '../get_sibling_agg_value';
-import calculateLabel from '../../../public/components/vis_editor/lib/calculate_label';
+import calculateLabel from '../../../public/components/lib/calculate_label';
 import SeriesAgg from '../series_agg';
 import getDefaultDecoration from './get_default_decoration';
 import unitToSeconds from '../unit_to_seconds';

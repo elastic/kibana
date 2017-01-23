@@ -1,4 +1,4 @@
-import newSeriesFn from '../components/vis_editor/lib/new_series_fn';
+import newSeriesFn from '../components/lib/new_series_fn';
 import uuid from 'node-uuid';
 export default () => {
   const id = uuid.v1();

@@ -7,7 +7,7 @@ export default function (kibana) {
 
     uiExports: {
       visTypes: [
-        'plugins/metrics/vis'
+        'plugins/metrics/kbn_vis_types'
       ]
     },
 

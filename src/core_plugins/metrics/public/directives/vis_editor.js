@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import modules from 'ui/modules';
-import VisEditor from '../components/vis_editor/vis_editor';
+import VisEditor from '../components/vis_editor';
 import addScope from '../lib/add_scope';
 import angular from 'angular';
 import createBrushHandler from '../lib/create_brush_handler';

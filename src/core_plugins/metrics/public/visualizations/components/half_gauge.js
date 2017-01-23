@@ -5,7 +5,7 @@ import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import ResizeAware from 'simianhacker-react-resize-aware';
-import HalfGaugeVis from '../lib/half_gauge_vis';
+import HalfGaugeVis from './half_gauge_vis';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
 

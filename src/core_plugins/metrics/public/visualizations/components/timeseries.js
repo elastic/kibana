@@ -3,7 +3,7 @@ import numeral from 'numeral';
 import React, { Component } from 'react';
 import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
-import TimeseriesChart from '../timeseries_chart';
+import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
 export default React.createClass({
