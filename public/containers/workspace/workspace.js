@@ -7,6 +7,7 @@ import TopNav from 'plugins/rework/components/top_nav/top_nav';
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Sidebar from 'plugins/rework/components/sidebar/sidebar';
 import NavButton from 'plugins/rework/components/nav_button/nav_button';
+import Editable from 'plugins/rework/components/editable/editable';
 
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
@@ -23,10 +24,15 @@ import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
+import { workpadName } from 'plugins/rework/state/actions/workpad';
 
 import './workspace.less';
 
 const Workspace = React.createClass({
+  nameWorkpad(value) {
+    const {dispatch} = this.props;
+    dispatch(workpadName(value));
+  },
   dropdown(name) {
     return () => {
       const {dispatch} = this.props;
@@ -73,7 +79,7 @@ const Workspace = React.createClass({
       <div className="rework--application">
         <TopNav>
           <div className="rework--top-nav-top">
-            <span className="rework--workpad-name">{workpad.name}</span>
+            <Editable className="rework--workpad-name" onChange={this.nameWorkpad} value={workpad.name}></Editable>
           </div>
           <div className="rework--top-nav-bottom">
             <NavButton
