@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { elementSelect } from 'plugins/rework/state/actions/element';
+import { elementSelect, elementRemove } from 'plugins/rework/state/actions/element';
 
 const ElementWrapper = React.createClass({
   select(id) {
@@ -11,10 +11,22 @@ const ElementWrapper = React.createClass({
       dispatch(elementSelect(id));
     };
   },
+  handleKeypress(e) {
+    const {dispatch, id} = this.props;
+    if (e.keyCode === 8 || e.keyCode === 46) {
+      dispatch(elementRemove(id));
+    }
+  },
   render() {
     const {id} = this.props;
     return (
-      <div style={{height: '100%'}} tabIndex="0" onFocus={this.select(id)} id={id} className="rework--element-wrapper">
+      <div
+        style={{height: '100%'}}
+        tabIndex="0"
+        onFocus={this.select(id)}
+        id={id}
+        onKeyDown={this.handleKeypress}
+        className="rework--element-wrapper">
         {this.props.children}
       </div>
     );
