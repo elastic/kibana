@@ -20,7 +20,6 @@ module.exports = function (server) {
         console.log(payload);
 
         callWithRequest(request, 'index', body).then(function (resp) {
-          console.log(resp);
           reply({
             ok: true,
           });
