@@ -3,18 +3,24 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import {argumentSet} from 'plugins/rework/state/actions/element';
+import {dropdownToggle} from 'plugins/rework/state/actions/misc';
 import ArgumentForm from 'plugins/rework/components/argument_form/argument_form';
 import './element_editor.less';
 
 const Editor = React.createClass({
+  elementAdd() {
+    this.props.dispatch(dropdownToggle('element'));
+  },
   render() {
     const {element, dispatch} = this.props;
 
     if (!element) {
       return (
         <div className="rework--editor">
-          <h4><i className="fa fa-info-circle"></i> Select an element</h4>
-          <p>Select an element to configure it here. If you don't have any elements <a>Add one</a></p>
+          <h4>Select an element</h4>
+          <p>
+            Select an element to configure it here. If you don't have any,
+            <a onClick={this.elementAdd}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
         </div>
       );
     }
