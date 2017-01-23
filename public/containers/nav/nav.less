@@ -1,0 +1,13 @@
+@import (reference) "~plugins/rework/main.less";
+
+@disabled-button-color: @kibanaGray4;
+
+.rework--nav--layer-buttons {
+  display: inline-block;
+
+  &.rework--nav--layer-buttons-disabled {
+    .rework--nav-button > a {
+      color: @disabled-button-color;
+    }
+  }
+}
