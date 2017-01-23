@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
 import ResizeAware from 'simianhacker-react-resize-aware';
-import getLastValue from './get_last_value';
+import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
 export default React.createClass({
 

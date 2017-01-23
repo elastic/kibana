@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import $ from './flot';
+import $ from '../lib/flot';
 import ResizeAware from 'simianhacker-react-resize-aware';
 import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
@@ -89,7 +89,7 @@ export default React.createClass({
     const { value, max, color, reversed } = this.props;
     const { scale, translateX, translateY, top, left } = this.state;
     const size = 2 * Math.PI * 50;
-    const sliceSize = 0.6;
+    const sliceSize = 1;
     const percent = value < max ? value / max : 1;
     const styles = reactcss({
       default: {
@@ -101,9 +101,9 @@ export default React.createClass({
         },
         svg: {
           position: 'absolute',
-          top: this.state.top || 0,
-          left: this.state.left || 0,
-          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
+          top: this.state.top,
+          left: this.state.left,
+          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         }
       }
     }, this.props);
@@ -117,7 +117,7 @@ export default React.createClass({
         stroke: color,
         strokeWidth: this.props.gaugeLine,
         strokeDasharray: `${(percent * sliceSize) * size} ${size}`,
-        transform: 'rotate(-197.8 60 60)',
+        transform: 'rotate(-90 60 60)',
       },
       circleBackground: {
         r: 50,
@@ -127,7 +127,7 @@ export default React.createClass({
         stroke: this.props.reversed ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
         strokeDasharray: `${sliceSize * size} ${size}`,
         strokeWidth: this.props.innerLine,
-        transform: 'rotate(162 60 60)',
+        // transform: 'rotate(116 60 60)',
       }
     };
 
@@ -137,9 +137,9 @@ export default React.createClass({
     return (
       <ResizeAware ref="resize" style={styles.resize}>
         <div style={styles.svg} ref="inner">
-          <svg width={120.72} height={78.72}>
-            <circle {...props.circleBackground} style={{ strokeWidth: this.props.innerLine }}/>
-            <circle {...props.circle} style={{ strokeWidth: this.props.gaugeLine }}/>
+          <svg width={120.72} height={120.72}>
+            <circle {...props.circleBackground}/>
+            <circle {...props.circle}/>
           </svg>
         </div>
       </ResizeAware>
@@ -147,4 +147,3 @@ export default React.createClass({
   }
 
 });
-

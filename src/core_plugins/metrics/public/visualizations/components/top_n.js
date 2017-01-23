@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import getLastValue from './get_last_value';
+import getLastValue from '../lib/get_last_value';
 export default React.createClass({
 
   getDefaultProps() {

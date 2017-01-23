@@ -1,11 +1,7 @@
-import _ from 'lodash';
-import numeral from 'numeral';
 import React, { Component } from 'react';
-import $ from './flot';
-import getLastValue from './get_last_value';
-import getValueBy from './get_value_by';
+import $ from '../lib/flot';
 import ResizeAware from 'simianhacker-react-resize-aware';
-import CircleGaugeVis from './circle_gauge_vis';
+import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
 
@@ -23,8 +19,6 @@ export default React.createClass({
     const inner = findDOMNode(this.refs.inner);
     const resize = findDOMNode(this.refs.resize);
     let scale = this.state.scale;
-
-    if (!inner || !resize) return;
 
     // Let's start by scaling to the largest dimension
     if (resize.clientWidth - resize.clientHeight < 0) {
@@ -91,65 +85,66 @@ export default React.createClass({
     const newState = this.calculateCorrdinates();
     newState && this.setState(newState);
   },
-
   render() {
-    const { metric } = this.props;
+    const { value, max, color, reversed } = this.props;
     const { scale, translateX, translateY, top, left } = this.state;
-    const value = metric && getLastValue(metric.data, 5) || 0;
-    const max = metric && getValueBy('max', metric.data) || 1;
-    const formatter = (metric && (metric.tickFormatter || metric.formatter)) ||
-      this.props.tickFormatter || ((v) => v);
-    const title = metric && metric.label || '';
+    const size = 2 * Math.PI * 50;
+    const sliceSize = 0.6;
+    const percent = value < max ? value / max : 1;
     const styles = reactcss({
       default: {
-        inner: {
-          top: this.state.top,
-          left: this.state.left,
-          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
+        resize: {
+          position: 'relative',
+          display: 'flex',
+          rowDirection: 'column',
+          flex: '1 0 auto'
+        },
+        svg: {
+          position: 'absolute',
+          top: this.state.top || 0,
+          left: this.state.left || 0,
+          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
         }
       }
     }, this.props);
 
-    const gaugeProps = {
-      reversed: this.props.reversed,
-      value,
-      gaugeLine: this.props.gaugeLine,
-      innerLine: this.props.innerLine,
-      innerColor: this.props.innerColor,
-      max: this.props.max || max,
-      color: metric && metric.color || '#8ac336'
+    const props = {
+      circle: {
+        r: 50,
+        cx: 60,
+        cy: 60,
+        fill: 'rgba(0,0,0,0)',
+        stroke: color,
+        strokeWidth: this.props.gaugeLine,
+        strokeDasharray: `${(percent * sliceSize) * size} ${size}`,
+        transform: 'rotate(-197.8 60 60)',
+      },
+      circleBackground: {
+        r: 50,
+        cx: 60,
+        cy: 60,
+        fill: 'rgba(0,0,0,0)',
+        stroke: this.props.reversed ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+        strokeDasharray: `${sliceSize * size} ${size}`,
+        strokeWidth: this.props.innerLine,
+        transform: 'rotate(162 60 60)',
+      }
     };
-    const valueStyle = {};
-    if (this.props.valueColor) {
-      valueStyle.color = this.props.valueColor;
-    }
 
-    let metrics;
-    if (metric) {
-      metrics = (
-        <div
-          className="thorCircleGauge__metrics"
-          ref="inner"
-          style={styles.inner}>
-          <div
-            className="thorCircleGauge__value"
-            style={valueStyle}
-            ref="label">{ formatter(value) }</div>
-          <div
-            className="thorCircleGauge__label"
-            ref="title">{ title }</div>
-        </div>
-      );
+    if (this.props.innerColor) {
+      props.circleBackground.stroke = this.props.innerColor;
     }
-    let className = 'thorCircleGauge';
-    if (this.props.reversed) className += ' reversed';
     return (
-      <div className={className}>
-        <ResizeAware className="thorCircleGauge__resize" ref="resize">
-          { metrics }
-          <CircleGaugeVis {...gaugeProps}/>
-        </ResizeAware>
-      </div>
+      <ResizeAware ref="resize" style={styles.resize}>
+        <div style={styles.svg} ref="inner">
+          <svg width={120.72} height={78.72}>
+            <circle {...props.circleBackground} style={{ strokeWidth: this.props.innerLine }}/>
+            <circle {...props.circle} style={{ strokeWidth: this.props.gaugeLine }}/>
+          </svg>
+        </div>
+      </ResizeAware>
     );
   }
+
 });
+

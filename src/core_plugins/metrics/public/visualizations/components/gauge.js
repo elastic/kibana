@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import numeral from 'numeral';
 import React, { Component } from 'react';
-import $ from './flot';
-import getLastValue from './get_last_value';
+import $ from '../lib/flot';
+import getLastValue from '../lib/get_last_value';
 import GaugeVis from './gauge_vis';
 
 class Gauge extends Component {

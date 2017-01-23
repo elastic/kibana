@@ -2,12 +2,12 @@ import _ from 'lodash';
 import moment from 'moment';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
-import $ from './flot';
-import eventBus from './events';
+import $ from '../lib/flot';
+import eventBus from '../lib/events';
 import ResizeAware from 'simianhacker-react-resize-aware';
 import reactcss from 'reactcss';
-import calculateBarWidth from './calculate_bar_width';
-import colors from './colors';
+import calculateBarWidth from '../lib/calculate_bar_width';
+import colors from '../lib/colors';
 
 const Chart = React.createClass({
 

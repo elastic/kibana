@@ -1,7 +1,11 @@
-import React, { Component } from 'react';
-import $ from './flot';
-import ResizeAware from 'simianhacker-react-resize-aware';
 import _ from 'lodash';
+import numeral from 'numeral';
+import React, { Component } from 'react';
+import $ from '../lib/flot';
+import getLastValue from '../lib/get_last_value';
+import getValueBy from '../lib/get_value_by';
+import ResizeAware from 'simianhacker-react-resize-aware';
+import HalfGaugeVis from '../lib/half_gauge_vis';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
 
@@ -19,6 +23,8 @@ export default React.createClass({
     const inner = findDOMNode(this.refs.inner);
     const resize = findDOMNode(this.refs.resize);
     let scale = this.state.scale;
+
+    if (!inner || !resize) return;
 
     // Let's start by scaling to the largest dimension
     if (resize.clientWidth - resize.clientHeight < 0) {
@@ -85,22 +91,18 @@ export default React.createClass({
     const newState = this.calculateCorrdinates();
     newState && this.setState(newState);
   },
+
   render() {
-    const { value, max, color, reversed } = this.props;
+    const { metric } = this.props;
     const { scale, translateX, translateY, top, left } = this.state;
-    const size = 2 * Math.PI * 50;
-    const sliceSize = 1;
-    const percent = value < max ? value / max : 1;
+    const value = metric && getLastValue(metric.data, 5) || 0;
+    const max = metric && getValueBy('max', metric.data) || 1;
+    const formatter = (metric && (metric.tickFormatter || metric.formatter)) ||
+      this.props.tickFormatter || ((v) => v);
+    const title = metric && metric.label || '';
     const styles = reactcss({
       default: {
-        resize: {
-          position: 'relative',
-          display: 'flex',
-          rowDirection: 'column',
-          flex: '1 0 auto'
-        },
-        svg: {
-          position: 'absolute',
+        inner: {
           top: this.state.top,
           left: this.state.left,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
@@ -108,42 +110,46 @@ export default React.createClass({
       }
     }, this.props);
 
-    const props = {
-      circle: {
-        r: 50,
-        cx: 60,
-        cy: 60,
-        fill: 'rgba(0,0,0,0)',
-        stroke: color,
-        strokeWidth: this.props.gaugeLine,
-        strokeDasharray: `${(percent * sliceSize) * size} ${size}`,
-        transform: 'rotate(-90 60 60)',
-      },
-      circleBackground: {
-        r: 50,
-        cx: 60,
-        cy: 60,
-        fill: 'rgba(0,0,0,0)',
-        stroke: this.props.reversed ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-        strokeDasharray: `${sliceSize * size} ${size}`,
-        strokeWidth: this.props.innerLine,
-        // transform: 'rotate(116 60 60)',
-      }
+    const gaugeProps = {
+      reversed: this.props.reversed,
+      value,
+      gaugeLine: this.props.gaugeLine,
+      innerLine: this.props.innerLine,
+      innerColor: this.props.innerColor,
+      max: this.props.max || max,
+      color: metric && metric.color || '#8ac336'
     };
-
-    if (this.props.innerColor) {
-      props.circleBackground.stroke = this.props.innerColor;
+    const valueStyle = {};
+    if (this.props.valueColor) {
+      valueStyle.color = this.props.valueColor;
     }
-    return (
-      <ResizeAware ref="resize" style={styles.resize}>
-        <div style={styles.svg} ref="inner">
-          <svg width={120.72} height={120.72}>
-            <circle {...props.circleBackground}/>
-            <circle {...props.circle}/>
-          </svg>
+
+    let metrics;
+    if (metric) {
+      metrics = (
+        <div
+          className="thorHalfGauge__metrics"
+          ref="inner"
+          style={styles.inner}>
+          <div
+            className="thorHalfGauge__label"
+            ref="title">{ title }</div>
+          <div
+            className="thorHalfGauge__value"
+            style={valueStyle}
+            ref="label">{ formatter(value) }</div>
         </div>
-      </ResizeAware>
+      );
+    }
+    let className = 'thorHalfGauge';
+    if (this.props.reversed) className += ' reversed';
+    return (
+      <div className={className}>
+        <ResizeAware className="thorHalfGauge__resize" ref="resize">
+          { metrics }
+          <HalfGaugeVis {...gaugeProps}/>
+        </ResizeAware>
+      </div>
     );
   }
-
 });

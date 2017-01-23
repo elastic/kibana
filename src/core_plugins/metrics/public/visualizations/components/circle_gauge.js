@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import numeral from 'numeral';
 import React, { Component } from 'react';
-import $ from './flot';
-import getLastValue from './get_last_value';
-import getValueBy from './get_value_by';
+import $ from '../lib/flot';
+import getLastValue from '../lib/get_last_value';
+import getValueBy from '../lib/get_value_by';
 import ResizeAware from 'simianhacker-react-resize-aware';
-import HalfGaugeVis from './half_gauge_vis';
+import CircleGaugeVis from '../lib/circle_gauge_vis';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
 
@@ -128,26 +128,26 @@ export default React.createClass({
     if (metric) {
       metrics = (
         <div
-          className="thorHalfGauge__metrics"
+          className="thorCircleGauge__metrics"
           ref="inner"
           style={styles.inner}>
           <div
-            className="thorHalfGauge__label"
-            ref="title">{ title }</div>
-          <div
-            className="thorHalfGauge__value"
+            className="thorCircleGauge__value"
             style={valueStyle}
             ref="label">{ formatter(value) }</div>
+          <div
+            className="thorCircleGauge__label"
+            ref="title">{ title }</div>
         </div>
       );
     }
-    let className = 'thorHalfGauge';
+    let className = 'thorCircleGauge';
     if (this.props.reversed) className += ' reversed';
     return (
       <div className={className}>
-        <ResizeAware className="thorHalfGauge__resize" ref="resize">
+        <ResizeAware className="thorCircleGauge__resize" ref="resize">
           { metrics }
-          <HalfGaugeVis {...gaugeProps}/>
+          <CircleGaugeVis {...gaugeProps}/>
         </ResizeAware>
       </div>
     );

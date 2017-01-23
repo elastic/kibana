@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
-import $ from './flot';
+import $ from '../lib/flot';
 
 class GaugeVis extends Component {
 

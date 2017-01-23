@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import numeral from 'numeral';
 import React, { Component } from 'react';
-import $ from './flot';
-import getLastValue from './get_last_value';
-import TimeseriesChart from './timeseries_chart';
+import $ from '../lib/flot';
+import getLastValue from '../lib/get_last_value';
+import TimeseriesChart from '../timeseries_chart';
 import Legend from './legend';
-import eventBus from './events';
+import eventBus from '../lib/events';
 export default React.createClass({
   getInitialState() {
     const values = this.getLastValues();
