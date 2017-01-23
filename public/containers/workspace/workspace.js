@@ -127,7 +127,7 @@ const Workspace = React.createClass({
           <Centered onMouseDown={this.select(null)}>
             <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
             <Workpad workpad={workpad}>
-                <PageManager add={this.pageAdd} remove={this.pageRemove}></PageManager>
+                <PageManager add={this.pageAdd} remove={this.pageRemove} pageCount={workpad.pages.length}></PageManager>
                 <Stack top={workpad.page}>
                   {workpad.pages.map((pageId) => {
                     const page = pages[pageId];

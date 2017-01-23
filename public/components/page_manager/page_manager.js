@@ -6,8 +6,9 @@ import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 
 export default React.createClass({
   render() {
-    const { add, remove } = this.props;
-
+    const { add, remove, pageCount } = this.props;
+    const removeClasses = ['rework--page-manager-remove', 'fa', 'fa-ban'];
+    if (pageCount === 1) removeClasses.push('rework--page-manager-no-remove');
     return (
       <div className="rework--page-manager">
         <Tooltip content="Add Page" place="top">
@@ -15,7 +16,7 @@ export default React.createClass({
         </Tooltip>
 
         <Tooltip content="Remove Page" place="top">
-          <i className="rework--page-manager-remove fa fa-ban" onClick={remove}></i>
+          <i className={removeClasses.join(' ')} onClick={remove}></i>
         </Tooltip>
       </div>
     );
