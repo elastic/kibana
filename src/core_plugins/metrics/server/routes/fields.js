@@ -1,4 +1,4 @@
-import getFields from '../../lib/get_fields';
+import getFields from '../lib/get_fields';
 import Promise from 'bluebird';
 export default (server) => {
 

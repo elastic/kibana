@@ -1,5 +1,5 @@
-import fieldsRoutes from './server/routes/api/fields';
-import visDataRoutes from './server/routes/api/vis';
+import fieldsRoutes from './server/routes/fields';
+import visDataRoutes from './server/routes/vis';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -21,9 +21,7 @@ export default function (kibana) {
 
 
     init(server, options) {
-      const config = server.config();
       const { status } = server.plugins.elasticsearch;
-
       fieldsRoutes(server);
       visDataRoutes(server);
     }
