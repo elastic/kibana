@@ -49,6 +49,7 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
       const urlObject = url.parse(mapUrl, true);
       expect(urlObject.hostname).to.be('tiles.elastic.co');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana_tests');
+      expect(urlObject.query).to.have.property('my_app_version');
 
     });
 

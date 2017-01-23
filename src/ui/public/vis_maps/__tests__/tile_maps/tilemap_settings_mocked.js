@@ -84,6 +84,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
       expect(urlObject).to.have.property('hostname', 'proxy-tiles.elastic.co');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
+      expect(urlObject.query).to.have.property('my_app_version');
 
     });
 
