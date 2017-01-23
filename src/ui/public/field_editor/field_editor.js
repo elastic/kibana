@@ -90,7 +90,7 @@ uiModules
             });
         }
         const confirmModalOptions = {
-          confirmButtonText: 'Delete',
+          confirmButtonText: 'Delete field',
           onConfirm: doDelete
         };
         confirmModal(

@@ -282,7 +282,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
           if (_.get(err, 'origError.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
-            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
+            return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
               .then(() => docSource.doIndex(source))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }

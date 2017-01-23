@@ -176,7 +176,7 @@ uiModules.get('apps/management')
         }
         const confirmModalOptions = {
           onConfirm: doDelete,
-          confirmButtonText: 'Delete'
+          confirmButtonText: 'Delete object'
         };
         confirmModal(
           'Are you sure want to delete this object? This action is irreversible!',

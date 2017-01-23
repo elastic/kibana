@@ -111,7 +111,7 @@ uiModules.get('apps/management')
         }
 
         const confirmModalOptions = {
-          confirmButtonText: 'Delete',
+          confirmButtonText: `Delete ${$scope.currentTab.title}`,
           onConfirm: doBulkDelete
         };
         confirmModal(

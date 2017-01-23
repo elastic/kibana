@@ -5,7 +5,7 @@ const module = uiModules.get('kibana');
 
 /**
  * @typedef {Object} PromisifiedConfirmOptions
- * @property {String=} confirmButtonText
+ * @property {String} confirmButtonText
  * @property {String=} cancelButtonText
  */
 
@@ -22,7 +22,6 @@ module.factory('confirmModalPromise', function (Promise, confirmModal) {
     const defaultOptions = {
       onConfirm: resolve,
       onCancel: reject,
-      confirmButtonText: 'Okay',
       cancelButtonText: 'Cancel'
     };
     const confirmOptions = Object.assign(defaultOptions, customOptions);
