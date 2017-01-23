@@ -64,10 +64,7 @@ const App = React.createClass({
 function mapStateToProps(state) {
   return {
     editor: state.transient.editor,
-    workpad: state.persistent.workpad,
-    pages: state.persistent.pages,
     elements: state.persistent.elements,
-    elementCache: state.transient.elementCache,
     selectedElement: state.transient.selectedElement
   };
 }
