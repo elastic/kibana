@@ -1,71 +1,31 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import classnames from 'classnames';
 
 // Containers
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Nav from 'plugins/rework/containers/nav/nav';
-import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
+import WorkpadContainer from 'plugins/rework/containers/workpad_container/workpad_container';
 
 // Components
 import Sidebar from 'plugins/rework/components/sidebar/sidebar';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
-import Centered from 'plugins/rework/components/centered/centered';
-import Pager from 'plugins/rework/components/pager/pager';
-import PageManager from 'plugins/rework/components/page_manager/page_manager';
-import Workpad from 'plugins/rework/components/workpad/workpad';
-import Stack from 'plugins/rework/components/stack/stack';
-import Page from 'plugins/rework/components/page/page';
-import Positionable from 'plugins/rework/components/positionable/positionable';
-import Element from 'plugins/rework/components/element/element';
 
 // Actions
 import { editorToggle } from 'plugins/rework/state/actions/editor';
-import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
-import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
+
 
 import './app.less';
 
 const App = React.createClass({
-  pageAdd() {
-    this.props.dispatch(pageAdd());
-  },
-  pageRemove() {
-    const {page, pages} = this.props.workpad;
-    this.props.dispatch(pageRemove(pages[page]));
-  },
-  select(id) {
-    return (e) => {
-      e.stopPropagation();
-      this.props.dispatch(elementSelect(id));
-    };
-  },
-  resizeMove(id) {
-    return (e) => {
-      const {dispatch} = this.props;
-      const {top, left, height, width} = e.interaction.absolute;
 
-      dispatch(elementTop(id, top));
-      dispatch(elementLeft(id, left));
-      dispatch(elementHeight(id, height));
-      dispatch(elementWidth(id, width));
-    };
-  },
-  rotate(id) {
-    return (e) => {
-      const {dispatch} = this.props;
-      const {angle} = e.interaction.absolute;
-      dispatch(elementAngle(id, angle));
-    };
-  },
   do(action) {
     const {dispatch} = this.props;
     return () => dispatch(action());
   },
   render() {
-    const  {workpad, pages, elements, dataframes, editor, elementCache, selectedElement} = this.props;
+    const  {elements, editor, selectedElement} = this.props;
     const {resizeMove, rotate, select} = this;
     const currentElement = elements[selectedElement];
 
@@ -93,49 +53,7 @@ const App = React.createClass({
             </div>
           </Sidebar>
 
-          <Centered onMouseDown={this.select(null)}>
-            <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
-            <Workpad workpad={workpad}>
-                <PageManager add={this.pageAdd} remove={this.pageRemove} pageCount={workpad.pages.length}></PageManager>
-                <Stack top={workpad.page}>
-                  {workpad.pages.map((pageId) => {
-                    const page = pages[pageId];
-                    return (
-                      <Page key={pageId} page={page}>
-                        {page.elements.map((elementId, i) => {
-                          const element = elements[elementId];
-                          const selected = elementId === selectedElement ? true : false;
-                          const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
-
-                          // This is really gross because it doesn't actually wrap the element.
-                          // Rather you end up with a bunch of 0 height divs stacked at the top
-                          // of the page. Ew.
-                          const wrapperClasses = classnames({
-                            'rework--workspace-element-header': true,
-                            'rework--workspace-element-header-selected': selected,
-                          });
-                          return (
-                            <div key={elementId} className={wrapperClasses}>
-                              <ElementWrapper id={elementId} args={element.args}>
-                                <Positionable style={{zIndex: 2000 + i}}
-                                  position={position}
-                                  move={resizeMove(elementId)}
-                                  resize={resizeMove(elementId)}
-                                  rotate={rotate(elementId)}>
-                                    <Element type={element.type} args={elementCache[elementId]}></Element>
-                                </Positionable>
-                              </ElementWrapper>
-
-                            </div>
-                          );
-                        })}
-                      </Page>
-                    );
-                  })}
-                </Stack>
-            </Workpad>
-            <Pager direction='next' handler={this.do(pageNext)}></Pager>
-          </Centered>
+          <WorkpadContainer></WorkpadContainer>
         </div>
       </div>
 
