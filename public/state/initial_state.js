@@ -13,11 +13,11 @@ export default {
   },
   persistent: { // Stuff that should survive, be serialized and be saved
     workpad: {
-      name: 'Headwind',
+      name: 'Untitled Workpad',
       id: uuid(),
-      pages: ['page-0', 'page-1'], // In theory you could reference a page multiple times, but you know, don't.
-      height: 600,
-      width: 400,
+      pages: ['page-0'], // In theory you could reference a page multiple times, but you know, don't.
+      height: 800,
+      width: 600,
       page: 0,
     },
     pages: {
@@ -26,54 +26,10 @@ export default {
         style: {
           backgroundColor: '#fff'
         },
-        elements: ['element-0', 'element-2'] // Same deal here. I'm watching you.
+        elements: [] // Same deal here. I'm watching you.
       },
-      'page-1': {
-        id: 'page-1',
-        style: {
-          backgroundColor: '#6c6'
-        },
-        elements: ['element-1']
-      }
     },
-    elements: {
-      'element-0': {
-        id: 'element-0',
-        type: 'json',
-        height: 100,
-        width: 100,
-        top: 0,
-        left: 0,
-        angle: 0,
-        args: {
-          _style: 'border: 1px solid #000;'
-        }
-      },
-      'element-2': {
-        id: 'element-2',
-        type: 'table',
-        height: 300,
-        width: 400,
-        top: 200,
-        left: 20,
-        angle: 0,
-        args: {
-          dataframe: 'dataframe-1'
-        }
-      },
-      'element-1': {
-        id: 'element-1',
-        type: 'box',
-        height: 70,
-        width: 300,
-        top: 300,
-        left: 50,
-        angle: 30,
-        args: {
-          color: '#00A388'
-        }
-      }
-    },
+    elements: {},
     dataframes: {
       'dataframe-1': {
         id: 'dataframe-1',
