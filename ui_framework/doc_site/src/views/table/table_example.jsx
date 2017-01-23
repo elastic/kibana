@@ -21,4 +21,8 @@ export default createExample([{
   title: 'ControlledTable with NoItems',
   html: require('./controlled_table_no_items.html'),
   hasDarkTheme: false,
+}, {
+  title: 'ControlledTable with PromptForItems',
+  html: require('./controlled_table_prompt_for_items.html'),
+  hasDarkTheme: false,
 }]);
