@@ -15,6 +15,8 @@ export const elementTop = createAction('ELEMENT_TOP', mutateElement);
 export const elementLeft = createAction('ELEMENT_LEFT', mutateElement);
 export const elementAngle = createAction('ELEMENT_ANGLE', mutateElement);
 export const elementRemove = createAction('ELEMENT_REMOVE', (elementId, pageId) => {return {elementId, pageId};});
+export const elementLayer = createAction('ELEMENT_LAYER', (elementId, pageId, layer) => {return {elementId, pageId, layer};});
+
 
 export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
@@ -31,6 +33,36 @@ export function elementAdd(type, pageId) {
     const action = createAction('ELEMENT_ADD', (element, pageId) => {return {element, pageId};});
     dispatch(action(element, pageId));
     dispatch(elementResolve(element.id));
+  };
+}
+
+export function elementLayerMove(elementId, pageId, movement) {
+  return (dispatch, getState) => {
+    const elementIdList = getState().persistent.pages[pageId].elements;
+    const elementIndex = elementIdList.indexOf(elementId);
+    if (elementIndex < 0) return;
+
+    let newIndex;
+    switch (movement) {
+      case '++':
+        newIndex = elementIdList.length - 1;
+        break;
+      case '+':
+        if (elementIndex === elementIdList.length - 1) return;
+        newIndex = elementIndex + 1;
+        break;
+      case '-':
+        if (elementIndex === 0) return;
+        newIndex = elementIndex - 1;
+        break;
+      case '--':
+        if (elementIndex === 0) return;
+        newIndex = 0;
+        break;
+      default:
+        return;
+    }
+    dispatch(elementLayer(elementId, pageId, newIndex));
   };
 }
 

@@ -1,6 +1,7 @@
 import elements from 'plugins/rework/elements/elements';
 import getInitialState from './initial_state';
 import _ from 'lodash';
+import move from 'lodash-move';
 
 function rootReducer(state = {}, action) {
   const setTransient = (prop, value) => {
@@ -38,6 +39,13 @@ function rootReducer(state = {}, action) {
         ...state.persistent.pages[id],
         [prop]: value
       }});
+  };
+
+  const layerElement = (elementId, pageId, newLayer) => {
+    const elementList = state.persistent.pages[pageId].elements.slice(0);
+    const oldLayer = elementList.indexOf(elementId);
+    const newElements = move(elementList, oldLayer, newLayer);
+    return setPage(pageId, 'elements', newElements);
   };
 
   const removeElement = (elementId) => {
@@ -106,6 +114,8 @@ function rootReducer(state = {}, action) {
       return addElement(payload.element, payload.pageId);
     case 'ELEMENT_REMOVE':
       return removeElement(payload.elementId, payload.pageId);
+    case 'ELEMENT_LAYER':
+      return layerElement(payload.elementId, payload.pageId, payload.layer);
 
     case 'ELEMENT_SELECT':
       return setTransient('selectedElement', payload);
