@@ -1,50 +1,5 @@
 import _ from 'lodash';
-import moment from 'moment';
-import Color from 'color';
-import calculateLabel from '../../public/components/vis_editor/lib/calculate_label';
-import basicAggs from '../../public/lib/basic_aggs';
-import bucketTransform from './bucket_transform';
-import calculateIndices from './calculate_indices';
-import extendStatsTypes from './extended_stats_types';
-import getAggValue from './get_agg_value';
-import getBucketsPath from './get_buckets_path';
-import getSiblingAggValue from './get_sibling_agg_value';
-import SeriesAgg from './series_agg';
-import unitToSeconds from './unit_to_seconds';
-
-import getRequestParams from './vis_data/get_request_params';
-import handleResponse from './vis_data/handle_response';
-import handleErrorResponse from './vis_data/handle_error_response';
-
-function getPanelData(req) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  return panel => {
-    return Promise.all(panel.series.map(series => getRequestParams(req, panel, series)
-      .then(params => {
-        return callWithRequest(req, 'msearch', params)
-          .then(resp => {
-            const result = {};
-            result[panel.id] = {
-              id: panel.id,
-              series: resp.responses
-              .map(handleResponse(panel))
-              .reduce((acc, data) => {
-                return acc.concat(data);
-              }, [])
-            };
-            return result;
-          })
-          .catch(handleErrorResponse(panel));
-      }))).then(resp => {
-        const result = {};
-        result[panel.id] = {
-          id: panel.id,
-          series: resp.reduce((acc, item) => acc.concat(item[panel.id].series || []), [])
-        };
-        return result;
-      });
-  };
-}
+import getPanelData from './vis_data/get_panel_data';
 
 function getVisData(req) {
   const reqs = req.payload.panels.map(getPanelData(req));
