@@ -9,7 +9,7 @@ export function getTopNavConfig(kbnUrl) {
     getNewConfig(kbnUrl),
     getAddConfig(),
     getSaveConfig(),
-    getOpenConfig(),
+    getOpenConfig(kbnUrl),
     getShareConfig(),
     getOptionsConfig()];
 }
@@ -24,7 +24,7 @@ function getNewConfig(kbnUrl) {
     key: 'new',
     description: 'New Dashboard',
     testId: 'dashboardNewButton',
-    run: () => { kbnUrl.change('/dashboard', {}); }
+    run: () => { kbnUrl.change('/dashboard/create'); }
   };
 }
 
@@ -55,12 +55,12 @@ function getSaveConfig() {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getOpenConfig() {
+function getOpenConfig(kbnUrl) {
   return {
     key: 'open',
     description: 'Open Saved Dashboard',
     testId: 'dashboardOpenButton',
-    template: require('plugins/kibana/dashboard/top_nav/open.html')
+    run: () => { kbnUrl.change('/dashboard'); }
   };
 }
 
