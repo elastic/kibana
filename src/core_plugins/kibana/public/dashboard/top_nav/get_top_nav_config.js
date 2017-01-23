@@ -37,7 +37,7 @@ function getEditConfig(modeChange) {
  */
 function getViewConfig(modeChange) {
   return {
-    key: 'stop editing',
+    key: 'done',
     description: 'Stop editing and switch to view only mode',
     testId: 'dashboardViewOnlyMode',
     run: () => {
