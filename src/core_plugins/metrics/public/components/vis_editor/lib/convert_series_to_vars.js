@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { getLastValue } from '../../../visualizations/lib';
+import getLastValue from '../../../visualizations/lib/get_last_value';
 import tickFormatter from '../../../lib/tick_formatter';
 import moment from 'moment';
 import calculateLabel from './calculate_label';

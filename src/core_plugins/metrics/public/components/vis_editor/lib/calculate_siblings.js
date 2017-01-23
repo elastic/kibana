@@ -1,4 +1,3 @@
-import calculateLabel from './calculate_label';
 import _ from 'lodash';
 
 function getAncestors(siblings, item) {

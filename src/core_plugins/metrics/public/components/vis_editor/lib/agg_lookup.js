@@ -43,11 +43,11 @@ const pipeline = [
 const byType = {
   _all: lookup,
   pipeline: pipeline,
-  top_10: _.omit(lookup, pipeline)
+  basic: _.omit(lookup, pipeline),
 };
 
 export function isBasicAgg(item) {
-  return _.includes(Object.keys(byType.top_10), item.type);
+  return _.includes(Object.keys(byType.basic), item.type);
 }
 
 export function createOptions(type = '_all', siblings = []) {
