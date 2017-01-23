@@ -45,7 +45,9 @@ uiModules.get('kibana')
 
       constructor() {
 
-        this._queryParams = {};
+        this._queryParams = {
+          my_app_version: tilemapsConfig.my_app_version
+        };
         this._error = null;
 
         //initialize settings with the default of the configuration

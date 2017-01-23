@@ -43,7 +43,7 @@ module.exports = function (kibana) {
           'docViews'
         ],
 
-        injectVars: function (server, options) {
+        injectVars: function (server) {
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
@@ -56,6 +56,7 @@ module.exports = function (kibana) {
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
             tilemapsConfig: {
+              my_app_version: serverConfig.get('pkg.version'),
               deprecated: {
                 isOverridden: isOverridden,
                 config: tilemapConfig,
