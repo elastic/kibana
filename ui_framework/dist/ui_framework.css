@@ -946,6 +946,30 @@ body {
       -ms-flex-align: center;
           align-items: center; }
 
+.kuiPromptForItems {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 30px; }
+
+.kuiPromptForItems__message {
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
+
+.kuiPromptForItems__actions {
+  margin-top: 10px; }
+
 /**
  * 1. Make seamless transition from ToolBar to Table header.
  * 1. Make seamless transition from Table to ToolBarFooter header.
