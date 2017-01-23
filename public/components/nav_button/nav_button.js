@@ -1,7 +1,6 @@
 import React from 'react';
 import './nav_button.less';
 import classnames from 'classnames';
-import ReactTooltip from 'react-tooltip';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 
 export default React.createClass({

@@ -5,7 +5,7 @@ import 'ui/autoload/all';
 import './directives/react';
 import './state/store_service';
 
-import rootComponent from './components/app';
+import rootComponent from './containers/app/app';
 
 require('./main.less');
 

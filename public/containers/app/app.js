@@ -26,9 +26,9 @@ import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
-import './workspace.less';
+import './app.less';
 
-const Workspace = React.createClass({
+const App = React.createClass({
   pageAdd() {
     this.props.dispatch(pageAdd());
   },
@@ -154,4 +154,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Workspace);
+export default connect(mapStateToProps)(App);
