@@ -3,12 +3,14 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
 
-import TopNav from 'plugins/rework/components/top_nav/top_nav';
+// Containers
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
-import Sidebar from 'plugins/rework/components/sidebar/sidebar';
-import NavButton from 'plugins/rework/components/nav_button/nav_button';
-import Editable from 'plugins/rework/components/editable/editable';
+import Nav from 'plugins/rework/containers/nav/nav';
+import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
+import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
 
+// Components
+import Sidebar from 'plugins/rework/components/sidebar/sidebar';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
 import Pager from 'plugins/rework/components/pager/pager';
@@ -18,14 +20,11 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
-import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
-import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
 
-import { dropdownToggle } from 'plugins/rework/state/actions/misc';
+// Actions
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
-import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
 
 import './workspace.less';
 
@@ -36,17 +35,6 @@ const Workspace = React.createClass({
   pageRemove() {
     const {page, pages} = this.props.workpad;
     this.props.dispatch(pageRemove(pages[page]));
-  },
-  nameWorkpad(value) {
-    this.props.dispatch(workpadName(value));
-  },
-  newWorkpad() {
-    this.props.dispatch(workpadNew());
-  },
-  dropdown(name) {
-    return () => {
-      this.props.dispatch(dropdownToggle(name));
-    };
   },
   select(id) {
     return (e) => {
@@ -85,26 +73,7 @@ const Workspace = React.createClass({
     // But for now, its actually *more* readable this way.
     return (
       <div className="rework--application">
-        <TopNav>
-          <div className="rework--top-nav-top">
-            <Editable className="rework--workpad-name" onChange={this.nameWorkpad} value={workpad.name}></Editable>
-          </div>
-          <div className="rework--top-nav-bottom">
-            <NavButton
-              tooltip="Dataframes"
-              className="fa fa-database"
-              onClick={this.dropdown('dataframe')}></NavButton>
-            <NavButton
-              tooltip="Add Element"
-              className="fa fa-plus-circle"
-              onClick={this.dropdown('element')}></NavButton>
-            <NavButton
-              tooltip="New Workpad"
-              className="fa fa-star"
-              onClick={this.newWorkpad}></NavButton>
-
-          </div>
-        </TopNav>
+        <Nav></Nav>
         <DropDown></DropDown>
 
         <div className="rework--workspace">
