@@ -11,7 +11,7 @@ export default React.createClass({
     };
 
     return (
-      <div className="rework--page" style={pageStyle}>
+      <div className="rework--page" id={id} style={pageStyle}>
         {this.props.children}
       </div>
     );
