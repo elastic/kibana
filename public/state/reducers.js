@@ -24,6 +24,13 @@ function rootReducer(state = {}, action) {
     return result;
   };
 
+  // TODO: Remove all elements
+  const removePage = (pageId) => {
+    const result = setPersistent('pages', _.omit(state.persistent.pages, pageId));
+    result.persistent.workpad.pages = _.without(result.persistent.workpad.pages, pageId);
+    return result;
+  };
+
   const setPage = (id, prop, value) => {
     return setPersistent('pages', {
       ...state.persistent.pages,
@@ -92,6 +99,8 @@ function rootReducer(state = {}, action) {
       return setWorkpad('page', payload);
     case 'PAGE_ADD':
       return addPage(payload);
+    case 'PAGE_REMOVE':
+      return removePage(payload);
 
     case 'ELEMENT_ADD':
       return addElement(payload.element, payload.pageId);
