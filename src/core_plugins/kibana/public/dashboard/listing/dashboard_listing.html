@@ -1,0 +1,130 @@
+<!-- Local nav. -->
+<kbn-top-nav name="dashboard">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+    <!-- Title. -->
+    <div
+      data-transclude-slot="topLeftCorner"
+      class="kuiLocalTitle"
+    >
+      Dashboard
+    </div>
+  </div>
+</kbn-top-nav>
+
+<div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <!-- ControlledTable -->
+  <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
+    <!-- ToolBar -->
+    <div class="kuiToolBar">
+      <div class="kuiToolBarSearch">
+        <div class="kuiToolBarSearchBox">
+          <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
+          <input
+            class="kuiToolBarSearchBox__input"
+            type="text"
+            placeholder="Search..."
+            aria-label="Filter"
+            ng-model="listingController.filter"
+          >
+        </div>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- We need an empty section for the buttons to be positioned consistently. -->
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Bulk delete button -->
+        <button
+          class="kuiButton kuiButton--danger"
+          ng-click="listingController.deleteSelectedItems()"
+          aria-label="Delete selected objects"
+          ng-hide="listingController.getSelectedItemsCount() === 0"
+          tooltip="Delete selected dashboards"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
+        </button>
+
+        <!-- Create dashboard button -->
+        <a
+          class="kuiButton kuiButton--primary"
+          href="#/dashboard/create"
+          aria-label="Create new dashboard"
+          ng-hide="listingController.getSelectedItemsCount() > 0"
+          tooltip="Create new dashboard"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- NoResults -->
+    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length">
+      <div class="kuiNoResults">
+        No dashboards matched your search.
+      </div>
+    </div>
+
+    <!-- Table -->
+    <table class="kuiTable" ng-if="listingController.items.length">
+      <thead>
+      <tr>
+        <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+          <input
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-checked="listingController.areAllItemsChecked()"
+            ng-click="listingController.toggleAll()"
+          >
+        </th>
+
+        <th class="kuiTableHeaderCell" ng-click="listingController.sortHits()">
+          Name
+          <i
+            class="fa"
+            ng-class="listingController.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+          </i>
+        </th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        ng-repeat="item in listingController.items track by item.id | orderBy:'title'"
+        class="kuiTableRow"
+      >
+        <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+          <input
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-click="listingController.toggleItem(item)"
+            ng-checked="listingController.isItemChecked(item)"
+          >
+        </td>
+
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            <a class="kuiLink" ng-click="listingController.open(item)">
+              {{ item.title }}
+            </a>
+          </div>
+        </td>
+      </tr>
+
+      </tbody>
+    </table>
+
+    <!-- ToolBarFooter -->
+    <div class="kuiToolBarFooter">
+      <div class="kuiToolBarFooterSection">
+        <div class="kuiToolBarText" ng-hide="listingController.getSelectedItemsCount() === 0">
+          {{ listingController.getSelectedItemsCount() }} selected
+        </div>
+      </div>
+      <div class="kuiToolBarFooterSection">
+        <!-- We need an empty section for the buttons to be positioned consistently. -->
+      </div>
+    </div>
+  </div>
+</div>
