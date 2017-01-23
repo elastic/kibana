@@ -17,8 +17,6 @@ module.exports = function (server) {
           body: payload
         };
 
-        console.log(payload);
-
         callWithRequest(request, 'index', body).then(function (resp) {
           reply({
             ok: true,
