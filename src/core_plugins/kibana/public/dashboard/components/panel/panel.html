@@ -4,9 +4,12 @@
       {{::savedObj.title}}
     </span>
     <div class="btn-group">
+      <!--
+      Pulling out of 5.2 due to https://github.com/elastic/kibana/issues/9766
       <a aria-label="Expand" ng-click="toggleExpand()">
         <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
+      -->
       <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
