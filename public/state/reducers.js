@@ -15,6 +15,15 @@ function rootReducer(state = {}, action) {
     return setPersistent('workpad', {...state.persistent.workpad, [prop]: value});
   };
 
+  const addPage = (page) => {
+    const result = setPersistent('pages', {
+      ...state.persistent.pages,
+      [page.id]: page});
+
+    result.persistent.workpad.pages.push(page.id);
+    return result;
+  };
+
   const setPage = (id, prop, value) => {
     return setPersistent('pages', {
       ...state.persistent.pages,
@@ -24,21 +33,23 @@ function rootReducer(state = {}, action) {
       }});
   };
 
+  const removeElement = (elementId) => {
+    const result = setPersistent('elements', _.omit(state.persistent.elements, elementId));
+    // Gross, loop over all pages and remove this element from all of them, even though it should only
+    // be on one. So gross.
+    result.persistent.pages = _.mapValues(result.persistent.pages, (page) => {
+      page.elements = _.without(page.elements, elementId);
+      return page;
+    });
+    return result;
+  };
+
   const addElement = (element, pageId) => {
     const result = setPersistent('elements', {
       ...state.persistent.elements,
       [element.id]: element});
 
     result.persistent.pages[pageId].elements.unshift(element.id);
-    return result;
-  };
-
-  const addPage = (page) => {
-    const result = setPersistent('pages', {
-      ...state.persistent.pages,
-      [page.id]: page});
-
-    result.persistent.workpad.pages.push(page.id);
     return result;
   };
 
@@ -83,8 +94,9 @@ function rootReducer(state = {}, action) {
       return addPage(payload);
 
     case 'ELEMENT_ADD':
-      // payload.page. hrm.
       return addElement(payload.element, payload.pageId);
+    case 'ELEMENT_REMOVE':
+      return removeElement(payload.elementId, payload.pageId);
 
     case 'ELEMENT_SELECT':
       return setTransient('selectedElement', payload);

@@ -14,6 +14,7 @@ export const elementWidth = createAction('ELEMENT_WIDTH', mutateElement);
 export const elementTop = createAction('ELEMENT_TOP', mutateElement);
 export const elementLeft = createAction('ELEMENT_LEFT', mutateElement);
 export const elementAngle = createAction('ELEMENT_ANGLE', mutateElement);
+export const elementRemove = createAction('ELEMENT_REMOVE', (elementId, pageId) => {return {elementId, pageId};});
 
 export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
