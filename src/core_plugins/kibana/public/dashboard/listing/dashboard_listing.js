@@ -8,7 +8,7 @@ export function DashboardListingController(
   Notifier,
   Private,
   timefilter,
-  safeConfirm
+  confirmModal
 ) {
   timefilter.enabled = false;
 
@@ -76,17 +76,21 @@ export function DashboardListingController(
   };
 
   this.deleteSelectedItems = function deleteSelectedItems() {
-    safeConfirm('Are you sure you want to delete the selected dashboards? This action is irreversible!',
-        { confirmButtonText: 'Delete', cancelButtonText: 'Cancel' })
-      .then(() => {
-        const selectedIds = selectedItems.map(item => item.id);
+    const doDelete = () => {
+      const selectedIds = selectedItems.map(item => item.id);
 
-        dashboardService.delete(selectedIds)
-          .then(fetchObjects)
-          .then(() => {
-            selectedItems = [];
-          })
-          .catch(error => notify.error(error));
+      dashboardService.delete(selectedIds)
+        .then(fetchObjects)
+        .then(() => {
+          selectedItems = [];
+        })
+        .catch(error => notify.error(error));
+    };
+    confirmModal(
+      'Are you sure you want to delete the selected dashboards? This action is irreversible!',
+      {
+        confirmButtonText: 'Delete',
+        onConfirm: doDelete
       });
   };
 

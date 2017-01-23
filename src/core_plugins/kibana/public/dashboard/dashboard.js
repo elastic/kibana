@@ -6,14 +6,11 @@ import uiRoutes from 'ui/routes';
 
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
-import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
-import 'plugins/kibana/dashboard/styles/index.less';
 
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
 import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
-import { savedDashboardRegister } from 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants } from './dashboard_constants';
