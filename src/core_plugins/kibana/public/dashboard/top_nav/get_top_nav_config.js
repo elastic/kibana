@@ -1,4 +1,4 @@
-import { DashboardViewMode } from './dashboard_view_mode';
+import { DashboardViewMode } from '../dashboard_view_mode';
 
 /**
  * @param {DashboardMode} dashboardMode.
@@ -10,9 +10,9 @@ import { DashboardViewMode } from './dashboard_view_mode';
 export function getTopNavConfig(dashboardMode, kbnUrl, modeChange) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
-      return [getNewConfig(kbnUrl), getOpenConfig(), getShareConfig(), getEditConfig(modeChange)];
+      return [getShareConfig(), getEditConfig(modeChange)];
     case DashboardViewMode.EDIT:
-      return [getNewConfig(kbnUrl), getOpenConfig(), getAddConfig(), getSaveConfig(), getOptionsConfig(), getViewConfig(modeChange)];
+      return [getAddConfig(), getSaveConfig(), getOptionsConfig(), getViewConfig(modeChange)];
     default:
       return [];
   }
@@ -49,24 +49,12 @@ function getViewConfig(modeChange) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getNewConfig(kbnUrl) {
-  return {
-    key: 'new',
-    description: 'New Dashboard',
-    testId: 'dashboardNewButton',
-    run: () => { kbnUrl.change('/dashboard', {}); }
-  };
-}
-
-/**
- * @returns {kbnTopNavConfig}
- */
 function getAddConfig() {
   return {
     key: 'add',
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
-    template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+    template: require('plugins/kibana/dashboard/top_nav/add_panel.html')
   };
 }
 
@@ -78,19 +66,7 @@ function getSaveConfig() {
     key: 'save',
     description: 'Save Dashboard',
     testId: 'dashboardSaveButton',
-    template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
-  };
-}
-
-/**
- * @returns {kbnTopNavConfig}
- */
-function getOpenConfig() {
-  return {
-    key: 'open',
-    description: 'Open Saved Dashboard',
-    testId: 'dashboardOpenButton',
-    template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+    template: require('plugins/kibana/dashboard/top_nav/save.html')
   };
 }
 
@@ -102,7 +78,7 @@ function getShareConfig() {
     key: 'share',
     description: 'Share Dashboard',
     testId: 'dashboardShareButton',
-    template: require('plugins/kibana/dashboard/partials/share.html')
+    template: require('plugins/kibana/dashboard/top_nav/share.html')
   };
 }
 
@@ -114,6 +90,6 @@ function getOptionsConfig() {
     key: 'options',
     description: 'Options',
     testId: 'dashboardOptionsButton',
-    template: require('plugins/kibana/dashboard/partials/options.html')
+    template: require('plugins/kibana/dashboard/top_nav/options.html')
   };
 }

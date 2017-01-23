@@ -6,9 +6,9 @@
       <!-- Title. -->
       <div
         data-transclude-slot="topLeftCorner"
-        class="kuiLocalTitle"
       >
-        <span ng-bind="getDashTitle()"></span>
+        <!-- Breadcrumbs. -->
+        <bread-crumbs title="getDashTitle()" use-links="true" omit-current-page="true"></bread-crumbs>
       </div>
 
       <!-- Search. -->
@@ -57,17 +57,20 @@
   </div>
 
   <div ng-show="showViewHelpText()" class="text-center start-screen">
-    <h2>Ready to get started?</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
-  </div>
+    <h2>This dashboard is empty. Let's fill it up!</h2>
+  <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
+</div>
 
   <dashboard-grid ng-if="!hasExpandedPanel()"></dashboard-grid>
 
   <dashboard-panel ng-if="hasExpandedPanel()"
                    panel="expandedPanel"
                    is-full-screen-mode="!chrome.getVisible()"
-                   state="state"
                    is-expanded="true"
-                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
-                   parent-ui-state="uiState">
+                   dashboard-view-mode="dashboardViewMode"
+                   get-vis-click-handler="filterBarClickHandler(state)"
+                   get-vis-brush-handler="brushEvent(state)"
+                   save-state="state.save()"
+                   create-child-ui-state="createChildUiState(path, uiState)"
+                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
 </dashboard-app>

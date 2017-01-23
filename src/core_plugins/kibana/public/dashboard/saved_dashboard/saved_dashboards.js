@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
-import 'plugins/kibana/dashboard/services/_saved_dashboard';
+import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
 import uiModules from 'ui/modules';
 const module = uiModules.get('app/dashboard');
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
