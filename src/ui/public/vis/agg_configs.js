@@ -114,6 +114,15 @@ export default function AggConfigsFactory(Private) {
       const dsl = dslLvlCursor[config.id] = config.toDsl();
       let subAggs;
 
+      ((function parseParentAggs(dsl) {
+        if (dsl.parentAggs) {
+          _.each(dsl.parentAggs, (agg, key) => {
+            dslLvlCursor[key] = agg;
+            parseParentAggs(agg);
+          });
+        }
+      })(dsl));
+
       if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
         subAggs = dsl.aggs || (dsl.aggs = {});
@@ -125,6 +134,15 @@ export default function AggConfigsFactory(Private) {
         });
       }
     });
+
+    function removeParentAggs(obj) {
+      for(const prop in obj) {
+        if (prop === 'parentAggs') delete obj[prop];
+        else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+      }
+    }
+
+    removeParentAggs(dslTopLvl);
 
     return dslTopLvl;
   };
