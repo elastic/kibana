@@ -56,7 +56,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         }, Promise.resolve());
       }
 
-      return addVisualizations(visualizations)
+      return PageObjects.dashboard.clickNewDashboard()
+        .then(() => addVisualizations(visualizations))
         .then(function () {
           PageObjects.common.debug('done adding visualizations');
           PageObjects.common.saveScreenshot('Dashboard-add-visualizations');

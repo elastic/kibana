@@ -13,8 +13,8 @@ export default class DashboardPage {
   }
 
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('dashboardNewButton')
-    .click();
+    return PageObjects.common.findTestSubject('newDashboardLink')
+      .click();
   }
 
   clickAddVisualization() {
