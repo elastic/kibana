@@ -52,11 +52,17 @@ dashboard-grid {
         .panel .panel-heading .btn-group {
           display: block !important;
         }
-        .panel--edit-mode {
-          border-color: @kibanaGray4;
-        }
       }
 
+    }
+    .panel--edit-mode {
+      border-color: @kibanaGray4;
+      .visualize-show-spy {
+        visibility: visible;
+      }
+      .panel-heading .btn-group {
+        display: block !important;
+      }
     }
   }
 

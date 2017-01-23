@@ -59,10 +59,20 @@
       </div>
     </div>
 
-    <!-- NoResults -->
+    <!-- PromptForItems -->
     <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length">
-      <div class="kuiNoResults">
-        No dashboards matched your search.
+      <div class="kuiPromptForItems">
+        <div class="kuiPromptForItems__message">
+          Looks like you don&rsquo;t have any dashboards. Let&rsquo;s add some!
+        </div>
+
+        <div class="kuiPromptForItems__actions">
+          <a class="kuiButton kuiButton--primary kuiButton--iconText"
+             href="#/dashboard/create">
+            <span class="kuiButton__icon kuiIcon fa-plus"></span>
+            Add a dashboard
+          </a>
+        </div>
       </div>
     </div>
 

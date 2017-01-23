@@ -90,6 +90,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         if (filter) return filter.query;
       };
 
+      // Brand new dashboards are defaulted to edit mode, existing ones default to view mode.
+      const defaultMode =
+        $route.current.params[DashboardConstants.VIEW_MODE_PARAM] ||
+        (dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
+
       const stateDefaults = {
         title: dash.title,
         panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
@@ -97,6 +102,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
         query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || { query_string: { query: '*' } },
         filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
+        viewMode: defaultMode
       };
 
       let savedDashTimeFrom = dash.timeFrom;
@@ -140,7 +146,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         // Time changes don't propagate to stateMonitor so we must track that dirty state manually.
         if (($appStatus.dirty || (dash.timeRestore && timeMismatch())) &&
           // Don't warn if loading the dashboard for the first time.
-          newMode === DashboardViewMode.VIEW && $scope.dashboardViewMode === DashboardViewMode.EDIT) {
+          newMode === DashboardViewMode.VIEW && $state.viewMode === DashboardViewMode.EDIT) {
 
           const exitEditMode = () => {
             if (dash.id) {
@@ -166,15 +172,18 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
 
         const doModeSwitch = () => {
-          $scope.dashboardViewMode = newMode;
+          $scope.dashboardViewMode = $state.viewMode = newMode;
           $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
           if (newMode === DashboardViewMode.EDIT) {
-            // watch for state changes and update the appStatus.dirty value
+            // We don't want a difference in view mode to trigger the dirty state.
+            stateDefaults.viewMode = $state.viewMode;
             stateMonitor = stateMonitorFactory.create($state, stateDefaults);
             stateMonitor.onChange(status => {
               $appStatus.dirty = status.dirty;
             });
           }
+
+          $state.save();
         };
 
         if (newMode === DashboardViewMode.EDIT && dash.id && changedFilterList.length > 0) {
@@ -214,13 +223,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       };
 
-      // Brand new dashboards are defaulted to edit mode, existing ones default to view mode.
-      const defaultMode =
-        $route.current.params[DashboardConstants.VIEW_MODE_PARAM] ||
-        (dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
-      // To avoid view mode being a part of the state, we need to remove it from the url.
-      kbnUrl.removeParam(DashboardConstants.VIEW_MODE_PARAM);
-      changeViewMode(defaultMode);
+      changeViewMode($state.viewMode);
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -323,7 +326,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.getDashTitle = function () {
         const displayTitle = dash.lastSavedTitle || `${dash.title} (unsaved)`;
-        const isEditMode = $scope.dashboardViewMode === DashboardViewMode.EDIT;
+        const isEditMode = $state.viewMode === DashboardViewMode.EDIT;
         return isEditMode ? 'Editing ' + displayTitle : displayTitle;
       };
 
@@ -420,11 +423,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       init();
 
       $scope.showEditHelpText = () => {
-        return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.EDIT;
+        return !$scope.state.panels.length && $state.viewMode === DashboardViewMode.EDIT;
       };
 
       $scope.showViewHelpText = () => {
-        return !$scope.state.panels.length && $scope.dashboardViewMode === DashboardViewMode.VIEW;
+        return !$scope.state.panels.length && $state.viewMode === DashboardViewMode.VIEW;
       };
     }
   };
