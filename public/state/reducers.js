@@ -1,4 +1,5 @@
 import elements from 'plugins/rework/elements/elements';
+import initialState from './initial_state';
 import _ from 'lodash';
 
 function rootReducer(state = {}, action) {
@@ -41,6 +42,14 @@ function rootReducer(state = {}, action) {
       }});
   };
 
+  const newWorkpad = () => {
+    return {
+      app: {...state.app},
+      transient: {...initialState.transient},
+      persistent: {...initialState.persistent}
+    };
+  };
+
   const { payload, type } = action;
   switch (type) {
 
@@ -56,6 +65,8 @@ function rootReducer(state = {}, action) {
       return setWorkpad('width', payload);
     case 'WORKPAD_NAME':
       return setWorkpad('name', payload);
+    case 'WORKPAD_NEW':
+      return newWorkpad();
 
     case 'PAGE_SET':
       return setWorkpad('page', payload);
