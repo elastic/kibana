@@ -5,7 +5,7 @@ import onStart from './on_start';
 import thunk from 'redux-thunk';
 import persistState from 'redux-localstorage';
 import rootReducer from './reducers';
-import initialState from './initial_state';
+import getInitialState from './initial_state';
 import _ from 'lodash';
 
 
@@ -13,6 +13,7 @@ const app = modules.get('apps/rework');
 
 app.service('$store', (kbnVersion, basePath) => {
 
+  const initialState = getInitialState();
   // Set the defaults from Kibana plugin
   initialState.app.kbnVersion = kbnVersion;
   initialState.app.basePath = basePath;

@@ -1,5 +1,5 @@
 import elements from 'plugins/rework/elements/elements';
-import initialState from './initial_state';
+import getInitialState from './initial_state';
 import _ from 'lodash';
 
 function rootReducer(state = {}, action) {
@@ -72,8 +72,8 @@ function rootReducer(state = {}, action) {
   const newWorkpad = () => {
     return {
       app: {...state.app},
-      transient: {...initialState.transient},
-      persistent: {...initialState.persistent}
+      transient: {...getInitialState().transient},
+      persistent: {...getInitialState().persistent}
     };
   };
 
