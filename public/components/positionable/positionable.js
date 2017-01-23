@@ -36,16 +36,17 @@ export default React.createClass({
     this.removeHandlers(this.refs.positionableWrapper);
   },
   render() {
-    const { children, position, rotate, resize } = this.props;
+    const { children, position, rotate, resize, style } = this.props;
 
     const wrappedChildren = React.Children.map(children, (child) => {
       const newStyle = {
+        ...style,
         position: 'absolute',
         transform: `rotate(${position.angle}deg)`,
         height: position.height,
         width: position.width,
         top: position.top,
-        left: position.left
+        left: position.left,
       };
       return (
         <div className="rework--positionable"

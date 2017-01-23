@@ -56,7 +56,7 @@ function rootReducer(state = {}, action) {
       ...state.persistent.elements,
       [element.id]: element});
 
-    result.persistent.pages[pageId].elements.unshift(element.id);
+    result.persistent.pages[pageId].elements.push(element.id);
     return result;
   };
 

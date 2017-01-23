@@ -133,7 +133,7 @@ const Workspace = React.createClass({
                     const page = pages[pageId];
                     return (
                       <Page key={pageId} page={page}>
-                        {page.elements.map((elementId) => {
+                        {page.elements.map((elementId, i) => {
                           const element = elements[elementId];
                           const selected = elementId === selectedElement ? true : false;
                           const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
@@ -148,7 +148,7 @@ const Workspace = React.createClass({
                           return (
                             <div key={elementId} className={wrapperClasses}>
                               <ElementWrapper id={elementId} args={element.args}>
-                                <Positionable
+                                <Positionable style={{zIndex: 2000 + i}}
                                   position={position}
                                   move={resizeMove(elementId)}
                                   resize={resizeMove(elementId)}

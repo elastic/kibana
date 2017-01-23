@@ -1,5 +1,14 @@
 @import (reference) "~plugins/rework/main.less";
 
+/*
+z-indices:
+  Workspace: 0-1000
+  Page: 1000-1999
+  Elements: 2000-2999 (closer to front of array = lower on stack)
+  Left-sidebar: 3000-3999
+  Top Nav & Dropdowns: 4000-4999
+*/
+
 .rework--application {
   display: flex;
   flex-direction: column;
@@ -32,6 +41,10 @@
         display: block;
       }
     }
+  }
+
+  .rework--sidebar-left {
+    z-index: 3000;
   }
 
   .rework--editor {
