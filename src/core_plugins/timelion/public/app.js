@@ -97,7 +97,7 @@ app.controller('timelion', function (
         onConfirm: doDelete,
         confirmButtonText: 'Delete sheet'
       };
-      confirmModal('Are you sure you want to delete the sheet ' + title + ' ?', confirmModalOptions);
+      confirmModal(`Are you sure you want to delete the sheet ${title}?`, confirmModalOptions);
     },
     testId: 'timelionDeleteButton',
   }, {

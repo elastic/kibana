@@ -94,7 +94,7 @@ uiModules
           onConfirm: doDelete
         };
         confirmModal(
-          `Are you sure want to delete ${self.field.name}'? This action is irreversible!`,
+          `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
           confirmModalOptions);
       };
 

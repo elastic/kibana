@@ -72,11 +72,11 @@ uiModules.get('apps/management')
 
   $scope.refreshFields = function () {
     const confirmModalOptions = {
-      confirmButtonText: 'Reload fields',
+      confirmButtonText: 'Refresh fields',
       onConfirm: () => { $scope.indexPattern.refreshFields(); }
     };
     confirmModal(
-      'This will reset the field popularity counters. Are you sure you want to reload your fields?',
+      'This will reset the field popularity counters. Are you sure you want to refresh your fields?',
       confirmModalOptions);
   };
 
