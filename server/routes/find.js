@@ -14,14 +14,14 @@ module.exports = function (server) {
         const esQuery = params.name ? {
           bool: {
             should: [
-              {match: {'name': params.name}},
-              {wildcard: {'name': `*${params.name}`}},
-              {wildcard: {'name': `${params.name}*`}},
-              {wildcard: {'name': `*${params.name}*`}},
-              {match: {'name.keyword': params.name}},
-              {wildcard: {'name.keyword': `*${params.name}`}},
-              {wildcard: {'name.keyword': `${params.name}*`}},
-              {wildcard: {'name.keyword': `*${params.name}*`}},
+              {match: {'workpad.name': params.name}},
+              {wildcard: {'workpad.name': `*${params.name}`}},
+              {wildcard: {'workpad.name': `${params.name}*`}},
+              {wildcard: {'workpad.name': `*${params.name}*`}},
+              {match: {'workpad.name.keyword': params.name}},
+              {wildcard: {'workpad.name.keyword': `*${params.name}`}},
+              {wildcard: {'workpad.name.keyword': `${params.name}*`}},
+              {wildcard: {'workpad.name.keyword': `*${params.name}*`}},
             ]
           }
         } : {match_all:{}};
@@ -31,7 +31,7 @@ module.exports = function (server) {
           type: server.plugins.rework.kibanaType,
           body: {
             query: esQuery,
-            _source: ['name', '@timestamp'],
+            _source: ['workpad.name', '@timestamp'],
             sort: [{
               '@timestamp': {
                 order: 'desc'

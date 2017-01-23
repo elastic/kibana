@@ -13,11 +13,14 @@ module.exports = function (server) {
         const body = {
           index: config.get('kibana.index'),
           type: server.plugins.rework.kibanaType,
-          id: payload.id,
+          id: payload.workpad.id,
           body: payload
         };
 
+        console.log(payload);
+
         callWithRequest(request, 'index', body).then(function (resp) {
+          console.log(resp);
           reply({
             ok: true,
           });
