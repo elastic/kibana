@@ -43,7 +43,7 @@ module.exports = function (kibana) {
           'docViews'
         ],
 
-        injectVars: function (server, options) {
+        injectVars: function (server) {
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
