@@ -3,6 +3,27 @@ import {dataframeResolve} from './actions/dataframe';
 import {elementResolve} from './actions/element';
 
 
+/*
+POST /.kibana/the_rework_1/_mapping
+
+{
+  "properties": {
+    "pages": {
+      "type": "object",
+      "enabled": false
+    },
+    "elements": {
+      "type": "object",
+      "enabled": false
+    },
+    "dataframes": {
+      "type": "object",
+      "enabled": false
+
+    }
+  }
+}
+*/
 
 // Stuff todo when you bootstrap the store
 export default function (store) {
