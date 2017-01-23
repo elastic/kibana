@@ -9,8 +9,19 @@ export default React.createClass({
 
     return (
       <div className='rework--nav-button'>
-        <a data-tip={tooltip} className={className} onClick={onClick}>{this.props.children}</a>
-        <ReactTooltip type='dark' effect='solid' />
+        <a
+          data-tip={tooltip}
+          className={className}
+          onClick={onClick}
+          >
+          {this.props.children}
+        </a>
+        <ReactTooltip
+          class="rework--tooltip"
+          type='dark'
+          effect='solid'
+          event='mouseover'
+          eventOff='click mouseout'/>
       </div>
     );
   }

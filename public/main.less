@@ -14,3 +14,16 @@
 a {
   cursor: pointer;
 }
+
+
+.rework--tooltip {
+  &.place-bottom {
+    font-size: 11px !important;
+    padding: 4px 10px;
+    &:after {
+      border-bottom-color: rgba(0,0,0,0.75) !important;
+      border-bottom-style: solid;
+      border-bottom-width: 4px;
+    }
+  }
+}
