@@ -12,6 +12,7 @@ import Editable from 'plugins/rework/components/editable/editable';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 import Centered from 'plugins/rework/components/centered/centered';
 import Pager from 'plugins/rework/components/pager/pager';
+import PageManager from 'plugins/rework/components/page_manager/page_manager';
 import Workpad from 'plugins/rework/components/workpad/workpad';
 import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
@@ -22,32 +23,35 @@ import ElementEditor from 'plugins/rework/containers/element_editor/element_edit
 
 import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { editorToggle } from 'plugins/rework/state/actions/editor';
-import { pageNext, pagePrevious } from 'plugins/rework/state/actions/page';
+import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
 
 import './workspace.less';
 
 const Workspace = React.createClass({
+  pageAdd() {
+    this.props.dispatch(pageAdd());
+  },
+  pageRemove() {
+    const {page, pages} = this.props.workpad;
+    this.props.dispatch(pageRemove(pages[page]));
+  },
   nameWorkpad(value) {
-    const {dispatch} = this.props;
-    dispatch(workpadName(value));
+    this.props.dispatch(workpadName(value));
   },
   newWorkpad() {
-    const {dispatch} = this.props;
-    dispatch(workpadNew());
+    this.props.dispatch(workpadNew());
   },
   dropdown(name) {
     return () => {
-      const {dispatch} = this.props;
-      dispatch(dropdownToggle(name));
+      this.props.dispatch(dropdownToggle(name));
     };
   },
   select(id) {
     return (e) => {
       e.stopPropagation();
-      const {dispatch} = this.props;
-      dispatch(elementSelect(id));
+      this.props.dispatch(elementSelect(id));
     };
   },
   resizeMove(id) {
@@ -123,6 +127,7 @@ const Workspace = React.createClass({
           <Centered onMouseDown={this.select(null)}>
             <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
             <Workpad workpad={workpad}>
+                <PageManager add={this.pageAdd} remove={this.pageRemove}></PageManager>
                 <Stack top={workpad.page}>
                   {workpad.pages.map((pageId) => {
                     const page = pages[pageId];
