@@ -9,7 +9,7 @@ const DEFAULT_INITIAL_STATE = {
   columns: ['@message'],
 };
 
-export default class DiscoverPage {
+export default class ContextPage {
   init(remote) {
     this.remote = remote;
   }
