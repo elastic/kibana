@@ -55,6 +55,9 @@ $toolBarPadding: 10px;
 $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
 
+// Rhythm
+$verticalRhythm: 10px;
+
 @mixin darkTheme {
   .theme-dark & {
     @content;
@@ -224,3 +227,4 @@ body {
 @import "table/index";
 @import "tabs/index";
 @import "tool_bar/index";
+@import "vertical_rhythm/index";

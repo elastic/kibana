@@ -1350,3 +1350,6 @@ body {
   color: #5A5A5A;
   white-space: nowrap;
   /* 1 */ }
+
+.kuiVerticalRhythm + .kuiVerticalRhythm {
+  margin-top: 10px; }
