@@ -1,5 +1,20 @@
 @import (reference) "~plugins/rework/main.less";
 
+.rework--page-manager > * {
+  margin-left: 5px;
+  color: @text-color;
+}
+
+.rework--page-manager-config {
+
+  &.show {
+    display: inline !important;
+  }
+  &:hover {
+    color: @kibanaBlue3;
+  }
+}
+
 .rework--page-manager-add {
   &:hover {
     color: @kibanaGreen1;
@@ -7,7 +22,6 @@
 }
 
 .rework--page-manager-remove {
-  margin-left: 5px;
   &:hover {
     color: @kibanaPink1;
   }

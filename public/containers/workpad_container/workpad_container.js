@@ -21,7 +21,7 @@ import Presentation from 'plugins/rework/components/presentation/presentation';
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 
 import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
-import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
+import { pageNext, pagePrevious, pageAdd, pageRemove, pageReplace } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
 const DataframeDialog = React.createClass({
@@ -60,9 +60,13 @@ const DataframeDialog = React.createClass({
     const {dispatch} = this.props;
     return () => dispatch(action());
   },
+  changePage(page) {
+    this.props.dispatch(pageReplace(page));
+  },
   render() {
     const {fullscreen, workpad, elements, selectedElement, pages, elementCache} = this.props;
     const {rotate, resizeMove} = this;
+    const currentPage = pages[workpad.pages[workpad.page]];
 
     const stack = (
       <Stack top={workpad.page}>
@@ -123,7 +127,13 @@ const DataframeDialog = React.createClass({
         <Centered onMouseDown={this.select(null)}>
           <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
           <Workpad workpad={workpad}>
-              <PageManager add={this.pageAdd} remove={this.pageRemove} pageCount={workpad.pages.length}></PageManager>
+              <PageManager
+                add={this.pageAdd}
+                remove={this.pageRemove}
+                pageCount={workpad.pages.length}
+                page={currentPage}
+                onPageChange={this.changePage}>
+              </PageManager>
               {stack}
           </Workpad>
           <Pager direction='next' handler={this.do(pageNext)}></Pager>
