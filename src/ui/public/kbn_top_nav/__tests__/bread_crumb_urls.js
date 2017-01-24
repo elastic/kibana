@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import { getBreadCrumbUrls } from '../bread_crumbs/bread_crumb_url';
+import { getBreadCrumbUrls } from '../bread_crumbs/bread_crumb_urls';
 
 describe('getBreadCrumbUrls', function () {
 

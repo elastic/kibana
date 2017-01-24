@@ -60,16 +60,25 @@
       </div>
     </div>
 
+    <!-- NoResults -->
+    <div ng-if="!listingController.items.length && listingController.filter" class="kuiPanel kuiPanel--centered">
+      <div class="kuiNoItems">
+        No dashboards matched your search.
+      </div>
+    </div>
+
     <!-- PromptForItems -->
-    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length">
+    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length && !listingController.filter">
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
           Looks like you don&rsquo;t have any dashboards. Let&rsquo;s add some!
         </div>
 
         <div class="kuiPromptForItems__actions">
-          <a class="kuiButton kuiButton--primary kuiButton--iconText"
-                  href="#/dashboard/create">
+          <a
+            class="kuiButton kuiButton--primary kuiButton--iconText"
+            href="#/dashboard/create"
+          >
             <span class="kuiButton__icon kuiIcon fa-plus"></span>
             Add a dashboard
           </a>
@@ -92,10 +101,10 @@
 
         <th class="kuiTableHeaderCell" ng-click="listingController.sortHits()">
           Name
-          <i
+          <span
             class="fa"
             ng-class="listingController.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-          </i>
+          </span>
         </th>
       </tr>
       </thead>
