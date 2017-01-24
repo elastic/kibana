@@ -77,11 +77,12 @@ function rootReducer(state = {}, action) {
       }});
   };
 
-  const newWorkpad = () => {
+  const newWorkpad = (workpad) => {
+    const persistent = workpad || getInitialState().persistent;
     return {
       app: {...state.app},
       transient: {...getInitialState().transient},
-      persistent: {...getInitialState().persistent}
+      persistent: {...persistent}
     };
   };
 
@@ -102,6 +103,9 @@ function rootReducer(state = {}, action) {
       return setWorkpad('name', payload);
     case 'WORKPAD_NEW':
       return newWorkpad();
+    case 'WORKPAD_LOAD':
+      return newWorkpad(payload);
+
 
     case 'PAGE_SET':
       return setWorkpad('page', payload);

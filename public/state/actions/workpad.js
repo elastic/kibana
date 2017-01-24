@@ -20,3 +20,11 @@ export function workpadInit() {
     dispatch(dataframeResolveAll());
   };
 }
+
+export function workpadLoad(workpad) {
+  return (dispatch, getState) => {
+    const action = createAction('WORKPAD_LOAD');
+    dispatch(action(workpad));
+    dispatch(workpadInit());
+  };
+}
