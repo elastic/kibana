@@ -11,10 +11,10 @@ import moment from 'moment';
 
 frameSources.push(new FrameSource('timelion', {
   displayName: 'Timelion',
-  help: 'Use timelion to fetch data',
+  help: 'Use timelion expressions to fetch data from Elasticsearch and other sources',
   defaults: {
     expression: '.static(5:10:2:10:23:11:12:13:14).mvavg(10)',
-    interval: '1m'
+    interval: 'auto'
   },
   toDataframe: function (value, app) {
     const dataframe =   {
