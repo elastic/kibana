@@ -6,6 +6,7 @@ import { savedDashboardRegister } from 'plugins/kibana/dashboard/saved_dashboard
 
 import dashboardListingTemplate from './listing/dashboard_listing.html';
 import { DashboardListingController } from './listing/dashboard_listing';
+import { DashboardConstants } from './dashboard_constants';
 
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
@@ -13,7 +14,7 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true
   })
-  .when('/dashboard', {
+  .when(DashboardConstants.LANDING_PAGE_URL, {
     template: dashboardListingTemplate,
     controller: DashboardListingController,
     controllerAs: 'listingController'
