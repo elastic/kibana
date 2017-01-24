@@ -10,7 +10,7 @@ export default function AggTypeMetricDerivativeProvider(Private) {
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev'];
+  const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
