@@ -19,10 +19,12 @@
       </option>
     </select>
   </div>
-  <ng-form name="customMetricForm" ng-if="agg.params.buckets_path === 'custom'" class="vis-editor-agg-order-agg">
-    <vis-editor-agg-params
-      agg="agg.params.customMetric"
-      group-name="'metrics'">
-    </vis-editor-agg-params>
-  </ng-form>
+  <div ng-if="agg.params.buckets_path === 'custom'" class="vis-editor-agg-order-agg">
+    <ng-form name="customMetricForm">
+      <vis-editor-agg-params
+        agg="agg.params.customMetric"
+        group-name="'metrics'">
+      </vis-editor-agg-params>
+    </ng-form>
+  </div>
 </div>
