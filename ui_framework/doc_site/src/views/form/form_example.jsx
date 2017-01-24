@@ -13,6 +13,10 @@ export default createExample([{
   html: require('./text_area.html'),
   hasDarkTheme: false,
 }, {
+  title: 'TextArea, non-resizable',
+  html: require('./text_area_non_resizable.html'),
+  hasDarkTheme: false,
+}, {
   title: 'CheckBox',
   html: require('./check_box.html'),
   hasDarkTheme: false,

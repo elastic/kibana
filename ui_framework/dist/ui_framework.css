@@ -346,6 +346,9 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+.kuiTextArea--nonResizable {
+  resize: none; }
+
 .kuiTextInput {
   -webkit-appearance: none;
      -moz-appearance: none;
