@@ -7,6 +7,7 @@ import Editable from 'plugins/rework/components/editable/editable';
 import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
 import { elementLayerMove } from 'plugins/rework/state/actions/element';
 import { dropdownToggle } from 'plugins/rework/state/actions/misc';
+import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
 
 import './nav.less';
 
@@ -29,6 +30,9 @@ const DataframeDialog = React.createClass({
       this.props.dispatch(elementLayerMove(selectedElementId, currentPageId, movement));
     };
   },
+  do(action) {
+    return () => this.props.dispatch(action());
+  },
   render() {
     const {workpad, selectedElementId, currentPageId} = this.props;
     const layerClasses = ['rework--nav--layer-buttons'];
@@ -40,6 +44,10 @@ const DataframeDialog = React.createClass({
           <Editable className="rework--workpad-name" onChange={this.nameWorkpad} value={workpad.name}></Editable>
         </div>
         <div className="rework--top-nav-bottom">
+          <NavButton
+            tooltip="Present"
+            className="fa fa-play"
+            onClick={this.do(fullscreenToggle)}></NavButton>
           <NavButton
             tooltip="Dataframes"
             className="fa fa-database"

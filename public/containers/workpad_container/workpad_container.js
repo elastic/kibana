@@ -14,10 +14,13 @@ import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 import Fullscreen from 'plugins/rework/components/fullscreen/fullscreen';
+import Presentation from 'plugins/rework/components/presentation/presentation';
+
 
 // Containers
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 
+import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
 import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
@@ -106,11 +109,13 @@ const DataframeDialog = React.createClass({
     if (fullscreen) {
       return (
         <Fullscreen height={workpad.height} width={workpad.width}>
-          <Centered>
-            <Workpad workpad={workpad}>
-              {stack}
-            </Workpad>
-          </Centered>
+          <Presentation onNext={this.do(pageNext)} onPrev={this.do(pagePrevious)} onEsc={this.do(fullscreenToggle)}>
+            <Centered>
+              <Workpad workpad={workpad}>
+                {stack}
+              </Workpad>
+            </Centered>
+          </Presentation>
         </Fullscreen>
       );
     } else {
