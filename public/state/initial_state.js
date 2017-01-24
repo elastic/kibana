@@ -4,6 +4,7 @@ export default () => {
   return {
     app: {}, // Kibana stuff in here
     transient: { // Things that don't survive a refresh
+      fullscreen: false,
       editor: true,
       selectedElement: null,
       dropdown: null,
