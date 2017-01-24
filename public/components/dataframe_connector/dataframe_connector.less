@@ -1,0 +1,23 @@
+@import (reference) "~plugins/rework/main.less";
+
+.rework--dataframe-connector {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: @border-radius-small;
+  width: 100%;
+  height: 100%;
+
+  .table {
+    margin-bottom: 0px;
+    border: 1px solid @table-border-color;
+  }
+
+  .rework--dataframe-connector-name, .rework--dataframe-connector-help {
+    line-height: 27px;
+  }
+
+  tr:hover {
+    background-color: @kibanaGray6;
+    cursor: pointer;
+  }
+}
