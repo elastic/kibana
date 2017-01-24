@@ -48,6 +48,9 @@ const DataframeDialog = React.createClass({
             tooltip="Present"
             className="fa fa-play"
             onClick={this.do(fullscreenToggle)}></NavButton>
+
+          <vhr/>
+
           <NavButton
             tooltip="Dataframes"
             className="fa fa-database"
