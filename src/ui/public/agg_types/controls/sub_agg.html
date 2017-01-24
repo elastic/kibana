@@ -9,7 +9,7 @@
       <option
         ng-repeat="respAgg in responseValueAggs track by respAgg.id"
         value="{{respAgg.id}}"
-        ng-if="respAgg.type.name !== 'derivative'"
+        ng-if="respAgg.type.name !== agg.type.name"
         ng-disabled="rejectAgg(respAgg)"
         ng-selected="agg.params.buckets_path === respAgg.id">
         metric: {{safeMakeLabel(respAgg)}}
