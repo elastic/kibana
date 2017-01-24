@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import classnames from 'classnames';
+import $ from 'jquery';
 
 // Components
 import Centered from 'plugins/rework/components/centered/centered';
@@ -12,6 +13,7 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
+import Fullscreen from 'plugins/rework/components/fullscreen/fullscreen';
 
 // Containers
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
@@ -56,54 +58,73 @@ const DataframeDialog = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const {workpad, elements, selectedElement, pages, elementCache} = this.props;
+    const {fullscreen, workpad, elements, selectedElement, pages, elementCache} = this.props;
     const {rotate, resizeMove} = this;
 
-    return (
-      <Centered onMouseDown={this.select(null)}>
-        <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
-        <Workpad workpad={workpad}>
-            <PageManager add={this.pageAdd} remove={this.pageRemove} pageCount={workpad.pages.length}></PageManager>
-            <Stack top={workpad.page}>
-              {workpad.pages.map((pageId) => {
-                const page = pages[pageId];
+    const stack = (
+      <Stack top={workpad.page}>
+        {workpad.pages.map((pageId) => {
+          const page = pages[pageId];
+          return (
+            <Page key={pageId} page={page}>
+              {page.elements.map((elementId, i) => {
+                const element = elements[elementId];
+                const selected = elementId === selectedElement ? true : false;
+                const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
+
+                // This is really gross because it doesn't actually wrap the element.
+                // Rather you end up with a bunch of 0 height divs stacked at the top
+                // of the page. Ew.
+                const wrapperClasses = classnames({
+                  'rework--workspace-element-header': true,
+                  'rework--workspace-element-header-selected': selected,
+                });
                 return (
-                  <Page key={pageId} page={page}>
-                    {page.elements.map((elementId, i) => {
-                      const element = elements[elementId];
-                      const selected = elementId === selectedElement ? true : false;
-                      const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
+                  <div key={elementId} className={wrapperClasses}>
+                    <ElementWrapper id={elementId} args={element.args}>
+                      <Positionable style={{zIndex: 2000 + i}}
+                        position={position}
+                        interact={fullscreen ? false : true}
+                        move={resizeMove(elementId)}
+                        resize={resizeMove(elementId)}
+                        rotate={rotate(elementId)}>
+                          <Element type={element.type} args={elementCache[elementId]}></Element>
+                      </Positionable>
+                    </ElementWrapper>
 
-                      // This is really gross because it doesn't actually wrap the element.
-                      // Rather you end up with a bunch of 0 height divs stacked at the top
-                      // of the page. Ew.
-                      const wrapperClasses = classnames({
-                        'rework--workspace-element-header': true,
-                        'rework--workspace-element-header-selected': selected,
-                      });
-                      return (
-                        <div key={elementId} className={wrapperClasses}>
-                          <ElementWrapper id={elementId} args={element.args}>
-                            <Positionable style={{zIndex: 2000 + i}}
-                              position={position}
-                              move={resizeMove(elementId)}
-                              resize={resizeMove(elementId)}
-                              rotate={rotate(elementId)}>
-                                <Element type={element.type} args={elementCache[elementId]}></Element>
-                            </Positionable>
-                          </ElementWrapper>
-
-                        </div>
-                      );
-                    })}
-                  </Page>
+                  </div>
                 );
               })}
-            </Stack>
-        </Workpad>
-        <Pager direction='next' handler={this.do(pageNext)}></Pager>
-      </Centered>
+            </Page>
+          );
+        })}
+      </Stack>
     );
+
+
+
+    if (fullscreen) {
+      return (
+        <Fullscreen height={workpad.height} width={workpad.width}>
+          <Centered>
+            <Workpad workpad={workpad}>
+              {stack}
+            </Workpad>
+          </Centered>
+        </Fullscreen>
+      );
+    } else {
+      return (
+        <Centered onMouseDown={this.select(null)}>
+          <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
+          <Workpad workpad={workpad}>
+              <PageManager add={this.pageAdd} remove={this.pageRemove} pageCount={workpad.pages.length}></PageManager>
+              {stack}
+          </Workpad>
+          <Pager direction='next' handler={this.do(pageNext)}></Pager>
+        </Centered>
+      );
+    }
   }
 });
 
@@ -113,7 +134,8 @@ function mapStateToProps(state) {
     pages: state.persistent.pages,
     elements: state.persistent.elements,
     elementCache: state.transient.elementCache,
-    selectedElement: state.transient.selectedElement
+    selectedElement: state.transient.selectedElement,
+    fullscreen: state.transient.fullscreen
   };
 }
 

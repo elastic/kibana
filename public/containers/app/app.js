@@ -25,12 +25,17 @@ const App = React.createClass({
     return () => dispatch(action());
   },
   render() {
-    const  {elements, editor, selectedElement} = this.props;
+    const  {elements, editor, selectedElement, fullscreen} = this.props;
     const {resizeMove, rotate, select} = this;
     const currentElement = elements[selectedElement];
 
+    const workpadContainerElem = (<WorkpadContainer></WorkpadContainer>);
+
+
     // TODO: This entire thing can be broken up into smaller containers.
     // But for now, its actually *more* readable this way.
+    if (fullscreen) return workpadContainerElem;
+
     return (
       <div className="rework--application">
         <Nav></Nav>
@@ -53,7 +58,8 @@ const App = React.createClass({
             </div>
           </Sidebar>
 
-          <WorkpadContainer></WorkpadContainer>
+          {workpadContainerElem}
+
         </div>
       </div>
 
@@ -65,7 +71,8 @@ function mapStateToProps(state) {
   return {
     editor: state.transient.editor,
     elements: state.persistent.elements,
-    selectedElement: state.transient.selectedElement
+    selectedElement: state.transient.selectedElement,
+    fullscreen: state.transient.fullscreen,
   };
 }
 
