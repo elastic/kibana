@@ -2,6 +2,8 @@ import {argumentResolve} from './element';
 import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import {mutateWithId} from './lib/helpers';
+import { getDataframeTemplate } from '../templates';
+
 import elementTypes from 'plugins/rework/elements/elements';
 import _ from 'lodash';
 
@@ -20,6 +22,13 @@ export function dataframeResolveAll() {
   return (dispatch, getState) => {
     const ids = _.keys(getState().persistent.dataframes);
     _.each(ids, id => dispatch(dataframeResolve(id)));
+  };
+}
+
+export function dataframeAdd(dataframe) {
+  return (dispatch, getState) => {
+    const newFrame = _.assign({}, getDataframeTemplate(), dataframe);
+    dispatch(dataframeSet(newFrame));
   };
 }
 
