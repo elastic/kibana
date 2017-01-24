@@ -7,8 +7,25 @@
   width: 100%;
   height: 100%;
 
+  .rework--workpad-list-name, .rework--workpad-list-timestamp {
+    line-height: 27px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
   tr:hover {
     background-color: @kibanaGray6;
+  }
+}
+
+.rework--workpad-list-delete {
+  font-size: 20px;
+  line-height: 27px;
+
+  &:hover {
+    color: @kibanaPink1;
     cursor: pointer;
   }
 }
