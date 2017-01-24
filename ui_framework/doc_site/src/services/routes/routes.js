@@ -28,6 +28,9 @@ import LocalNavExample
 import MicroButtonExample
   from '../../views/micro_button/micro_button_example.jsx';
 
+import PanelExample
+  from '../../views/panel/panel_example.jsx';
+
 import TableExample
   from '../../views/table/table_example.jsx';
 
@@ -65,6 +68,9 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+}, {
+  name: 'Panel',
+  component: PanelExample,
 }, {
   name: 'Table',
   component: TableExample,
