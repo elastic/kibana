@@ -1,7 +1,9 @@
-<dl class="source truncate-by-height">
+<div class="source kuiDocumentSource">
   <% defPairs.forEach(function (def) { %>
-    <dt><%- def[0] %>:</dt>
-    <dd><%= def[1] %></dd>
+    <div class="kuiDocumentSourceItem">
+      <div class="kuiDocumentSourceItem__term"><%- def[0] %></div>
+      <div class="kuiDocumentSourceItem__description"><%= def[1] %></div>
+    </div>
     <%= ' ' %>
   <% }); %>
-</dl>
+</div>

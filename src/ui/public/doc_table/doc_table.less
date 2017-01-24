@@ -31,3 +31,48 @@ doc-table {
     opacity: @loading-opacity;
   }
 }
+
+.kuiDocumentDetails {
+  display: flex;
+  max-height: 100px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+  &::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ecf0f1;
+    border: 6px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+.kuiDocumentSource {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin-top: -4px;
+}
+
+.kuiDocumentSourceItem {
+  width: 300px;
+  padding: 4px 2px 0;
+  margin-right: 2px;
+}
+
+  .kuiDocumentSourceItem__term {
+    word-wrap: break-word;
+    font-weight: bold;
+  }
+
+  .kuiDocumentSourceItem__description {
+    word-wrap: break-word;
+    padding-bottom: 4px;
+  }
