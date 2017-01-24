@@ -13,7 +13,8 @@ module.service('debounce', ['$timeout', function ($timeout) {
     let result;
     options = _.defaults(options || {}, {
       leading: false,
-      trailing: true
+      trailing: true,
+      invokeApply: true,
     });
 
     function debounce() {
@@ -32,7 +33,7 @@ module.service('debounce', ['$timeout', function ($timeout) {
       if (timeout) {
         $timeout.cancel(timeout);
       }
-      timeout = $timeout(later, wait);
+      timeout = $timeout(later, wait, options.invokeApply);
 
       if (callNow) {
         result = func.apply(self, args);
