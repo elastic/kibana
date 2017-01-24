@@ -3,23 +3,23 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-describe('ui/modals/safe_confirm', function () {
+describe('ui/modals/confirm_modal_promise', function () {
 
   let $rootScope;
   let message;
-  let safeConfirm;
+  let confirmModalPromise;
   let promise;
 
   beforeEach(function () {
     ngMock.module('kibana');
     ngMock.inject(function ($injector) {
-      safeConfirm = $injector.get('safeConfirm');
+      confirmModalPromise = $injector.get('confirmModalPromise');
       $rootScope = $injector.get('$rootScope');
     });
 
     message = 'woah';
 
-    promise = safeConfirm(message);
+    promise = confirmModalPromise(message, { confirmButtonText: 'click me' });
   });
 
   afterEach(function () {
@@ -79,6 +79,17 @@ describe('ui/modals/safe_confirm', function () {
 
         expect(cancelCallback.called).to.be(true);
         expect(confirmCallback.called).to.be(false);
+      });
+    });
+
+    context('error is thrown', function () {
+      it('when no confirm button text is used', function () {
+        try {
+          confirmModalPromise(message);
+          expect(false).to.be(true);
+        } catch (error) {
+          expect(error).to.not.be(undefined);
+        }
       });
     });
   });

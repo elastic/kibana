@@ -1,3 +1,2 @@
 import './confirm_modal';
-import './safe_confirm';
-
+import './confirm_modal_promise';
