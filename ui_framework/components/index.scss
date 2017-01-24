@@ -34,6 +34,8 @@ $successColor: #417505;
 $warningColor: #ffac15;
 $errorColor: #D86051;
 $focusColor: #6EADC1;
+$focusDangerColor: #ff523c;
+$focusBackgroundColor: #ffffff;
 $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
 $linkColor: #3CAED2;
@@ -67,11 +69,12 @@ $verticalRhythm: 10px;
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
  */
-@mixin focus($color: $focusColor) {
+@mixin focus($color: $focusColor, $backgroundColor: $focusBackgroundColor) {
   z-index: 1; /* 1 */
-  outline: 1px solid $color !important; /* 2 */
-  outline-offset: 2px !important; /* 2 */
+  outline: none; /* 2 */
+  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
 }
 
 @mixin formControlFocus {
@@ -189,6 +192,18 @@ $verticalRhythm: 10px;
 }
 
 @mixin buttonOnStandoutBackground {
+  .kuiButton {
+    &:focus {
+      @include focus($focusColor, $standoutBackgroundColor);
+    }
+  }
+
+  .kuiButton--danger {
+    &:focus {
+      @include focus($focusDangerColor, $standoutBackgroundColor);
+    }
+  }
+
   .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF;

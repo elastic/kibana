@@ -1,6 +1,7 @@
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
  */
 /**
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
@@ -115,10 +116,10 @@ body {
   .kuiButton:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #6EADC1 !important;
+    outline: none;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
 
 .kuiButton--iconText .kuiButton__icon:first-child {
   margin-right: 4px; }
@@ -173,18 +174,20 @@ body {
   .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #ff523c !important;
+    outline: none;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */
     color: #FFFFFF !important;
     /* 1 */ }
 
 /**
  * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #3CAED2;
+  color: #3CAED2 !important;
+  /* 2 */
   background-color: transparent; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
     color: #006E8A !important;
@@ -271,10 +274,10 @@ body {
   .kuiCheckBox:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #6EADC1 !important;
+    outline: none;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
     cursor: not-allowed; }
@@ -981,6 +984,20 @@ body {
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
+  .kuiPanelHeader .kuiButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiPanelHeader .kuiButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
   .kuiPanelHeader .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF; }
@@ -1178,6 +1195,20 @@ body {
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
+  .kuiToolBar .kuiButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiToolBar .kuiButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
   .kuiToolBar .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF; }
