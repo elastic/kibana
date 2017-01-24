@@ -217,6 +217,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
         g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
+        if ($container.width() <= 0) {
+          return;
+        }
         g.$widgets.each(function (i, widget) {
           g.resize_widget($(widget));
         });
