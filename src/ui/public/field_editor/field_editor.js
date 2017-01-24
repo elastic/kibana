@@ -17,7 +17,7 @@ uiModules
 .directive('fieldEditor', function (Private, $sce, confirmModal) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
-  const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
+  const getEnabledScriptingLangs = Private(GetEnabledScriptingLangsProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
