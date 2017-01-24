@@ -5,16 +5,30 @@ import { ModalOverlay } from './modal_overlay';
 
 const module = uiModules.get('kibana');
 
+/**
+ * @typedef {Object} ConfirmModalOptions
+ * @property {String} confirmButtonText
+ * @property {String=} cancelButtonText
+ * @property {function} onConfirm
+ * @property {function=} onCancel
+ */
+
 module.factory('confirmModal', function ($rootScope, $compile) {
   let modalPopover;
 
-  return function confirmModal(message, customOptions = {}) {
+  /**
+   * @param {String} message - the message to show in the body of the confirmation dialog.
+   * @param {ConfirmModalOptions} - Options to further customize the dialog.
+   */
+  return function confirmModal(message, customOptions) {
     const defaultOptions = {
-      onConfirm: noop,
       onCancel: noop,
-      confirmButtonText: 'Confirm',
       cancelButtonText: 'Cancel'
     };
+
+    if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
+      throw new Error('Please specify confirmation button text and onConfirm action');
+    }
 
     const options = Object.assign(defaultOptions, customOptions);
     if (modalPopover) {

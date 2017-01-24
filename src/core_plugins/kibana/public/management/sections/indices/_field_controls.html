@@ -6,8 +6,7 @@
 
   <button
     ng-if="field.scripted"
-    confirm-click="remove(field)"
-    confirmation="Are you sure want to delete '{{field.name}}'? This action is irreversible!"
+    ng-click="remove(field)"
     class="btn btn-xs btn-danger"
     aria-label="Delete">
     <i aria-hidden="true" class="fa fa-trash"></i>

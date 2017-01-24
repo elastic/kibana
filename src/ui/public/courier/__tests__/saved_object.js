@@ -2,6 +2,7 @@
  * Tests functionality in ui/public/courier/saved_object/saved_object.js
  */
 
+import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
@@ -88,14 +89,14 @@ describe('Saved Object', function () {
   }
 
   beforeEach(ngMock.module('kibana',
-
-    // The default implementation of safeConfirm uses $timeout which will cause
-    // the test environment to hang.
+    // Use the native window.confirm instead of our specialized version to make testing
+    // this easier.
     function ($provide) {
-      const overrideSafeConfirm = message => window.confirm(message) ? Promise.resolve() : Promise.reject();
-      $provide.decorator('safeConfirm', () => overrideSafeConfirm);
+      const overrideConfirm = message => window.confirm(message) ? Promise.resolve() : Promise.reject();
+      $provide.decorator('confirmModalPromise', () => overrideConfirm);
     })
   );
+
   beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
     SavedObject = Private(SavedObjectFactory);
     IndexPattern = Private(IndexPatternFactory);
