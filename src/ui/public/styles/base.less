@@ -757,21 +757,6 @@ fieldset {
     font-size: 12px;
   }
 
-.kuiStaticInput {
-  display: block;
-  width: 100%;
-  font-size: 14px;
-  color: #2d2d2d;
-  border: 1px solid;
-  border-radius: 4px;
-}
-
-.kuiStaticInput {
-  padding: 5px 0;
-  border-color: transparent;
-  background-color: transparent;;
-}
-
 .kuiInputNote {
   margin: 5px 0 10px;
 }
@@ -897,7 +882,6 @@ fieldset {
   }
 }
 
-
 // TODO: Extract these styles into the UI Framework.
 
 .kuiFormSection {
@@ -913,47 +897,6 @@ fieldset {
   font-weight: normal;
 }
 
-.kuiInput,
-.kuiStaticInput {
-  display: block;
-  width: 100%;
-  font-size: 14px;
-  color: #2d2d2d;
-  border: 1px solid;
-  border-radius: 4px;
-}
-
-.kuiStaticInput {
-  padding: 5px 0;
-  border-color: transparent;
-}
-
-.kuiInput {
-  padding: 5px 15px;
-  border-color: #D4D4D4;
-}
-
-.kuiSelect {
-  display: block;
-  width: 100%;
-  height: 32px;
-  padding: 5px 15px;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #2D2D2D;
-  background-color: #ffffff;
-  background-image: none;
-  border: 1px solid #D4D4D4;
-  border-radius: 4px;
-}
-
-/**
- * 1. Override Bootstrap checkbox styles.
- */
-.kuiCheckBox {
-  margin: 0 !important; // 1
-}
-
 .kuiSideBarSelect {
   // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
   height: 24px;
@@ -963,8 +906,14 @@ fieldset {
 
 .kuiSideBarInput {
   // TODO: @include kuiInput styles when this is moved to the UI Framework and we're using SASS.
+  display: block;
+  width: 100%;
   height: 24px;
   font-size: 12px;
+  color: #2d2d2d;
+  border: 1px solid #D4D4D4;
+  border-radius: 4px;
+  padding: 5px 15px;
 }
 
 .kuiSideBarSection {
