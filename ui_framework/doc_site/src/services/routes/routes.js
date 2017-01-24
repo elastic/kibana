@@ -40,6 +40,9 @@ import TabsExample
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
 
+import VerticalRhythmExample
+  from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Bar',
@@ -80,6 +83,9 @@ const components = [{
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
+}, {
+  name: 'VerticalRhythm',
+  component: VerticalRhythmExample,
 }];
 
 export default {
