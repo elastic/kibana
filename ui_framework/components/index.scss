@@ -23,6 +23,9 @@ $font: "Open Sans", Helvetica, Arial, sans-serif;
 $fontSize: 14px;
 $lineHeight: 1.5;
 
+// Typography
+$titleFontSize: 18px;
+
 // Button
 $buttonBorderRadius: 4px;
 
@@ -47,6 +50,8 @@ $tableRowBorder: 1px solid $standoutBackgroundColor;
 $formTransitionTiming: 0.1s linear;
 
 // Bar
+$toolBarHeight: 50px;
+$toolBarPadding: 10px;
 $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
 

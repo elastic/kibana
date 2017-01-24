@@ -930,7 +930,9 @@ body {
   line-height: 1.5; }
 
 .kuiPanel {
-  border: 2px solid #E4E4E4; }
+  border-left: 2px solid #E4E4E4;
+  border-right: 2px solid #E4E4E4;
+  border-bottom: 2px solid #E4E4E4; }
 
 .kuiPanel--centered {
   display: -webkit-box;
@@ -945,6 +947,37 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
+
+.kuiPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px;
+  height: 50px;
+  background-color: #E4E4E4; }
+  .kuiPanelHeader .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF; }
+    .kuiPanelHeader .kuiButton--basic:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3; }
+  .kuiPanelHeader .kuiSelect {
+    border-color: #ffffff; }
+    .kuiPanelHeader .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+
+.kuiPanelHeader__title {
+  font-size: 18px;
+  line-height: 1.5; }
+
+.kuiPanelBody {
+  padding: 10px; }
 
 .kuiPromptForItems {
   display: -webkit-box;
