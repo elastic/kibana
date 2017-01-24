@@ -180,9 +180,11 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #3CAED2;
+  color: #3CAED2 !important;
+  /* 2 */
   background-color: transparent; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
     color: #006E8A !important;

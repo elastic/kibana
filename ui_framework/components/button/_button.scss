@@ -111,9 +111,10 @@
 
 /**
  * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: $linkColor;
+  color: $linkColor !important; /* 2 */
   background-color: transparent;
 
   &:hover:enabled,
