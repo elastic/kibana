@@ -22,6 +22,8 @@ import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wr
 
 import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
 import { pageNext, pagePrevious, pageAdd, pageRemove, pageReplace } from 'plugins/rework/state/actions/page';
+import { workpadReplace } from 'plugins/rework/state/actions/workpad';
+
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
 const DataframeDialog = React.createClass({
@@ -62,6 +64,9 @@ const DataframeDialog = React.createClass({
   },
   changePage(page) {
     this.props.dispatch(pageReplace(page));
+  },
+  changeWorkpad(workpad) {
+    this.props.dispatch(workpadReplace(workpad));
   },
   render() {
     const {fullscreen, workpad, elements, selectedElement, pages, elementCache} = this.props;
@@ -132,7 +137,9 @@ const DataframeDialog = React.createClass({
                 remove={this.pageRemove}
                 pageCount={workpad.pages.length}
                 page={currentPage}
-                onPageChange={this.changePage}>
+                onPageChange={this.changePage}
+                workpad={workpad}
+                onWorkpadChange={this.changeWorkpad}>
               </PageManager>
               {stack}
           </Workpad>

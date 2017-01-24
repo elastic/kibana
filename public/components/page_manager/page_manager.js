@@ -5,7 +5,7 @@ import './page_manager.less';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 import { Popover, PopoverContent, PopoverTitle } from 'reactstrap';
 import PageProperties from 'plugins/rework/components/page_properties/page_properties';
-import WorkpadProperties from 'plugins/rework/components/page_properties/page_properties';
+import WorkpadProperties from 'plugins/rework/components/workpad_properties/workpad_properties';
 
 
 export default React.createClass({
@@ -38,6 +38,10 @@ export default React.createClass({
         <Popover placement="bottom" isOpen={this.state.configPopover} target="configPopover" toggle={this.toggle}>
           <PopoverContent>
             <PageProperties onChange={onPageChange} page={page}></PageProperties>
+            <hr/>
+            <WorkpadProperties onChange={onWorkpadChange} workpad={workpad}></WorkpadProperties>
+
+            <button className="btn btn-success" onClick={this.toggleConfig}>Done</button>
           </PopoverContent>
         </Popover>
       </div>

@@ -4,8 +4,8 @@ import _ from 'lodash';
 
 export default React.createClass({
   setColor(color) {
-    const {page} = this.props;
-    this.props.onChange({...page, style: {...page.style, backgroundColor: color.hex}});
+    const {page, onChange} = this.props;
+    onChange({...page, style: {...page.style, backgroundColor: color.hex}});
   },
   render() {
     const {page, onChange} = this.props;
@@ -19,8 +19,8 @@ export default React.createClass({
 
     return (
       <div className='rework--page-properties'>
-        <label>Page Background</label>
-        <CirclePicker color={page.style.backgroundColor} colors={colors} circleSize={25} cirleSpacing={0} onChange={this.setColor}/>
+        <h4>Page Background</h4>
+        <CirclePicker color={page.style.backgroundColor} colors={colors} circleSize={24} circleSpacing={6} onChange={this.setColor}/>
       </div>
     );
   }
