@@ -79,15 +79,22 @@ $verticalRhythm: 10px;
   border-color: $selectedBorderColor;
 }
 
-@mixin formControl {
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+@mixin formControlBase {
   appearance: none;
   padding: 3px 12px 4px;
   font-size: $fontSize;
   font-weight: 400;
   line-height: $lineHeight;
+  color: $fontColor;
+}
+
+@mixin formControl {
+  @include formControlBase;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: $fontColor;
   border-radius: $buttonBorderRadius;
   transition: border-color $formTransitionTiming;
 

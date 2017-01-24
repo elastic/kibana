@@ -9,8 +9,19 @@ export default createExample([{
   html: require('./text_input.html'),
   hasDarkTheme: false,
 }, {
+  title: 'StaticInput',
+  description: (
+    <p>Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to edit.</p>
+  ),
+  html: require('./static_input.html'),
+  hasDarkTheme: false,
+}, {
   title: 'TextArea',
   html: require('./text_area.html'),
+  hasDarkTheme: false,
+}, {
+  title: 'TextArea, non-resizable',
+  html: require('./text_area_non_resizable.html'),
   hasDarkTheme: false,
 }, {
   title: 'CheckBox',
