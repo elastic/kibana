@@ -27,7 +27,7 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     };
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
-      throw 'Please specify confirmation button text and onConfirm action';
+      throw new Error('Please specify confirmation button text and onConfirm action');
     }
 
     const options = Object.assign(defaultOptions, customOptions);

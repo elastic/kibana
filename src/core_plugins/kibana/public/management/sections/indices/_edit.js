@@ -77,7 +77,8 @@ uiModules.get('apps/management')
     };
     confirmModal(
       'This will reset the field popularity counters. Are you sure you want to refresh your fields?',
-      confirmModalOptions);
+      confirmModalOptions
+    );
   };
 
   $scope.removePattern = function () {

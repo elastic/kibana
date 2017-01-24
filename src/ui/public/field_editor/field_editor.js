@@ -95,7 +95,8 @@ uiModules
         };
         confirmModal(
           `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
-          confirmModalOptions);
+          confirmModalOptions
+        );
       };
 
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {

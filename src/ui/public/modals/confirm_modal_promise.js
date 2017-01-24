@@ -21,8 +21,7 @@ module.factory('confirmModalPromise', function (Promise, confirmModal) {
   return (message, customOptions) => new Promise((resolve, reject) => {
     const defaultOptions = {
       onConfirm: resolve,
-      onCancel: reject,
-      cancelButtonText: 'Cancel'
+      onCancel: reject
     };
     const confirmOptions = Object.assign(defaultOptions, customOptions);
     confirmModal(message, confirmOptions);

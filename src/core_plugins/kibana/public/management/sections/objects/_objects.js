@@ -116,7 +116,8 @@ uiModules.get('apps/management')
         };
         confirmModal(
           `Are you sure you want to delete the selected ${$scope.currentTab.title}? This action is irreversible!`,
-          confirmModalOptions);
+          confirmModalOptions
+        );
       };
 
       // TODO: Migrate all scope methods to the controller.

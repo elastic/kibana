@@ -180,7 +180,8 @@ uiModules.get('apps/management')
         };
         confirmModal(
           'Are you sure want to delete this object? This action is irreversible!',
-          confirmModalOptions);
+          confirmModalOptions
+        );
       };
 
       $scope.submit = function () {
