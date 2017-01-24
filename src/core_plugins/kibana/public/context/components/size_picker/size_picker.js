@@ -12,8 +12,10 @@ module.directive('contextSizePicker', function ContextSizePicker() {
     bindToController: true,
     controller: ContextSizePickerController,
     controllerAs: 'contextSizePicker',
+    link: linkContextSizePicker,
     replace: true,
     restrict: 'E',
+    require: 'ngModel',
     scope: {
       count: '=',
       isDisabled: '=',
@@ -23,8 +25,16 @@ module.directive('contextSizePicker', function ContextSizePicker() {
   };
 });
 
+function linkContextSizePicker(scope, element, attrs, ngModel) {
+  scope.countModel = ngModel;
+}
 
-function ContextSizePickerController() {
+function ContextSizePickerController($scope) {
+  $scope.$watch(
+    () => this.count,
+    () => $scope.countModel.$rollbackViewValue(),
+  );
+
   this.getOrSetCount = (count) => (
     _.isUndefined(count) ? this.count : this.onChangeCount(count)
   );
