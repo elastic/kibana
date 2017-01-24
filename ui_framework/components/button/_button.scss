@@ -104,7 +104,7 @@
   }
 
   &:focus {
-    @include focus(#ff523c);
+    @include focus($focusDangerColor);
     color: #FFFFFF !important; /* 1 */
   }
 }
