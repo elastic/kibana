@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import './dataframe_connector.less';
+import uuid from 'uuid/v4';
 
 export default React.createClass({
   getInitialState() {
@@ -12,7 +13,8 @@ export default React.createClass({
       const {name} = this.state;
       this.props.onConnect({
         name, type,
-        value:  frameSources.byName[type].defaults
+        value:  frameSources.byName[type].defaults,
+        id: uuid()
       });
     };
   },
