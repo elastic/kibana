@@ -53,8 +53,8 @@
               </small>
             </label>
             <select
-              required
               ng-disabled="index.fetchFieldsError"
+              ng-required="!index.fetchFieldsError"
               ng-options="field.name for field in index.dateFields"
               ng-model="index.timeField"
               auto-select-if-only-one="index.dateFields"
