@@ -85,7 +85,6 @@ app.controller('timelion', function (
       return !savedSheet.id;
     },
     run: function () {
-      var title = savedSheet.title;
       const title = savedSheet.title;
       function doDelete() {
         savedSheet.delete().then(() => {
