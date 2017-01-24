@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 
 export const pageSet = createAction('PAGE_SET');
+export const pageReplace = createAction('PAGE_REPLACE');
 
 export function pageAdd() {
   return (dispatch, getState) => {

@@ -115,6 +115,8 @@ function rootReducer(state = {}, action) {
       return addPage(payload);
     case 'PAGE_REMOVE':
       return removePage(payload);
+    case 'PAGE_REPLACE':
+      return setPersistent('pages', {...state.persistent.pages, [payload.id]: payload});
 
     case 'ELEMENT_ADD':
       return addElement(payload.element, payload.pageId);
