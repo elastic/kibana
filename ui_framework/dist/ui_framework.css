@@ -3,6 +3,9 @@
  * 2. Override inherited styles (possibly from Bootstrap).
  */
 /**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+/**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
  * 2. Fit MicroButton inside of Table rows without pushing them taller.
@@ -288,9 +291,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
@@ -317,6 +320,21 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+/**
+ * 1. Have the same spatial footprint as the regular input.
+ */
+.kuiStaticInput {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  border: 1px solid transparent;
+  /* 1 */ }
+
 .kuiTextArea {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -325,9 +343,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
@@ -346,6 +364,9 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+.kuiTextArea--nonResizable {
+  resize: none; }
+
 .kuiTextInput {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -354,9 +375,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;

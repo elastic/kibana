@@ -15,10 +15,17 @@ export default createExample([{
   html: require('./vertical_rhythm.html'),
   hasDarkTheme: false,
 }, {
-  title: 'VerticalRhythm with Panels',
+  title: 'VerticalRhythm as wrapper',
   description: (
-    <p>You can apply it to any component, e.g. Panels.</p>
+    <p>Wrap any series of components, e.g. Panel, in the VerticalRhythm component to space them apart.</p>
   ),
-  html: require('./vertical_rhythm_with_panels.html'),
+  html: require('./vertical_rhythm_as_wrapper.html'),
+  hasDarkTheme: false,
+}, {
+  title: 'VerticalRhythm on component',
+  description: (
+    <p>You can also apply the VerticalRhythm class directly to components.</p>
+  ),
+  html: require('./vertical_rhythm_on_component.html'),
   hasDarkTheme: false,
 }]);
