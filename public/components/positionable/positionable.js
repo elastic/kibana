@@ -13,30 +13,34 @@ export default React.createClass({
 
     rotate(elem, {
       on: this.props.rotate,
-      handle: '.rework--positionable-rotate-handle'
+      handle: '.rework--interactable-rotate-handle'
     });
 
     resize(elem, {
       on: this.props.resize,
       sides: {
-        left:   '.rework--positionable-resize-nw, .rework--positionable-resize-sw, .rework--positionable-resize-w',
-        top:    '.rework--positionable-resize-nw, .rework--positionable-resize-ne, .rework--positionable-resize-n',
-        right:  '.rework--positionable-resize-ne, .rework--positionable-resize-se, .rework--positionable-resize-e',
-        bottom: '.rework--positionable-resize-sw, .rework--positionable-resize-se, .rework--positionable-resize-s'
+        left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
+        top:    '.rework--interactable-resize-nw, .rework--interactable-resize-ne, .rework--interactable-resize-n',
+        right:  '.rework--interactable-resize-ne, .rework--interactable-resize-se, .rework--interactable-resize-e',
+        bottom: '.rework--interactable-resize-sw, .rework--interactable-resize-se, .rework--interactable-resize-s'
       }
     });
   },
   removeHandlers(elem) {
     remove($(elem));
   },
+  componentWillUpdate(nextProps) {
+    if (this.props.interact && !nextProps.interact) this.removeHandlers(this.refs.positionableWrapper);
+    if (!this.props.interact && nextProps.interact) this.attachHandlers(this.refs.positionableWrapper);
+  },
   componentDidMount() {
-    this.attachHandlers(this.refs.positionableWrapper);
+    if (this.props.interact) this.attachHandlers(this.refs.positionableWrapper);
   },
   componentWillUnmount() {
     this.removeHandlers(this.refs.positionableWrapper);
   },
   render() {
-    const { children, position, rotate, resize, style } = this.props;
+    const { children, position, rotate, resize, style, interact } = this.props;
 
     const wrappedChildren = React.Children.map(children, (child) => {
       const newStyle = {
@@ -48,31 +52,42 @@ export default React.createClass({
         top: position.top,
         left: position.left,
       };
-      return (
-        <div className="rework--positionable"
-          ref="positionableWrapper"
-          style={newStyle}>
-          <div className="rework--positionable-actions">
-            <div className="rework--positionable-action rework--positionable-rotate-handle">
-              <i className="fa fa-undo rework--positionable-rotate-handle"></i>
-            </div>
+
+      if (!interact) {
+        return (
+          <div className='rework--positionable'
+            ref="positionableWrapper"
+            style={newStyle}>
+            {child}
           </div>
+        );
+      } else {
+        return (
+          <div className='rework--positionable rework--interactable'
+            ref="positionableWrapper"
+            style={newStyle}>
+            <div className="rework--interactable-actions">
+              <div className="rework--interactable-action rework--interactable-rotate-handle">
+                <i className="fa fa-undo rework--interactable-rotate-handle"></i>
+              </div>
+            </div>
 
-          <div className="rework--positionable-meta"></div>
+            <div className="rework--interactable-meta"></div>
 
-          {child}
+            {child}
 
-          <div className="rework--positionable-resize rework--positionable-resize-nw"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-ne"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-se"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-sw"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-n"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-e"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-s"></div>
-          <div className="rework--positionable-resize rework--positionable-resize-w"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-nw"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-ne"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-se"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-sw"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-n"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-e"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-s"></div>
+            <div className="rework--interactable-resize rework--interactable-resize-w"></div>
 
-        </div>
-      );
+          </div>
+        );
+      }
     });
 
     return (

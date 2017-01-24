@@ -24,21 +24,21 @@ z-indices:
   z-index: 1000;
 
   .rework--workspace-element-header {
-    .rework--positionable-actions, .rework--positionable-resize {
+    .rework--interactable-actions, .rework--interactable-resize {
       display: none;
     }
 
-    .rework--positionable:hover .rework--positionable-meta {
+    .rework--interactable:hover .rework--interactable-meta {
       box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
     }
 
     &.rework--workspace-element-header-selected {
 
-      .rework--positionable-meta {
+      .rework--interactable-meta {
         box-shadow: inset 0px 0px 0px 2px @kibanaBlue2;
       }
 
-      .rework--positionable-actions, .rework--positionable-resize {
+      .rework--interactable-actions, .rework--interactable-resize {
         display: block;
       }
     }
@@ -68,7 +68,7 @@ z-indices:
 
   .rework--workpad {
 
-    .rework--positionable {
+    .rework--interactable {
       overflow: none;
     }
 
