@@ -83,7 +83,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       const dashboardName = 'Dashboard Test 1';
       // TODO: save time on the dashboard and test it
       return PageObjects.dashboard.saveDashboard(dashboardName)
-      // click New Dashboard just to clear the one we just created
+        .then(() => PageObjects.dashboard.gotoDashboardLandingPage())
+        // click New Dashboard just to clear the one we just created
         .then(function () {
           return PageObjects.common.try(function () {
             PageObjects.common.debug('saved Dashboard, now click New Dashboard');

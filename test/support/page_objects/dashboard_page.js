@@ -131,10 +131,9 @@ export default class DashboardPage {
     return this.gotoDashboardLandingPage()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
-      return self.remote
-      .findByCssSelector('input[name="filter"]')
-      .click()
-      .type(dashName.replace('-',' '));
+      return PageObjects.common.findTestSubject('searchFilter')
+        .click()
+        .type(dashName.replace('-',' '));
     })
     .then(() => {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
