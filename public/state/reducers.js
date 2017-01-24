@@ -107,7 +107,8 @@ function rootReducer(state = {}, action) {
       return newWorkpad();
     case 'WORKPAD_LOAD':
       return newWorkpad(payload);
-
+    case 'WORKPAD_REPLACE':
+      return setPersistent('workpad', payload);
 
     case 'PAGE_SET':
       return setWorkpad('page', payload);

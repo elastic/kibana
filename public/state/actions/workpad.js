@@ -5,6 +5,8 @@ import {elementResolveAll} from './element';
 export const workpadHeight = createAction('WORKPAD_HEIGHT');
 export const workpadWidth = createAction('WORKPAD_WIDTH');
 export const workpadName = createAction('WORKPAD_NAME');
+export const workpadReplace = createAction('WORKPAD_REPLACE');
+
 
 export function workpadNew() {
   return (dispatch, getState) => {
