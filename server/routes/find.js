@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 module.exports = function (server) {
   server.route({
     method: 'GET',
@@ -31,7 +33,7 @@ module.exports = function (server) {
           type: server.plugins.rework.kibanaType,
           body: {
             query: esQuery,
-            _source: ['workpad.name', '@timestamp'],
+            _source: ['workpad.name', 'workpad.id', '@timestamp'],
             sort: [{
               '@timestamp': {
                 order: 'desc'
@@ -45,7 +47,13 @@ module.exports = function (server) {
         callWithRequest(request, 'search', body).then(function (resp) {
           reply({
             ok: true,
-            resp: resp
+            workpads: _.map(resp.hits.hits, (hit) => {
+              return {
+                timestamp: hit._source['@timestamp'],
+                name: hit._source.workpad.name,
+                id: hit._id
+              };
+            })
           });
         }).catch(function (resp) {
           reply({

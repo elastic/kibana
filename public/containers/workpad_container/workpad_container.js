@@ -16,7 +16,6 @@ import Element from 'plugins/rework/components/element/element';
 // Containers
 import ElementWrapper from 'plugins/rework/containers/element_wrapper/element_wrapper';
 
-
 import { pageNext, pagePrevious, pageAdd, pageRemove } from 'plugins/rework/state/actions/page';
 import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
 
