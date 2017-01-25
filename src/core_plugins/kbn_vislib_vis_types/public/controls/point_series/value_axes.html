@@ -228,14 +228,9 @@
                          class="kuiInput kuiSideBarInput"
                          type="number"
                          step="0.1"
-                         greater-than="{{axis.scale.min}}"
                          ng-model="axis.scale.max"
-                         ng-required="axis.scale.setYExtents"
                   >
                 </div>
-              </div>
-              <div ng-show="axis.scale.min >= axis.scale.max">
-                <span class="text-danger">Max must be greater than min</span>
               </div>
 
               <div class="kuiSideBarFormRow">
@@ -247,10 +242,8 @@
                          class="kuiInput kuiSideBarInput"
                          type="number"
                          step="0.1"
-                         less-than="{{axis.scale.max}}"
                          greater-than="{{axis.scale.type === 'log' ? 0 : ''}}"
                          ng-model="axis.scale.min"
-                         ng-required="axis.scale.setYExtents"
                   >
                 </div>
               </div>
