@@ -255,12 +255,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       });
 
-      // listen for notifications from the grid component that changes have
-      // been made, rather than watching the panels deeply
-      $scope.$on('change:vis', function () {
-        $state.save();
-      });
-
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
         pendingVis++;
