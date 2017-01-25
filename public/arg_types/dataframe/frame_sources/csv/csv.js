@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {parse} from './parse';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
+import './csv.less';
 
 frameSources.push(new FrameSource('csv', {
   displayName: 'CSV',
@@ -56,8 +57,8 @@ frameSources.push(new FrameSource('csv', {
     render() {
       const {csv} = this.props.value;
       return (
-        <div className="reframe--csv">
-          <div className="reframe--csv--character-count">Length: {_.get(csv, 'length')}</div>
+        <div className="rework--csv">
+          <div className="rework--csv--character-count">Length: {_.get(csv, 'length')}</div>
           <textarea className="form-control" rows="10" onChange={this.typing} value={csv}></textarea>
         </div>
       );
