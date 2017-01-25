@@ -1,26 +1,28 @@
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import numeral from 'numeral';
-import React, { Component } from 'react';
 import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
-export default React.createClass({
-  getInitialState() {
-    const values = this.getLastValues();
-    return {
-      showLegend: this.props.legend != null ? this.props.legend : true,
+
+class Timeseries extends Component {
+
+  constructor(props) {
+    super(props);
+    const values = this.getLastValues(props);
+    this.state = {
+      showLegend: props.legend != null ? props.legend : true,
       values: values || {},
       show: _.keys(values) || [],
       ignoreLegendUpdates: false,
       ignoreVisabilityUpdates: false
     };
-  },
-
-  getDefaultProps() {
-    return { legend: true };
-  },
+    this.toggleFilter = this.toggleFilter.bind(this);
+    this.handleHideClick = this.handleHideClick.bind(this);
+    this.plothover = this.plothover.bind(this);
+  }
 
   filterLegend(id) {
     if (!_.has(this.state.values, id)) return [];
@@ -34,7 +36,7 @@ export default React.createClass({
       this.setState({ ignoreVisabilityUpdates: true, show: [id] });
     }
     return show;
-  },
+  }
 
   toggleFilter(event, id) {
     const show = this.filterLegend(id);
@@ -42,10 +44,9 @@ export default React.createClass({
       this.props.onFilter(show);
     }
     eventBus.trigger('toggleFilter', id, this);
-  },
+  }
 
   getLastValues(props) {
-    props = props || this.props;
     const values = {};
     props.series.forEach((row) => {
       // we need a valid identifier
@@ -53,7 +54,7 @@ export default React.createClass({
       values[row.id] = getLastValue(row.data);
     });
     return values;
-  },
+  }
 
   updateLegend(pos, item) {
     const values = {};
@@ -75,12 +76,11 @@ export default React.createClass({
         }
       });
     } else {
-      _.assign(values, this.getLastValues());
+      _.assign(values, this.getLastValues(this.props));
     }
 
     this.setState({ values });
-  },
-
+  }
 
   componentWillReceiveProps(props) {
     if (props.legend !== this.props.legend) this.setState({ showLegend: props.legend });
@@ -95,15 +95,15 @@ export default React.createClass({
       }
       this.setState(nextState);
     }
-  },
+  }
 
   plothover(event, pos, item) {
     this.updateLegend(pos, item);
-  },
+  }
 
   handleHideClick() {
     this.setState({ showLegend: !this.state.showLegend });
-  },
+  }
 
   render() {
     let className = 'rhythm_chart';
@@ -119,20 +119,44 @@ export default React.createClass({
         <div style={style} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
-              show={ this.state.show }
+              crosshair={this.props.crosshair}
+              onBrush={this.props.onBrush}
               plothover={ this.plothover}
-              {...this.props}/>
+              reversed={this.props.reversed}
+              series={this.props.series}
+              show={ this.state.show }
+              tickFormatter={this.props.tickFormatter}
+              yaxes={this.props.yaxes} />
           </div>
           <Legend
-            showLegend={this.state.showLegend}
-            seriesFilter={this.state.show}
-            seriesValues={this.state.values}
+            legendPosition={this.props.legendPosition}
             onClick={this.handleHideClick}
             onToggle={this.toggleFilter}
-            {...this.props}/>
+            series={this.props.series}
+            showLegend={this.state.showLegend}
+            seriesValues={this.state.values}
+            seriesFilter={this.state.show}
+            tickFormatter={this.props.tickFormatter} />
         </div>
       </div>
     );
   }
 
-});
+
+
+}
+
+Timeseries.defaultProps = {
+  legned: true
+};
+
+Timeseries.propTypes = {
+  legend         : PropTypes.bool,
+  legendPosition : PropTypes.string,
+  onFilter       : PropTypes.func,
+  series         : PropTypes.array,
+  reversed       : PropTypes.bool,
+  tickFormatter  : PropTypes.func
+};
+
+export default Timeseries;

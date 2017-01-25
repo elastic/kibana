@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import VerticalLegend from './vertical_legend';
 import HorizontalLegend from './horizontal_legend';
-export default React.createClass({
-  render() {
-    if (this.props.legendPosition === 'bottom') {
-      return (<HorizontalLegend {...this.props}/>);
-    }
-    return (<VerticalLegend {...this.props}/>);
+
+function Legend(props) {
+  if (props.legendPosition === 'bottom') {
+    return (<HorizontalLegend {...props}/>);
   }
-});
+  return (<VerticalLegend {...props}/>);
+}
+
+Legend.propTypes = {
+  legendPosition : PropTypes.string,
+  onClick        : PropTypes.func,
+  onToggle       : PropTypes.func,
+  series         : PropTypes.array,
+  showLegend     : PropTypes.bool,
+  seriesValues   : PropTypes.object,
+  seriesFilter   : PropTypes.array,
+  tickFormatter  : PropTypes.func
+};
+
+export default Legend;

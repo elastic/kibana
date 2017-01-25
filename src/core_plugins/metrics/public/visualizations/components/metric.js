@@ -1,31 +1,36 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
 import ResizeAware from 'simianhacker-react-resize-aware';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
-export default React.createClass({
 
-  getInitialState() {
-    return { scale: 1, left: 0, top: 0, translateX: 1, translateY: 1 };
-  },
+class Metric extends Component {
 
-  getDefaultProps() {
-    return { fontSize: 60 };
-  },
+  constructor(props) {
+    super(props);
+    this.state = {
+      scale: 1,
+      left: 0,
+      top: 0,
+      translateX: 1,
+      translateY: 1
+    };
+    this.handleResize = this.handleResize.bind(this);
+  }
 
   componentDidMount() {
     const resize = findDOMNode(this.refs.resize);
     if (!resize) return;
     resize.addEventListener('resize', this.handleResize);
     this.handleResize();
-  },
+  }
 
   componentWillUnmount() {
     const resize = findDOMNode(this.refs.resize);
     if (!resize) return;
     resize.removeEventListener('resize', this.handleResize);
-  },
+  }
 
   calculateCorrdinates() {
     const inner = findDOMNode(this.refs.inner);
@@ -61,7 +66,7 @@ export default React.createClass({
     const left = Math.floor((resize.clientWidth - newWidth) / 2);
 
     return { scale, top, left, translateY, translateX };
-  },
+  }
 
   // When the component updates it might need to be resized so we need to
   // recalculate the corrdinates and only update if things changed a little. THis
@@ -71,19 +76,19 @@ export default React.createClass({
     if (!_.isEqual(newState, this.state)) {
       this.setState(newState);
     }
-  },
+  }
 
   calcDimensions(el, scale) {
     const newWidth = Math.floor(el.clientWidth * scale);
     const newHeight = Math.floor(el.clientHeight * scale);
     return [newWidth, newHeight];
-  },
+  }
 
   handleResize() {
     // Bingo!
     const newState = this.calculateCorrdinates();
     this.setState(newState);
-  },
+  }
 
   render() {
     const { metric, secondary } = this.props;
@@ -94,8 +99,8 @@ export default React.createClass({
       default: {
         container: {},
         inner: {
-          top: this.state.top,
-          left: this.state.left,
+          top: this.state.top || 0,
+          left: this.state.left || 0,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         },
         primary_text: {
@@ -166,4 +171,14 @@ export default React.createClass({
       </div>
     );
   }
-});
+
+}
+
+Metric.propTypes = {
+  backgroundColor : PropTypes.string,
+  metric          : PropTypes.object,
+  secondary       : PropTypes.object,
+  reversed        : PropTypes.bool
+};
+
+export default Metric;

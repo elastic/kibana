@@ -1,50 +1,8 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
-export default React.createClass({
 
-  getDefaultProps() {
-    return {
-      tickFormatter: n => n,
-      onClick: e => e
-    };
-  },
-
-  renderLabels() {
-    return item => {
-      const key = `${item.id || item.label}-label`;
-      return (
-        <div key={key}
-          onClick={e => this.props.onClick(e, item)}
-          className="rhythm_top_n__label">
-          { item.label }
-        </div>
-      );
-    };
-  },
-
-  renderBars(maxValue) {
-    return item => {
-      const key = `${item.id || item.label}-bar`;
-      const lastValue = getLastValue(item.data);
-      const width = `${100 * (lastValue / maxValue)}%`;
-      const backgroundColor = item.color;
-      return (
-        <div key={key} className="rhythm_top_n__bar">
-          <div className="rhythm_top_n__inner-bar" style={{ width, backgroundColor }}></div>
-        </div>
-      );
-    };
-  },
-
-  renderValues() {
-    return item => {
-      const key = `${item.id || item.label}-value`;
-      const lastValue = getLastValue(item.data);
-      const value = this.props.tickFormatter(lastValue);
-      return (<div key={key} className="rhythm_top_n__value">{ value }</div>);
-    };
-  },
+class TopN extends Component {
 
   handleClick(item) {
     return (e) => {
@@ -52,7 +10,7 @@ export default React.createClass({
         this.props.onClick(item);
       }
     };
-  },
+  }
 
   renderRow(maxValue) {
     return item => {
@@ -79,7 +37,7 @@ export default React.createClass({
         </tr>
       );
     };
-  },
+  }
 
   render() {
     if (!this.props.series) return (<div style={{ display: 'none' }}/>);
@@ -105,19 +63,20 @@ export default React.createClass({
         </table>
       </div>
     );
-
-    // const labels = this.props.series.map(this.renderLabels(maxValue));
-    // const bars = this.props.series.map(this.renderBars(maxValue));
-    // const values = this.props.series.map(this.renderValues(maxValue));
-    // return (
-    //   <div className="rhythm_top_n">
-    //     <div className="rhythm_top_n__container">
-    //       <div className="rhythm_top_n__labels">{ labels }</div>
-    //       <div className="rhythm_top_n__bars">{ bars }</div>
-    //       <div className="rhythm_top_n__values">{ values }</div>
-    //     </div>
-    //   </div>
-    // );
   }
 
-});
+}
+
+TopN.defaultProps = {
+  tickFormatter : n => n,
+  onClick       : i => i
+};
+
+TopN.propTypes = {
+  tickFormatter : PropTypes.func,
+  onClick       : PropTypes.func,
+  series        : PropTypes.array,
+  reversed      : PropTypes.bool
+};
+
+export default TopN;
