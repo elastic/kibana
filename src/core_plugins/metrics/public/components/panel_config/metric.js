@@ -1,6 +1,6 @@
+import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
-import React from 'react';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
@@ -8,7 +8,13 @@ import DataFormatPicker from '../data_format_picker';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'node-uuid';
-export default React.createClass({
+
+class MetricPanelConfig extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { selectedTab: 'data' };
+  }
 
   componentWillMount() {
     const { model } = this.props;
@@ -17,15 +23,11 @@ export default React.createClass({
         background_color_rules: [{ id: uuid.v1() }]
       });
     }
-  },
-
-  getInitialState() {
-    return { selectedTab: 'data' };
-  },
+  }
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
-  },
+  }
 
   render() {
     const { selectedTab } = this.state;
@@ -38,11 +40,22 @@ export default React.createClass({
     ];
     let view;
     if (selectedTab === 'data') {
-      view = (<SeriesEditor limit={2} colorPicker={false} {...this.props}/>);
+      view = (
+        <SeriesEditor
+          colorPicker={false}
+          fields={this.props.fields}
+          limit={2}
+          model={this.props.model}
+          name={this.props.name}
+          onChange={this.props.onChange} />
+      );
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern with-interval={true} {...this.props}/>
+          <IndexPattern
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange}/>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>
             <input
@@ -79,5 +92,14 @@ export default React.createClass({
       </div>
     );
   }
-});
 
+}
+
+MetricPanelConfig.propTypes = {
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  visData: PropTypes.object,
+};
+
+export default MetricPanelConfig;

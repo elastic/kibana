@@ -1,20 +1,23 @@
+import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
-import React from 'react';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import DataFormatPicker from '../data_format_picker';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
-export default React.createClass({
-  getInitialState() {
-    return { selectedTab: 'data' };
-  },
+
+class TimeseriesPanelConfig extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { selectedTab: 'data' };
+  }
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
-  },
+  }
 
   render() {
     const { model } = this.props;
@@ -32,11 +35,21 @@ export default React.createClass({
     ];
     let view;
     if (selectedTab === 'data') {
+      view = (
+        <SeriesEditor
+          fields={this.props.fields}
+          model={this.props.model}
+          name={this.props.name}
+          onChange={this.props.onChange} />
+      );
       view = (<SeriesEditor {...this.props}/>);
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern with-interval={true} {...this.props}/>
+          <IndexPattern
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange}/>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Axis Min</div>
             <input
@@ -111,5 +124,15 @@ export default React.createClass({
       </div>
     );
   }
-});
 
+
+}
+
+TimeseriesPanelConfig.propTypes = {
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  visData: PropTypes.object,
+};
+
+export default TimeseriesPanelConfig;

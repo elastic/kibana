@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
-export default React.createClass({
 
-  getDefaultProps() {
-    return { label: 'Data Formatter' };
-  },
+class DataFormatPicker extends Component {
+
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleCustomChange = this.handleCustomChange.bind(this);
+  }
 
   handleChange(value) {
     if (value.value === 'custom') {
@@ -13,13 +16,13 @@ export default React.createClass({
     } else {
       this.props.onChange(value);
     }
-  },
+  }
 
   handleCustomChange() {
     this.props.onChange({
       value: _.get(this.refs, 'custom.value', '')
     });
-  },
+  }
 
   render() {
     const { value } = this.props;
@@ -66,4 +69,17 @@ export default React.createClass({
       </div>
     );
   }
-});
+
+}
+
+DataFormatPicker.defaultProps = {
+  label: 'Data Formatter'
+};
+
+DataFormatPicker.propTypes = {
+  value    : PropTypes.string,
+  label    : PropTypes.string,
+  onChange : PropTypes.func
+};
+
+export default DataFormatPicker;

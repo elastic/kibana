@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import Tooltip from '../tooltip';
-export default (props) => {
 
+function AggRow(props) {
   let iconClassName = 'fa fa-eye-slash';
   let iconRowClassName = 'vis_editor__agg_row-icon';
   const last = _.last(props.siblings);
@@ -19,8 +19,8 @@ export default (props) => {
         <Tooltip text="Sort">
           <div className="vis_editor__agg_sort thor__button-outlined-default sm">
             <i className="fa fa-sort"></i>
-      </div>
-      </Tooltip>
+          </div>
+        </Tooltip>
       </div>
     );
   }
@@ -40,4 +40,14 @@ export default (props) => {
       </div>
     </div>
   );
+}
+
+AggRow.propTypes = {
+  disableDelete : PropTypes.bool,
+  model         : PropTypes.object,
+  onAdd         : PropTypes.func,
+  onDelete      : PropTypes.func,
+  siblings      : PropTypes.array,
 };
+
+export default AggRow;

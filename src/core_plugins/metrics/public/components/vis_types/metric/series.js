@@ -1,40 +1,14 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import ColorPicker from '../../color_picker';
-import Agg from '../../aggs/agg';
-import newMetricAggFn from '../../lib/new_metric_agg_fn';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import Tooltip from '../../tooltip';
-import {
-  handleAdd,
-  handleDelete,
-  handleChange
-} from '../../lib/collection_actions';
-import seriesChangeHandler from '../../lib/series_change_handler';
+import createAggRowRender from '../../lib/create_agg_row_render';
 
-export default React.createClass({
-
-  renderRow(row, index, items) {
-    const { props } = this;
-    const { panel, model, fields } = props;
-    const changeHandler = seriesChangeHandler(props, items);
-    return (
-      <Agg
-        key={row.id}
-        sortData={row.id}
-        panel={panel}
-        siblings={items}
-        model={row}
-        onAdd={handleAdd.bind(null, props, newMetricAggFn)}
-        onDelete={handleDelete.bind(null, props, row)}
-        onChange={changeHandler}
-        disableDelete={items.length < 2}
-        fields={fields}/>
-    );
-  },
+class MetricSeries extends Component {
 
   render() {
     const {
@@ -54,11 +28,11 @@ export default React.createClass({
         e.preventDefault;
         const part = {};
         part[name] = this.refs[name].value;
-        this.props.handleChange(part);
+        this.props.onChange(part);
       };
     };
 
-    const aggs = model.metrics.map(this.renderRow);
+    const aggs = model.metrics.map(createAggRowRender(this.props));
 
     let caretClassName = 'fa fa-caret-down';
     if (!visible) caretClassName = 'fa fa-caret-right';
@@ -73,11 +47,12 @@ export default React.createClass({
       if (selectedTab === 'metrics') {
         const handleSort = (data) => {
           const metrics = data.map(id => model.metrics.find(m => m.id === id));
-          this.props.handleChange({ metrics });
+          this.props.onChange({ metrics });
         };
         seriesBody = (
           <div>
             <Sortable
+              style={{ cursor: 'default' }}
               dynamic={true}
               direction="vertical"
               onSort={handleSort}
@@ -87,7 +62,7 @@ export default React.createClass({
             <div className="vis_editor__agg_row">
               <div className="vis_editor__agg_row-item">
                 <Split
-                  onChange={this.props.handleChange}
+                  onChange={this.props.onChange}
                   fields={fields}
                   panel={panel}
                   model={model}/>
@@ -97,7 +72,7 @@ export default React.createClass({
         );
       } else {
         seriesBody = (<SeriesConfig {...this.props}
-          onChange={this.props.handleChange}/>);
+          onChange={this.props.onChange}/>);
       }
       body = (
         <div className="vis_editor__series-row">
@@ -117,7 +92,7 @@ export default React.createClass({
       colorPicker = (
         <ColorPicker
           disableTrash={true}
-          onChange={this.props.handleChange}
+          onChange={this.props.onChange}
           name="color"
           value={model.color}/>
       );
@@ -165,5 +140,32 @@ export default React.createClass({
       </div>
     );
   }
-});
 
+}
+
+MetricSeries.propTypes = {
+  className                 : PropTypes.string,
+  colorPicker               : PropTypes.bool,
+  disableAdd                : PropTypes.bool,
+  disableDelete             : PropTypes.bool,
+  fields                    : PropTypes.object,
+  name                      : PropTypes.string,
+  onAdd                     : PropTypes.func,
+  onChange                  : PropTypes.func,
+  onClone                   : PropTypes.func,
+  onDelete                  : PropTypes.func,
+  onMouseDown               : PropTypes.func,
+  onSortableItemMount       : PropTypes.func,
+  onSortableItemReadyToMove : PropTypes.func,
+  onTouchStart              : PropTypes.func,
+  model                     : PropTypes.object,
+  panel                     : PropTypes.object,
+  selectedTab               : PropTypes.string,
+  sortData                  : PropTypes.string,
+  style                     : PropTypes.object,
+  switchTab                 : PropTypes.func,
+  toggleVisible             : PropTypes.func,
+  visible                   : PropTypes.bool
+};
+
+export default MetricSeries;

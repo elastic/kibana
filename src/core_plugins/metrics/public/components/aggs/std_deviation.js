@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
@@ -8,7 +8,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 
-export default React.createClass({
+class StandardDeviationAgg extends Component {
 
   render() {
     const { model, panel, fields } = this.props;
@@ -27,7 +27,12 @@ export default React.createClass({
     const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
 
     return (
-      <AggRow {...this.props}>
+      <AggRow
+        disableDelete={this.props.disableDelete}
+        model={this.props.model}
+        onAdd={this.props.onAdd}
+        onDelete={this.props.onDelete}
+        siblings={this.props.siblings}>
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
@@ -64,4 +69,18 @@ export default React.createClass({
       </AggRow>
     );
   }
-});
+
+}
+
+StandardDeviationAgg.propTypes = {
+  disableDelete             : PropTypes.bool,
+  fields                    : PropTypes.object,
+  model                     : PropTypes.object,
+  onAdd                     : PropTypes.func,
+  onChange                  : PropTypes.func,
+  onDelete                  : PropTypes.func,
+  panel                     : PropTypes.object,
+  siblings                  : PropTypes.array,
+};
+
+export default StandardDeviationAgg;

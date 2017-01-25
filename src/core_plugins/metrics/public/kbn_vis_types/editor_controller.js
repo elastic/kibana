@@ -80,7 +80,7 @@ app.controller('MetricsEditorController', (
   }
 
   $scope.visData = {};
-  $scope.fields = [];
+  $scope.fields = {};
   // All those need to be consolidated
   $scope.$listen(timefilter, 'fetch', fetch($scope));
   $scope.$listen(queryFilter, 'fetch', fetch($scope));

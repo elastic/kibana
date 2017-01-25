@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import reactCSS from 'reactcss';
 
 import { ColorWrap as colorWrap, Saturation, Hue, Alpha, Checkboard } from 'react-color/lib/components/common';
@@ -9,10 +9,11 @@ import CompactColor from 'react-color/lib/components/compact/CompactColor';
 import color from 'react-color/lib/helpers/color';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export class CustomColorPicker extends React.Component {
+export class CustomColorPicker extends Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shallowCompare.bind(this, this, arguments[0], arguments[1]);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(data) {
@@ -129,46 +130,46 @@ export class CustomColorPicker extends React.Component {
     });
 
     return (
-      <div style={ styles.picker } className="custom-picker">
-        <div style={ styles.saturation }>
+      <div style={styles.picker} className="custom-picker">
+        <div style={styles.saturation}>
           <Saturation
-            style={ styles.Saturation }
+            style={styles.Saturation}
             { ...this.props }
-            pointer={ ChromePointerCircle }
-            onChange={ this.handleChange.bind(this) }
+            pointer={ChromePointerCircle}
+            onChange={this.handleChange}
           />
         </div>
-        <div style={ styles.body }>
-          <div style={ styles.controls } className="flexbox-fix">
-            <div style={ styles.color }>
-              <div style={ styles.swatch }>
-                <div style={ styles.active } />
+        <div style={styles.body}>
+          <div style={styles.controls} className="flexbox-fix">
+            <div style={styles.color}>
+              <div style={styles.swatch}>
+                <div style={styles.active} />
                 <Checkboard />
               </div>
             </div>
-            <div style={ styles.toggles }>
-              <div style={ styles.hue }>
+            <div style={styles.toggles}>
+              <div style={styles.hue}>
                 <Hue
-                  style={ styles.Hue }
-                  { ...this.props }
-                  pointer={ ChromePointer }
-                  onChange={ this.handleChange.bind(this) }
+                  style={styles.Hue}
+                  {...this.props}
+                  pointer={ChromePointer}
+                  onChange={this.handleChange}
                 />
               </div>
-              <div style={ styles.alpha }>
+              <div style={styles.alpha}>
                 <Alpha
-                  style={ styles.Alpha }
-                  { ...this.props }
-                  pointer={ ChromePointer }
-                  onChange={ this.handleChange.bind(this) }
+                  style={styles.Alpha}
+                  {...this.props}
+                  pointer={ChromePointer}
+                  onChange={this.handleChange}
                 />
               </div>
             </div>
           </div>
           <ChromeFields
-            { ...this.props }
-            onChange={ this.handleChange.bind(this) }
-            disableAlpha={ this.props.disableAlpha }
+            {...this.props}
+            onChange={this.handleChange}
+            disableAlpha={this.props.disableAlpha}
           />
           <div style={styles.swatches} className="flexbox-fix">
             {swatches}
@@ -187,6 +188,12 @@ CustomColorPicker.defaultProps = {
     '#0F1419', '#666666', '#B3B3B3', '#9F0500', '#C45100', '#FB9E00',
     '#808900', '#194D33', '#0C797D', '#0062B1', '#653294', '#AB149E',
   ],
+};
+
+CustomColorPicker.propTypes = {
+  color            : PropTypes.string,
+  onChangeComplete : PropTypes.func,
+  onChange         : PropTypes.func
 };
 
 export default colorWrap(CustomColorPicker);

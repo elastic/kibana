@@ -1,21 +1,26 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Tooltip } from 'pui-react-tooltip';
 import { OverlayTrigger } from 'pui-react-overlay-trigger';
-export default React.createClass({
 
-  getDefaultProps() {
-    return { placement: 'top', text: 'tip!' };
-  },
+function TooltipComponent(props) {
+  const tooltip = (
+    <Tooltip>{ props.text }</Tooltip>
+  );
+  return (
+    <OverlayTrigger placement={props.placement} overlay={tooltip}>
+      { props.children}
+    </OverlayTrigger>
+  );
+}
 
-  render() {
-    const tooltip = (
-      <Tooltip>{ this.props.text }</Tooltip>
-    );
-    return (
-      <OverlayTrigger placement={this.props.placement} overlay={tooltip}>
-        { this.props.children}
-      </OverlayTrigger>
-    );
-  }
+TooltipComponent.defaultProps = {
+  placement : 'top',
+  text      : 'Tip!'
+};
 
-});
+TooltipComponent.propTypes = {
+  placement : PropTypes.string,
+  text      : PropTypes.node
+};
+
+export default TooltipComponent;

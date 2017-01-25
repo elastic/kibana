@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Tooltip from './tooltip';
 
-export default (props) => {
+function AddDeleteButtons(props) {
   const createDelete = () => {
     if (props.disableDelete) {
       return (<span style={{ display: 'none' }}/>);
@@ -45,4 +45,14 @@ export default (props) => {
       { deleteBtn }
     </div>
   );
+}
+
+AddDeleteButtons.propTypes = {
+  disableAdd    : PropTypes.bool,
+  disableDelete : PropTypes.bool,
+  onClone       : PropTypes.func,
+  onAdd         : PropTypes.func,
+  onDelete      : PropTypes.func
 };
+
+export default AddDeleteButtons;

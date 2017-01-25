@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 import calculateSiblings from '../lib/calculate_siblings';
@@ -17,43 +17,48 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
-export default React.createClass({
+function MetricSelect(props) {
+  const {
+    restrict,
+    metric,
+    onChange,
+    value,
+    exclude
+  } = props;
 
-  getDefaultProps() {
-    return {
-      metric: {},
-      restrict: 'none',
-      exclude: [],
-      additionalOptions: [],
-      style: {}
-    };
-  },
+  const metrics = props.metrics
+    .filter(createTypeFilter(restrict, exclude));
 
-  render() {
-    const {
-      restrict,
-      metric,
-      onChange,
-      value,
-      exclude
-    } = this.props;
+  const options = calculateSiblings(metrics, metric)
+    .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+    .map(row => {
+      const label = calculateLabel(row, metrics);
+      return { value: row.id, label };
+    });
 
-    const metrics = this.props.metrics
-      .filter(createTypeFilter(restrict, exclude));
+  return (
+    <Select
+      placeholder="Select metric..."
+      options={options.concat(props.additionalOptions)}
+      value={value}
+      onChange={onChange}/>
+  );
+}
 
-    const options = calculateSiblings(metrics, metric)
-      .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
-      .map(row => {
-        const label = calculateLabel(row, metrics);
-        return { value: row.id, label };
-      });
+MetricSelect.defaultProps = {
+  additionalOptions: [],
+  exclude: [],
+  metric: {},
+  restrict: 'none',
+};
 
-    return (
-      <Select
-        placeholder="Select metric..."
-        options={options.concat(this.props.additionalOptions)}
-        value={value}
-        onChange={onChange}/>
-    );
-  }
-});
+MetricSelect.propTypes = {
+  additionalOptions : PropTypes.array,
+  exclude           : PropTypes.array,
+  metric            : PropTypes.object,
+  onChange          : PropTypes.func,
+  restrict          : PropTypes.string,
+  value             : PropTypes.string
+};
+
+export default MetricSelect;

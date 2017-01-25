@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
@@ -15,11 +15,12 @@ const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
-const Percentiles = React.createClass({
+class Percentiles extends Component {
 
-  getDefaultProps() {
-    return { name: 'percentiles' };
-  },
+  constructor(props) {
+    super(props);
+    this.renderRow = this.renderRow.bind(this);
+  }
 
   handleTextChange(item, name) {
     return (e) => {
@@ -28,7 +29,7 @@ const Percentiles = React.createClass({
       part[name] = _.get(e, 'value', _.get(e, 'currentTarget.value'));
       handleChange(_.assign({}, item, part));
     };
-  },
+  }
 
   handleNumberChange(item, name) {
     return (e) => {
@@ -37,7 +38,7 @@ const Percentiles = React.createClass({
       part[name] = Number(_.get(e, 'value', _.get(e, 'currentTarget.value')));
       handleChange(_.assign({}, item, part));
     };
-  },
+  }
 
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
@@ -88,7 +89,7 @@ const Percentiles = React.createClass({
           disableDelete={items.length < 2}/>
       </div>
     );
-  },
+  }
 
   render() {
     const { model, name } = this.props;
@@ -101,9 +102,20 @@ const Percentiles = React.createClass({
       </div>
     );
   }
-});
+}
 
-export default React.createClass({
+Percentiles.defaultProps = {
+  name: 'percentile'
+};
+
+Percentiles.propTypes = {
+  name: PropTypes.string,
+  model: PropTypes.object,
+  onChange: PropTypes.func
+};
+
+
+class PercentileAgg extends Component {
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
@@ -111,7 +123,7 @@ export default React.createClass({
         percentiles: [newPercentile({ value: 50 })]
       }));
     }
-  },
+  }
 
   render() {
     const { model, panel, fields } = this.props;
@@ -122,7 +134,12 @@ export default React.createClass({
     const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
 
     return (
-      <AggRow {...this.props}>
+      <AggRow
+        disableDelete={this.props.disableDelete}
+        model={this.props.model}
+        onAdd={this.props.onAdd}
+        onDelete={this.props.onDelete}
+        siblings={this.props.siblings}>
         <div className="vis_editor__row_item">
           <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
             <div className="vis_editor__row_item">
@@ -152,5 +169,19 @@ export default React.createClass({
       </AggRow>
     );
   }
-});
+
+}
+
+PercentileAgg.propTypes = {
+  disableDelete             : PropTypes.bool,
+  fields                    : PropTypes.object,
+  model                     : PropTypes.object,
+  onAdd                     : PropTypes.func,
+  onChange                  : PropTypes.func,
+  onDelete                  : PropTypes.func,
+  panel                     : PropTypes.object,
+  siblings                  : PropTypes.array,
+};
+
+export default PercentileAgg;
 

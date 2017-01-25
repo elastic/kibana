@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import Visualization from './visualization';
-export default React.createClass({
 
-  getInitialState() {
-    return { height: 250, dragging: false };
-  },
+class VisEditorVisualization extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      height: 250,
+      dragging: false
+    };
+
+    this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+  }
 
   handleMouseDown(e) {
     this.setState({ dragging: true });
-  },
+  }
 
   handleMouseUp(e) {
     this.setState({ dragging: false });
-  },
+  }
 
   componentWillMount() {
     this.handleMouseMove = (event) => {
@@ -25,15 +33,14 @@ export default React.createClass({
     };
     window.addEventListener('mousemove', this.handleMouseMove);
     window.addEventListener('mouseup', this.handleMouseUp);
-  },
+  }
 
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
     window.removeEventListener('mouseup', this.handleMouseUp);
-  },
+  }
 
   render() {
-    const { model, data } = this.props;
     const style = { height: this.state.height };
     if (this.state.dragging) {
       style.userSelect = 'none';
@@ -45,8 +52,10 @@ export default React.createClass({
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
+            model={this.props.model}
+            onBrush={this.props.onBrush}
             onChange={this.handleChange}
-            {...this.props}/>
+            visData={this.props.visData} />
         </div>
         <div
           className="vis_editor__visualization-draghandle"
@@ -57,4 +66,13 @@ export default React.createClass({
       </div>
     );
   }
-});
+}
+
+VisEditorVisualization.propTypes = {
+  model    : PropTypes.object,
+  onBrush  : PropTypes.func,
+  onChange : PropTypes.func,
+  visData  : PropTypes.object
+};
+
+export default VisEditorVisualization;

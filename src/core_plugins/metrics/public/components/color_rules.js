@@ -1,22 +1,16 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from './add_delete_buttons';
 import Select from 'react-select';
 import collectionActions from './lib/collection_actions';
 import ColorPicker from './color_picker';
 
-export default React.createClass({
+class ColorRules extends Component {
 
-  getDefaultProps() {
-    return {
-      name: 'color_rules',
-      primaryName: 'background',
-      primaryVarName: 'background_color',
-      secondaryName: 'text',
-      secondaryVarName: 'color',
-      hideSecondary: false
-    };
-  },
+  constructor(props) {
+    super(props);
+    this.renderRow = this.renderRow.bind(this);
+  }
 
   handleChange(item, name, cast = String) {
     return (e) => {
@@ -26,7 +20,7 @@ export default React.createClass({
       if (part[name] === 'undefined') part[name] = undefined;
       handleChange(_.assign({}, item, part));
     };
-  },
+  }
 
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
@@ -81,7 +75,7 @@ export default React.createClass({
         </div>
       </div>
     );
-  },
+  }
 
   render() {
     const { model, name } = this.props;
@@ -93,4 +87,27 @@ export default React.createClass({
       </div>
     );
   }
-});
+
+}
+
+ColorRules.defaultProps = {
+  name             : 'color_rules',
+  primaryName      : 'background',
+  primaryVarName   : 'background_color',
+  secondaryName    : 'text',
+  secondaryVarName : 'color',
+  hideSecondary    : false
+};
+
+ColorRules.propTypes = {
+  name             : PropTypes.string,
+  model            : PropTypes.object,
+  onChange         : PropTypes.func,
+  primaryName      : PropTypes.string,
+  primaryVarName   : PropTypes.string,
+  secondaryName    : PropTypes.string,
+  secondaryVarName : PropTypes.string,
+  hideSecondary    : PropTypes.bool
+};
+
+export default ColorRules;

@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';
 
-export default React.createClass({
+class CalculationVars extends Component {
 
-  getDefaultProps() {
-    return { name: 'variables' };
-  },
+  constructor(props) {
+    super(props);
+    this.renderRow = this.renderRow.bind(this);
+  }
 
   handleChange(item, name) {
     return (e) => {
@@ -17,7 +18,7 @@ export default React.createClass({
       part[name] = _.get(e, 'value', _.get(e, 'currentTarget.value'));
       handleChange(_.assign({}, item, part));
     };
-  },
+  }
 
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
@@ -49,12 +50,11 @@ export default React.createClass({
         </div>
       </div>
     );
-  },
+  }
 
   render() {
     const { model, name } = this.props;
     if (!model[name]) return (<div/>);
-
     const rows = model[name].map(this.renderRow);
     return (
       <div className="vis_editor__calc_vars">
@@ -63,4 +63,17 @@ export default React.createClass({
     );
   }
 
-});
+}
+
+CalculationVars.defaultProps = {
+  name: 'variables'
+};
+
+CalculationVars.propTypes = {
+  metrics  : PropTypes.array,
+  model    : PropTypes.object,
+  name     : PropTypes.string,
+  onChange : PropTypes.func
+};
+
+export default CalculationVars;

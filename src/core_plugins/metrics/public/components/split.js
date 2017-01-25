@@ -1,29 +1,16 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
 import _ from 'lodash';
 import FieldSelect from './aggs/field_select';
 import MetricSelect from './aggs/metric_select';
 import calculateLabel from './lib/calculate_label';
-export default React.createClass({
+import createTextHandler from './lib/create_text_handler';
+import createSelectHandler from './lib/create_select_handler';
 
-  handleTextChange(name) {
-    return (e) => {
-      e.preventDefault();
-      const part = {};
-      part[name] = this.refs[name].value;
-      this.props.onChange(part);
-    };
-  },
-
-  handleSelectChange(name) {
-    return (value) => {
-      const part = {};
-      part[name] = value && value.value || null;
-      this.props.onChange(part);
-    };
-  },
-
+class Split extends Component {
   render() {
+    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleSelectChange = createSelectHandler(this.props.onChange);
     const { model, panel } = this.props;
     const modeOptions = [
       { label: 'Everything', value: 'everything' },
@@ -34,10 +21,10 @@ export default React.createClass({
     const modeSelect = (
       <div className="vis_editor__split-selects">
         <Select
-        clearable={false}
-        value={ model.split_mode || 'everything' }
-        onChange={this.handleSelectChange('split_mode')}
-        options={ modeOptions }/>
+          clearable={false}
+          value={ model.split_mode || 'everything' }
+          onChange={handleSelectChange('split_mode')}
+          options={ modeOptions }/>
       </div>
     );
     if (model.split_mode === 'filter') {
@@ -45,12 +32,12 @@ export default React.createClass({
         <div className="vis_editor__split-container">
           <div className="vis_editor__label">Group By</div>
           {modeSelect}
-        <div className="vis_editor__label">Query String</div>
-        <input
-          className="vis_editor__split-filter"
-          defaultValue={model.filter}
-          onChange={this.handleTextChange('filter')}
-          ref="filter"/>
+          <div className="vis_editor__label">Query String</div>
+          <input
+            className="vis_editor__split-filter"
+            defaultValue={model.filter}
+            onChange={handleTextChange('filter')}
+            ref="filter"/>
         </div>
       );
     }
@@ -66,7 +53,7 @@ export default React.createClass({
             <FieldSelect
               restrict="string"
               IndexPattern={indexPattern}
-              onChange={this.handleSelectChange('terms_field')}
+              onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
               fields={this.props.fields} />
           </div>
@@ -76,7 +63,7 @@ export default React.createClass({
             type="number"
             defaultValue={model.terms_size || 10}
             className="vis_editor__split-term_count"
-            onChange={this.handleTextChange('terms_size')}
+            onChange={handleTextChange('terms_size')}
             ref="terms_size"/>
           <div className="vis_editor__label">Order By</div>
           <div className="vis_editor__split-aggs">
@@ -84,7 +71,7 @@ export default React.createClass({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount]}
-              onChange={this.handleSelectChange('terms_order_by')}
+              onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by || '_count'}/>
           </div>
@@ -96,4 +83,14 @@ export default React.createClass({
       {modeSelect}
     </div>);
   }
-});
+
+}
+
+Split.propTypes = {
+  fields   : PropTypes.object,
+  model    : PropTypes.object,
+  onChange : PropTypes.func,
+  panel    : PropTypes.object
+};
+
+export default Split;

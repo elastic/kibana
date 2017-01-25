@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 
 import timeseries from './vis_types/timeseries/series';
@@ -16,22 +16,22 @@ const lookup = {
   markdown
 };
 
-export default sortable(React.createClass({
+class Series extends Component {
 
-  getInitialState() {
-    return {
+  constructor(props) {
+    super(props);
+    this.state = {
       visible: true,
       selectedTab: 'metrics'
     };
-  },
-
-  getDefaultProps() {
-    return { name: 'metrics' };
-  },
+    this.handleChange = this.handleChange.bind(this);
+    this.switchTab = this.switchTab.bind(this);
+    this.toggleVisible = this.toggleVisible.bind(this);
+  }
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
-  },
+  }
 
   handleChange(part) {
     if (this.props.onChange) {
@@ -39,26 +39,70 @@ export default sortable(React.createClass({
       const doc = _.assign({}, model, part);
       this.props.onChange(doc);
     }
-  },
+  }
 
   toggleVisible(e) {
     e.preventDefault();
     this.setState({ visible: !this.state.visible });
-  },
+  }
 
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
     if (Component) {
       const params = {
-        switchTab: this.switchTab,
-        handleChange: this.handleChange,
-        toggleVisible: this.toggleVisible,
-        ...this.state,
-        ...this.props
+        className                 : this.props.className,
+        colorPicker               : this.props.colorPicker,
+        disableAdd                : this.props.disableAdd,
+        disableDelete             : this.props.disableDelete,
+        fields                    : this.props.fields,
+        name                      : this.props.name,
+        onAdd                     : this.props.onAdd,
+        onChange                  : this.handleChange,
+        onClone                   : this.props.onClone,
+        onDelete                  : this.props.onDelete,
+        onMouseDown               : this.props.onMouseDown,
+        onTouchStart              : this.props.onTouchStart,
+        onSortableItemMount       : this.props.onSortableItemMount,
+        onSortableItemReadyToMove : this.props.onSortableItemReadyToMove,
+        model                     : this.props.model,
+        panel                     : this.props.panel,
+        selectedTab               : this.state.selectedTab,
+        sortData                  : this.props.sortData,
+        style                     : this.props.style,
+        switchTab                 : this.switchTab,
+        toggleVisible             : this.toggleVisible,
+        visible                   : this.state.visible
       };
       return (<Component {...params}/>);
     }
     return (<div>Missing Series component for panel type: {panel.type}</div>);
   }
-}));
+
+}
+
+Series.defaultProps = {
+  name: 'metrics'
+};
+
+Series.propTypes = {
+  className                 : PropTypes.string,
+  colorPicker               : PropTypes.bool,
+  disableAdd                : PropTypes.bool,
+  disableDelete             : PropTypes.bool,
+  fields                    : PropTypes.object,
+  name                      : PropTypes.string,
+  onAdd                     : PropTypes.func,
+  onChange                  : PropTypes.func,
+  onClone                   : PropTypes.func,
+  onDelete                  : PropTypes.func,
+  onMouseDown               : PropTypes.func,
+  onSortableItemMount       : PropTypes.func,
+  onSortableItemReadyToMove : PropTypes.func,
+  onTouchStart              : PropTypes.func,
+  model                     : PropTypes.object,
+  panel                     : PropTypes.object,
+  sortData                  : PropTypes.string,
+};
+
+export default sortable(Series);

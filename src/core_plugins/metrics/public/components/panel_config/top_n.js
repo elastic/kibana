@@ -1,7 +1,7 @@
+import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import _ from 'lodash';
 import IndexPattern from '../index_pattern';
-import React from 'react';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
@@ -10,7 +10,13 @@ import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'node-uuid';
 import YesNo from '../yes_no';
-export default React.createClass({
+
+class TopNPanelConfig extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { selectedTab: 'data' };
+  }
 
   componentWillMount() {
     const { model } = this.props;
@@ -22,15 +28,11 @@ export default React.createClass({
       parts.series = [_.assign({}, model.series[0])];
     }
     this.props.onChange(parts);
-  },
-
-  getInitialState() {
-    return { selectedTab: 'data' };
-  },
+  }
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
-  },
+  }
 
   render() {
     const { selectedTab } = this.state;
@@ -43,7 +45,15 @@ export default React.createClass({
     ];
     let view;
     if (selectedTab === 'data') {
-      view = (<SeriesEditor limit={1} colorPicker={false} {...this.props}/>);
+      view = (
+        <SeriesEditor
+          colorPicker={false}
+          fields={this.props.fields}
+          limit={1}
+          model={this.props.model}
+          name={this.props.name}
+          onChange={this.props.onChange} />
+      );
     } else {
       view = (
         <div className="vis_editor__container">
@@ -56,7 +66,10 @@ export default React.createClass({
               onChange={handleTextChange('drilldown_url')}
               defaultValue={model.drilldown_url}/>
           </div>
-          <IndexPattern with-interval={true} {...this.props}/>
+          <IndexPattern
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange}/>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
             <ColorPicker
@@ -101,5 +114,14 @@ export default React.createClass({
       </div>
     );
   }
-});
 
+}
+
+TopNPanelConfig.propTypes = {
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  visData: PropTypes.object,
+};
+
+export default TopNPanelConfig;

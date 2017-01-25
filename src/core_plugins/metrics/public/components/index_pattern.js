@@ -1,18 +1,10 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
-export default React.createClass({
 
-  getDefaultProps() {
-    return {
-      prefix: '',
-      disabled: false,
-      className: 'vis_editor__row'
-    };
-  },
-
+class IndexPattern extends Component {
   render() {
     const { model, fields, prefix } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -49,6 +41,21 @@ export default React.createClass({
       </div>
     );
   }
+}
 
-});
+IndexPattern.defaultProps = {
+  prefix    : '',
+  disabled  : false,
+  className : 'vis_editor__row'
+};
 
+IndexPattern.propTypes = {
+  model     : PropTypes.object.isRequired,
+  fields    : PropTypes.object.isRequired,
+  onChange  : PropTypes.func.isRequired,
+  prefix    : PropTypes.string,
+  disabled  : PropTypes.bool,
+  className : PropTypes.string
+};
+
+export default IndexPattern;

@@ -1,9 +1,9 @@
 /* eslint max-len:0 */
+import React, { Component, PropTypes } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import moment from 'moment';
 import calculateLabel from './lib/calculate_label';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import React from 'react';
 import AceEditor from 'react-ace';
 import _ from 'lodash';
 import brace from 'brace';
@@ -11,21 +11,28 @@ import 'brace/mode/markdown';
 import 'brace/theme/github';
 import { getLastValue } from 'plugins/metrics/visualizations';
 import numeral from 'numeral';
-export default React.createClass({
+
+class MarkdownEditor extends Component {
+
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleOnLoad = this.handleOnLoad.bind(this);
+  }
 
   handleChange(value) {
     this.props.onChange({ markdown: value });
-  },
+  }
 
   handleOnLoad(ace) {
     this.ace = ace;
-  },
+  }
 
   handleVarClick(snippet) {
     return (e) => {
       if (this.ace) this.ace.insert(snippet);
     };
-  },
+  }
 
   render() {
     const { model, visData } = this.props;
@@ -95,9 +102,9 @@ export default React.createClass({
             theme="github"
             width="100%"
             height="100%"
-            name={ `ace-${model.id}` }
+            name={`ace-${model.id}`}
             setOptions={{ wrap: true, fontSize: '14px' }}
-            value={ model.markdown }
+            value={model.markdown}
             onChange={this.handleChange}/>
         </div>
         <div className="vis_editor__markdown-variables">
@@ -110,7 +117,7 @@ export default React.createClass({
               </tr>
             </thead>
             <tbody>
-              { rows }
+              {rows}
             </tbody>
           </table>
           <div style={{ marginBottom: 10 }}>There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for creating lists with data from a group by...</div>
@@ -125,4 +132,13 @@ export default React.createClass({
       </div>
     );
   }
-});
+
+}
+
+MarkdownEditor.propTypes = {
+  onChange : PropTypes.func,
+  model    : PropTypes.object,
+  visData  : PropTypes.object
+};
+
+export default MarkdownEditor;

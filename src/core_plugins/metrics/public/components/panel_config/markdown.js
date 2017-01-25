@@ -1,9 +1,9 @@
+import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
 import AceEditor from 'react-ace';
 import brace from 'brace';
 import 'brace/mode/less';
-import React from 'react';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
@@ -13,14 +13,18 @@ import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
 const lessC = less(window, { env: 'production' });
-export default React.createClass({
-  getInitialState() {
-    return { selectedTab: 'markdown' };
-  },
+
+class MarkdownPanelConfig extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { selectedTab: 'markdown' };
+    this.handleCSSChange = this.handleCSSChange.bind(this);
+  }
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
-  },
+  }
 
   handleCSSChange(value) {
     const { model } = this.props;
@@ -34,7 +38,7 @@ export default React.createClass({
       }
       this.props.onChange(parts);
     });
-  },
+  }
 
   render() {
     const { model } = this.props;
@@ -61,11 +65,21 @@ export default React.createClass({
     if (selectedTab === 'markdown') {
       view = (<MarkdownEditor {...this.props}/>);
     } else if (selectedTab === 'data') {
-      view = (<SeriesEditor {...this.props}/>);
+      view = (
+        <SeriesEditor
+          colorPicker={false}
+          fields={this.props.fields}
+          model={this.props.model}
+          name={this.props.name}
+          onChange={this.props.onChange} />
+      );
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern with-interval={true} {...this.props}/>
+          <IndexPattern
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange}/>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
             <ColorPicker
@@ -129,6 +143,13 @@ export default React.createClass({
       </div>
     );
   }
-});
+}
 
+MarkdownPanelConfig.propTypes = {
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  visData: PropTypes.object,
+};
 
+export default MarkdownPanelConfig;
