@@ -106,8 +106,8 @@ class GaugeVis extends Component {
         },
         svg: {
           position: 'absolute',
-          top: this.state.top || 0,
-          left: this.state.left || 0,
+          top: this.state.top,
+          left: this.state.left,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         }
       }
@@ -179,10 +179,10 @@ GaugeVis.defaultProps = {
 
 GaugeVis.propTypes = {
   color      : PropTypes.string,
-  gaugeLine  : PropTypes.number,
-  innerColor : PropTypes.string,
-  innerLine  : PropTypes.number,
-  max        : PropTypes.number,
+  gaugeLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerColor : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric     : PropTypes.object,
   reversed   : PropTypes.bool,
   value      : PropTypes.number,

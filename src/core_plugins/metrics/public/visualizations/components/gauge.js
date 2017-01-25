@@ -165,7 +165,7 @@ class Gauge extends Component {
       }
     }
     let className = type === 'half' ? 'thorHalfGauge' : 'thorCircleGauge';
-    if (this.props.reversed) className += ' reversed';
+    if (this.props.reversed) className = `reversed ${className}`;
     return (
       <div className={className}>
         <ResizeAware className={`${className}__resize`} ref="resize">
@@ -185,10 +185,10 @@ Gauge.propTypes = {
 };
 
 Gauge.propTypes = {
-  gaugeLine  : PropTypes.number,
-  innerColor : PropTypes.string,
-  innerLine  : PropTypes.number,
-  max        : PropTypes.number,
+  gaugeLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerColor : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric     : PropTypes.object,
   reversed   : PropTypes.bool,
   type       : PropTypes.oneOf(['half', 'circle']),
