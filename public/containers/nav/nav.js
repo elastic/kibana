@@ -8,7 +8,9 @@ import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
 import { elementLayerMove } from 'plugins/rework/state/actions/element';
 import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
+import { Timepicker } from '@elastic/kbn-react-ui';
 
+import '@elastic/kbn-react-ui/css/main.css';
 import './nav.less';
 
 
@@ -34,7 +36,7 @@ const DataframeDialog = React.createClass({
     return () => this.props.dispatch(action());
   },
   render() {
-    const {workpad, selectedElementId, currentPageId} = this.props;
+    const {workpad, selectedElementId, currentPageId, time} = this.props;
     const layerClasses = ['rework--nav--layer-buttons'];
     if (!selectedElementId) layerClasses.push('rework--nav--layer-buttons-disabled');
 
@@ -42,6 +44,12 @@ const DataframeDialog = React.createClass({
       <TopNav>
         <div className="rework--top-nav-top">
           <Editable className="rework--workpad-name" onChange={this.nameWorkpad} value={workpad.name}></Editable>
+          <Timepicker
+            refresh={_.noop}
+            timefilter={time}
+            onPause={_.noop}
+            onPickerClick={this.dropdown('timepicker')}
+          />
         </div>
         <div className="rework--top-nav-bottom">
           <NavButton
@@ -100,6 +108,7 @@ function mapStateToProps(state) {
   const {workpad} = state.persistent;
   return {
     workpad: workpad,
+    time: workpad.time,
     selectedElementId: state.transient.selectedElement,
     currentPageId: workpad.pages[workpad.page]
   };

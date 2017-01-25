@@ -3,7 +3,9 @@ import { connect } from 'react-redux';
 import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
 import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import WorkpadList from 'plugins/rework/components/workpad_list';
-import {workpadLoad} from 'plugins/rework/state/actions/workpad';
+import {workpadLoad, workpadTime} from 'plugins/rework/state/actions/workpad';
+import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
+import Timepicker from 'plugins/rework/components/timepicker/timepicker';
 import './drop_down.less';
 import classnames from 'classnames';
 import fetch from 'isomorphic-fetch';
@@ -25,11 +27,20 @@ const DropDown = React.createClass({
       dispatch(workpadLoad(resp.resp._source));
     });
   },
+  updateTime(time) {
+    const {dispatch} = this.props;
+    dispatch(workpadTime(time));
+    dispatch(dataframeResolveAll());
+  },
   render() {
-    const {dropdown} = this.props;
+    const {dropdown, time} = this.props;
     const style = {
       display: 'flex',
       position: 'relative',
+    };
+
+    const timeAppObj = {
+      timefilter: time
     };
 
     const dialog = (() => {
@@ -40,6 +51,8 @@ const DropDown = React.createClass({
           return (<ElementAddDialog></ElementAddDialog>);
         case 'workpads':
           return (<WorkpadList onSelect={this.loadWorkpad}></WorkpadList>);
+        case 'timepicker':
+          return (<Timepicker time={time} onChange={this.updateTime}></Timepicker>);
         default:
           return null;
       }
@@ -58,6 +71,7 @@ const DropDown = React.createClass({
 function mapStateToProps(state) {
   return {
     dropdown: state.transient.dropdown,
+    time: state.persistent.workpad.time,
   };
 }
 

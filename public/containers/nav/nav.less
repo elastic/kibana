@@ -2,6 +2,31 @@
 
 @disabled-button-color: @kibanaGray4;
 
+.kbnUITimepicker__refresh {
+  display: none !important;
+}
+
+.kbnUITimepicker__pick-label {
+  background-color: @rework--action-link-color;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: @border-radius-base;
+  margin-left: 5px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: #000;
+  }
+}
+
+.kbnUITimepicker__pick .fa {
+  font-size: 20px;
+}
+
+.kbnUITimepicker__picker {
+  flex-grow: 1;
+}
+
 .rework--nav--layer-buttons {
   display: inline-block;
 
