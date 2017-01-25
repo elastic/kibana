@@ -12,9 +12,9 @@ const ElementWrapper = React.createClass({
     };
   },
   handleKeypress(e) {
-    const {dispatch, id} = this.props;
+    const {dispatch, id, pageId} = this.props;
     if (e.keyCode === 8 || e.keyCode === 46) {
-      dispatch(elementRemove(id));
+      dispatch(elementRemove(id, pageId));
     }
   },
   render() {

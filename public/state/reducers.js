@@ -48,14 +48,12 @@ function rootReducer(state = {}, action) {
     return setPage(pageId, 'elements', newElements);
   };
 
-  const removeElement = (elementId) => {
+  const removeElement = (elementId, pageId) => {
     const result = setPersistent('elements', _.omit(state.persistent.elements, elementId));
-    // Gross, loop over all pages and remove this element from all of them, even though it should only
-    // be on one. So gross.
-    result.persistent.pages = _.mapValues(result.persistent.pages, (page) => {
-      page.elements = _.without(page.elements, elementId);
-      return page;
-    });
+    const {pages} = result.persistent;
+    // This right here is why you'll have a bad time if you use elements on more than one page.
+    // You won't be able to remove them correctly, and its gonna be bad. I guess I could switch to elementRemoveSlowly.
+    result.persistent.pages = {...pages, [pageId]: {...pages[pageId], elements: _.without(elementId)}};
     return result;
   };
 
@@ -138,6 +136,9 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'top', payload.value);
     case 'ELEMENT_LEFT':
       return setElement(payload.id, 'left', payload.value);
+
+    case 'DATAFRAME_REMOVE':
+      return setPersistent('dataframes', _.omit(state.persistent.dataframes, payload));
 
     case 'DATAFRAME_UNRESOLVED':
       return setPersistent('dataframes', {
