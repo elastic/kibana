@@ -22,10 +22,9 @@ async function fetchPredecessors(es, indexPattern, anchorDocument, sort, size) {
 
 
 function prepareQuery(indexPattern, anchorDocument, sort, size) {
-  const anchorUid = getDocumentUid(anchorDocument._type, anchorDocument._id);
   const successorsQuery = addComputedFields(
     indexPattern,
-    createSuccessorsQuery(anchorUid, anchorDocument.sort, sort, size)
+    createSuccessorsQuery(anchorDocument.sort, sort, size)
   );
   return successorsQuery;
 }
