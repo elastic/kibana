@@ -35,10 +35,29 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // debounced layout function is safe to call as much as possible
       const safeLayout = _.debounce(layout, 200);
 
-      $scope.removePanelFromState = (panelIndex) => {
+      /**
+       * Mapping of panelIndex to the angular element in the grid.
+       */
+      const panelElementMapping = {};
+
+      // Tell gridster to remove the panel, and cleanup our metadata
+      function removePanelFromGrid(panel, silent) {
+        const panelElement = panelElementMapping[panel.panelIndex];
+        // remove from grister 'silently' (don't reorganize after)
+        gridster.remove_widget(panelElement, silent);
+      }
+
+      $scope.removePanel = (panelIndex) => {
         _.remove($scope.state.panels, function (panel) {
-          return panel.panelIndex === panelIndex;
+          if (panel.panelIndex === panelIndex) {
+            removePanelFromGrid(panel);
+            $scope.uiState.removeChild(getPersistedStateId(panel));
+            return true;
+          } else {
+            return false;
+          }
         });
+        $scope.state.save();
       };
 
       /**
@@ -81,16 +100,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
         $scope.$watchCollection('state.panels', function (panels) {
           const currentPanels = gridster.$widgets.toArray().map(function (el) {
-            return getPanelFor(el);
+            return $scope.getPanelByPanelIndex(el.panelIndex);
           });
-
-          // panels that are now missing from the panels array
-          const removed = _.difference(currentPanels, panels);
-
           // panels that have been added
           const added = _.difference(panels, currentPanels);
-
-          if (removed.length) removed.forEach(removePanel);
           if (added.length) {
             // See issue https://github.com/elastic/kibana/issues/2138 and the
             // subsequent fix for why we need to sort here. Short story is that
@@ -105,16 +118,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                 return a.row - b.row;
               }
             });
-
             added.forEach(addPanel);
           }
 
-          // ensure that every panel can be serialized now that we are done
-          $state.panels.forEach(PanelUtils.makeSerializeable);
-
-          // alert interested parties that we have finished processing changes to the panels
-          // TODO: change this from event based to calling a method on dashboardApp
-          if (added.length || removed.length) $scope.$root.$broadcast('change:vis');
+          if (added.length) $scope.state.save();
         });
 
         $scope.$on('$destroy', function () {
@@ -122,13 +129,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           $window.off('resize', safeLayout);
 
           if (!gridster) return;
-          gridster.$widgets.each(function (i, el) {
-            const panel = getPanelFor(el);
+          gridster.$widgets.each(function (i, widget) {
+            const panel = $scope.getPanelByPanelIndex(widget.panelIndex);
+            const panelElement = panelElementMapping[panel.panelIndex];
             // stop any animations
-            panel.$el.stop();
-            removePanel(panel, true);
-            // not that we will, but lets be safe
-            PanelUtils.makeSerializeable(panel);
+            panelElement.stop();
+            removePanelFromGrid(panel, true);
           });
         });
 
@@ -138,26 +144,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         $scope.$on('globalNav:update', safeLayout);
       }
 
-      // return the panel object for an element.
-      //
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // ALWAYS CALL PanelUtils.makeSerializeable AFTER YOU ARE DONE WITH IT
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      function getPanelFor(el) {
-        const $panel = el.jquery ? el : $(el);
-        const panel = $panel.data('panel');
-        panel.$el = $panel;
-        return panel;
-      }
-
-      // Tell gridster to remove the panel, and cleanup our metadata
-      function removePanel(panel, silent) {
-        // remove from grister 'silently' (don't reorganize after)
-        gridster.remove_widget(panel.$el, silent);
-        panel.$el.removeData('panel');
-        $scope.uiState.removeChild(getPersistedStateId(panel));
-      }
-
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
         PanelUtils.initializeDefaults(panel);
@@ -165,7 +151,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         const panelHtml = `
             <li>
                 <dashboard-panel
-                  remove="removePanelFromState(${panel.panelIndex})"
+                  remove="removePanel(${panel.panelIndex})"
                   panel="getPanelByPanelIndex(${panel.panelIndex})"
                   is-full-screen-mode="!chrome.getVisible()"
                   is-expanded="false"
@@ -175,28 +161,29 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   toggle-expand="toggleExpandPanel(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState(path, uiState)">
             </li>`;
-        panel.$el = $compile(panelHtml)($scope);
+        const panelElement = $compile(panelHtml)($scope);
+        panelElementMapping[panel.panelIndex] = panelElement;
+        // Put the panelIndex on both the outer jQuery element, and the inner widget.
+        panelElement.panelIndex = panelElement[0].panelIndex = panel.panelIndex;
 
         // tell gridster to use the widget
-        gridster.add_widget(panel.$el, panel.size_x, panel.size_y, panel.col, panel.row);
+        gridster.add_widget(panelElement, panel.size_x, panel.size_y, panel.col, panel.row);
 
         // Gridster may change the position of the widget when adding it, make sure the panel
         // contains the latest info.
-        PanelUtils.refreshSizeAndPosition(panel);
-
-        // stash the panel in the element's data
-        panel.$el.data('panel', panel);
+        PanelUtils.refreshSizeAndPosition(panel, panelElement);
       }
 
-      // when gridster tell us it made a change, update each of the panel objects
-      function readGridsterChangeHandler(e, ui, $widget) {
+      // When gridster tell us it made a change, update each of the panel objects
+      function readGridsterChangeHandler() {
         // ensure that our panel objects keep their size in sync
-        gridster.$widgets.each(function (i, el) {
-          const panel = getPanelFor(el);
-          PanelUtils.refreshSizeAndPosition(panel);
-          PanelUtils.makeSerializeable(panel);
-          $scope.$root.$broadcast('change:vis');
+        gridster.$widgets.each(function (i, widget) {
+          const panel = $scope.getPanelByPanelIndex(widget.panelIndex);
+          const panelElement = panelElementMapping[panel.panelIndex];
+          PanelUtils.refreshSizeAndPosition(panel, panelElement);
         });
+
+        $scope.state.save();
       }
 
       // calculate the position and sizing of the gridster el, and the columns within it
