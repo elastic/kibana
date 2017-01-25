@@ -16,6 +16,7 @@ import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { FilterUtils } from './filter_utils';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -75,22 +76,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       }
 
-      const matchQueryFilter = function (filter) {
-        return filter.query && filter.query.query_string && !filter.meta;
-      };
-
-      const extractQueryFromFilters = function (filters) {
-        const filter = _.find(filters, matchQueryFilter);
-        if (filter) return filter.query;
-      };
-
       const stateDefaults = {
         title: dash.title,
         panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
         options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
         uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
-        query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || { query_string: { query: '*' } },
-        filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
+        query: FilterUtils.getQueryFilterForDashboard(dash),
+        filters: FilterUtils.getFilterBarsForDashboard(dash),
       };
 
       let stateMonitor;
