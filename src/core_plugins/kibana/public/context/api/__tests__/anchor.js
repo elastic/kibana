@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import expect from 'expect.js';
 import sinon from 'sinon';
 
 import { fetchAnchor } from 'plugins/kibana/context/api/anchor';
@@ -12,10 +12,8 @@ describe('context app', function () {
 
       return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(() => {
-          expect(esStub.search.calledOnce).to.be.true;
-          expect(esStub.search.firstCall.args)
-            .to.have.lengthOf(1)
-            .with.deep.property('[0].index', 'index1');
+          expect(esStub.search.calledOnce).to.be(true);
+          expect(esStub.search.firstCall.args[0]).to.have.property('index', 'index1');
         });
     });
 
@@ -25,11 +23,9 @@ describe('context app', function () {
 
       return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(() => {
-          expect(esStub.search.calledOnce).to.be.true;
-          expect(esStub.search.firstCall.args)
-            .to.have.lengthOf(1)
-            .with.deep.property('[0].body')
-              .that.contains.all.keys(['script_fields', 'docvalue_fields', 'stored_fields']);
+          expect(esStub.search.calledOnce).to.be(true);
+          expect(esStub.search.firstCall.args[0].body).to.have.keys([
+            'script_fields', 'docvalue_fields', 'stored_fields']);
         });
     });
 
@@ -40,10 +36,10 @@ describe('context app', function () {
       return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(
           () => {
-            expect(true, 'expected the promise to be rejected').to.be.false;
+            expect().fail('expected the promise to be rejected');
           },
           (error) => {
-            expect(error).to.be.an('error');
+            expect(error).to.be.an(Error);
           }
         );
     });

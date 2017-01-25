@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import expect from 'expect.js';
 
 import {
   reverseQuerySort,
@@ -17,7 +17,7 @@ describe('context app', function () {
           'field3',
           '_score',
         ],
-      })).to.deep.equal({
+      })).to.eql({
         sort: [
           { field1: { order: 'asc', mode: 'max' } },
           { field2: 'desc' },
@@ -30,13 +30,13 @@ describe('context app', function () {
 
   describe('function reverseSortDirection', function () {
     it('should reverse a direction given as a string', function () {
-      expect(reverseSortDirection('asc')).to.equal('desc');
-      expect(reverseSortDirection('desc')).to.equal('asc');
+      expect(reverseSortDirection('asc')).to.eql('desc');
+      expect(reverseSortDirection('desc')).to.eql('asc');
     });
 
     it('should reverse a direction given in an option object', function () {
-      expect(reverseSortDirection({ order: 'asc' })).to.deep.equal({ order: 'desc' });
-      expect(reverseSortDirection({ order: 'desc' })).to.deep.equal({ order: 'asc' });
+      expect(reverseSortDirection({ order: 'asc' })).to.eql({ order: 'desc' });
+      expect(reverseSortDirection({ order: 'desc' })).to.eql({ order: 'asc' });
     });
 
     it('should preserve other properties than `order` in an option object', function () {
@@ -49,15 +49,15 @@ describe('context app', function () {
 
   describe('function reverseSortDirective', function () {
     it('should return direction `asc` when given just `_score`', function () {
-      expect(reverseSortDirective('_score')).to.deep.equal({ _score: 'asc' });
+      expect(reverseSortDirective('_score')).to.eql({ _score: 'asc' });
     });
 
     it('should return direction `desc` when given just a field name', function () {
-      expect(reverseSortDirective('field1')).to.deep.equal({ field1: 'desc' });
+      expect(reverseSortDirective('field1')).to.eql({ field1: 'desc' });
     });
 
     it('should reverse direction when given an object', function () {
-      expect(reverseSortDirective({ field1: 'asc' })).to.deep.equal({ field1: 'desc' });
+      expect(reverseSortDirective({ field1: 'asc' })).to.eql({ field1: 'desc' });
     });
   });
 });

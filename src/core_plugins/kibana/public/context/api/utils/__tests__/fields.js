@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import expect from 'expect.js';
 
 import { addComputedFields } from 'plugins/kibana/context/api/utils/fields';
 
@@ -14,8 +14,9 @@ describe('context app', function () {
         }
       });
 
-      expect(addComputedFields({ getComputedFields }, {})).to.have.property('script_fields')
-        .that.is.deep.equal(getComputedFields().scriptFields);
+      const query = addComputedFields({ getComputedFields }, {});
+      expect(query).to.have.property('script_fields');
+      expect(query.script_fields).to.eql(getComputedFields().scriptFields);
     });
 
     it('should add the `docvalue_fields` property defined in the given index pattern', function () {
@@ -23,8 +24,9 @@ describe('context app', function () {
         docvalueFields: ['field1'],
       });
 
-      expect(addComputedFields({ getComputedFields }, {})).to.have.property('docvalue_fields')
-        .that.is.deep.equal(getComputedFields().docvalueFields);
+      const query = addComputedFields({ getComputedFields }, {});
+      expect(query).to.have.property('docvalue_fields');
+      expect(query.docvalue_fields).to.eql(getComputedFields().docvalueFields);
     });
 
     it('should add the `stored_fields` property defined in the given index pattern', function () {
@@ -32,15 +34,16 @@ describe('context app', function () {
         storedFields: ['field1'],
       });
 
-      expect(addComputedFields({ getComputedFields }, {})).to.have.property('stored_fields')
-        .that.is.deep.equal(getComputedFields().storedFields);
+      const query = addComputedFields({ getComputedFields }, {});
+      expect(query).to.have.property('stored_fields');
+      expect(query.stored_fields).to.eql(getComputedFields().storedFields);
     });
 
     it('should preserve other properties of the query', function () {
       const getComputedFields = () => ({});
 
-      expect(addComputedFields({ getComputedFields }, { property1: 'value1' }))
-        .to.have.property('property1', 'value1');
+      const query = addComputedFields({ getComputedFields }, { property1: 'value1' });
+      expect(query).to.have.property('property1', 'value1');
     });
   });
 });
