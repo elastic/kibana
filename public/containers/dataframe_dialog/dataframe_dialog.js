@@ -18,6 +18,9 @@ const DataframeDialog = React.createClass({
       dataframe: dataframes[dataframeIds[0]]
     };
   }, // This could be initialized with the defaults for the form right?
+  componentWillReceiveProps(nextProps) {
+    if (nextProps !== this.props) this.setState(this.getInitialState);
+  },
   selectDataframe(id) {
     const {dataframes} = this.props;
     this.setState(_.assign({}, this.state, {dataframe: dataframes[id]}));
@@ -48,7 +51,9 @@ const DataframeDialog = React.createClass({
     this.setState(_.assign({}, this.state, {creating: false, dataframe: dataframe}));
   },
   removeDataframe(id) {
-    return () => this.props.dispatch(dataframeRemove(id));
+    return () => {
+      this.props.dispatch(dataframeRemove(id));
+    };
   },
   render() {
     const {dataframes} = this.props;
@@ -70,7 +75,7 @@ const DataframeDialog = React.createClass({
           <a onClick={this.removeDataframe(dataframe.id)} className="fa fa-ban"></a>
         </div>
 
-        <DataframeEditor dataframe={dataframe} commit={this.commit}></DataframeEditor>
+        <DataframeEditor key={dataframe.id} dataframe={dataframe} commit={this.commit}></DataframeEditor>
       </div>
     );
 
