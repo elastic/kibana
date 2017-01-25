@@ -272,6 +272,10 @@
   .agg-table-paginated {
     tr:hover td {
       background-color: @table-row-hover-bg;
+      
+      .table-cell-filter {
+        background-color: @table-row-hover-bg;
+      }
     }
   }
 
@@ -578,4 +582,15 @@
     background-color: @config-bg;
     color: @dark-button-font;
   }
+
+
+// /src/ui/public/doc_table/doc_table.less
+  .discover-table-row {
+    td {
+      .table-cell-filter {
+        background-color: @panel-bg;
+      }
+    }
+  }
 }
+
