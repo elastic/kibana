@@ -16,18 +16,21 @@ frameSources.push(new FrameSource('timelion', {
     expression: '.static(5:10:2:10:23:11:12:13:14).mvavg(10)',
     interval: 'auto'
   },
-  toDataframe: function (value, app) {
+  toDataframe: function (value, filters) {
     const dataframe =   {
       type: 'dataframe',
       columns: [{name: 'foo', type: 'string'}],
       rows: []
     };
 
+    const timeFilters = _.filter(filters, {type: 'time'});
+    if (timeFilters.length !== 1) throw new Error('Timelion must have 1 and only 1 time filter');
+
     const body = {
       sheet: [value.expression],
       time: {
-        from: 'now-2y',
-        to: 'now',
+        from: timeFilters[0].value.from,
+        to: timeFilters[0].value.to,
         interval: 'auto',
         timezone: 'America/Phoenix'
       }

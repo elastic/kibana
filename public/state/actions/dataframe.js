@@ -34,9 +34,12 @@ export function dataframeAdd(dataframe) {
 
 export function dataframeResolve(id) {
   return (dispatch, getState) => {
+    // TODO: Wire this up to be actual filters.
+    const time = getState().persistent.workpad.time;
+    const filters = [{id: 'globalTimeFilter', type: 'time', value: time}];
     const dataframe = getState().persistent.dataframes[id];
     const toDataframe = frameSources.byName[dataframe.type].toDataframe;
-    Promise.resolve(toDataframe(dataframe.value))
+    Promise.resolve(toDataframe(dataframe.value, filters))
       .then(resolvedFrame => {
         dispatch(dataframeResolved(id, resolvedFrame));
         dispatch(dataframeSync(id));

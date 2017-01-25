@@ -13,7 +13,7 @@ frameSources.push(new FrameSource('csv', {
           '"impreza","sedan",16000\n' +
           '"outback","SUV",25000\n'
   },
-  toDataframe: function (value) {
+  toDataframe: function (value, filters) {
     const dataframe =   {
       type: 'dataframe',
       columns: [],
