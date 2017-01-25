@@ -27,7 +27,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           $cell.addClass('cell-hover');
           $cell.scope.clickHandler = function (event, negate) {
             if ($(event.target).is('a')) return; // Don't add filter if a link was clicked
-            clickHandler({ point: { aggConfigResult: aggConfigResult }, negate: negate });
+            clickHandler({ point: { aggConfigResult: aggConfigResult }, negate });
           };
           return $compile($cell)($cell.scope);
         };
