@@ -28,7 +28,11 @@ module.directive('vislibSeries', function ($parse, $compile) {
       $scope.series = $scope.vis.params.seriesParams;
       $scope.$watch(() => {
         return $scope.vis.aggs.map(agg => {
-          return agg.params.field ? agg.makeLabel() : '';
+          try {
+            return agg.makeLabel();
+          } catch (e) {
+            return '';
+          }
         }).join();
       }, () => {
         let serieCount = 0;
@@ -65,6 +69,7 @@ module.directive('vislibSeries', function ($parse, $compile) {
 
       $scope.changeValueAxis = (index) => {
         const series = $scope.vis.params.seriesParams[index];
+        $scope.updateAxisTitle();
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;

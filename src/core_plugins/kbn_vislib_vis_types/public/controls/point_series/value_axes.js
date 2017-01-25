@@ -118,16 +118,13 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
       };
 
       const lastAxisTitles = {};
-      $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
-          return agg.params.field ? agg.makeLabel() : '';
-        }).join();
-      }, () => {
-        $scope.vis.params.valueAxes.forEach((axis, i) => {
+      $scope.updateAxisTitle = function () {
+        $scope.vis.params.valueAxes.forEach((axis, axisNumber) => {
           let label = '';
+          const isFirst = axisNumber === 0;
           const matchingSeries = [];
-          $scope.vis.params.seriesParams.forEach(series => {
-            const isMatchingSeries = (i === 0 && !series.valueAxis) || (series.valueAxis === axis.id);
+          $scope.vis.params.seriesParams.forEach((series, i) => {
+            const isMatchingSeries = (isFirst && !series.valueAxis) || (series.valueAxis === axis.id);
             if (isMatchingSeries) {
               let seriesNumber = 0;
               $scope.vis.aggs.forEach(agg => {
@@ -146,6 +143,18 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
             axis.title.text = label;
           }
         });
+      };
+
+      $scope.$watch(() => {
+        return $scope.vis.aggs.map(agg => {
+          try {
+            return agg.makeLabel();
+          } catch (e) {
+            return '';
+          }
+        }).join();
+      }, () => {
+        $scope.updateAxisTitle();
       });
     }
   };
