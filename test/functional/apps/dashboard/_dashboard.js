@@ -56,11 +56,12 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         }, Promise.resolve());
       }
 
-      return addVisualizations(visualizations)
-      .then(function () {
-        PageObjects.common.debug('done adding visualizations');
-        PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
-      });
+      return PageObjects.dashboard.clickNewDashboard()
+        .then(() => addVisualizations(visualizations))
+        .then(function () {
+          PageObjects.common.debug('done adding visualizations');
+          PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
+        });
     });
 
     bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
@@ -82,22 +83,23 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       const dashboardName = 'Dashboard Test 1';
       // TODO: save time on the dashboard and test it
       return PageObjects.dashboard.saveDashboard(dashboardName)
-      // click New Dashboard just to clear the one we just created
-      .then(function () {
-        return PageObjects.common.try(function () {
-          PageObjects.common.debug('saved Dashboard, now click New Dashboard');
-          return PageObjects.dashboard.clickNewDashboard();
+        .then(() => PageObjects.dashboard.gotoDashboardLandingPage())
+        // click New Dashboard just to clear the one we just created
+        .then(function () {
+          return PageObjects.common.try(function () {
+            PageObjects.common.debug('saved Dashboard, now click New Dashboard');
+            return PageObjects.dashboard.clickNewDashboard();
+          });
+        })
+        .then(function () {
+          return PageObjects.common.try(function () {
+            PageObjects.common.debug('now re-load previously saved dashboard');
+            return PageObjects.dashboard.loadSavedDashboard(dashboardName);
+          });
+        })
+        .then(function () {
+          PageObjects.common.saveScreenshot('Dashboard-load-saved');
         });
-      })
-      .then(function () {
-        return PageObjects.common.try(function () {
-          PageObjects.common.debug('now re-load previously saved dashboard');
-          return PageObjects.dashboard.loadSavedDashboard(dashboardName);
-        });
-      })
-      .then(function () {
-        PageObjects.common.saveScreenshot('Dashboard-load-saved');
-      });
     });
 
     bdd.it('should have all the expected visualizations', function checkVisualizations() {
