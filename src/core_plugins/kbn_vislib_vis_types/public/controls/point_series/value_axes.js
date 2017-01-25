@@ -88,6 +88,7 @@ module.directive('vislibValueAxes', function ($parse, $compile) {
         }, 1);
 
         $scope.vis.params.valueAxes.push(newAxis);
+        return newAxis;
       };
 
       $scope.removeValueAxis = function (axis) {

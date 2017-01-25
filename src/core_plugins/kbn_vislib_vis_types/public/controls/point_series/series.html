@@ -1,4 +1,4 @@
-<div class="kuiSideBarSection">
+<div class="kuiSideBarSection kuiSideBarSection__main">
   <div class="kuiSideBarSectionTitle">
     <div class="kuiSideBarSectionTitle__text">
       Metrics
@@ -69,7 +69,7 @@
               ng-change="changeValueAxis($index)"
             >
               <option ng-repeat="axis in vis.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
-
+              <option value="new">New Axis ...</option>
             </select>
           </div>
         </div>

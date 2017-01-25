@@ -104,13 +104,13 @@ export default function PointSeriesVisType(Private) {
       }],
       editor: pointSeriesTemplate,
       optionTabs: [
-        { name: 'options', title: 'Settings', editor: pointSeriesTemplate },
         {
           name: 'advanced',
-          title: 'Advanced',
+          title: 'Axes & Metrics',
           editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
           '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },
+        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
       ],
     },
     schemas: new Schemas([
