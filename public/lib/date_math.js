@@ -11,7 +11,7 @@ function parse(text, roundUp) {
   if (moment.isMoment(text)) {
     return text;
   }
-  if (_.isDate(text)) {
+  if (_.isDate(text) || _.isNumber(text)) {
     return moment(text);
   }
 
