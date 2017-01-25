@@ -116,7 +116,7 @@ body {
   .kuiButton:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
     /* 3 */ }
@@ -174,7 +174,7 @@ body {
   .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
@@ -274,7 +274,7 @@ body {
   .kuiCheckBox:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
     /* 3 */ }
@@ -987,14 +987,14 @@ body {
   .kuiPanelHeader .kuiButton:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
     /* 3 */ }
@@ -1198,14 +1198,14 @@ body {
   .kuiToolBar .kuiButton:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
     /* 3 */ }
   .kuiToolBar .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
-    outline: none;
+    outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
     /* 3 */ }
