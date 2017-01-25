@@ -3,6 +3,7 @@ import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import uiModules from 'ui/modules';
+import tableCellFilterHtml from './partials/table_cell_filter.html';
 const module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
@@ -18,25 +19,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
         const createAggConfigResultCell = function (aggConfigResult) {
-          const $cell = $(
-            `<td>
-              <span class="table-cell-filter">
-                <span
-                  ng-click="clickHandler($event, false)"
-                  class="fa fa-search-plus"
-                  tooltip="Filter for value"
-                  tooltip-append-to-body="1"
-                ></span>
-
-                <span
-                  ng-click="clickHandler($event, true)"
-                  class="fa fa-search-minus"
-                  tooltip="Filter out value"
-                  tooltip-append-to-body="1"
-                ></span>
-              </span>
-            </td>`
-          );
+          const $cell = $(tableCellFilterHtml);
 
           const $state = getAppState();
           const clickHandler = filterBarClickHandler($state);
