@@ -2,24 +2,24 @@
   <div class="form-group">
     <label>Metric</label>
     <select
-      name="buckets_path"
-      ng-model="agg.params.buckets_path"
+      name="metricAgg"
+      ng-model="agg.params.metricAgg"
       required
       class="form-control">
       <option
         ng-repeat="respAgg in responseValueAggs track by respAgg.id"
         value="{{respAgg.id}}"
-        ng-if="respAgg.type.name !== 'derivative'"
+        ng-if="respAgg.type.name !== agg.type.name"
         ng-disabled="rejectAgg(respAgg)"
-        ng-selected="agg.params.buckets_path === respAgg.id">
+        ng-selected="agg.params.metricAgg === respAgg.id">
         metric: {{safeMakeLabel(respAgg)}}
       </option>
-      <option value="custom" ng-selected="agg.params.buckets_path === 'custom'">
+      <option value="custom" ng-selected="agg.params.metricAgg === 'custom'">
         Custom Metric
       </option>
     </select>
   </div>
-  <div ng-if="agg.params.buckets_path === 'custom'" class="vis-editor-agg-order-agg">
+  <div ng-if="agg.params.metricAgg === 'custom'" class="vis-editor-agg-order-agg">
     <ng-form name="customMetricForm">
       <vis-editor-agg-params
         agg="agg.params.customMetric"
