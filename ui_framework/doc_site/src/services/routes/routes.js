@@ -40,6 +40,9 @@ import TabsExample
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
 
+import TypographyExample
+  from '../../views/typography/typography_example.jsx';
+
 import VerticalRhythmExample
   from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
 
@@ -83,6 +86,9 @@ const components = [{
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
+}, {
+  name: 'Typography',
+  component: TypographyExample,
 }, {
   name: 'VerticalRhythm',
   component: VerticalRhythmExample,
