@@ -14,10 +14,10 @@ import { GetEnabledScriptingLangsProvider, getSupportedScriptingLangs } from '..
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce) {
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
-  let Field = Private(IndexPatternsFieldProvider);
-  let getEnabledScriptingLangs = Private(GetEnabledScriptingLangsProvider);
+.directive('fieldEditor', function (Private, $sce, confirmModal) {
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const Field = Private(IndexPatternsFieldProvider);
+  const getEnabledScriptingLangs = Private(GetEnabledScriptingLangsProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -78,15 +78,25 @@ uiModules
       };
 
       self.delete = function () {
-        let indexPattern = self.indexPattern;
-        let field = self.field;
+        function doDelete() {
+          const indexPattern = self.indexPattern;
+          const field = self.field;
 
-        indexPattern.fields.remove({ name: field.name });
-        return indexPattern.save()
-        .then(function () {
-          notify.info('Deleted Field "' + field.name + '"');
-          redirectAway();
-        });
+          indexPattern.fields.remove({ name: field.name });
+          return indexPattern.save()
+            .then(function () {
+              notify.info('Deleted Field "' + field.name + '"');
+              redirectAway();
+            });
+        }
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: doDelete
+        };
+        confirmModal(
+          `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
+          confirmModalOptions
+        );
       };
 
       self.isSupportedLang = function (lang) {

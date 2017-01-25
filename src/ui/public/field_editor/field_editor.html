@@ -228,8 +228,7 @@
     <button
       type="button"
       ng-if="editor.field.scripted && !editor.creating"
-      confirm-click="editor.delete()"
-      confirmation="Are you sure want to delete '{{ editor.field.name }}'? This action is irreversible!"
+      ng-click="editor.delete()"
       aria-label="Delete"
       class="btn btn-danger">
       Delete Field
