@@ -25,6 +25,9 @@
     "rsync": "^0.4.0"
   },
   "dependencies": {
+    "@elastic/datemath": "^2.3.0",
+    "@elastic/kbn-react-ui": "github:rashidkpc/kbn-react-ui",
+    "@elastic/thor-visualizations": "github:elastic/thor-visualizations",
     "angular": "^1.5.3",
     "api-check": "^7.5.5",
     "babel-register": "^6.3.13",
