@@ -1,73 +1,193 @@
-import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import $ from '../lib/flot';
+import ResizeAware from 'simianhacker-react-resize-aware';
+import _ from 'lodash';
+import { findDOMNode } from 'react-dom';
+import reactcss from 'reactcss';
 
 class GaugeVis extends Component {
 
   constructor(props) {
     super(props);
-    this.height = props.height || 150;
-    this.width = props.width || 150;
-    this.opts = {
-      series: {
-        pie: {
-          innerRadius: 0.7,
-          show: true,
-          startAngle: 1,
-        }
-      }
+    this.state = {
+      scale: 1,
+      top: 0,
+      left: 0,
+      translateX: 1,
+      translateY: 1
     };
+    this.handleResize = this.handleResize.bind(this);
   }
 
-  shouldComponentUpdate() {
-    if (!this.plot) return true;
-    return false;
-  }
+  calculateCorrdinates() {
+    const inner = findDOMNode(this.refs.inner);
+    const resize = findDOMNode(this.refs.resize);
+    let scale = this.state.scale;
 
-  componentWillReceiveProps(newProps) {
-    if (this.plot) {
-      const max = newProps.max || 1;
-      this.plot.setData(this.caluclateData(newProps.value / max));
-      this.plot.draw();
+    // Let's start by scaling to the largest dimension
+    if (resize.clientWidth - resize.clientHeight < 0) {
+      scale = resize.clientWidth / inner.clientWidth;
+    } else {
+      scale = resize.clientHeight / inner.clientHeight;
     }
+    let [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
+
+    // Now we need to check to see if it will still fit
+    if (newWidth > resize.clientWidth) {
+      scale = resize.clientWidth / inner.clientWidth;
+    }
+    if (newHeight > resize.clientHeight) {
+      scale = resize.clientHeight / inner.clientHeight;
+    }
+
+    // Calculate the final dimensions
+    [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
+
+    // Because scale is middle out we need to translate
+    // the new X,Y corrdinates
+    const translateX = (newWidth - inner.clientWidth) / 2;
+    const translateY = (newHeight - inner.clientHeight) / 2;
+
+    // Center up and down
+    const top = Math.floor((resize.clientHeight - newHeight) / 2);
+    const left = Math.floor((resize.clientWidth - newWidth) / 2);
+
+    return { scale, top, left, translateY, translateX };
   }
 
   componentDidMount() {
-    this.renderGauge();
+    const resize = findDOMNode(this.refs.resize);
+    if (!resize) return;
+    resize.addEventListener('resize', this.handleResize);
+    this.handleResize();
   }
 
   componentWillUnmount() {
-    this.plot.shutdown();
+    const resize = findDOMNode(this.refs.resize);
+    if (!resize) return;
+    resize.removeEventListener('resize', this.handleResize);
   }
 
-  caluclateData(value) {
-    let color = this.props.color || '#8ac336';
-    if (this.props.thresholds) {
-      if (value > 0.60) color = '#fbce47';
-      if (value > 0.80) color = '#d76051';
+  // When the component updates it might need to be resized so we need to
+  // recalculate the corrdinates and only update if things changed a little. THis
+  // happens when the number is too wide or you add a new series.
+  componentDidUpdate() {
+    const newState = this.calculateCorrdinates();
+    if (newState && !_.isEqual(newState, this.state)) {
+      this.setState(newState);
     }
-    return [
-      { color: color, data: (value * 0.5) },
-      { color: '#DDDDDD', data: 0.5 - (value * 0.5) },
-      { color: '#FFFFFF', data: 0.5 }
-    ];
   }
 
-  renderGauge() {
-    const { target } = this.refs;
-    const max = this.props.max || 1;
-    const data = this.caluclateData(this.props.value / max);
-    $(target).width(this.width).height(this.height);
-    this.plot = $.plot(target, data, this.opts);
+  calcDimensions(el, scale) {
+    const newWidth = Math.floor(el.clientWidth * scale);
+    const newHeight = Math.floor(el.clientHeight * scale);
+    return [newWidth, newHeight];
+  }
+
+  handleResize() {
+    // Bingo!
+    const newState = this.calculateCorrdinates();
+    newState && this.setState(newState);
   }
 
   render() {
+    const { type, value, max, color, reversed } = this.props;
+    const { scale, translateX, translateY, top, left } = this.state;
+    const size = 2 * Math.PI * 50;
+    const sliceSize = type === 'half' ? 0.6 : 1;
+    const percent = value < max ? value / max : 1;
+    const styles = reactcss({
+      default: {
+        resize: {
+          position: 'relative',
+          display: 'flex',
+          rowDirection: 'column',
+          flex: '1 0 auto'
+        },
+        svg: {
+          position: 'absolute',
+          top: this.state.top || 0,
+          left: this.state.left || 0,
+          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
+        }
+      }
+    }, this.props);
+
+    const props = {
+      circle: {
+        r: 50,
+        cx: 60,
+        cy: 60,
+        fill: 'rgba(0,0,0,0)',
+        stroke: color,
+        strokeWidth: this.props.gaugeLine,
+        strokeDasharray: `${(percent * sliceSize) * size} ${size}`,
+        transform: 'rotate(-90 60 60)',
+      },
+      circleBackground: {
+        r: 50,
+        cx: 60,
+        cy: 60,
+        fill: 'rgba(0,0,0,0)',
+        stroke: this.props.reversed ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+        strokeDasharray: `${sliceSize * size} ${size}`,
+        strokeWidth: this.props.innerLine
+      }
+    };
+
+    if (type === 'half') {
+      styles.svg.transform = `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`;
+      props.circle.transform = 'rotate(-197.8 60 60)';
+      props.circleBackground.transform = 'rotate(162 60 60)';
+    }
+
+    if (this.props.innerColor) {
+      props.circleBackground.stroke = this.props.innerColor;
+    }
+
+    let svg;
+    if (type === 'half') {
+      svg = (
+        <svg width={120.72} height={78.72}>
+          <circle {...props.circleBackground} style={{ strokeWidth: this.props.innerLine }}/>
+          <circle {...props.circle} style={{ strokeWidth: this.props.gaugeLine }}/>
+        </svg>
+      );
+    } else {
+      svg = (
+        <svg width={120.72} height={120.72}>
+          <circle {...props.circleBackground}/>
+          <circle {...props.circle}/>
+        </svg>
+      );
+    }
     return (
-      <div className="chart" style={{ overflow: 'hidden', height: this.height / 2 }}>
-        <div ref="target"/>
-      </div>
+      <ResizeAware ref="resize" style={styles.resize}>
+        <div style={styles.svg} ref="inner">
+          {svg}
+        </div>
+      </ResizeAware>
     );
   }
+
 }
 
+GaugeVis.defaultProps = {
+  innerLine : 2,
+  gaugeLine : 10
+};
+
+GaugeVis.propTypes = {
+  color      : PropTypes.string,
+  gaugeLine  : PropTypes.number,
+  innerColor : PropTypes.string,
+  innerLine  : PropTypes.number,
+  max        : PropTypes.number,
+  metric     : PropTypes.object,
+  reversed   : PropTypes.bool,
+  value      : PropTypes.number,
+  type       : PropTypes.oneOf(['half', 'circle'])
+};
+
 export default GaugeVis;
+

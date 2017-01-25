@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { HalfGauge, CircleGauge, getLastValue } from 'plugins/metrics/visualizations';
+import { Gauge, getLastValue } from 'plugins/metrics/visualizations';
 import color from 'color';
 
 function getColors(props) {
@@ -37,7 +37,9 @@ function GaugeVisualization(props) {
       return _.assign({}, row, newProps);
     });
   const params = {
-    metric: series[0], };
+    metric: series[0],
+    type: model.gauge_style || 'half'
+  };
 
   if (colors.text) {
     params.valueColor = colors.text;
@@ -54,15 +56,10 @@ function GaugeVisualization(props) {
     params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
   }
   const style = { backgroundColor: panelBackgroundColor };
-  let gauge;
-  if (model.gauge_style === 'half') {
-    gauge = (<HalfGauge {...params}/>);
-  } else {
-    gauge = (<CircleGauge {...params}/>);
-  }
+
   return (
     <div className="dashboard__visualization" style={style}>
-      { gauge }
+      <Gauge {...params} />
     </div>
   );
 }

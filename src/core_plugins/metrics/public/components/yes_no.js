@@ -34,7 +34,7 @@ function YesNo(props) {
 
 YesNo.propTypes = {
   name  : PropTypes.string,
-  value : PropTypes.value
+  value : PropTypes.number
 };
 
 export default YesNo;
