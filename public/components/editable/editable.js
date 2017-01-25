@@ -8,7 +8,7 @@ export default React.createClass({
   },
   handleKeyPress(e) {
     const onDone = this.props.onDone || _.noop;
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === 'Escape') {
       this.refs.editableInput.blur();
       onDone();
     }
@@ -27,7 +27,7 @@ export default React.createClass({
         value={value}
         onChange={this.change}
         style={style}
-        onKeyPress={this.handleKeyPress}/>
+        onKeyDown={this.handleKeyPress}/>
     );
   }
 });
