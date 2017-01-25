@@ -1,15 +1,9 @@
-import { chain, isArray, isPlainObject, forOwn, memoize, set, transform } from 'lodash';
+import { isArray, isPlainObject, forOwn, set, transform } from 'lodash';
 import { readFileSync as read } from 'fs';
 import { safeLoad } from 'js-yaml';
-import { red } from 'ansicolors';
+
 
 import { fromRoot } from '../../utils';
-import { rewriteLegacyConfig } from './legacy_config';
-import { checkForDeprecatedConfig } from './deprecated_config';
-
-const log = memoize(function (message) {
-  console.log(red('WARNING:'), message);
-});
 
 export function merge(sources) {
   return transform(sources, (merged, source) => {
@@ -35,6 +29,5 @@ export function merge(sources) {
 export default function (paths) {
   const files = [].concat(paths || []);
   const yamls = files.map(path => safeLoad(read(path, 'utf8')));
-  const config = merge(yamls.map(file => rewriteLegacyConfig(file, log)));
-  return checkForDeprecatedConfig(config, log);
+  return merge(yamls);
 }
