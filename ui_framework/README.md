@@ -88,12 +88,13 @@ For a more in-depth analysis of the problems with Bootstrap (and similar framewo
 
 ## Examples of other in-house UI frameworks
 
+* [Smaato React UI Framework](http://smaato.github.io/ui-framework/#/modal)
+* [Ubiquiti CSS Framework](http://ubnt-css.herokuapp.com/#/app/popover)
 * [GitHub's Primer](http://primercss.io/)
 * [Palantir's Blueprint](http://blueprintjs.com/docs/#components)
-* [Ubiquiti CSS Framework](http://ubnt-css.herokuapp.com/#/app/popover)
-* [Smaato React UI Framework](http://smaato.github.io/ui-framework/#/modal)
 * [Lonely Planet Style Guide](http://rizzo.lonelyplanet.com/styleguide/design-elements/colours)
 * [MailChimp Patterns Library](http://ux.mailchimp.com/patterns)
 * [Salesforce Lightning Design System](https://www.lightningdesignsystem.com/)
 * [Refills](http://refills.bourbon.io/)
 * [Formstone](https://formstone.it/)
+* [Element VueJS Framework](http://element.eleme.io/#/en-US/component/dialog)
