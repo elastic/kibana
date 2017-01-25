@@ -8,7 +8,7 @@ argTypes.push(new ArgType('style', {
   help: 'Custom CSS styles to apply to the element.',
   form: ({commit, value}) => {
     const storeValue = (e) => commit(e.target.value);
-    return (<textarea className="form-control" onChange={storeValue} value={value}></textarea>);
+    return (<textarea className="form-control" rows={10} onChange={storeValue} value={value}></textarea>);
   },
   resolve: (value, state) => {
     try {
