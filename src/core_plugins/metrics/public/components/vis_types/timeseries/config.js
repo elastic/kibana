@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
@@ -6,7 +6,7 @@ import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import IndexPattern from '../../index_pattern';
 
-export default React.createClass({
+class TimeseriesConfig extends Component {
   render() {
     const { fields, model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -186,6 +186,12 @@ export default React.createClass({
       </div>
     );
   }
-});
+}
 
+TimeseriesConfig.propTypes = {
+  fields   : PropTypes.object,
+  model    : PropTypes.object,
+  onChange : PropTypes.func
+};
 
+export default TimeseriesConfig;

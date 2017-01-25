@@ -129,10 +129,10 @@ class TimeseriesPanelConfig extends Component {
 }
 
 TimeseriesPanelConfig.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-  visData: PropTypes.object,
+  fields   : PropTypes.object,
+  model    : PropTypes.object,
+  onChange : PropTypes.func,
+  visData  : PropTypes.object,
 };
 
 export default TimeseriesPanelConfig;

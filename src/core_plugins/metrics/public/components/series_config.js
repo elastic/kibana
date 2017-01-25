@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
-import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
-import createTextHandler from '../../lib/create_text_handler';
-import YesNo from '../../yes_no';
-import IndexPattern from '../../index_pattern';
+import DataFormatPicker from './data_format_picker';
+import createSelectHandler from './lib/create_select_handler';
+import createTextHandler from './lib/create_text_handler';
+import YesNo from './yes_no';
+import IndexPattern from './index_pattern';
 
-export default React.createClass({
+class Config extends Component {
   render() {
     const { fields, model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -40,17 +40,25 @@ export default React.createClass({
               name="override_index_pattern"
               onChange={this.props.onChange}/>
             <IndexPattern
-              {...this.props}
+              onChange={this.props.onChange}
+              model={this.props.model}
+              fields={this.props.fields}
               prefix="series_"
               className="vis_editor__row_item vis_editor__row"
-              disabled={!model.override_index_pattern}
-              with-interval={true} />
+              disabled={!model.override_index_pattern} />
           </div>
         </div>
       </div>
     );
   }
-});
 
+}
 
+Config.propTypes = {
+  fields   : PropTypes.object,
+  model    : PropTypes.object,
+  onChange : PropTypes.func
+};
+
+export default Config;
 

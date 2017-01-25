@@ -71,8 +71,12 @@ class TimeseriesSeries extends Component {
           </div>
         );
       } else {
-        seriesBody = (<SeriesConfig {...this.props}
-          onChange={this.props.onChange}/>);
+        seriesBody = (
+          <SeriesConfig
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange} />
+        );
       }
       body = (
         <div className="vis_editor__series-row">

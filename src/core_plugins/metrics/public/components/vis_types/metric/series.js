@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from './config';
+import SeriesConfig from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import Tooltip from '../../tooltip';
@@ -71,8 +71,12 @@ class MetricSeries extends Component {
           </div>
         );
       } else {
-        seriesBody = (<SeriesConfig {...this.props}
-          onChange={this.props.onChange}/>);
+        seriesBody = (
+          <SeriesConfig
+            fields={this.props.fields}
+            model={this.props.model}
+            onChange={this.props.onChange} />
+        );
       }
       body = (
         <div className="vis_editor__series-row">
