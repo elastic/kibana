@@ -97,6 +97,21 @@ module.exports = {
     return body;
   },
 
+  serial_diff: (bucket, metrics, bucketSize) => {
+    checkMetric(bucket, ['type', 'field']);
+    const metric = _.find(metrics, { id: bucket.field });
+    const body = {
+      serial_diff: {
+        buckets_path: getBucketsPath(bucket.field, metrics),
+        gap_policy: 'skip', // seems sane
+        lag: 1
+      }
+    };
+    if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
+    if (bucket.lag) body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    return body;
+  },
+
   cumulative_sum: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
     const metric = _.find(metrics, { id: bucket.field });

@@ -171,6 +171,71 @@ describe('bucketTransform', () => {
     });
   });
 
+  describe('serial_diff', () => {
+    it('returns serial_diff agg with defaults', () => {
+      const metric = {
+        id: '2',
+        type: 'serial_diff',
+        field: '1',
+      };
+      const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
+      const fn = bucketTransform.serial_diff;
+      expect(fn(metric, metrics)).is.eql({
+        serial_diff: {
+          buckets_path: '1',
+          gap_policy: 'skip',
+          lag: 1
+        }
+      });
+    });
+
+    it('returns serial_diff agg with lag', () => {
+      const metric = {
+        id: '2',
+        type: 'serial_diff',
+        field: '1',
+        lag: 10
+      };
+      const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
+      const fn = bucketTransform.serial_diff;
+      expect(fn(metric, metrics)).is.eql({
+        serial_diff: {
+          buckets_path: '1',
+          gap_policy: 'skip',
+          lag: 10
+        }
+      });
+    });
+
+    it('returns serial_diff agg with gap_policy', () => {
+      const metric = {
+        id: '2',
+        type: 'serial_diff',
+        field: '1',
+        gap_policy: 'zero_fill'
+      };
+      const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
+      const fn = bucketTransform.serial_diff;
+      expect(fn(metric, metrics)).is.eql({
+        serial_diff: {
+          buckets_path: '1',
+          gap_policy: 'zero_fill',
+          lag: 1
+        }
+      });
+    });
+
+    it('throws error if type is missing', () => {
+      const run = () => bucketTransform.serial_diff({ id: 'test', field: 'cpu.pct' });
+      expect(run).to.throw(Error, 'Metric missing type');
+    });
+
+    it('throws error if field is missing', () => {
+      const run = () => bucketTransform.serial_diff({ id: 'test', type: 'serial_diff' });
+      expect(run).to.throw(Error, 'Metric missing field');
+    });
+  });
+
   describe('cumulative_sum', () => {
     it('returns cumulative_sum agg', () => {
       const metric = { id: '2', type: 'cumulative_sum', field: '1' };

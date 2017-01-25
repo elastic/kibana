@@ -22,7 +22,8 @@ const lookup = {
   'variance_bucket': 'Overall Variance',
   'sum_of_squares_bucket': 'Overall Sum of Sq.',
   'std_deviation_bucket': 'Overall Std. Deviation',
-  'series_agg': 'Series Agg'
+  'series_agg': 'Series Agg',
+  'serial_diff': 'Serial Difference'
 };
 
 const pipeline = [
@@ -37,7 +38,8 @@ const pipeline = [
   'variance_bucket',
   'sum_of_squares_bucket',
   'std_deviation_bucket',
-  'series_agg'
+  'series_agg',
+  'serial_diff'
 ];
 
 const byType = {

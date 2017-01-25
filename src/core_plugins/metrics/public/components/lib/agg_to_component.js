@@ -7,6 +7,7 @@ import CumulativeSum from '../aggs/cumulative_sum';
 import StdDeviation from '../aggs/std_deviation';
 import StdSibling from '../aggs/std_sibling';
 import SeriesAgg from '../aggs/series_agg';
+import SerialDiff from '../aggs/serial_diff';
 export default {
   count: StdAgg,
   avg: StdAgg,
@@ -30,7 +31,8 @@ export default {
   cumulative_sum: CumulativeSum,
   moving_average: MovingAverage,
   derivative: Derivative,
-  series_agg: SeriesAgg
+  series_agg: SeriesAgg,
+  serial_diff: SerialDiff
 };
 
 

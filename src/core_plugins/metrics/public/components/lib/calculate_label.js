@@ -10,7 +10,8 @@ const paths = [
   'max_bucket',
   'std_deviation_bucket',
   'variance_bucket',
-  'sum_of_squares_bucket'
+  'sum_of_squares_bucket',
+  'serial_diff'
 ];
 export default function calculateLabel(metric, metrics) {
   if (!metric) return 'Unknown';
