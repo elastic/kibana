@@ -36,6 +36,17 @@ export function elementAdd(type, pageId) {
   };
 }
 
+// Because it has to find the page(s)...grrr, the element is on.
+export function elementRemoveSlowly(elementId) {
+  return (dispatch, getState) => {
+    _.each(getState().persistent.pages, page => {
+      if (_.includes(page.elements, elementId)) {
+        dispatch(elementRemove(elementId, page.id));
+      }
+    });
+  };
+}
+
 export function elementLayerMove(elementId, pageId, movement) {
   return (dispatch, getState) => {
     const elementIdList = getState().persistent.pages[pageId].elements;

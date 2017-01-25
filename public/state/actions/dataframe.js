@@ -1,4 +1,4 @@
-import {argumentResolve} from './element';
+import {argumentResolve, elementRemoveSlowly} from './element';
 import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import {mutateWithId} from './lib/helpers';
@@ -44,6 +44,14 @@ export function dataframeResolve(id) {
   };
 };
 
+export function dataframeRemove(id) {
+  return (dispatch, getState) => {
+    const action = createAction('DATAFRAME_REMOVE');
+    dispatch(dataframeRemoveLinkedElements(id));
+    dispatch(action(id));
+  };
+}
+
 // TODO: This is really bad. It loops over every element, and every argument
 // to check if any of them use the dataframe in question, and if so, resolves the
 // argument. There has to be a better way to keep these things in sync.
@@ -56,6 +64,22 @@ function dataframeSync(id) {
         if (arg.type.name !== 'dataframe') return;
         if (element.args[arg.name] !== id) return;
         dispatch(argumentResolve(element.id, arg.name));
+      });
+    });
+  };
+}
+
+// TODO: Alow really bad, since elementRemoveSlowly also loops over every page.
+// We're basically looping over everything EVER. Kill me now.
+function dataframeRemoveLinkedElements(id) {
+  return (dispatch, getState) => {
+    const elements = getState().persistent.elements;
+    _.each(elements, element => {
+      const elementType = elementTypes.byName[element.type];
+      _.each(elementType.args, arg => {
+        if (arg.type.name !== 'dataframe') return;
+        if (element.args[arg.name] !== id) return;
+        dispatch(elementRemoveSlowly(element.id));
       });
     });
   };

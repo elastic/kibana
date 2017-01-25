@@ -20,6 +20,8 @@ frameSources.push(new FrameSource('csv', {
       rows: []
     };
 
+    if (!value || value.length === 0) return dataframe;
+
     let parsedArrays;
     try {
       parsedArrays = parse(value.csv);
@@ -28,6 +30,8 @@ frameSources.push(new FrameSource('csv', {
     }
 
     const keys = parsedArrays.shift();
+    if (!keys.length || !parsedArrays.length) return dataframe;
+
     dataframe.rows = _.map(parsedArrays, (values) => _.zipObject(keys, values));
     dataframe.columns = _.map(keys, (key) => {
       return {
@@ -44,17 +48,13 @@ frameSources.push(new FrameSource('csv', {
   // Simply use onChange={commit('someProperty')} as your default. Think of it as ng-model, sort of.
   // The data will go "up" using commit, and come back down on the value attribute.
   form: React.createClass({
-    getInitialState() {
-      return {csv: this.props.value.csv};
-    },
     typing(e) {
       const {commit} = this.props;
       const value = {csv: e.target.value};
-      this.setState(_.assign({}, this.state, value));
       commit(value);
     },
     render() {
-      const {csv} = this.state;
+      const {csv} = this.props.value;
       return (
         <div className="reframe--csv">
           <div className="reframe--csv--character-count">Length: {_.get(csv, 'length')}</div>
