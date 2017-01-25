@@ -35,7 +35,7 @@ const Editor = React.createClass({
           {_.map(args, (arg) => {
             const type = arg.type.name;
             const value = argValues[arg.name];
-            const name = arg.name;
+            const name = arg.displayName;
             const commit = (value) => {
               dispatch(argumentSet(id, name, value));
             };

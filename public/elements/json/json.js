@@ -6,21 +6,13 @@ import Arg from 'plugins/rework/arg_types/arg';
 import _ from 'lodash';
 
 elements.push(new Element('json', {
-  displayName: 'JSON',
-  args: [
-    new Arg('_style', {
-      type: 'style',
-      default: ''
-    })
-  ],
+  args: [],
   template: ({args}) => {
-    const style = Object.assign({}, args._style, {height: '100%', width: '100%'});
+    //const style = Object.assign({}, args._style, {height: '100%', width: '100%'});
     return (
-      <div style={style}>
-        <pre>
-          {JSON.stringify(args, null, ' ')}
-        </pre>
-      </div>
+      <pre>
+        {JSON.stringify(args, null, ' ')}
+      </pre>
     );
   }
 }));
