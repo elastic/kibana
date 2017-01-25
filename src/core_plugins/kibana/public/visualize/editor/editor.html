@@ -81,6 +81,9 @@
     <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
       <visualize
         vis="vis"
+        shared-item
+        shared-item-title="{{savedVis.lastSavedTitle}}"
+        shared-item-description="{{savedVis.description}}"
         render-counter
         ui-state="uiState"
         show-spy-panel="chrome.getVisible()"
