@@ -9,10 +9,16 @@ frameSources.push(new FrameSource('csv', {
   displayName: 'CSV',
   help: 'Import a CSV',
   defaults: {
-    csv:  '"model","segment","price"\n' +
-          '"crosstrek","SUV",21000\n' +
-          '"impreza","sedan",16000\n' +
-          '"outback","SUV",25000\n'
+    csv:'"make","model","year","price"\n' +
+        '"Subaru","Impreza",2015,17695\n' +
+        '"Subaru","Impreza",2016,18020\n' +
+        '"Subaru","Impreza",2017,18245\n' +
+        '"Subaru","Baja",2015,21995\n' +
+        '"Subaru","Baja",2016,21995\n' +
+        '"Subaru","Baja",2017,22345\n' +
+        '"Subaru","Outback",2015,23245\n' +
+        '"Subaru","Outback",2016,23470\n' +
+        '"Subaru","Outback",2017,24445\n'
   },
   toDataframe: function (value, filters) {
     const dataframe =   {
