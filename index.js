@@ -38,6 +38,8 @@ module.exports = function (kibana) {
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
         'plugins/rework/elements/table/table',
+        'plugins/rework/elements/timechart/timechart',
+
 
 
       ],
