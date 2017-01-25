@@ -266,7 +266,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     removeMetaField(name) {
       const fieldIndex = _.findIndex(this.fields, {
         name: name,
-        met: true
+        meta: true
       });
       this.fields.splice(fieldIndex, 1);
       this.save();

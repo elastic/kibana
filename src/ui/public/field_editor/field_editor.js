@@ -162,7 +162,15 @@ uiModules
       }
 
       function redirectAway() {
-        kbnUrl.changeToRoute(self.indexPattern, self.field.scripted ? 'scriptedFields' : 'indexedFields');
+        let type = 'indexedFields';
+        if (self.field.scripted) {
+          type = 'scriptedFields';
+        } else if(self.field.meta) {
+          type = 'metaFields';
+        } else {
+          type = 'indexedFields';
+        }
+        kbnUrl.changeToRoute(self.indexPattern, type);
       }
 
       function getFieldFormatType() {
