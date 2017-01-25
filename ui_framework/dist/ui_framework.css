@@ -533,17 +533,24 @@ body {
   line-height: 1.5;
   border: 2px solid; }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--info {
-  border-color: rgba(63, 168, 199, 0.25); }
+  border-color: rgba(63, 168, 199, 0.25);
+  /* 1 */ }
 
 .kuiInfoPanel--success {
-  border-color: rgba(65, 117, 5, 0.25); }
+  border-color: rgba(65, 117, 5, 0.25);
+  /* 1 */ }
 
 .kuiInfoPanel--warning {
-  border-color: rgba(255, 172, 21, 0.25); }
+  border-color: rgba(255, 172, 21, 0.25);
+  /* 1 */ }
 
 .kuiInfoPanel--error {
-  border-color: rgba(216, 96, 81, 0.25); }
+  border-color: rgba(216, 96, 81, 0.25);
+  /* 1 */ }
 
 /**
  * 1. Align with first line of title text if it wraps.
