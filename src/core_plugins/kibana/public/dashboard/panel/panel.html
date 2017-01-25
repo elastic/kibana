@@ -1,4 +1,11 @@
-<div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
+<div
+  class="panel panel-default"
+  ng-switch on="panel.type"
+  ng-if="savedObj || error"
+  shared-item
+  shared-item-title="{{savedObj.title}}"
+  shared-item-description="{{savedObj.description}}"
+  render-counter>
   <div class="panel-heading">
     <span class="panel-title" title="{{::savedObj.title}}">
       {{::savedObj.title}}
@@ -34,7 +41,6 @@
     search-source="savedObj.searchSource"
     show-spy-panel="!isFullScreenMode"
     ui-state="uiState"
-    render-counter
     class="panel-content">
   </visualize>
 
@@ -43,7 +49,6 @@
     search-source="savedObj.searchSource"
     sorting="panel.sort"
     columns="panel.columns"
-    render-counter
     class="panel-content"
     filter="filter">
   </doc-table>
