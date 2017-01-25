@@ -93,7 +93,7 @@ const DataframeDialog = React.createClass({
                 });
                 return (
                   <div key={elementId} className={wrapperClasses}>
-                    <ElementWrapper id={elementId} args={element.args}>
+                    <ElementWrapper id={elementId} pageId={pageId} args={element.args}>
                       <Positionable style={{zIndex: 2000 + i}}
                         position={position}
                         interact={fullscreen ? false : true}
