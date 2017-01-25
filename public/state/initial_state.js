@@ -18,8 +18,8 @@ export default () => {
         name: 'Untitled Workpad',
         id: uuid(),
         pages: ['page-0'], // In theory you could reference a page multiple times, but you know, don't.
-        height: 800,
-        width: 600,
+        width: 1280,
+        height: 720,
         page: 0,
       },
       pages: {
