@@ -35,13 +35,13 @@ const Editor = React.createClass({
           {_.map(args, (arg) => {
             const type = arg.type.name;
             const value = argValues[arg.name];
-            const name = arg.displayName;
+            const {name, displayName} = arg;
             const commit = (value) => {
               dispatch(argumentSet(id, name, value));
             };
             return (
               <div key={name} className="rework--editor-section">
-                <h4>{name}</h4>
+                <h4>{displayName}</h4>
                 <ArgumentForm type={type} commit={commit} value={value}></ArgumentForm>
               </div>
             );
