@@ -57,7 +57,9 @@ const DataframeDialog = React.createClass({
 
     const edit = (
       <div>
-        <h4>Edit Dataframe <small>or <a onClick={this.startCreating}>connect a new Dataframe</a></small></h4>
+        <h4>Edit Dataframe
+          <small> or <a onClick={this.startCreating}><i className="fa fa-plus-circle"></i> connect a new Dataframe</a></small>
+        </h4>
         <div className="rework--dataframe-dropdown-actions">
           {this.state.renaming ?
             (<Editable focus={true} onDone={this.finishRename} value={dataframe.name}></Editable>)
