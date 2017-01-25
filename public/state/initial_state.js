@@ -18,9 +18,14 @@ export default () => {
         name: 'Untitled Workpad',
         id: uuid(),
         pages: ['page-0'], // In theory you could reference a page multiple times, but you know, don't.
-        width: 1280,
+        width: 600,
         height: 720,
         page: 0,
+        time: { // persist time with workpad, this is easy to change
+          from: 'now-1y',
+          to: 'now',
+          mode: 'relative',
+        }
       },
       pages: {
         'page-0': {
