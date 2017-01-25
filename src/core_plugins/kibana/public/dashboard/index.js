@@ -274,6 +274,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.addVis = function (hit) {
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
+        notify.info(`Visualization ${hit.title} successfully added to your dashbard`);
       };
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
@@ -289,6 +290,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.addSearch = function (hit) {
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
+        notify.info(`Search ${hit.title} successfully added to your dashbard`);
       };
 
       // Setup configurable values for config directive, after objects are initialized
