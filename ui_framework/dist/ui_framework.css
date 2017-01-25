@@ -1403,5 +1403,27 @@ body {
   white-space: nowrap;
   /* 1 */ }
 
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  font-size: 22px; }
+
+/**
+ * 1. Override h2, h3, etc.
+ */
+.kuiSubTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  font-size: 18px; }
+
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
