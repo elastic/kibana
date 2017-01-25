@@ -122,7 +122,7 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true),
             filterable: isFilterable,
-            column: column
+            column
           }));
         });
 
