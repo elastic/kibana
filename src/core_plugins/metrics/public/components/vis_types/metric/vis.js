@@ -40,6 +40,7 @@ function MetricVisualization(props) {
     });
   const params = {
     metric: series[0],
+    reversed: props.reversed
   };
   if (series[1]) {
     params.secondary = series[1];
@@ -65,6 +66,7 @@ MetricVisualization.propTypes = {
   model           : PropTypes.object,
   onBrush         : PropTypes.func,
   onChange        : PropTypes.func,
+  reversed        : PropTypes.bool,
   visData         : PropTypes.object
 };
 

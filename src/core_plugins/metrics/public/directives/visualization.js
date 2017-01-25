@@ -12,7 +12,7 @@ app.directive('metricsVisualization', (timefilter) => {
   return {
     restrict: 'E',
     link: ($scope, $el, $attrs) => {
-      const addToState = ['model', 'visData', 'backgroundColor'];
+      const addToState = ['model', 'visData', 'reversed'];
       const Component = addScope(Visualization, $scope, addToState);
       const handleBrush = createBrushHandler($scope, timefilter);
       render(<Component onBrush={handleBrush} className="dashboard__visualization"/>, $el[0]);

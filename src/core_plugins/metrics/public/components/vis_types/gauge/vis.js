@@ -38,7 +38,8 @@ function GaugeVisualization(props) {
     });
   const params = {
     metric: series[0],
-    type: model.gauge_style || 'half'
+    type: model.gauge_style || 'half',
+    reversed: props.reversed
   };
 
   if (colors.text) {
@@ -70,6 +71,7 @@ GaugeVisualization.propTypes = {
   model           : PropTypes.object,
   onBrush         : PropTypes.func,
   onChange        : PropTypes.func,
+  reversed        : PropTypes.bool,
   visData         : PropTypes.object
 };
 

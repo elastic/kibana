@@ -30,6 +30,7 @@ function Visualization(props) {
   const component = types[model.type];
   if (component) {
     return React.createElement(component, {
+      reversed        : props.reversed,
       backgroundColor : props.backgroundColor,
       model           : props.model,
       onBrush         : props.onBrush,
@@ -50,6 +51,7 @@ Visualization.propTypes = {
   model           : PropTypes.object,
   onBrush         : PropTypes.func,
   onChange        : PropTypes.func,
+  reversed        : PropTypes.bool,
   visData         : PropTypes.object
 };
 

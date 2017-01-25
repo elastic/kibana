@@ -26,7 +26,7 @@ app.controller('MetricsVisController', (
   // We need to watch the app state for changes to the dark theme attribute.
   $scope.state = getAppState();
   $scope.$watch('state.options.darkTheme', newValue => {
-    $scope.backgroundColor = newValue ? '#272727' : '#FFF';
+    $scope.reversed = Boolean(newValue);
   });
 
   const queryFilter = Private(require('ui/filter_bar/query_filter'));

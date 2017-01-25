@@ -96,6 +96,7 @@ function TimeseriesVisualization(props) {
     legendPosition: model.legend_position || 'right',
     series,
     yaxes,
+    reversed: props.reversed,
     legend: Boolean(model.show_legend),
     onBrush: (ranges) => {
       if (props.onBrush) props.onBrush(ranges);
@@ -105,7 +106,7 @@ function TimeseriesVisualization(props) {
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
     style.backgroundColor = panelBackgroundColor;
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
+    params.reversed = color(panelBackgroundColor || backgroundColor).luminosity() < 0.45;
   }
   return (
     <div className="dashboard__visualization" style={style}>
@@ -121,6 +122,7 @@ TimeseriesVisualization.propTypes = {
   model           : PropTypes.object,
   onBrush         : PropTypes.func,
   onChange        : PropTypes.func,
+  reversed        : PropTypes.bool,
   visData         : PropTypes.object
 };
 

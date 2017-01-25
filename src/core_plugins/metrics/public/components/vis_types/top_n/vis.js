@@ -32,7 +32,10 @@ function TopNVisualization(props) {
       return item;
     });
 
-  const params = { series: series };
+  const params = {
+    series: series,
+    reversed: props.reversed
+  };
   const panelBackgroundColor = model.background_color || backgroundColor;
 
   if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
@@ -53,6 +56,7 @@ TopNVisualization.propTypes = {
   model           : PropTypes.object,
   onBrush         : PropTypes.func,
   onChange        : PropTypes.func,
+  reversed        : PropTypes.bool,
   visData         : PropTypes.object
 };
 
