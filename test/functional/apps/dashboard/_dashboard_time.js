@@ -10,7 +10,7 @@ const toTime = '2015-09-23 18:31:44.000';
 
 bdd.describe('dashboard time', function dashboardSaveWithTime() {
   bdd.before(async function () {
-    await PageObjects.dashboard.initTests();
+    return PageObjects.dashboard.initTests();
   });
 
   bdd.describe('dashboard without stored timed', async function () {
@@ -21,6 +21,8 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
     });
 
     bdd.it('Does not set the time picker on open', async function () {
+      await PageObjects.dashboard.clickDoneEditing();
+
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -34,11 +36,13 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
 
   bdd.describe('dashboard with stored timed', async function () {
     bdd.it('is saved with quick time', async function () {
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.header.setQuickTime('Today');
       await PageObjects.dashboard.saveDashboard(dashboardName, true);
     });
 
     bdd.it('sets quick time on open', async function () {
+      await PageObjects.dashboard.clickDoneEditing();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -48,11 +52,13 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
     });
 
     bdd.it('is saved with absolute time', async function () {
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.saveDashboard(dashboardName, true);
     });
 
     bdd.it('sets absolute time on open', async function () {
+      await PageObjects.dashboard.clickDoneEditing();
       await PageObjects.header.setQuickTime('Today');
 
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);

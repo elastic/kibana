@@ -7,6 +7,8 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
+import { DashboardStrings } from './dashboard_strings';
+import { DashboardViewMode } from './dashboard_view_mode';
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
@@ -14,6 +16,7 @@ import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardState } from './dashboard_state';
 
 const app = uiModules.get('app/dashboard', [
@@ -49,7 +52,7 @@ uiRoutes
     }
   });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, quickRanges, kbnUrl, Private) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, quickRanges, kbnUrl, confirmModal, Private) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
@@ -66,10 +69,18 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         docTitle.change(dash.title);
       }
 
+      // Brand new dashboards are defaulted to edit mode, existing ones default to view mode, except when trumped
+      // by a url param.
+      const defaultViewMode =
+        $route.current.params[DashboardConstants.VIEW_MODE_PARAM] ||
+        (dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
+      kbnUrl.removeParam(DashboardConstants.VIEW_MODE_PARAM);
+
       const dashboardState = new DashboardState(
         dash,
         timefilter,
         !getAppState.previouslyStored(),
+        defaultViewMode,
         quickRanges,
         AppState);
 
@@ -84,17 +95,15 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.model = { query: dashboardState.getQuery() };
 
       $scope.panels = dashboardState.getPanels();
-      $scope.topNavMenu = getTopNavConfig(kbnUrl);
+      $scope.options = dashboardState.getOptions();
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
-      $scope.expandedPanel = null;
-
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
+      $scope.expandedPanel = null;
+
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      $scope.getDashTitle = () => {
-        return dashboardState.dashboard.lastSavedTitle || `${dashboardState.dashboard.title} (unsaved)`;
-      };
+      $scope.getDashTitle = () => DashboardStrings.getDashboardTitle(dashboardState);
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
 
@@ -125,7 +134,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.showEditHelpText = () => {
-        return !dashboardState.getPanels().length;
+        return !dashboardState.getPanels().length && dashboardState.getViewMode() === DashboardViewMode.EDIT;
+      };
+
+      $scope.showViewHelpText = () => {
+        return !dashboardState.getPanels().length && dashboardState.getViewMode() === DashboardViewMode.VIEW;
       };
 
       /**
@@ -141,22 +154,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
-      $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson).then(function (id) {
-          $scope.kbnTopNav.close('save');
-          if (id) {
-            notify.info(`Saved Dashboard as "${dash.title}"`);
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change(
-                `${DashboardConstants.EXISTING_DASHBOARD_URL}`,
-                { id: dash.id });
-            } else {
-              docTitle.change(dash.lastSavedTitle);
-            }
-          }
-        }).catch(notify.fatal);
-      };
-
       $scope.$watchCollection(() => dashboardState.getOptions(), () => dashboardState.saveState());
       $scope.$watch(() => dashboardState.getOptions().darkTheme, updateTheme);
 
@@ -165,6 +162,24 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
+
+      $scope.save = function () {
+        // Make sure to save the latest query, even if 'enter' hasn't been hit.
+        dashboardState.updateFilters(queryFilter);
+        return dashboardState.saveDashboard(angular.toJson).then(function (id) {
+          $scope.kbnTopNav.close('save');
+          if (id) {
+            notify.info(`Saved Dashboard as "${dash.title}"`);
+            if (dash.id !== $routeParams.id) {
+              kbnUrl.change(
+                `${DashboardConstants.EXISTING_DASHBOARD_URL}?${DashboardConstants.VIEW_MODE_PARAM}=${DashboardViewMode.EDIT}`,
+                { id: dash.id });
+            } else {
+              docTitle.change(dash.lastSavedTitle);
+            }
+          }
+        }).catch(notify.fatal);
+      };
 
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
@@ -195,6 +210,45 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
       }
+
+      const changeViewMode = (newMode) => {
+        const isPageRefresh = newMode === dashboardState.getViewMode();
+        const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+
+        function doModeSwitch() {
+          $scope.dashboardViewMode = newMode;
+          $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+          dashboardState.switchViewMode(newMode);
+        }
+
+        function onCancel() {
+          dashboardState.reloadLastSavedFilters();
+          const refreshUrl = dashboardState.getReloadDashboardUrl();
+          dashboardState.resetState();
+          kbnUrl.change(refreshUrl.url, refreshUrl.options);
+          doModeSwitch();
+        }
+
+        if (leavingEditMode && dashboardState.getIsDirty()) {
+          confirmModal(
+            DashboardStrings.getUnsavedChangesWarningMessage(dashboardState),
+            {
+              onConfirm: () => $scope.save().then(doModeSwitch),
+              onCancel,
+              onClose: _.noop,
+              confirmButtonText: 'Save dashboard',
+              cancelButtonText: 'Lose changes',
+              title: `Save dashboard ${dash.title}`,
+              showClose: true
+            }
+          );
+        } else {
+          // No special handling, just make the switch.
+          doModeSwitch();
+        }
+      };
+
+      changeViewMode(dashboardState.getViewMode());
 
       $scope.$on('ready:vis', function () {
         if (pendingVisCount > 0) pendingVisCount--;
