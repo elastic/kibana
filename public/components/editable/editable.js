@@ -7,9 +7,14 @@ export default React.createClass({
     this.props.onChange(e.target.value);
   },
   handleKeyPress(e) {
+    const onDone = this.props.onDone || _.noop;
     if (e.key === 'Enter') {
       this.refs.editableInput.blur();
+      onDone();
     }
+  },
+  componentDidMount() {
+    if (this.props.focus) this.refs.editableInput.focus();
   },
   render() {
     const {value, onChange, className, style} = this.props;
