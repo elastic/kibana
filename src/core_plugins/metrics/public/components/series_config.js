@@ -6,7 +6,7 @@ import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
 import IndexPattern from './index_pattern';
 
-class Config extends Component {
+class SeriesConfig extends Component {
   render() {
     const { fields, model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -54,11 +54,11 @@ class Config extends Component {
 
 }
 
-Config.propTypes = {
+SeriesConfig.propTypes = {
   fields   : PropTypes.object,
   model    : PropTypes.object,
   onChange : PropTypes.func
 };
 
-export default Config;
+export default SeriesConfig;
 
