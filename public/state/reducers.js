@@ -57,6 +57,12 @@ function rootReducer(state = {}, action) {
     return result;
   };
 
+  const removeDataframe = (dataframeId) => {
+    const result = setPersistent('dataframes', _.omit(state.persistent.dataframes, dataframeId));
+    result.transient.dataframeCache = _.omit(state.transient.dataframeCache, dataframeId);
+    return result;
+  };
+
   const addElement = (element, pageId) => {
     const result = setPersistent('elements', {
       ...state.persistent.elements,
@@ -138,7 +144,7 @@ function rootReducer(state = {}, action) {
       return setElement(payload.id, 'left', payload.value);
 
     case 'DATAFRAME_REMOVE':
-      return setPersistent('dataframes', _.omit(state.persistent.dataframes, payload));
+      return removeDataframe(payload);
 
     case 'DATAFRAME_UNRESOLVED':
       return setPersistent('dataframes', {
