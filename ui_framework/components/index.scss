@@ -73,7 +73,7 @@ $verticalRhythm: 10px;
  */
 @mixin focus($color: $focusColor, $backgroundColor: $focusBackgroundColor) {
   z-index: 1; /* 1 */
-  outline: none; /* 2 */
+  outline: none !important; /* 2 */
   box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
 }
 
