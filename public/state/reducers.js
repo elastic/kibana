@@ -107,6 +107,8 @@ function rootReducer(state = {}, action) {
       return setWorkpad('width', payload);
     case 'WORKPAD_NAME':
       return setWorkpad('name', payload);
+    case 'WORKPAD_TIME':
+      return setWorkpad('time', payload);
     case 'WORKPAD_NEW':
       return newWorkpad();
     case 'WORKPAD_LOAD':
