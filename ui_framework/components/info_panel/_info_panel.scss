@@ -1,8 +1,56 @@
 .kuiInfoPanel {
-  padding: 20px;
+  padding: 14px 20px 18px;
   line-height: $lineHeight;
+  border: 2px solid;
+}
+
+.kuiInfoPanel--info {
+  border-color: rgba($infoColor, 0.25);
+}
+
+.kuiInfoPanel--success {
+  border-color: rgba($successColor, 0.25);
 }
 
 .kuiInfoPanel--warning {
-  background-color: #FFF6E4;
+  border-color: rgba($warningColor, 0.25);
 }
+
+.kuiInfoPanel--error {
+  border-color: rgba($errorColor, 0.25);
+}
+
+/**
+ * 1. Align with first line of title text if it wraps.
+ */
+.kuiInfoPanelHeader {
+  display: flex;
+  align-items: baseline; /* 1 */
+}
+
+  .kuiInfoPanelHeader__icon {
+    margin-right: 10px;
+    font-size: $fontSize;
+    line-height: $lineHeight;
+  }
+
+  .kuiInfoPanelHeader__title {
+    font-size: $fontSize;
+    line-height: $lineHeight;
+    font-weight: 700;
+  }
+
+.kuiInfoPanelBody {
+  $infoPanelVerticalRhythm: 8px;
+
+  margin-top: $infoPanelVerticalRhythm;
+
+  > * + * {
+    margin-top: $infoPanelVerticalRhythm;
+  }
+}
+
+  .kuiInfoPanelBody__message {
+    font-size: $fontSize;
+    line-height: $lineHeight;
+  }
