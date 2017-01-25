@@ -3,9 +3,11 @@ import _ from 'lodash';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 
+import TimelionInterval from 'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion_interval';
 import TimelionExpression from 'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion_expression';
 import fetch from 'isomorphic-fetch';
 import moment from 'moment';
+import './timelion.less';
 
 //import TimelionExpression from './timelion_expression';
 
@@ -31,7 +33,7 @@ frameSources.push(new FrameSource('timelion', {
       time: {
         from: timeFilters[0].value.from,
         to: timeFilters[0].value.to,
-        interval: 'auto',
+        interval: value.interval,
         timezone: 'America/Phoenix'
       }
     };
@@ -74,7 +76,7 @@ frameSources.push(new FrameSource('timelion', {
     getInitialState() {
       return {expression: this.props.value.expression, interval: this.props.value.interval};
     },
-    typing(prop) {
+    change(prop) {
       return (value) => {
         this.setState(_.assign({}, this.state, {[prop]: value}));
       };
@@ -85,10 +87,16 @@ frameSources.push(new FrameSource('timelion', {
     render() {
       const {expression, interval} = this.state;
       return (
-        <div className="reframe--timelion">
-          <form className="reframe--timelion form-inline" onSubmit={this.run}>
-            <TimelionExpression onChange={this.typing('expression')} expression={expression}></TimelionExpression>
-            <button className="btn" type="submit"><i className="fa fa-play"></i></button>
+        <div className="rework--timelion">
+          <form onSubmit={this.run}>
+
+            <label>Expression</label>
+            <div className="rework--timelion--input">
+              <TimelionExpression onChange={this.change('expression')} expression={expression}></TimelionExpression>
+              <TimelionInterval onChange={this.change('interval')} interval={interval}></TimelionInterval>
+              <button className="btn rework--timelion--submit" type="submit"><i className="fa fa-play"></i></button>
+
+            </div>
           </form>
         </div>
       );
