@@ -10,56 +10,58 @@ import './dataframe_dialog.less';
 
 const DataframeDialog = React.createClass({
   getInitialState() {
-    const {selected, dataframes} = this.props;
+    const {dataframes} = this.props;
+    const dataframeIds = _.keys(dataframes);
     return {
       creating: false,
       renaming: false,
-      selected: selected || _.keys(dataframes)[0]
+      dataframe: dataframes[dataframeIds[0]]
     };
   }, // This could be initialized with the defaults for the form right?
-  selectDataframe(value) {
-    this.setState(_.assign({}, this.state, {selected: value}));
+  selectDataframe(id) {
+    const {dataframes} = this.props;
+    this.setState(_.assign({}, this.state, {dataframe: dataframes[id]}));
   },
-  creating(isCreating) {
-    return () => {this.setState(_.assign({}, this.state, {creating: isCreating}));};
+  // Keep this function, accessing state here will cause pass-by-reference issues
+  commit(value) {
+    const {dispatch, dataframes} = this.props;
+    const dataframe = _.cloneDeep(this.state.dataframe);
+    const newFrame = Object.assign({}, dataframe, {value});
+    this.setState(_.assign({}, this.state, {dataframe: newFrame}));
+    dispatch(dataframeSet(newFrame));
   },
   startRename(name) {
     this.setState(_.assign({}, this.state, {renaming: true}));
   },
-  finishRename(value) {
+  finishRename(name) {
     const {dispatch, dataframes} = this.props;
-    const {selected} = this.state;
-    const dataframe = Object.assign({}, dataframes[selected], {name: value});
-    dispatch(dataframeSet(dataframe));
+    const {dataframe} = this.state;
+    const newFrame = Object.assign({}, dataframe, {name});
+    dispatch(dataframeSet(newFrame));
     this.setState(_.assign({}, this.state, {renaming: false}));
-
+  },
+  startCreating() {
+    this.setState(_.assign({}, this.state, {creating: true}));
   },
   connectDataframe(dataframe) {
     this.props.dispatch(dataframeAdd(dataframe));
-    this.setState(_.assign({}, this.state, {creating: false, selected: dataframe.id}));
+    this.setState(_.assign({}, this.state, {creating: false, dataframe: dataframe}));
   },
   removeDataframe(id) {
     return () => this.props.dispatch(dataframeRemove(id));
   },
-  commit(value) {
-    // So this is the place we need to dispatch the event to resolve the frame
-    const {dispatch, dataframes} = this.props;
-    const {selected} = this.state;
-    const dataframe = Object.assign({}, dataframes[selected], {value});
-    dispatch(dataframeSet(dataframe));
-  },
   render() {
     const {dataframes} = this.props;
-    const {selected, creating} = this.state;
-    const dataframe = dataframes[selected];
+    const {creating} = this.state;
+    const dataframe = _.cloneDeep(this.state.dataframe);
 
     const edit = (
       <div>
-        <h4>Edit Dataframe <small>or <a onClick={this.creating(true)}>connect a new Dataframe</a></small></h4>
+        <h4>Edit Dataframe <small>or <a onClick={this.startCreating}>connect a new Dataframe</a></small></h4>
         <div className="rework--dataframe-dropdown-actions">
           {this.state.renaming ?
             (<Editable focus={true} onDone={this.finishRename} value={dataframe.name}></Editable>)
-            : (<DataframeSelector dataframes={dataframes} onChange={this.selectDataframe} selected={selected}></DataframeSelector>)
+            : (<DataframeSelector dataframes={dataframes} onChange={this.selectDataframe} selected={dataframe.id}></DataframeSelector>)
           }
 
           <a onClick={this.startRename} className="fa fa-pencil"></a>
