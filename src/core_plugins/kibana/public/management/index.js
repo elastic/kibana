@@ -20,19 +20,25 @@ uiRoutes
   template: landingTemplate
 });
 
+uiRoutes
+.when('/management/:section', {
+  redirectTo: '/management'
+});
+
 require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
 });
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $route, $location, timefilter, buildNum, buildSha) {
+.directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha) {
   return {
     restrict: 'E',
     template: appTemplate,
     transclude: true,
     scope: {
-      sectionName: '@section'
+      sectionName: '@section',
+      omitPages: '@omitBreadcrumbPages'
     },
 
     link: function ($scope) {
