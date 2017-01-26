@@ -10,6 +10,9 @@ import ButtonExample
 import FormExample
   from '../../views/form/form_example.jsx';
 
+import HeaderBarExample
+  from '../../views/header_bar/header_bar_example.jsx';
+
 import IconExample
   from '../../views/icon/icon_example.jsx';
 
@@ -56,6 +59,9 @@ const components = [{
 }, {
   name: 'Form',
   component: FormExample,
+}, {
+  name: 'HeaderBar',
+  component: HeaderBarExample,
 }, {
   name: 'Icon',
   component: IconExample,
