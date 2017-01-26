@@ -11,7 +11,7 @@ import createTextHandler from '../lib/create_text_handler';
 class StandardDeviationAgg extends Component {
 
   render() {
-    const { model, panel, fields } = this.props;
+    const { model, series, panel, fields } = this.props;
 
     const modeOptions = [
       { label: 'Raw', value: 'raw' },
@@ -24,7 +24,7 @@ class StandardDeviationAgg extends Component {
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange, this.refs);
 
-    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
+    const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
     return (
       <AggRow
@@ -80,6 +80,7 @@ StandardDeviationAgg.propTypes = {
   onChange                  : PropTypes.func,
   onDelete                  : PropTypes.func,
   panel                     : PropTypes.object,
+  series                    : PropTypes.object,
   siblings                  : PropTypes.array,
 };
 

@@ -24,6 +24,7 @@ function Agg(props) {
         onChange={props.onChange}
         onDelete={props.onDelete}
         panel={props.panel}
+        series={props.series}
         siblings={props.siblings}/>
     </div>
   );
@@ -42,6 +43,7 @@ Agg.propTypes = {
   onSortableItemReadyToMove : PropTypes.func,
   onTouchStart              : PropTypes.func,
   panel                     : PropTypes.object,
+  series                    : PropTypes.object,
   siblings                  : PropTypes.array,
   sortData                  : PropTypes.string,
 };

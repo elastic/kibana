@@ -7,7 +7,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 
 function StandardAgg(props) {
-  const { model, panel, fields } = props;
+  const { model, panel, series, fields } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -16,7 +16,7 @@ function StandardAgg(props) {
     restrict = 'string';
   }
 
-  const indexPattern = model.override_index_pattern || model.series_index_pattern || panel.index_pattern;
+  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
   return (
     <AggRow
@@ -56,6 +56,7 @@ StandardAgg.propTypes = {
   onChange                  : PropTypes.func,
   onDelete                  : PropTypes.func,
   panel                     : PropTypes.object,
+  series                    : PropTypes.object,
   siblings                  : PropTypes.array,
 };
 

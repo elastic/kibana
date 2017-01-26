@@ -88,6 +88,7 @@ StandardSiblingAgg.propTypes = {
   onChange                  : PropTypes.func,
   onDelete                  : PropTypes.func,
   panel                     : PropTypes.object,
+  series                    : PropTypes.object,
   siblings                  : PropTypes.array,
 };
 

@@ -18,6 +18,7 @@ export default function createAggRowRender(props) {
         onChange={changeHandler}
         onDelete={handleDelete.bind(null, props, row)}
         panel={panel}
+        series={model}
         siblings={items}
         sortData={row.id} />
     );

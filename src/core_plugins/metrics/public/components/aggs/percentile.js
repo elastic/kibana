@@ -126,12 +126,12 @@ class PercentileAgg extends Component {
   }
 
   render() {
-    const { model, panel, fields } = this.props;
+    const { series, model, panel, fields } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const handleNumberChange = createNumberHandler(handleChange);
-    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
+    const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
     return (
       <AggRow
@@ -180,6 +180,7 @@ PercentileAgg.propTypes = {
   onChange                  : PropTypes.func,
   onDelete                  : PropTypes.func,
   panel                     : PropTypes.object,
+  series                    : PropTypes.object,
   siblings                  : PropTypes.array,
 };
 
