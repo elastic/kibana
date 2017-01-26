@@ -142,7 +142,9 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  $scope.searchSource.set('index', $scope.indexPattern);
+  $scope.searchSource
+  .set('index', $scope.indexPattern)
+  .highlightAll(true);
 
   if (savedSearch.id) {
     docTitle.change(savedSearch.title);
@@ -474,15 +476,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     kbnUrl.change('/discover');
   };
 
-  $scope.updateDataSource = function updateDataSource() {
+  $scope.updateDataSource = Promise.method(function updateDataSource() {
     $scope.searchSource
     .size($scope.opts.sampleSize)
     .sort(getSort($state.sort, $scope.indexPattern))
     .query(!$state.query ? null : $state.query)
     .set('filter', queryFilter.getFilters());
-
-    return $scope.searchSource.highlightRequest();
-  };
+  });
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {

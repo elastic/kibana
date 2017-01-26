@@ -95,6 +95,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'filter',
     'sort',
     'highlight',
+    'highlightAll',
     'aggs',
     'from',
     'size',
@@ -256,6 +257,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       case 'index':
       case 'type':
       case 'id':
+      case 'highlightAll':
         if (key && state[key] == null) {
           state[key] = val;
         }
