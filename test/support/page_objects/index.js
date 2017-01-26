@@ -26,21 +26,24 @@ class PageObjects {
   constructor() {
     this.isInitialized = false;
     this.remote = undefined;
+    this.pageObjects = [
+      common,
+      consolePage,
+      contextPage,
+      dashboardPage,
+      discoverPage,
+      headerPage,
+      settingsPage,
+      shieldPage,
+      visualizePage,
+      monitoringPage,
+    ];
   }
 
   init(remote) {
     this.isInitialized = true;
     this.remote = remote;
-    common.init(remote);
-    consolePage.init(remote);
-    contextPage.init(remote);
-    dashboardPage.init(remote);
-    discoverPage.init(remote);
-    headerPage.init(remote);
-    settingsPage.init(remote);
-    shieldPage.init(remote);
-    visualizePage.init(remote);
-    monitoringPage.init(remote);
+    this.pageObjects.map((pageObject) => pageObject.init(remote));
   }
 
   assertInitialized() {
