@@ -14,7 +14,8 @@ const module = uiModules.get('kibana');
  * @property {String=} title - If given, shows a title on the confirm modal. A title must be given if
  * showClose is true, for aesthetic reasons.
  * @property {Boolean=} showClose - If true, shows an [x] icon close button which by default is a noop
- * @property {function=} onClose - Custom close button to call if showClose is true
+ * @property {function=} onClose - Custom close button to call if showClose is true. If not supplied
+ * but showClose is true, the function defaults to onCancel.
  */
 
 module.factory('confirmModal', function ($rootScope, $compile) {
@@ -28,7 +29,6 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     const defaultOptions = {
       onCancel: noop,
       cancelButtonText: 'Cancel',
-      onClose: noop,
       showClose: false
     };
 
@@ -41,6 +41,11 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     }
 
     const options = Object.assign(defaultOptions, customOptions);
+
+    // Special handling for onClose - if no specific callback was supplied, default to the
+    // onCancel callback.
+    options.onClose = customOptions.onClose || options.onCancel;
+
     if (modalPopover) {
       throw new Error('You\'ve called confirmModal but there\'s already a modal open. ' +
         'You can only have one modal open at a time.');
