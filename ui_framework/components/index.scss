@@ -30,8 +30,9 @@ $titleFontSize: 18px;
 $buttonBorderRadius: 4px;
 
 // Colors
+$infoColor: #3fa8c7;
 $successColor: #417505;
-$warningColor: #ffac15;
+$warningColor: #ec9800;
 $errorColor: #D86051;
 $focusColor: #6EADC1;
 $focusDangerColor: #ff523c;
@@ -235,6 +236,7 @@ body {
 
 @import "bar/index";
 @import "button/index";
+@import "event/index";
 @import "form/index";
 @import "header_bar/index";
 @import "icon/index";
@@ -242,11 +244,13 @@ body {
 @import "link/index";
 @import "loading_items/index";
 @import "local_nav/index";
+@import "menu/index";
 @import "micro_button/index";
 @import "modal/index";
 @import "no_items/index";
 @import "panel/index";
 @import "prompt_for_items/index";
+@import "status_text/index";
 @import "table/index";
 @import "tabs/index";
 @import "tool_bar/index";

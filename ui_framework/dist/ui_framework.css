@@ -229,6 +229,37 @@ body {
 .kuiButtonGroup--united .kuiButton + .kuiButton {
   margin-left: 2px; }
 
+.kuiEvent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiEventSymbol {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-right: 8px; }
+
+.kuiEventBody {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%; }
+
+.kuiEventBody__message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #191E23; }
+
+.kuiEventBody__metadata {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #9fa3a7; }
+
 /**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
  *    ugly default appearance which we can't customize, so our best option is to give Firefox
@@ -486,7 +517,7 @@ body {
   color: #417505; }
 
 .kuiIcon--warning {
-  color: #ffac15; }
+  color: #ec9800; }
 
 .kuiIcon--error {
   color: #D86051; }
@@ -903,6 +934,17 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+.kuiMenu--contained {
+  border-top: 1px solid #E4E4E4;
+  border-bottom: 1px solid #E4E4E4; }
+  .kuiMenu--contained .kuiMenuItem {
+    padding: 6px; }
+
+.kuiMenuItem {
+  padding: 6px 0; }
+  .kuiMenuItem + .kuiMenuItem {
+    border-top: 1px solid #E4E4E4; }
+
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -1105,6 +1147,31 @@ body {
 
 .kuiPromptForItems__actions {
   margin-top: 10px; }
+
+.kuiStatusText {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline; }
+
+.kuiStatusText--info {
+  color: #3fa8c7; }
+
+.kuiStatusText--success {
+  color: #417505; }
+
+.kuiStatusText--warning {
+  color: #ec9800; }
+
+.kuiStatusText--error {
+  color: #D86051; }
+
+.kuiStatusText__icon {
+  margin-right: 6px; }
 
 /**
  * 1. Make seamless transition from ToolBar to Table header.

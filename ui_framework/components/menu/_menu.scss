@@ -1,0 +1,19 @@
+.kuiMenu {
+}
+
+.kuiMenu--contained {
+  border-top: $tableRowBorder;
+  border-bottom: $tableRowBorder;
+
+  .kuiMenuItem {
+    padding: 6px;
+  }
+}
+
+.kuiMenuItem {
+  padding: 6px 0;
+
+  & + & {
+    border-top: $tableRowBorder;
+  }
+}

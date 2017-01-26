@@ -7,6 +7,9 @@ import BarExample
 import ButtonExample
   from '../../views/button/button_example.jsx';
 
+import EventExample
+  from '../../views/event/event_example.jsx';
+
 import FormExample
   from '../../views/form/form_example.jsx';
 
@@ -34,6 +37,9 @@ import MicroButtonExample
 import PanelExample
   from '../../views/panel/panel_example.jsx';
 
+import StatusTextExample
+  from '../../views/status_text/status_text_example.jsx';
+
 import TableExample
   from '../../views/table/table_example.jsx';
 
@@ -56,6 +62,9 @@ const components = [{
 }, {
   name: 'Button',
   component: ButtonExample,
+}, {
+  name: 'Event',
+  component: EventExample,
 }, {
   name: 'Form',
   component: FormExample,
@@ -83,6 +92,9 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'StatusText',
+  component: StatusTextExample,
 }, {
   name: 'Table',
   component: TableExample,
