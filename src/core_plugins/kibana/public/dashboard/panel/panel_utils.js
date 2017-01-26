@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+import _ from 'lodash';
 
 export class PanelUtils {
   /**
@@ -32,5 +33,15 @@ export class PanelUtils {
     panel.size_y = data.size_y;
     panel.col = data.col;
     panel.row = data.row;
+  }
+
+  /**
+   * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
+   * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
+   * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
+   * @param panels {Array<Object>}
+   */
+  static findPanelByPanelIndex(panelIndex, panels) {
+    return _.find(panels, (panel) => panel.panelIndex === panelIndex);
   }
 }

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
-import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
 
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
@@ -17,6 +17,7 @@ import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { FilterUtils } from './filter_utils';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -180,6 +181,22 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
        */
       $scope.createChildUiState = function createChildUiState(path, uiState) {
         return $scope.uiState.createChild(path, uiState, true);
+      };
+
+      $scope.saveState = function saveState() {
+        $state.save();
+      };
+
+      $scope.onPanelRemoved = (panelIndex) => {
+        _.remove($scope.state.panels, function (panel) {
+          if (panel.panelIndex === panelIndex) {
+            $scope.uiState.removeChild(getPersistedStateId(panel));
+            return true;
+          } else {
+            return false;
+          }
+        });
+        $state.save();
       };
 
       $scope.brushEvent = brushEvent;

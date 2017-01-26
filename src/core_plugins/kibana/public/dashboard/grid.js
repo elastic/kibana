@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import Binder from 'ui/binder';
+import chrome from 'ui/chrome';
 import 'gridster';
 import uiModules from 'ui/modules';
 import { PanelUtils } from 'plugins/kibana/dashboard/panel/panel_utils';
@@ -11,7 +12,43 @@ const app = uiModules.get('app/dashboard');
 app.directive('dashboardGrid', function ($compile, Notifier) {
   return {
     restrict: 'E',
-    require: '^dashboardApp', // must inherit from the dashboardApp
+    scope: {
+      /**
+       * Used to create a child persisted state for the panel from parent state.
+       * @type {function} - Returns a {PersistedState} child uiState for this scope.
+       */
+      createChildUiState: '=',
+      /**
+       * Trigger after a panel has been removed from the grid.
+       */
+      onPanelRemoved: '=',
+      /**
+       * Contains information about this panel.
+       * @type {Array<PanelState>}
+       */
+      panels: '=',
+      /**
+       * Returns a click handler for a visualization.
+       * @type {function}
+       */
+      getVisClickHandler: '&',
+      /**
+       * Returns a brush event handler for a visualization.
+       * @type {function}
+       */
+      getVisBrushHandler: '&',
+      /**
+       * Call when changes should be propagated to the url and thus saved in state.
+       * @type {function}
+       */
+      saveState: '=',
+      /**
+       * Expand or collapse a panel, so it either takes up the whole screen or goes back to its
+       * natural size.
+       * @type {function}
+       */
+      toggleExpand: '=',
+    },
     link: function ($scope, $el) {
       const notify = new Notifier();
       const $container = $el;
@@ -19,9 +56,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
       const $window = $(window);
       const binder = new Binder($scope);
-
-      // appState from controller
-      const $state = $scope.state;
 
       let gridster; // defined in init()
 
@@ -34,7 +68,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
       // debounced layout function is safe to call as much as possible
       const safeLayout = _.debounce(layout, 200);
-
       /**
        * Mapping of panelIndex to the angular element in the grid.
        */
@@ -48,29 +81,13 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       }
 
       $scope.removePanel = (panelIndex) => {
-        _.remove($scope.state.panels, function (panel) {
-          if (panel.panelIndex === panelIndex) {
-            removePanelFromGrid(panel);
-            $scope.uiState.removeChild(getPersistedStateId(panel));
-            return true;
-          } else {
-            return false;
-          }
-        });
-        $scope.state.save();
+        const panel = PanelUtils.findPanelByPanelIndex(panelIndex, $scope.panels);
+        removePanelFromGrid(panel);
+        $scope.onPanelRemoved(panelIndex);
       };
 
-      /**
-       * Removes the panel with the given index from the $scope.state.panels array. Does not
-       * remove the ui element from gridster - that is triggered by a watcher that is
-       * triggered on changes made to $scope.state.panels.
-       * @param panelIndex {number}
-       */
-      $scope.getPanelByPanelIndex = (panelIndex) => {
-        return _.find($scope.state.panels, function (panel) {
-          return panel.panelIndex === panelIndex;
-        });
-      };
+      $scope.findPanelByPanelIndex = PanelUtils.findPanelByPanelIndex;
+      $scope.isFullScreenMode = !chrome.getVisible();
 
       function init() {
         $el.addClass('gridster');
@@ -98,10 +115,11 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           gridster.enable().enable_resize();
         });
 
-        $scope.$watchCollection('state.panels', function (panels) {
-          const currentPanels = gridster.$widgets.toArray().map(function (el) {
-            return $scope.getPanelByPanelIndex(el.panelIndex);
-          });
+        $scope.$watchCollection('panels', function (panels) {
+          const currentPanels = gridster.$widgets.toArray().map(
+            el => PanelUtils.findPanelByPanelIndex(el.panelIndex, $scope.panels)
+          );
+
           // panels that have been added
           const added = _.difference(panels, currentPanels);
           if (added.length) {
@@ -121,7 +139,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             added.forEach(addPanel);
           }
 
-          if (added.length) $scope.state.save();
+          if (added.length) {
+            $scope.saveState();
+          }
         });
 
         $scope.$on('$destroy', function () {
@@ -130,7 +150,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
           if (!gridster) return;
           gridster.$widgets.each(function (i, widget) {
-            const panel = $scope.getPanelByPanelIndex(widget.panelIndex);
+            const panel = PanelUtils.findPanelByPanelIndex(widget.panelIndex, $scope.panels);
             const panelElement = panelElementMapping[panel.panelIndex];
             // stop any animations
             panelElement.stop();
@@ -147,19 +167,18 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
         PanelUtils.initializeDefaults(panel);
-
         const panelHtml = `
             <li>
                 <dashboard-panel
                   remove="removePanel(${panel.panelIndex})"
-                  panel="getPanelByPanelIndex(${panel.panelIndex})"
-                  is-full-screen-mode="!chrome.getVisible()"
+                  panel="findPanelByPanelIndex(${panel.panelIndex}, panels)"
+                  is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
-                  get-vis-click-handler="filterBarClickHandler(state)"
-                  get-vis-brush-handler="brushEvent(state)"
-                  save-state="state.save()"
-                  toggle-expand="toggleExpandPanel(${panel.panelIndex})"
-                  create-child-ui-state="createChildUiState(path, uiState)">
+                  get-vis-click-handler="getVisClickHandler(state)"
+                  get-vis-brush-handler="getVisBrushHandler(state)"
+                  save-state="saveState"
+                  toggle-expand="toggleExpand(${panel.panelIndex})"
+                  create-child-ui-state="createChildUiState">
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;
@@ -178,12 +197,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       function readGridsterChangeHandler() {
         // ensure that our panel objects keep their size in sync
         gridster.$widgets.each(function (i, widget) {
-          const panel = $scope.getPanelByPanelIndex(widget.panelIndex);
+          const panel = PanelUtils.findPanelByPanelIndex(widget.panelIndex, $scope.panels);
           const panelElement = panelElementMapping[panel.panelIndex];
           PanelUtils.refreshSizeAndPosition(panel, panelElement);
         });
 
-        $scope.state.save();
+        $scope.saveState();
       }
 
       // calculate the position and sizing of the gridster el, and the columns within it
