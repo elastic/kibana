@@ -2,11 +2,10 @@
 }
 
 .kuiMenu--contained {
-  border-top: $tableRowBorder;
-  border-bottom: $tableRowBorder;
+  border: $tableRowBorder;
 
   .kuiMenuItem {
-    padding: 6px;
+    padding: 6px 10px;
   }
 }
 

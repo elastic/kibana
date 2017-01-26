@@ -935,10 +935,9 @@ body {
   font-weight: bold; }
 
 .kuiMenu--contained {
-  border-top: 1px solid #E4E4E4;
-  border-bottom: 1px solid #E4E4E4; }
+  border: 1px solid #E4E4E4; }
   .kuiMenu--contained .kuiMenuItem {
-    padding: 6px; }
+    padding: 6px 10px; }
 
 .kuiMenuItem {
   padding: 6px 0; }
@@ -1556,6 +1555,18 @@ body {
   /* 1 */
   color: #191E23;
   font-size: 18px; }
+
+/**
+ * 1. Override p.
+ */
+.kuiText {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  line-height: 1.5;
+  font-size: 14px; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }

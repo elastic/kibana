@@ -25,14 +25,17 @@ import InfoPanelExample
 import LinkExample
   from '../../views/link/link_example.jsx';
 
-import ModalExample
-  from '../../views/modal/modal_example.jsx';
-
 import LocalNavExample
   from '../../views/local_nav/local_nav_example.jsx';
 
+import MenuExample
+  from '../../views/menu/menu_example.jsx';
+
 import MicroButtonExample
   from '../../views/micro_button/micro_button_example.jsx';
+
+import ModalExample
+  from '../../views/modal/modal_example.jsx';
 
 import PanelExample
   from '../../views/panel/panel_example.jsx';
@@ -83,6 +86,9 @@ const components = [{
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+}, {
+  name: 'Menu',
+  component: MenuExample,
 }, {
   name: 'MicroButton',
   component: MicroButtonExample,
