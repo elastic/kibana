@@ -127,7 +127,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * @return {Promise}
      * @resolved {SavedObject}
      */
-    this.init = _.once(() => {
+    this.init = _.once((isDefered) => {
       // ensure that the type is defined
       if (!type) throw new Error('You must define a type name to use SavedObject objects.');
 
@@ -166,7 +166,13 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
           }
 
           // fetch the object from ES
-          return docSource.fetch().then(this.applyESResp);
+          if (isDefered) {
+            const defer = Promise.defer();
+            docSource._createRequest(defer);
+            return defer.promise.then(this.applyESResp);
+          } else {
+            return docSource.fetch().then(this.applyESResp);
+          }
         })
         .then(() => {
           return customInit.call(this);
