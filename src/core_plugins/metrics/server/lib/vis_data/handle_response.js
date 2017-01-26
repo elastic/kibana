@@ -98,7 +98,7 @@ export default panel => resp => {
       //handle without group buckets
     } else {
       const buckets = _.get(aggs, `${series.id}.timeseries.buckets`);
-      if (/_bucket$/.test(metric.type)) {
+      if (/_bucket$/.test(metric.type) && buckets) {
         if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') {
           function mapBucketByMode(mode) {
             return bucket => {
@@ -137,7 +137,7 @@ export default panel => resp => {
             ...decoration
           });
         }
-      } else if (metric.type === 'std_deviation' && metric.mode === 'band') {
+      } else if (metric.type === 'std_deviation' && metric.mode === 'band' && buckets) {
         const upper = buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
         const lower = buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
         result.push({
@@ -156,7 +156,7 @@ export default panel => resp => {
           points: { show: false },
           data: lower
         });
-      } else if (metric.type === 'percentile') {
+      } else if (metric.type === 'percentile' && buckets) {
         metric.percentiles.forEach(percentile => {
           const deco = {};
           const label = (series.label || calculateLabel(metric, series.metrics)) + ` (${percentile.value})`;
