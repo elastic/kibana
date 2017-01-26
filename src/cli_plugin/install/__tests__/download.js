@@ -6,7 +6,7 @@ import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import Logger from '../../lib/logger';
 import { UnsupportedProtocolError } from '../../lib/errors';
-import { download, _downloadSingle } from '../download';
+import { download, _downloadSingle, _getFilePath } from '../download';
 import { join } from 'path';
 
 describe('kibana cli', function () {
@@ -129,6 +129,22 @@ describe('kibana cli', function () {
           });
         });
 
+      });
+
+    });
+
+    describe('_getFilePath', function () {
+      it('should decode paths', function () {
+        expect(_getFilePath('Test%20folder/file.zip')).to.equal('Test folder/file.zip');
+      });
+
+      it('should remove the leading slash from windows paths', function () {
+        const platform = Object.getOwnPropertyDescriptor(process, 'platform');
+        Object.defineProperty(process, 'platform', { value: 'win32' });
+
+        expect(_getFilePath('/C:/foo/bar')).to.equal('C:/foo/bar');
+
+        Object.defineProperty(process, 'platform', platform);
       });
 
     });

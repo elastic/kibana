@@ -3,12 +3,21 @@ import downloadLocalFile from './downloaders/file';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { parse } from 'url';
 
+export function _getFilePath(filePath) {
+  const decodedPath = decodeURI(filePath);
+  const isWindows = /^win/.test(process.platform);
+  if (isWindows) {
+    return decodedPath.replace(/^\//, '');
+  }
+  return decodedPath;
+}
+
 export function _downloadSingle(settings, logger, sourceUrl) {
   const urlInfo = parse(sourceUrl);
   let downloadPromise;
 
   if (/^file/.test(urlInfo.protocol)) {
-    downloadPromise = downloadLocalFile(logger, decodeURI(urlInfo.path), settings.tempArchiveFile);
+    downloadPromise = downloadLocalFile(logger, _getFilePath(urlInfo.path), settings.tempArchiveFile);
   } else if (/^https?/.test(urlInfo.protocol)) {
     downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
   } else {
