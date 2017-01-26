@@ -26,7 +26,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -86,13 +86,17 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer) {
       });
 
       $scope.getContextAppHref = () => {
-        return `#/context/${$scope.indexPattern.id}/${$scope.row._type}/${$scope.row._id}?${
-          $httpParamSerializer({
-            _a: rison.encode({
-              columns: $scope.columns,
-            }),
-          })
-        }`;
+        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorType }}/{{ anchorId }}', {
+          anchorId: $scope.row._id,
+          anchorType: $scope.row._type,
+          indexPattern: $scope.indexPattern.id,
+        });
+        const hash = $httpParamSerializer({
+          _a: rison.encode({
+            columns: $scope.columns,
+          }),
+        });
+        return `${path}?${hash}`;
       };
 
       // create a tr element that lists the value for each *column*
