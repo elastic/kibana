@@ -5,7 +5,7 @@ import elements from 'plugins/rework/elements/elements';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import { Timeseries } from '@elastic/thor-visualizations';
 import '@elastic/thor-visualizations/css/main.css';
-import './timechart.less';
+import stylesheet from '!!raw!./timechart.less';
 
 import moment from 'moment';
 import icon from './icon.svg';
@@ -14,6 +14,7 @@ import Arg from 'plugins/rework/arg_types/arg';
 elements.push(new Element('timechart', {
   displayName: 'Time Chart',
   icon: icon,
+  stylesheet: stylesheet,
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
@@ -62,7 +63,7 @@ elements.push(new Element('timechart', {
     };
 
     return (
-      <div className="rework--timechart">
+      <div className="rework--timechart" id="foobu">
         <Timeseries {...props}></Timeseries>
       </div>
     );
