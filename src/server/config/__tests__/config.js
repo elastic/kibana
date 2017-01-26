@@ -216,15 +216,15 @@ describe('lib/config/config', function () {
       });
 
       it('should allow you to extend the schema at the top level', function () {
-        let newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
-        config.extendSchema('myTest', newSchema);
+        const newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema(newSchema, {}, 'myTest');
         expect(config.get('myTest.test')).to.be(true);
       });
 
       it('should allow you to extend the schema with a prefix', function () {
-        let newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
-        config.extendSchema('prefix.myTest', newSchema);
-        expect(config.get('prefix')).to.eql({ myTest: { test: true }});
+        const newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema(newSchema, {}, 'prefix.myTest');
+        expect(config.get('prefix')).to.eql({ myTest: { test: true } });
         expect(config.get('prefix.myTest')).to.eql({ test: true });
         expect(config.get('prefix.myTest.test')).to.be(true);
       });

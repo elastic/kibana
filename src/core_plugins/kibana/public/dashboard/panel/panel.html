@@ -1,0 +1,50 @@
+<div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
+  <div class="panel-heading">
+    <span class="panel-title" title="{{::savedObj.title}}">
+      {{::savedObj.title}}
+    </span>
+    <div class="btn-group">
+      <!--
+      Pulling out due to https://github.com/elastic/kibana/issues/9766.  Uncomment when fixed.
+      <a aria-label="Expand" ng-click="toggleExpand()">
+        <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
+      </a>
+      -->
+      <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
+        <i aria-hidden="true" class="fa fa-pencil"></i>
+      </a>
+      <a aria-label="Move" ng-show="!isExpanded && !isFullScreenMode" class="panel-move">
+        <i aria-hidden="true" class="fa fa-arrows"></i>
+      </a>
+      <a aria-label="Remove" ng-show="!isExpanded && !isFullScreenMode" ng-click="remove()">
+        <i aria-hidden="true" class="fa fa-times"></i>
+      </a>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div ng-if="error" class="load-error">
+    <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
+    <span ng-bind="error"></span>
+  </div>
+
+  <visualize
+    ng-switch-when="visualization"
+    vis="savedObj.vis"
+    search-source="savedObj.searchSource"
+    show-spy-panel="!isFullScreenMode"
+    ui-state="uiState"
+    render-counter
+    class="panel-content">
+  </visualize>
+
+  <doc-table
+    ng-switch-when="search"
+    search-source="savedObj.searchSource"
+    sorting="panel.sort"
+    columns="panel.columns"
+    render-counter
+    class="panel-content"
+    filter="filter">
+  </doc-table>
+</div>

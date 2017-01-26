@@ -3,8 +3,8 @@
   @include buttonOnStandoutBackground;
   @include selectOnStandoutBackground;
 
-  padding: 10px;
-  height: 50px;
+  padding: $toolBarPadding;
+  height: $toolBarHeight;
   background-color: $standoutBackgroundColor;
 }
 

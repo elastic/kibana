@@ -12,9 +12,15 @@ export default class DashboardPage {
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
+  gotoDashboardLandingPage() {
+    return this.findTimeout
+      .findByCssSelector('a[href="#/dashboard"]')
+      .click();
+  }
+
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('dashboardNewButton')
-    .click();
+    return PageObjects.common.findTestSubject('newDashboardLink')
+      .click();
   }
 
   clickAddVisualization() {
@@ -121,15 +127,13 @@ export default class DashboardPage {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
-    var self = this;
-    return PageObjects.common.findTestSubject('dashboardOpenButton')
-    .click()
+    const self = this;
+    return this.gotoDashboardLandingPage()
     .then(function filterDashboard() {
       PageObjects.common.debug('Load Saved Dashboard button clicked');
-      return self.remote
-      .findByCssSelector('input[name="filter"]')
-      .click()
-      .type(dashName.replace('-',' '));
+      return PageObjects.common.findTestSubject('searchFilter')
+        .click()
+        .type(dashName.replace('-',' '));
     })
     .then(() => {
       return PageObjects.header.isGlobalLoadingIndicatorHidden();

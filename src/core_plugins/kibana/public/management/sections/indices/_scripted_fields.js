@@ -9,7 +9,7 @@ import { getSupportedScriptingLangs } from 'ui/scripting_langs';
 import { scriptedFields as docLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
-.directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
+.directive('scriptedFields', function (kbnUrl, Notifier, $filter, confirmModal) {
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
 
@@ -100,7 +100,11 @@ uiModules.get('apps/management')
       };
 
       $scope.remove = function (field) {
-        $scope.indexPattern.removeScriptedField(field.name);
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
+        };
+        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
       };
 
       $scope.getDeprecatedLanguagesInUse = function () {

@@ -1,6 +1,10 @@
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
+ */
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -112,10 +116,10 @@ body {
   .kuiButton:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #6EADC1 !important;
+    outline: none !important;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
 
 .kuiButton--iconText .kuiButton__icon:first-child {
   margin-right: 4px; }
@@ -170,18 +174,20 @@ body {
   .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #ff523c !important;
+    outline: none !important;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */
     color: #FFFFFF !important;
     /* 1 */ }
 
 /**
  * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #3CAED2;
+  color: #3CAED2 !important;
+  /* 2 */
   background-color: transparent; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
     color: #006E8A !important;
@@ -268,10 +274,10 @@ body {
   .kuiCheckBox:focus {
     z-index: 1;
     /* 1 */
-    outline: 1px solid #6EADC1 !important;
+    outline: none !important;
     /* 2 */
-    outline-offset: 2px !important;
-    /* 2 */ }
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
     cursor: not-allowed; }
@@ -288,9 +294,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
@@ -317,6 +323,21 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+/**
+ * 1. Have the same spatial footprint as the regular input.
+ */
+.kuiStaticInput {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  border: 1px solid transparent;
+  /* 1 */ }
+
 .kuiTextArea {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -325,9 +346,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
@@ -346,6 +367,9 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+.kuiTextArea--nonResizable {
+  resize: none; }
+
 .kuiTextInput {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -354,9 +378,9 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: #191E23;
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
@@ -930,7 +954,9 @@ body {
   line-height: 1.5; }
 
 .kuiPanel {
-  border: 2px solid #E4E4E4; }
+  border-left: 2px solid #E4E4E4;
+  border-right: 2px solid #E4E4E4;
+  border-bottom: 2px solid #E4E4E4; }
 
 .kuiPanel--centered {
   display: -webkit-box;
@@ -945,6 +971,75 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
+
+.kuiPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px;
+  height: 50px;
+  background-color: #E4E4E4; }
+  .kuiPanelHeader .kuiButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiPanelHeader .kuiButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  .kuiPanelHeader .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF; }
+    .kuiPanelHeader .kuiButton--basic:disabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3; }
+  .kuiPanelHeader .kuiSelect {
+    border-color: #ffffff; }
+    .kuiPanelHeader .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+
+.kuiPanelHeader__title {
+  font-size: 18px;
+  line-height: 1.5; }
+
+.kuiPanelBody {
+  padding: 10px; }
+
+.kuiPromptForItems {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 30px; }
+
+.kuiPromptForItems__message {
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
+
+.kuiPromptForItems__actions {
+  margin-top: 10px; }
 
 /**
  * 1. Make seamless transition from ToolBar to Table header.
@@ -1100,6 +1195,20 @@ body {
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
+  .kuiToolBar .kuiButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiToolBar .kuiButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
   .kuiToolBar .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF; }
@@ -1293,3 +1402,28 @@ body {
   color: #5A5A5A;
   white-space: nowrap;
   /* 1 */ }
+
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  font-size: 22px; }
+
+/**
+ * 1. Override h2, h3, etc.
+ */
+.kuiSubTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  font-size: 18px; }
+
+.kuiVerticalRhythm + .kuiVerticalRhythm {
+  margin-top: 10px; }

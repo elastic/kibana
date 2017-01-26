@@ -8,63 +8,59 @@ import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import errors from 'ui/errors';
 import SimpleEmitter from 'ui/utils/simple_emitter';
-import EventsProvider from 'ui/events';
 
-export default function (Private) {
-  let Events = Private(EventsProvider);
-
-  function validateParent(parent, path) {
-    if (path.length <= 0) {
-      throw new errors.PersistedStateError('PersistedState child objects must contain a path');
-    }
-
-    if (parent instanceof PersistedState) return;
-    throw new errors.PersistedStateError('Parent object must be an instance of PersistedState');
+function prepSetParams(key, value, path) {
+  // key must be the value, set the entire state using it
+  if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
+    // setting entire tree, swap the key and value to write to the state
+    value = key;
+    key = undefined;
   }
 
-  function validateValue(value) {
-    let msg = 'State value must be a plain object';
-    if (!value) return;
-    if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
-  }
+  // ensure the value being passed in is never mutated
+  return {
+    value: _.cloneDeep(value),
+    key: key
+  };
+}
 
-  function prepSetParams(key, value, path) {
-    // key must be the value, set the entire state using it
-    if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
-      // setting entire tree, swap the key and value to write to the state
-      value = key;
-      key = undefined;
-    }
+export class PersistedState {
 
-    // ensure the value being passed in is never mutated
-    return {
-      value: _.cloneDeep(value),
-      key: key
-    };
-  }
+  /**
+   *
+   * @param value
+   * @param path
+   * @param parent
+   * @param silent
+   * @param EmitterClass {SimpleEmitter} - a SimpleEmitter class that this class will extend. Can be used to
+   * inherit a custom event emitter. For example, the EventEmitter is an "angular-ized" version
+   * for angular components which automatically triggers a digest loop for every registered
+   * handler.  TODO: Get rid of the need for EventEmitter by wrapping handlers that require it
+   * in a special function that will handler triggering the digest loop.
+   */
+  constructor(value, path, parent, silent, EmitterClass = SimpleEmitter) {
+    EmitterClass.call(this);
 
-  function parentDelegationMixin(from, to) {
-    _.forOwn(from.prototype, function (method, methodName) {
-      to.prototype[methodName] = function () {
-        return from.prototype[methodName].apply(this._parent || this, arguments);
-      };
-    });
-  }
-
-  _.class(PersistedState).inherits(Events);
-  parentDelegationMixin(SimpleEmitter, PersistedState);
-  parentDelegationMixin(Events, PersistedState);
-
-  function PersistedState(value, path, parent, silent) {
-    PersistedState.Super.call(this);
-
+    this._EmitterClass = EmitterClass;
     this._path = this._setPath(path);
     this._parent = parent || false;
 
+    _.forOwn(EmitterClass.prototype, (method, methodName) => {
+      this[methodName] = function () {
+        return EmitterClass.prototype[methodName].apply(this._parent || this, arguments);
+      };
+    });
+
+    // Some validations
     if (this._parent) {
-      validateParent(this._parent, this._path);
-    } else if (!this._path.length) {
-      validateValue(value);
+      if (this._path.length <= 0) {
+        throw new errors.PersistedStateError('PersistedState child objects must contain a path');
+      }
+      if (!(this._parent instanceof PersistedState)) {
+        throw new errors.PersistedStateError('Parent object must be an instance of PersistedState');
+      }
+    } else if (!this._path.length && value && !_.isPlainObject(value)) {
+      throw new errors.PersistedStateError('State value must be a plain object');
     }
 
     value = value || this._getDefault();
@@ -74,26 +70,26 @@ export default function (Private) {
     this._initialized = true; // used to track state changes
   }
 
-  PersistedState.prototype.get = function (key, def) {
+  get(key, def) {
     return _.cloneDeep(this._get(key, def));
-  };
+  }
 
-  PersistedState.prototype.set = function (key, value) {
-    let params = prepSetParams(key, value, this._path);
-    let val = this._set(params.key, params.value);
+  set(key, value) {
+    const params = prepSetParams(key, value, this._path);
+    const val = this._set(params.key, params.value);
     this.emit('set');
     return val;
-  };
+  }
 
-  PersistedState.prototype.setSilent = function (key, value) {
-    let params = prepSetParams(key, value, this._path);
+  setSilent(key, value) {
+    const params = prepSetParams(key, value, this._path);
     return this._set(params.key, params.value, true);
-  };
+  }
 
-  PersistedState.prototype.reset = function (path) {
-    let keyPath = this._getIndex(path);
-    let origValue = _.get(this._defaultState, keyPath);
-    let currentValue = _.get(this._mergedState, keyPath);
+  reset(path) {
+    const keyPath = this._getIndex(path);
+    const origValue = _.get(this._defaultState, keyPath);
+    const currentValue = _.get(this._mergedState, keyPath);
 
     if (_.isUndefined(origValue)) {
       this._cleanPath(path, this._mergedState);
@@ -106,51 +102,58 @@ export default function (Private) {
     this._cleanPath(path, this._defaultChildState);
 
     if (!_.isEqual(currentValue, origValue)) this.emit('change');
-  };
+  }
 
-  PersistedState.prototype.createChild = function (path, value, silent) {
+  /**
+   *
+   * @param path {String}
+   * @param value {Object} The uiState to store.
+   * @param silent {Boolean}
+   * @returns {PersistedState}
+   */
+  createChild(path, value, silent) {
     this._setChild(this._getIndex(path), value, this._parent || this);
-    return new PersistedState(value, this._getIndex(path), this._parent || this, silent);
-  };
+    return new PersistedState(value, this._getIndex(path), this._parent || this, silent, this._EmitterClass);
+  }
 
-  PersistedState.prototype.removeChild = function (path) {
-    let origValue = _.get(this._defaultState, this._getIndex(path));
+  removeChild(path) {
+    const origValue = _.get(this._defaultState, this._getIndex(path));
 
     if (_.isUndefined(origValue)) {
       this.reset(path);
     } else {
       this.set(path, origValue);
     }
-  };
+  }
 
-  PersistedState.prototype.getChanges = function () {
+  getChanges() {
     return _.cloneDeep(this._changedState);
-  };
+  }
 
-  PersistedState.prototype.toJSON = function () {
+  toJSON() {
     return this.get();
-  };
+  }
 
-  PersistedState.prototype.toString = function () {
+  toString() {
     return JSON.stringify(this.toJSON());
-  };
+  }
 
-  PersistedState.prototype.fromString = function (input) {
+  fromString(input) {
     return this.set(JSON.parse(input));
-  };
+  }
 
-  PersistedState.prototype._getIndex = function (key) {
+  _getIndex(key) {
     if (_.isUndefined(key)) return this._path;
     return (this._path || []).concat(toPath(key));
-  };
+  }
 
-  PersistedState.prototype._getPartialIndex = function (key) {
-    let keyPath = this._getIndex(key);
+  _getPartialIndex(key) {
+    const keyPath = this._getIndex(key);
     return keyPath.slice(this._path.length);
-  };
+  }
 
-  PersistedState.prototype._cleanPath = function (path, stateTree) {
-    let partialPath = this._getPartialIndex(path);
+  _cleanPath(path, stateTree) {
+    const partialPath = this._getPartialIndex(path);
     let remove = true;
 
     // recursively delete value tree, when no other keys exist
@@ -165,31 +168,31 @@ export default function (Private) {
       if (remove) delete stateVal[lastKey];
       if (Object.keys(stateVal).length > 0) remove = false;
     }
-  };
+  }
 
-  PersistedState.prototype._getDefault = function () {
-    let def = (this._hasPath()) ? undefined : {};
+  _getDefault() {
+    const def = (this._hasPath()) ? undefined : {};
     return (this._parent ? this.get() : def);
-  };
+  }
 
-  PersistedState.prototype._setPath = function (path) {
-    let isString = _.isString(path);
-    let isArray = _.isArray(path);
+  _setPath(path) {
+    const isString = _.isString(path);
+    const isArray = _.isArray(path);
 
     if (!isString && !isArray) return [];
     return (isString) ? [this._getIndex(path)] : path;
-  };
+  }
 
-  PersistedState.prototype._setChild = function (path, value, parent) {
+  _setChild(path, value, parent) {
     parent._defaultChildState = parent._defaultChildState || {};
     _.set(parent._defaultChildState, path, value);
-  };
+  }
 
-  PersistedState.prototype._hasPath = function () {
+  _hasPath() {
     return this._path.length > 0;
-  };
+  }
 
-  PersistedState.prototype._get = function (key, def) {
+  _get(key, def) {
     // delegate to parent instance
     if (this._parent) return this._parent._get(this._getIndex(key), def);
 
@@ -199,10 +202,10 @@ export default function (Private) {
     }
 
     return _.get(this._mergedState, this._getIndex(key), def);
-  };
+  }
 
-  PersistedState.prototype._set = function (key, value, silent, initialChildState) {
-    let self = this;
+  _set(key, value, silent, initialChildState) {
+    const self = this;
     let stateChanged = false;
     let initialState = !this._initialized;
     let keyPath = this._getIndex(key);
@@ -272,7 +275,5 @@ export default function (Private) {
     if (!silent && stateChanged) this.emit('change');
 
     return this;
-  };
-
-  return PersistedState;
-};
+  }
+}
