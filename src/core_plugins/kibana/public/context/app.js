@@ -32,6 +32,7 @@ module.directive('contextApp', function ContextApp() {
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
+      discoverUrl: '=',
     },
     template: contextAppTemplate,
   };
@@ -41,7 +42,7 @@ function ContextAppController($scope, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
-  this.state = createInitialState();
+  this.state = createInitialState(this.discoverUrl);
 
   this.actions = _.mapValues(Object.assign(
     {},
@@ -76,7 +77,7 @@ function ContextAppController($scope, Private) {
   );
 }
 
-function createInitialState() {
+function createInitialState(discoverUrl) {
   return {
     queryParameters: createInitialQueryParametersState(),
     rows: {
@@ -89,6 +90,11 @@ function createInitialState() {
       anchor: 'uninitialized',
       predecessors: 'uninitialized',
       successors: 'uninitialized',
+    },
+    navigation: {
+      discover: {
+        url: discoverUrl,
+      },
     },
   };
 }

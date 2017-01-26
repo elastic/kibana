@@ -16,6 +16,7 @@ uiRoutes
     `<context-app
       anchor-uid="contextAppRoute.anchorUid"
       columns="contextAppRoute.state.columns"
+      discover-url="contextAppRoute.discoverUrl"
       index-pattern="contextAppRoute.indexPattern"
       predecessor-count="contextAppRoute.state.predecessorCount"
       successor-count="contextAppRoute.state.successorCount"
@@ -25,7 +26,14 @@ uiRoutes
 });
 
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern) {
+function ContextAppRouteController(
+  $routeParams,
+  $scope,
+  AppState,
+  chrome,
+  config,
+  indexPattern,
+) {
   this.state = new AppState(createDefaultAppState(config));
   this.state.save(true);
 
@@ -36,6 +44,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
   ], () => this.state.save(true));
   this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
   this.indexPattern = indexPattern;
+  this.discoverUrl = chrome.getNavLinkById('kibana:discover').lastSubUrl;
 }
 
 function createDefaultAppState(config) {
