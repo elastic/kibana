@@ -8,11 +8,12 @@ import '@elastic/thor-visualizations/css/main.css';
 import './timechart.less';
 
 import moment from 'moment';
-
+import icon from './icon.svg';
 import Arg from 'plugins/rework/arg_types/arg';
 
 elements.push(new Element('timechart', {
   displayName: 'Time Chart',
+  icon: icon,
   args: [
     new Arg('dataframe', {
       type: 'dataframe',

@@ -3,11 +3,12 @@ import _ from 'lodash';
 import Element from 'plugins/rework/elements/element';
 import elements from 'plugins/rework/elements/elements';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
-
+import icon from './icon.svg';
 import Arg from 'plugins/rework/arg_types/arg';
 
 elements.push(new Element('table', {
   displayName: 'Table',
+  icon: icon,
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
