@@ -179,8 +179,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;
-        // Put the panelIndex on both the outer jQuery element, and the inner widget.
-        panelElement.panelIndex = panelElement[0].panelIndex = panel.panelIndex;
+        // Store the panelIndex on the widget so it can be used to retrieve the panelElement
+        // from the mapping.
+        panelElement[0].panelIndex = panel.panelIndex;
 
         // tell gridster to use the widget
         gridster.add_widget(panelElement, panel.size_x, panel.size_y, panel.col, panel.row);
