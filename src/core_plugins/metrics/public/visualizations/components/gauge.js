@@ -178,7 +178,7 @@ class Gauge extends Component {
 
 }
 
-Gauge.propTypes = {
+Gauge.defaultProps = {
   type      : 'half',
   innerLine : 2,
   gaugeLine : 10
