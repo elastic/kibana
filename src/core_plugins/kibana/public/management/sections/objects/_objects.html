@@ -1,12 +1,14 @@
 <kbn-management-app section="kibana" class="kuiView">
   <kbn-management-objects class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
-    <div class="kuiViewContentItem kuiSubHeader">
-      <h1 class="kuiTitle">
-        Edit Saved Objects
-      </h1>
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit Saved Objects
+        </h1>
+      </div>
 
-      <div>
+      <div class="kuiBarSection">
         <button
           class="kuiButton kuiButton--basic kuiButton--iconText"
           ng-click="exportAll()"
@@ -78,8 +80,7 @@
           <!-- Bulk delete button -->
           <button
             class="kuiButton kuiButton--danger kuiButton--iconText"
-            confirm-click="bulkDelete()"
-            confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
+            ng-click="bulkDelete()"
             aria-label="Delete selected objects"
             ng-disabled="selectedItems.length == 0"
           >

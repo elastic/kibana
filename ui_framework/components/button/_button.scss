@@ -73,7 +73,7 @@
 
   &:hover:enabled,
   &:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important; /* 1 */
     background-color: #006E8A;
   }
 
@@ -86,13 +86,16 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051;
 
   &:hover:enabled,
   &:active:enabled {
-    color: #FFFFFF;
+    color: #FFFFFF !important; /* 1 */
     background-color: #A52E1F;
   }
 
@@ -100,23 +103,27 @@
     background-color: #efc0ba;
   }
 
-  /**
-   * 1. Override Bootstrap.
-   */
   &:focus {
-    @include focus(#ff523c);
+    @include focus($focusDangerColor);
     color: #FFFFFF !important; /* 1 */
   }
 }
 
-@mixin buttonOnReverseBackground {
-  .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF;
+/**
+ * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
+ */
+.kuiButton--hollow {
+  color: $linkColor !important; /* 2 */
+  background-color: transparent;
 
-    &:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3;
-    }
+  &:hover:enabled,
+  &:active:enabled {
+    color: $linkHoverColor !important; /* 1 */
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: #dddddd !important; /* 1 */
   }
 }

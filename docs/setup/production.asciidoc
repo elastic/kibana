@@ -4,7 +4,6 @@
 * <<configuring-kibana-shield, Using Kibana with X-Pack>>
 * <<enabling-ssl, Enabling SSL>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
-* <<kibana-tribe, Kibana and Tribe Nodes>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -43,14 +42,15 @@ to work with X-Pack, see {xpack-ref}kibana.html.
 Kibana supports SSL encryption for both client requests and the requests the Kibana server
 sends to Elasticsearch.
 
-To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file` and
-`ssl_cert_file` properties in `kibana.yml`:
+To encrypt communications between the browser and the Kibana server, you configure the `server.ssl.enabled`,
+`server.ssl.certificate` and `server.ssl.key` properties in `kibana.yml`:
 
 [source,text]
 ----
 # SSL for outgoing requests from the Kibana Server (PEM formatted)
+server.ssl.enabled: true
 server.ssl.key: /path/to/your/server.key
-server.ssl.cert: /path/to/your/server.crt
+server.ssl.certificate: /path/to/your/server.crt
 ----
 
 If you are using X-Pack Security or a proxy that provides an HTTPS endpoint for Elasticsearch,
@@ -62,17 +62,18 @@ protocol when you configure the Elasticsearch URL in `kibana.yml`:
 
 [source,text]
 ----
-elasticsearch: "https://<your_elasticsearch_host>.com:9200"
+elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
 ----
 
-If you are using a self-signed certificate for Elasticsearch, set the `ca` property in
-`kibana.yml` to specify the location of the PEM file. Setting the `ca` property lets you  leave the `verify_ssl` option enabled.
+If you are using a self-signed certificate for Elasticsearch, set the `certificateAuthorities` property in
+`kibana.yml` to specify the location of the PEM file. Setting the `certificateAuthorities` property lets you use the
+default `verificationMode` option of `full`.
 
 [source,text]
 ----
 # If you need to provide a CA certificate for your Elasticsearch instance, put
 # the path of the pem file here.
-ca: /path/to/your/ca/cacert.pem
+elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/ca/cacert.pem" ]
 ----
 
 [float]
@@ -112,10 +113,3 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://localhost:9200"
 --------
-
-[float]
-[[kibana-tribe]]
-=== Kibana and Tribe Nodes
-
-Kibana 5.0 does not support tribe nodes. We are working on a solution that
-addresses this limitation.

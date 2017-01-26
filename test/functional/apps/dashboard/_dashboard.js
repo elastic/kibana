@@ -2,7 +2,7 @@
 import expect from 'expect.js';
 import {
   DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
-} from '../../../../src/core_plugins/kibana/public/dashboard/components/panel/lib/panel_state';
+} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
 import {
   bdd,
@@ -56,7 +56,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         }, Promise.resolve());
       }
 
-      return addVisualizations(visualizations)
+      return PageObjects.dashboard.clickNewDashboard()
+        .then(() => addVisualizations(visualizations))
         .then(function () {
           PageObjects.common.debug('done adding visualizations');
           PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
@@ -82,7 +83,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       const dashboardName = 'Dashboard Test 1';
       // TODO: save time on the dashboard and test it
       return PageObjects.dashboard.saveDashboard(dashboardName)
-      // click New Dashboard just to clear the one we just created
+        .then(() => PageObjects.dashboard.gotoDashboardLandingPage())
+        // click New Dashboard just to clear the one we just created
         .then(function () {
           return PageObjects.common.try(function () {
             PageObjects.common.debug('saved Dashboard, now click New Dashboard');

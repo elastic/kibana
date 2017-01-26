@@ -1,12 +1,14 @@
 <kbn-management-app section="kibana" class="kuiView">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
-    <div class="kuiViewContentItem kuiSubHeader">
-      <h1 class="kuiTitle">
-        Edit {{ title }}
-      </h1>
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit {{ title }}
+        </h1>
+      </div>
 
-      <div class="kuiButtonGroup">
+      <div class="kuiBarSection">
         <a
           class="kuiButton kuiButton--basic kuiButton--iconText"
           href="{{ link }}"
@@ -17,7 +19,7 @@
 
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText"
-          confirm-click="delete()"
+          ng-click="delete()"
         >
           <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
           Delete {{ title }}

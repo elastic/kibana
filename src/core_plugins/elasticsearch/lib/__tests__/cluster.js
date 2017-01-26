@@ -10,7 +10,7 @@ describe('plugins/elasticsearch', function () {
     let cluster;
     const config = {
       url: 'http://localhost:9200',
-      ssl: { verify: false },
+      ssl: { verificationMode: 'full' },
       requestHeadersWhitelist: [ 'authorization' ]
     };
 

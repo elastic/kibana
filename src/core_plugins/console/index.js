@@ -3,8 +3,9 @@ import Boom from 'boom';
 import apiServer from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
-import { startsWith, endsWith } from 'lodash';
+import { has, startsWith, endsWith } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
+import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
 
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
@@ -50,22 +51,18 @@ export default function (kibana) {
               key: Joi.string()
             }).default()
           })
-        ).default([
-          {
-            match: {
-              protocol: '*',
-              host: '*',
-              port: '*',
-              path: '*'
-            },
-
-            timeout: 180000,
-            ssl: {
-              verify: true
-            }
-          }
-        ])
+        ).default()
       }).default();
+    },
+
+    deprecations: function () {
+      return [
+        (settings, log) => {
+          if (has(settings, 'proxyConfig')) {
+            log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+          }
+        }
+      ];
     },
 
     init: function (server, options) {
@@ -108,6 +105,14 @@ export default function (kibana) {
 
           const requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
           const filterHeaders = server.plugins.elasticsearch.filterHeaders;
+
+          let additionalConfig;
+          if (server.config().get('console.proxyConfig')) {
+            additionalConfig = proxyConfigCollection.configForUri(uri);
+          } else {
+            additionalConfig = getElasticsearchProxyConfig(server);
+          }
+
           reply.proxy({
             mapUri: function (request, done) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
@@ -121,7 +126,7 @@ export default function (kibana) {
               }
             },
 
-            ...proxyConfigCollection.configForUri(uri)
+            ...additionalConfig
           });
         }
       };
@@ -175,7 +180,7 @@ export default function (kibana) {
 
     uiExports: {
       apps: apps,
-
+      hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
 
       injectDefaultVars(server, options) {

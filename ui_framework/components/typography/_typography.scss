@@ -1,0 +1,19 @@
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0; /* 1 */
+  font-weight: 400; /* 1 */
+  color: $fontColor;
+  font-size: 22px;
+}
+
+/**
+ * 1. Override h2, h3, etc.
+ */
+.kuiSubTitle {
+  margin: 0; /* 1 */
+  font-weight: 400; /* 1 */
+  color: $fontColor;
+  font-size: 18px;
+}

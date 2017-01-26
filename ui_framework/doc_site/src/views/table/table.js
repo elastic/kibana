@@ -6,6 +6,10 @@ $('[data-sort-icon-descending]').hide();
 
 const demoSortableColumns = $('[data-demo-sortable-column]');
 
+if (!demoSortableColumns.length) {
+  throw new Error('demoSortableColumns missing');
+}
+
 let sortedColumn;
 let isSortAscending = true;
 
@@ -20,6 +24,15 @@ function sortColumn(column) {
       $sortedColumn.removeClass('tableHeaderCell-isSorted');
       const ascendingIcon = $sortedColumn.find('[data-sort-icon-ascending]');
       const descendingIcon = $sortedColumn.find('[data-sort-icon-descending]');
+
+      if (!ascendingIcon.length) {
+        throw new Error('ascendingIcon missing');
+      }
+
+      if (!descendingIcon.length) {
+        throw new Error('descendingIcon missing');
+      }
+
       ascendingIcon.hide();
       descendingIcon.hide();
     }
@@ -29,8 +42,18 @@ function sortColumn(column) {
   sortedColumn = column;
   const $sortedColumn = $(sortedColumn);
   $sortedColumn.addClass('tableHeaderCell-isSorted');
+
   const ascendingIcon = $(sortedColumn).find('[data-sort-icon-ascending]');
   const descendingIcon = $(sortedColumn).find('[data-sort-icon-descending]');
+
+  if (!ascendingIcon.length) {
+    throw new Error('ascendingIcon missing');
+  }
+
+  if (!descendingIcon.length) {
+    throw new Error('descendingIcon missing');
+  }
+
   if (isSortAscending) {
     ascendingIcon.show();
     descendingIcon.hide();

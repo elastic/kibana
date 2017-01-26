@@ -13,6 +13,10 @@ var OutputJsonHighlightRules = function () {
 
   this.$rules.start.unshift(
     {
+      "token": "warning",
+      "regex": "#!.*$"
+    },
+    {
       "token": "comment",
       "regex": "#.*$"
     }

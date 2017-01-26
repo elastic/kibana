@@ -31,19 +31,13 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     loadSettings = (expectedUrl) => {
       // body and headers copied from https://proxy-tiles.elastic.co/v1/manifest
       const MANIFEST_BODY = `{
-        "version":"0.0.0",
-          "expiry":"14d",
-          "services":[
+        "services":[
           {
             "id":"road_map",
-            "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png",
+            "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana",
             "minZoom":0,
             "maxZoom":12,
-            "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
-            "query_parameters":{
-              "elastic_tile_service_tos":"agree",
-              "my_app_name":"kibana"
-            }
+            "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"
           }
         ]
       }`;
@@ -90,11 +84,12 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
       expect(urlObject).to.have.property('hostname', 'proxy-tiles.elastic.co');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
+      expect(urlObject.query).to.have.property('my_app_version');
 
     });
 
     it('should get options', async function () {
-      const options = tilemapSettings.getOptions();
+      const options = tilemapSettings.getTMSOptions();
       expect(options).to.have.property('minZoom', 0);
       expect(options).to.have.property('maxZoom', 12);
       expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
@@ -137,7 +132,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     it('merges query params into manifest request', () => {
       tilemapSettings.addQueryParams({ foo: 'bar' });
       tilemapsConfig.manifestServiceUrl = 'http://test.com/manifest?v=1';
-      loadSettings('http://test.com/manifest?v=1&foo=bar');
+      loadSettings('http://test.com/manifest?v=1&my_app_version=1.2.3&foo=bar');
     });
 
   });
