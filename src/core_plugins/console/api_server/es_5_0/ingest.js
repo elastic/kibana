@@ -6,7 +6,8 @@ const processorDefinition = {
     dateIndexNameProcessorDefinition,
     failProcessorDefinition,
     foreachProcessorDefinition,
-    grokProcessorDefinition
+    grokProcessorDefinition,
+    gsubProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -110,6 +111,17 @@ const grokProcessorDefinition = {
     },
     ignore_missing: {
       __one_of: [ false, true ]
+    }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/gsub-processor.html
+const gsubProcessorDefinition = {
+  gsub: {
+    __template: {
+      field: '',
+      pattern: '',
+      replacement: ''
     }
   }
 };
