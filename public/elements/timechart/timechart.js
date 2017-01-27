@@ -6,6 +6,7 @@ import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import { Timeseries } from '@elastic/thor-visualizations';
 import '@elastic/thor-visualizations/css/main.css';
 import stylesheet from '!!raw!./timechart.less';
+import Warning from 'plugins/rework/components/warning/warning';
 
 import moment from 'moment';
 import icon from './icon.svg';
@@ -22,11 +23,20 @@ elements.push(new Element('timechart', {
     })
   ],
   template: ({args}) => {
-    const dataframe = new Dataframe(args.dataframe);
 
-    if (!dataframe.rows.length) return (<div>Waiting...</div>);
+    let groups;
+    let dataframe;
+    try {
+      dataframe = new Dataframe(args.dataframe);
+      groups = _.groupBy(dataframe.rows, (row) => row.named.label.value);
+    } catch (e) {
+      return (
+        <Warning>
+          Unable to render chart from dataframe. Check your columns;
+        </Warning>
+      );
+    }
 
-    const groups = _.groupBy(dataframe.rows, (row) => row.named.label.value);
 
     const series = _.map(groups, (rows, label) => {
       return {
