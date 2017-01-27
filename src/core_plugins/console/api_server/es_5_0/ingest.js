@@ -11,7 +11,8 @@ const processorDefinition = {
     joinProcessorDefinition,
     jsonProcessorDefinition,
     kvProcessorDefinition,
-    lowercaseProcessorDefinition
+    lowercaseProcessorDefinition,
+    removeProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -188,6 +189,16 @@ const lowercaseProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/remove-processor.html
+const removeProcessorDefinition = {
+  remove: {
+    __template: {
+      field: ''
+    },
+    field: ''
   }
 };
 
