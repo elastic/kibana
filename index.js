@@ -40,6 +40,7 @@ module.exports = function (kibana) {
         // it must declare that requirement in the "require" property above. Neat.
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
+        'plugins/rework/elements/markdown/markdown',
         'plugins/rework/elements/table/table',
         'plugins/rework/elements/timechart/timechart',
 

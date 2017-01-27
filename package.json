@@ -50,6 +50,7 @@
     "redux-localstorage": "^0.4.1",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.1.0",
+    "remarkable": "^1.7.1",
     "uuid": "^3.0.1"
   }
 }
