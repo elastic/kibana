@@ -42,7 +42,14 @@ const Editor = React.createClass({
             return (
               <div key={name} className="rework--editor-section">
                 <h4>{displayName.replace('_', ' ')}</h4>
-                <ArgumentForm type={type} commit={commit} value={value} help={arg.help} context={argValues}></ArgumentForm>
+                <ArgumentForm
+                  type={type}
+                  commit={commit}
+                  value={value}
+                  help={arg.help}
+                  options={arg.options}
+                  context={argValues}>
+                  </ArgumentForm>
               </div>
             );
           })}
