@@ -1,3 +1,14 @@
+const processorDefinition = {
+  __one_of: [
+    appendProcessorDefinition,
+    convertProcessorDefinition,
+    dateProcessorDefinition,
+    dateIndexNameProcessorDefinition,
+    failProcessorDefinition,
+    foreachProcessorDefinition
+  ] // TODO: add more processor definitions
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
@@ -71,16 +82,22 @@ const failProcessorDefinition = {
   }
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/foreach-processor.html
+const foreachProcessorDefinition = {
+  foreach: {
+    __template: {
+      field: '',
+      processor: ''
+    },
+    field: '',
+    processor: processorDefinition
+  }
+};
+
 const pipelineDefinition = {
   description: '',
   processors: [
-    {
-      __one_of: [
-        appendProcessorDefinition,
-        convertProcessorDefinition,
-        dateProcessorDefinition
-      ] // TODO: add more processor definitions
-    }
+    processorDefinition
   ],
   version: 123,
 };
