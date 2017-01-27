@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
+import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 import Editable from 'plugins/rework/components/editable/editable';
 import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 import DataframeEditor from 'plugins/rework/components/dataframe_editor/dataframe_editor';
@@ -17,9 +18,13 @@ const DataframeDialog = React.createClass({
       renaming: false,
       dataframe: _.cloneDeep(dataframes[dataframeIds[0]])
     };
-  }, // This could be initialized with the defaults for the form right?
+  },
   componentWillReceiveProps(nextProps) {
-    if (nextProps !== this.props) this.setState(this.getInitialState);
+    const dataframeIds = _.keys(nextProps.dataframes);
+
+    if (!nextProps.dataframes[this.state.dataframe.id]) {
+      this.setState({dataframe: _.cloneDeep(nextProps.dataframes[dataframeIds[0]])});
+    }
   },
   selectDataframe(id) {
     const {dataframes} = this.props;
@@ -52,6 +57,7 @@ const DataframeDialog = React.createClass({
   },
   removeDataframe(id) {
     return () => {
+      if (_.keys(this.props.dataframes).length < 2) return;
       this.props.dispatch(dataframeRemove(id));
     };
   },
@@ -59,6 +65,8 @@ const DataframeDialog = React.createClass({
     const {dataframes} = this.props;
     const {creating} = this.state;
     const dataframe = _.cloneDeep(this.state.dataframe);
+
+    const deleteClasses = _.keys(dataframes).length < 2 ? ['rework--no-action'] : [];
 
     const edit = (
       <div>
@@ -71,8 +79,10 @@ const DataframeDialog = React.createClass({
             : (<DataframeSelector dataframes={dataframes} onChange={this.selectDataframe} selected={dataframe.id}></DataframeSelector>)
           }
 
-          <a onClick={this.startRename} className="fa fa-pencil"></a>
-          <a onClick={this.removeDataframe(dataframe.id)} className="fa fa-ban"></a>
+          <Tooltip place="left" content="Rename"><a onClick={this.startRename} className="fa fa-pencil"></a></Tooltip>
+          <Tooltip place="left" content="Delete frame and all linked elements">
+            <a onClick={this.removeDataframe(dataframe.id)} className={['fa fa-ban', ...deleteClasses].join(' ')}></a>
+          </Tooltip>
         </div>
 
         <DataframeEditor key={dataframe.id} dataframe={dataframe} commit={this.commit}></DataframeEditor>
