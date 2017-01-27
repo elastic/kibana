@@ -9,7 +9,8 @@ const processorDefinition = {
     grokProcessorDefinition,
     gsubProcessorDefinition,
     joinProcessorDefinition,
-    jsonProcessorDefinition
+    jsonProcessorDefinition,
+    kvProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -152,6 +153,25 @@ const jsonProcessorDefinition = {
     field: '',
     target_field: '',
     add_to_root: {
+      __one_of: [ false, true ]
+    }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/kv-processor.html
+const kvProcessorDefinition = {
+  kv: {
+    __template: {
+      field: '',
+      field_split: '',
+      value_split: ''
+    },
+    field: '',
+    field_split: '',
+    value_split: '',
+    target_field: '',
+    include_keys: [],
+    ignore_missing: {
       __one_of: [ false, true ]
     }
   }
