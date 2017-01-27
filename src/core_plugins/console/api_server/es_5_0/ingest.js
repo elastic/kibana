@@ -1,3 +1,4 @@
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
     __template: {
@@ -9,6 +10,7 @@ const appendProcessorDefinition = {
   }
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/convert-processor.html
 const convertProcessorDefinition = {
   convert: {
     __template: {
@@ -26,6 +28,7 @@ const convertProcessorDefinition = {
   }
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-processor.html
 const dateProcessorDefinition = {
   date: {
     __template: {
