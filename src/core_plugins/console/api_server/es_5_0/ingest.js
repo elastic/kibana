@@ -266,7 +266,7 @@ const splitProcessorDefinition = {
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/sort-processor.html
 const sortProcessorDefinition = {
-  split: {
+  sort: {
     __template: {
       field: ''
     },
