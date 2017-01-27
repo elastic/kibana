@@ -21,13 +21,18 @@ export default class Element {
     this.args = props.args;
 
     // A CSS stylesheet. Note that you can use {{args.somevalue}} in the sheet to get the values of your arguments
-    this.stylesheet = props.stylesheet || 'div {border: 2px solid #f00;}';
+    this.stylesheet = props.stylesheet || '__noStyle_noClass_JustLikeMe {border: 2px solid #f00;}';
+
+    this.args.push(new Arg('_container_style', {
+      displayName: 'Element Style',
+      type: 'container_style',
+      help: ''
+    }));
 
     // Every element gets a custom style sheet too, this is supplied by the user if they wish
-    this.args.push(new Arg('_style', {
-      displayName: 'style',
+    this.args.push(new Arg('_custom_style', {
+      displayName: 'Custom CSS',
       type: 'style',
-      default: ''
     }));
   }
 }
