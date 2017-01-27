@@ -4,15 +4,19 @@ var helpers = require('./helpers');
 
 helpers.setupBabelCache(process.env);
 
-exports.webpack = require('@elastic/babel-preset-kibana/webpack');
-exports.react = require('@elastic/babel-preset-kibana/webpack');
-exports.node = Object.assign(
-  {},
-  require('@elastic/babel-preset-kibana/node'),
-  {
-    ignore: [
-      helpers.fromRoot('src'),
-      /[\\\/](node_modules|bower_components)[\\\/]/
-    ]
-  }
-);
+exports.webpack = {
+  presets: ["react", "es2015", "stage-1"],
+  plugins: ["add-module-exports"]
+};
+exports.react = {
+  presets: ["react", "es2015", "stage-1"],
+  plugins: ["add-module-exports"]
+};
+exports.node = {
+  presets: ["es2015-node", "stage-1"],
+  plugins: ["add-module-exports"],
+  ignore: [
+    helpers.fromRoot('src'),
+    /[\\\/](node_modules|bower_components)[\\\/]/
+  ]
+};
