@@ -44,15 +44,15 @@ export default () => {
           type: 'csv',
           value: {
             csv:'"make","model","year","price"\n' +
-                '"Subaru","Impreza",2003,17695\n' +
-                '"Subaru","Impreza",2004,18020\n' +
-                '"Subaru","Impreza",2005,18245\n' +
-                '"Subaru","Baja",2003,21995\n' +
-                '"Subaru","Baja",2004,21995\n' +
-                '"Subaru","Baja",2005,22345\n' +
-                '"Subaru","Outback",2003,23245\n' +
-                '"Subaru","Outback",2004,23470\n' +
-                '"Subaru","Outback",2005,24445\n'
+                '"Subaru","Impreza","2015",17695\n' +
+                '"Subaru","Impreza","2016",18020\n' +
+                '"Subaru","Impreza","2017",18245\n' +
+                '"Subaru","Baja","2015",21995\n' +
+                '"Subaru","Baja","2016",21995\n' +
+                '"Subaru","Baja","2017",22345\n' +
+                '"Subaru","Outback","2015",23245\n' +
+                '"Subaru","Outback","2016",23470\n' +
+                '"Subaru","Outback","2017",24445\n'
           }
         },
         /*

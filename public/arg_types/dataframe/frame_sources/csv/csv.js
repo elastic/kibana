@@ -10,15 +10,15 @@ frameSources.push(new FrameSource('csv', {
   help: 'Import a CSV',
   defaults: {
     csv:'"make","model","year","price"\n' +
-        '"Subaru","Impreza",2015,17695\n' +
-        '"Subaru","Impreza",2016,18020\n' +
-        '"Subaru","Impreza",2017,18245\n' +
-        '"Subaru","Baja",2015,21995\n' +
-        '"Subaru","Baja",2016,21995\n' +
-        '"Subaru","Baja",2017,22345\n' +
-        '"Subaru","Outback",2015,23245\n' +
-        '"Subaru","Outback",2016,23470\n' +
-        '"Subaru","Outback",2017,24445\n'
+        '"Subaru","Impreza","2015",17695\n' +
+        '"Subaru","Impreza","2016",18020\n' +
+        '"Subaru","Impreza","2017",18245\n' +
+        '"Subaru","Baja","2015",21995\n' +
+        '"Subaru","Baja","2016",21995\n' +
+        '"Subaru","Baja","2017",22345\n' +
+        '"Subaru","Outback","2015",23245\n' +
+        '"Subaru","Outback","2016",23470\n' +
+        '"Subaru","Outback","2017",24445\n'
   },
   toDataframe: function (value, filters) {
     const dataframe =   {
