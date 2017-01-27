@@ -18,4 +18,11 @@ export default createExample([{
   ),
   html: require('./sub_title.html'),
   hasDarkTheme: false,
+}, {
+  title: 'Text',
+  description: (
+    <p>Works well with a <code className="guideCode">p</code>.</p>
+  ),
+  html: require('./text.html'),
+  hasDarkTheme: false,
 }]);
