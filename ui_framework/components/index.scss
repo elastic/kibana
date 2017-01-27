@@ -23,6 +23,9 @@ $font: "Open Sans", Helvetica, Arial, sans-serif;
 $fontSize: 14px;
 $lineHeight: 1.5;
 
+// Typography
+$titleFontSize: 18px;
+
 // Button
 $buttonBorderRadius: 4px;
 
@@ -31,6 +34,8 @@ $successColor: #417505;
 $warningColor: #ffac15;
 $errorColor: #D86051;
 $focusColor: #6EADC1;
+$focusDangerColor: #ff523c;
+$focusBackgroundColor: #ffffff;
 $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
 $linkColor: #3CAED2;
@@ -47,8 +52,13 @@ $tableRowBorder: 1px solid $standoutBackgroundColor;
 $formTransitionTiming: 0.1s linear;
 
 // Bar
+$toolBarHeight: 50px;
+$toolBarPadding: 10px;
 $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
+
+// Rhythm
+$verticalRhythm: 10px;
 
 @mixin darkTheme {
   .theme-dark & {
@@ -59,11 +69,12 @@ $toolBarItsemSpacing: 10px;
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
  */
-@mixin focus($color: $focusColor) {
+@mixin focus($color: $focusColor, $backgroundColor: $focusBackgroundColor) {
   z-index: 1; /* 1 */
-  outline: 1px solid $color !important; /* 2 */
-  outline-offset: 2px !important; /* 2 */
+  outline: none !important; /* 2 */
+  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
 }
 
 @mixin formControlFocus {
@@ -71,15 +82,22 @@ $toolBarItsemSpacing: 10px;
   border-color: $selectedBorderColor;
 }
 
-@mixin formControl {
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+@mixin formControlBase {
   appearance: none;
   padding: 3px 12px 4px;
   font-size: $fontSize;
   font-weight: 400;
   line-height: $lineHeight;
+  color: $fontColor;
+}
+
+@mixin formControl {
+  @include formControlBase;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  color: $fontColor;
   border-radius: $buttonBorderRadius;
   transition: border-color $formTransitionTiming;
 
@@ -174,6 +192,18 @@ $toolBarItsemSpacing: 10px;
 }
 
 @mixin buttonOnStandoutBackground {
+  .kuiButton {
+    &:focus {
+      @include focus($focusColor, $standoutBackgroundColor);
+    }
+  }
+
+  .kuiButton--danger {
+    &:focus {
+      @include focus($focusDangerColor, $standoutBackgroundColor);
+    }
+  }
+
   .kuiButton--basic {
     color: #5a5a5a;
     background-color: #FFFFFF;
@@ -215,6 +245,9 @@ body {
 @import "modal/index";
 @import "no_items/index";
 @import "panel/index";
+@import "prompt_for_items/index";
 @import "table/index";
 @import "tabs/index";
 @import "tool_bar/index";
+@import "typography/index";
+@import "vertical_rhythm/index";

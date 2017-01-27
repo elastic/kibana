@@ -293,7 +293,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
 
-    bdd.it('should zoom in to level 12', function () {
+    bdd.it('should zoom in to level 10', function () {
       // 6
       return PageObjects.visualize.clickMapZoomIn()
       .then(function () {
@@ -306,14 +306,6 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function () {
         // 9
-        return PageObjects.visualize.clickMapZoomIn();
-      })
-      .then(function () {
-        // 10
-        return PageObjects.visualize.clickMapZoomIn();
-      })
-      .then(function () {
-        // 11
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
@@ -330,7 +322,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function () {
         return PageObjects.visualize.getMapZoomInEnabled();
       })
-      // now we're at level 12 and zoom out should be disabled
+      // now we're at level 10 and zoom out should be disabled
       .then(function (enabled) {
         expect(enabled).to.be(false);
       });

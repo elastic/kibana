@@ -28,6 +28,9 @@ import LocalNavExample
 import MicroButtonExample
   from '../../views/micro_button/micro_button_example.jsx';
 
+import PanelExample
+  from '../../views/panel/panel_example.jsx';
+
 import TableExample
   from '../../views/table/table_example.jsx';
 
@@ -36,6 +39,12 @@ import TabsExample
 
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
+
+import TypographyExample
+  from '../../views/typography/typography_example.jsx';
+
+import VerticalRhythmExample
+  from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -66,6 +75,9 @@ const components = [{
   name: 'Modal',
   component: ModalExample,
 }, {
+  name: 'Panel',
+  component: PanelExample,
+}, {
   name: 'Table',
   component: TableExample,
 }, {
@@ -74,6 +86,12 @@ const components = [{
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
+}, {
+  name: 'Typography',
+  component: TypographyExample,
+}, {
+  name: 'VerticalRhythm',
+  component: VerticalRhythmExample,
 }];
 
 export default {
