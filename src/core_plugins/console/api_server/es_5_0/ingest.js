@@ -8,7 +8,8 @@ const processorDefinition = {
     foreachProcessorDefinition,
     grokProcessorDefinition,
     gsubProcessorDefinition,
-    joinProcessorDefinition
+    joinProcessorDefinition,
+    jsonProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -139,6 +140,20 @@ const joinProcessorDefinition = {
     },
     field: '',
     separator: ''
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/json-processor.html
+const jsonProcessorDefinition = {
+  json: {
+    __template: {
+      field: ''
+    },
+    field: '',
+    target_field: '',
+    add_to_root: {
+      __one_of: [ false, true ]
+    }
   }
 };
 
