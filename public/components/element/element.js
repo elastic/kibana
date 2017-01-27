@@ -8,26 +8,28 @@ import handlebars from 'handlebars/dist/handlebars';
 class Element extends React.PureComponent {
   render() {
     const {type, args} = this.props;
-    const userStyle = args ? args._style : {};
-    const customStyle = {
-      ...userStyle,
-      height: '100%',
-      width: '100%'
-    };
     const elementType = elementTypes.byName[type];
     const ElementContent = args ? elementType.template : () => (<Loading />);
 
+    // Build the inline style for the wrapper
+    const customStyle = args ? args._custom_style : {};
+    const containerStyle = args ? args._container_style : {};
+    const elementStyle = {
+      ...containerStyle,
+      ...customStyle,
+      height: '100%',
+      width: '100%'
+    };
+
+    // Build the templatable stylesheet
     const styleId = uuid();
-    const elementStylesheet = elementType.stylesheet;
-    const styleTemplate = handlebars.compile(elementStylesheet);
-    if (args) {
-      args.foo = '#f00';
-    }
-    const compiledStyle = styleTemplate(args);
+    const styleSheet = elementType.stylesheet;
+    const styleTemplate = handlebars.compile(styleSheet);
+    const scopedStyleSheet = styleTemplate(args);
 
     return (
-      <div className="rework--element" style={customStyle} data-style={styleId}>
-        <ScopedStyle scope={`[data-style="${styleId}"]`}>{compiledStyle}</ScopedStyle>
+      <div className="rework--element" style={elementStyle} data-style={styleId}>
+        <ScopedStyle scope={`[data-style="${styleId}"]`}>{scopedStyleSheet}</ScopedStyle>
         <ElementContent args={args}></ElementContent>
       </div>
     );
