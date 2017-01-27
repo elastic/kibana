@@ -35,7 +35,7 @@ export default React.createClass({
           <a className={removeClasses.join(' ')} onClick={remove}></a>
         </Tooltip>
 
-        <Popover placement="bottom" isOpen={this.state.configPopover} target="configPopover" toggle={this.toggle}>
+        <Popover placement="bottom" isOpen={this.state.configPopover} target="configPopover" toggle={this.toggleConfig}>
           <PopoverContent>
             <PageProperties onChange={onPageChange} page={page}></PageProperties>
             <hr/>
