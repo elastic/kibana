@@ -3,7 +3,9 @@ const appendProcessorDefinition = {
     __template: {
       field: '',
       value: []
-    }
+    },
+    field: '',
+    value: []
   }
 };
 
