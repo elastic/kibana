@@ -7,7 +7,8 @@ const processorDefinition = {
     failProcessorDefinition,
     foreachProcessorDefinition,
     grokProcessorDefinition,
-    gsubProcessorDefinition
+    gsubProcessorDefinition,
+    joinProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -126,6 +127,18 @@ const gsubProcessorDefinition = {
     field: '',
     pattern: '',
     replacement: ''
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/join-processor.html
+const joinProcessorDefinition = {
+  join: {
+    __template: {
+      field: '',
+      separator: ''
+    },
+    field: '',
+    separator: ''
   }
 };
 
