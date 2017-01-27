@@ -12,5 +12,7 @@ export default class Arg {
 
     this.help = props.help === undefined ? this.type.help : props.help;
 
+    this.options = props.options || {};
+
   }
 }
