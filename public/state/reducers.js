@@ -51,9 +51,11 @@ function rootReducer(state = {}, action) {
   const removeElement = (elementId, pageId) => {
     const result = setPersistent('elements', _.omit(state.persistent.elements, elementId));
     const {pages} = result.persistent;
+    const {elementCache} = result.transient;
     // This right here is why you'll have a bad time if you use elements on more than one page.
     // You won't be able to remove them correctly, and its gonna be bad. I guess I could switch to elementRemoveSlowly.
     result.persistent.pages = {...pages, [pageId]: {...pages[pageId], elements: _.without(pages[pageId].elements, elementId)}};
+    result.transient.elementCache = _.omit(elementCache, elementId);
     return result;
   };
 
