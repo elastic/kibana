@@ -15,7 +15,8 @@ const processorDefinition = {
     removeProcessorDefinition,
     renameProcessorDefinition,
     scriptProcessorDefinition,
-    setProcessorDefinition
+    setProcessorDefinition,
+    splitProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -243,6 +244,21 @@ const setProcessorDefinition = {
     value: '',
     override: {
       __one_of: [ true, false ]
+    }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/split-processor.html
+const splitProcessorDefinition = {
+  split: {
+    __template: {
+      field: '',
+      separator: ''
+    },
+    field: '',
+    separator: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
     }
   }
 };
