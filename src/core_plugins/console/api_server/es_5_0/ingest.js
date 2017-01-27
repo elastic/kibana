@@ -41,7 +41,25 @@ const dateProcessorDefinition = {
     timezone: 'UTC',
     locale: 'ENGLISH'
   }
-}
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html
+const dateIndexNameProcessorDefinition = {
+  date_index_name: {
+    __template: {
+      field: '',
+      date_rounding: ''
+    },
+    field: '',
+    date_rounding: {
+      __one_of: [ 'y', 'M', 'w', 'd', 'h', 'm', 's' ]
+    },
+    date_formats: [],
+    timezone: 'UTC',
+    locale: 'ENGLISH',
+    index_name_format: 'yyyy-MM-dd'
+  }
+};
 
 const pipelineDefinition = {
   description: '',
