@@ -12,7 +12,8 @@ const processorDefinition = {
     jsonProcessorDefinition,
     kvProcessorDefinition,
     lowercaseProcessorDefinition,
-    removeProcessorDefinition
+    removeProcessorDefinition,
+    renameProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -199,6 +200,21 @@ const removeProcessorDefinition = {
       field: ''
     },
     field: ''
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/rename-processor.html
+const renameProcessorDefinition = {
+  rename: {
+    __template: {
+      field: '',
+      target_field: ''
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
+    }
   }
 };
 
