@@ -11,14 +11,23 @@
   border-color: rgba($infoColor, 0.25); /* 1 */
 }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--success {
   border-color: rgba($successColor, 0.25); /* 1 */
 }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--warning {
   border-color: rgba($warningColor, 0.25); /* 1 */
 }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--error {
   border-color: rgba($errorColor, 0.25); /* 1 */
 }
