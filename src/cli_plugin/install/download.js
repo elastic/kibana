@@ -6,8 +6,9 @@ import { parse } from 'url';
 export function _getFilePath(filePath) {
   const decodedPath = decodeURI(filePath);
   const isWindows = /^win/.test(process.platform);
-  if (isWindows) {
-    return decodedPath.replace(/^\//, '');
+  const prefixedDrive = /^\/[a-zA-Z]:/.test(decodedPath);
+  if (isWindows && prefixedDrive) {
+    return decodedPath.slice(1);
   }
   return decodedPath;
 }
