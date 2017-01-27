@@ -122,7 +122,10 @@ const gsubProcessorDefinition = {
       field: '',
       pattern: '',
       replacement: ''
-    }
+    },
+    field: '',
+    pattern: '',
+    replacement: ''
   }
 };
 
