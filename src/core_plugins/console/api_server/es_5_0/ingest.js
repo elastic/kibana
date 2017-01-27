@@ -13,7 +13,8 @@ const processorDefinition = {
     kvProcessorDefinition,
     lowercaseProcessorDefinition,
     removeProcessorDefinition,
-    renameProcessorDefinition
+    renameProcessorDefinition,
+    scriptProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -215,6 +216,18 @@ const renameProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/script-processor.html
+const scriptProcessorDefinition = {
+  script: {
+    __template: {},
+    lang: 'painless',
+    file: '',
+    id: '',
+    inline: '',
+    params: {}
   }
 };
 
