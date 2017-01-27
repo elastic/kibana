@@ -30,6 +30,8 @@ module.exports = function (kibana) {
         // Then argument types
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/style/style',
+        'plugins/rework/arg_types/container_style/container_style',
+
         'plugins/rework/arg_types/dataframe/dataframe',
 
         // Then the elements that use them.
