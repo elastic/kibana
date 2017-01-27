@@ -17,7 +17,8 @@ const processorDefinition = {
     scriptProcessorDefinition,
     setProcessorDefinition,
     splitProcessorDefinition,
-    sortProcessorDefinition
+    sortProcessorDefinition,
+    trimProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -272,6 +273,19 @@ const sortProcessorDefinition = {
     },
     field: '',
     order: 'asc'
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/trim-processor.html
+const trimProcessorDefinition = {
+  trim: {
+    __template: {
+      field: ''
+    },
+    field: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
+    }
   }
 };
 
