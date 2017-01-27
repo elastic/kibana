@@ -9,12 +9,30 @@ const appendProcessorDefinition = {
   }
 };
 
+const convertProcessorDefinition = {
+  convert: {
+    __template: {
+      field: '',
+      type: ''
+    },
+    field: '',
+    type: {
+      __one_of: [ 'integer', 'float', 'string', 'boolean', 'auto' ]
+    },
+    target_field: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
+    }
+  }
+};
+
 const pipelineDefinition = {
   description: '',
   processors: [
     {
       __one_of: [
-        appendProcessorDefinition
+        appendProcessorDefinition,
+        convertProcessorDefinition
       ] // TODO: add more processor definitions
     }
   ],
