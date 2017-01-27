@@ -310,6 +310,7 @@ const dotExpanderProcessorDefinition = {
     __template: {
       field: ''
     },
+    field: '',
     path: ''
   }
 };
