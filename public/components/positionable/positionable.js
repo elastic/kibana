@@ -1,14 +1,31 @@
 import React from 'react';
 import $ from 'jquery';
+import _ from 'lodash';
 import {move, resize, rotate, remove} from './interaction';
 import './positionable.less';
 
 export default React.createClass({
+  getInitialState() {
+    const {position} = this.props;
+    return position;
+  },
   attachHandlers(ref) {
     const elem = $(ref);
 
+    const resizeMove = (e) => {
+      const {top, left, height, width} = e.interaction.absolute;
+      this.setState({top, left, height, width});
+    };
+
+    const commitMove = _.debounce(this.props.move, 100, {maxWait: 1000});
+    const commitResize = _.debounce(this.props.resize, 50, {maxWait: 50});
+
+
     move(elem, {
-      on: this.props.move
+      on: (e) => {
+        resizeMove(e);
+        commitMove(e);
+      }
     });
 
     rotate(elem, {
@@ -17,7 +34,10 @@ export default React.createClass({
     });
 
     resize(elem, {
-      on: this.props.resize,
+      on: (e) => {
+        resizeMove(e);
+        commitResize(e);
+      },
       sides: {
         left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
         top:    '.rework--interactable-resize-nw, .rework--interactable-resize-ne, .rework--interactable-resize-n',
@@ -42,15 +62,17 @@ export default React.createClass({
   render() {
     const { children, position, rotate, resize, style, interact } = this.props;
 
+    const {top, left, height, width} = this.state;
+
     const wrappedChildren = React.Children.map(children, (child) => {
       const newStyle = {
         ...style,
         position: 'absolute',
         transform: `rotate(${position.angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
-        height: position.height,
-        width: position.width,
-        top: position.top,
-        left: position.left,
+        height: height,
+        width: width,
+        top: top,
+        left: left,
       };
 
       if (!interact) {
