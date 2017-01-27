@@ -61,6 +61,16 @@ const dateIndexNameProcessorDefinition = {
   }
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/fail-processor.html
+const failProcessorDefinition = {
+  fail: {
+    __template: {
+      message: ''
+    },
+    message: ''
+  }
+};
+
 const pipelineDefinition = {
   description: '',
   processors: [
