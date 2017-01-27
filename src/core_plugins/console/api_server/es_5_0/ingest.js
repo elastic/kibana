@@ -19,8 +19,9 @@ const processorDefinition = {
     splitProcessorDefinition,
     sortProcessorDefinition,
     trimProcessorDefinition,
-    uppercaseProcessorDefinition
-  ] // TODO: add more processor definitions
+    uppercaseProcessorDefinition,
+    dotExpanderProcessorDefinition
+  ]
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
@@ -300,6 +301,16 @@ const uppercaseProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dot-expand-processor.html
+const dotExpanderProcessorDefinition = {
+  dot_expander: {
+    __template: {
+      field: ''
+    },
+    path: ''
   }
 };
 
