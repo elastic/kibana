@@ -1,29 +1,3 @@
-const processorDefinition = {
-  __one_of: [
-    appendProcessorDefinition,
-    convertProcessorDefinition,
-    dateProcessorDefinition,
-    dateIndexNameProcessorDefinition,
-    failProcessorDefinition,
-    foreachProcessorDefinition,
-    grokProcessorDefinition,
-    gsubProcessorDefinition,
-    joinProcessorDefinition,
-    jsonProcessorDefinition,
-    kvProcessorDefinition,
-    lowercaseProcessorDefinition,
-    removeProcessorDefinition,
-    renameProcessorDefinition,
-    scriptProcessorDefinition,
-    setProcessorDefinition,
-    splitProcessorDefinition,
-    sortProcessorDefinition,
-    trimProcessorDefinition,
-    uppercaseProcessorDefinition,
-    dotExpanderProcessorDefinition
-  ]
-};
-
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
@@ -102,10 +76,10 @@ const foreachProcessorDefinition = {
   foreach: {
     __template: {
       field: '',
-      processor: ''
+      processor: {}
     },
     field: '',
-    processor: processorDefinition
+    processor: {} // TODO: Make this recursively reference processorDefinition
   }
 };
 
@@ -313,6 +287,32 @@ const dotExpanderProcessorDefinition = {
     field: '',
     path: ''
   }
+};
+
+const processorDefinition = {
+  __one_of: [
+    appendProcessorDefinition,
+    convertProcessorDefinition,
+    dateProcessorDefinition,
+    dateIndexNameProcessorDefinition,
+    failProcessorDefinition,
+    foreachProcessorDefinition,
+    grokProcessorDefinition,
+    gsubProcessorDefinition,
+    joinProcessorDefinition,
+    jsonProcessorDefinition,
+    kvProcessorDefinition,
+    lowercaseProcessorDefinition,
+    removeProcessorDefinition,
+    renameProcessorDefinition,
+    scriptProcessorDefinition,
+    setProcessorDefinition,
+    splitProcessorDefinition,
+    sortProcessorDefinition,
+    trimProcessorDefinition,
+    uppercaseProcessorDefinition,
+    dotExpanderProcessorDefinition
+  ]
 };
 
 const pipelineDefinition = {
