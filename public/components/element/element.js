@@ -5,10 +5,17 @@ import ScopedStyle from 'plugins/rework/components/scoped_style/scoped_style';
 import uuid from 'uuid/v4';
 import handlebars from 'handlebars/dist/handlebars';
 
-class Element extends React.PureComponent {
+const Element = React.createClass({
+  getInitialState() {
+    const {type} = this.props;
+    return {
+      styleId: uuid(),
+      elementType: elementTypes.byName[type]
+    };
+  },
   render() {
     const {type, args} = this.props;
-    const elementType = elementTypes.byName[type];
+    const {styleId, elementType} = this.state;
     const ElementContent = args ? elementType.template : () => (<Loading />);
 
     // Build the inline style for the wrapper
@@ -22,7 +29,6 @@ class Element extends React.PureComponent {
     };
 
     // Build the templatable stylesheet
-    const styleId = uuid();
     const styleSheet = elementType.stylesheet;
     const styleTemplate = handlebars.compile(styleSheet);
     const scopedStyleSheet = styleTemplate(args);
@@ -34,6 +40,6 @@ class Element extends React.PureComponent {
       </div>
     );
   }
-}
+});
 
 export default Element;

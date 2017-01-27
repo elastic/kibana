@@ -34,60 +34,63 @@ elements.push(new Element('timechart', {
       default: 'label'
     }),
   ],
-  template: ({args}) => {
+  template: class Timechart extends React.PureComponent {
 
-    let groups;
-    let dataframe;
-    try {
-      dataframe = new Dataframe(args.dataframe);
-      groups = _.groupBy(dataframe.rows, (row) => row.named[args.group_by].value);
-    } catch (e) {
-      return (
-        <Warning>
-          Unable to render chart from dataframe. Check your columns;
-        </Warning>
-      );
-    }
+    render() {
+      const {args} = this.props;
+      let groups;
+      let dataframe;
+      try {
+        dataframe = new Dataframe(args.dataframe);
+        groups = _.groupBy(dataframe.rows, (row) => row.named[args.group_by].value);
+      } catch (e) {
+        return (
+          <Warning>
+            Unable to render chart from dataframe. Check your columns;
+          </Warning>
+        );
+      }
 
 
-    const series = _.map(groups, (rows, label) => {
-      return {
-        color: _.get(rows[0].named.color, 'value'),
-        stack: true,
-        lines: { show: true, lineWidth: 1, fill: 0.5 },
-        points: { show: true, lineWidth: 1, radius: 1, fill: 1 },
-        label: label,
-        data: _.map(rows, (row) => {
-          return [moment(row.named[args.time_column].value).valueOf(), row.named[args.value_column].value];
-        })
-      };
-    });
-
-    const props = {
-      //crosshair: true,
-      //tickFormatter: formatter,
-      legendPosition: args.legend_position || 'right',
-      series,
-      legend: true,
-      /*
-      onBrush: (ranges) => {
-        const link = {
-          path: location.path,
-          query: _.assign({}, location.query, {
-            mode: 'absolute',
-            from: moment(ranges.xaxis.from).valueOf(),
-            to: moment(ranges.xaxis.to).valueOf()
+      const series = _.map(groups, (rows, label) => {
+        return {
+          color: _.get(rows[0].named.color, 'value'),
+          stack: true,
+          lines: { show: true, lineWidth: 1, fill: 0.5 },
+          points: { show: true, lineWidth: 1, radius: 1, fill: 1 },
+          label: label,
+          data: _.map(rows, (row) => {
+            return [moment(row.named[args.time_column].value).valueOf(), row.named[args.value_column].value];
           })
         };
-        dispatch(changeLocation(link));
-      }
-      */
-    };
+      });
 
-    return (
-      <div className="rework--timechart" id="foobu">
-        <Timeseries {...props}></Timeseries>
-      </div>
-    );
+      const props = {
+        //crosshair: true,
+        //tickFormatter: formatter,
+        legendPosition: args.legend_position || 'right',
+        series,
+        legend: true,
+        /*
+        onBrush: (ranges) => {
+          const link = {
+            path: location.path,
+            query: _.assign({}, location.query, {
+              mode: 'absolute',
+              from: moment(ranges.xaxis.from).valueOf(),
+              to: moment(ranges.xaxis.to).valueOf()
+            })
+          };
+          dispatch(changeLocation(link));
+        }
+        */
+      };
+
+      return (
+        <div className="rework--timechart" id="foobu">
+          <Timeseries {...props}></Timeseries>
+        </div>
+      );
+    };
   }
 }));
