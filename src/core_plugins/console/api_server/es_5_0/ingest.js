@@ -14,7 +14,8 @@ const processorDefinition = {
     lowercaseProcessorDefinition,
     removeProcessorDefinition,
     renameProcessorDefinition,
-    scriptProcessorDefinition
+    scriptProcessorDefinition,
+    setProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -228,6 +229,21 @@ const scriptProcessorDefinition = {
     id: '',
     inline: '',
     params: {}
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/set-processor.html
+const setProcessorDefinition = {
+  set: {
+    __template: {
+      field: '',
+      value: ''
+    },
+    field: '',
+    value: '',
+    override: {
+      __one_of: [ true, false ]
+    }
   }
 };
 
