@@ -26,13 +26,28 @@ const convertProcessorDefinition = {
   }
 };
 
+const dateProcessorDefinition = {
+  date: {
+    __template: {
+      field: '',
+      formats: []
+    },
+    field: '',
+    target_field: '@timestamp',
+    formats: [],
+    timezone: 'UTC',
+    locale: 'ENGLISH'
+  }
+}
+
 const pipelineDefinition = {
   description: '',
   processors: [
     {
       __one_of: [
         appendProcessorDefinition,
-        convertProcessorDefinition
+        convertProcessorDefinition,
+        dateProcessorDefinition
       ] // TODO: add more processor definitions
     }
   ],
