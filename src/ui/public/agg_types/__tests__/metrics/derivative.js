@@ -18,7 +18,7 @@ describe('Derivative metric', function () {
       derivativeMetric = Private(DerivativeProvider);
 
       const params = settings || {
-        buckets_path: '1',
+        metricAgg: '1',
         customMetric: null
       };
 
@@ -58,7 +58,7 @@ describe('Derivative metric', function () {
 
   it('should return a label Derivative of max bytes', function () {
     init({
-      buckets_path: 'custom',
+      metricAgg: 'custom',
       customMetric: {
         id:'1-orderAgg',
         type: 'max',
@@ -71,7 +71,7 @@ describe('Derivative metric', function () {
 
   it('should return a label prefixed with number of derivative', function () {
     init({
-      buckets_path: 'custom',
+      metricAgg: 'custom',
       customMetric: {
         id:'2-orderAgg',
         type: 'derivative',
@@ -91,7 +91,7 @@ describe('Derivative metric', function () {
 
   it('should set parent aggs', function () {
     init({
-      buckets_path: 'custom',
+      metricAgg: 'custom',
       customMetric: {
         id:'2-orderAgg',
         type: 'max',
@@ -104,7 +104,7 @@ describe('Derivative metric', function () {
 
   it('should set nested parent aggs', function () {
     init({
-      buckets_path: 'custom',
+      metricAgg: 'custom',
       customMetric: {
         id:'2-orderAgg',
         type: 'derivative',

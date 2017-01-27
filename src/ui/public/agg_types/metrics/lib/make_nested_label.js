@@ -16,7 +16,7 @@ const makeNestedLabel = function (aggConfig, label) {
     }
     return metricLabel;
   }
-  const metric = aggConfig.vis.aggs.find(agg => agg.id === aggConfig.params.buckets_path);
+  const metric = aggConfig.vis.aggs.find(agg => agg.id === aggConfig.params.metricAgg);
   return `${uppercaseLabel} of ${metric.makeLabel()}`;
 };
 
