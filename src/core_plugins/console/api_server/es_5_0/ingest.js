@@ -16,7 +16,8 @@ const processorDefinition = {
     renameProcessorDefinition,
     scriptProcessorDefinition,
     setProcessorDefinition,
-    splitProcessorDefinition
+    splitProcessorDefinition,
+    sortProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -260,6 +261,17 @@ const splitProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/sort-processor.html
+const sortProcessorDefinition = {
+  split: {
+    __template: {
+      field: ''
+    },
+    field: '',
+    order: 'asc'
   }
 };
 
