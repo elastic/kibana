@@ -1,6 +1,10 @@
 # Architecture Style Guide
 
-## File and Folder Structure
+## Application and Plugin Architecture
+
+These are a collection of architectural styles to follow when building Kibana plugins and applications.
+
+### File and Folder Structure
 
 Kibana applications, both the core project and any plugins created for Kibana, should follow this basic file and folder structure:
 
