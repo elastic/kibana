@@ -79,7 +79,7 @@ const foreachProcessorDefinition = {
       processor: {}
     },
     field: '',
-    processor: {} // TODO: Make this recursively reference processorDefinition
+    processor: {}
   }
 };
 
