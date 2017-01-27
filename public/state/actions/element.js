@@ -93,8 +93,8 @@ export function elementResolve(elementId) {
 
     Promise.all(argPromises).then((argValues) => {
       const argNames = _.map(argDefinitions, 'name');
-      const elementCache = _.zipObject(argNames, argValues);
-      _.each(elementCache, (value, name) => {
+      const resolvedArgs = _.zipObject(argNames, argValues);
+      _.each(resolvedArgs, (value, name) => {
         dispatch(argumentResolved(elementId, name, value));
       });
     });
