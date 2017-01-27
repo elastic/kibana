@@ -9,5 +9,8 @@ export default class Arg {
     // This can be a value or a function. If it is a function then it will be passed state.
     // eg (state) => {return state.some.value}; is acceptable
     this.default = props.default === undefined ? this.type.default : props.default;
+
+    this.help = props.help === undefined ? this.type.help : props.help;
+
   }
 }
