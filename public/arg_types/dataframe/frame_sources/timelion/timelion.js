@@ -78,7 +78,7 @@ frameSources.push(new FrameSource('timelion', {
     },
     change(prop) {
       return (value) => {
-        this.setState(_.assign({}, this.state, {[prop]: value}));
+        this.setState({[prop]: value});
       };
     },
     run() {

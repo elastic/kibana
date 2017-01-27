@@ -21,7 +21,7 @@ export default React.createClass({
       }
     })
     .then(resp => resp.json()).then(resp => {
-      this.setState(_.assign({}, {workpads: resp.workpads}));
+      this.setState({workpads: resp.workpads});
     });
   },
   handleDelete(id) {

@@ -19,7 +19,8 @@ export default class Dataframe {
     }
   */
   constructor(data) {
-    const {columns, rows, keys} = data;
+    const columns = _.get(data, 'columns') || [];
+    const rows = _.get(data, 'rows') || [];
     // Consider using immutable.js in this class
     this.columns = new Columns(columns || []);
     this.rows = _.map(rows || [], (row) => new Row(this.columns, row));

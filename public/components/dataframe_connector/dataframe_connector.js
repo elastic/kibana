@@ -19,7 +19,7 @@ export default React.createClass({
     };
   },
   updateName(e) {
-    this.setState(_.assign({}, {name: e.target.value}));
+    this.setState({name: e.target.value});
   },
   render() {
     const {name, type} = this.state;

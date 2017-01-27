@@ -15,7 +15,7 @@ const DataframeDialog = React.createClass({
     return {
       creating: false,
       renaming: false,
-      dataframe: dataframes[dataframeIds[0]]
+      dataframe: _.cloneDeep(dataframes[dataframeIds[0]])
     };
   }, // This could be initialized with the defaults for the form right?
   componentWillReceiveProps(nextProps) {
@@ -23,32 +23,32 @@ const DataframeDialog = React.createClass({
   },
   selectDataframe(id) {
     const {dataframes} = this.props;
-    this.setState(_.assign({}, this.state, {dataframe: dataframes[id]}));
+    this.setState({dataframe: _.cloneDeep(dataframes[id])});
   },
   // Keep this function, accessing state here will cause pass-by-reference issues
   commit(value) {
     const {dispatch, dataframes} = this.props;
-    const dataframe = _.cloneDeep(this.state.dataframe);
-    const newFrame = Object.assign({}, dataframe, {value});
-    this.setState(_.assign({}, this.state, {dataframe: newFrame}));
+    const {dataframe} = this.state;
+    const newFrame = _.assign(dataframe, {value});
+    this.setState({dataframe: newFrame});
     dispatch(dataframeSet(newFrame));
   },
   startRename(name) {
-    this.setState(_.assign({}, this.state, {renaming: true}));
+    this.setState({renaming: true});
   },
   finishRename(name) {
     const {dispatch, dataframes} = this.props;
     const {dataframe} = this.state;
-    const newFrame = Object.assign({}, dataframe, {name});
+    const newFrame = _.assign(dataframe, {name});
     dispatch(dataframeSet(newFrame));
-    this.setState(_.assign({}, this.state, {renaming: false}));
+    this.setState({renaming: false});
   },
   startCreating() {
-    this.setState(_.assign({}, this.state, {creating: true}));
+    this.setState({creating: true});
   },
   connectDataframe(dataframe) {
     this.props.dispatch(dataframeAdd(dataframe));
-    this.setState(_.assign({}, this.state, {creating: false, dataframe: dataframe}));
+    this.setState({creating: false, dataframe: dataframe});
   },
   removeDataframe(id) {
     return () => {
