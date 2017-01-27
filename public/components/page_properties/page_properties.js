@@ -5,7 +5,7 @@ import ColorPicker from 'plugins/rework/components/color_picker/color_picker';
 export default React.createClass({
   setColor(color) {
     const {page, onChange} = this.props;
-    onChange({...page, style: {...page.style, backgroundColor: color.hex}});
+    onChange({...page, style: {...page.style, backgroundColor: color}});
   },
   render() {
     const {page, onChange} = this.props;
