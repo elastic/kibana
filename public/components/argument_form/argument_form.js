@@ -5,7 +5,7 @@ export default React.createClass({
   render() {
     const {type, value, commit, help} = this.props;
     const Form = argTypes.byName[type].form;
-    const helpText = help || argTypes.byName[type].help;
+    const helpText = help;
 
     return (
       <div className="rework--argument-form">
