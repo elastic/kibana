@@ -29,11 +29,11 @@ UiModules
       };
 
       $scope.forward = function () {
-        assign(timefilter.time, timeNavigation.stepForward(timefilter.getBounds()));
+        timefilter.time = timeNavigation.stepForward(timefilter.getBounds());
       };
 
       $scope.back = function () {
-        assign(timefilter.time, timeNavigation.stepBackward(timefilter.getBounds()));
+        timefilter.time = timeNavigation.stepBackward(timefilter.getBounds());
       };
 
       $scope.updateFilter = function (from, to) {
