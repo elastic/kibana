@@ -11,8 +11,6 @@ import PageManager from 'plugins/rework/components/page_manager/page_manager';
 import Workpad from 'plugins/rework/components/workpad/workpad';
 import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
-import Positionable from 'plugins/rework/components/positionable/positionable';
-import Element from 'plugins/rework/components/element/element';
 import Fullscreen from 'plugins/rework/components/fullscreen/fullscreen';
 import Presentation from 'plugins/rework/components/presentation/presentation';
 
@@ -24,7 +22,7 @@ import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
 import { pageNext, pagePrevious, pageAdd, pageRemove, pageReplace } from 'plugins/rework/state/actions/page';
 import { workpadReplace } from 'plugins/rework/state/actions/workpad';
 
-import { elementSelect, elementTop, elementLeft, elementHeight, elementWidth, elementAngle } from 'plugins/rework/state/actions/element';
+import { elementSelect } from 'plugins/rework/state/actions/element';
 
 const DataframeDialog = React.createClass({
   pageAdd() {
@@ -38,24 +36,6 @@ const DataframeDialog = React.createClass({
     return (e) => {
       e.stopPropagation();
       this.props.dispatch(elementSelect(id));
-    };
-  },
-  resizeMove(id) {
-    return (e) => {
-      const {dispatch} = this.props;
-      const {top, left, height, width} = e.interaction.absolute;
-
-      dispatch(elementTop(id, top));
-      dispatch(elementLeft(id, left));
-      dispatch(elementHeight(id, height));
-      dispatch(elementWidth(id, width));
-    };
-  },
-  rotate(id) {
-    return (e) => {
-      const {dispatch} = this.props;
-      const {angle} = e.interaction.absolute;
-      dispatch(elementAngle(id, angle));
     };
   },
   do(action) {
@@ -93,17 +73,7 @@ const DataframeDialog = React.createClass({
                 });
                 return (
                   <div key={elementId} className={wrapperClasses}>
-                    <ElementWrapper id={elementId} pageId={pageId} args={element.args}>
-                      <Positionable style={{zIndex: 2000 + i}}
-                        position={position}
-                        interact={fullscreen ? false : true}
-                        move={resizeMove(elementId)}
-                        resize={resizeMove(elementId)}
-                        rotate={rotate(elementId)}>
-                          <Element type={element.type} args={elementCache[elementId]}></Element>
-                      </Positionable>
-                    </ElementWrapper>
-
+                    <ElementWrapper element={element} page={page} layer={i}></ElementWrapper>
                   </div>
                 );
               })}

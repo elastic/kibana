@@ -46,7 +46,7 @@ export default React.createClass({
       const newStyle = {
         ...style,
         position: 'absolute',
-        transform: `rotate(${position.angle}deg)`,
+        transform: `rotate(${position.angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
         height: position.height,
         width: position.width,
         top: position.top,
