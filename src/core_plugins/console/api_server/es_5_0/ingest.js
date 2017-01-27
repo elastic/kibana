@@ -5,7 +5,8 @@ const processorDefinition = {
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
     failProcessorDefinition,
-    foreachProcessorDefinition
+    foreachProcessorDefinition,
+    grokProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -91,6 +92,25 @@ const foreachProcessorDefinition = {
     },
     field: '',
     processor: processorDefinition
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html
+const grokProcessorDefinition = {
+  grok: {
+    __template: {
+      field: '',
+      patterns: []
+    },
+    field: '',
+    patterns: [],
+    pattern_definitions: {},
+    trace_match: {
+      __one_of: [ false, true ]
+    },
+    ignore_missing: {
+      __one_of: [ false, true ]
+    }
   }
 };
 
