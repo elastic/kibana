@@ -52,7 +52,7 @@ elements.push(new Element('timechart', {
 
     const series = _.map(groups, (rows, label) => {
       return {
-        color: '#6EDBFF',
+        color: _.get(rows[0].named.color, 'value'),
         stack: true,
         lines: { show: true, lineWidth: 1, fill: 0.5 },
         points: { show: true, lineWidth: 1, radius: 1, fill: 1 },

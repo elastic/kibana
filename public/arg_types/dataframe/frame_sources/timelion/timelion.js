@@ -55,18 +55,21 @@ frameSources.push(new FrameSource('timelion', {
       const columns = [
         {name: 'label', type: 'string'},
         {name: 'time', type: 'string'},
-        {name: 'value', type: 'number'}
+        {name: 'value', type: 'number'},
+        {name: 'color', type: 'string'}
       ];
 
-      const rows = [].concat.apply([], _.map(seriesList.list, series =>
-        _.map(series.data, point => {
+      const rows = [].concat.apply([], _.map(seriesList.list, series => {
+        const color = series.color;
+        return _.map(series.data, point => {
           return {
             label: series.label,
             time: moment(point[0]).format(),
+            color: color,
             value: point[1]
           };
-        })
-      ));
+        });
+      }));
 
       return {columns: columns, rows: rows};
     });
