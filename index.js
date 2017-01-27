@@ -31,8 +31,9 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',
-
         'plugins/rework/arg_types/dataframe/dataframe',
+        'plugins/rework/arg_types/dataframe_column/dataframe_column',
+
 
         // Then the elements that use them.
         // Thus, if an element plugin relies on an arg_type plugin,
