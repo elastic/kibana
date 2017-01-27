@@ -13,15 +13,13 @@ argTypes.push(new ArgType('dataframe', {
   form: ({commit, value}) => {
     return (<FrameLink value={value} select={commit}></FrameLink>);
   },
+  cache: false, // Its ok not to cache this, this is cheap
   resolve: (value, state) => {
     const {dataframeCache} = state.transient;
-    const frameNames = _.keys(dataframeCache);
 
-    const resolvedFrame = value == null ? dataframeCache[frameNames[0]] : dataframeCache[value];
-
-    if (!resolvedFrame) {
+    if (!dataframeCache[value]) {
       return {type: 'dataframe', columns: [], rows: []};
     }
-    return resolvedFrame;
+    return dataframeCache[value];
   }
 }));
