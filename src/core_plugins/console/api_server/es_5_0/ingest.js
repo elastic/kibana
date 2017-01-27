@@ -10,7 +10,8 @@ const processorDefinition = {
     gsubProcessorDefinition,
     joinProcessorDefinition,
     jsonProcessorDefinition,
-    kvProcessorDefinition
+    kvProcessorDefinition,
+    lowercaseProcessorDefinition
   ] // TODO: add more processor definitions
 };
 
@@ -171,6 +172,19 @@ const kvProcessorDefinition = {
     value_split: '',
     target_field: '',
     include_keys: [],
+    ignore_missing: {
+      __one_of: [ false, true ]
+    }
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/lowercase-processor.html
+const lowercaseProcessorDefinition = {
+  lowercase: {
+    __template: {
+      field: ''
+    },
+    field: '',
     ignore_missing: {
       __one_of: [ false, true ]
     }
