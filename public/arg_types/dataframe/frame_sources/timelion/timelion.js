@@ -54,7 +54,7 @@ frameSources.push(new FrameSource('timelion', {
 
       const columns = [
         {name: 'label', type: 'string'},
-        {name: 'timestamp', type: 'string'},
+        {name: 'time', type: 'string'},
         {name: 'value', type: 'number'}
       ];
 
@@ -62,7 +62,7 @@ frameSources.push(new FrameSource('timelion', {
         _.map(series.data, point => {
           return {
             label: series.label,
-            timestamp: moment(point[0]).format(),
+            time: moment(point[0]).format(),
             value: point[1]
           };
         })

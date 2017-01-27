@@ -20,7 +20,19 @@ elements.push(new Element('timechart', {
     new Arg('dataframe', {
       type: 'dataframe',
       default: (state) => _.keys(state.transient.dataframeCache)[0]
-    })
+    }),
+    new Arg('time_column', {
+      type: 'dataframe_column',
+      default: 'time'
+    }),
+    new Arg('value_column', {
+      type: 'dataframe_column',
+      default: 'value'
+    }),
+    new Arg('group_by', {
+      type: 'dataframe_column',
+      default: 'label'
+    }),
   ],
   template: ({args}) => {
 
@@ -28,7 +40,7 @@ elements.push(new Element('timechart', {
     let dataframe;
     try {
       dataframe = new Dataframe(args.dataframe);
-      groups = _.groupBy(dataframe.rows, (row) => row.named.label.value);
+      groups = _.groupBy(dataframe.rows, (row) => row.named[args.group_by].value);
     } catch (e) {
       return (
         <Warning>
@@ -46,7 +58,7 @@ elements.push(new Element('timechart', {
         points: { show: true, lineWidth: 1, radius: 1, fill: 1 },
         label: label,
         data: _.map(rows, (row) => {
-          return [moment(row.named.timestamp.value).valueOf(), row.named.value.value];
+          return [moment(row.named[args.time_column].value).valueOf(), row.named[args.value_column].value];
         })
       };
     });
