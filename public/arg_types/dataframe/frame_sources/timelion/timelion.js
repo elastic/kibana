@@ -71,7 +71,7 @@ frameSources.push(new FrameSource('timelion', {
         });
       }));
 
-      return {columns: columns, rows: rows};
+      return {columns: columns, rows: rows, schema: 'timeseries', keys: ['label']};
     });
 
   },
