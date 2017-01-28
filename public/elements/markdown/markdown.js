@@ -7,6 +7,9 @@ import icon from './icon.svg';
 import FontResize from './font_resize';
 import _ from 'lodash';
 import './markdown.less';
+import handlebars from 'handlebars/dist/handlebars';
+import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
+
 
 const md = new Remarkable('full', {
   html: false, // I'm a crazy person!
@@ -24,7 +27,7 @@ elements.push(new Element('markdown', {
     }),
     new Arg('markdown', {
       type: 'string',
-      default: '',
+      default: 'Your Text Here',
       options: {
         rows: 10
       }
@@ -38,7 +41,16 @@ elements.push(new Element('markdown', {
     };
 
     function getContent() {
-      return {__html: md.render(args.markdown)};
+      let markdown;
+      try {
+        const template = handlebars.compile(args.markdown || '');
+        markdown = template({rows: args.dataframe.rows});
+      } catch (e) {
+        console.log(e);
+        markdown = args.markdown;
+      }
+
+      return {__html: md.render(markdown)};
     }
 
     return (
