@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Row from './row';
 import Columns from './columns';
+import {aggregator} from './aggregator';
 
 export default class Dataframe {
   /*
@@ -24,10 +25,19 @@ export default class Dataframe {
     // Consider using immutable.js in this class
     this.columns = new Columns(columns || []);
     this.rows = _.map(rows || [], (row) => new Row(this.columns, row));
+    this.value = data;
   }
 
   get toTuples() {
     return _.map(this.rows, (row) => row.ordered);
+  }
+
+  get aggregate() {
+    return this.getAggregator();
+  }
+
+  getAggregator() {
+    return aggregator(this.value.rows);
   }
 
 }
