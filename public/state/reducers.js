@@ -33,6 +33,8 @@ function rootReducer(state = {}, action) {
   };
 
   const setPage = (id, prop, value) => {
+    if (!state.persistent.pages[id]) return state;
+
     return setPersistent('pages', {
       ...state.persistent.pages,
       [id]: {
@@ -75,6 +77,7 @@ function rootReducer(state = {}, action) {
   };
 
   const setElement = (id, prop, value) => {
+    if (!state.persistent.elements[id]) return state;
     return setPersistent('elements', {
       ...state.persistent.elements,
       [id]: {
