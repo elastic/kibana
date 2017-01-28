@@ -1,3 +1,5 @@
+@import (reference) "~plugins/rework/main.less";
+
 .rework--markdown {
   h1, h2, h3, h4, h5, h6 {
     margin-top: 0;
@@ -26,6 +28,14 @@
   h6 {
     font-size: 1em;
     font-weight: bold;
+  }
+
+  table {
+    width: 100%;
+
+    th {
+      border-bottom: 0.5em solid transparent;
+    }
   }
 
 }
