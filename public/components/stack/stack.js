@@ -10,6 +10,7 @@ export default React.createClass({
 
     const stack = React.Children.map(children, (child, i) => {
       const newStyle = i !== top ? {display: 'none'} : style;
+      child = i !== top ? null : child; // Don't render children that are not visisble
       return (<div style={newStyle}>{child}</div>);
     });
 
