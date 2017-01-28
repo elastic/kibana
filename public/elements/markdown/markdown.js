@@ -21,17 +21,17 @@ elements.push(new Element('markdown', {
   displayName: 'markdown',
   icon: icon,
   args: [
-    new Arg('dataframe', {
-      type: 'dataframe',
-      default: (state) => _.keys(state.transient.dataframeCache)[0]
-    }),
     new Arg('markdown', {
       type: 'string',
       default: 'Your Text Here',
       options: {
         rows: 10
       }
-    })
+    }),
+    new Arg('dataframe', {
+      type: 'dataframe',
+      default: (state) => _.keys(state.transient.dataframeCache)[0]
+    }),
   ],
   template: ({args}) => {
     const style = {
