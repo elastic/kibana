@@ -16,6 +16,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 [float]
 === Apps
 * https://github.com/sivasamyk/logtrail[LogTrail] - View, analyze, search and tail log events in realtime with a developer/sysadmin friendly interface
+* https://github.com/wtakase/kibana-own-home[Own Home] (wtakase) - enables multi-tenancy
 
 [float]
 === Timelion Extensions
