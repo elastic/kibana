@@ -7,6 +7,8 @@ export default class Dataframe {
   /*
     Constructor:
     {
+      schema: undefined // a string identifier of some sort (optional)
+      keys: ['model', 'segment'], // columns to be used for producing a primary key
       columns: [
         {name: 'model', type: 'string' },
         {name: 'segment', type: 'string' },
@@ -16,7 +18,7 @@ export default class Dataframe {
         {model: 'crosstrek', segment: 'SUV', price: 21000},
         {model: 'impreza', segment: 'sedan', price: 16000},
         {model: 'outback', segment: 'SUV', price: 25000}
-      ]
+      ],
     }
   */
   constructor(data) {
@@ -25,6 +27,8 @@ export default class Dataframe {
     // Consider using immutable.js in this class
     this.columns = new Columns(columns || []);
     this.rows = _.map(rows || [], (row) => new Row(this.columns, row));
+    this.schema = data.schema;
+    this.keys = data.keys;
     this.value = data;
   }
 
