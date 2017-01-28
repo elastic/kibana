@@ -17,8 +17,8 @@ export default React.createClass({
       this.setState({top, left, height, width});
     };
 
-    const commitMove = _.debounce(this.props.move, 100, {maxWait: 1000});
-    const commitResize = _.debounce(this.props.resize, 50, {maxWait: 50});
+    const commitMove = _.debounce(this.props.move, 500);
+    const commitResize = _.debounce(this.props.resize, 100, {maxWait: 100});
 
 
     move(elem, {
