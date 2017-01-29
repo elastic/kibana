@@ -9,6 +9,18 @@ z-indices:
   Top Nav & Dropdowns: 4000-4999
 */
 
+.rework--fullscreen {
+  .rework--page {
+    overflow: hidden;
+  }
+}
+
+.rework--element {
+  overflow: hidden; // Elements can handle this themselves
+  height: 100%;
+  width: 100%;
+}
+
 .rework--application {
   display: flex;
   flex-direction: column;
@@ -67,15 +79,8 @@ z-indices:
 
 
   .rework--workpad {
-
     .rework--interactable {
       overflow: none;
-    }
-
-    .rework--element {
-      overflow: hidden; // Elements can handle this themselves
-      height: 100%;
-      width: 100%;
     }
   }
 
