@@ -14,7 +14,7 @@ const Element = React.createClass({
     };
   },
   render() {
-    const {type, args} = this.props;
+    const {type, args, setArg} = this.props;
     const {styleId, elementType} = this.state;
     const ElementContent = args ? elementType.template : () => (<Loading />);
 
@@ -36,7 +36,7 @@ const Element = React.createClass({
     return (
       <div className="rework--element" style={elementStyle} data-style={styleId}>
         <ScopedStyle scope={`[data-style="${styleId}"]`}>{scopedStyleSheet}</ScopedStyle>
-        <ElementContent args={args}></ElementContent>
+        <ElementContent args={args} setArg={setArg}></ElementContent>
       </div>
     );
   }

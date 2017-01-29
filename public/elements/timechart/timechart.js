@@ -36,12 +36,22 @@ elements.push(new Element('timechart', {
   ],
   template: class Timechart extends React.PureComponent {
 
+    componentWillUpdate(nextProps) {
+      const {args, setArg} = nextProps;
+
+      if (args.dataframe.schema === 'timeseries' || args.dataframe.schema === 'timelion') {
+        setArg('time_column', 'time');
+        setArg('value_column', 'value');
+        setArg('group_by', 'label');
+      };
+    }
+
     render() {
       const {args} = this.props;
       let groups;
       let dataframe;
       try {
-        dataframe = new Dataframe(args.dataframe);
+        dataframe = args.dataframe;
         groups = _.groupBy(dataframe.rows, (row) => row.named[args.group_by].value);
       } catch (e) {
         return (
