@@ -34,11 +34,6 @@ elements.push(new Element('markdown', {
     }),
   ],
   template: ({args}) => {
-    const style = {
-      height: '100%',
-      width: '100%',
-      backgroundColor: args.color
-    };
 
     function getContent() {
       let markdown;
@@ -46,7 +41,6 @@ elements.push(new Element('markdown', {
         const template = handlebars.compile(args.markdown || '');
         markdown = template({rows: args.dataframe.rows});
       } catch (e) {
-        console.log(e);
         markdown = args.markdown;
       }
 
