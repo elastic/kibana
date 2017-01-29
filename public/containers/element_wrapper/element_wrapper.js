@@ -6,7 +6,7 @@ import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 
 import { elementSelect, elementTop, elementLeft, elementHeight,
-  elementWidth, elementAngle, elementRemove } from 'plugins/rework/state/actions/element';
+  elementWidth, elementAngle, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
 
 const ElementWrapper = React.createClass({
   select(id) {
@@ -40,6 +40,11 @@ const ElementWrapper = React.createClass({
       dispatch(elementAngle(id, angle));
     };
   },
+  setArg(arg, value) {
+    const {element, dispatch} = this.props;
+    if (_.isEqual(element.args[arg], value)) return;
+    this.props.dispatch(argumentSet(this.props.element.id, arg, value));
+  },
   render() {
     const {element, page, fullscreen, layer, elementCache} = this.props;
     const {id} = element;
@@ -59,7 +64,7 @@ const ElementWrapper = React.createClass({
           move={this.resizeMove(id)}
           resize={this.resizeMove(id)}
           rotate={this.rotate(id)}>
-            <Element type={element.type} args={elementCache[id]}></Element>
+            <Element type={element.type} args={elementCache[id]} setArg={this.setArg}></Element>
         </Positionable>
       </div>
     );
