@@ -12,24 +12,38 @@ export default createExample([{
   html: require('./icon.html'),
   hasDarkTheme: false,
 }, {
+  title: 'Info',
+  description: (
+    <p>Use this Icon to denote useful information.</p>
+  ),
+  html: require('./icon_info.html'),
+  hasDarkTheme: false,
+}, {
   title: 'Success',
   description: (
-    <p>Use this Icon to convey the successful completion of an action, e.g. filling out a form field correctly or a successful API request.</p>
+    <p>Use this Icon to denote the successful completion of an action, e.g. filling out a form field correctly or a successful API request.</p>
   ),
   html: require('./icon_success.html'),
   hasDarkTheme: false,
 }, {
   title: 'Warning',
   description: (
-    <p>Use this Icon to convey an irregularity or potential problems.</p>
+    <p>Use this Icon to denote an irregularity or potential problems.</p>
   ),
   html: require('./icon_warning.html'),
   hasDarkTheme: false,
 }, {
   title: 'Error',
   description: (
-    <p>Use this Icon to convey a failed attempt at an action, e.g. an invalid form field or an API error.</p>
+    <p>Use this Icon to denote a failed attempt at an action, e.g. an invalid form field or an API error.</p>
   ),
   html: require('./icon_error.html'),
   hasDarkTheme: false,
-}]);
+}, {
+  title: 'Inactive',
+  description: (
+    <p>Use this Icon to denote a disabled, inactive, off, offline, or asleep status.</p>
+  ),
+  html: require('./icon_inactive.html'),
+  hasDarkTheme: false,
+}, ]);
