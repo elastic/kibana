@@ -8,8 +8,7 @@ export default React.createClass({
     this.props.onChange(e.target.value);
   },
   render() {
-    const {onChange, value} = this.props;
-    const dataframe = new Dataframe(this.props.dataframe);
+    const {onChange, value, dataframe} = this.props;
 
     const maybeBlank = !dataframe.columns.named[value] ? '' : value;
 

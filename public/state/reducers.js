@@ -1,5 +1,6 @@
 import elements from 'plugins/rework/elements/elements';
 import getInitialState from './initial_state';
+import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import _ from 'lodash';
 import move from 'lodash-move';
 
@@ -161,7 +162,7 @@ function rootReducer(state = {}, action) {
     case 'DATAFRAME_RESOLVED':
       return setTransient('dataframeCache', {
         ...state.transient.dataframeCache,
-        [payload.id]: payload.value});
+        [payload.id]: new Dataframe(payload.value)});
 
     // Set one resolved argument. We probably don't need the thing above, do we? Grr.
     case 'ARGUMENT_RESOLVED':

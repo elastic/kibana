@@ -16,7 +16,7 @@ elements.push(new Element('table', {
     })
   ],
   template: ({args}) => {
-    const dataframe = new Dataframe(args.dataframe);
+    const {dataframe} = args;
     const header = _.map(dataframe.columns.ordered, (column) => (
       <th className={`reframe--type--${column.type}`} key={column.name}>
         {column.name}
