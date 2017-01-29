@@ -11,6 +11,10 @@
   -moz-osx-font-smoothing: grayscale; /* 1 */
 }
 
+.kuiIcon--info {
+  color: $infoColor;
+}
+
 .kuiIcon--success {
   color: $successColor;
 }
@@ -21,4 +25,8 @@
 
 .kuiIcon--error {
   color: $errorColor;
+}
+
+.kuiIcon--inactive {
+  color: $inactiveColor;
 }

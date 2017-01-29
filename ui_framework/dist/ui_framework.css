@@ -513,6 +513,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* 1 */ }
 
+.kuiIcon--info {
+  color: #3fa8c7; }
+
 .kuiIcon--success {
   color: #417505; }
 
@@ -522,12 +525,65 @@ body {
 .kuiIcon--error {
   color: #D86051; }
 
+.kuiIcon--inactive {
+  color: #c3c3c3; }
+
 .kuiInfoPanel {
-  padding: 20px;
-  line-height: 1.5; }
+  padding: 14px 20px 18px;
+  line-height: 1.5;
+  border: 2px solid; }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--info {
+  border-color: rgba(63, 168, 199, 0.25);
+  /* 1 */ }
+
+.kuiInfoPanel--success {
+  border-color: rgba(65, 117, 5, 0.25);
+  /* 1 */ }
 
 .kuiInfoPanel--warning {
-  background-color: #FFF6E4; }
+  border-color: rgba(255, 172, 21, 0.25);
+  /* 1 */ }
+
+.kuiInfoPanel--error {
+  border-color: rgba(216, 96, 81, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. Align with first line of title text if it wraps.
+ */
+.kuiInfoPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  /* 1 */ }
+
+.kuiInfoPanelHeader__icon {
+  margin-right: 10px;
+  font-size: 14px;
+  line-height: 1.5; }
+
+.kuiInfoPanelHeader__title {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700; }
+
+.kuiInfoPanelBody {
+  margin-top: 8px; }
+  .kuiInfoPanelBody > * + * {
+    margin-top: 8px; }
+
+.kuiInfoPanelBody__message {
+  font-size: 14px;
+  line-height: 1.5; }
 
 .kuiLink {
   color: #3CAED2;
