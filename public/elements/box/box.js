@@ -7,17 +7,11 @@ import icon from './icon.svg';
 elements.push(new Element('box', {
   displayName: 'Box',
   icon: icon,
-  args: [
-    new Arg('color', {
-      type: 'string',
-      default: '#000'
-    })
-  ],
+  args: [],
   template: ({args}) => {
     const style = {
       height: '100%',
       width: '100%',
-      backgroundColor: args.color
     };
     return (
       <div style={style}></div>
