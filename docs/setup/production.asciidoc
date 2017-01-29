@@ -106,6 +106,7 @@ name of your cluster.
 cluster.name: "my_cluster"
 --------
 . Check your transport and HTTP host configs in `elasticsearch.yml` under `network.host` and `transport.host`. The `transport.host` needs to be on the network reachable to the cluster members, the `network.host` is the network for the HTTP connection for Kibana (localhost:9200 by default).
++
 --------
 network.host: localhost
 http.port: 9200
