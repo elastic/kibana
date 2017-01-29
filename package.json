@@ -47,6 +47,7 @@
     "reactstrap": "^4.0.1",
     "redux": "^3.6.0",
     "redux-actions": "^1.2.0",
+    "redux-batched-subscribe": "^0.1.6",
     "redux-localstorage": "^0.4.1",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.1.0",
