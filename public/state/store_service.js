@@ -21,10 +21,10 @@ app.service('$store', (kbnVersion, basePath) => {
   initialState.app.basePath = basePath;
 
   // Limit redux updates to 20FPS
-  const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
+  //const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
   const persistentStore = compose(
     applyMiddleware(thunk),
-    batchedSubscribe(debounceNotify),
+    //batchedSubscribe(debounceNotify),
     persistState('persistent', {key: 'rework-persistent'}),
   );
 
