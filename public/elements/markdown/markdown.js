@@ -4,7 +4,7 @@ import elements from 'plugins/rework/elements/elements';
 import Arg from 'plugins/rework/arg_types/arg';
 import Remarkable from 'remarkable';
 import icon from './icon.svg';
-import FontResize from './font_resize';
+import FontResize from 'plugins/rework/components/font_resize/font_resize';
 import _ from 'lodash';
 import stylesheet from '!!raw!./markdown.less';
 import handlebars from 'handlebars/dist/handlebars';
@@ -53,7 +53,9 @@ elements.push(new Element('markdown', {
 
     return (
       <FontResize max={_.get(args.text_style, 'object.fontSize')}>
-        <div className="rework--markdown" dangerouslySetInnerHTML={getContent()}></div>
+        <div style={{display: 'inline-block', margin: '2px'}}
+          className="rework--markdown"
+          dangerouslySetInnerHTML={getContent()}></div>
       </FontResize>
     );
   }
