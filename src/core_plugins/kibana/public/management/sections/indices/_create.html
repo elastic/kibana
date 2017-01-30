@@ -9,6 +9,30 @@
       </div>
       <div>
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
+          <div class="form-group">
+            <label>
+              Index name or pattern
+            </label>
+            <p class="help-block" ng-if="!index.nameIsPattern">Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*</p>
+            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern">Patterns allow you to define dynamic index names. Static text in an index name is denoted using brackets. Example: [logstash-]YYYY.MM.DD. Please note that weeks are setup to use ISO weeks which start on Monday. &mdash;
+              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/">Date Format Documentation</a></small></p>
+            <input
+              ng-model="index.name"
+              ng-attr-placeholder="{{index.defaultName}}"
+              ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+              validate-index-name
+              allow-wildcard
+              name="name"
+              required
+              type="text"
+              class="form-control">
+              <small ng-show="index.nameInterval.name == 'weeks'">
+                <strong>Note: </strong>
+                I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
+                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
+              </small>
+            </div>
+
           <div class="form-group time-and-pattern">
             <label>
               <input
@@ -16,7 +40,59 @@
                 type="checkbox">
               Index contains time-based events
             </label>
-            <br>
+          </div>
+
+          <div class="form-group" ng-if="index.isTimeBased">
+            <label>
+              Time-field name
+              &nbsp;
+              <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
+              &nbsp;
+              <small>
+                <a ng-click="refreshFieldList();"> refresh fields</a>
+              </small>
+            </label>
+            <select
+              ng-disabled="index.fetchFieldsError"
+              ng-required="!index.fetchFieldsError"
+              ng-options="field.name for field in index.dateFields"
+              ng-model="index.timeField"
+              auto-select-if-only-one="index.dateFields"
+              class="form-control">
+            </select>
+          </div>
+
+          <div class="form-group" ng-if="canExpandIndices()">
+            <label>
+              <input ng-model="index.notExpandable" type="checkbox">
+              Do not expand index pattern when searching <small>(Not recommended)</small>
+            </label>
+
+            <div ng-if="index.notExpandable" class="alert alert-info">
+              This index pattern will be queried directly rather than being
+              expanded into more performant searches against individual indices.
+
+              Elasticsearch will receive a query against <em>{{index.name}}</em>
+              and will have to search through all matching indices regardless
+              of whether they have data that matches the current time range.
+            </div>
+
+            <p class="help-block">
+              By default, searches against any time-based index pattern that
+              contains a wildcard will automatically be expanded to query only
+              the indices that contain data within the currently selected time
+              range.
+            </p>
+
+            <p class="help-block">
+              Searching against the index pattern <em>logstash-*</em> will
+              actually query elasticsearch for the specific matching indices
+              (e.g. <em>logstash-2015.12.21</em>) that fall within the current
+              time range.
+            </p>
+          </div>
+
+          <div class="form-group time-and-pattern">
             <label ng-if="index.isTimeBased">
               <input ng-model="index.nameIsPattern" type="checkbox">
               Use event times to create index names <small>[DEPRECATED]</small>
@@ -48,60 +124,6 @@
               ng-model="index.nameInterval"
               class="form-control">
             </select>
-          </div>
-
-          <div class="form-group">
-            <label>
-              Index name or pattern
-            </label>
-            <p class="help-block" ng-if="!index.nameIsPattern">Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*</p>
-            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern">Patterns allow you to define dynamic index names. Static text in an index name is denoted using brackets. Example: [logstash-]YYYY.MM.DD. Please note that weeks are setup to use ISO weeks which start on Monday. &mdash;
-              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/">Date Format Documentation</a></small></p>
-            <input
-              ng-model="index.name"
-              ng-attr-placeholder="{{index.defaultName}}"
-              ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
-              validate-index-name
-              allow-wildcard
-              name="name"
-              required
-              type="text"
-              class="form-control">
-              <small ng-show="index.nameInterval.name == 'weeks'">
-                <strong>Note: </strong>
-                I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
-                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
-              </small>
-            </div>
-
-          <div class="form-group" ng-if="canExpandIndices()">
-            <label>
-              <input ng-model="index.notExpandable" type="checkbox">
-              Do not expand index pattern when searching <small>(Not recommended)</small>
-            </label>
-
-            <div ng-if="index.notExpandable" class="alert alert-info">
-              This index pattern will be queried directly rather than being
-              expanded into more performant searches against individual indices.
-
-              Elasticsearch will receive a query against <em>{{index.name}}</em>
-              and will have to search through all matching indices regardless
-              of whether they have data that matches the current time range.
-            </div>
-
-            <p class="help-block">
-              By default, searches against any time-based index pattern that
-              contains a wildcard will automatically be expanded to query only
-              the indices that contain data within the currently selected time
-              range.
-            </p>
-
-            <p class="help-block">
-              Searching against the index pattern <em>logstash-*</em> will
-              actually query elasticsearch for the specific matching indices
-              (e.g. <em>logstash-2015.12.21</em>) that fall within the current
-              time range.
-            </p>
           </div>
 
           <section>
@@ -146,26 +168,6 @@
               </a>
             </div>
           </section>
-
-          <div class="form-group" ng-if="index.isTimeBased && !index.fetchFieldsError">
-            <label>
-              Time-field name
-              &nbsp;
-              <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
-              &nbsp;
-              <small>
-                <a ng-click="refreshFieldList();"> refresh fields</a>
-              </small>
-            </label>
-            <select
-              required
-              ng-if="!index.fetchFieldsError"
-              ng-options="field.name for field in index.dateFields"
-              ng-model="index.timeField"
-              auto-select-if-only-one="index.dateFields"
-              class="form-control">
-            </select>
-          </div>
 
           <button
             data-test-subj="submitCreateIndexPatternFromExistingForm"
