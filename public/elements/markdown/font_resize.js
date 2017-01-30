@@ -27,7 +27,7 @@ export default React.createClass({
       return {'font-size': fontSize + 'px', 'line-height': fontSize + 'px'};
     }
 
-    while (inner[0].scrollHeight < outer.height() && fontSize <= '100') {
+    while (inner[0].scrollHeight < outer.height() && fontSize <= this.props.max) {
       inner.css(getCSS(++fontSize));
     }
 
