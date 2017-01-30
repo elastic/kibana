@@ -79,7 +79,9 @@ const foreachProcessorDefinition = {
       processor: {}
     },
     field: '',
-    processor: {}
+    processor: {
+      __scope_link: '_processor'
+    }
   }
 };
 
@@ -328,6 +330,12 @@ const simulateUrlParamsDefinition = {
 };
 
 module.exports = function (api) {
+
+  // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
+  // may recursively use the autocomplete rules for any processor.
+  api.addEndpointDescription('_processor', {
+    data_autocomplete_rules: processorDefinition
+  });
 
   api.addEndpointDescription('_put_ingest_pipeline', {
     methods: ['PUT'],
