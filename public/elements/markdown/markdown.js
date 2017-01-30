@@ -6,7 +6,7 @@ import Remarkable from 'remarkable';
 import icon from './icon.svg';
 import FontResize from './font_resize';
 import _ from 'lodash';
-import './markdown.less';
+import stylesheet from '!!raw!./markdown.less';
 import handlebars from 'handlebars/dist/handlebars';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 
@@ -18,6 +18,7 @@ const md = new Remarkable('full', {
 });
 
 elements.push(new Element('markdown', {
+  stylesheet: stylesheet,
   displayName: 'markdown',
   icon: icon,
   args: [
@@ -31,6 +32,9 @@ elements.push(new Element('markdown', {
     new Arg('dataframe', {
       type: 'dataframe',
       default: (state) => _.keys(state.transient.dataframeCache)[0]
+    }),
+    new Arg('text_style', {
+      type: 'text_style',
     }),
   ],
   template: ({args}) => {
@@ -48,7 +52,9 @@ elements.push(new Element('markdown', {
     }
 
     return (
-      <FontResize><div className="rework--markdown" dangerouslySetInnerHTML={getContent()}></div></FontResize>
+      <FontResize max={_.get(args.text_style, 'object.fontSize')}>
+        <div className="rework--markdown" dangerouslySetInnerHTML={getContent()}></div>
+      </FontResize>
     );
   }
 }));
