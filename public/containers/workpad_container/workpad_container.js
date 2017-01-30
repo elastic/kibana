@@ -99,22 +99,30 @@ const DataframeDialog = React.createClass({
       );
     } else {
       return (
-        <Centered onMouseDown={this.select(null)}>
-          <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
-          <Workpad workpad={workpad}>
-              <PageManager
-                add={this.pageAdd}
-                remove={this.pageRemove}
-                pageCount={workpad.pages.length}
-                page={currentPage}
-                onPageChange={this.changePage}
-                workpad={workpad}
-                onWorkpadChange={this.changeWorkpad}>
-              </PageManager>
-              {stack}
-          </Workpad>
-          <Pager direction='next' handler={this.do(pageNext)}></Pager>
-        </Centered>
+        <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+            <div style={{overflow: 'auto'}}>
+              <div className="rework--workspace-upper" style={{textAlign: 'center', padding: '10px 0'}}>
+                <PageManager
+                  add={this.pageAdd}
+                  remove={this.pageRemove}
+                  pageCount={workpad.pages.length}
+                  page={currentPage}
+                  onPageChange={this.changePage}
+                  workpad={workpad}
+                  onWorkpadChange={this.changeWorkpad}>
+                </PageManager>
+              </div>
+              <div className="rework--workspace-lower" onMouseDown={this.select(null)}>
+                <Centered>
+                  <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
+                  <Workpad workpad={workpad}>
+                      {stack}
+                  </Workpad>
+                  <Pager direction='next' handler={this.do(pageNext)}></Pager>
+                </Centered>
+              </div>
+            </div>
+        </div>
       );
     }
   }

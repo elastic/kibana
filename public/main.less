@@ -9,11 +9,16 @@
   z-index: 10000;
 }
 
+// A bunch of disgusting hacks to make the editor and workspace scroll nicely
+.app-wrapper-panel, .application, .rework--application {
+  height: 100%;
+}
+
 .application { // Propogates flex all the way to our <react> element
   overflow: auto;
 
   &> * { flex-grow: 1; display: flex;
-    &> * { flex-grow: 1; display: flex; }}}
+    &> * { flex-grow: 1; display: flex; flex-direction: column}}}
 
 
 a {
