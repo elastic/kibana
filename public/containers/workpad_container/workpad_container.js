@@ -99,9 +99,9 @@ const DataframeDialog = React.createClass({
       );
     } else {
       return (
-        <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-            <div style={{overflow: 'auto'}}>
-              <div className="rework--workspace-upper" style={{textAlign: 'center', padding: '10px 0'}}>
+        <div style={{overflow: 'auto', flexGrow: 1, display: 'flex', flexDirection: 'column'}}>
+            <div style={{margin: 'auto'}}>
+              <div className="rework--workspace-upper" style={{textAlign: 'center', padding: '10px 0', height: '60px'}}>
                 <PageManager
                   add={this.pageAdd}
                   remove={this.pageRemove}
@@ -112,7 +112,7 @@ const DataframeDialog = React.createClass({
                   onWorkpadChange={this.changeWorkpad}>
                 </PageManager>
               </div>
-              <div className="rework--workspace-lower" onMouseDown={this.select(null)}>
+              <div className="rework--workspace-lower" onMouseDown={this.select(null)} style={{margin: 'auto'}}>
                 <Centered>
                   <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
                   <Workpad workpad={workpad}>
