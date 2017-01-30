@@ -5,8 +5,7 @@ import { connect } from 'react-redux';
 import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 
-import { elementSelect, elementTop, elementLeft, elementHeight,
-  elementWidth, elementAngle, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
+import { elementSelect, elementProps, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
 
 const ElementWrapper = React.createClass({
   select(id) {
@@ -27,17 +26,14 @@ const ElementWrapper = React.createClass({
       const {dispatch} = this.props;
       const {top, left, height, width} = e.interaction.absolute;
 
-      dispatch(elementTop(id, top));
-      dispatch(elementLeft(id, left));
-      dispatch(elementHeight(id, height));
-      dispatch(elementWidth(id, width));
+      dispatch(elementProps(id, {top, left, height, width}));
     };
   },
   rotate(id) {
     return (e) => {
       const {dispatch} = this.props;
       const {angle} = e.interaction.absolute;
-      dispatch(elementAngle(id, angle));
+      dispatch(elementProps(id, {angle}));
     };
   },
   setArg(arg, value) {

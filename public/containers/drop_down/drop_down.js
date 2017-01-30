@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
 import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import WorkpadList from 'plugins/rework/components/workpad_list';
-import {workpadLoad, workpadTime} from 'plugins/rework/state/actions/workpad';
+import {workpadLoad, workpadProps} from 'plugins/rework/state/actions/workpad';
 import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
 import Timepicker from 'plugins/rework/components/timepicker/timepicker';
 import './drop_down.less';
@@ -29,7 +29,7 @@ const DropDown = React.createClass({
   },
   updateTime(time) {
     const {dispatch} = this.props;
-    dispatch(workpadTime(time));
+    dispatch(workpadProps({time}));
     dispatch(dataframeResolveAll());
   },
   render() {

@@ -77,13 +77,13 @@ function rootReducer(state = {}, action) {
     return result;
   };
 
-  const setElement = (id, prop, value) => {
+  const setElement = (id, props) => {
     if (!state.persistent.elements[id]) return state;
     return setPersistent('elements', {
       ...state.persistent.elements,
       [id]: {
         ...state.persistent.elements[id],
-        [prop]: value
+        ...props
       }});
   };
 
@@ -107,14 +107,8 @@ function rootReducer(state = {}, action) {
       return setTransient('editor', false);
     case 'EDITOR_OPEN':
       return setTransient('editor', true);
-    case 'WORKPAD_HEIGHT':
+    case 'WORKPAD_PROPS':
       return setWorkpad('height', payload);
-    case 'WORKPAD_WIDTH':
-      return setWorkpad('width', payload);
-    case 'WORKPAD_NAME':
-      return setWorkpad('name', payload);
-    case 'WORKPAD_TIME':
-      return setWorkpad('time', payload);
     case 'WORKPAD_NEW':
       return newWorkpad();
     case 'WORKPAD_LOAD':
@@ -140,16 +134,8 @@ function rootReducer(state = {}, action) {
 
     case 'ELEMENT_SELECT':
       return setTransient('selectedElement', payload);
-    case 'ELEMENT_ANGLE':
-      return setElement(payload.id, 'angle', payload.value);
-    case 'ELEMENT_HEIGHT':
-      return setElement(payload.id, 'height', payload.value);
-    case 'ELEMENT_WIDTH':
-      return setElement(payload.id, 'width', payload.value);
-    case 'ELEMENT_TOP':
-      return setElement(payload.id, 'top', payload.value);
-    case 'ELEMENT_LEFT':
-      return setElement(payload.id, 'left', payload.value);
+    case 'ELEMENT_PROPS':
+      return setElement(payload.id, payload.value);
 
     case 'DATAFRAME_REMOVE':
       return removeDataframe(payload);

@@ -9,11 +9,8 @@ import { getElementTemplate } from '../templates';
 */
 
 export const elementSelect = createAction('ELEMENT_SELECT');
-export const elementHeight = createAction('ELEMENT_HEIGHT', mutateElement);
-export const elementWidth = createAction('ELEMENT_WIDTH', mutateElement);
-export const elementTop = createAction('ELEMENT_TOP', mutateElement);
-export const elementLeft = createAction('ELEMENT_LEFT', mutateElement);
-export const elementAngle = createAction('ELEMENT_ANGLE', mutateElement);
+export const elementProps = createAction('ELEMENT_PROPS', mutateElement);
+
 export const elementRemove = createAction('ELEMENT_REMOVE', (elementId, pageId) => {return {elementId, pageId};});
 export const elementLayer = createAction('ELEMENT_LAYER', (elementId, pageId, layer) => {return {elementId, pageId, layer};});
 

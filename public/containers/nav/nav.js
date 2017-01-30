@@ -4,7 +4,7 @@ import _ from 'lodash';
 import TopNav from 'plugins/rework/components/top_nav/top_nav';
 import NavButton from 'plugins/rework/components/nav_button/nav_button';
 import Editable from 'plugins/rework/components/editable/editable';
-import { workpadName, workpadNew } from 'plugins/rework/state/actions/workpad';
+import { workpadProps, workpadNew } from 'plugins/rework/state/actions/workpad';
 import { elementLayerMove } from 'plugins/rework/state/actions/element';
 import { dropdownToggle } from 'plugins/rework/state/actions/misc';
 import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
@@ -15,8 +15,8 @@ import './nav.less';
 
 
 const DataframeDialog = React.createClass({
-  nameWorkpad(value) {
-    this.props.dispatch(workpadName(value));
+  nameWorkpad(name) {
+    this.props.dispatch(workpadProps({name}));
   },
   newWorkpad() {
     this.props.dispatch(workpadNew());
