@@ -59,19 +59,6 @@ export default React.createClass({
       </div>
     );
 
-  /*
-  <a className="rework--page-manager-config fa fa-cog" id="configPopover" onClick={this.toggleConfig}></a>
-  <Popover placement="bottom" isOpen={this.state.popover} target="configPopover" toggle={this.toggle}>
-    <PopoverContent>
-      <PageProperties onChange={onPageChange} page={page}></PageProperties>
-      <hr/>
-      <WorkpadProperties onChange={onWorkpadChange} workpad={workpad}></WorkpadProperties>
-
-      <button className="btn btn-success" onClick={this.toggleConfig}>Done</button>
-    </PopoverContent>
-  </Popover>
-  */
-
     const popoverId = uuid();
     return !popover ? picker : (
       <div>
