@@ -45,6 +45,7 @@ module.exports = function (kibana) {
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
         'plugins/rework/elements/image/image',
+        'plugins/rework/elements/number/number',
         'plugins/rework/elements/markdown/markdown',
         'plugins/rework/elements/table/table',
         'plugins/rework/elements/timechart/timechart',
