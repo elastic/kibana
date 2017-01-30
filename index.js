@@ -31,6 +31,8 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',
+        'plugins/rework/arg_types/text_style/text_style',
+
         'plugins/rework/arg_types/dataframe/dataframe',
         'plugins/rework/arg_types/dataframe_column/dataframe_column',
 
