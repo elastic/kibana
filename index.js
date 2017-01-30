@@ -29,6 +29,8 @@ module.exports = function (kibana) {
 
         // Then argument types
         'plugins/rework/arg_types/string/string',
+        'plugins/rework/arg_types/image/image',
+        'plugins/rework/arg_types/select/select',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',
         'plugins/rework/arg_types/text_style/text_style',
@@ -42,6 +44,7 @@ module.exports = function (kibana) {
         // it must declare that requirement in the "require" property above. Neat.
         'plugins/rework/elements/json/json',
         'plugins/rework/elements/box/box',
+        'plugins/rework/elements/image/image',
         'plugins/rework/elements/markdown/markdown',
         'plugins/rework/elements/table/table',
         'plugins/rework/elements/timechart/timechart',
