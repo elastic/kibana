@@ -5,11 +5,15 @@ import elements from 'plugins/rework/elements/elements';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import icon from './icon.svg';
 import FontResize from 'plugins/rework/components/font_resize/font_resize';
+import GridBlocks from 'plugins/rework/components/grid_blocks/grid_blocks';
+import stylesheet from '!!raw!./number.less';
+
 
 import Arg from 'plugins/rework/arg_types/arg';
 
 elements.push(new Element('number', {
   displayName: 'Number',
+  stylesheet: stylesheet,
   icon: icon,
   args: [
     new Arg('dataframe', {
@@ -29,34 +33,46 @@ elements.push(new Element('number', {
         choices: ['sum', 'min', 'max', 'avg', 'last']
       }
     }),
-    new Arg('group_by', {
+    new Arg('label_by', {
       type: 'dataframe_column',
     }),
-
+    new Arg('value_style', {
+      type: 'text_style',
+    }),
+    new Arg('label_style', {
+      type: 'text_style',
+    }),
+    new Arg('layout', {
+      type: 'select',
+      default: 'row',
+      options: {
+        choices: ['row', 'column']
+      }
+    }),
   ],
   template: ({args}) => {
-    if (!_.get(args.dataframe, 'aggregate')) return (<div></div>);
+    if (!_.get(args.dataframe, `aggregate.${args.aggregate_with}`)) return (<div></div>);
 
     let content;
-    if (!args.group_by.length) {
-      content = args.dataframe.aggregate[args.aggregate_with](args.column);
+    if (!_.get(args, 'label_by.length')) {
+      content = (
+        <div>
+          {args.dataframe.aggregate[args.aggregate_with](args.column)}
+        </div>
+      );
     } else {
-      content = _.map(args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.column), (val, key) => {
-        return (
-          <div key={key}>
-            {val}<br/>
-            <small>{key}</small>
-          </div>
-        );
-      });
+      content = (
+        <div style={{display: 'flex', flexDirection: args.layout, flexRow: 1, flexBasis: 0}}>
+          {_.map(args.dataframe.aggregate.by(args.label_by)[args.aggregate_with](args.column), (val, key) => (
+            <div style={{width: '100%', height: '100%'}} key={key}>
+              <div className="rework--number-value">{val}</div>
+              <div className="rework--number-label">{key}</div>
+            </div>
+          ))}
+        </div>
+      );
     }
 
-    return (
-      <FontResize>
-        <div style={{display: 'inline-block'}}>
-          {content}
-        </div>
-      </FontResize>
-    );
+    return (<div style={{height: '100%', width: '100%'}}>{content}</div>);
   }
 }));

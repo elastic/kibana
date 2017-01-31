@@ -42,6 +42,7 @@
     "rc-tooltip": "^3.4.2",
     "react": "^15.4.2",
     "react-color": "^2.11.1",
+    "react-container-dimensions": "^1.3.0",
     "react-dom": "^15.4.1",
     "react-dropzone": "^3.9.2",
     "react-redux": "^5.0.1",
