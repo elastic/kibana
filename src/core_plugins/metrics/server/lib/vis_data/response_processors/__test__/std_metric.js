@@ -47,6 +47,23 @@ describe('stdMetric(resp, panel, series)', () => {
     expect(next.calledOnce).to.equal(true);
   });
 
+  it('calls next when finished (percentile)', () => {
+    series.metrics[0].type = 'percentile';
+    const next = sinon.spy(d => d);
+    const results = stdMetric(resp, panel, series)(next)([]);
+    expect(next.calledOnce).to.equal(true);
+    expect(results).to.have.length(0);
+  });
+
+  it('calls next when finished (std_deviation band)', () => {
+    series.metrics[0].type = 'std_deviation';
+    series.metrics[0].mode = 'band';
+    const next = sinon.spy(d => d);
+    const results = stdMetric(resp, panel, series)(next)([]);
+    expect(next.calledOnce).to.equal(true);
+    expect(results).to.have.length(0);
+  });
+
   it('creates a series', () => {
     const next = results => results;
     const results = stdMetric(resp, panel, series)(next)([]);

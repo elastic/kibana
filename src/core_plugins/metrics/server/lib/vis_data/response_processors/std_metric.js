@@ -10,19 +10,20 @@ export default function stdMetric(resp, panel, series) {
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
       return next(results);
     }
-    if (_.includes(basicAggs, metric.type)) {
-      const decoration = getDefaultDecoration(series);
-      getSplits(resp, series).forEach((split) => {
-        const data = split.timeseries.buckets.map(mapBucket(metric));
-        results.push({
-          id: `${split.id}`,
-          label: split.label,
-          color: split.color,
-          data,
-          ...decoration
-        });
-      });
+    if (metric.type === 'percentile') {
+      return next(results);
     }
+    const decoration = getDefaultDecoration(series);
+    getSplits(resp, series).forEach((split) => {
+      const data = split.timeseries.buckets.map(mapBucket(metric));
+      results.push({
+        id: `${split.id}`,
+        label: split.label,
+        color: split.color,
+        data,
+        ...decoration
+      });
+    });
     return next(results);
   };
 }
