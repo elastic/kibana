@@ -18,4 +18,4 @@ export default createExample([{
   ),
   html: require('./event_menu.html'),
   hasDarkTheme: false,
-},]);
+}]);

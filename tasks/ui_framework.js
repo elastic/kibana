@@ -13,7 +13,7 @@ module.exports = function (grunt) {
 
   function uiFrameworkServerStart() {
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server' : './node_modules/.bin/webpack-dev-server',
+      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=ui_framework/doc_site/webpack.config.js',
         '--hot ',

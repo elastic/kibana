@@ -62,14 +62,20 @@
     </div>
 
     <!-- NoResults -->
-    <div ng-if="!listingController.items.length && listingController.filter" class="kuiPanel kuiPanel--centered">
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && listingController.filter"
+    >
       <div class="kuiNoItems">
         No dashboards matched your search.
       </div>
     </div>
 
     <!-- PromptForItems -->
-    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length && !listingController.filter">
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && !listingController.filter"
+    >
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
           Looks like you don&rsquo;t have any dashboards. Let&rsquo;s add some!

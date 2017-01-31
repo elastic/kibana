@@ -41,9 +41,9 @@ uiModules.get('kibana')
       }
     },
     controllerAs: 'paginate',
-    controller: function ($scope) {
-      let self = this;
-      let ALL = 0;
+    controller: function ($scope, $document) {
+      const self = this;
+      const ALL = 0;
 
       self.sizeOptions = [
         { title: '10', value: 10 },
@@ -96,6 +96,10 @@ uiModules.get('kibana')
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
         }
+      };
+
+      self.goToTop = function goToTop() {
+        $document.scrollTop(0);
       };
 
       self.renderList = function () {

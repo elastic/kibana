@@ -1,6 +1,9 @@
 
 import Slugify from '../string/slugify';
 
+import ActionItemExample
+  from '../../views/action_item/action_item_example.jsx';
+
 import BarExample
   from '../../views/bar/bar_example.jsx';
 
@@ -31,6 +34,9 @@ import LocalNavExample
 import MenuExample
   from '../../views/menu/menu_example.jsx';
 
+import MenuButtonExample
+  from '../../views/menu_button/menu_button_example.jsx';
+
 import MicroButtonExample
   from '../../views/micro_button/micro_button_example.jsx';
 
@@ -60,6 +66,9 @@ import VerticalRhythmExample
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'ActionItem',
+  component: ActionItemExample,
+}, {
   name: 'Bar',
   component: BarExample,
 }, {
@@ -89,6 +98,9 @@ const components = [{
 }, {
   name: 'Menu',
   component: MenuExample,
+}, {
+  name: 'MenuButton',
+  component: MenuButtonExample,
 }, {
   name: 'MicroButton',
   component: MicroButtonExample,
