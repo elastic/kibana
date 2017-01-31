@@ -27,12 +27,12 @@ doc-table {
         background-color: @panel-bg;
         white-space: nowrap;
         right: 0;
-        visibility: hidden;
+        display: none;
       }
 
       &:hover {
         .table-cell-filter {
-          visibility: visible;
+          display: inline;
         }
       }
     }
@@ -58,6 +58,7 @@ doc-table {
 .docTableRowFilterIcon {
   font-size: 14px;
   line-height: 1; /* 1 */
+  display: inline;
 
   & + & {
     margin-left: 5px;
