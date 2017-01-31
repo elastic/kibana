@@ -17,12 +17,13 @@ export default React.createClass({
   },
   componentWillReceiveProps(nextProps) {},
   resize() {
+    const {height, width, target} = this.props;
+
     const outer = $(this.refs.outer);
-    const inner = $(outer.children()[0]);
+    const inner = target ? $(target, outer) : $(outer.children()[0]);
     if (inner.height() === 0) return;
 
     const max = this.props.max || Infinity;
-
 
     // Make the font really big
     var fontSize = inner.css('font-size');
@@ -40,12 +41,26 @@ export default React.createClass({
 
     if (!inner[0]) return;
 
-    while (inner[0].scrollHeight < outer.height() && inner[0].scrollWidth < outer.width() && fontSize <= max) {
+    function shouldBeBigger() {
+      if (width && height) return (inner[0].scrollHeight < outer.height() && inner[0].scrollWidth < outer.width());
+      if (height) return (inner[0].scrollHeight < outer.height());
+      if (width) return (inner[0].scrollWidth < outer.width());
+      return false;
+    }
+
+    function shouldBeSmaller() {
+      if (width && height) return (inner[0].scrollHeight > outer.height() || inner[0].scrollWidth > outer.width());
+      if (height) return (inner[0].scrollHeight > outer.height());
+      if (width) return (inner[0].scrollWidth > outer.width());
+      return false;
+    }
+
+    while (shouldBeBigger() && fontSize <= max) {
       inner.css(getCSS(++fontSize));
     }
 
     // Ok, now make it just small enough
-    while ((inner[0].scrollHeight > outer.height() || inner[0].scrollWidth > outer.width()) && fontSize > 1) {
+    while (shouldBeSmaller() && fontSize > 1) {
       inner.css(getCSS(--fontSize));
     }
   },
@@ -63,7 +78,7 @@ export default React.createClass({
     };
 
     return (
-      <div ref="outer" style={outerStyle}>{children}</div>
+      <div ref="outer" className="rework--font-resize" style={outerStyle}>{children}</div>
     );
   }
 });
