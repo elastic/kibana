@@ -11,6 +11,11 @@ import processors from './response_processors';
 
 export default function handleResponseBody(panel) {
   return resp => {
+    if (resp.error) {
+      const err = new Error(resp.error.type);
+      err.response = JSON.stringify(resp);
+      throw err;
+    }
     const keys = Object.keys(resp.aggregations);
     if (keys.length !== 1) throw Error('There should only be one series per request.');
     const seriesId = keys[0];
