@@ -1,7 +1,9 @@
 .kuiPanel {
-  border-left: $tableBorder;
-  border-right: $tableBorder;
-  border-bottom: $tableBorder;
+  border: $tableBorder;
+}
+
+.kuiPanel--withHeader {
+  border-top: none;
 }
 
 .kuiPanel--centered {
