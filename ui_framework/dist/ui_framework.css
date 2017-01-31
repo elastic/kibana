@@ -1223,9 +1223,10 @@ body {
   line-height: 1.5; }
 
 .kuiPanel {
-  border-left: 2px solid #E4E4E4;
-  border-right: 2px solid #E4E4E4;
-  border-bottom: 2px solid #E4E4E4; }
+  border: 2px solid #E4E4E4; }
+
+.kuiPanel--withHeader {
+  border-top: none; }
 
 .kuiPanel--centered {
   display: -webkit-box;
