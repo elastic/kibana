@@ -13,8 +13,8 @@ function rootReducer(state = {}, action) {
     return {...state, persistent: {...state.persistent, [prop]: value}};
   };
 
-  const setWorkpad = (prop, value) => {
-    return setPersistent('workpad', {...state.persistent.workpad, [prop]: value});
+  const setWorkpad = (props) => {
+    return setPersistent('workpad', {...state.persistent.workpad, ...props});
   };
 
   const addPage = (page) => {
@@ -108,7 +108,7 @@ function rootReducer(state = {}, action) {
     case 'EDITOR_OPEN':
       return setTransient('editor', true);
     case 'WORKPAD_PROPS':
-      return setWorkpad('height', payload);
+      return setWorkpad(payload);
     case 'WORKPAD_NEW':
       return newWorkpad();
     case 'WORKPAD_LOAD':
