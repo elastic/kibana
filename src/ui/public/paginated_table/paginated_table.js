@@ -14,6 +14,7 @@ uiModules
     scope: {
       rows: '=',
       columns: '=',
+      linkToTop: '=',
       perPage: '=?',
       showBlankRows: '=?',
       sortHandler: '=?',
