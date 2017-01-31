@@ -1,0 +1,87 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ * 3. Make the button just tall enough to fit inside an Option Layout.
+ */
+.kuiMenuButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 10px; /* 3 */
+  font-size: 12px;
+  font-weight: 400;
+  line-height: $lineHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $buttonBorderRadius;
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none; /* 2 */
+  }
+
+  &:active:enabled {
+    transform: translateY(1px);
+  }
+
+  &:focus {
+    @include focus;
+  }
+}
+
+.kuiMenuButton--iconText {
+  .kuiMenuButton__icon {
+    &:first-child {
+      margin-right: 4px;
+    }
+
+    &:last-child {
+      margin-left: 4px;
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiMenuButton--basic {
+  color: #5a5a5a;
+  background-color: #ffffff;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: #5a5a5a !important; /* 1 */
+  }
+
+  &:hover:enabled,
+  &:active:enabled {
+    background-color: #F2F2F2;
+  }
+
+  &:disabled {
+    color: #9B9B9B;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiMenuButton--danger {
+  color: #D76051;
+  background-color: #ffffff;
+
+  &:hover:enabled,
+  &:active:enabled {
+    color: #FFFFFF !important; /* 1 */
+    background-color: #D76051;
+  }
+
+  &:disabled {
+    color: #9B9B9B;
+  }
+
+  &:focus {
+    @include focus($focusDangerColor);
+  }
+}
