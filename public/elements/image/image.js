@@ -9,10 +9,7 @@ elements.push(new Element('image', {
   icon: icon,
   args: [
     new Arg('image', {
-      type: 'image',
-      default: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiA' +
-    'xNiI+PHBhdGggZD0iTTggMkE0IDQgMCAwIDAgNCA2SDVBMyAzIDAgMCAxIDggMyAzIDMgMCAwIDEgMTEgNiAzIDMgMCAwIDEgOCA5SDdWMTJI' +
-    'OFYxMEE0IDQgMCAwIDAgMTIgNiA0IDQgMCAwIDAgOCAyTTcgMTNWMTRIOFYxM0g3IiBmaWxsPSIjNGQ0ZDRkIi8+PC9zdmc+'
+      type: 'image'
     }),
     new Arg('mode', {
       type: 'select',
