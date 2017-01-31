@@ -16,15 +16,15 @@ application this is the `ContextAppController::state` object.
 consistency, it does little to make the state changes easier to reason about.
 To avoid having state mutations scattered all over the code, this app
 implements a unidirectional data flow architecture. That means that the state
-is treated as immutable throughout the application and a new state may only be
-derived via the root reducer (see below).
+is treated as immutable throughout the application except for actions, which
+may modify it to cause angular to re-render and watches to trigger.
 
 **Unit-Testability**: Creating unit tests for large parts of the UI code is
-made easy by expressing the state management logic mostly as side-effect-free
-functions. The only place where side-effects are allowed are action creators
-and the reducer middlewares. Due to the nature of AngularJS a certain amount of
-impure code must be employed in some cases, e.g. when dealing with the isolate
-scope bindings in `ContextAppController`.
+made easy by expressing the as much of the logic as possible as
+side-effect-free functions. The only place where side-effects are allowed are
+actions. Due to the nature of AngularJS a certain amount of impure code must be
+employed in some cases, e.g. when dealing with the isolate scope bindings in
+`ContextAppController`.
 
 **Loose Coupling**: An attempt was made to couple the parts that make up this
 app as loosely as possible. This means using pure functions whenever possible
@@ -50,48 +50,21 @@ from the redux architecture that forms a ciruclar unidirectional data flow:
   |  v
   |  |* state
   |  v
-  |  |* selectors calculate derived (memoized) values
+  |  |* angular templates render state
   |  v
-  |  |* angular templates render values
+  |  |* angular calls actions in response to user action/system events
   |  v
-  |  |* angular dispatches actions in response to user action/system events
-  |  v
-  |  |* middleware processes the action
-  |  v
-  |  |* reducer derives new state from action
+  |  |* actions modify state
   |  v
   +--+
 
 ```
 
 **State**: The state is the single source of truth at
-`ContextAppController::state` and may only be replaced by a new state create
-via the root reducer.
+`ContextAppController::state` and may only be modified by actions.
 
-**Reducer**: The reducer at `ContextAppController.reducer` can derive a new
-state from the previous state and an action. It must be a pure function and can
-be composed from sub-reducers using various utilities like
-`createReducerPipeline`, that passes the action and the previous sub-reducer's
-result to each sub-reducer in order. The reducer is only called by the dispatch
-function located at `ContextAppController::dispatch`.
-
-**Action**: Actions are objets that describe user or system actions in a
-declarative manner. Each action is supposed to be passed to
-`ContextAppController::dispatch`, that passes them to each of its middlewares
-in turn before calling the root reducer with the final action. Usually, actions
-are created using helper functions called action creators to ensure they adhere
-to the [Flux Standard Action] schema.
-
-[Flux Standard Action]: https://github.com/acdlite/flux-standard-action
-
-**Selector**: To decouple the view from the specific state structure, selectors
-encapsulate the knowledge about how to retrieve a particular set of values from
-the state in a single location. Additionally, selectors can encapsulate the
-logic for calculating derived properties from the state, which should be kept
-as flat as possible and free of duplicate information. The performance penalty
-for performing these calculations at query time is commonly circumvented by
-memoizing the selector results as is the case with `createSelector` from
-[redux_lite/selector_helpers.js](./redux_lite/selector_helpers.js).
+**Action**: Actions are functions that are called inreponse user or system
+actions and may modified the state the are bound to via their closure.
 
 
 ## Directory Structure
@@ -122,6 +95,3 @@ create and execute the queries for the preceeding and succeeding documents.
 
 **api/utils**: Exports various functions used to create and transform
 queries.
-
-**redux_lite**: Exports various functions to create the dispatcher, action
-creators, reducers and selectors.
