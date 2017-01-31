@@ -67,6 +67,7 @@ module.factory('SavedDashboard', function (courier, config) {
     }
   };
 
+  // Order these fields to the top, the rest are alphabetical
   SavedDashboard.fieldOrder = ['title', 'description'];
 
   SavedDashboard.searchsource = true;
