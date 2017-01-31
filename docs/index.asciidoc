@@ -4,7 +4,7 @@
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-:release-state:  unreleased
+:release-state:  released
 :version:        5.2.0
 :major-version:  5.x
 :branch:         5.2
