@@ -24,22 +24,13 @@ export class PanelUtils {
   /**
    * Ensures that the panel object has the latest size/pos info.
    * @param {PanelState} panel
+   * @param {Element} panelElement - jQuery element representing the element in the UI
    */
-  static refreshSizeAndPosition(panel) {
-    const data = panel.$el.coords().grid;
+  static refreshSizeAndPosition(panel, panelElement) {
+    const data = panelElement.coords().grid;
     panel.size_x = data.size_x;
     panel.size_y = data.size_y;
     panel.col = data.col;
     panel.row = data.row;
-  }
-
-  /**
-   * $el is a circular structure because it contains a reference to it's parent panel,
-   * so it needs to be removed before it can be serialized (we also don't
-   * want it to show up in the url).
-   * @param {PanelState} panel
-   */
-  static makeSerializeable(panel) {
-    delete panel.$el;
   }
 }
