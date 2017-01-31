@@ -18,6 +18,26 @@ doc-table {
     word-break: break-word;
   }
 
+  .discover-table-row {
+    td {
+      position: relative;
+
+      .table-cell-filter {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.75);
+        white-space: nowrap;
+        right: 0;
+        visibility: hidden;
+      }
+
+      &:hover {
+        .table-cell-filter {
+          visibility: visible;
+        }
+      }
+    }
+  }
+
   .loading {
     opacity: @loading-opacity;
   }
@@ -29,5 +49,17 @@ doc-table {
     right: 0;
     z-index: 20;
     opacity: @loading-opacity;
+  }
+}
+
+/**
+ * 1. Align icon with text in cell.
+ */
+.docTableRowFilterIcon {
+  font-size: 14px;
+  line-height: 1; /* 1 */
+
+  & + & {
+    margin-left: 5px;
   }
 }
