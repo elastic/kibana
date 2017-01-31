@@ -74,13 +74,15 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       const panelElementMapping = {};
 
       // Tell gridster to remove the panel, and cleanup our metadata
-      function removePanelFromGrid(panelElement, silent) {
+      function removePanelFromGrid(panelIndex, silent) {
+        const panelElement = panelElementMapping[panelIndex];
         // remove from grister 'silently' (don't reorganize after)
         gridster.remove_widget(panelElement, silent);
+        delete panelElementMapping[panelIndex];
       }
 
       $scope.removePanel = (panelIndex) => {
-        removePanelFromGrid(panelElementMapping[panelIndex]);
+        removePanelFromGrid(panelIndex);
         $scope.onPanelRemoved(panelIndex);
       };
 
@@ -151,7 +153,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             const panelElement = panelElementMapping[widget.panelIndex];
             // stop any animations
             panelElement.stop();
-            removePanelFromGrid(panelElement, true);
+            removePanelFromGrid(widget.panelIndex, true);
           });
         });
 
