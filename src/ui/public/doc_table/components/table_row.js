@@ -9,7 +9,8 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import uiModules from 'ui/modules';
-let module = uiModules.get('app/discover');
+import FilterManagerProvider from 'ui/filter_manager';
+const module = uiModules.get('app/discover');
 
 
 
@@ -24,9 +25,10 @@ let MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile) {
-  let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
-  let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Private) {
+  const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
+  const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const filterManager = Private(FilterManagerProvider);
 
   return {
     restrict: 'A',
@@ -83,27 +85,44 @@ module.directive('kbnTableRow', function ($compile) {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
+      $scope.inlineFilter = function inlineFilter($event, type) {
+        const column = $($event.target).data().column;
+        const field = $scope.indexPattern.fields.byName[column];
+        $scope.indexPattern.popularizeField(field, 1);
+        filterManager.add(field, $scope.flattenedRow[column], type, $scope.indexPattern.id);
+      };
+
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
-        let indexPattern = $scope.indexPattern;
+        const indexPattern = $scope.indexPattern;
+        $scope.flattenedRow = indexPattern.flattenHit(row);
 
         // We just create a string here because its faster.
         let newHtmls = [
           openRowHtml
         ];
 
+        const mapping = indexPattern.fields.byName;
         if (indexPattern.timeFieldName) {
           newHtmls.push(cellTemplate({
             timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName)
+            formatted: _displayField(row, indexPattern.timeFieldName),
+            filterable: mapping[indexPattern.timeFieldName].filterable,
+            column: indexPattern.timeFieldName
           }));
         }
 
         $scope.columns.forEach(function (column) {
+          const isFilterable = $scope.flattenedRow[column] !== undefined
+            && mapping[column]
+            && mapping[column].filterable;
+
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
-            formatted: _displayField(row, column, true)
+            formatted: _displayField(row, column, true),
+            filterable: isFilterable,
+            column
           }));
         });
 
@@ -128,7 +147,7 @@ module.directive('kbnTableRow', function ($compile) {
           // rebuild cells since we modified the children
           $cells = $el.children();
 
-          if (i === 0 && !reuse) {
+          if (!reuse) {
             $toggleScope = $scope.$new();
             $compile($target)($toggleScope);
           }
@@ -160,4 +179,4 @@ module.directive('kbnTableRow', function ($compile) {
       }
     }
   };
-});
+}]);
