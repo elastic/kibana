@@ -51,8 +51,8 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
       function cantLookup() {
         const display = {};
         _.each(['from', 'to'], function (time) {
-          if (moment.isMoment($scope[time])) {
-            display[time] = $scope[time].format(dateFormat);
+          if (moment($scope[time]).isValid()) {
+            display[time] = moment($scope[time]).format(dateFormat);
           } else {
             if ($scope[time] === 'now') {
               display[time] = 'now';
@@ -71,4 +71,3 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
     }
   };
 });
-

@@ -17,7 +17,7 @@
  */
 /**
  * 1. Put 10px of space between each child.
- * 2. If there is only one child, align it to the right. If you wanted it aligned right, you
+ * 2. If there is only one section, align it to the right. If you wanted it aligned right, you
  *    wouldn't use the Bar in the first place.
  * 3. Children in the middle should center their content.
  * 4. Fix an IE bug which causes the last child to overflow the container.
@@ -28,6 +28,20 @@
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
+
+.kuiActionItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
 
 .kuiBar {
   display: -webkit-box;
@@ -82,7 +96,7 @@ body {
     /* 5 */ }
   .kuiBarSection:only-child {
     margin-left: auto;
-    /* 1 */ }
+    /* 2 */ }
   .kuiBarSection > * + * {
     margin-left: 10px;
     /* 1 */ }
@@ -228,6 +242,37 @@ body {
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
   margin-left: 2px; }
+
+.kuiEvent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiEventSymbol {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-right: 8px; }
+
+.kuiEventBody {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%; }
+
+.kuiEventBody__message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #191E23; }
+
+.kuiEventBody__metadata {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #9fa3a7; }
 
 /**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
@@ -399,6 +444,71 @@ body {
     opacity: 0.4;
     cursor: not-allowed; }
 
+.kuiHeaderBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
+  border-bottom: 2px solid #E4E4E4; }
+
+/**
+ * 1. Align a single section to the left by default.
+ */
+.kuiHeaderBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiHeaderBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiHeaderBarSection:first-child {
+    margin-left: 0; }
+  .kuiHeaderBarSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiHeaderBarSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiHeaderBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiHeaderBarSection:only-child {
+    margin-left: 0;
+    /* 1 */ }
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -417,21 +527,86 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* 1 */ }
 
+.kuiIcon--info {
+  color: #3fa8c7; }
+
 .kuiIcon--success {
   color: #417505; }
 
 .kuiIcon--warning {
-  color: #ffac15; }
+  color: #ec9800; }
 
 .kuiIcon--error {
   color: #D86051; }
 
+.kuiIcon--inactive {
+  color: #c3c3c3; }
+
 .kuiInfoPanel {
-  padding: 20px;
+  padding: 14px 20px 18px;
+  line-height: 1.5;
+  border: 2px solid; }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--info {
+  border-color: rgba(63, 168, 199, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--success {
+  border-color: rgba(65, 117, 5, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--warning {
+  border-color: rgba(236, 152, 0, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--error {
+  border-color: rgba(216, 96, 81, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. Align with first line of title text if it wraps.
+ */
+.kuiInfoPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  /* 1 */ }
+
+.kuiInfoPanelHeader__icon {
+  margin-right: 10px;
+  font-size: 14px;
   line-height: 1.5; }
 
-.kuiInfoPanel--warning {
-  background-color: #FFF6E4; }
+.kuiInfoPanelHeader__title {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700; }
+
+.kuiInfoPanelBody {
+  margin-top: 8px; }
+  .kuiInfoPanelBody > * + * {
+    margin-top: 8px; }
+
+.kuiInfoPanelBody__message {
+  font-size: 14px;
+  line-height: 1.5; }
 
 .kuiLink {
   color: #3CAED2;
@@ -838,6 +1013,100 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+.kuiMenu--contained {
+  border: 1px solid #E4E4E4; }
+  .kuiMenu--contained .kuiMenuItem {
+    padding: 6px 10px; }
+
+.kuiMenuItem {
+  padding: 6px 0; }
+  .kuiMenuItem + .kuiMenuItem {
+    border-top: 1px solid #E4E4E4; }
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ * 3. Make the button just tall enough to fit inside an Option Layout.
+ */
+.kuiMenuButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 10px;
+  /* 3 */
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px; }
+  .kuiMenuButton:disabled {
+    cursor: default;
+    pointer-events: none;
+    /* 2 */ }
+  .kuiMenuButton:active:enabled {
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
+  .kuiMenuButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+
+.kuiMenuButton--iconText .kuiMenuButton__icon:first-child {
+  margin-right: 4px; }
+
+.kuiMenuButton--iconText .kuiMenuButton__icon:last-child {
+  margin-left: 4px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiMenuButton--basic {
+  color: #5a5a5a;
+  background-color: #ffffff; }
+  .kuiMenuButton--basic:focus {
+    color: #5a5a5a !important;
+    /* 1 */ }
+  .kuiMenuButton--basic:hover:enabled, .kuiMenuButton--basic:active:enabled {
+    background-color: #F2F2F2; }
+  .kuiMenuButton--basic:disabled {
+    color: #9B9B9B; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiMenuButton--danger {
+  color: #D76051;
+  background-color: #ffffff; }
+  .kuiMenuButton--danger:hover:enabled, .kuiMenuButton--danger:active:enabled {
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #D76051; }
+  .kuiMenuButton--danger:disabled {
+    color: #9B9B9B; }
+  .kuiMenuButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */ }
+
+.kuiMenuButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiMenuButtonGroup .kuiMenuButton + .kuiMenuButton {
+    margin-left: 4px; }
+
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -954,9 +1223,10 @@ body {
   line-height: 1.5; }
 
 .kuiPanel {
-  border-left: 2px solid #E4E4E4;
-  border-right: 2px solid #E4E4E4;
-  border-bottom: 2px solid #E4E4E4; }
+  border: 2px solid #E4E4E4; }
+
+.kuiPanel--withHeader {
+  border-top: none; }
 
 .kuiPanel--centered {
   display: -webkit-box;
@@ -1040,6 +1310,31 @@ body {
 
 .kuiPromptForItems__actions {
   margin-top: 10px; }
+
+.kuiStatusText {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline; }
+
+.kuiStatusText--info {
+  color: #3fa8c7; }
+
+.kuiStatusText--success {
+  color: #417505; }
+
+.kuiStatusText--warning {
+  color: #ec9800; }
+
+.kuiStatusText--error {
+  color: #D86051; }
+
+.kuiStatusText__icon {
+  margin-right: 6px; }
 
 /**
  * 1. Make seamless transition from ToolBar to Table header.
@@ -1258,7 +1553,7 @@ body {
     /* 5 */ }
   .kuiToolBarSection:only-child {
     margin-left: auto;
-    /* 1 */ }
+    /* 2 */ }
   .kuiToolBarSection > * + * {
     margin-left: 10px;
     /* 1 */ }
@@ -1327,7 +1622,7 @@ body {
     /* 5 */ }
   .kuiToolBarFooterSection:only-child {
     margin-left: auto;
-    /* 1 */ }
+    /* 2 */ }
   .kuiToolBarFooterSection > * + * {
     margin-left: 10px;
     /* 1 */ }
@@ -1424,6 +1719,18 @@ body {
   /* 1 */
   color: #191E23;
   font-size: 18px; }
+
+/**
+ * 1. Override p.
+ */
+.kuiText {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  line-height: 1.5;
+  font-size: 14px; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }

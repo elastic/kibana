@@ -11,6 +11,11 @@ const module = uiModules.get('kibana');
  * @property {String=} cancelButtonText
  * @property {function} onConfirm
  * @property {function=} onCancel
+ * @property {String=} title - If given, shows a title on the confirm modal. A title must be given if
+ * showClose is true, for aesthetic reasons.
+ * @property {Boolean=} showClose - If true, shows an [x] icon close button which by default is a noop
+ * @property {function=} onClose - Custom close button to call if showClose is true. If not supplied
+ * but showClose is true, the function defaults to onCancel.
  */
 
 module.factory('confirmModal', function ($rootScope, $compile) {
@@ -23,14 +28,24 @@ module.factory('confirmModal', function ($rootScope, $compile) {
   return function confirmModal(message, customOptions) {
     const defaultOptions = {
       onCancel: noop,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: 'Cancel',
+      showClose: false
     };
+
+    if (customOptions.showClose === true && !customOptions.title) {
+      throw new Error('A title must be supplied when a close icon is shown');
+    }
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
       throw new Error('Please specify confirmation button text and onConfirm action');
     }
 
     const options = Object.assign(defaultOptions, customOptions);
+
+    // Special handling for onClose - if no specific callback was supplied, default to the
+    // onCancel callback.
+    options.onClose = customOptions.onClose || options.onCancel;
+
     if (modalPopover) {
       throw new Error('You\'ve called confirmModal but there\'s already a modal open. ' +
         'You can only have one modal open at a time.');
@@ -41,6 +56,8 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     confirmScope.message = message;
     confirmScope.confirmButtonText = options.confirmButtonText;
     confirmScope.cancelButtonText = options.cancelButtonText;
+    confirmScope.title = options.title;
+    confirmScope.showClose = options.showClose;
     confirmScope.onConfirm = () => {
       destroy();
       options.onConfirm();
@@ -48,6 +65,10 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     confirmScope.onCancel = () => {
       destroy();
       options.onCancel();
+    };
+    confirmScope.onClose = () => {
+      destroy();
+      options.onClose();
     };
 
     const modalInstance = $compile(template)(confirmScope);

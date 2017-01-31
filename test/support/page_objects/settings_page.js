@@ -286,8 +286,11 @@ export default class SettingsPage {
       await this.clickDeletePattern();
     });
     await PageObjects.common.try(async () => {
-      PageObjects.common.debug('acceptConfirmation');
+      PageObjects.common.debug('getAlertText');
       alertText = await PageObjects.common.findTestSubject('confirmModalBodyText').getVisibleText();
+    });
+    await PageObjects.common.try(async () => {
+      PageObjects.common.debug('acceptConfirmation');
       await PageObjects.common.findTestSubject('confirmModalConfirmButton')
         .click();
     });

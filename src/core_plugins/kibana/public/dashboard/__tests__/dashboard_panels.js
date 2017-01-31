@@ -19,7 +19,18 @@ describe('dashboard panels', function () {
 
       $el = angular.element(`
         <dashboard-app>
-          <dashboard-grid style="width: 600px; height: 600px;"></dashboard-grid>
+          <dashboard-grid
+            style="width: 600px; height: 600px;"
+            ng-if="!hasExpandedPanel()"
+            on-panel-removed="onPanelRemoved"
+            panels="state.panels"
+            get-vis-click-handler="filterBarClickHandler(state)"
+            get-vis-brush-handler="brushEvent(state)"
+            save-state="saveState"
+            toggle-expand="toggleExpandPanel"
+            create-child-ui-state="createChildUiState"
+            toggle-expand="toggleExpandPanel"
+           ></dashboard-grid>
         </dashboard-app>`);
       $compile($el)($scope);
       $scope.$digest();

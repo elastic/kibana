@@ -106,7 +106,10 @@
       </div>
 
       <!-- NoResults -->
-      <div class="kuiPanel kuiPanel--centered" ng-if="!service.data.length">
+      <div
+        class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+        ng-if="!service.data.length"
+      >
         <div class="kuiNoItems">
           No {{service.title}} matched your search.
         </div>

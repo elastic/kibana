@@ -1,14 +1,23 @@
 
 import Slugify from '../string/slugify';
 
+import ActionItemExample
+  from '../../views/action_item/action_item_example.jsx';
+
 import BarExample
   from '../../views/bar/bar_example.jsx';
 
 import ButtonExample
   from '../../views/button/button_example.jsx';
 
+import EventExample
+  from '../../views/event/event_example.jsx';
+
 import FormExample
   from '../../views/form/form_example.jsx';
+
+import HeaderBarExample
+  from '../../views/header_bar/header_bar_example.jsx';
 
 import IconExample
   from '../../views/icon/icon_example.jsx';
@@ -19,17 +28,26 @@ import InfoPanelExample
 import LinkExample
   from '../../views/link/link_example.jsx';
 
-import ModalExample
-  from '../../views/modal/modal_example.jsx';
-
 import LocalNavExample
   from '../../views/local_nav/local_nav_example.jsx';
+
+import MenuExample
+  from '../../views/menu/menu_example.jsx';
+
+import MenuButtonExample
+  from '../../views/menu_button/menu_button_example.jsx';
 
 import MicroButtonExample
   from '../../views/micro_button/micro_button_example.jsx';
 
+import ModalExample
+  from '../../views/modal/modal_example.jsx';
+
 import PanelExample
   from '../../views/panel/panel_example.jsx';
+
+import StatusTextExample
+  from '../../views/status_text/status_text_example.jsx';
 
 import TableExample
   from '../../views/table/table_example.jsx';
@@ -48,14 +66,23 @@ import VerticalRhythmExample
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'ActionItem',
+  component: ActionItemExample,
+}, {
   name: 'Bar',
   component: BarExample,
 }, {
   name: 'Button',
   component: ButtonExample,
 }, {
+  name: 'Event',
+  component: EventExample,
+}, {
   name: 'Form',
   component: FormExample,
+}, {
+  name: 'HeaderBar',
+  component: HeaderBarExample,
 }, {
   name: 'Icon',
   component: IconExample,
@@ -69,6 +96,12 @@ const components = [{
   name: 'LocalNav',
   component: LocalNavExample,
 }, {
+  name: 'Menu',
+  component: MenuExample,
+}, {
+  name: 'MenuButton',
+  component: MenuButtonExample,
+}, {
   name: 'MicroButton',
   component: MicroButtonExample,
 }, {
@@ -77,6 +110,9 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'StatusText',
+  component: StatusTextExample,
 }, {
   name: 'Table',
   component: TableExample,
