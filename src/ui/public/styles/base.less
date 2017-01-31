@@ -253,7 +253,6 @@ kbn-table, .kbn-table {
       visibility: visible;
     }
   }
-
 }
 
 //== Generic Table
@@ -491,6 +490,16 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
+  position: relative;
+
+  .table-cell-filter {
+    position: absolute;
+    background-color: @table-cell-hover-bg;
+    white-space: nowrap;
+    right: 0;
+    top: 5px;
+    display: none;
+  }
 }
 
   .cell-hover-show {
@@ -499,8 +508,9 @@ style-compile {
   }
 
 .cell-hover:hover {
-  background-color: @table-cell-hover-hover-bg;
-  cursor: cell;
+  .table-cell-filter {
+    display: inline;
+  }
 
   .cell-hover-show {
     visibility: visible;
