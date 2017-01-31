@@ -133,7 +133,7 @@ describe('paginated table', function () {
       const data = makeData(5, 5);
       renderTable(data.columns, data.rows, 10, null, false);
 
-      const linkToTop = $el.find('.top-link');
+      const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.size()).to.be(0);
     });
 
@@ -141,7 +141,7 @@ describe('paginated table', function () {
       const data = makeData(5, 5);
       renderTable(data.columns, data.rows, 10, null, false, true);
 
-      const linkToTop = $el.find('.top-link');
+      const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.size()).to.be(1);
     });
 

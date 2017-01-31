@@ -1,6 +1,11 @@
-<div class="top-link" ng-if="linkToTop">
-  <a ng-click="paginate.goToTop()">^ Top</a>
-</div>
+<a
+  class="kuiLink"
+  ng-if="linkToTop"
+  ng-click="paginate.goToTop()"
+  data-test-subj="paginateControlsLinkToTop"
+>
+  Scroll to top
+</a>
 
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">

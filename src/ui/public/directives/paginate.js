@@ -98,7 +98,7 @@ uiModules.get('kibana')
         }
       };
 
-      self.goToTop = function () {
+      self.goToTop = function goToTop() {
         $document.scrollTop(0);
       };
 
