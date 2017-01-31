@@ -42,8 +42,11 @@ elements.push(new Element('markdown', {
     function getContent() {
       let markdown;
       try {
-        const template = handlebars.compile(args.markdown || '');
-        markdown = template({rows: args.dataframe.rows});
+        //const template = handlebars.compile(args.markdown || '');
+        //markdown = template({rows: args.dataframe.rows});
+        _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+        const compiled = _.template(args.markdown || '');
+        markdown = compiled(args.dataframe.aggregate);
       } catch (e) {
         markdown = args.markdown;
       }
