@@ -34,7 +34,7 @@ uiModules
        * Used to create a child persisted state for the panel from parent state.
        * @type {function} - Returns a {PersistedState} child uiState for this scope.
        */
-      createChildUiState: '&',
+      createChildUiState: '=',
       /**
        * Contains information about this panel.
        * @type {PanelState}
@@ -69,7 +69,7 @@ uiModules
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
        */
-      saveState: '&'
+      saveState: '='
     },
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
@@ -89,7 +89,7 @@ uiModules
 
         // create child ui state from the savedObj
         const uiState = $scope.savedObj.uiStateJSON ? JSON.parse($scope.savedObj.uiStateJSON) : {};
-        $scope.uiState = $scope.createChildUiState({ path : getPersistedStateId($scope.panel), uiState });
+        $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           $scope.savedObj.vis.setUiState($scope.uiState);
