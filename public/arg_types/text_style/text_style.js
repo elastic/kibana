@@ -14,7 +14,7 @@ argTypes.push(new ArgType('text_style', {
     fontFamily: 'Arial, Helvetica, sans-serif',
     textDecoration: 'none',
     fontWeight: 'normal',
-    fontStyle: 'italic',
+    fontStyle: 'normal',
     fontSize: 14,
     textAlign: 'left',
     color: '#000000'
