@@ -52,7 +52,7 @@ elements.push(new Element('markdown', {
     }
 
     return (
-      <FontResize max={_.get(args.text_style, 'object.fontSize')}>
+      <FontResize height={true} width={true} max={_.get(args.text_style, 'object.fontSize')}>
         <div style={{display: 'inline-block', margin: '2px'}}
           className="rework--markdown"
           dangerouslySetInnerHTML={getContent()}></div>
