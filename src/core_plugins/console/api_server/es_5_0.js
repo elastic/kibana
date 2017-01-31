@@ -12,6 +12,7 @@ let parts = [
   require('./es_5_0/nodes'),
   require('./es_5_0/globals'),
   require('./es_5_0/indices'),
+  require('./es_5_0/ingest'),
   require('./es_5_0/mappings'),
   require('./es_5_0/percolator'),
   require('./es_5_0/query'),
