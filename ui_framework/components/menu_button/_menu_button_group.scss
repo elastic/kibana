@@ -1,0 +1,7 @@
+.kuiMenuButtonGroup {
+  display: flex;
+
+  .kuiMenuButton + .kuiMenuButton {
+    margin-left: 4px;
+  }
+}
