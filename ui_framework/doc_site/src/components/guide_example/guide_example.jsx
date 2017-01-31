@@ -41,6 +41,7 @@ export default class GuideExample extends Component {
         title={section.title}
         slug={section.slug}
         html={section.html}
+        source={section.source}
         js={section.js}
         hasDarkTheme={section.hasDarkTheme}
       >
@@ -71,7 +72,8 @@ GuideExample.propTypes = {
   sections: PropTypes.arrayOf(React.PropTypes.shape({
     title: React.PropTypes.string.isRequired,
     description: React.PropTypes.any,
-    html: React.PropTypes.string.isRequired,
+    html: React.PropTypes.string,
+    source: React.PropTypes.string,
     js: React.PropTypes.string,
     hasDarkTheme: React.PropTypes.bool,
   })),

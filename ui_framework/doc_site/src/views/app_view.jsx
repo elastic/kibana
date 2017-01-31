@@ -80,7 +80,7 @@ export default class AppView extends Component {
           isOpen={this.props.isCodeViewerOpen}
           onClose={this.onCloseCodeViewer}
           title={this.props.code.title}
-          html={this.props.code.html}
+          html={this.props.code.html || this.props.code.source}
           js={this.props.code.js}
         />
       </div>
