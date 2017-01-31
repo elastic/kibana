@@ -27,9 +27,36 @@ const chrome = require('ui/chrome')
       }
 
       const data = resp.data;
-      ui.metrics = data.metrics;
-      ui.name = data.name;
+      const metrics = data.metrics;
+      if (metrics) {
+        ui.metrics = [{
+          name: 'Heap Total',
+          value: _.get(metrics, 'process.heap.total_in_bytes'),
+          type: 'byte'
+        }, {
+          name: 'Heap used',
+          value: _.get(metrics, 'process.heap.used_in_bytes'),
+          type: 'byte'
+        }, {
+          name: 'Load',
+          value: [_.get(metrics, 'os.load.1m'), _.get(metrics, 'os.load.5m'), _.get(metrics, 'os.load.15m')],
+          type: 'float'
+        }, {
+          name: 'Response Time Avg',
+          value: _.get(metrics, 'response_times.average'),
+          type: 'ms'
+        }, {
+          name: 'Response Time Max',
+          value: _.get(metrics, 'response_times.max'),
+          type: 'ms'
+        }, {
+          name: 'Requests',
+          value: _.get(metrics, 'requests.total'),
+          type: 'integer'
+        }];
+      }
 
+      ui.name = data.name;
       ui.statuses = data.status.statuses;
 
       const overall = data.status.overall;

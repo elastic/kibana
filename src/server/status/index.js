@@ -16,15 +16,22 @@ export default function (kbnServer, server, config) {
     method: 'GET',
     path: '/api/status',
     handler: function (request, reply) {
-      return reply({
+      const status = {
         name: config.get('server.name'),
-        version: config.get('pkg.version'),
-        buildNum: config.get('pkg.buildNum'),
-        buildSha: config.get('pkg.buildSha'),
         uuid: config.get('server.uuid'),
-        status: kbnServer.status.toJSON(),
-        metrics: kbnServer.metrics
-      });
+        version: {
+          number: config.get('pkg.version'),
+          build_hash: config.get('pkg.buildSha'),
+          build_number: config.get('pkg.buildNum'),
+        },
+        status: kbnServer.status.toJSON()
+      };
+
+      if (config.get('status.metrics')) {
+        status.metrics = kbnServer.metrics;
+      }
+
+      return reply(status);
     }
   }));
 
