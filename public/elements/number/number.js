@@ -56,7 +56,7 @@ elements.push(new Element('number', {
     let content;
     if (!_.get(args, 'label_by.length')) {
       content = (
-        <div>
+        <div className="rework--number-value">
           {args.dataframe.aggregate[args.aggregate_with](args.column)}
         </div>
       );
