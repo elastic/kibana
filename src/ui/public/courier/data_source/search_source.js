@@ -181,12 +181,6 @@ export default function SearchSourceFactory(Promise, Private, config) {
     });
   };
 
-  SearchSource.prototype.highlightRequest = function highlightRequest() {
-    return this._flatten().then(({ body }) => {
-      this.highlight(getHighlightRequest(body.query));
-    });
-  };
-
   /******
    * PRIVATE APIS
    ******/
