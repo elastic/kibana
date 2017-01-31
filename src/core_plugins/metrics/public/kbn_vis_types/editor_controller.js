@@ -1,4 +1,5 @@
 import modules from 'ui/modules';
+import 'plugins/timelion/directives/refresh_hack';
 import $ from 'jquery';
 import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
