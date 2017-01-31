@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
+import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 
 import TimelionInterval from 'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion_interval';
 import TimelionExpression from 'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion_expression';
@@ -71,7 +72,7 @@ frameSources.push(new FrameSource('timelion', {
         });
       }));
 
-      return {columns: columns, rows: rows, schema: 'timeseries', keys: ['label']};
+      return new Dataframe({columns: columns, rows: rows, schema: 'timeseries', keys: ['label']});
     });
 
   },

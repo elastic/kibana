@@ -51,7 +51,7 @@ elements.push(new Element('number', {
     }),
   ],
   template: ({args}) => {
-    if (!_.get(args.dataframe, `aggregate.${args.aggregate_with}`)) return (<div></div>);
+    //if (!_.get(args.dataframe, `aggregate.${args.aggregate_with}`)) return (<div></div>);
 
     let content;
     if (!_.get(args, 'label_by.length')) {

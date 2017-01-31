@@ -148,7 +148,7 @@ function rootReducer(state = {}, action) {
     case 'DATAFRAME_RESOLVED':
       return setTransient('dataframeCache', {
         ...state.transient.dataframeCache,
-        [payload.id]: new Dataframe(payload.value)});
+        [payload.id]: payload.value});
 
     // Set one resolved argument. We probably don't need the thing above, do we? Grr.
     case 'ARGUMENT_RESOLVED':
@@ -158,6 +158,15 @@ function rootReducer(state = {}, action) {
           ...state.transient.elementCache[payload.id],
           [payload.name]: payload.value
         }});
+
+    case 'ARGUMENTS_RESOLVED':
+      return setTransient('elementCache', {
+        ...state.transient.elementCache,
+        [payload.id]: {
+          ...state.transient.elementCache[payload.id],
+          ...payload.value
+        }});
+
 
     // Soooo hideous
     case 'ARGUMENT_UNRESOLVED':
@@ -170,6 +179,7 @@ function rootReducer(state = {}, action) {
             [payload.name]: payload.value
           }
         }});
+
 
     default:
       return state;

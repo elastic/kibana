@@ -18,6 +18,9 @@ export const elementLayer = createAction('ELEMENT_LAYER', (elementId, pageId, la
 export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
 
+export const argumentsResolved = createAction('ARGUMENTS_RESOLVED', mutateElement);
+
+
 export function elementAdd(type, pageId) {
   return (dispatch, getState) => {
     const elementType = elementTypes.byName[type];
@@ -91,9 +94,7 @@ export function elementResolve(elementId) {
     Promise.all(argPromises).then((argValues) => {
       const argNames = _.map(argDefinitions, 'name');
       const resolvedArgs = _.zipObject(argNames, argValues);
-      _.each(resolvedArgs, (value, name) => {
-        dispatch(argumentResolved(elementId, name, value));
-      });
+      dispatch(argumentsResolved(elementId, resolvedArgs));
     });
   };
 }

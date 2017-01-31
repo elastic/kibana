@@ -58,44 +58,38 @@ elements.push(new Element('grow', {
     render() {
       const {args, setArg} = this.props;
 
-      if (_.get(args, 'group_by.length') && _.get(args.dataframe, `aggregate.${args.aggregate_with}`)) {
-        const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
-        const max = _.max(_.values(valueObj));
-        return (
-          <div style={{width: '100%', height: '100%'}} className="rework--grow">
-            <GridBlocks>
-              {_.map(valueObj, (value, key) => {
-                const scale = value / max;
-                return (
-                  <div className="rework--grow-wrapper" key={key}>
-                    <div
-                      style={{
-                        display: 'inline-block',
-                        height: '100%',
-                        width: '100%',
-                        backgroundImage: `url(${args.image})`,
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: 'contain',
-                        transform: `scale(${scale})`
-                      }}>
-                    </div>
-                    <div className="rework--grow-label" style={{
-                      height: _.get(args.label_style, 'object.fontSize') + 'px'
+      const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
+      const max = _.max(_.values(valueObj));
+      return (
+        <div style={{width: '100%', height: '100%'}} className="rework--grow">
+          <GridBlocks>
+            {_.map(valueObj, (value, key) => {
+              const scale = value / max;
+              return (
+                <div className="rework--grow-wrapper" key={key}>
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      height: '100%',
+                      width: '100%',
+                      backgroundImage: `url(${args.image})`,
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: 'contain',
+                      transform: `scale(${scale})`
                     }}>
-                      <center>{key}</center>
-                    </div>
-                </div>
-                );
-              })}
-            </GridBlocks>
-          </div>
-        );
-      } else {
-        return (
-          <div></div>
-        );
-      }
+                  </div>
+                  <div className="rework--grow-label" style={{
+                    height: _.get(args.label_style, 'object.fontSize') + 'px'
+                  }}>
+                    <center>{key}</center>
+                  </div>
+              </div>
+              );
+            })}
+          </GridBlocks>
+        </div>
+      );
 
     };
   }

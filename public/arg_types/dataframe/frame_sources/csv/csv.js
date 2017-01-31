@@ -3,6 +3,8 @@ import _ from 'lodash';
 import {parse} from './parse';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
+import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
+
 import './csv.less';
 
 frameSources.push(new FrameSource('csv', {
@@ -47,7 +49,7 @@ frameSources.push(new FrameSource('csv', {
       };
     });
 
-    return dataframe;
+    return new Dataframe(dataframe);
   },
   // You can write JSX here.
   // If you need more state you should create a component to handle it.
