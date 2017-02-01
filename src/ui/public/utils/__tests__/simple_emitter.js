@@ -40,7 +40,7 @@ describe('SimpleEmitter class', function () {
 
   describe('#on', function () {
     it('registers a handler', function () {
-      let handler = sinon.stub();
+      const handler = sinon.stub();
       emitter.on('a', handler);
       expect(emitter.listenerCount('a')).to.be(1);
 
@@ -56,7 +56,7 @@ describe('SimpleEmitter class', function () {
     });
 
     it('allows the same function to be registered multiple times', function () {
-      let handler = function () {};
+      const handler = function () {};
       emitter.on('a', handler);
       expect(emitter.listenerCount()).to.be(1);
       emitter.on('a', handler);
@@ -66,7 +66,7 @@ describe('SimpleEmitter class', function () {
 
   describe('#off', function () {
     it('removes a listener if it was registered', function () {
-      let handler = sinon.stub();
+      const handler = sinon.stub();
       expect(emitter.listenerCount()).to.be(0);
       emitter.on('a', handler);
       expect(emitter.listenerCount('a')).to.be(1);
@@ -94,11 +94,11 @@ describe('SimpleEmitter class', function () {
   describe('#emit', function () {
     it('calls the handlers in the order they were defined', function () {
       let i = 0;
-      let incr = function () { return ++i; };
-      let one = sinon.spy(incr);
-      let two = sinon.spy(incr);
-      let three = sinon.spy(incr);
-      let four = sinon.spy(incr);
+      const incr = function () { return ++i; };
+      const one = sinon.spy(incr);
+      const two = sinon.spy(incr);
+      const three = sinon.spy(incr);
+      const four = sinon.spy(incr);
 
       emitter
       .on('a', one)
@@ -122,11 +122,11 @@ describe('SimpleEmitter class', function () {
 
     it('always emits the handlers that were initially registered', function () {
 
-      let destructive = sinon.spy(function () {
+      const destructive = sinon.spy(function () {
         emitter.removeAllListeners();
         expect(emitter.listenerCount()).to.be(0);
       });
-      let stub = sinon.stub();
+      const stub = sinon.stub();
 
       emitter.on('run', destructive).on('run', stub).emit('run');
 

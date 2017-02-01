@@ -4,7 +4,7 @@ import moment from 'moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 
 module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
@@ -15,9 +15,9 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
       to: '='
     },
     link: function ($scope, $elem) {
-      let dateFormat = config.get('dateFormat');
+      const dateFormat = config.get('dateFormat');
 
-      let lookupByRange = {};
+      const lookupByRange = {};
       _.each(quickRanges, function (frame) {
         lookupByRange[frame.from + ' to ' + frame.to] = frame;
       });
@@ -26,13 +26,13 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
         let text;
         // If both parts are date math, try to look up a reasonable string
         if ($scope.from && $scope.to && !moment.isMoment($scope.from) && !moment.isMoment($scope.to)) {
-          let tryLookup = lookupByRange[$scope.from.toString() + ' to ' + $scope.to.toString()];
+          const tryLookup = lookupByRange[$scope.from.toString() + ' to ' + $scope.to.toString()];
           if (tryLookup) {
             $elem.text(tryLookup.display);
           } else {
-            let fromParts = $scope.from.toString().split('-');
+            const fromParts = $scope.from.toString().split('-');
             if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
-              let rounded = fromParts[1].split('/');
+              const rounded = fromParts[1].split('/');
               text = 'Last ' + rounded[0];
               if (rounded[1]) {
                 text = text + ' rounded to the ' + timeUnits[rounded[1]];
@@ -49,7 +49,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
       };
 
       function cantLookup() {
-        let display = {};
+        const display = {};
         _.each(['from', 'to'], function (time) {
           if (moment($scope[time]).isValid()) {
             display[time] = moment($scope[time]).format(dateFormat);
@@ -57,7 +57,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
-              let tryParse = dateMath.parse($scope[time], time === 'to' ? true : false);
+              const tryParse = dateMath.parse($scope[time], time === 'to' ? true : false);
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
           }

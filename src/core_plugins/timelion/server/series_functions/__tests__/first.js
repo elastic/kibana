@@ -1,9 +1,9 @@
-let filename = require('path').basename(__filename);
-let fn = require(`../${filename}`);
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
 
-let expect = require('chai').expect;
-let seriesList = require('./fixtures/seriesList.js')();
-let invoke = require('./helpers/invoke_series_fn.js');
+const expect = require('chai').expect;
+const seriesList = require('./fixtures/seriesList.js')();
+const invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, function () {
   it('should return exactly the data input', function () {

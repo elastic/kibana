@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let Promise = require('bluebird');
+const _ = require('lodash');
+const Promise = require('bluebird');
 
 
 /**
@@ -15,7 +15,7 @@ let Promise = require('bluebird');
 module.exports = function reduce(args, fn) {
   return Promise.all(args).then(function (args) {
 
-    let seriesList = args.shift();
+    const seriesList = args.shift();
     let argument = args.shift();
 
     if (seriesList.type !== 'seriesList') {
@@ -36,7 +36,7 @@ module.exports = function reduce(args, fn) {
 
         let output = _.map(destinationObject.data, function (point, index) {
 
-          let value = point[1];
+          const value = point[1];
 
           if (value == null) {
             return [point[0], null];

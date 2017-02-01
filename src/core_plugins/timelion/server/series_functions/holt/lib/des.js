@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function des(points, alpha, beta) {
   let level;
@@ -13,7 +13,7 @@ module.exports = function des(points, alpha, beta) {
     throw new Error ('You need at least 2 points to use double exponential smoothing');
   }
 
-  let smoothedPoints = _.map(points, (point, i) => {
+  const smoothedPoints = _.map(points, (point, i) => {
     if (i === 0) {
       return point;
     }

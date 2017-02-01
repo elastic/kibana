@@ -12,8 +12,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover tab', function describeIndexTests() {
   bdd.before(function () {
-    let fromTime = '2015-09-19 06:31:44.000';
-    let toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })

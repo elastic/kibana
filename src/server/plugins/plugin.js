@@ -97,7 +97,7 @@ module.exports = class Plugin {
   }
 
   async getConfigSchema() {
-    let schema = await this.getExternalConfigSchema(Joi);
+    const schema = await this.getExternalConfigSchema(Joi);
     return schema || defaultConfigSchema;
   }
 
@@ -112,7 +112,7 @@ module.exports = class Plugin {
 
   async init() {
     let { id, version, kbnServer, configPrefix } = this;
-    let { config } = kbnServer;
+    const { config } = kbnServer;
 
     // setup the hapi register function and get on with it
     const asyncRegister = async (server, options) => {

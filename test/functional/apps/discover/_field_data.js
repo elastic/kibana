@@ -12,8 +12,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover app', function describeIndexTests() {
   bdd.before(function () {
-    let fromTime = '2015-09-19 06:31:44.000';
-    let toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
@@ -37,12 +37,12 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
   bdd.describe('field data', function () {
-    let queryName1 = 'Query # 1';
-    let fromTimeString = 'September 19th 2015, 06:31:44.000';
-    let toTimeString = 'September 23rd 2015, 18:31:44.000';
+    const queryName1 = 'Query # 1';
+    const fromTimeString = 'September 19th 2015, 06:31:44.000';
+    const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
     bdd.it('search php should show the correct hit count', function () {
-      let expectedHitCount = '445';
+      const expectedHitCount = '445';
       return PageObjects.discover.query('php')
       .then(function () {
         return PageObjects.common.try(function tryingForTime() {
@@ -65,7 +65,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('search _type:apache should show the correct hit count', function () {
-      let expectedHitCount = '11,156';
+      const expectedHitCount = '11,156';
       return PageObjects.discover.query('_type:apache')
       .then(function () {
         return PageObjects.common.try(function tryingForTime() {
@@ -78,7 +78,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('doc view should show Time and _source columns', function () {
-      let expectedHeader = 'Time _source';
+      const expectedHeader = 'Time _source';
       return PageObjects.discover.getDocHeader()
       .then(function (header) {
         expect(header).to.be(expectedHeader);
@@ -87,7 +87,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('doc view should show oldest time first', function () {
       // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
-      let ExpectedDoc =
+      const ExpectedDoc =
         'September 22nd 2015, 23:50:13.253 index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
         + ' ip:238.171.34.42 extension:jpg response:200 geo.coordinates:{ "lat": 38.66494528, "lon": -88.45299556'
         + ' } geo.src:FR geo.dest:KH geo.srcdest:FR:KH @tags:success, info utc_time:September 22nd 2015,'
@@ -138,7 +138,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('doc view should sort ascending', function () {
       // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
-      let ExpectedDoc =
+      const ExpectedDoc =
         'September 20th 2015, 00:00:00.000 index:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
         + ' ip:143.84.142.7 extension:jpg response:200 geo.coordinates:{ "lat": 38.68407028, "lon": -120.9871642 }'
         + ' geo.src:ES geo.dest:US geo.srcdest:ES:US @tags:error, info utc_time:September 20th 2015, 00:00:00.000'
@@ -230,8 +230,8 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
     bdd.it('a bad syntax query should show an error message', function () {
-      let expectedHitCount = '1011,156';
-      let expectedError = 'Discover: Failed to parse query [xxx(yyy]';
+      const expectedHitCount = '1011,156';
+      const expectedError = 'Discover: Failed to parse query [xxx(yyy]';
       return PageObjects.discover.query('xxx(yyy')
       .then(function () {
         return PageObjects.header.getToastMessage();

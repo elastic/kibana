@@ -1,25 +1,25 @@
 require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
-let _ = require('lodash');
-let $ = require('jquery');
-let moment = require('moment-timezone');
-let observeResize = require('plugins/timelion/lib/observe_resize');
-let calculateInterval = require('plugins/timelion/lib/calculate_interval');
+const _ = require('lodash');
+const $ = require('jquery');
+const moment = require('moment-timezone');
+const observeResize = require('plugins/timelion/lib/observe_resize');
+const calculateInterval = require('plugins/timelion/lib/calculate_interval');
 
 module.exports = function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
-        let template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        let timezone = Private(require('plugins/timelion/services/timezone'))();
-        let getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
+        const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
+        const timezone = Private(require('plugins/timelion/services/timezone'))();
+        const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
         moment.tz.setDefault(config.get('dateFormat:tz'));
 
-        let render = $scope.seriesList.render || {};
+        const render = $scope.seriesList.render || {};
 
         $scope.chart = $scope.seriesList.list;
         $scope.interval = $scope.interval;
@@ -27,7 +27,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
         let legendValueNumbers;
         let debouncedSetLegendNumbers;
-        let defaultOptions = {
+        const defaultOptions = {
           xaxis: {
             mode: 'time',
             tickLength: 5,
@@ -65,12 +65,12 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
 
         $scope.toggleSeries = function (id) {
-          let series = $scope.chart[id];
+          const series = $scope.chart[id];
           series._hide = !series._hide;
           drawPlot($scope.chart);
         };
 
-        let cancelResize = observeResize($elem, function () {
+        const cancelResize = observeResize($elem, function () {
           drawPlot($scope.chart);
         });
 
@@ -108,7 +108,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           clearLegendNumbers();
         });
 
-        let debounceDelay = 50;
+        const debounceDelay = 50;
         debouncedSetLegendNumbers = _.debounce(setLegendNumbers, debounceDelay, {
           maxWait: debounceDelay,
           leading: true,
@@ -117,20 +117,20 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
         // Shamelessly borrowed from the flotCrosshairs example
         function setLegendNumbers(pos) {
-          let plot = $scope.plot;
+          const plot = $scope.plot;
 
-          let axes = plot.getAxes();
+          const axes = plot.getAxes();
           if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
             return;
           }
 
           let i;
           let j;
-          let dataset = plot.getData();
+          const dataset = plot.getData();
           for (i = 0; i < dataset.length; ++i) {
 
-            let series = dataset[i];
-            let precision = _.get(series, '_meta.precision', 2);
+            const series = dataset[i];
+            const precision = _.get(series, '_meta.precision', 2);
 
             if (series._hide) continue;
 
@@ -169,22 +169,22 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           }
 
           if (!$('.chart-canvas', $elem).length) $elem.html(template);
-          let canvasElem = $('.chart-canvas', $elem);
+          const canvasElem = $('.chart-canvas', $elem);
 
-          let title = _(plotConfig).map('_title').compact().last();
+          const title = _(plotConfig).map('_title').compact().last();
           $('.chart-top-title', $elem).text(title == null ? '' : title);
 
-          let options = _.cloneDeep(defaultOptions);
+          const options = _.cloneDeep(defaultOptions);
 
           // Get the X-axis tick format
-          let time = timefilter.getBounds();
-          let interval = calculateInterval(
+          const time = timefilter.getBounds();
+          const interval = calculateInterval(
             time.min.valueOf(),
             time.max.valueOf(),
             config.get('timelion:target_buckets') || 200,
             $scope.interval
           );
-          let format = getxAxisFormatter(interval);
+          const format = getxAxisFormatter(interval);
 
           // Use moment to format ticks so we get timezone correction
           options.xaxis.tickFormatter = function (val) {
@@ -192,11 +192,11 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           };
 
           // Calculate how many ticks can fit on the axis
-          let tickLetterWidth = 7;
-          let tickPadding = 45;
+          const tickLetterWidth = 7;
+          const tickPadding = 45;
           options.xaxis.ticks = Math.floor($elem.width() / ((format.length * tickLetterWidth) + tickPadding));
 
-          let series = _.map(plotConfig, function (series, index) {
+          const series = _.map(plotConfig, function (series, index) {
             series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
               lines: {

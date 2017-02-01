@@ -160,7 +160,7 @@ export default class DashboardPage {
         return chart.getAttribute('title');
       }
 
-      let getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }
@@ -211,7 +211,7 @@ export default class DashboardPage {
         });
       }
 
-      let getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }

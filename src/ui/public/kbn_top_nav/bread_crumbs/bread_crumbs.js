@@ -3,7 +3,7 @@ import chrome from 'ui/chrome/chrome';
 import breadCrumbsTemplate from './bread_crumbs.html';
 import { getBreadCrumbUrls } from './bread_crumb_urls';
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.directive('breadCrumbs', function ($location) {
   return {

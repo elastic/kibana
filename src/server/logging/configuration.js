@@ -2,7 +2,7 @@ import _ from 'lodash';
 import logReporter from './log_reporter';
 
 export default function loggingConfiguration(config) {
-  let events = config.get('logging.events');
+  const events = config.get('logging.events');
 
   if (config.get('logging.silent')) {
     _.defaults(events, {});

@@ -2,6 +2,5 @@
 extends: '@elastic/kibana'
 rules:
   no-unused-vars: off
-  prefer-const: off
   no-extra-semi: off
   quotes: off

@@ -18,11 +18,11 @@ module.exports = (kbnServer, server, config) => {
   });
 
   return fromNode(cb => {
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       cb(new Error('Server timedout waiting for the optimizer to become ready'));
     }, config.get('optimize.lazyProxyTimeout'));
 
-    let waiting = once(() => {
+    const waiting = once(() => {
       server.log(['info', 'optimize'], 'Waiting for optimizer completion');
     });
 

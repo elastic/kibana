@@ -158,9 +158,9 @@ export class PersistedState {
 
     // recursively delete value tree, when no other keys exist
     while (partialPath.length > 0) {
-      let lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
-      let statePath = this._path.concat(partialPath);
-      let stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
+      const lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+      const statePath = this._path.concat(partialPath);
+      const stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
 
       // if stateVal isn't an object, do nothing
       if (!_.isPlainObject(stateVal)) return;
@@ -207,9 +207,9 @@ export class PersistedState {
   _set(key, value, silent, initialChildState) {
     const self = this;
     let stateChanged = false;
-    let initialState = !this._initialized;
-    let keyPath = this._getIndex(key);
-    let hasKeyPath = keyPath.length > 0;
+    const initialState = !this._initialized;
+    const keyPath = this._getIndex(key);
+    const hasKeyPath = keyPath.length > 0;
 
     // if this is the initial state value, save value as the default
     if (initialState) {
@@ -235,7 +235,7 @@ export class PersistedState {
         }
       } else {
         // check for changes at path, emit an event when different
-        let curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
+        const curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
         stateChanged = !_.isEqual(curVal, value);
 
         if (!initialChildState) {
@@ -252,11 +252,11 @@ export class PersistedState {
     }
 
     // update the merged state value
-    let targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-    let sourceObj = _.merge({}, this._defaultChildState, this._changedState);
+    const targetObj = this._mergedState || _.cloneDeep(this._defaultState);
+    const sourceObj = _.merge({}, this._defaultChildState, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    let mergeMethod = function (targetValue, sourceValue, mergeKey) {
+    const mergeMethod = function (targetValue, sourceValue, mergeKey) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue

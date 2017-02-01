@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 // Downsampling of cummulative metrics
 // Good: count, sum
@@ -18,7 +18,7 @@ module.exports = function (dataTuples, targetTuples) {
   let i = 0;
   let j = 0;
   let spreadCount = 0;
-  let result = [];
+  const result = [];
   let bucket;
   let time;
   let scaleSet;

@@ -1,6 +1,6 @@
-let Promise = require('bluebird');
-let spawn = require('./spawn');
-let grunt = require('grunt');
+const Promise = require('bluebird');
+const spawn = require('./spawn');
+const grunt = require('grunt');
 
 module.exports = function (repo, dir) {
   // store the previous and new hash from the repo

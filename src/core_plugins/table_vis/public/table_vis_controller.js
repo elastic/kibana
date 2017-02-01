@@ -11,7 +11,7 @@ const module = uiModules.get('kibana/table_vis', ['kibana']);
 module.controller('KbnTableVisController', function ($scope, $element, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
-  let uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
+  const uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
   assign($scope.vis.params.sort, uiStateSort);
 
   $scope.sort = $scope.vis.params.sort;

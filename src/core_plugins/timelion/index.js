@@ -1,12 +1,12 @@
 
-let path = require('path');
+const path = require('path');
 
 module.exports = function (kibana) {
   let mainFile = 'plugins/timelion/app';
 
-  let ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
-  let protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
-  let descriptor = ownDescriptor || protoDescriptor || {};
+  const ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
+  const protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
+  const descriptor = ownDescriptor || protoDescriptor || {};
   if (descriptor.get) {
     // the autoload list has been replaced with a getter that complains about
     // improper access, bypass that getter by seeing if it is defined
@@ -23,7 +23,7 @@ module.exports = function (kibana) {
         icon: 'plugins/timelion/icon.svg',
         main: mainFile,
         injectVars: function (server, options) {
-          let config = server.config();
+          const config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),

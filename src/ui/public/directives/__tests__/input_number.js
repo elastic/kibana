@@ -6,7 +6,7 @@ import 'ui/directives/input_number';
 describe('Number input directive', function () {
   let $compile;
   let $rootScope;
-  let html = '<input type="text" ng-model="value" input-number />';
+  const html = '<input type="text" ng-model="value" input-number />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -16,7 +16,7 @@ describe('Number input directive', function () {
   }));
 
   it('should allow whole numbers', function () {
-    let element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = '123';
     $rootScope.$digest();
@@ -32,7 +32,7 @@ describe('Number input directive', function () {
   });
 
   it('should allow numbers with decimals', function () {
-    let element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = '123.0';
     $rootScope.$digest();

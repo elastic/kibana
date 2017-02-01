@@ -1,8 +1,8 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 
 define(function (require) {
-  let module = require('ui/modules').get('app/sheet');
-  let _ = require('lodash');
+  const module = require('ui/modules').get('app/sheet');
+  const _ = require('lodash');
   // bring in the factory
   require('./_saved_sheet.js');
 

@@ -48,10 +48,10 @@ const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 export default function createRegistry(spec) {
   spec = spec || {};
 
-  let constructor = _.has(spec, 'constructor') && spec.constructor;
-  let iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
-  let props = _.omit(spec, notPropsOptNames);
-  let providers = [];
+  const constructor = _.has(spec, 'constructor') && spec.constructor;
+  const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
+  const props = _.omit(spec, notPropsOptNames);
+  const providers = [];
 
   /**
    * This is the Private module that will be instanciated by
@@ -61,7 +61,7 @@ export default function createRegistry(spec) {
    *                          that were registered, the registry spec
    *                          defines how things will be indexed.
    */
-  let registry = function (Private, $injector) {
+  const registry = function (Private, $injector) {
     // index all of the modules
     iaOpts.initialSet = providers.map(Private);
     let modules = new IndexedArray(iaOpts);

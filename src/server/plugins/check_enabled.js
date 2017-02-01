@@ -9,7 +9,7 @@ export default async function (kbnServer, server, config) {
 
   const { plugins } = kbnServer;
 
-  for (let plugin of plugins) {
+  for (const plugin of plugins) {
     const enabledInConfig = config.get([...toPath(plugin.configPrefix), 'enabled']);
     const hasOveride = forcedOverride.hasOwnProperty(plugin.id);
     if (hasOveride) {

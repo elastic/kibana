@@ -1,8 +1,8 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = updateVersion;
 
-let versions = [
+const versions = [
   'major',
   'minor',
   'patch',
@@ -44,7 +44,7 @@ let versions = [
 function updateVersion(version, expr) {
   expr = String(expr).split('=');
 
-  let change = {
+  const change = {
     name: expr[0],
     val: expr[1] || null
   };
@@ -58,7 +58,7 @@ function updateVersion(version, expr) {
   }
 
   // parse the current version
-  let parts = _.chain(version.split('.'))
+  const parts = _.chain(version.split('.'))
 
   // ensure that their are three pieces, either x.x.x or x.x.x-y
   .tap(function (versionNumbers) {
@@ -70,7 +70,7 @@ function updateVersion(version, expr) {
   // describe all of the version parts with a name, parse
   // the numbers, and extract tag from patch
   .transform(function (parts, v, i) {
-    let name = versions[i];
+    const name = versions[i];
 
     if (name !== 'patch') {
       parts[name] = _.parseInt(v);
@@ -121,7 +121,7 @@ function updateVersion(version, expr) {
     }
 
     // properties that are zero-d by the previous update
-    let emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
+    const emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
     while (emptyUpdates.length) {
       parts[emptyUpdates.shift()] = '';
     }

@@ -1,7 +1,7 @@
-let alter = require('../lib/alter.js');
-let _ = require('lodash');
-let Chainable = require('../lib/classes/chainable');
-let argType = require('../handlers/lib/arg_type.js');
+const alter = require('../lib/alter.js');
+const _ = require('lodash');
+const Chainable = require('../lib/classes/chainable');
+const argType = require('../handlers/lib/arg_type.js');
 
 module.exports = new Chainable('condition', {
   args: [
@@ -35,9 +35,9 @@ module.exports = new Chainable('condition', {
     'to the result if the condition proves true, with an optional else.',
   aliases: ['if'],
   fn: function conditionFn(args) {
-    let config = args.byName;
+    const config = args.byName;
     return alter(args, function (eachSeries) {
-      let data = _.map(eachSeries.data, function (point, i) {
+      const data = _.map(eachSeries.data, function (point, i) {
         function getNumber(source) {
           if (argType(source) === 'number') return source;
           if (argType(source) === 'null') return null;
@@ -45,11 +45,11 @@ module.exports = new Chainable('condition', {
           throw new Error ('must be a number or a seriesList');
         }
 
-        let ifVal = getNumber(config.if);
-        let thenVal = getNumber(config.then);
-        let elseVal = _.isUndefined(config.else) ? point[1] : getNumber(config.else);
+        const ifVal = getNumber(config.if);
+        const thenVal = getNumber(config.then);
+        const elseVal = _.isUndefined(config.else) ? point[1] : getNumber(config.else);
 
-        let newValue = (function () {
+        const newValue = (function () {
           switch (config.operator) {
             case 'lt':
               return point[1] <   ifVal ? thenVal : elseVal;

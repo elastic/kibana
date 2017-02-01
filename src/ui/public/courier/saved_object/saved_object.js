@@ -21,9 +21,9 @@ import SearchSourceProvider from '../data_source/search_source';
 
 export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
-  let DocSource = Private(DocSourceProvider);
-  let SearchSource = Private(SearchSourceProvider);
-  let mappingSetup = Private(MappingSetupProvider);
+  const DocSource = Private(DocSourceProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const mappingSetup = Private(MappingSetupProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
@@ -32,7 +32,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * Initialize config vars
      ************/
     // the doc which is used to store this object
-    let docSource = new DocSource();
+    const docSource = new DocSource();
 
     // type name for this object, used as the ES-type
     const type = config.type;
@@ -50,15 +50,15 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     this.defaults = config.defaults || {};
 
     // Create a notifier for sending alerts
-    let notify = new Notifier({
+    const notify = new Notifier({
       location: 'Saved ' + type
     });
 
     // mapping definition for the fields that this object will expose
-    let mapping = mappingSetup.expandShorthand(config.mapping);
+    const mapping = mappingSetup.expandShorthand(config.mapping);
 
-    let afterESResp = config.afterESResp || _.noop;
-    let customInit = config.init || _.noop;
+    const afterESResp = config.afterESResp || _.noop;
+    const customInit = config.init || _.noop;
 
     // optional search source which this object configures
     this.searchSource = config.searchSource ? new SearchSource() : undefined;
@@ -81,8 +81,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         state = {};
       }
 
-      let oldState = this.searchSource.toJSON();
-      let fnProps = _.transform(oldState, function (dynamic, val, name) {
+      const oldState = this.searchSource.toJSON();
+      const fnProps = _.transform(oldState, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
@@ -182,7 +182,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
 
       if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, this.id);
 
-      let meta = resp._source.kibanaSavedObjectMeta || {};
+      const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
 
       if (!config.indexPattern && this._source.indexPattern) {
@@ -223,7 +223,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * @return {Object}
      */
     this.serialize = () => {
-      let body = {};
+      const body = {};
 
       _.forOwn(mapping, (fieldMapping, fieldName) => {
         if (this[fieldName] != null) {
@@ -306,7 +306,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      */
     this.save = (saveOptions = {}) => {
       // Save the original id in case the save fails.
-      let originalId = this.id;
+      const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
       // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
       // exists.
@@ -322,7 +322,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       // ensure that the docSource has the current id
       docSource.id(this.id);
 
-      let source = this.serialize();
+      const source = this.serialize();
 
       this.isSaving = true;
       const doSave = saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);

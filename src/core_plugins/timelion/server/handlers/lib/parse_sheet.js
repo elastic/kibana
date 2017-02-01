@@ -1,9 +1,9 @@
-let fs = require('fs');
-let path = require('path');
-let _ = require('lodash');
-let grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
-let PEG = require('pegjs');
-let Parser = PEG.buildParser(grammar);
+const fs = require('fs');
+const path = require('path');
+const _ = require('lodash');
+const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
+const PEG = require('pegjs');
+const Parser = PEG.buildParser(grammar);
 
 module.exports = function parseSheet(sheet) {
   return _.map(sheet, function (plot) {

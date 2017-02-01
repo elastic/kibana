@@ -1,11 +1,11 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function (func) {
-  let functions = {};
+  const functions = {};
   functions[func.name] = func;
   if (func.aliases) {
     _.each(func.aliases, function (alias) {
-      let aliasFn = _.clone(func);
+      const aliasFn = _.clone(func);
       aliasFn.isAlias = true;
       functions[alias] = aliasFn;
     });

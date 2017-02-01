@@ -1,6 +1,6 @@
-let reduce = require('../lib/reduce.js');
+const reduce = require('../lib/reduce.js');
 
-let Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('sum', {
   args: [
     {

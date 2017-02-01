@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let moment = require('moment');
+const _ = require('lodash');
+const moment = require('moment');
 
 // Upsampling of non-cummulative sets
 // Good: average, min, max
@@ -14,8 +14,8 @@ module.exports = function (dataTuples, targetTuples) {
 
   let currentCarry = dataTuples[0][1];
   return _.map(targetTuples, function (bucket, h) {
-    let targetTime = bucket[0];
-    let dataTime = dataTuples[0][0];
+    const targetTime = bucket[0];
+    const dataTime = dataTuples[0][0];
 
     if (dataTuples[0] && targetTime >= dataTime) {
       currentCarry = dataTuples[0][1];

@@ -8,7 +8,7 @@ module.exports = function ses(points, alpha) {
   let origin;
   let level;
 
-  let smoothedPoints = _.reduce(points, (result, point, i) => {
+  const smoothedPoints = _.reduce(points, (result, point, i) => {
     if (i === 0) {
       origin = point;
       level = point;

@@ -1,6 +1,6 @@
-let _ = require('lodash');
-let logoUrl = require('./logo.png');
-let moment = require('moment-timezone');
+const _ = require('lodash');
+const logoUrl = require('./logo.png');
+const moment = require('moment-timezone');
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -15,7 +15,7 @@ document.title = 'Timelion - Kibana';
 
 require('ui/chrome');
 
-let app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
@@ -27,7 +27,7 @@ require('./vis');
 require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
-let unsafeNotifications = require('ui/notify')._notifs;
+const unsafeNotifications = require('ui/notify')._notifs;
 
 require('ui/routes').enable();
 
@@ -53,15 +53,15 @@ app.controller('timelion', function (
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
   timefilter.enabled = true;
-  let notify = new Notifier({
+  const notify = new Notifier({
     location: 'Timelion'
   });
 
-  let timezone = Private(require('plugins/timelion/services/timezone'))();
-  let docTitle = Private(require('ui/doc_title'));
+  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const docTitle = Private(require('ui/doc_title'));
 
-  let defaultExpression = '.es(*)';
-  let savedSheet = $route.current.locals.savedSheet;
+  const defaultExpression = '.es(*)';
+  const savedSheet = $route.current.locals.savedSheet;
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -136,7 +136,7 @@ app.controller('timelion', function (
     };
   }
 
-  let init = function () {
+  const init = function () {
     $scope.running = false;
     $scope.search();
 
@@ -219,7 +219,7 @@ app.controller('timelion', function (
       $scope.sheet = [];
       $scope.running = false;
 
-      let err = new Error(resp.message);
+      const err = new Error(resp.message);
       err.stack = resp.stack;
       notify.error(err);
 

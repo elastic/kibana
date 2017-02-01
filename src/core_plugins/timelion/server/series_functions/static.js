@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let fetch = require('node-fetch');
-let moment = require('moment');
-let Datasource = require('../lib/classes/datasource');
-let Promise = require('bluebird');
+const _ = require('lodash');
+const fetch = require('node-fetch');
+const moment = require('moment');
+const Datasource = require('../lib/classes/datasource');
+const Promise = require('bluebird');
 
 
 module.exports = new Datasource ('static', {
@@ -24,12 +24,12 @@ module.exports = new Datasource ('static', {
   fn: function staticFn(args, tlConfig) {
 
     let data;
-    let target = tlConfig.getTargetSeries();
+    const target = tlConfig.getTargetSeries();
     if (typeof args.byName.value === 'string') {
-      let points = args.byName.value.split(':');
-      let begin = _.first(target)[0];
-      let end = _.last(target)[0];
-      let step = (end - begin) / (points.length - 1);
+      const points = args.byName.value.split(':');
+      const begin = _.first(target)[0];
+      const end = _.last(target)[0];
+      const step = (end - begin) / (points.length - 1);
       data = _.map(points, function (point, i) {
         return [begin + (i * step), parseFloat(point)];
       });

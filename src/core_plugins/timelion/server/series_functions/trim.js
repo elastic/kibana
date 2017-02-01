@@ -1,7 +1,7 @@
-let alter = require('../lib/alter.js');
-let _ = require('lodash');
-let Chainable = require('../lib/classes/chainable');
-let argType = require('../handlers/lib/arg_type.js');
+const alter = require('../lib/alter.js');
+const _ = require('lodash');
+const Chainable = require('../lib/classes/chainable');
+const argType = require('../handlers/lib/arg_type.js');
 
 module.exports = new Chainable('trim', {
   args: [
@@ -22,7 +22,7 @@ module.exports = new Chainable('trim', {
   ],
   help: 'Set N buckets at the start or end of a series to null to fit the "partial bucket issue"',
   fn: function conditionFn(args) {
-    let config = args.byName;
+    const config = args.byName;
     if (config.start == null) config.start = 1;
     if (config.end == null) config.end = 1;
 

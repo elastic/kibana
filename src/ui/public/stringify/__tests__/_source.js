@@ -33,8 +33,8 @@ describe('_source formatting', function () {
     });
 
     it('uses the _source, field, and hit to create a <dl>', function () {
-      let hit = _.first(hits);
-      let $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
+      const hit = _.first(hits);
+      const $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
       expect($dl.is('dl')).to.be.ok();
       expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
     });

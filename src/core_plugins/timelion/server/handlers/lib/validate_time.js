@@ -1,11 +1,11 @@
-let parseDateMath = require('../../lib/date_math.js');
-let toMS = require('../../lib/to_milliseconds.js');
+const parseDateMath = require('../../lib/date_math.js');
+const toMS = require('../../lib/to_milliseconds.js');
 
 module.exports = function validateTime(time, tlConfig) {
-  let span = parseDateMath(time.to, true) - parseDateMath(time.from);
-  let interval = toMS(time.interval);
-  let bucketCount = span / interval;
-  let maxBuckets = tlConfig.settings['timelion:max_buckets'];
+  const span = parseDateMath(time.to, true) - parseDateMath(time.from);
+  const interval = toMS(time.interval);
+  const bucketCount = span / interval;
+  const maxBuckets = tlConfig.settings['timelion:max_buckets'];
   if (bucketCount > maxBuckets) {
     throw new Error('Max buckets exceeded: ' +
       Math.round(bucketCount) + ' of ' + maxBuckets + ' allowed. ' +

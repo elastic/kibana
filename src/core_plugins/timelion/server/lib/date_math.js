@@ -1,7 +1,7 @@
-let _ = require('lodash');
-let moment = require('moment');
+const _ = require('lodash');
+const moment = require('moment');
 
-let units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+const units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
 
 /* This is a simplified version of elasticsearch's date parser */
 function parse(text, roundUp) {
@@ -44,10 +44,10 @@ function parse(text, roundUp) {
 }
 
 function parseDateMath(mathString, time, roundUp) {
-  let dateTime = time;
+  const dateTime = time;
 
   for (let i = 0; i < mathString.length;) {
-    let c = mathString.charAt(i++);
+    const c = mathString.charAt(i++);
     let type;
     let num;
     let unit;
@@ -67,7 +67,7 @@ function parseDateMath(mathString, time, roundUp) {
     } else if (mathString.length === 2) {
       num = mathString.charAt(i);
     } else {
-      let numFrom = i;
+      const numFrom = i;
       while (!isNaN(mathString.charAt(i))) {
         i++;
         if (i > 10) {

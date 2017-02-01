@@ -3,8 +3,8 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import angular from 'angular';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 export default function _SourceFormatProvider(Private, shortDotsFilter) {
-  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  let template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
+  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
 
   _.class(Source).inherits(FieldFormat);
   function Source(params) {
@@ -20,15 +20,15 @@ export default function _SourceFormatProvider(Private, shortDotsFilter) {
     html: function sourceToHtml(source, field, hit) {
       if (!field) return this.getConverterFor('text')(source, field, hit);
 
-      let highlights = (hit && hit.highlight) || {};
-      let formatted = field.indexPattern.formatHit(hit);
-      let highlightPairs = [];
-      let sourcePairs = [];
+      const highlights = (hit && hit.highlight) || {};
+      const formatted = field.indexPattern.formatHit(hit);
+      const highlightPairs = [];
+      const sourcePairs = [];
 
       _.keys(formatted).forEach(function (key) {
-        let pairs = highlights[key] ? highlightPairs : sourcePairs;
-        let field = shortDotsFilter(key);
-        let val = formatted[key];
+        const pairs = highlights[key] ? highlightPairs : sourcePairs;
+        const field = shortDotsFilter(key);
+        const val = formatted[key];
         pairs.push([field, val]);
       }, []);
 

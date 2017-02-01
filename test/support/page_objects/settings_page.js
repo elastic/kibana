@@ -139,7 +139,7 @@ export default class SettingsPage {
         });
       }
 
-      let getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -180,7 +180,7 @@ export default class SettingsPage {
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        let thisChart = chart;
+        const thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -192,7 +192,7 @@ export default class SettingsPage {
         });
       }
 
-      let getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {

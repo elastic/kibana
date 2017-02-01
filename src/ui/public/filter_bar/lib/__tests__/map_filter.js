@@ -23,7 +23,7 @@ describe('Filter Bar Directive', function () {
 
   describe('mapFilter()', function () {
     it('should map query filters', function (done) {
-      let before = { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } };
+      const before = { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', '_type');
@@ -36,7 +36,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should map exists filters', function (done) {
-      let before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
+      const before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', 'exists');
@@ -49,7 +49,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should map missing filters', function (done) {
-      let before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
+      const before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', 'missing');
@@ -62,7 +62,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should map json filter', function (done) {
-      let before = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
+      const before = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', 'query');
@@ -75,7 +75,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should finish with a catch', function (done) {
-      let before = { meta: { index: 'logstash-*' } };
+      const before = { meta: { index: 'logstash-*' } };
       mapFilter(before).catch(function (error) {
         expect(error).to.be.an(Error);
         expect(error.message).to.be('No mappings have been found for filter.');
