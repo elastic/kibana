@@ -15,4 +15,4 @@ export default function LayoutTypeFactory(Private) {
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
     point_series: Private(VislibLibLayoutTypesColumnLayoutProvider)
   };
-};
+}

@@ -377,4 +377,4 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }
 
   init();
-};
+}

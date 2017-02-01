@@ -78,6 +78,6 @@ export default function AggTypeService(Private) {
     group: ['type'],
     initialSet: aggs.metrics.concat(aggs.buckets)
   });
-};
+}
 
 // preload

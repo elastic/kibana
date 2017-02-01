@@ -329,4 +329,4 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   return AggConfig;
-};
+}

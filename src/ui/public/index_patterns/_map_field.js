@@ -48,4 +48,4 @@ export default function MapFieldFn(Private, config) {
 
     return mapping;
   };
-};
+}

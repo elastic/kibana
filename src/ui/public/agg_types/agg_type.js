@@ -147,4 +147,4 @@ export default function AggTypeFactory(Private) {
   };
 
   return AggType;
-};
+}

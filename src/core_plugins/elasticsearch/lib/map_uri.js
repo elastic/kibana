@@ -43,4 +43,4 @@ export default function mapUri(cluster, proxyPrefix) {
     const mappedUrl = formatUrl(mappedUrlComponents);
     done(null, mappedUrl, mappedHeaders);
   };
-};
+}

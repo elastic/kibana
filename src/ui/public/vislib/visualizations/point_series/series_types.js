@@ -11,4 +11,4 @@ export default function SeriesTypeFactory(Private) {
     area: Private(VislibVisualizationsAreaChartProvider),
     heatmap: Private(VislibVisualizationsHeatmapChartProvider)
   };
-};
+}

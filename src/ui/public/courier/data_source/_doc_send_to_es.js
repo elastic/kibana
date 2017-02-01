@@ -88,4 +88,4 @@ export default function (Promise, Private, es, esAdmin, kbnIndex) {
       throw new errors.RequestFailure(err);
     });
   };
-};
+}

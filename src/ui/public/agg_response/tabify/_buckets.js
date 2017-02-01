@@ -29,4 +29,4 @@ export default function AggResponseBucketsProvider() {
   };
 
   return Buckets;
-};
+}

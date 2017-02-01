@@ -35,7 +35,7 @@ describe('dashboard panels', function () {
       $compile($el)($scope);
       $scope.$digest();
     });
-  };
+  }
 
   function findPanelWithVisualizationId(id) {
     return $scope.state.panels.find((panel) => { return panel.id === id; });

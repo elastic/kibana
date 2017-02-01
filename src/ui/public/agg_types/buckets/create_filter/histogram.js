@@ -11,4 +11,4 @@ export default function createHistogramFilterProvider(Private) {
       aggConfig.fieldFormatter()(key)
     );
   };
-};
+}

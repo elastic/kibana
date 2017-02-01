@@ -29,4 +29,4 @@ export default function ZeroFillDataArrayUtilService(Private) {
 
     return arr1;
   };
-};
+}

@@ -32,4 +32,4 @@ export default function VislibVisTypeFactory(Private) {
   };
 
   return VislibVisType;
-};
+}

@@ -180,8 +180,8 @@ bdd.describe('discover app', function describeIndexTests() {
            ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
           if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
             hasFailure = true;
-          };
-        };
+          }
+        }
         if (hasFailure) {
           PageObjects.common.log(stringResults);
           PageObjects.common.log(paths);

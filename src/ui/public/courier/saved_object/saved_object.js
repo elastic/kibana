@@ -365,4 +365,4 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
   }
 
   return SavedObject;
-};
+}

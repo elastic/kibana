@@ -45,7 +45,7 @@ export default function LayoutFactory(Private) {
       if (this.opts.get('type') === 'point_series') {
         this.updateCategoryAxisSize();
       }
-    };
+    }
 
     /**
      * Create the layout based on the json array provided
@@ -59,7 +59,7 @@ export default function LayoutFactory(Private) {
       return _.each(arr, (obj) => {
         this.layout(obj);
       });
-    };
+    }
 
     updateCategoryAxisSize() {
       const visConfig = this.opts;
@@ -83,7 +83,7 @@ export default function LayoutFactory(Private) {
       } else {
         el.find('.y-axis-div-wrapper').width(`${width}px`);
       }
-    };
+    }
 
 
     /**
@@ -135,7 +135,7 @@ export default function LayoutFactory(Private) {
       }
 
       return childEl;
-    };
+    }
 
     /**
      * Appends a `type` of DOM element to `el` and gives it a class name attribute `className`
@@ -162,7 +162,7 @@ export default function LayoutFactory(Private) {
       return d3.select(el)
       .append(type)
       .attr('class', className);
-    };
+    }
 
     /**
      * Removes all DOM elements from DOM element
@@ -173,8 +173,8 @@ export default function LayoutFactory(Private) {
      */
     removeAll(el) {
       return d3.select(el).selectAll('*').remove();
-    };
+    }
   }
 
   return Layout;
-};
+}

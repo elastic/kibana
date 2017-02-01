@@ -37,4 +37,4 @@ export default function _SourceFormatProvider(Private, shortDotsFilter) {
   };
 
   return Source;
-};
+}

@@ -110,4 +110,4 @@ export default function init(input, output, sourceLocation = 'stored') {
   loadSavedState();
   setupAutosave();
   mappings.startRetrievingAutoCompleteInfo();
-};
+}

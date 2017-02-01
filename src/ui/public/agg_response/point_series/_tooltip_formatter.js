@@ -40,4 +40,4 @@ export default function PointSeriesTooltipFormatter($compile, $rootScope) {
     $tooltipScope.$apply();
     return $tooltip[0].outerHTML;
   };
-};
+}

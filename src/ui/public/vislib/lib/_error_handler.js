@@ -30,8 +30,8 @@ export default function ErrorHandlerFactory() {
       if (badWidth || badHeight) {
         throw new errors.ContainerTooSmall();
       }
-    };
+    }
   }
 
   return ErrorHandler;
-};
+}

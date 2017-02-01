@@ -90,4 +90,4 @@ export default function (vis, resp) {
   walkBuckets(buckets[0], resp.aggregations);
 
   return results;
-};
+}

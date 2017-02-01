@@ -125,7 +125,7 @@ export default function LineChartFactory(Private) {
       }
 
       return circles;
-    };
+    }
 
     /**
      * Adds path to SVG
@@ -178,7 +178,7 @@ export default function LineChartFactory(Private) {
       .attr('stroke-width', 2);
 
       return line;
-    };
+    }
 
     /**
      * Renders d3 visualization
@@ -208,8 +208,8 @@ export default function LineChartFactory(Private) {
           return svg;
         });
       };
-    };
+    }
   }
 
   return LineChart;
-};
+}

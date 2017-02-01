@@ -307,4 +307,4 @@ export default function defaultSettingsProvider() {
       description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
     }
   };
-};
+}

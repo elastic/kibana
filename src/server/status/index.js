@@ -49,4 +49,4 @@ export default function (kbnServer, server, config) {
       return reply.renderStatusPage();
     }
   }));
-};
+}
