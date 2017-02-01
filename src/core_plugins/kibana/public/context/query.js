@@ -5,6 +5,13 @@ import { fetchPredecessors, fetchSuccessors } from './api/context';
 import { QueryParameterActionsProvider } from './query_parameters';
 
 
+const LOADING_STATUS = {
+  FAILED: 'failed',
+  LOADED: 'loaded',
+  LOADING: 'loading',
+  UNINITIALIZED: 'uninitialized',
+};
+
 function QueryActionsProvider(es, Notifier, Private, Promise) {
   const {
     increasePredecessorCount,
@@ -25,19 +32,19 @@ function QueryActionsProvider(es, Notifier, Private, Promise) {
   const fetchAnchorRow = (state) => () => {
     const { queryParameters: { indexPattern, anchorUid, sort } } = state;
 
-    setLoadingStatus(state)('anchor', 'loading');
+    setLoadingStatus(state)('anchor', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
       fetchAnchor(es, indexPattern, anchorUid, _.zipObject([sort]))
     ))
       .then(
         (anchorDocument) => {
-          setLoadingStatus(state)('anchor', 'loaded');
+          setLoadingStatus(state)('anchor', LOADING_STATUS.LOADED);
           state.rows.anchor = anchorDocument;
           return anchorDocument;
         },
         (error) => {
-          setLoadingStatus(state)('anchor', 'failed');
+          setLoadingStatus(state)('anchor', LOADING_STATUS.FAILED);
           notifier.error(error);
           throw error;
         }
@@ -50,19 +57,19 @@ function QueryActionsProvider(es, Notifier, Private, Promise) {
       rows: { anchor },
     } = state;
 
-    setLoadingStatus(state)('predecessors', 'loading');
+    setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
       fetchPredecessors(es, indexPattern, anchor, _.zipObject([sort]), predecessorCount)
     ))
       .then(
         (predecessorDocuments) => {
-          setLoadingStatus(state)('predecessors', 'loaded');
+          setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADED);
           state.rows.predecessors = predecessorDocuments;
           return predecessorDocuments;
         },
         (error) => {
-          setLoadingStatus(state)('predecessors', 'failed');
+          setLoadingStatus(state)('predecessors', LOADING_STATUS.FAILED);
           notifier.error(error);
           throw error;
         },
@@ -75,19 +82,19 @@ function QueryActionsProvider(es, Notifier, Private, Promise) {
       rows: { anchor },
     } = state;
 
-    setLoadingStatus(state)('successors', 'loading');
+    setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
       fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
     ))
       .then(
         (successorDocuments) => {
-          setLoadingStatus(state)('successors', 'loaded');
+          setLoadingStatus(state)('successors', LOADING_STATUS.LOADED);
           state.rows.successors = successorDocuments;
           return successorDocuments;
         },
         (error) => {
-          setLoadingStatus(state)('successors', 'failed');
+          setLoadingStatus(state)('successors', LOADING_STATUS.FAILED);
           notifier.error(error);
           throw error;
         },
@@ -149,6 +156,17 @@ function QueryActionsProvider(es, Notifier, Private, Promise) {
   };
 }
 
+function createInitialLoadingStatusState() {
+  return {
+    anchor: LOADING_STATUS.UNINITIALIZED,
+    predecessors: LOADING_STATUS.UNINITIALIZED,
+    successors: LOADING_STATUS.UNINITIALIZED,
+  };
+}
+
+
 export {
+  createInitialLoadingStatusState,
+  LOADING_STATUS,
   QueryActionsProvider,
 };

@@ -22,7 +22,7 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="predecessorLoadMoreButton"
-        disabled="contextApp.state.loadingStatus.predecessors !== 'loaded'"
+        disabled="contextApp.state.loadingStatus.predecessors !== contextApp.constants.LOADING_STATUS.LOADED"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
@@ -35,7 +35,7 @@
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
         data-test-subj="predecessorCountPicker"
-        is-disabled="contextApp.state.loadingStatus.anchor !== 'loaded'"
+        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
       ></context-size-picker>
       <div>newer entries</div>
@@ -44,7 +44,10 @@
 
   <!-- Loading feedback -->
   <div
-    ng-if="['uninitialized', 'loading'].includes(contextApp.state.loadingStatus.anchor)"
+    ng-if="[
+      contextApp.constants.LOADING_STATUS.UNINITIALIZED,
+      contextApp.constants.LOADING_STATUS.LOADING,
+    ].includes(contextApp.state.loadingStatus.anchor)"
     class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
   >
     <div class="kuiLoadingItems">
@@ -54,7 +57,7 @@
 
   <!-- Error feedback -->
   <div
-    ng-if="contextApp.state.loadingStatus.anchor === 'failed'"
+    ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.FAILED"
     class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
   >
     <div class="kuiLoadingItems">
@@ -64,7 +67,7 @@
 
   <!-- Table -->
   <div
-    ng-if="contextApp.state.loadingStatus.anchor === 'loaded'"
+    ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.LOADED"
     class="kuiPanel kuiVerticalRhythm"
   >
     <div class="discover-table" fixed-scroll>
@@ -83,7 +86,7 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="successorLoadMoreButton"
-        disabled="contextApp.state.loadingStatus.successors !== 'loaded'"
+        disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
       >
@@ -96,7 +99,7 @@
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
         data-test-subj="successorCountPicker"
-        is-disabled="contextApp.state.loadingStatus.anchor !== 'loaded'"
+        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
       <div>older entries</div>

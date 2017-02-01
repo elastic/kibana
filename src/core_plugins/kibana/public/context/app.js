@@ -9,7 +9,11 @@ import {
   QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
 } from './query_parameters';
-import { QueryActionsProvider } from './query';
+import {
+  createInitialLoadingStatusState,
+  LOADING_STATUS,
+  QueryActionsProvider,
+} from './query';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
@@ -50,6 +54,10 @@ function ContextAppController($scope, Private) {
     queryActions,
   ), (action) => (...args) => action(this.state)(...args));
 
+  this.constants = {
+    LOADING_STATUS,
+  };
+
   $scope.$watchGroup([
     () => this.state.rows.predecessors,
     () => this.state.rows.anchor,
@@ -86,11 +94,7 @@ function createInitialState(discoverUrl) {
       predecessors: [],
       successors: [],
     },
-    loadingStatus: {
-      anchor: 'uninitialized',
-      predecessors: 'uninitialized',
-      successors: 'uninitialized',
-    },
+    loadingStatus: createInitialLoadingStatusState(),
     navigation: {
       discover: {
         url: discoverUrl,
