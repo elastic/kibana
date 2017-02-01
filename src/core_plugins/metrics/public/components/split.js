@@ -51,7 +51,6 @@ class Split extends Component {
           <div className="vis_editor__label">By</div>
           <div className="vis_editor__item">
             <FieldSelect
-              restrict="string"
               IndexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
