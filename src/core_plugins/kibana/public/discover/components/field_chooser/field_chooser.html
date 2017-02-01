@@ -1,16 +1,18 @@
 <div class="sidebar-list">
   <div ng-show="indexPatternList.length > 1">
-    <div class="index-pattern" ng-click="showIndexPatternSelection = !showIndexPatternSelection"
-    ng-class="{active: showIndexPatternSelection === true}">
-      <div css-truncate title="{{indexPattern.id}}">{{indexPattern.id}}</div>
-      <i ng-hide="showIndexPatternSelection" class="fa fa-caret-down"></i>
-      <i ng-show="showIndexPatternSelection" class="fa fa-caret-up"></i>
-    </div>
-    <div ng-show="showIndexPatternSelection">
-      <ul class="list-unstyled sidebar-item index-pattern-selection">
-        <li css-truncate class="sidebar-item-title" title="{{id}}" ng-repeat="id in indexPatternList | orderBy" ng-show="indexPattern.id != id" ng-click="setIndexPattern(id)">{{id}}</li>
-      </ul>
-    </div>
+    <ui-select
+      class="index-pattern-selection"
+      ng-model="selectedIndexPattern"
+      on-select="setIndexPattern($item)"
+      ng-init="selectedIndexPattern = indexPattern.id"
+    >
+      <ui-select-match>
+        {{$select.selected}}
+      </ui-select-match>
+      <ui-select-choices repeat="id in indexPatternList | filter:$select.search">
+        <div ng-bind-html="id"></div>
+      </ui-select-choices>
+    </ui-select>
   </div>
   <div ng-hide="indexPatternList.length > 1">
     <div class="index-pattern">

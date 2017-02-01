@@ -2,6 +2,7 @@ import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import 'ui/filters/unique';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import 'angular-ui-select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
