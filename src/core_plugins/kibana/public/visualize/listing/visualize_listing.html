@@ -41,7 +41,7 @@
           confirm-click="listingController.deleteSelectedItems()"
           confirmation="Are you sure you want to delete the selected visualizations? This action is irreversible!"
           aria-label="Delete selected objects"
-          ng-hide="listingController.getSelectedItemsCount() === 0"
+          ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected visualizations"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
@@ -52,7 +52,7 @@
           class="kuiButton kuiButton--primary"
           href="#/visualize/step/1"
           aria-label="Create new visualization"
-          ng-hide="listingController.getSelectedItemsCount() > 0"
+          ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
@@ -80,9 +80,6 @@
             >
           </th>
 
-          <th class="kuiTableHeaderCell kuiTableHeaderCell--icon">
-          </th>
-
           <th class="kuiTableHeaderCell">
             Name
           </th>
@@ -107,10 +104,6 @@
             >
           </td>
 
-          <td class="kuiTableRowCell kuiTableRowCell--icon">
-            <div class="kuiIcon kuiIcon--basic {{ item.icon }}"></div>
-          </td>
-
           <td class="kuiTableRowCell">
             <div class="kuiTableRowCell__liner">
               <a class="kuiLink" ng-href="{{ item.url }}">
@@ -121,7 +114,10 @@
 
           <td class="kuiTableRowCell">
             <div class="kuiTableRowCell__liner">
-              {{ item.type.title }}
+              <span class="kuiStatusText">
+                <span class="kuiStatusText__icon kuiIcon {{ item.icon }}"></span>
+                {{ item.type.title }}
+              </span>
             </div>
           </td>
         </tr>

@@ -88,9 +88,7 @@
  * 2. Align checkbox with text in other cells.
  */
 .kuiTableHeaderCell--checkBox,
-.kuiTableRowCell--checkBox,
-.kuiTableHeaderCell--icon,
-.kuiTableRowCell--icon {
+.kuiTableRowCell--checkBox {
   width: 28px; /* 1 */
   padding-right: 0;
   line-height: 1;
