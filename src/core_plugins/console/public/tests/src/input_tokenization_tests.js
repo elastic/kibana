@@ -4,7 +4,7 @@ import { initializeInput } from '../../src/input';
 let input;
 
 var token_iterator = ace.require("ace/token_iterator");
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
 
 module("Input Tokenization", {
@@ -27,7 +27,7 @@ function tokensAsList() {
     t = input.parser.nextNonEmptyToken(iter);
   }
   while (t) {
-    ret.push({value: t.value, type: t.type});
+    ret.push({ value: t.value, type: t.type });
     t = input.parser.nextNonEmptyToken(iter);
   }
 
@@ -54,7 +54,7 @@ function token_test(token_list, prefix, data) {
       var tokens = tokensAsList();
       var normTokenList = [];
       for (var i = 0; i < token_list.length; i++) {
-        normTokenList.push({type: token_list[i++], value: token_list[i]});
+        normTokenList.push({ type: token_list[i++], value: token_list[i] });
       }
 
       deepEqual(tokens, normTokenList, "Doc:\n" + data);

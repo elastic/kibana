@@ -75,7 +75,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should finish with a catch', function (done) {
-      let before = { meta: { index: 'logstash-*' }};
+      let before = { meta: { index: 'logstash-*' } };
       mapFilter(before).catch(function (error) {
         expect(error).to.be.an(Error);
         expect(error.message).to.be('No mappings have been found for filter.');

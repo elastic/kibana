@@ -51,7 +51,7 @@ describe('JSON input validation', function () {
   it('should allow valid json', function () {
     element.val('{"foo": "bar"}');
     element.trigger('input');
-    expect($rootScope.value).to.eql({foo: 'bar'});
+    expect($rootScope.value).to.eql({ foo: 'bar' });
     expect(element.hasClass('ng-valid')).to.be.ok();
   });
 });

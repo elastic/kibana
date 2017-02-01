@@ -101,7 +101,7 @@ module.exports = function (tlConfig) {
     }
 
     return promise.then(function (result) {
-      return invokeChain({type:'chain', chain: chain}, [result]);
+      return invokeChain({ type:'chain', chain: chain }, [result]);
     });
 
   }

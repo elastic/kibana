@@ -15,7 +15,7 @@ export default function registerCount(server) {
       })
       .then(
         function (res) {
-          reply({count: res.count});
+          reply({ count: res.count });
         },
         function (error) {
           reply(handleESError(error));

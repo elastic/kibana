@@ -29,7 +29,7 @@ export default function brushEventProvider(timefilter) {
 
           const min = event.range[0];
           const max = event.range[event.range.length - 1];
-          const range = {gte: min, lt: max};
+          const range = { gte: min, lt: max };
           if (_.has(existingFilter, 'range')) {
             existingFilter.range[event.data.xAxisField.name] = range;
           } else if (_.has(existingFilter, 'script.script.params.gte')

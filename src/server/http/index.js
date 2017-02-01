@@ -29,7 +29,7 @@ module.exports = async function (kbnServer, server, config) {
           lookupCompressed: true
         }
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -41,7 +41,7 @@ module.exports = async function (kbnServer, server, config) {
       handler: {
         file: filePath
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 

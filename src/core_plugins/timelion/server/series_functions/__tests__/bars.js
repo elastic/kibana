@@ -22,7 +22,7 @@ describe(filename, () => {
   });
 
   it('leaves existing bars alone when called without option, if they exist', () => {
-    seriesList.list[0].bars = {foo: true};
+    seriesList.list[0].bars = { foo: true };
     return invoke(fn, [seriesList]).then((r) => {
       var bars = _.map(r.output.list, 'bars');
       expect(bars[0].foo).to.equal(true);

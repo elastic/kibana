@@ -7,7 +7,7 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
   let AggConfig = Private(VisAggConfigProvider);
   let TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
   let Buckets = Private(AggResponseTabifyBucketsProvider);
-  let notify = new Notifier({ location: 'agg_response/tabify'});
+  let notify = new Notifier({ location: 'agg_response/tabify' });
 
   function tabifyAggResponse(vis, esResponse, respOpts) {
     let write = new TabbedAggResponseWriter(vis, respOpts);

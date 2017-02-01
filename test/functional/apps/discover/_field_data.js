@@ -16,7 +16,7 @@ bdd.describe('discover app', function describeIndexTests() {
     var toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+    return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');

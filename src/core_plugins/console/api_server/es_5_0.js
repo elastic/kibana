@@ -29,7 +29,7 @@ function ES_5_0() {
   }, this);
 }
 
-ES_5_0.prototype = _.create(Api.prototype, {'constructor': ES_5_0});
+ES_5_0.prototype = _.create(Api.prototype, { 'constructor': ES_5_0 });
 
 (function (cls) {
   cls.addEndpointDescription = function (endpoint, description) {

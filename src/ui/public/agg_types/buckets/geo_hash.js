@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
-import {geohashColumns} from 'ui/utils/decode_geo_hash';
+import { geohashColumns } from 'ui/utils/decode_geo_hash';
 
 export default function GeoHashAggDefinition(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);

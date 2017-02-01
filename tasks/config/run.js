@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   let platform = require('os').platform();
-  let {format} = require('url');
-  let {resolve} = require('path');
+  let { format } = require('url');
+  let { resolve } = require('path');
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   let buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';

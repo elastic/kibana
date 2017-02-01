@@ -53,7 +53,7 @@ export default function MapFactory(Private, tilemapSettings) {
       if (this._boundingControl) return;
 
       const self = this;
-      const drawOptions = {draw: {}};
+      const drawOptions = { draw: {} };
 
       _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
         if (self._events && !self._events.listenerCount(drawShape)) {

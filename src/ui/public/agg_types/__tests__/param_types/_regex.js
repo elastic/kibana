@@ -43,7 +43,7 @@ describe('Regex', function () {
       let vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
         ]
       });
       aggConfig = vis.aggs[0];

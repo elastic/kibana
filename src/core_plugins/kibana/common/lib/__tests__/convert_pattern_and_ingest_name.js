@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import {patternToIngest, ingestToPattern} from '../convert_pattern_and_ingest_name';
+import { patternToIngest, ingestToPattern } from '../convert_pattern_and_ingest_name';
 
 describe('convertPatternAndTemplateName', function () {
 

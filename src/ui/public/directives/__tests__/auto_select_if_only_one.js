@@ -8,8 +8,8 @@ describe('Auto-select if only one directive', function () {
   let $compile;
   let $rootScope;
   let zeroOptions = [];
-  let oneOption = [{label: 'foo'}];
-  let multiOptions = [{label: 'foo'}, {label: 'bar'}];
+  let oneOption = [{ label: 'foo' }];
+  let multiOptions = [{ label: 'foo' }, { label: 'bar' }];
 
   beforeEach(ngMock.module('kibana'));
 

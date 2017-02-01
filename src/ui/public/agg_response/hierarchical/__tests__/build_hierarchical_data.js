@@ -72,9 +72,9 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension', row: true }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension', row: true } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
@@ -89,9 +89,9 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
@@ -112,9 +112,9 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
@@ -157,7 +157,7 @@ describe('buildHierarchicalData', function () {
             type: 'count',
             schema: 'metric'
           },
-          { type: 'histogram', schema: 'segment', params: { field: 'bytes', interval: 8192 }}
+          { type: 'histogram', schema: 'segment', params: { field: 'bytes', interval: 8192 } }
         ]
       });
       // We need to set the aggs to a known value.

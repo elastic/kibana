@@ -65,14 +65,14 @@ describe('docViewer', function () {
     }
     it('should have a tab for the view', function () {
       registerExtension();
-      registerExtension({title: 'exampleView2'});
+      registerExtension({ title: 'exampleView2' });
       init();
       expect($elem.find('.nav-tabs li').length).to.be(2);
     });
 
     it('should activate the first view in order', function () {
-      registerExtension({order: 2});
-      registerExtension({title: 'exampleView2'});
+      registerExtension({ order: 2 });
+      registerExtension({ title: 'exampleView2' });
       init();
       expect($elem.find('.nav-tabs .active').text().trim()).to.be('exampleView2');
     });

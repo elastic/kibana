@@ -18,8 +18,8 @@ uiModules.get('kibana/table_vis')
           connect: true,
           tooltips: true,
           step: 1,
-          range: {'min': 1, 'max': 100},
-          format: {to: (value) => parseInt(value) + 'px', from: value => parseInt(value)}
+          range: { 'min': 1, 'max': 100 },
+          format: { to: (value) => parseInt(value) + 'px', from: value => parseInt(value) }
         });
         slider.noUiSlider.on('change', function () {
           const fontSize = slider.noUiSlider.get();

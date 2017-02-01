@@ -5,7 +5,7 @@ require('ui/state_management/app_state');
 module.exports = function dashboardContext(Private, getAppState) {
   return function () {
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var bool = {must: [], must_not: []};
+    var bool = { must: [], must_not: [] };
     var filterBarFilters = queryFilter.getFilters();
     var queryBarFilter = getAppState().query;
 
@@ -27,6 +27,6 @@ module.exports = function dashboardContext(Private, getAppState) {
       }
     });
 
-    return {bool: bool};
+    return { bool: bool };
   };
 };

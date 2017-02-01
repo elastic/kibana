@@ -18,7 +18,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const clickHandler = filterBarClickHandler(appState);
     const aggs = $scope.vis.aggs.getResponseAggs();
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-    clickHandler({point: {aggConfigResult: aggConfigResult}});
+    clickHandler({ point: { aggConfigResult: aggConfigResult } });
   });
   tagCloud.on('renderComplete', () => {
 
@@ -87,11 +87,11 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();
-  }, 1000, {trailing: true}), true);
+  }, 1000, { trailing: true }), true);
 
 
   function getContainerSize() {
-    return {width: $element.width(), height: $element.height()};
+    return { width: $element.width(), height: $element.height() };
   }
 
   function getValue(metricsAgg, bucket) {

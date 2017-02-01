@@ -25,11 +25,11 @@ export default async (plugins) => {
   };
 
   const collection = plugins.toArray();
-  for (let {id} of collection) {
+  for (let { id } of collection) {
     await initialize(id, 'preInit');
   }
 
-  for (let {id} of collection) {
+  for (let { id } of collection) {
     await initialize(id, 'init');
   }
 };

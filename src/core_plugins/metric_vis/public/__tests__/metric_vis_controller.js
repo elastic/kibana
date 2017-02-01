@@ -34,8 +34,8 @@ describe('metric vis', function () {
     $scope.processTableGroups({
       tables: [{
         columns: [
-          {title: '1st percentile of bytes'},
-          {title: '99th percentile of bytes'}
+          { title: '1st percentile of bytes' },
+          { title: '99th percentile of bytes' }
         ],
         rows: [[ { toString: () => formatter(182) }, { toString: () => formatter(445842.4634666484) } ]]
       }]

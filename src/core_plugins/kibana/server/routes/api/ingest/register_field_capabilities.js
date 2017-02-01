@@ -22,7 +22,7 @@ export function registerFieldCapabilities(server) {
             return _.pick(value, ['searchable', 'aggregatable']);
           });
 
-          reply({fields: fieldsFilteredValues});
+          reply({ fields: fieldsFilteredValues });
         },
         (error) => {
           reply(handleESError(error));

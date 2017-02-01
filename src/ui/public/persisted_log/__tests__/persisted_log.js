@@ -115,14 +115,14 @@ describe('PersistedLog', function () {
 
     it ('should truncate the list upon initialization if too long', () => {
       storage.get.returns(payload.slice(0));
-      let log = new PersistedLog(historyName, {maxLength: 1});
+      let log = new PersistedLog(historyName, { maxLength: 1 });
       let items = log.get();
       expect(items.length).to.equal(1);
     });
 
     it('should allow a maxLength of 0', () => {
       storage.get.returns(payload.slice(0));
-      let log = new PersistedLog(historyName, {maxLength: 0});
+      let log = new PersistedLog(historyName, { maxLength: 0 });
       let items = log.get();
       expect(items.length).to.equal(0);
     });

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import d3 from 'd3';
-import {fromNode, delay} from 'bluebird';
+import { fromNode, delay } from 'bluebird';
 
 describe('tag cloud tests', function () {
 
@@ -11,9 +11,9 @@ describe('tag cloud tests', function () {
   const midValue = (minValue + maxValue) / 2;
   const baseTest = {
     data: [
-      {text: 'foo', value: minValue},
-      {text: 'bar', value: midValue},
-      {text: 'foobar', value: maxValue},
+      { text: 'foo', value: minValue },
+      { text: 'bar', value: midValue },
+      { text: 'foobar', value: maxValue },
     ],
     options: {
       orientation: 'single',

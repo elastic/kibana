@@ -5,7 +5,7 @@ var chainRunnerFn = require('../handlers/chain_runner.js');
 var timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
-  reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
+  reply({ title: e.toString(), message: e.toString(), stack: e.stack }).code(400);
 }
 
 

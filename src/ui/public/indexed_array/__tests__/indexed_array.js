@@ -112,7 +112,7 @@ describe('IndexedArray', function () {
         initialSet: users
       });
 
-      reg.remove({name: 'John'});
+      reg.remove({ name: 'John' });
 
       expect(_.eq(reg.raw, reg.slice(0))).to.be(true);
       expect(reg.length).to.be(3);

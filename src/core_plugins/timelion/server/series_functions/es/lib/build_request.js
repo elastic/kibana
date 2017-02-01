@@ -3,10 +3,10 @@ var createDateAgg = require('./create_date_agg');
 
 module.exports =  function buildRequest(config, tlConfig) {
 
-  var bool = {must: [], must_not: []};
+  var bool = { must: [], must_not: [] };
 
-  var timeFilter = {range:{}};
-  timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+  var timeFilter = { range:{} };
+  timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
   bool.must.push(timeFilter);
 
   // Use the kibana filter bar filters
@@ -16,10 +16,10 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   var aggs = {
     'q': {
-      meta: {type: 'split'},
+      meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q).map(function (q) {
-          return [q, {query_string:{query: q}}];
+          return [q, { query_string:{ query: q } }];
         }).zipObject().value(),
       },
       aggs: {}
@@ -32,7 +32,7 @@ module.exports =  function buildRequest(config, tlConfig) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       aggCursor[clause[0]] = {
-        meta: {type: 'split'},
+        meta: { type: 'split' },
         terms: {
           field: clause[0],
           size: parseInt(clause[1], 10)

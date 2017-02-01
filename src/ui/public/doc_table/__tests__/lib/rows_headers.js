@@ -282,7 +282,7 @@ describe('Doc Table', function () {
 
     beforeEach(function () {
       let row = getFakeRow(0, mapping);
-      mapping._id = {indexed: true, type: 'string'};
+      mapping._id = { indexed: true, type: 'string' };
       row._source._id = 'foo';
 
       init($elem, {

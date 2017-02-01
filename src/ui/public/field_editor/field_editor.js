@@ -123,7 +123,7 @@ uiModules
         self.defFormatType = initDefaultFormat();
         self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[newValue] || []);
 
-        if (_.isUndefined(_.find(self.fieldFormatTypes, {id: self.selectedFormatId}))) {
+        if (_.isUndefined(_.find(self.fieldFormatTypes, { id: self.selectedFormatId }))) {
           delete self.selectedFormatId;
         }
       });

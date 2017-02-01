@@ -50,7 +50,7 @@ describe('KbnTopNavController', function () {
     describe('description:', function () {
       it('defaults to "Toggle ${key} view" when using templates', function () {
         const controller = new KbnTopNavController([
-          { key: 'foo', template: '<h1></h1>'},
+          { key: 'foo', template: '<h1></h1>' },
           { key: 'Bar', description: 'not the default' },
           { key: '1234', run: ()=>{} },
         ]);

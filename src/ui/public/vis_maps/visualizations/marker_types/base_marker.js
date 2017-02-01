@@ -45,7 +45,7 @@ export default function MarkerFactory() {
       const self = this;
 
       // create the legend control, keep a reference
-      self._legend = L.control({position: this._attr.legendPosition});
+      self._legend = L.control({ position: this._attr.legendPosition });
 
       self._legend.onAdd = function () {
         // creates all the neccessary DOM elements for the control, adds listeners
@@ -230,7 +230,7 @@ export default function MarkerFactory() {
     };
 
     _createTooltip(content, latLng) {
-      L.popup({autoPan: false})
+      L.popup({ autoPan: false })
       .setLatLng(latLng)
       .setContent(content)
       .openOn(this.map);

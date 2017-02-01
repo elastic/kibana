@@ -36,7 +36,7 @@ module.exports = new Datasource ('worldbank_indicators', {
     var seriesLists = _.map(countries, function (country) {
       var code = 'countries/' + country + '/indicators/' + config.indicator;
       var wbArgs = [code];
-      wbArgs.byName = {code: code};
+      wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 

@@ -64,7 +64,7 @@ describe('Highlight', function () {
   });
 
   it('should accept an object and return a string containing its properties', function () {
-    let obj = {foo: 1, bar: 2};
+    let obj = { foo: 1, bar: 2 };
     let result = filter(obj, null);
     expect(result.indexOf('' + obj)).to.be(-1);
     expect(result.indexOf('foo')).to.be.greaterThan(-1);

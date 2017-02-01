@@ -99,7 +99,7 @@ export default function ColumnChartFactory(Private) {
 
       let barWidth;
       if (isTimeScale) {
-        const {min, interval} = this.handler.data.get('ordered');
+        const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
         if (!isHorizontal) groupWidth *= -1;
         const groupSpacing = groupWidth * groupSpacingPercentage;
@@ -165,7 +165,7 @@ export default function ColumnChartFactory(Private) {
       let barWidth;
 
       if (isTimeScale) {
-        const {min, interval} = this.handler.data.get('ordered');
+        const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
         if (!isHorizontal) groupWidth *= -1;
         const groupSpacing = groupWidth * groupSpacingPercentage;

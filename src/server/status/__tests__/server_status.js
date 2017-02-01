@@ -7,7 +7,7 @@ import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('ServerStatus class', function () {
-  const plugin = {id: 'name', version: '1.2.3'};
+  const plugin = { id: 'name', version: '1.2.3' };
 
   let server;
   let serverStatus;
@@ -99,8 +99,8 @@ describe('ServerStatus class', function () {
 
   describe('#toJSON()', function () {
     it('serializes to overall status and individuals', function () {
-      const pluginOne = {id: 'one', version: '1.0.0'};
-      const pluginTwo = {id: 'two', version: '2.0.0'};
+      const pluginOne = { id: 'one', version: '1.0.0' };
+      const pluginTwo = { id: 'two', version: '2.0.0' };
 
       let service = serverStatus.create('some service');
       let p1 = serverStatus.createForPlugin(pluginOne);

@@ -61,7 +61,7 @@ export default function PointSeriesFactory(Private) {
     };
 
     addClipPath(svg) {
-      const {width, height} = svg.node().getBBox();
+      const { width, height } = svg.node().getBBox();
       const startX = 0;
       const startY = 0;
       this.clipPathId = 'chart-area' + _.uniqueId();
@@ -95,7 +95,7 @@ export default function PointSeriesFactory(Private) {
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      const {width, height} = svg.node().getBBox();
+      const { width, height } = svg.node().getBBox();
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just

@@ -114,7 +114,7 @@ module.exports = function (api) {
       },
       "doc": {},
       "upsert": {},
-      "scripted_upsert": {__one_of: [true, false]}
+      "scripted_upsert": { __one_of: [true, false] }
     }
 
   });
@@ -159,13 +159,13 @@ module.exports = function (api) {
       fields: [
         "{field}"
       ],
-      offsets: {__one_of: [false, true]},
-      payloads: {__one_of: [false, true]},
-      positions: {__one_of: [false, true]},
-      term_statistics: {__one_of: [true, false]},
-      field_statistics: {__one_of: [false, true]},
+      offsets: { __one_of: [false, true] },
+      payloads: { __one_of: [false, true] },
+      positions: { __one_of: [false, true] },
+      term_statistics: { __one_of: [true, false] },
+      field_statistics: { __one_of: [false, true] },
       per_field_analyzer: {
-        __template: {"FIELD": ""},
+        __template: { "FIELD": "" },
         "{field}": ""
       },
       routing: "",
@@ -206,14 +206,14 @@ module.exports = function (api) {
       fields: [
         "{field}"
       ],
-      offsets: {__one_of: [false, true]},
-      payloads: {__one_of: [false, true]},
-      positions: {__one_of: [false, true]},
-      term_statistics: {__one_of: [true, false]},
-      field_statistics: {__one_of: [false, true]},
-      dfs: {__one_of: [true, false]},
+      offsets: { __one_of: [false, true] },
+      payloads: { __one_of: [false, true] },
+      positions: { __one_of: [false, true] },
+      term_statistics: { __one_of: [true, false] },
+      field_statistics: { __one_of: [false, true] },
+      dfs: { __one_of: [true, false] },
       per_field_analyzer: {
-        __template: {"FIELD": ""},
+        __template: { "FIELD": "" },
         "{field}": ""
       },
       routing: "",

@@ -10,7 +10,7 @@ export default function GetQueryFromUser(es, Private) {
    */
   return function (text) {
     function getQueryStringQuery(text) {
-      return decorateQuery({query_string: {query: text}});
+      return decorateQuery({ query_string: { query: text } });
     }
 
     let matchAll = getQueryStringQuery('*');

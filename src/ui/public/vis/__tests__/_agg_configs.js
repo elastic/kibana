@@ -211,7 +211,7 @@ describe('AggConfigs', function () {
         aggs: [
           { type: 'terms', schema: 'split' },
           { type: 'date_histogram', schema: 'segment' },
-          { type: 'percentiles', schema: 'metric', params: { percents: [1, 2, 3]} }
+          { type: 'percentiles', schema: 'metric', params: { percents: [1, 2, 3] } }
         ]
       });
 

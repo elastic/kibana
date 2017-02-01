@@ -15,7 +15,7 @@ module.exports = function createMappingsFromPatternFields(fields) {
       mapping = {
         type: 'text',
         fields: {
-          keyword: {type: 'keyword', ignore_above: 256}
+          keyword: { type: 'keyword', ignore_above: 256 }
         }
       };
     }

@@ -25,7 +25,7 @@ describe('Filter Manager', function () {
           lte: 3
         }
       };
-      expect(fn(indexPattern.fields.byName.bytes, {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
+      expect(fn(indexPattern.fields.byName.bytes, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
@@ -40,7 +40,7 @@ describe('Filter Manager', function () {
           lte: 3
         }
       });
-      expect(fn(indexPattern.fields.byName['script number'], {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
+      expect(fn(indexPattern.fields.byName['script number'], { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should wrap painless scripts in comparator lambdas', function () {
@@ -49,21 +49,21 @@ describe('Filter Manager', function () {
               `gte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.gte) && ` +
               `lte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.lte)`;
 
-      const inlineScript = fn(indexPattern.fields.byName['script date'], {gte: 1, lte: 3}, indexPattern).script.script.inline;
+      const inlineScript = fn(indexPattern.fields.byName['script date'], { gte: 1, lte: 3 }, indexPattern).script.script.inline;
       expect(inlineScript).to.be(expected);
     });
 
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], {gte: 1, gt: 3}, indexPattern);
+        fn(indexPattern.fields.byName['script number'], { gte: 1, gt: 3 }, indexPattern);
       }).to.throwError();
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], {lte: 1, lt: 3}, indexPattern);
+        fn(indexPattern.fields.byName['script number'], { lte: 1, lt: 3 }, indexPattern);
       }).to.throwError();
     });
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
-      _.each({gte: '>=', gt: '>', lte: '<=', lt: '<'}, function (operator, key) {
+      _.each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, function (operator, key) {
         let params = {};
         params[key] = 5;
         let filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
