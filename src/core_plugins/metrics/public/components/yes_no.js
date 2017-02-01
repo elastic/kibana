@@ -34,7 +34,7 @@ function YesNo(props) {
 
 YesNo.propTypes = {
   name  : PropTypes.string,
-  value : PropTypes.number
+  value : PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 };
 
 export default YesNo;
