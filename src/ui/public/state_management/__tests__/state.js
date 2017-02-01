@@ -187,6 +187,23 @@ describe('State Management', function () {
       stateObj = state.toObject();
       expect(stateObj).to.eql({});
     });
+
+    it('does not replace the state value on read', () => {
+      const { state } = setup();
+      sinon.stub($location, 'search', (newSearch) => {
+        if (newSearch) {
+          return $location;
+        } else {
+          return {
+            [state.getQueryParamName()]: '(a:1)'
+          };
+        }
+      });
+      const replaceStub = sinon.stub($location, 'replace').returns($location);
+
+      state.fetch();
+      sinon.assert.notCalled(replaceStub);
+    });
   });
 
   describe('Hashing', () => {
