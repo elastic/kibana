@@ -6,7 +6,8 @@ import getSplitColors from './get_split_colors';
 export default function getSplits(resp, series) {
   const metric = getLastMetric(series);
   if (_.has(resp, `aggregations.${series.id}.buckets`)) {
-    const colors = getSplitColors(series.color, Number(series.terms_size || 10), series.split_color_mode);
+    const size = _.get(resp, `aggregations.${series.id}.buckets`).length;
+    const colors = getSplitColors(series.color, size, series.split_color_mode);
     return _.get(resp, `aggregations.${series.id}.buckets`).map(bucket => {
       bucket.id = `${series.id}:${bucket.key}`;
       bucket.label = bucket.key;
