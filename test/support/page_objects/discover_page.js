@@ -77,9 +77,9 @@ export default class DiscoverPage {
   }
 
   getBarChartData() {
-    var self = this;
-    var yAxisLabel = 0;
-    var yAxisHeight;
+    let self = this;
+    let yAxisLabel = 0;
+    let yAxisHeight;
 
     return PageObjects.header.isGlobalLoadingIndicatorHidden()
     .then(() => {
@@ -124,7 +124,7 @@ export default class DiscoverPage {
                 return Math.round(barHeight / yAxisHeight * yAxisLabel);
               });
           }
-          var getChartTypesPromises = chartTypes.map(getChartType);
+          let getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         })
         .then(function (bars) {

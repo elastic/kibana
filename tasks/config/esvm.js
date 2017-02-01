@@ -1,8 +1,8 @@
 module.exports = function (grunt) {
-  var resolve = require('path').resolve;
-  var directory = resolve(__dirname, '../../esvm');
-  var dataDir = resolve(directory, 'data_dir');
-  var serverConfig = require('../../test/server_config');
+  let resolve = require('path').resolve;
+  let directory = resolve(__dirname, '../../esvm');
+  let dataDir = resolve(directory, 'data_dir');
+  let serverConfig = require('../../test/server_config');
 
   return {
     options: {

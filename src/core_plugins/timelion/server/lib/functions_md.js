@@ -1,16 +1,16 @@
-var loadFunctions = require('./load_functions.js');
-var functions  = loadFunctions('series_functions/');
-var _ = require('lodash');
+let loadFunctions = require('./load_functions.js');
+let functions  = loadFunctions('series_functions/');
+let _ = require('lodash');
 
 
 module.exports = (function () {
-  var functionArray = _.map(functions, function (val, key) {
+  let functionArray = _.map(functions, function (val, key) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
     return _.extend({}, val, { name: key });
   });
 
   function toDocBlock(fn) {
-    var help = '';
+    let help = '';
 
     if (fn.isAlias) return help;
 
@@ -18,7 +18,7 @@ module.exports = (function () {
     help += fn.help + '\n\n';
 
     // If chainable, drop first argument from help
-    var args = fn.chainable ? fn.args.slice(1) : fn.args.slice();
+    let args = fn.chainable ? fn.args.slice(1) : fn.args.slice();
     if (!args.length) {
       help += '*This function does not accept any arguments.*\n\n';
       return help;
@@ -39,7 +39,7 @@ module.exports = (function () {
   }
 
   function createDocs() {
-    var help = '';
+    let help = '';
     help += '## Timelion function reference\n';
     help += 'This document is auto generated from the timelion code. ' +
     'Do not submit pulls against this document. You want to submit a pull against something in the ' +

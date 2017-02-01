@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var fetch = require('node-fetch');
-var moment = require('moment');
-var worldbank = require('./worldbank.js');
-var Promise = require('bluebird');
-var Datasource = require('../lib/classes/datasource');
+let _ = require('lodash');
+let fetch = require('node-fetch');
+let moment = require('moment');
+let worldbank = require('./worldbank.js');
+let Promise = require('bluebird');
+let Datasource = require('../lib/classes/datasource');
 
 
 module.exports = new Datasource ('worldbank_indicators', {
@@ -27,15 +27,15 @@ module.exports = new Datasource ('worldbank_indicators', {
     mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent
     time ranges.`,
   fn: function worldbankIndicators(args, tlConfig) {
-    var config = _.defaults(args.byName, {
+    let config = _.defaults(args.byName, {
       country: 'wld',
       indicator: 'SP.POP.TOTL'
     });
 
-    var countries = config.country.split(':');
-    var seriesLists = _.map(countries, function (country) {
-      var code = 'countries/' + country + '/indicators/' + config.indicator;
-      var wbArgs = [code];
+    let countries = config.country.split(':');
+    let seriesLists = _.map(countries, function (country) {
+      let code = 'countries/' + country + '/indicators/' + config.indicator;
+      let wbArgs = [code];
       wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });

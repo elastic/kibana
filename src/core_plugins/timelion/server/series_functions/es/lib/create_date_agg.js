@@ -1,7 +1,7 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = function createDateAgg(config, tlConfig) {
-  var dateAgg = {
+  let dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
       date_histogram: {
@@ -30,7 +30,7 @@ module.exports = function createDateAgg(config, tlConfig) {
         }
       };
     } else if (metric[0] && metric[1]) {
-      var metricName = metric[0] + '(' + metric[1] + ')';
+      let metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
       dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
     } else {

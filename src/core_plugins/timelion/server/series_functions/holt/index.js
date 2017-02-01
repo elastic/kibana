@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var Chainable = require('../../lib/classes/chainable');
-var ses = require('./lib/ses');
-var des = require('./lib/des');
-var tes = require('./lib/tes');
-var toMilliseconds = require('../../lib/to_milliseconds');
+let _ = require('lodash');
+let Chainable = require('../../lib/classes/chainable');
+let ses = require('./lib/ses');
+let des = require('./lib/des');
+let tes = require('./lib/tes');
+let toMilliseconds = require('../../lib/to_milliseconds');
 
 module.exports = new Chainable('holt', {
   args: [
@@ -71,8 +71,8 @@ module.exports = new Chainable('holt', {
       // points exponentially degrade relative to the alpha, eg:
       // 0.8^1, 0.8^2, 0.8^3, etc
 
-      var times = _.map(series.data, 0);
-      var points = _.map(series.data, 1);
+      let times = _.map(series.data, 0);
+      let points = _.map(series.data, 1);
 
       if (alpha != null && beta == null && gamma == null) {
         points = ses(points, alpha);

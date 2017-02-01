@@ -7,13 +7,13 @@ import {
 
 import PageObjects from '../../../support/page_objects';
 
-var expect = require('expect.js');
+let expect = require('expect.js');
 
 bdd.describe('source filters', function describeIndexTests() {
   bdd.before(function () {
 
-    var fromTime = '2015-09-19 06:31:44.000';
-    var toTime = '2015-09-23 18:31:44.000';
+    let fromTime = '2015-09-19 06:31:44.000';
+    let toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })

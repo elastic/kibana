@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var moment = require('moment');
+let _ = require('lodash');
+let moment = require('moment');
 
 // map of moment's short/long unit ids and elasticsearch's long unit ids
 // to their value in milliseconds
-var vals = _.transform([
+let vals = _.transform([
   ['ms', 'milliseconds', 'millisecond'],
   ['s', 'seconds', 'second', 'sec'],
   ['m', 'minutes', 'minute', 'min'],
@@ -14,17 +14,17 @@ var vals = _.transform([
   ['quarter'],
   ['y',  'years', 'year']
 ], function (vals, units) {
-  var normal = moment.normalizeUnits(units[0]);
-  var val = moment.duration(1, normal).asMilliseconds();
+  let normal = moment.normalizeUnits(units[0]);
+  let val = moment.duration(1, normal).asMilliseconds();
   [].concat(normal, units).forEach(function (unit) {
     vals[unit] = val;
   });
 }, {});
 // match any key from the vals object prececed by an optional number
-var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
+let parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
 module.exports = function (expr) {
-  var match = expr.match(parseRE);
+  let match = expr.match(parseRE);
   if (match) {
     if (match[2] === 'M' && match[1] !== '1') {
       throw new Error ('Invalid interval. 1M is only valid monthly interval.');

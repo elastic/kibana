@@ -1,33 +1,33 @@
 require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
-var _ = require('lodash');
-var $ = require('jquery');
-var moment = require('moment-timezone');
-var observeResize = require('plugins/timelion/lib/observe_resize');
-var calculateInterval = require('plugins/timelion/lib/calculate_interval');
+let _ = require('lodash');
+let $ = require('jquery');
+let moment = require('moment-timezone');
+let observeResize = require('plugins/timelion/lib/observe_resize');
+let calculateInterval = require('plugins/timelion/lib/calculate_interval');
 
 module.exports = function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
-        var template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        var timezone = Private(require('plugins/timelion/services/timezone'))();
-        var getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
+        let template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
+        let timezone = Private(require('plugins/timelion/services/timezone'))();
+        let getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
         moment.tz.setDefault(config.get('dateFormat:tz'));
 
-        var render = $scope.seriesList.render || {};
+        let render = $scope.seriesList.render || {};
 
         $scope.chart = $scope.seriesList.list;
         $scope.interval = $scope.interval;
         $scope.search = $scope.search || _.noop;
 
-        var legendValueNumbers;
-        var debouncedSetLegendNumbers;
-        var defaultOptions = {
+        let legendValueNumbers;
+        let debouncedSetLegendNumbers;
+        let defaultOptions = {
           xaxis: {
             mode: 'time',
             tickLength: 5,
@@ -65,12 +65,12 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
 
         $scope.toggleSeries = function (id) {
-          var series = $scope.chart[id];
+          let series = $scope.chart[id];
           series._hide = !series._hide;
           drawPlot($scope.chart);
         };
 
-        var cancelResize = observeResize($elem, function () {
+        let cancelResize = observeResize($elem, function () {
           drawPlot($scope.chart);
         });
 
@@ -108,7 +108,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           clearLegendNumbers();
         });
 
-        var debounceDelay = 50;
+        let debounceDelay = 50;
         debouncedSetLegendNumbers = _.debounce(setLegendNumbers, debounceDelay, {
           maxWait: debounceDelay,
           leading: true,
@@ -117,20 +117,20 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
         // Shamelessly borrowed from the flotCrosshairs example
         function setLegendNumbers(pos) {
-          var plot = $scope.plot;
+          let plot = $scope.plot;
 
-          var axes = plot.getAxes();
+          let axes = plot.getAxes();
           if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
             return;
           }
 
-          var i;
-          var j;
-          var dataset = plot.getData();
+          let i;
+          let j;
+          let dataset = plot.getData();
           for (i = 0; i < dataset.length; ++i) {
 
-            var series = dataset[i];
-            var precision = _.get(series, '_meta.precision', 2);
+            let series = dataset[i];
+            let precision = _.get(series, '_meta.precision', 2);
 
             if (series._hide) continue;
 
@@ -139,7 +139,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
               if (series.data[j][0] > pos.x) break;
             }
 
-            var y;
+            let y;
             try {
               y = series.data[j][1];
             } catch (e) {
@@ -160,7 +160,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           });
         }
 
-        var legendScope = $scope.$new();
+        let legendScope = $scope.$new();
         function drawPlot(plotConfig) {
 
           if (!plotConfig || !plotConfig.length) {
@@ -169,22 +169,22 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           }
 
           if (!$('.chart-canvas', $elem).length) $elem.html(template);
-          var canvasElem = $('.chart-canvas', $elem);
+          let canvasElem = $('.chart-canvas', $elem);
 
-          var title = _(plotConfig).map('_title').compact().last();
+          let title = _(plotConfig).map('_title').compact().last();
           $('.chart-top-title', $elem).text(title == null ? '' : title);
 
-          var options = _.cloneDeep(defaultOptions);
+          let options = _.cloneDeep(defaultOptions);
 
           // Get the X-axis tick format
-          var time = timefilter.getBounds();
-          var interval = calculateInterval(
+          let time = timefilter.getBounds();
+          let interval = calculateInterval(
             time.min.valueOf(),
             time.max.valueOf(),
             config.get('timelion:target_buckets') || 200,
             $scope.interval
           );
-          var format = getxAxisFormatter(interval);
+          let format = getxAxisFormatter(interval);
 
           // Use moment to format ticks so we get timezone correction
           options.xaxis.tickFormatter = function (val) {
@@ -192,11 +192,11 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           };
 
           // Calculate how many ticks can fit on the axis
-          var tickLetterWidth = 7;
-          var tickPadding = 45;
+          let tickLetterWidth = 7;
+          let tickPadding = 45;
           options.xaxis.ticks = Math.floor($elem.width() / ((format.length * tickLetterWidth) + tickPadding));
 
-          var series = _.map(plotConfig, function (series, index) {
+          let series = _.map(plotConfig, function (series, index) {
             series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
               lines: {

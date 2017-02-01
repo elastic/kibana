@@ -160,7 +160,7 @@ export default class DashboardPage {
         return chart.getAttribute('title');
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      let getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }
@@ -172,7 +172,7 @@ export default class DashboardPage {
     .then(function (titleObjects) {
 
       function getTitles(chart) {
-        var obj = {};
+        let obj = {};
         return chart.getAttribute('data-col')
         .then(theData => {
           obj = { dataCol:theData };
@@ -211,7 +211,7 @@ export default class DashboardPage {
         });
       }
 
-      var getTitlePromises = titleObjects.map(getTitles);
+      let getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }

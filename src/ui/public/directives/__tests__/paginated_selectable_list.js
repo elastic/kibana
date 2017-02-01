@@ -21,9 +21,9 @@ let stringList = [
 
 let lists = [objectList, stringList, []];
 
-var $scope;
-var $element;
-var $isolatedScope;
+let $scope;
+let $element;
+let $isolatedScope;
 
 lists.forEach(function (list) {
   let isArrayOfObjects = list.every((item) => {

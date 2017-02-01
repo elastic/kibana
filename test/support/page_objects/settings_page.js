@@ -139,7 +139,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -175,12 +175,12 @@ export default class SettingsPage {
   }
 
   getPageSize() {
-    var selectedItemLabel = '';
+    let selectedItemLabel = '';
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        var thisChart = chart;
+        let thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -192,7 +192,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {
@@ -280,7 +280,7 @@ export default class SettingsPage {
   }
 
   async removeIndexPattern() {
-    var alertText;
+    let alertText;
     await PageObjects.common.try(async () => {
       PageObjects.common.debug('click delete index pattern button');
       await this.clickDeletePattern();

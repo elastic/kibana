@@ -203,7 +203,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(2).find('td').eq(1).text()).to.be('cccc');
       expect(tableRows.eq(1).find('td').eq(1).text()).to.be('bbbb');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
@@ -213,7 +213,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(1, 'desc');
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('zzzz');
       expect(tableRows.eq(1).find('td').eq(1).text()).to.be('cccc');
       expect(tableRows.eq(2).find('td').eq(1).text()).to.be('bbbb');
