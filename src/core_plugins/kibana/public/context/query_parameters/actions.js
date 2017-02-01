@@ -1,10 +1,11 @@
 import _ from 'lodash';
 
+import { QUERY_PARAMETER_KEYS } from './constants';
+
 
 const MIN_CONTEXT_SIZE = 0;
-const QUERY_PARAMETER_KEYS = Object.keys(createInitialQueryParametersState());
 
-function QueryParameterActionsProvider(config) {
+export function QueryParameterActionsProvider(config) {
   const defaultSizeStep = parseInt(config.get('context:step'), 10);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
@@ -45,21 +46,3 @@ function QueryParameterActionsProvider(config) {
     setSuccessorCount,
   };
 }
-
-function createInitialQueryParametersState() {
-  return {
-    anchorUid: null,
-    columns: [],
-    indexPattern: null,
-    predecessorCount: 0,
-    successorCount: 0,
-    sort: [],
-  };
-}
-
-
-export {
-  createInitialQueryParametersState,
-  QueryParameterActionsProvider,
-  QUERY_PARAMETER_KEYS,
-};

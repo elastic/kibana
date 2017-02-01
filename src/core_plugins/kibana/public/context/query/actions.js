@@ -1,18 +1,12 @@
 import _ from 'lodash';
 
-import { fetchAnchor } from './api/anchor';
-import { fetchPredecessors, fetchSuccessors } from './api/context';
-import { QueryParameterActionsProvider } from './query_parameters';
+import { fetchAnchor } from '../api/anchor';
+import { fetchPredecessors, fetchSuccessors } from '../api/context';
+import { QueryParameterActionsProvider } from '../query_parameters';
+import { LOADING_STATUS } from './constants';
 
 
-const LOADING_STATUS = {
-  FAILED: 'failed',
-  LOADED: 'loaded',
-  LOADING: 'loading',
-  UNINITIALIZED: 'uninitialized',
-};
-
-function QueryActionsProvider(es, Notifier, Private, Promise) {
+export function QueryActionsProvider(es, Notifier, Private, Promise) {
   const {
     increasePredecessorCount,
     increaseSuccessorCount,
@@ -155,18 +149,3 @@ function QueryActionsProvider(es, Notifier, Private, Promise) {
     setAllRows,
   };
 }
-
-function createInitialLoadingStatusState() {
-  return {
-    anchor: LOADING_STATUS.UNINITIALIZED,
-    predecessors: LOADING_STATUS.UNINITIALIZED,
-    successors: LOADING_STATUS.UNINITIALIZED,
-  };
-}
-
-
-export {
-  createInitialLoadingStatusState,
-  LOADING_STATUS,
-  QueryActionsProvider,
-};
