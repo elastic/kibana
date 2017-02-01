@@ -113,7 +113,7 @@ export default function HandlerBaseClass(Private) {
      * @returns {HTMLElement} With the visualization child element
      */
     render() {
-      if (this.visConfig.get('error')) return this.error(this.visConfig.get('error'));
+      if (this.visConfig.get('error', null)) return this.error(this.visConfig.get('error'));
 
       const self = this;
       const { binder, charts = [] } = this;
