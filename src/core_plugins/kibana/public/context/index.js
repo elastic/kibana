@@ -1,6 +1,8 @@
 import uiRoutes from 'ui/routes';
+
 import './app';
 import { getDocumentUid } from './api/utils/ids';
+import contextAppRouteTemplate from './index.html';
 
 
 uiRoutes
@@ -12,17 +14,7 @@ uiRoutes
       return courier.indexPatterns.get($route.current.params.indexPattern);
     },
   },
-  template: (
-    `<context-app
-      anchor-uid="contextAppRoute.anchorUid"
-      columns="contextAppRoute.state.columns"
-      discover-url="contextAppRoute.discoverUrl"
-      index-pattern="contextAppRoute.indexPattern"
-      predecessor-count="contextAppRoute.state.predecessorCount"
-      successor-count="contextAppRoute.state.successorCount"
-      sort="[contextAppRoute.indexPattern.timeFieldName, 'desc']"
-    >`
-  ),
+  template: contextAppRouteTemplate,
 });
 
 
