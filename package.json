@@ -102,6 +102,7 @@
     "brace": "0.5.1",
     "bunyan": "1.7.1",
     "check-hash": "1.0.1",
+    "color": "1.0.3",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",

@@ -75,7 +75,7 @@ describe('getSplits(resp, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
-        color: '#E60000',
+        color: '#F30000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
       }

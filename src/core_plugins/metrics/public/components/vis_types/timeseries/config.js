@@ -28,6 +28,11 @@ class TimeseriesConfig extends Component {
       { label: 'Line', value: 'line' }
     ];
 
+    const splitColorOptions = [
+      { label: 'Gradient', value: 'gradient' },
+      { label: 'Rainbow', value: 'rainbow' }
+    ];
+
     let type;
     if (model.chart_type === 'line') {
       type = (
@@ -136,6 +141,14 @@ class TimeseriesConfig extends Component {
                 value={model.hide_in_legend}
                 name="hide_in_legend"
                 onChange={this.props.onChange}/>
+              <div className="vis_editor__label">Split Color Theme</div>
+              <div className="vis_editor__row_item">
+                <Select
+                  clearable={false}
+                  options={splitColorOptions}
+                  value={model.split_color_mode || 'gradient' }
+                  onChange={handleSelectChange('split_color_mode')}/>
+              </div>
           </div>
           <div className="vis_editor__series_config-row">
               <div className="vis_editor__label">Separate Axis</div>
