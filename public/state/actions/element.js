@@ -33,6 +33,7 @@ export function elementAdd(type, pageId) {
     const action = createAction('ELEMENT_ADD', (element, pageId) => {return {element, pageId};});
     dispatch(action(element, pageId));
     dispatch(elementResolve(element.id));
+    dispatch(elementSelect(element.id));
   };
 }
 
