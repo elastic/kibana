@@ -61,8 +61,8 @@ const DataframeDialog = React.createClass({
             <Page key={pageId} page={page}>
               {page.elements.map((elementId, i) => {
                 const element = elements[elementId];
-                const selected = elementId === selectedElement ? true : false;
-                const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
+                const selected = elementId === _.get(selectedElement, 'id') ? true : false;
+                const position = _.pick(selectedElement, ['top', 'left', 'height', 'width', 'angle']);
 
                 // This is really gross because it doesn't actually wrap the element.
                 // Rather you end up with a bunch of 0 height divs stacked at the top
@@ -132,9 +132,9 @@ function mapStateToProps(state) {
   return {
     workpad: state.persistent.workpad,
     pages: state.persistent.pages,
+    selectedElement: state.persistent.elements[state.transient.selectedElement],
     elements: state.persistent.elements,
     elementCache: state.transient.elementCache,
-    selectedElement: state.transient.selectedElement,
     fullscreen: state.transient.fullscreen
   };
 }
