@@ -28,10 +28,10 @@ function getInteractionObj(target, originalEvent, originalPosition, originalSize
         height: 0
       },
       absolute: {
-        top: originalPosition.top,
-        left: originalPosition.left,
-        height: originalSize.height,
-        width: originalSize.width
+        top: Math.floor(originalPosition.top),
+        left: Math.floor(originalPosition.left),
+        height: Math.floor(originalSize.height),
+        width: Math.floor(originalSize.width)
       }
     }
   };
