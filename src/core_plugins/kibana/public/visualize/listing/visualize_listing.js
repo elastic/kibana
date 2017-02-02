@@ -66,18 +66,8 @@ export function VisualizeListingController(
       .catch(error => notify.error(error));
   };
 
-  this.open = function open(item) {
-    kbnUrl.change(item.url.substr(1));
-  };
-
-  this.edit = function edit(item) {
-    const params = {
-      // TODO: Get this value from somewhere instead of hardcoding it.
-      service: 'savedVisualizations',
-      id: item.id
-    };
-
-    kbnUrl.change('/management/kibana/objects/{{ service }}/{{ id }}', params);
+  this.getUrlForItem = function getUrlForItem(item) {
+    return `#/visualize/edit/${item.id}`;
   };
 
   $scope.$watch(() => this.filter, () => {

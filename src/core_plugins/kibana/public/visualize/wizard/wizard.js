@@ -15,7 +15,7 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /********
 /** Wizard Step 1
 /********/
-routes.when('/visualize/step/1', {
+routes.when('/visualize/new', {
   template: visualizeWizardStep1Template,
   controller: 'VisualizeWizardStep1',
 });
@@ -28,7 +28,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   $scope.visTypes = Private(RegistryVisTypesProvider);
   $scope.visTypeUrl = function (visType) {
-    const baseUrl = visType.requiresSearch ? '#/visualize/step/2?' : '#/visualize/create?';
+    const baseUrl = visType.requiresSearch ? '#/visualize/new/configure?' : '#/visualize/create?';
     const params = [`type=${encodeURIComponent(visType.name)}`];
     if (addToDashMode) {
       params.push(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
@@ -41,7 +41,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 /********
 /** Wizard Step 2
 /********/
-routes.when('/visualize/step/2', {
+routes.when('/visualize/new/configure', {
   template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
   resolve: {

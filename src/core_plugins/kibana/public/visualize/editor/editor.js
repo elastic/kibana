@@ -224,6 +224,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $state.replace();
 
+    $scope.getVisualizationTitle = function getVisualizationTitle() {
+      return savedVis.lastSavedTitle || 'New Visualization';
+    };
+
     $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
       timefilter.enabled = !!timeField;
     });

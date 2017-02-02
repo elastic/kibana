@@ -50,7 +50,7 @@
         <!-- Create visualization button -->
         <a
           class="kuiButton kuiButton--primary"
-          href="#/visualize/step/1"
+          href="#/visualize/new"
           aria-label="Create new visualization"
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
@@ -106,7 +106,7 @@
 
           <td class="kuiTableRowCell">
             <div class="kuiTableRowCell__liner">
-              <a class="kuiLink" ng-href="{{ item.url }}">
+              <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
                 {{ item.title }}
               </a>
             </div>
