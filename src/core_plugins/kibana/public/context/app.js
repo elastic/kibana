@@ -62,7 +62,7 @@ function ContextAppController($scope, Private) {
     () => this.state.rows.predecessors,
     () => this.state.rows.anchor,
     () => this.state.rows.successors,
-  ], _.spread(this.actions.setAllRows));
+  ], (newValues) => this.actions.setAllRows(...newValues));
 
   /**
    * Sync query parameters to arguments
