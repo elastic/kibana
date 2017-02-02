@@ -6,10 +6,10 @@ import ColorPicker from 'plugins/rework/components/color_picker/color_picker';
 argTypes.push(new ArgType('container_style', {
   default: {
     borderWidth: 0,
-    borderColor: 'transparent',
+    borderColor: 'rgba(0,0,0,0)',
     padding: 0,
     opacity: 10,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(0,0,0,0)',
   },
   help: 'Style divs and other containers',
   form: ({commit, value}) => {
