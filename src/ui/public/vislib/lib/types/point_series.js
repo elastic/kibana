@@ -11,6 +11,7 @@ export default function ColumnHandler(Private) {
 
     return {
       type: 'point_series',
+      addTimeMarker: cfg.addTimeMarker,
       series: _.map(series, (seri) => {
         return {
           show: true,
