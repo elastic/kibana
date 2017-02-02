@@ -12,7 +12,7 @@ module.directive('contextLoadingButton', function ContextLoadingButton() {
     replace: true,
     restrict: 'E',
     scope: {
-      disabled: '=',
+      isDisabled: '=',
       icon: '=',
     },
     template: contextLoadingButtonTemplate,

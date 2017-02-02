@@ -49,7 +49,7 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="predecessorLoadMoreButton"
-        disabled="contextApp.state.loadingStatus.predecessors !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-disabled="contextApp.state.loadingStatus.predecessors !== contextApp.constants.LOADING_STATUS.LOADED"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
@@ -103,7 +103,7 @@
     <div class="kuiBarSection">
       <context-loading-button
         data-test-subj="successorLoadMoreButton"
-        disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
       >
