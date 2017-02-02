@@ -12,7 +12,7 @@ import icon from './icon.svg';
 import Arg from 'plugins/rework/arg_types/arg';
 
 elements.push(new Element('grow', {
-  displayName: 'Time Chart',
+  displayName: 'Grow',
   icon: icon,
   stylesheet: stylesheet,
   args: [
