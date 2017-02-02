@@ -3,7 +3,8 @@ import processors from './request_processors';
 
 function buildRequestBody(req, panel, series) {
   const processor = buildProcessorFunction(processors, req, panel, series);
-  return processor({});
+  const doc = processor({});
+  return doc;
 }
 
 export default buildRequestBody;

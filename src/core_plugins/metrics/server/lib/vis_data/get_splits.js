@@ -6,14 +6,28 @@ import getSplitColors from './get_split_colors';
 export default function getSplits(resp, series) {
   const metric = getLastMetric(series);
   if (_.has(resp, `aggregations.${series.id}.buckets`)) {
-    const size = _.get(resp, `aggregations.${series.id}.buckets`).length;
-    const colors = getSplitColors(series.color, size, series.split_color_mode);
-    return _.get(resp, `aggregations.${series.id}.buckets`).map(bucket => {
-      bucket.id = `${series.id}:${bucket.key}`;
-      bucket.label = bucket.key;
-      bucket.color = colors.shift();
-      return bucket;
-    });
+    const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
+    if (_.isArray(buckets)) {
+      const size = buckets.length;
+      const colors = getSplitColors(series.color, size, series.split_color_mode);
+      return buckets.map(bucket => {
+        bucket.id = `${series.id}:${bucket.key}`;
+        bucket.label = bucket.key;
+        bucket.color = colors.shift();
+        return bucket;
+      });
+    }
+
+    if(series.split_mode === 'filters' && _.isPlainObject(buckets)) {
+      return series.split_filters.map(filter => {
+        const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
+        bucket.id = filter.id;
+        bucket.key = filter.id;
+        bucket.color = filter.color;
+        bucket.label = filter.label || filter.filter || '*';
+        return bucket;
+      });
+    }
   }
 
   const color = new Color(series.color);

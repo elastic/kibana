@@ -75,9 +75,54 @@ describe('getSplits(resp, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
-        color: '#F30000',
+        color: '#930000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
+      }
+    ]);
+  });
+
+  it('should return a splits for filters group bys', () => {
+    const resp = {
+      aggregations: {
+        SERIES: {
+          buckets: {
+            'filter-1': {
+              timeseries: { buckets: [] },
+            },
+            'filter-2': {
+              timeseries: { buckets: [] },
+            }
+          }
+        }
+      }
+    };
+    const series = {
+      id: 'SERIES',
+      color: '#F00',
+      split_mode: 'filters',
+      split_filters: [
+        { id: 'filter-1', color: '#F00', filter: 'status_code:[* TO 200]', label: '200s' },
+        { id: 'filter-2', color: '#0F0', filter: 'status_code:[300 TO *]', label: '300s' }
+      ],
+      metrics: [
+        { id: 'COUNT', type: 'count' },
+      ]
+    };
+    expect(getSplits(resp, series)).to.eql([
+      {
+        id: 'filter-1',
+        key: 'filter-1',
+        label: '200s',
+        color: '#F00',
+        timeseries: { buckets: [] },
+      },
+      {
+        id: 'filter-2',
+        key: 'filter-2',
+        label: '300s',
+        color: '#0F0',
+        timeseries: { buckets: [] },
       }
     ]);
   });

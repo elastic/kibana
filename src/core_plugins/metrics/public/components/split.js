@@ -6,81 +6,59 @@ import MetricSelect from './aggs/metric_select';
 import calculateLabel from './lib/calculate_label';
 import createTextHandler from './lib/create_text_handler';
 import createSelectHandler from './lib/create_select_handler';
+import uuid from 'node-uuid';
+
+import SplitByTerms from './splits/terms';
+import SplitByFilter from './splits/filter';
+import SplitByFilters from './splits/filters';
+import SplitByEverything from './splits/everything';
 
 class Split extends Component {
+
+  componentWillReceiveProps(nextProps) {
+    const { model } = nextProps;
+    if (model.split_mode === 'filters' && !model.split_filters) {
+      this.props.onChange({
+        split_filters: [
+          { color: model.color, id: uuid.v1() }
+        ]
+      });
+    }
+  }
+
   render() {
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
-    const handleSelectChange = createSelectHandler(this.props.onChange);
     const { model, panel } = this.props;
-    const modeOptions = [
-      { label: 'Everything', value: 'everything' },
-      { label: 'Filter', value: 'filter' },
-      { label: 'Terms', value: 'terms' }
-    ];
-    const indexPattern = model.override_index_pattern && model.series_index_pattern || panel.index_pattern;
-    const modeSelect = (
-      <div className="vis_editor__split-selects">
-        <Select
-          clearable={false}
-          value={ model.split_mode || 'everything' }
-          onChange={handleSelectChange('split_mode')}
-          options={ modeOptions }/>
-      </div>
-    );
+    const indexPattern = model.override_index_pattern &&
+      model.series_index_pattern ||
+      panel.index_pattern;
     if (model.split_mode === 'filter') {
       return (
-        <div className="vis_editor__split-container">
-          <div className="vis_editor__label">Group By</div>
-          {modeSelect}
-          <div className="vis_editor__label">Query String</div>
-          <input
-            className="vis_editor__split-filter"
-            defaultValue={model.filter}
-            onChange={handleTextChange('filter')}
-            ref="filter"/>
-        </div>
+        <SplitByFilter
+          model={model}
+          onChange={this.props.onChange} />
+      );
+    }
+    if (model.split_mode === 'filters') {
+      return (
+        <SplitByFilters
+          model={model}
+          onChange={this.props.onChange} />
       );
     }
     if (model.split_mode === 'terms') {
-      const { metrics } = model;
-      const defaultCount = { value: '_count', label: 'Doc Count (default)' };
       return (
-        <div className="vis_editor__split-container">
-          <div className="vis_editor__label">Group By</div>
-          {modeSelect}
-          <div className="vis_editor__label">By</div>
-          <div className="vis_editor__item">
-            <FieldSelect
-              IndexPattern={indexPattern}
-              onChange={handleSelectChange('terms_field')}
-              value={model.terms_field}
-              fields={this.props.fields} />
-          </div>
-          <div className="vis_editor__label">Top</div>
-          <input
-            placeholder="Size..."
-            type="number"
-            defaultValue={model.terms_size || 10}
-            className="vis_editor__split-term_count"
-            onChange={handleTextChange('terms_size')}
-            ref="terms_size"/>
-          <div className="vis_editor__label">Order By</div>
-          <div className="vis_editor__split-aggs">
-            <MetricSelect
-              metrics={metrics}
-              clearable={false}
-              additionalOptions={[defaultCount]}
-              onChange={handleSelectChange('terms_order_by')}
-              restrict="basic"
-              value={model.terms_order_by || '_count'}/>
-          </div>
-        </div>
+        <SplitByTerms
+          model={model}
+          indexPattern={indexPattern}
+          fields={this.props.fields}
+          onChange={this.props.onChange} />
       );
     }
-    return (<div className="vis_editor__split-container">
-      <div className="vis_editor__label">Group By</div>
-      {modeSelect}
-    </div>);
+    return (
+      <SplitByEverything
+        model={model}
+        onChange={this.props.onChange} />
+    );
   }
 
 }
