@@ -5,10 +5,10 @@ import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 
 export default React.createClass({
   render() {
-    const {className, onClick, tooltip} = this.props;
+    const {className, onClick, tooltip, id} = this.props;
 
     return (
-      <div className='rework--nav-button'>
+      <div className='rework--nav-button' id={id}>
         <Tooltip content={tooltip}>
           <a
             className={className}
