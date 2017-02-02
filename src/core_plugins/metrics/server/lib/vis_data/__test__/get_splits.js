@@ -111,14 +111,14 @@ describe('getSplits(resp, series)', () => {
     };
     expect(getSplits(resp, series)).to.eql([
       {
-        id: 'filter-1',
+        id: 'SERIES:filter-1',
         key: 'filter-1',
         label: '200s',
         color: '#F00',
         timeseries: { buckets: [] },
       },
       {
-        id: 'filter-2',
+        id: 'SERIES:filter-2',
         key: 'filter-2',
         label: '300s',
         color: '#0F0',

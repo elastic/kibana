@@ -13,6 +13,7 @@ export default function stdMetric(resp, panel, series) {
     if (metric.type === 'percentile') {
       return next(results);
     }
+    if (/_bucket$/.test(metric.type)) return next(results);
     const decoration = getDefaultDecoration(series);
     getSplits(resp, series).forEach((split) => {
       const data = split.timeseries.buckets.map(mapBucket(metric));

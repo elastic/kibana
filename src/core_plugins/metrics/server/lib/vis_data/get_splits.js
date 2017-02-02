@@ -21,7 +21,7 @@ export default function getSplits(resp, series) {
     if(series.split_mode === 'filters' && _.isPlainObject(buckets)) {
       return series.split_filters.map(filter => {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
-        bucket.id = filter.id;
+        bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
         bucket.color = filter.color;
         bucket.label = filter.label || filter.filter || '*';
