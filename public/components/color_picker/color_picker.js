@@ -1,6 +1,7 @@
 import React from 'react';
 import { CirclePicker } from 'react-color';
 import { Popover, PopoverContent, PopoverTitle } from 'reactstrap';
+import chroma from 'chroma-js';
 import uuid from 'uuid/v4';
 import './color_picker.less';
 
@@ -60,11 +61,18 @@ export default React.createClass({
     );
 
     const popoverId = uuid();
+
+    let pencilColor;
+    try {
+      pencilColor = chroma.contrast(color, '#000') < 4.5 ? '#fff' : '#000';
+    } catch (e) {
+      pencilColor = '#000';
+    }
     return !popover ? picker : (
       <div>
         <button
           className="btn rework--color-picker--popover-button"
-          style={{backgroundColor: color}}
+          style={{backgroundColor: color, color: pencilColor}}
           onClick={this.togglePopover}
           id={`colorPicker-${popoverId}`}>
           <i className="fa fa-pencil"></i>
