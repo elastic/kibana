@@ -2,6 +2,7 @@ import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry'
 
 export function VisualizeListingController(
   $scope,
+  confirmModal,
   kbnUrl,
   Notifier,
   Private,
@@ -56,14 +57,23 @@ export function VisualizeListingController(
   };
 
   this.deleteSelectedItems = function deleteSelectedItems() {
-    const selectedIds = selectedItems.map(item => item.id);
+    const doDelete = () => {
+      const selectedIds = selectedItems.map(item => item.id);
 
-    visualizationService.delete(selectedIds)
-      .then(fetchObjects)
-      .then(() => {
-        selectedItems = [];
-      })
-      .catch(error => notify.error(error));
+      visualizationService.delete(selectedIds)
+        .then(fetchObjects)
+        .then(() => {
+          selectedItems = [];
+        })
+        .catch(error => notify.error(error));
+    };
+
+    confirmModal(
+      'Are you sure you want to delete the selected visualizations? This action is irreversible!',
+      {
+        confirmButtonText: 'Delete',
+        onConfirm: doDelete
+      });
   };
 
   this.getUrlForItem = function getUrlForItem(item) {

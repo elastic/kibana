@@ -38,10 +38,9 @@
         <!-- Bulk delete button -->
         <button
           class="kuiButton kuiButton--danger"
-          confirm-click="listingController.deleteSelectedItems()"
-          confirmation="Are you sure you want to delete the selected visualizations? This action is irreversible!"
           aria-label="Delete selected objects"
           ng-if="listingController.getSelectedItemsCount() > 0"
+          ng-click="listingController.deleteSelectedItems()"
           tooltip="Delete selected visualizations"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
