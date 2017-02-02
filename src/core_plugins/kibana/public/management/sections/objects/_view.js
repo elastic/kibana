@@ -115,7 +115,14 @@ uiModules.get('apps/management')
 
         const fields =  _.reduce(obj._source, createField, []);
         if (service.Class) readObjectClass(fields, service.Class);
-        $scope.fields = _.sortBy(fields, 'name');
+
+        // sorts twice since we want numerical sort to prioritize over name,
+        // and sortBy will do string comparison if trying to match against strings
+        const nameSortedFields = _.sortBy(fields, 'name');
+        $scope.fields = _.sortBy(nameSortedFields, (field) => {
+          const orderIndex = service.Class.fieldOrder ? service.Class.fieldOrder.indexOf(field.name) : -1;
+          return (orderIndex > -1) ? orderIndex : Infinity;
+        });
       })
       .catch(notify.fatal);
 

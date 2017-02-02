@@ -50,5 +50,8 @@ module.factory('SavedSheet', function (courier, config) {
     version: 'integer'
   };
 
+  // Order these fields to the top, the rest are alphabetical
+  SavedSheet.fieldOrder = ['title', 'description'];
+
   return SavedSheet;
 });
