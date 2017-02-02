@@ -23,6 +23,7 @@ export function DashboardListingController(
     dashboardService.find(this.filter)
       .then(result => {
         this.items = result.hits;
+        this.sortItems();
       });
   };
 
@@ -41,9 +42,16 @@ export function DashboardListingController(
    * @param  {Array} hits Array of saved finder object hits
    * @return {Array} Array sorted either ascending or descending
    */
-  this.sortHits = function () {
+  this.sortItems = function sortItems() {
+    this.items =
+      this.isAscending
+      ? _.sortBy(this.items, 'title')
+      : _.sortBy(this.items, 'title').reverse();
+  };
+
+  this.toggleSort = function toggleSort() {
     this.isAscending = !this.isAscending;
-    this.items = this.isAscending ? _.sortBy(this.items, 'title') : _.sortBy(this.items, 'title').reverse();
+    this.sortItems();
   };
 
   this.toggleAll = function toggleAll() {
