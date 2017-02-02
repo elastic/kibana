@@ -1,4 +1,5 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
+import _ from 'lodash';
 
 export function VisualizeListingController(
   $scope,
@@ -21,11 +22,67 @@ export function VisualizeListingController(
     visualizationService.find(this.filter)
     .then(result => {
       this.items = result.hits;
+      this.sortItems();
     });
   };
 
   this.items = [];
   this.filter = '';
+
+  /**
+   * Remember sort direction per property.
+   */
+  this.sortProperties = [{
+    name: 'title',
+    getValue: item => item.title,
+    isSelected: true,
+    isAscending: true,
+  }, {
+    name: 'type',
+    getValue: item => item.type.title,
+    isSelected: false,
+    isAscending: true,
+  }];
+
+  this.getSortProperty = function getSortProperty() {
+    return _.find(this.sortProperties, property => property.isSelected);
+  };
+
+  this.getSortPropertyByName = function getSortPropertyByName(name) {
+    return _.find(this.sortProperties, property => property.name === name);
+  };
+
+  this.isAscending = function isAscending() {
+    const sortProperty = this.getSortProperty();
+    return sortProperty.isAscending;
+  };
+
+  /**
+   * Sorts hits either ascending or descending
+   * @param  {Array} hits Array of saved finder object hits
+   * @return {Array} Array sorted either ascending or descending
+   */
+  this.sortItems = function sortItems() {
+    const sortProperty = this.getSortProperty();
+
+    this.items =
+      sortProperty.isAscending
+      ? _.sortBy(this.items, sortProperty.getValue)
+      : _.sortBy(this.items, sortProperty.getValue).reverse();
+  };
+
+  this.sortOn = function sortOn(propertyName) {
+    const sortProperty = this.getSortProperty();
+
+    if (sortProperty.name === propertyName) {
+      sortProperty.isAscending = !sortProperty.isAscending;
+    } else {
+      sortProperty.isSelected = false;
+      this.getSortPropertyByName(propertyName).isSelected = true;
+    }
+
+    this.sortItems();
+  };
 
   this.toggleAll = function toggleAll() {
     if (this.areAllItemsChecked()) {

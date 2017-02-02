@@ -79,19 +79,29 @@
             >
           </th>
 
-          <th class="kuiTableHeaderCell">
+          <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('title')">
             Name
+            <span
+              class="kuiIcon"
+              ng-show="listingController.getSortProperty().name === 'title'"
+              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+            ></span>
           </th>
 
-          <th class="kuiTableHeaderCell">
+          <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('type')">
             Type
+            <span
+              class="kuiIcon"
+              ng-show="listingController.getSortProperty().name === 'type'"
+              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+            ></span>
           </th>
         </tr>
       </thead>
 
       <tbody>
         <tr
-          ng-repeat="item in listingController.items track by item.id | orderBy:'title'"
+          ng-repeat="item in listingController.items track by item.id"
           class="kuiTableRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox">
