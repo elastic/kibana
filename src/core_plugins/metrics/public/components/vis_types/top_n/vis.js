@@ -14,7 +14,7 @@ function TopNVisualization(props) {
       if (seriesConfig) {
         const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template);
         const value = getLastValue(item.data, item.data.length);
-        let color = seriesConfig.color;
+        let color = item.color || seriesConfig.color;
         if (model.bar_color_rules) {
           model.bar_color_rules.forEach(rule => {
             if (rule.opperator && rule.value != null && rule.bar_color) {
