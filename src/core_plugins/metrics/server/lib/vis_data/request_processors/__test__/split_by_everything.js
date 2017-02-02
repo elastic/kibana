@@ -42,6 +42,7 @@ describe('splitByEverything(req, panel, series)', () => {
 
   it('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
+    series.terms_field = 'host';
     const next = sinon.spy(doc => doc);
     const doc = splitByEverything(req, panel, series)(next)({});
     expect(next.calledOnce).to.equal(true);
