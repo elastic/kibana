@@ -16,7 +16,32 @@
   </div>
 </div>
 
-<div class="kuiViewContent kuiViewContentItem" role="main">
+<!-- Error feedback -->
+<div
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.FAILED"
+>
+  <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span class="kuiInfoPanelHeader__title">
+        Problem with query
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        Failed to load the anchor document.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.FAILED"
+  role="main"
+>
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
@@ -52,16 +77,6 @@
   >
     <div class="kuiLoadingItems">
       Loading&hellip;
-    </div>
-  </div>
-
-  <!-- Error feedback -->
-  <div
-    ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.FAILED"
-    class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
-  >
-    <div class="kuiLoadingItems">
-      Failed to load the anchor document
     </div>
   </div>
 
