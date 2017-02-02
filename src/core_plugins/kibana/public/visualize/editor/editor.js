@@ -18,9 +18,10 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
+import { VisualizeConstants } from '../visualize_constants';
 
 uiRoutes
-.when('/visualize/create', {
+.when(VisualizeConstants.CREATE_URL, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
@@ -37,7 +38,7 @@ uiRoutes
     }
   }
 })
-.when('/visualize/edit/:id', {
+.when(`${VisualizeConstants.EDIT_URL}/:id`, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route) {
@@ -286,10 +287,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     }
   };
 
-  $scope.startOver = function () {
-    kbnUrl.change('/visualize', {});
-  };
-
   /**
    * Called when the user clicks "Save" button.
    */
@@ -315,7 +312,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
-          kbnUrl.change('/visualize/edit/{{id}}', { id: savedVis.id });
+          kbnUrl.change(`${VisualizeConstants.EDIT_URL}/{{id}}`, { id: savedVis.id });
         }
       }
     }, notify.fatal);

@@ -14,7 +14,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.before(function () {
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToUrl('visualize', 'step/1')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickVerticalBarChart');
       return PageObjects.visualize.clickVerticalBarChart();

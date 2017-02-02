@@ -1,9 +1,9 @@
-
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
+import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
@@ -15,7 +15,7 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /********
 /** Wizard Step 1
 /********/
-routes.when('/visualize/new', {
+routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_URL, {
   template: visualizeWizardStep1Template,
   controller: 'VisualizeWizardStep1',
 });
@@ -27,9 +27,15 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   $scope.visTypes = Private(RegistryVisTypesProvider);
+
   $scope.visTypeUrl = function (visType) {
-    const baseUrl = visType.requiresSearch ? '#/visualize/new/configure?' : '#/visualize/create?';
+    const baseUrl =
+      visType.requiresSearch
+      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_URL}?`
+      : `#${VisualizeConstants.CREATE_URL}?`;
+
     const params = [`type=${encodeURIComponent(visType.name)}`];
+
     if (addToDashMode) {
       params.push(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
     }
@@ -41,7 +47,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 /********
 /** Wizard Step 2
 /********/
-routes.when('/visualize/new/configure', {
+routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_URL, {
   template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
   resolve: {
@@ -59,10 +65,17 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
   $scope.step2WithSearchUrl = function (hit) {
     if (addToDashMode) {
       return kbnUrl.eval(
-        `#/visualize/create?&type={{type}}&savedSearchId={{id}}&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
-        { type: type, id: hit.id });
+        `#${VisualizeConstants.CREATE_URL}` +
+        `?type={{type}}&savedSearchId={{id}}` +
+        `&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
+        { type: type, id: hit.id }
+      );
     }
-    return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}', { type: type, id: hit.id });
+
+    return kbnUrl.eval(
+      `#${VisualizeConstants.CREATE_URL}?type={{type}}&savedSearchId={{id}}`,
+      { type: type, id: hit.id }
+    );
   };
 
   timefilter.enabled = false;
@@ -76,8 +89,11 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     if (!pattern) return;
 
     if (addToDashMode) {
-      return `#/visualize/create?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}&type=${type}&indexPattern=${pattern}`;
+      return `#${VisualizeConstants.CREATE_URL}` +
+        `?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}` +
+        `&type=${type}&indexPattern=${pattern}`;
     }
-    return `#/visualize/create?type=${type}&indexPattern=${pattern}`;
+
+    return `#${VisualizeConstants.CREATE_URL}?type=${type}&indexPattern=${pattern}`;
   };
 });

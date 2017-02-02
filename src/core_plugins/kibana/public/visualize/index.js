@@ -20,12 +20,13 @@ import uiRoutes from 'ui/routes';
 
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
+import { VisualizeConstants } from './visualize_constants';
 
 uiRoutes
 .defaults(/visualize/, {
   requireDefaultIndex: true
 })
-.when('/visualize', {
+.when(VisualizeConstants.LANDING_PAGE_URL, {
   template: visualizeListingTemplate,
   controller: VisualizeListingController,
   controllerAs: 'listingController',

@@ -334,7 +334,7 @@ export default class VisualizePage {
   clickLoadSavedVisButton() {
     // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
     // element as a child instead of building the breadcrumbs dynamically.
-    return self.remote
+    return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('[href="#/visualize"]')
       .click();
