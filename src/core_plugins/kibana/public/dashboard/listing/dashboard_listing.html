@@ -100,7 +100,7 @@
           >
         </th>
 
-        <th class="kuiTableHeaderCell" ng-click="listingController.sortHits()">
+        <th class="kuiTableHeaderCell" ng-click="listingController.toggleSort()">
           Name
           <span
             class="fa"
@@ -112,7 +112,7 @@
 
       <tbody>
       <tr
-        ng-repeat="item in listingController.items track by item.id | orderBy:'title'"
+        ng-repeat="item in listingController.items track by item.id"
         class="kuiTableRow"
       >
         <td class="kuiTableRowCell kuiTableRowCell--checkBox">
