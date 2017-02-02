@@ -296,11 +296,6 @@ export default class VisualizePage {
     });
   }
 
-  clickNewVisualization() {
-    return PageObjects.common.findTestSubject('visualizeNewButton')
-    .click();
-  }
-
   saveVisualization(vizName) {
     return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
@@ -337,7 +332,11 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return PageObjects.common.findTestSubject('visualizeOpenButton')
+    // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
+    // element as a child instead of building the breadcrumbs dynamically.
+    return self.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[href="#/visualize"]')
       .click();
   }
 

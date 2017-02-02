@@ -104,20 +104,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
-    key: 'new',
-    description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize/step/1', {}); },
-    testId: 'visualizeNewButton',
-  }, {
     key: 'save',
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
-  }, {
-    key: 'open',
-    description: 'Open Saved Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); },
-    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
     description: 'Share Visualization',
@@ -225,7 +215,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $state.replace();
 
     $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || 'New Visualization';
+      return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
 
     $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
