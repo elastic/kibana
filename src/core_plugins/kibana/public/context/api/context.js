@@ -16,7 +16,7 @@ async function fetchPredecessors(es, indexPattern, anchorDocument, sort, size) {
   const successorsQuery = prepareQuery(indexPattern, anchorDocument, sort, size);
   const predecessorsQuery = reverseQuerySort(successorsQuery);
   const reversedResults = await performQuery(es, indexPattern, predecessorsQuery);
-  const results = reverseResults(reversedResults);
+  const results = reversedResults.slice().reverse();
   return results;
 }
 
@@ -38,11 +38,6 @@ async function performQuery(es, indexPattern, query) {
   });
 
   return _.get(response, ['hits', 'hits'], []);
-}
-
-function reverseResults(results) {
-  results.reverse();
-  return results;
 }
 
 
