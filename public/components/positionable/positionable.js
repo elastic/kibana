@@ -25,7 +25,7 @@ export default class Positionable extends React.PureComponent {
     };
 
     const commitMove = _.debounce(this.props.move, 500);
-    const commitResize = _.debounce(this.props.resize, 500);
+    const commitResize = _.debounce(this.props.resize, 50, {maxWait: 50});
     const commitRotate = _.debounce(this.props.rotate, 500);
 
     move(elem, {
