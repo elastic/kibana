@@ -32,10 +32,10 @@ function stubbedLogstashFields() {
     ['script number',     'number',     false, false, true,  false, { script: '1234' } ],
     ['script date',       'date',       false, false, true,  false, { script: '1234', lang: 'painless' } ],
     ['script murmur3',    'murmur3',    false, false, true,  false, { script: '1234' } ],
-    ['meta string',       'string',     false, false, true,  false, { meta: true, script: '\'i am a string\'', lang: 'expression' }],
-    ['meta number',       'number',     false, false, true,  false, { meta: true, script: '1234', lang: 'expression' }],
-    ['meta date',         'date',       false, false, true,  false, { meta: true, script: '1234', lang: 'painless' }],
-    ['meta murmur3',      'murmur3',    false, false, true,  false, { meta: true, script: '1234', lang: 'expression'}],
+    ['meta string',       'string',     false, false, true,  false, { meta: true }],
+    ['meta number',       'number',     false, false, true,  false, { meta: true }],
+    ['meta date',         'date',       false, false, true,  false, { meta: true }],
+    ['meta murmur3',      'murmur3',    false, false, true,  false, { meta: true }],
   ].map(function (row) {
     const [
       name,

@@ -8,7 +8,7 @@ import uiModules from 'ui/modules';
 import metaFieldsTemplate from 'plugins/kibana/management/sections/indices/_meta_fields.html';
 
 uiModules.get('apps/management')
-.directive('metaFields', function (kbnUrl, Notifier, $filter) {
+.directive('metaFields', function (kbnUrl, Notifier, $filter, confirmModal) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
@@ -42,7 +42,7 @@ uiModules.get('apps/management')
         rowScopes.length = 0;
 
         const fields = filter($scope.indexPattern.getMetaFields(), $scope.fieldFilter);
-        _.find($scope.editSections, {index: 'metaFields'}).count = fields.length; // Update the tab count
+        _.find($scope.editSections, { index: 'metaFields' }).count = fields.length; // Update the tab count
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
@@ -96,7 +96,11 @@ uiModules.get('apps/management')
       };
 
       $scope.remove = function (field) {
-        $scope.indexPattern.removeMetaField(field.name);
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: () => { $scope.indexPattern.removeMetaField(field.name); }
+        };
+        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
       };
     }
   };
