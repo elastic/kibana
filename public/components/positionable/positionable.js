@@ -4,38 +4,48 @@ import _ from 'lodash';
 import {move, resize, rotate, remove} from './interaction';
 import './positionable.less';
 
-export default React.createClass({
-  getInitialState() {
-    const {position} = this.props;
-    return position;
-  },
+export default class Positionable extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+    const {position} = props;
+    this.state = position;
+  }
+
   attachHandlers(ref) {
     const elem = $(ref);
 
-    const resizeMove = (e) => {
+    const stateMove = (e) => {
       const {top, left, height, width} = e.interaction.absolute;
       this.setState({top, left, height, width});
     };
 
-    const commitMove = this.props.move;
-    const commitResize = this.props.resize;
+    const stateRotate = (e) => {
+      const {angle} = e.interaction.absolute;
+      this.setState({angle});
+    };
 
+    const commitMove = _.debounce(this.props.move, 500);
+    const commitResize = _.debounce(this.props.resize, 500);
+    const commitRotate = _.debounce(this.props.rotate, 500);
 
     move(elem, {
       on: (e) => {
-        resizeMove(e);
+        stateMove(e);
         commitMove(e);
       }
     });
 
     rotate(elem, {
-      on: this.props.rotate,
+      on: (e) => {
+        stateRotate(e);
+        commitRotate(e);
+      },
       handle: '.rework--interactable-rotate-handle'
     });
 
     resize(elem, {
       on: (e) => {
-        resizeMove(e);
+        stateMove(e);
         commitResize(e);
       },
       sides: {
@@ -45,30 +55,39 @@ export default React.createClass({
         bottom: '.rework--interactable-resize-sw, .rework--interactable-resize-se, .rework--interactable-resize-s'
       }
     });
-  },
+  }
+
   removeHandlers(elem) {
     remove($(elem));
-  },
-  componentWillUpdate(nextProps) {
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    // This is gross and hacky but is needed to make updating state from props smooth.
+    if (_.isEqual(this.state, nextState) && !_.isEqual(nextProps.position, this.state)) this.setState(nextProps.position);
+
+    // If interactions have been enabled/disabled, attach/remove handlers.
     if (this.props.interact && !nextProps.interact) this.removeHandlers(this.refs.positionableWrapper);
     if (!this.props.interact && nextProps.interact) this.attachHandlers(this.refs.positionableWrapper);
-  },
+  }
+
   componentDidMount() {
     if (this.props.interact) this.attachHandlers(this.refs.positionableWrapper);
-  },
+  }
+
   componentWillUnmount() {
     this.removeHandlers(this.refs.positionableWrapper);
-  },
+  }
+
   render() {
     const { children, position, rotate, resize, style, interact } = this.props;
 
-    const {top, left, height, width} = this.state;
+    const {top, left, height, width, angle} = this.state;
 
     const wrappedChildren = React.Children.map(children, (child) => {
       const newStyle = {
         ...style,
         position: 'absolute',
-        transform: `rotate(${position.angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
+        transform: `rotate(${angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
         height: height,
         width: width,
         top: top,
@@ -116,4 +135,4 @@ export default React.createClass({
       <div>{wrappedChildren}</div>
     );
   }
-});
+};
