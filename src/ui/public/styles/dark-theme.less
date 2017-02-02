@@ -255,9 +255,10 @@
 
   .cell-hover {
     background-color: @table-cell-hover-bg;
-  }
-  .cell-hover:hover {
-    background-color: @table-cell-hover-hover-bg;
+
+    .table-cell-filter {
+      background-color: @table-cell-hover-bg;
+    }
   }
 
 
@@ -271,10 +272,10 @@
   .agg-table-paginated {
     tr:hover td {
       background-color: @table-row-hover-bg;
-    }
 
-    .cell-hover:hover {
-      background-color: @table-cell-hover-hover-bg;
+      .table-cell-filter {
+        background-color: @table-row-hover-bg;
+      }
     }
   }
 
@@ -586,4 +587,12 @@
     background: linear-gradient(to bottom, transparent 0%, @dashboard-bg 100%) !important;
   }
 
+// /src/ui/public/doc_table/doc_table.less
+  .discover-table-row {
+    td {
+      .table-cell-filter {
+        background-color: @panel-bg;
+      }
+    }
+  }
 }
