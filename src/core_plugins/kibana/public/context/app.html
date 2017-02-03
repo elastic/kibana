@@ -55,6 +55,14 @@
       >
         Load newer entries
       </context-loading-button>
+      <span
+        class="kuiStatusText kuiStatusText--warning"
+        ng-if="(contextApp.state.loadingStatus.predecessors === contextApp.constants.LOADING_STATUS.LOADED)
+          && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
+      >
+        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} newer entries could be found."></span>
+      </span>
     </div>
 
     <div class="kuiBarSection">
@@ -109,6 +117,14 @@
       >
         Load older entries
       </context-loading-button>
+      <span
+        class="kuiStatusText kuiStatusText--warning"
+        ng-if="(contextApp.state.loadingStatus.successors === contextApp.constants.LOADING_STATUS.LOADED)
+          && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
+      >
+        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} older entries could be found."></span>
+      </span>
     </div>
 
     <div class="kuiBarSection">
