@@ -58,7 +58,6 @@ import AbstractDataSourceProvider from './_abstract';
 import SearchRequestProvider from '../fetch/request/search';
 import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
-import { getHighlightRequestProvider } from '../../highlight';
 
 export default function SearchSourceFactory(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
@@ -66,7 +65,6 @@ export default function SearchSourceFactory(Promise, Private, config) {
   const SegmentedRequest = Private(SegmentedRequestProvider);
   const searchStrategy = Private(SearchStrategyProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
-  const getHighlightRequest = getHighlightRequestProvider(config);
 
   const forIp = Symbol('for which index pattern?');
 
