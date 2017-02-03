@@ -9,7 +9,13 @@ describe('Point Series Config Type Class Test Suite', function () {
   let pointSeriesConfig;
   let parsedConfig;
   let el;
-  const config = {
+  const histogramConfig = {
+    type: 'histogram',
+    addLegend: true,
+    addTooltip: true,
+  };
+
+  const heatmapConfig = {
     type: 'heatmap',
     addLegend: true,
     addTooltip: true,
@@ -71,6 +77,16 @@ describe('Point Series Config Type Class Test Suite', function () {
     pointSeriesConfig = Private(VislibLibVisPointSeriesTypeConfigProvider);
   }));
 
+  describe('histogram chart', function () {
+    beforeEach(function () {
+      parsedConfig = pointSeriesConfig.heatmap(histogramConfig, data);
+    });
+    it('should not throw an error when more than 25 series are provided', function () {
+      expect(parsedConfig.error).to.be.undefined;
+    });
+  });
+
+
   describe('heatmap chart', function () {
     beforeEach(function () {
       const stackedData = {
@@ -78,15 +94,15 @@ describe('Point Series Config Type Class Test Suite', function () {
         getLabels: () => [],
         data: stackedSeries
       };
-      parsedConfig = pointSeriesConfig.heatmap(config, stackedData);
+      parsedConfig = pointSeriesConfig.heatmap(heatmapConfig, stackedData);
     });
 
-    it('should throw an error when less than 25 series are provided', function () {
-      parsedConfig = pointSeriesConfig.heatmap(config, data);
+    it('should throw an error when more than 25 series are provided', function () {
+      parsedConfig = pointSeriesConfig.heatmap(heatmapConfig, data);
       expect(parsedConfig.error).to.be('There are too many series defined.');
     });
 
-    it('should not throw an error when more than 25 series are provided', function () {
+    it('should not throw an error when less than 25 series are provided', function () {
       expect(parsedConfig.error).to.be.undefined;
     });
 
