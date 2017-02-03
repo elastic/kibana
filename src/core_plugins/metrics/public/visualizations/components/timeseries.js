@@ -126,6 +126,7 @@ class Timeseries extends Component {
               series={this.props.series}
               show={ this.state.show }
               tickFormatter={this.props.tickFormatter}
+              options={this.props.options}
               yaxes={this.props.yaxes} />
           </div>
           <Legend
@@ -156,6 +157,7 @@ Timeseries.propTypes = {
   onFilter       : PropTypes.func,
   series         : PropTypes.array,
   reversed       : PropTypes.bool,
+  options        : PropTypes.object,
   tickFormatter  : PropTypes.func
 };
 

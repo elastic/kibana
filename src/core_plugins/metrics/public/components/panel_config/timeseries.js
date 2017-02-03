@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
+import AnnotationsEditor from '../annotations_editor';
 import IndexPattern from '../index_pattern';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
@@ -42,7 +43,14 @@ class TimeseriesPanelConfig extends Component {
           name={this.props.name}
           onChange={this.props.onChange} />
       );
-      view = (<SeriesEditor {...this.props}/>);
+    } else if (selectedTab === 'annotations') {
+      view = (
+        <AnnotationsEditor
+          fields={this.props.fields}
+          model={this.props.model}
+          name="annotations"
+          onChange={this.props.onChange} />
+      );
     } else {
       view = (
         <div className="vis_editor__container">
@@ -119,6 +127,8 @@ class TimeseriesPanelConfig extends Component {
             onClick={e => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={e => this.switchTab('options')}>Panel Options</div>
+          <div className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
+            onClick={e => this.switchTab('annotations')}>Annotations</div>
         </div>
         {view}
       </div>

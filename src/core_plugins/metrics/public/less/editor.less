@@ -350,3 +350,44 @@
   flex-grow: 1;
   margin-right: 10px;
 }
+
+.vis_editor__annotations {
+
+}
+
+.vis_editor__annotations-color,
+.vis_editor__annotations-controls {
+  flex-shrink: 0;
+}
+
+.vis_editor__annotations-row {
+  display: flex;
+  padding: 10px;
+  background-color: @lineColor;
+  margin-bottom: 2px;
+}
+
+.vis_editor__annotations-missing {
+  padding: 30px 10px;
+  font-size: 16px;
+  p { fonts-size: 16px; }
+  text-align: center;
+}
+
+.vis_editor__annotations-content {
+  margin: 0 10px;
+  flex-grow: 1;
+  .vis_editor__row {
+    margin-bottom: 10px;
+  }
+  .vis_editor__row-item {
+    flex-grow: 1;
+    margin-left: 10px;
+    &:first-child {
+      margin-left: 0;
+    }
+    .vis_editor__label {
+      margin-bottom: 4px;
+    }
+  }
+}
