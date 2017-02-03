@@ -9,15 +9,16 @@ import Promise from 'bluebird';
 describe('FixedScroll directive', function () {
 
   let compile;
+  let flushPendingTasks;
   const trash = [];
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.module(function ($provide) {
-    $provide.service('debounce', () => {
-      return targetFunction => targetFunction;
-    });
-  }));
-  beforeEach(ngMock.inject(function ($compile, $rootScope) {
+  beforeEach(ngMock.inject(function ($compile, $rootScope, $timeout) {
+
+    flushPendingTasks = function flushPendingTasks() {
+      $rootScope.$digest();
+      $timeout.flush();
+    };
 
     compile = function (ratioY, ratioX) {
       if (ratioX == null) ratioX = ratioY;
@@ -46,7 +47,7 @@ describe('FixedScroll directive', function () {
       }).appendTo($el);
 
       $compile($parent)($rootScope);
-      $rootScope.$digest();
+      flushPendingTasks();
 
       return {
         $container: $el,
@@ -97,7 +98,7 @@ describe('FixedScroll directive', function () {
 
       expect(off.callCount).to.be(0);
       els.$container.width(els.$container.prop('scrollWidth'));
-      els.$container.scope().$digest();
+      flushPendingTasks();
       expect(off.callCount).to.be(2);
       checkThisVals('$.fn.off', off);
 

@@ -110,14 +110,16 @@ uiModules
         const newWidth = $el.width();
 
         if (scrollWidth !== newScrollWidth || width !== newWidth) {
-          setup();
+          $scope.$apply(setup);
 
           scrollWidth = newScrollWidth;
           width = newWidth;
         }
       }
 
-      const debouncedCheckWidth = debounce(checkWidth, 100);
+      const debouncedCheckWidth = debounce(checkWidth, 100, {
+        invokeApply: false,
+      });
       $scope.$watch(debouncedCheckWidth);
 
       // cleanup when the scope is destroyed

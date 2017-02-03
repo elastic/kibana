@@ -13,7 +13,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjectsView', function (kbnIndex, Notifier) {
+.directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
   return {
     restrict: 'E',
     controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
@@ -115,7 +115,14 @@ uiModules.get('apps/management')
 
         const fields =  _.reduce(obj._source, createField, []);
         if (service.Class) readObjectClass(fields, service.Class);
-        $scope.fields = _.sortBy(fields, 'name');
+
+        // sorts twice since we want numerical sort to prioritize over name,
+        // and sortBy will do string comparison if trying to match against strings
+        const nameSortedFields = _.sortBy(fields, 'name');
+        $scope.fields = _.sortBy(nameSortedFields, (field) => {
+          const orderIndex = service.Class.fieldOrder ? service.Class.fieldOrder.indexOf(field.name) : -1;
+          return (orderIndex > -1) ? orderIndex : Infinity;
+        });
       })
       .catch(notify.fatal);
 
@@ -163,15 +170,25 @@ uiModules.get('apps/management')
        * @returns {type} description
        */
       $scope.delete = function () {
-        esAdmin.delete({
-          index: kbnIndex,
-          type: service.type,
-          id: $routeParams.id
-        })
-        .then(function (resp) {
-          return redirectHandler('deleted');
-        })
-        .catch(notify.fatal);
+        function doDelete() {
+          esAdmin.delete({
+            index: kbnIndex,
+            type: service.type,
+            id: $routeParams.id
+          })
+            .then(function (resp) {
+              return redirectHandler('deleted');
+            })
+            .catch(notify.fatal);
+        }
+        const confirmModalOptions = {
+          onConfirm: doDelete,
+          confirmButtonText: 'Delete object'
+        };
+        confirmModal(
+          'Are you sure want to delete this object? This action is irreversible!',
+          confirmModalOptions
+        );
       };
 
       $scope.submit = function () {

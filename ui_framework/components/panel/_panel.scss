@@ -2,8 +2,32 @@
   border: $tableBorder;
 }
 
+.kuiPanel--withHeader {
+  border-top: none;
+}
+
 .kuiPanel--centered {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.kuiPanelHeader {
+  @include buttonOnStandoutBackground;
+  @include selectOnStandoutBackground;
+
+  display: flex;
+  align-items: center;
+  padding: $toolBarPadding;
+  height: $toolBarHeight;
+  background-color: $standoutBackgroundColor;
+}
+
+  .kuiPanelHeader__title {
+    font-size: $titleFontSize;
+    line-height: $lineHeight;
+  }
+
+.kuiPanelBody {
+  padding: $toolBarPadding;
 }

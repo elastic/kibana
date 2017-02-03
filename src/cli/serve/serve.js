@@ -38,8 +38,13 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
     set('optimize.lazy', true);
-    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.ssl.cert', DEV_SSL_CERT_PATH);
+
+    if (opts.ssl) {
+      set('server.ssl.enabled', true);
+    }
+
+    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
   }

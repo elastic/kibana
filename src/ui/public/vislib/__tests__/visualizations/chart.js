@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
 import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
@@ -84,10 +84,10 @@ describe('Vislib _chart Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     Vis = Private(VislibVisProvider);
     Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new ($injector.get('PersistedState'))();
     PieChart = Private(VislibVisualizationsPieChartProvider);
     Chart = Private(VislibVisualizationsChartProvider);
 

@@ -17,7 +17,7 @@ $modalPadding: 10px;
 }
 
   .kuiModalHeader__title {
-    font-size: 18px;
+    font-size: $titleFontSize;
   }
 
 .kuiModalHeaderCloseButton {

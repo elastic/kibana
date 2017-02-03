@@ -3,7 +3,6 @@ import _ from 'lodash';
 import errors from 'ui/errors';
 import 'ui/es';
 import 'ui/promises';
-import 'ui/safe_confirm';
 import 'ui/index_patterns';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';

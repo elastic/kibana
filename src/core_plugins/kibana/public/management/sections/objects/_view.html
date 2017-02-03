@@ -1,12 +1,14 @@
 <kbn-management-app section="kibana" class="kuiView">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
-    <div class="kuiViewContentItem kuiSubHeader">
-      <h1 class="kuiTitle">
-        Edit {{ title }}
-      </h1>
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit {{ title }}
+        </h1>
+      </div>
 
-      <div class="kuiButtonGroup">
+      <div class="kuiBarSection">
         <a
           class="kuiButton kuiButton--basic kuiButton--iconText"
           href="{{ link }}"
@@ -17,7 +19,7 @@
 
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText"
-          confirm-click="delete()"
+          ng-click="delete()"
         >
           <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
           Delete {{ title }}
@@ -26,35 +28,62 @@
     </div>
 
     <!-- Errors -->
-    <div class="bs-callout bs-callout-danger" ng-if="notFound">
-      <h4>There is a problem with this saved object</h4>
+    <div
+      class="kuiViewContentItem kuiVerticalRhythm"
+      ng-if="notFound"
+    >
+      <div class="kuiInfoPanel kuiInfoPanel--error">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title">
+            There is a problem with this saved object
+          </span>
+        </div>
 
-      <p ng-if="notFound === 'search'">
-        The saved search associated with this object no longer exists.
-      </p>
+        <div class="kuiInfoPanelBody">
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'search'"
+          >
+            The saved search associated with this object no longer exists.
+          </div>
 
-      <p ng-if="notFound === 'index-pattern'">
-        The index pattern associated with this object no longer exists.
-      </p>
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'index-pattern'"
+          >
+            The index pattern associated with this object no longer exists.
+          </div>
 
-      <p ng-if="notFound === 'index-pattern-field'">
-        A field associated with this object no longer exists in the index pattern.
-      </p>
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'index-pattern-field'"
+          >
+            A field associated with this object no longer exists in the index pattern.
+          </div>
 
-      <p>
-        If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above.
-      </p>
+          <div class="kuiInfoPanelBody__message">
+            If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above.
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Intro -->
     <div class="kuiViewContentItem kuiVerticalRhythm">
       <div class="kuiInfoPanel kuiInfoPanel--warning">
-        <p>
-          <span class="kuiIcon kuiIcon--warning fa-bolt"></span>
-          <strong>Proceed with caution!</strong>
-        </p>
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Proceed with caution!
+          </span>
+        </div>
 
-        <p>Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be.</p>
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be.
+          </div>
+        </div>
       </div>
     </div>
 

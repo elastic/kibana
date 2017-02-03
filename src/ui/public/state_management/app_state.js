@@ -11,12 +11,13 @@
 import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
+
 const urlParam = '_a';
 
-function AppStateProvider(Private, $rootScope, $location) {
+function AppStateProvider(Private, $rootScope, $location, $injector) {
   const State = Private(StateManagementStateProvider);
-  const PersistedState = Private(PersistedStatePersistedStateProvider);
+  const PersistedState = $injector.get('PersistedState');
   let persistedStates;
   let eventUnsubscribers;
 
