@@ -42,11 +42,18 @@ export default React.createClass({
   },
   render() {
     const {scope, children} = this.props;
-    const scopedStyle = compiler.process(`
-      ${scope} {
-        ${children}
-      }
-    `).css;
+
+    let scopedStyle;
+    try {
+      scopedStyle = compiler.process(`
+        ${scope} {
+          ${children}
+        }
+      `).css;
+    } catch (e) {
+      scopedStyle = '';
+    }
+
     return (
       <style ref="style">
         {scopedStyle}

@@ -18,11 +18,5 @@ argTypes.push(new ArgType('style', {
     value = current value,
     state = current redux state
   */
-  resolve: (value, state) => {
-    try {
-      return transform(value);
-    } catch (e) {
-      return {};
-    }
-  }
+  resolve: (value, state) => value
 }));

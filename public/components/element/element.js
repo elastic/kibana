@@ -19,23 +19,24 @@ const Element = React.createClass({
     const ElementContent = args ? elementType.template : () => (<Loading />);
 
     // Build the inline style for the wrapper
-    const customStyle = args ? args._custom_style : {};
     const containerStyle = args ? args._container_style : {};
     const elementStyle = {
       ...containerStyle,
-      ...customStyle,
       height: '100%',
       width: '100%'
     };
 
     // Build the templatable stylesheet
     const styleSheet = elementType.stylesheet;
+    const customStyleSheet = args ? args._custom_style : '';
+
     const styleTemplate = handlebars.compile(styleSheet);
     const scopedStyleSheet = styleTemplate(args);
 
     return (
       <div className="rework--element" style={elementStyle} data-style={styleId}>
         <ScopedStyle scope={`[data-style="${styleId}"]`}>{scopedStyleSheet}</ScopedStyle>
+        <ScopedStyle scope={`[data-style="${styleId}"]`}>{customStyleSheet}</ScopedStyle>
         <ElementContent args={args} setArg={setArg}></ElementContent>
       </div>
     );
