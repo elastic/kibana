@@ -24,7 +24,6 @@ elements.push(new Element('circle', {
     }),
     new Arg('value_column', {
       type: 'dataframe_column',
-      default: 'value'
     }),
     new Arg('aggregate_with', {
       type: 'select',
@@ -36,7 +35,6 @@ elements.push(new Element('circle', {
     }),
     new Arg('group_by', {
       type: 'dataframe_column',
-      default: 'label'
     }),
     new Arg('label_style', {
       type: 'text_style',
@@ -59,14 +57,21 @@ elements.push(new Element('circle', {
       return result;
     }
 
-    componentWillUpdate(nextProps) {
-      const {args, setArg} = nextProps;
+    componentDidMount() {
+      const {args, setArg} = this.props;
+      const setUndefined = (prop, value) => {
+        if (!args[prop].length) {
+          setArg(prop, value);
+        }
+      };
 
       if (args.dataframe.schema === 'timeseries' || args.dataframe.schema === 'timelion') {
-        setArg('time_column', 'time');
-        setArg('value_column', 'value');
-        setArg('group_by', 'label');
-      };
+        setUndefined('value_column', 'value');
+        setUndefined('group_by', 'label');
+      } else {
+        setUndefined('value_column', _.get(args.dataframe.columns.ofType('number')[0], 'name'));
+        setUndefined('group_by', _.get(args.dataframe.columns.ofType('string')[0], 'name'));
+      }
     }
 
     componentDidUpdate() {
@@ -103,7 +108,11 @@ elements.push(new Element('circle', {
         };
       });
 
-      $.plot($(this.refs.plot), flotSeries, flotConfig);
+      try {
+        $.plot($(this.refs.plot), flotSeries, flotConfig);
+      } catch (e) {
+        console.log('Plot too small');
+      }
     }
 
     render() {
