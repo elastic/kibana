@@ -11,8 +11,25 @@ argTypes.push(new ArgType('container_style', {
     opacity: 10,
     backgroundColor: 'rgba(0,0,0,0)',
   },
-  help: 'Style divs and other containers',
-  form: ({commit, value}) => {
+  // help: 'Style divs and other containers',
+  form: ({commit, value, options}) => {
+
+    // Show everything, unless we're specifically telling the argument what to show
+    const show = options.show ? {
+      borderWidth: false,
+      borderColor: false,
+      padding: false,
+      opacity: false,
+      backgroundColor: false,
+      ...options.show
+    } : {
+      borderWidth: true,
+      borderColor: true,
+      padding: true,
+      opacity: true,
+      backgroundColor: true,
+    };
+
     const store = (prop, propValue) => {
       commit({...value, [prop]: propValue});
     };
@@ -29,38 +46,58 @@ argTypes.push(new ArgType('container_style', {
       return (value) => store(prop, value);
     };
 
+    const borderWidthCell = (
+      <td width="150">
+        <input type="number" className="form-control"
+        onChange={storeNumber('borderWidth')}
+        value={value.borderWidth}/>
+        <label>Border Width</label>
+      </td>
+    );
+
+    const borderColorCell = (
+      <td>
+        <ColorPicker color={value.borderColor} popover='right top' onChange={storeSimple('borderColor')}/>
+        <label>Border Color</label>
+      </td>
+    );
+
+    const backgroundColorCell = (
+      <td>
+        <ColorPicker color={value.backgroundColor} popover='right top' onChange={storeSimple('backgroundColor')}/>
+        <label>Background Color</label>
+      </td>
+    );
+
+    const paddingCell = (
+      <td>
+        <input type="number" className="form-control"
+        onChange={storeNumber('padding')}
+        value={value.padding}/>
+        <label>Padding</label>
+      </td>
+    );
+
+    const opacityCell = (
+      <td colSpan="2">
+        <input type="range" min="0" max="10"
+        onChange={storeNumber('opacity')}
+        value={value.opacity}/>
+        <label>Opacity</label>
+      </td>
+    );
+
     return (
       <table className="rework--table-form">
         <tbody>
           <tr>
-            <td width="150">
-              <input type="number" className="form-control"
-              onChange={storeNumber('borderWidth')}
-              value={value.borderWidth}/>
-              <label>Border Width</label>
-            </td>
-            <td>
-              <ColorPicker color={value.borderColor} popover='right top' onChange={storeSimple('borderColor')}/>
-              <label>Border Color</label>
-            </td>
-            <td>
-              <ColorPicker color={value.backgroundColor} popover='right top' onChange={storeSimple('backgroundColor')}/>
-              <label>Background Color</label>
-            </td>
+            {!show.borderWidth ? null : borderWidthCell}
+            {!show.borderColor ? null : borderColorCell}
+            {!show.backgroundColor ? null : backgroundColorCell}
           </tr>
           <tr>
-            <td>
-              <input type="number" className="form-control"
-              onChange={storeNumber('padding')}
-              value={value.padding}/>
-              <label>Padding</label>
-            </td>
-            <td colSpan="2">
-              <input type="range" min="0" max="10"
-              onChange={storeNumber('opacity')}
-              value={value.opacity}/>
-              <label>Opacity</label>
-            </td>
+            {!show.padding ? null : paddingCell}
+            {!show.opacity ? null : opacityCell}
           </tr>
         </tbody>
       </table>
