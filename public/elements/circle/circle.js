@@ -20,7 +20,7 @@ elements.push(new Element('circle', {
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
-      default: (state) => _.keys(state.transient.dataframeCache)[0]
+      default: (state) => _.keys(state.persistent.dataframes)[0]
     }),
     new Arg('value_column', {
       type: 'dataframe_column',
@@ -38,6 +38,22 @@ elements.push(new Element('circle', {
     }),
     new Arg('label_style', {
       type: 'text_style',
+    }),
+    new Arg('value_style', {
+      type: 'text_style',
+    }),
+    new Arg('theme', {
+      type: 'palette',
+    }),
+    new Arg('stroke', {
+      help: '',
+      type: 'container_style',
+      options: {
+        show: {
+          borderWidth: true,
+          borderColor: true
+        }
+      }
     }),
   ],
   template: class Circles extends React.PureComponent {
@@ -57,42 +73,40 @@ elements.push(new Element('circle', {
       return result;
     }
 
-    componentDidMount() {
-      const {args, setArg} = this.props;
-      const setUndefined = (prop, value) => {
-        if (!args[prop].length) {
-          setArg(prop, value);
-        }
-      };
-
-      if (args.dataframe.schema === 'timeseries' || args.dataframe.schema === 'timelion') {
-        setUndefined('value_column', 'value');
-        setUndefined('group_by', 'label');
-      } else {
-        setUndefined('value_column', _.get(args.dataframe.columns.ofType('number')[0], 'name'));
-        setUndefined('group_by', _.get(args.dataframe.columns.ofType('string')[0], 'name'));
-      }
-    }
-
-    componentDidUpdate() {
+    renderChart() {
+      const strokeParts = this.props.args.stroke.border.match(/([0-9]+)px [a-z]+ (.*)/);
+      const strokeWidth = strokeParts[1];
+      const strokeColor = strokeParts[2];
       const flotConfig = {
         series: {
           pie: {
             show: true,
+            stroke: {
+              width: strokeWidth,
+              color: strokeColor,
+            },
             //startAngle: (args.start_angle || 0) * (Math.PI / 180),
             label: {
               show: true,
-              //formatter: labelFormatter
+              formatter: (label, slice) => `
+                <div>
+                  <div class="rework--circle-label">
+                    <span class="rework--circle-label-text">${label}</span>
+                    <i class="fa fa-circle rework--circle-label-color" style="color: ${slice.color}"></i>
+                  </div>
+                  <div class="rework--circle-value">${slice.data[0][1]}</div>
+                </div>
+              `
             }
           }
         },
         grid: {
           show: false,
-          margin: 10
         },
         legend: {
           show: false
         },
+        colors: this.props.args.theme
       };
 
       const {args, setArg} = this.props;
@@ -113,6 +127,29 @@ elements.push(new Element('circle', {
       } catch (e) {
         console.log('Plot too small');
       }
+    }
+
+    componentDidMount() {
+      const {args, setArg} = this.props;
+      const setUndefined = (prop, value) => {
+        if (!args[prop].length) {
+          setArg(prop, value);
+        }
+      };
+
+      if (args.dataframe.schema === 'timeseries' || args.dataframe.schema === 'timelion') {
+        setUndefined('value_column', 'value');
+        setUndefined('group_by', 'label');
+      } else {
+        setUndefined('value_column', _.get(args.dataframe.columns.ofType('number')[0], 'name'));
+        setUndefined('group_by', _.get(args.dataframe.columns.ofType('string')[0], 'name'));
+      }
+
+      this.renderChart();
+    }
+
+    componentDidUpdate() {
+      this.renderChart();
     }
 
     render() {
