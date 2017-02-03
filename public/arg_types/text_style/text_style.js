@@ -72,6 +72,7 @@ argTypes.push(new ArgType('text_style', {
     );
   },
   resolve: (value, state) => {
+    value = value || {};
     var cssProperties = {};
 
     cssProperties['font-weight'] = value.fontWeight;
