@@ -43,16 +43,15 @@ const chrome = require('ui/chrome')
           type: 'float'
         }, {
           name: 'Response Time Avg',
-          value: _.get(metrics, 'response_times.average'),
+          value: _.get(metrics, 'response_times.average_in_millis'),
           type: 'ms'
         }, {
           name: 'Response Time Max',
-          value: _.get(metrics, 'response_times.max'),
+          value: _.get(metrics, 'response_times.max_in_millis'),
           type: 'ms'
         }, {
-          name: 'Requests',
-          value: _.get(metrics, 'requests.total'),
-          type: 'integer'
+          name: 'Requests Per Second',
+          value: _.get(metrics, 'requests.total') * 1000 / _.get(metrics, 'collection_time_in_millis')
         }];
       }
 
