@@ -9,6 +9,7 @@ module.exports = function (kbnServer, server, config) {
     kbnServer.metrics = {
       last_updated: timestamp,
       collection_time_in_millis: config.get('ops.interval'),
+      uptime_in_millis: process.uptime() * 1000,
       process: {
         heap: {
           total_in_bytes: _.get(event, 'psmem.heapTotal'),
