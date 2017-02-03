@@ -8,13 +8,15 @@ let module = uiModules.get('kibana');
 module.directive('breadCrumbs', function ($location) {
   return {
     restrict: 'E',
+    replace: true,
     scope: {
       omitCurrentPage: '=',
       /**
-       * Optional title to append at the end of the breadcrumbs
+       * Optional title to append at the end of the breadcrumbs. Note that this can't just be
+       * 'title', because that will be interpreted by browsers as an actual 'title' HTML attribute.
        * @type {String}
        */
-      title: '=',
+      pageTitle: '=',
       /**
        * If true, makes each breadcrumb a clickable link.
        * @type {String}
