@@ -93,6 +93,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'filter',
     'sort',
     'highlight',
+    'highlightAll',
     'aggs',
     'from',
     'size',
@@ -178,7 +179,6 @@ export default function SearchSourceFactory(Promise, Private, config) {
     });
   };
 
-
   /******
    * PRIVATE APIS
    ******/
@@ -249,6 +249,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       case 'index':
       case 'type':
       case 'id':
+      case 'highlightAll':
         if (key && state[key] == null) {
           state[key] = val;
         }
@@ -273,7 +274,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       // ignore if we already have a value
       if (state.body[key] == null) {
         if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val }};
+          val = { query_string: { query: val } };
         }
 
         state.body[key] = val;

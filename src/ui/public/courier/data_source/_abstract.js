@@ -8,12 +8,14 @@ import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
 import FieldWildcardProvider from '../../field_wildcard';
+import { getHighlightRequestProvider } from '../../highlight';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
-  let requestQueue = Private(RequestQueueProvider);
-  let errorHandlers = Private(ErrorHandlersProvider);
-  let courierFetch = Private(FetchProvider);
-  let { fieldWildcardFilter } = Private(FieldWildcardProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const errorHandlers = Private(ErrorHandlersProvider);
+  const courierFetch = Private(FetchProvider);
+  const { fieldWildcardFilter } = Private(FieldWildcardProvider);
+  const getHighlightRequest = Private(getHighlightRequestProvider);
 
   function SourceAbstract(initialState, strategy) {
     let self = this;
@@ -369,6 +371,13 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
             };
           }
           delete flatState.filters;
+        }
+
+        if (flatState.highlightAll != null) {
+          if (flatState.highlightAll && flatState.body.query) {
+            flatState.body.highlight = getHighlightRequest(flatState.body.query);
+          }
+          delete flatState.highlightAll;
         }
 
         // re-write filters within filter aggregations

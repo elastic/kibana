@@ -3,7 +3,9 @@ import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import urlTemplate from 'ui/stringify/editors/url.html';
-export default function UrlFormatProvider(Private, highlightFilter) {
+import { getHighlightHtml } from 'ui/highlight';
+
+export default function UrlFormatProvider(Private) {
 
   let FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
@@ -94,7 +96,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
           return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
         default:
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            label = highlightFilter(label, hit.highlight[field.name]);
+            label = getHighlightHtml(label, hit.highlight[field.name]);
           }
 
           return '<a href="' + url + '" target="_blank">' + label + '</a>';

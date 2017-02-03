@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
-import 'ui/highlight';
-export default function contentTypesProvider(highlightFilter) {
+import { getHighlightHtml } from 'ui/highlight';
+export default function contentTypesProvider() {
 
   let types = {
     html: function (format, convert) {
@@ -47,7 +47,7 @@ export default function contentTypesProvider(highlightFilter) {
     if (!hit || !hit.highlight || !hit.highlight[field.name]) {
       return formatted;
     } else {
-      return highlightFilter(formatted, hit.highlight[field.name]);
+      return getHighlightHtml(formatted, hit.highlight[field.name]);
     }
   }
 
