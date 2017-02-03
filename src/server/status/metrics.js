@@ -5,8 +5,9 @@ import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
 module.exports = function (kbnServer, server, config) {
   server.plugins['even-better'].monitor.on('ops', function (event) {
     const port = config.get('server.port');
-
+    const timestamp = new Date().toISOString();
     kbnServer.metrics = {
+      last_updated: timestamp,
       process: {
         heap: {
           total_in_bytes: _.get(event, 'psmem.heapTotal'),
@@ -21,8 +22,8 @@ module.exports = function (kbnServer, server, config) {
         }
       },
       response_times: {
-        average:  _.get(event, ['responseTimes', port, 'avg']),
-        max: _.get(event, ['responseTimes', port, 'max'])
+        average_in_millis:  _.get(event, ['responseTimes', port, 'avg']),
+        max_in_millis: _.get(event, ['responseTimes', port, 'max'])
       },
       requests:  keysToSnakeCaseShallow(_.get(event, ['requests', port])),
       concurrent_connections: _.get(event, ['concurrents', port])
