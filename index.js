@@ -30,6 +30,8 @@ module.exports = function (kibana) {
         // Then argument types
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/image/image',
+        'plugins/rework/arg_types/palette/palette',
+
         'plugins/rework/arg_types/select/select',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',

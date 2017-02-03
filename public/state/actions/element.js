@@ -26,7 +26,7 @@ export function elementAdd(type, pageId) {
     const elementType = elementTypes.byName[type];
     const args = _.fromPairs(
       _.map(elementType.args, arg => {
-        const argDefault = _.isFunction(arg.default) ? arg.default(getState()) : arg.default;
+        const argDefault = getArgDefaultValue(getState(), arg.default);
         return [arg.name, argDefault];
       }));
     const element = getElementTemplate({type: elementType.name, args: args});
@@ -126,8 +126,13 @@ function getArgDefinitions(state, elementId) {
   return argDefinitions;
 }
 
+function getArgDefaultValue(state, value) {
+  return _.isFunction(value) ? value(state) : value;
+}
+
 function resolveArgument(state, elementId, name) {
   const element = state.persistent.elements[elementId];
   const argDef = _.find(getArgDefinitions(state, elementId), {name: name});
-  return argDef.type.resolve(element.args[name], state);
+  const value = !_.isUndefined(element.args[name]) ? element.args[name] : getArgDefaultValue(state, argDef.type.default);
+  return argDef.type.resolve(value, state);
 }
