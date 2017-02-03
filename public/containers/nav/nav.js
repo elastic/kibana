@@ -33,8 +33,9 @@ const Nav = React.createClass({
   },
   elementLayer(movement) {
     return () => {
-      const {dispatch, selectedElementId, currentPageId} = this.props;
-      this.props.dispatch(elementLayerMove(selectedElementId, currentPageId, movement));
+      const {dispatch, element, currentPageId} = this.props;
+      if (!element) return;
+      this.props.dispatch(elementLayerMove(element.id, currentPageId, movement));
     };
   },
   do(action) {
