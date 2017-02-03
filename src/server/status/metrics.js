@@ -1,8 +1,11 @@
 import _ from 'lodash';
 import Samples from './samples';
+import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
+
 module.exports = function (kbnServer, server, config) {
   server.plugins['even-better'].monitor.on('ops', function (event) {
     const port = config.get('server.port');
+
     kbnServer.metrics = {
       process: {
         heap: {
@@ -21,7 +24,7 @@ module.exports = function (kbnServer, server, config) {
         average:  _.get(event, ['responseTimes', port, 'avg']),
         max: _.get(event, ['responseTimes', port, 'max'])
       },
-      requests:  _.get(event, ['requests', port]),
+      requests:  keysToSnakeCaseShallow(_.get(event, ['requests', port])),
       concurrent_connections: _.get(event, ['concurrents', port])
     };
 
