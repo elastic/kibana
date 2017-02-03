@@ -5,4 +5,8 @@ export default class Columns {
     this.ordered = columns;
     this.named = _.keyBy(columns, 'name');
   }
+
+  ofType(type) {
+    return _.filter(this.ordered, column => column.type === type);
+  }
 }
