@@ -5,8 +5,8 @@ export const getElementTemplate = (props) => {
   const template = {
     id: uuid(),
     type: 'json',
-    height: 100,
-    width: 200,
+    height: 200,
+    width: 400,
     top: 0,
     left: 0,
     angle: 0,
