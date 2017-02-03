@@ -1,3 +1,12 @@
+<a
+  class="kuiLink"
+  ng-if="linkToTop"
+  ng-click="paginate.goToTop()"
+  data-test-subj="paginateControlsLinkToTop"
+>
+  Scroll to top
+</a>
+
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
     <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
