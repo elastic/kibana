@@ -18,6 +18,13 @@ export default createExample([{
   ),
   html: require('./icon_info.html'),
 }, {
+  title: 'Basic',
+  description: (
+    <p>Use this Icon when you don't want to communicate any particular meaning with the icon's color.</p>
+  ),
+  html: require('./icon_basic.html'),
+  hasDarkTheme: false,
+}, {
   title: 'Success',
   description: (
     <p>Use this Icon to denote the successful completion of an action, e.g. filling out a form field correctly or a successful API request.</p>
