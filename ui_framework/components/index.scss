@@ -27,21 +27,21 @@ $lineHeight: 1.5;
 $titleFontSize: 18px;
 
 // Button
-$buttonBorderRadius: 4px;
+$buttonBorderRadius: 3px;
 
 // Colors
 $infoColor: #3fa8c7;
 $inactiveColor: #c3c3c3;
-$successColor: #417505;
+$successColor: #95c63f;
 $warningColor: #ec9800;
-$errorColor: #D86051;
+$errorColor: #f34833;
 $focusColor: #6EADC1;
 $focusDangerColor: #ff523c;
 $focusBackgroundColor: #ffffff;
 $fontColor: #191E23;
 $subduedFontColor: #9fa3a7;
-$linkColor: #3CAED2;
-$linkHoverColor: #006E8A;
+$linkColor: #00a9e5;
+$linkHoverColor: #00a9e5;
 $standoutBackgroundColor: #E4E4E4;
 $selectedBorderColor: #6EADC1;
 $errorBorderColor: $errorColor;
@@ -76,7 +76,7 @@ $verticalRhythm: 10px;
 @mixin focus($color: $focusColor, $backgroundColor: $focusBackgroundColor) {
   z-index: 1; /* 1 */
   outline: none !important; /* 2 */
-  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
+  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 3px $color; /* 3 */
 }
 
 @mixin formControlFocus {

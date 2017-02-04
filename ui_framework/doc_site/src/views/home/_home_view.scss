@@ -2,27 +2,44 @@
 @import "../../variables";
 
 .guideHome {
-  display: flex;
-  justify-content: center;
+  max-width: 1200px;
+  margin: 30px auto 200px;
 }
 
-  .guideHome__panel {
-    width: 100%;
-    max-width: 600px;
-    max-height: 500px;
-    padding: 60px;
-    margin-bottom: 20px;
-    border-radius: 3px;
-    background-color: #e8e8e8;
-    line-height: $guideLineHeight;
+.guideHomeSection {
+  & + & {
+    margin-top: 30px;
   }
+}
 
-  .guideHome__panelTitle {
-    font-weight: 700;
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
+.statusGroup {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
 
-  .guideHome__panelText {
-    font-size: 18px;
+  > * + * {
+    margin-left: 15px;
   }
+}
+
+.statusPanel {
+  display: flex;
+}
+
+.statusPanel__section {
+  flex: 1 1 0;
+
+  & + & {
+    margin-left: 10px;
+  }
+}
+
+.statTableRowHeader {
+  padding-right: 20px;
+  font-size: 12px;
+  vertical-align: bottom;
+}
+
+.hideTop {
+  margin-top: -1px;
+}

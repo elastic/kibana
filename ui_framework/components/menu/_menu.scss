@@ -2,17 +2,38 @@
 }
 
 .kuiMenu--contained {
-  border: $tableRowBorder;
+  // border: $tableRowBorder;
 
   .kuiMenuItem {
-    padding: 6px 10px;
+    padding: 10px 20px;
   }
 }
 
 .kuiMenuItem {
   padding: 6px 0;
+  border-radius: $buttonBorderRadius;
 
   & + & {
+    // border-top: $tableRowBorder;
+  }
+
+  &:hover {
+    background-color: #f7f7f7;
+  }
+}
+
+.kuiMenu--separated {
+  border: $tableRowBorder;
+
+  .kuiMenuItem {
+    padding: 10px 20px 30px;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  .kuiMenuItem + .kuiMenuItem {
     border-top: $tableRowBorder;
   }
 }

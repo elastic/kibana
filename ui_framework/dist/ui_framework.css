@@ -99,13 +99,14 @@ body {
      -moz-appearance: none;
           appearance: none;
   cursor: pointer;
-  padding: 4px 12px 5px;
+  padding: 4px 16px 5px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: normal;
   line-height: 1.5;
   text-decoration: none;
-  border: none;
-  border-radius: 4px; }
+  border: 1px solid;
+  border-radius: 3px;
+  -webkit-font-smoothing: antialiased; }
   .kuiButton:disabled {
     cursor: default;
     pointer-events: none;
@@ -118,7 +119,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px #6EADC1;
     /* 3 */ }
 
 .kuiButton--iconText .kuiButton__icon:first-child {
@@ -132,14 +133,13 @@ body {
  */
 .kuiButton--basic {
   color: #5a5a5a;
-  background-color: #F2F2F2; }
+  background-color: transparent;
+  border-color: #e2e2e2; }
   .kuiButton--basic:focus {
     color: #5a5a5a !important;
     /* 1 */ }
   .kuiButton--basic:hover:enabled, .kuiButton--basic:active:enabled {
-    color: #ffffff !important;
-    /* 1 */
-    background-color: #9B9B9B; }
+    background-color: #F2F2F2; }
   .kuiButton--basic:disabled {
     color: #9B9B9B; }
 
@@ -148,13 +148,16 @@ body {
  */
 .kuiButton--primary {
   color: #FFFFFF;
-  background-color: #6EADC1; }
+  background-color: #00a9e5;
+  border-color: #00a9e5; }
   .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
     color: #FFFFFF !important;
     /* 1 */
-    background-color: #006E8A; }
+    background-color: #005571;
+    border-color: #005571; }
   .kuiButton--primary:disabled {
-    background-color: #B6D6E0; }
+    background-color: #B6D6E0;
+    border-color: #B6D6E0; }
   .kuiButton--primary:focus {
     color: #FFFFFF !important;
     /* 1 */ }
@@ -164,19 +167,22 @@ body {
  */
 .kuiButton--danger {
   color: #FFFFFF;
-  background-color: #D76051; }
+  background-color: #f34833;
+  border-color: #f34833; }
   .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
     color: #FFFFFF !important;
     /* 1 */
-    background-color: #A52E1F; }
+    background-color: #b9200d;
+    border-color: #b9200d; }
   .kuiButton--danger:disabled {
-    background-color: #efc0ba; }
+    background-color: #efc0ba;
+    border-color: #efc0ba; }
   .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px #ff523c;
     /* 3 */
     color: #FFFFFF !important;
     /* 1 */ }
@@ -186,16 +192,16 @@ body {
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #3CAED2 !important;
+  color: #00a9e5 !important;
   /* 2 */
-  background-color: transparent; }
+  background-color: transparent;
+  border-color: #00a9e5; }
   .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
-    color: #006E8A !important;
-    /* 1 */
-    text-decoration: underline; }
+    background-color: rgba(0, 169, 224, 0.1); }
   .kuiButton--hollow:disabled {
-    color: #dddddd !important;
-    /* 1 */ }
+    color: #9B9B9B !important;
+    /* 1 */
+    border-color: #e2e2e2; }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -221,13 +227,13 @@ body {
   border-bottom-left-radius: 0; }
 
 .kuiButtonGroup--united > .kuiButton:only-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px; }
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px; }
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
-  margin-left: 2px; }
+  margin-left: -1px; }
 
 .kuiEvent {
   display: -webkit-box;
@@ -242,7 +248,8 @@ body {
           flex: 0 1 auto;
   font-size: 14px;
   line-height: 1.5;
-  padding-right: 8px; }
+  padding-right: 8px;
+  width: 20px; }
 
 .kuiEventBody {
   -webkit-box-flex: 1;
@@ -271,7 +278,7 @@ body {
   /* 1 */
   background-color: #FFFFFF;
   border: 1px solid #BEBEBE;
-  border-radius: 4px;
+  border-radius: 3px;
   width: 16px;
   height: 16px;
   line-height: 1.5 !important;
@@ -307,7 +314,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px #6EADC1;
     /* 3 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
@@ -328,7 +335,7 @@ body {
   color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  border-radius: 4px;
+  border-radius: 3px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
@@ -346,7 +353,7 @@ body {
   /* 2 */ }
   .kuiSelect:invalid:not(.ng-untouched) {
     /* 1 */
-    border-color: #D86051; }
+    border-color: #f34833; }
   .kuiSelect:focus {
     outline: none;
     border-color: #6EADC1; }
@@ -380,7 +387,7 @@ body {
   color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  border-radius: 4px;
+  border-radius: 3px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
@@ -390,7 +397,7 @@ body {
    */ }
   .kuiTextArea:invalid:not(.ng-untouched) {
     /* 1 */
-    border-color: #D86051; }
+    border-color: #f34833; }
   .kuiTextArea:focus {
     outline: none;
     border-color: #6EADC1; }
@@ -412,7 +419,7 @@ body {
   color: #191E23;
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
-  border-radius: 4px;
+  border-radius: 3px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
@@ -422,7 +429,7 @@ body {
    */ }
   .kuiTextInput:invalid:not(.ng-untouched) {
     /* 1 */
-    border-color: #D86051; }
+    border-color: #f34833; }
   .kuiTextInput:focus {
     outline: none;
     border-color: #6EADC1; }
@@ -445,7 +452,12 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  border-bottom: 2px solid #E4E4E4; }
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #E4E4E4; }
 
 /**
  * 1. Align a single section to the left by default.
@@ -464,7 +476,11 @@ body {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
-  margin-right: 25px; }
+  margin-right: 25px;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline; }
   .kuiHeaderBarSection:not(:first-child):not(:last-child):not(:only-child) {
     -webkit-box-pack: center;
     -webkit-justify-content: center;
@@ -517,13 +533,13 @@ body {
   color: #3fa8c7; }
 
 .kuiIcon--success {
-  color: #417505; }
+  color: #95c63f; }
 
 .kuiIcon--warning {
   color: #ec9800; }
 
 .kuiIcon--error {
-  color: #D86051; }
+  color: #f34833; }
 
 .kuiIcon--inactive {
   color: #c3c3c3; }
@@ -540,16 +556,25 @@ body {
   border-color: rgba(63, 168, 199, 0.25);
   /* 1 */ }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--success {
-  border-color: rgba(65, 117, 5, 0.25);
+  border-color: rgba(149, 198, 63, 0.25);
   /* 1 */ }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--warning {
-  border-color: rgba(255, 172, 21, 0.25);
+  border-color: rgba(236, 152, 0, 0.25);
   /* 1 */ }
 
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
 .kuiInfoPanel--error {
-  border-color: rgba(216, 96, 81, 0.25);
+  border-color: rgba(243, 72, 51, 0.25);
   /* 1 */ }
 
 /**
@@ -586,12 +611,13 @@ body {
   line-height: 1.5; }
 
 .kuiLink {
-  color: #3CAED2;
-  text-decoration: none; }
+  color: #00a9e5;
+  text-decoration: none;
+  font-weight: 700; }
   .kuiLink:visited, .kuiLink:active {
     color: #3CAED2; }
   .kuiLink:hover {
-    color: #006E8A;
+    color: #00a9e5;
     text-decoration: underline; }
 
 .kuiLoadingItems {
@@ -736,7 +762,7 @@ body {
   display: flex; }
 
 .kuiLocalDropdownHeader__action {
-  color: #3CAED2;
+  color: #00a9e5;
   font-size: 12px;
   text-decoration: none;
   cursor: pointer; }
@@ -990,14 +1016,22 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
-.kuiMenu--contained {
-  border: 1px solid #E4E4E4; }
-  .kuiMenu--contained .kuiMenuItem {
-    padding: 6px 10px; }
+.kuiMenu--contained .kuiMenuItem {
+  padding: 10px 20px; }
 
 .kuiMenuItem {
-  padding: 6px 0; }
-  .kuiMenuItem + .kuiMenuItem {
+  padding: 6px 0;
+  border-radius: 3px; }
+  .kuiMenuItem:hover {
+    background-color: #f7f7f7; }
+
+.kuiMenu--separated {
+  border: 1px solid #E4E4E4; }
+  .kuiMenu--separated .kuiMenuItem {
+    padding: 10px 20px 30px; }
+    .kuiMenu--separated .kuiMenuItem:hover {
+      background-color: transparent; }
+  .kuiMenu--separated .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
 
 .kuiMicroButton {
@@ -1151,14 +1185,14 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 3px #6EADC1;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 3px #ff523c;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--basic {
     color: #5a5a5a;
@@ -1211,19 +1245,20 @@ body {
   -webkit-box-align: baseline;
   -webkit-align-items: baseline;
       -ms-flex-align: baseline;
-          align-items: baseline; }
+          align-items: baseline;
+  font-weight: 700; }
 
 .kuiStatusText--info {
   color: #3fa8c7; }
 
 .kuiStatusText--success {
-  color: #417505; }
+  color: #95c63f; }
 
 .kuiStatusText--warning {
   color: #ec9800; }
 
 .kuiStatusText--error {
-  color: #D86051; }
+  color: #f34833; }
 
 .kuiStatusText__icon {
   margin-right: 6px; }
@@ -1232,17 +1267,8 @@ body {
  * 1. Make seamless transition from ToolBar to Table header.
  * 1. Make seamless transition from Table to ToolBarFooter header.
  */
-.kuiControlledTable .kuiTable {
-  border-top: none;
-  /* 1 */ }
-
-.kuiControlledTable .kuiToolBarFooter {
-  border-top: none;
-  /* 2 */ }
-
 .kuiTable {
   width: 100%;
-  border: 2px solid #E4E4E4;
   border-collapse: collapse;
   background-color: #FFFFFF; }
 
@@ -1252,7 +1278,8 @@ body {
   line-height: 1.5;
   padding: 7px 8px 8px;
   text-align: left;
-  color: #a7a7a7; }
+  color: #444;
+  font-size: 12px; }
   .kuiTableHeaderCell:last-child {
     padding-right: 16px; }
 
@@ -1275,8 +1302,13 @@ body {
 .kuiTableSortIcon {
   pointer-events: none; }
 
-.kuiTableRow:hover .kuiTableRowHoverReveal {
-  display: inline-block; }
+.kuiTableRow:hover {
+  background-color: #f7f7f7; }
+  .kuiTableRow:hover .kuiTableRowHoverReveal {
+    display: inline-block; }
+
+.kuiTableRow:last-child .kuiTableRowCell {
+  border-bottom: 1px solid #E4E4E4; }
 
 .kuiTableRowHoverReveal {
   display: none; }
@@ -1347,18 +1379,18 @@ body {
   .kuiTab + .kuiTab {
     border-left: none; }
   .kuiTab:focus {
-    color: #3CAED2;
+    color: #00a9e5;
     z-index: 1;
     outline: 1px solid #6EADC1 !important;
     /* 1 */ }
   .kuiTab:hover:not(.kuiTab-isSelected) {
-    color: #006E8A; }
+    color: #00a9e5; }
   .kuiTab:active {
     outline: none;
     border-color: #ffffff;
     box-shadow: none;
     /* 1 */
-    color: #3CAED2 !important; }
+    color: #00a9e5 !important; }
   .kuiTab.kuiTab-isSelected {
     color: #191E23;
     background-color: #F2F2F2;
@@ -1379,34 +1411,7 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  padding: 10px;
-  height: 50px;
-  background-color: #E4E4E4; }
-  .kuiToolBar .kuiButton:focus {
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
-    /* 3 */ }
-  .kuiToolBar .kuiButton--danger:focus {
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
-    /* 3 */ }
-  .kuiToolBar .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF; }
-    .kuiToolBar .kuiButton--basic:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
-  .kuiToolBar .kuiSelect {
-    border-color: #ffffff; }
-    .kuiToolBar .kuiSelect:focus {
-      outline: none;
-      border-color: #6EADC1; }
+  height: 50px; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -1472,10 +1477,8 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  padding: 10px;
   height: 40px;
-  background-color: #ffffff;
-  border: 2px solid #E4E4E4; }
+  background-color: #ffffff; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;
@@ -1556,7 +1559,7 @@ body {
 
 .kuiToolBarSearchBox__icon {
   position: absolute;
-  top: 6px;
+  top: 8px;
   left: 8px;
   font-size: 14px;
   color: #ACACAC; }
@@ -1565,17 +1568,38 @@ body {
    * 1. Fix inherited styles (possibly from Bootstrap).
    */
 .kuiToolBarSearchBox__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 3px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
   width: 100%;
   min-width: 200px;
-  padding: 5px 12px 6px 28px;
-  background-color: #FFFFFF;
-  color: #191E23;
-  border: 1px solid #FFFFFF;
-  border-radius: 4px;
-  font-size: 14px;
-  border: 1px solid #ffffff;
+  padding: 6px 12px 7px 28px;
   line-height: normal;
   /* 1 */ }
+  .kuiToolBarSearchBox__input:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #f34833; }
+  .kuiToolBarSearchBox__input:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiToolBarSearchBox__input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
     border-color: #6EADC1; }
@@ -1596,10 +1620,11 @@ body {
 .kuiTitle {
   margin: 0;
   /* 1 */
-  font-weight: 400;
+  font-weight: 300;
   /* 1 */
   color: #191E23;
-  font-size: 22px; }
+  font-size: 26px;
+  -webkit-font-smoothing: antialiased; }
 
 /**
  * 1. Override h2, h3, etc.
@@ -1607,10 +1632,11 @@ body {
 .kuiSubTitle {
   margin: 0;
   /* 1 */
-  font-weight: 400;
+  font-weight: 300;
   /* 1 */
   color: #191E23;
-  font-size: 18px; }
+  font-size: 20px;
+  -webkit-font-smoothing: antialiased; }
 
 /**
  * 1. Override p.
@@ -1622,7 +1648,8 @@ body {
   /* 1 */
   color: #191E23;
   line-height: 1.5;
-  font-size: 14px; }
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
