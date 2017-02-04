@@ -124,6 +124,7 @@ class Timeseries extends Component {
               plothover={ this.plothover}
               reversed={this.props.reversed}
               series={this.props.series}
+              annotations={this.props.annotations}
               show={ this.state.show }
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
@@ -156,6 +157,7 @@ Timeseries.propTypes = {
   legendPosition : PropTypes.string,
   onFilter       : PropTypes.func,
   series         : PropTypes.array,
+  annotations    : PropTypes.array,
   reversed       : PropTypes.bool,
   options        : PropTypes.object,
   tickFormatter  : PropTypes.func

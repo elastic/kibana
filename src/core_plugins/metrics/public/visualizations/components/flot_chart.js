@@ -61,7 +61,7 @@ class FlotChart extends Component {
       const { series, markings } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
-      if (markings) _.set(options, 'grid.markings', markings);
+      _.set(options, 'grid.markings', this.getMarkings());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -94,6 +94,24 @@ class FlotChart extends Component {
       }).reverse().value();
   }
 
+  getMarkings() {
+    const { annotations } = this.props;
+    if (annotations) {
+      return annotations.reduce((acc, item) => {
+        return acc.concat(item.series.map(series => {
+          return {
+            color: item.color,
+            lineWidth: 2,
+            xaxis: {
+              from: series[0],
+              to: series[0]
+            }
+          };
+        }));
+      }, []);
+    }
+  }
+
   getOptions() {
     const yaxes = this.props.yaxes || [{}];
 
@@ -123,9 +141,12 @@ class FlotChart extends Component {
         borderWidth: 1,
         borderColor: lineColor,
         hoverable: true,
-        mouseActiveRadius: 200
+        mouseActiveRadius: 200,
+        markings: this.getMarkings()
       }
     };
+
+    console.log(opts.grid.markings);
 
     if (this.props.crosshair) {
       _.set(opts, 'crosshair', {

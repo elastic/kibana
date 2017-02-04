@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import basicAggs from '../../../../public/components/lib/basic_aggs';
-import getAggValue from '../../get_agg_value';
-import getDefaultDecoration from '../get_default_decoration';
-import getSplits from '../get_splits';
-import getLastMetric from '../get_last_metric';
-import mapBucket from '../map_bucket';
+import basicAggs from '../../../../../public/components/lib/basic_aggs';
+import getAggValue from '../../../get_agg_value';
+import getDefaultDecoration from '../../get_default_decoration';
+import getSplits from '../../get_splits';
+import getLastMetric from '../../get_last_metric';
+import mapBucket from '../../map_bucket';
 export default function stdDeviationBands(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);

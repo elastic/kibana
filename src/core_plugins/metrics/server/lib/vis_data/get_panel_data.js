@@ -1,6 +1,7 @@
 import getRequestParams from './get_request_params';
 import handleResponseBody from './handle_response_body';
 import handleErrorResponse from './handle_error_response';
+import getAnnotations from './get_annotations';
 export default function getPanelData(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   return panel => {
@@ -20,6 +21,13 @@ export default function getPanelData(req) {
             series: series.reduce((acc, series) => acc.concat(series), [])
           }
         };
+      })
+      .then(resp => {
+        if (!panel.annotations) return resp;
+        return getAnnotations(req, panel).then(annotations => {
+          resp[panel.id].annotations = annotations;
+          return resp;
+        });
       })
       .catch(handleErrorResponse(panel));
   };

@@ -7,7 +7,7 @@ import Color from 'color';
 import getDefaultDecoration from './get_default_decoration';
 import mapBucket from './map_bucket';
 
-import processors from './response_processors';
+import processors from './response_processors/series';
 
 export default function handleResponseBody(panel) {
   return resp => {

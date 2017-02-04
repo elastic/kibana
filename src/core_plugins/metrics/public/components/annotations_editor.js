@@ -44,7 +44,7 @@ class AnnotationsEditor extends Component {
     const handleDelete = collectionActions.handleDelete
       .bind(null, this.props, row);
     return (
-      <div className="vis_editor__annotations-row">
+      <div className="vis_editor__annotations-row" key={row.id}>
         <div className="vis_editor__annotations-color">
           <ColorPicker
             disableTrash={true}
@@ -100,8 +100,8 @@ class AnnotationsEditor extends Component {
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
                 type="text"
-                onChange={this.handleChange(row, 'template')}
-                defaultValue={row.query_string} />
+                onChange={this.handleChange(row, 'fields')}
+                defaultValue={row.fields} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (eg.<code>{'{{field.name}}'}</code>)</div>
@@ -110,7 +110,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'template')}
-                defaultValue={row.query_string} />
+                defaultValue={row.template} />
             </div>
           </div>
         </div>
@@ -131,7 +131,7 @@ class AnnotationsEditor extends Component {
         .bind(null, this.props, newAnnotation);
       content = (
         <div className="vis_editor__annotations-missing">
-          <p>Click the button below to create your first annotation data source.</p>
+          <p>Click the button below to create an annotation data source.</p>
           <a className="thor__button-outlined-default large"
         onClick={handleAdd}>Add Data Source</a>
         </div>

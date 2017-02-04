@@ -68,12 +68,14 @@ app.controller('MetricsEditorController', (
         debouncedFetchFields(series.series_index_pattern);
       }
     });
-    newValue.annotations.forEach(item => {
-      if (item.index_pattern &&
-        !$scope.fields[item.index_pattern]) {
-        debouncedFetchFields(item.index_pattern);
-      }
-    });
+    if (newValue.annotations) {
+      newValue.annotations.forEach(item => {
+        if (item.index_pattern &&
+          !$scope.fields[item.index_pattern]) {
+          debouncedFetchFields(item.index_pattern);
+        }
+      });
+    }
   });
 
   // If the model doesn't exist we need to either intialize it with a copy from

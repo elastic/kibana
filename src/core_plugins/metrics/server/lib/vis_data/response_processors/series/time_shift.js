@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import unitToSeconds from '../../unit_to_seconds';
+import unitToSeconds from '../../../unit_to_seconds';
 export default function timeShift(resp, panel, series) {
   return next => results => {
     if (/^([\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {

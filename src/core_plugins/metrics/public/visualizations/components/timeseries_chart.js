@@ -169,6 +169,7 @@ class TimeseriesChart extends Component {
       plothover: this.props.plothover,
       reversed: this.props.reversed,
       series: this.props.series,
+      annotations: this.props.annotations,
       show: this.props.show,
       tickFormatter: this.props.tickFormatter,
       yaxes: this.props.yaxes
@@ -192,6 +193,7 @@ TimeseriesChart.propTypes = {
   plothover     : PropTypes.func,
   reversed      : PropTypes.bool,
   series        : PropTypes.array,
+  annotations   : PropTypes.array,
   show          : PropTypes.array,
   tickFormatter : PropTypes.func,
   yaxes         : PropTypes.array,

@@ -12,6 +12,17 @@ function hasSeperateAxis(row) {
 function TimeseriesVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const series = _.get(visData, `${model.id}.series`, []);
+  const annotations = model.annotations.map(annotation => {
+    const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
+      .map(item => [item.key, item.docs]);
+    return {
+      id: annotation.id,
+      template: annotation.template,
+      color: annotation.color,
+      icon: annotation.icon,
+      series: data
+    };
+  });
   const seriesModel = model.series.map(s => _.cloneDeep(s));
   const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
   const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
@@ -95,6 +106,7 @@ function TimeseriesVisualization(props) {
     tickFormatter: formatter,
     legendPosition: model.legend_position || 'right',
     series,
+    annotations,
     yaxes,
     reversed: props.reversed,
     legend: Boolean(model.show_legend),
