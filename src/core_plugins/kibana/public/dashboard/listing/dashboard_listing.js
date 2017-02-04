@@ -1,17 +1,22 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
+import 'ui/pager_control';
+import 'ui/pager';
 import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
 export function DashboardListingController(
+  $filter,
   $scope,
+  confirmModal,
   kbnUrl,
   Notifier,
+  pagerService,
   Private,
-  timefilter,
-  confirmModal
+  timefilter
 ) {
   timefilter.enabled = false;
 
+  const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const dashboardService = services.dashboards;
@@ -19,16 +24,37 @@ export function DashboardListingController(
 
   let selectedItems = [];
 
+  /**
+   * Sorts hits either ascending or descending
+   * @param  {Array} hits Array of saved finder object hits
+   * @return {Array} Array sorted either ascending or descending
+   */
+  const sortItems = () => {
+    this.items =
+      this.isAscending
+      ? _.sortBy(this.items, 'title')
+      : _.sortBy(this.items, 'title').reverse();
+  };
+
+  const calculateItemsOnPage = () => {
+    sortItems();
+    this.pager.setTotalItems(this.items.length);
+    this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
+  };
+
   const fetchObjects = () => {
     dashboardService.find(this.filter)
       .then(result => {
         this.items = result.hits;
-        this.sortItems();
+        calculateItemsOnPage();
       });
   };
 
   this.items = [];
+  this.pageOfItems = [];
   this.filter = '';
+
+  this.pager = pagerService.create(this.items.length, 20, 1);
 
   /**
    * Boolean that keeps track of whether hits are sorted ascending (true)
@@ -37,21 +63,9 @@ export function DashboardListingController(
    */
   this.isAscending = true;
 
-  /**
-   * Sorts hits either ascending or descending
-   * @param  {Array} hits Array of saved finder object hits
-   * @return {Array} Array sorted either ascending or descending
-   */
-  this.sortItems = function sortItems() {
-    this.items =
-      this.isAscending
-      ? _.sortBy(this.items, 'title')
-      : _.sortBy(this.items, 'title').reverse();
-  };
-
   this.toggleSort = function toggleSort() {
     this.isAscending = !this.isAscending;
-    this.sortItems();
+    calculateItemsOnPage();
   };
 
   this.toggleAll = function toggleAll() {
@@ -102,8 +116,18 @@ export function DashboardListingController(
       });
   };
 
-  this.open = function open(item) {
-    kbnUrl.change(item.url.substr(1));
+  this.onPageNext = () => {
+    this.pager.nextPage();
+    calculateItemsOnPage();
+  };
+
+  this.onPagePrevious = () => {
+    this.pager.previousPage();
+    calculateItemsOnPage();
+  };
+
+  this.getUrlForItem = function getUrlForItem(item) {
+    return `#/dashboard/${item.id}`;
   };
 
   $scope.$watch(() => this.filter, () => {

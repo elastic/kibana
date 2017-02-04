@@ -1,16 +1,21 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
+import 'ui/pager_control';
+import 'ui/pager';
 import _ from 'lodash';
 
 export function VisualizeListingController(
+  $filter,
   $scope,
   confirmModal,
   kbnUrl,
   Notifier,
+  pagerService,
   Private,
   timefilter
 ) {
   timefilter.enabled = false;
 
+  const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
@@ -18,16 +23,39 @@ export function VisualizeListingController(
 
   let selectedItems = [];
 
+  /**
+   * Sorts hits either ascending or descending
+   * @param  {Array} hits Array of saved finder object hits
+   * @return {Array} Array sorted either ascending or descending
+   */
+  const sortItems = () => {
+    const sortProperty = this.getSortProperty();
+
+    this.items =
+      sortProperty.isAscending
+      ? _.sortBy(this.items, sortProperty.getValue)
+      : _.sortBy(this.items, sortProperty.getValue).reverse();
+  };
+
+  const calculateItemsOnPage = () => {
+    sortItems();
+    this.pager.setTotalItems(this.items.length);
+    this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
+  };
+
   const fetchObjects = () => {
     visualizationService.find(this.filter)
     .then(result => {
       this.items = result.hits;
-      this.sortItems();
+      calculateItemsOnPage();
     });
   };
 
   this.items = [];
+  this.pageOfItems = [];
   this.filter = '';
+
+  this.pager = pagerService.create(this.items.length, 20, 1);
 
   /**
    * Remember sort direction per property.
@@ -57,20 +85,6 @@ export function VisualizeListingController(
     return sortProperty.isAscending;
   };
 
-  /**
-   * Sorts hits either ascending or descending
-   * @param  {Array} hits Array of saved finder object hits
-   * @return {Array} Array sorted either ascending or descending
-   */
-  this.sortItems = function sortItems() {
-    const sortProperty = this.getSortProperty();
-
-    this.items =
-      sortProperty.isAscending
-      ? _.sortBy(this.items, sortProperty.getValue)
-      : _.sortBy(this.items, sortProperty.getValue).reverse();
-  };
-
   this.sortOn = function sortOn(propertyName) {
     const sortProperty = this.getSortProperty();
 
@@ -81,7 +95,7 @@ export function VisualizeListingController(
       this.getSortPropertyByName(propertyName).isSelected = true;
     }
 
-    this.sortItems();
+    calculateItemsOnPage();
   };
 
   this.toggleAll = function toggleAll() {
@@ -131,6 +145,16 @@ export function VisualizeListingController(
         confirmButtonText: 'Delete',
         onConfirm: doDelete
       });
+  };
+
+  this.onPageNext = () => {
+    this.pager.nextPage();
+    calculateItemsOnPage();
+  };
+
+  this.onPagePrevious = () => {
+    this.pager.previousPage();
+    calculateItemsOnPage();
   };
 
   this.getUrlForItem = function getUrlForItem(item) {

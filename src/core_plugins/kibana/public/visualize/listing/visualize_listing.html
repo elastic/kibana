@@ -31,10 +31,6 @@
       </div>
 
       <div class="kuiToolBarSection">
-        <!-- We need an empty section for the buttons to be positioned consistently. -->
-      </div>
-
-      <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
         <button
           class="kuiButton kuiButton--danger"
@@ -56,6 +52,21 @@
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
       </div>
     </div>
 
@@ -101,7 +112,7 @@
 
       <tbody>
         <tr
-          ng-repeat="item in listingController.items track by item.id"
+          ng-repeat="item in listingController.pageOfItems track by item.id"
           class="kuiTableRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox">
@@ -141,8 +152,20 @@
           {{ listingController.getSelectedItemsCount() }} selected
         </div>
       </div>
+
       <div class="kuiToolBarFooterSection">
-        <!-- We need an empty section for the buttons to be positioned consistently. -->
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
       </div>
     </div>
   </div>
