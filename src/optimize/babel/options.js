@@ -1,17 +1,18 @@
-// this file is not transpiled
+// this file is not transpiled in dev
 
-var helpers = require('./helpers');
-
-helpers.setupBabelCache(process.env);
+const {
+  nodePresets,
+  webpackPresets,
+  plugins,
+  devIgnore
+} = require('./helpers');
 
 exports.webpack = {
-  presets: ["react", "es2015", "stage-1"],
-  plugins: ["add-module-exports"]
+  presets: webpackPresets,
+  plugins: plugins
 };
 exports.node = {
-  presets: ["es2015-node", "stage-1"],
-  plugins: ["add-module-exports"],
-  ignore: [
-    /[\\\/](node_modules|bower_components|mock_data|scenarios)[\\\/]/
-  ]
+  presets: nodePresets,
+  plugins,
+  ignore: devIgnore
 };

@@ -1,13 +1,35 @@
-// this file is not transpiled
+// this file is not transpiled in dev
 
-exports.fromRoot = require('path').resolve.bind(null, __dirname, '../../../');
+const env = process.env;
+const fromRoot = require('path').resolve.bind(null, __dirname, '../../../');
 
-exports.setupBabelCache = function (env) {
-  if (!env.BABEL_CACHE_PATH) {
-    env.BABEL_CACHE_PATH = exports.fromRoot('optimize/.babelcache.json');
-  }
+if (!env.BABEL_CACHE_PATH) {
+  env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');
+}
 
-  if (!env.WEBPACK_BABEL_CACHE_DIR) {
-    env.WEBPACK_BABEL_CACHE_DIR = exports.fromRoot('optimize/.webpack.babelcache');
-  }
-};
+if (!env.WEBPACK_BABEL_CACHE_DIR) {
+  env.WEBPACK_BABEL_CACHE_DIR = fromRoot('optimize/.webpack.babelcache');
+}
+
+exports.nodePresets = [
+  require.resolve('babel-preset-es2015'),
+  require.resolve('babel-preset-stage-1'),
+];
+
+exports.webpackPresets = [
+  require.resolve('babel-preset-react'),
+  ...exports.nodePresets
+]
+
+exports.plugins = [
+  require.resolve('babel-plugin-add-module-exports'),
+];
+
+exports.devIgnore = [
+  /[\\\/](node_modules|bower_components)[\\\/]/
+]
+
+exports.buildIgnore = [
+  fromRoot('src'),
+  ...exports.devIgnore
+]
