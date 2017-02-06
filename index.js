@@ -48,6 +48,8 @@ module.exports = function (kibana) {
         'plugins/rework/elements/box/box',
         'plugins/rework/elements/grow/grow',
         'plugins/rework/elements/circle/circle',
+        'plugins/rework/elements/chart/chart',
+
 
         'plugins/rework/elements/image/image',
         'plugins/rework/elements/number/number',
