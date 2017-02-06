@@ -1,10 +1,9 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
-export function DashboardListingController($injector, $scope) {
+export function VisualizeListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
   const kbnUrl = $injector.get('kbnUrl');
@@ -18,8 +17,8 @@ export function DashboardListingController($injector, $scope) {
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
-  const dashboardService = services.dashboards;
-  const notify = new Notifier({ location: 'Dashboard' });
+  const visualizationService = services.visualizations;
+  const notify = new Notifier({ location: 'Visualize' });
 
   let selectedItems = [];
 
@@ -29,10 +28,12 @@ export function DashboardListingController($injector, $scope) {
    * @return {Array} Array sorted either ascending or descending
    */
   const sortItems = () => {
+    const sortProperty = this.getSortProperty();
+
     this.items =
-      this.isAscending
-      ? _.sortBy(this.items, 'title')
-      : _.sortBy(this.items, 'title').reverse();
+      sortProperty.isAscending
+      ? _.sortBy(this.items, sortProperty.getValue)
+      : _.sortBy(this.items, sortProperty.getValue).reverse();
   };
 
   const calculateItemsOnPage = () => {
@@ -42,11 +43,11 @@ export function DashboardListingController($injector, $scope) {
   };
 
   const fetchObjects = () => {
-    dashboardService.find(this.filter)
-      .then(result => {
-        this.items = result.hits;
-        calculateItemsOnPage();
-      });
+    visualizationService.find(this.filter)
+    .then(result => {
+      this.items = result.hits;
+      calculateItemsOnPage();
+    });
   };
 
   const deselectAll = () => {
@@ -69,14 +70,43 @@ export function DashboardListingController($injector, $scope) {
   });
 
   /**
-   * Boolean that keeps track of whether hits are sorted ascending (true)
-   * or descending (false) by title
-   * @type {Boolean}
+   * Remember sort direction per property.
    */
-  this.isAscending = true;
+  this.sortProperties = [{
+    name: 'title',
+    getValue: item => item.title,
+    isSelected: true,
+    isAscending: true,
+  }, {
+    name: 'type',
+    getValue: item => item.type.title,
+    isSelected: false,
+    isAscending: true,
+  }];
 
-  this.toggleSort = function toggleSort() {
-    this.isAscending = !this.isAscending;
+  this.getSortProperty = function getSortProperty() {
+    return this.sortProperties.find(property => property.isSelected);
+  };
+
+  this.getSortPropertyByName = function getSortPropertyByName(name) {
+    return this.sortProperties.find(property => property.name === name);
+  };
+
+  this.isAscending = function isAscending() {
+    const sortProperty = this.getSortProperty();
+    return sortProperty.isAscending;
+  };
+
+  this.sortOn = function sortOn(propertyName) {
+    const sortProperty = this.getSortProperty();
+
+    if (sortProperty.name === propertyName) {
+      sortProperty.isAscending = !sortProperty.isAscending;
+    } else {
+      sortProperty.isSelected = false;
+      this.getSortPropertyByName(propertyName).isSelected = true;
+    }
+
     deselectAll();
     calculateItemsOnPage();
   };
@@ -99,7 +129,7 @@ export function DashboardListingController($injector, $scope) {
   };
 
   this.isItemChecked = function isItemChecked(item) {
-    return selectedItems.indexOf(item) !== -1;
+    return selectedItems.includes(item);
   };
 
   this.areAllItemsChecked = function areAllItemsChecked() {
@@ -114,7 +144,7 @@ export function DashboardListingController($injector, $scope) {
     const doDelete = () => {
       const selectedIds = selectedItems.map(item => item.id);
 
-      dashboardService.delete(selectedIds)
+      visualizationService.delete(selectedIds)
         .then(fetchObjects)
         .then(() => {
           deselectAll();
@@ -123,7 +153,7 @@ export function DashboardListingController($injector, $scope) {
     };
 
     confirmModal(
-      'Are you sure you want to delete the selected dashboards? This action is irreversible!',
+      'Are you sure you want to delete the selected visualizations? This action is irreversible!',
       {
         confirmButtonText: 'Delete',
         onConfirm: doDelete
@@ -143,6 +173,6 @@ export function DashboardListingController($injector, $scope) {
   };
 
   this.getUrlForItem = function getUrlForItem(item) {
-    return `#/dashboard/${item.id}`;
+    return `#/visualize/edit/${item.id}`;
   };
 }
