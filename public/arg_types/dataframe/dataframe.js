@@ -9,6 +9,7 @@ import FrameLink from './frame_link';
 
 argTypes.push(new ArgType('dataframe', {
   help: 'The source of data to link to this element',
+  default: (state) => _.keys(state.persistent.dataframes)[0],
   form: ({commit, value}) => {
     return (<FrameLink value={value} select={commit}></FrameLink>);
   },

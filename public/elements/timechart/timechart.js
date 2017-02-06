@@ -19,7 +19,6 @@ elements.push(new Element('timechart', {
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
-      default: (state) => _.keys(state.transient.dataframeCache)[0]
     }),
     new Arg('time_column', {
       type: 'dataframe_column',

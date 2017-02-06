@@ -12,7 +12,6 @@ elements.push(new Element('table', {
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
-      default: (state) => _.keys(state.transient.dataframeCache)[0]
     })
   ],
   template: ({args}) => {
