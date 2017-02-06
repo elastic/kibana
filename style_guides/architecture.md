@@ -28,7 +28,7 @@ plugin_root:
   </dd>
 
   <dt>server</dt>
-  <dd>Ths folder is where server code belongs. Things like custom routes, data models, things that communicate with Elasticsearch, or any other code that should only be executed on the server should go here.</dd>
+  <dd>This folder is where server code belongs. Things like custom routes, data models, or any other code that should only be executed on the server should go here.</dd>
 
   <dt>common</dt>
   <dd>This folder is where code that is useful on both the client and the server belongs. A consistent example of this is constants, but this could apply to helper modules as well.</dd>
