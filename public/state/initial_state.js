@@ -37,6 +37,7 @@ export default () => {
         },
       },
       elements: {},
+      filters: {},
       dataframes: {
         'dataframe-1': {
           id: 'dataframe-1',
