@@ -3,17 +3,21 @@ import _ from 'lodash';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
+import Annotation from './annotation';
 
 class TimeseriesChart extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      annotations: [],
       showTooltip: false,
       mouseHoverTimer: false,
     };
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleMouseOver = this.handleMouseOver.bind(this);
+    this.renderAnnotations = this.renderAnnotations.bind(this);
+    this.handleDraw = this.handleDraw.bind(this);
   }
 
   calculateLeftRight(item, plot) {
@@ -32,6 +36,22 @@ class TimeseriesChart extends Component {
       left = point.left;
     }
     return [left, right];
+  }
+
+  handleDraw(plot) {
+    if (!plot || !this.props.annotations) return;
+    const annotations = this.props.annotations.reduce((acc, anno) => {
+      return acc.concat(anno.series.map(series => {
+        return {
+          series,
+          plot,
+          key: `${anno.id}-${series[0]}`,
+          icon: anno.icon,
+          color: anno.color
+        };
+      }));
+    }, []);
+    this.setState({ annotations });
   }
 
   handleMouseOver(e, pos, item, plot) {
@@ -60,6 +80,18 @@ class TimeseriesChart extends Component {
     this.state.mouseHoverTimer = window.setTimeout(() => {
       this.setState({ showTooltip: false });
     }, 250);
+  }
+
+  renderAnnotations(annotation) {
+    return (
+      <Annotation
+        series={annotation.series}
+        plot={annotation.plot}
+        key={annotation.key}
+        icon={annotation.icon}
+        reversed={this.props.reversed}
+        color={annotation.color}/>
+    );
   }
 
   render() {
@@ -162,9 +194,11 @@ class TimeseriesChart extends Component {
 
     const params = {
       crosshair: this.props.crosshair,
+      onPlotCreate: this.handlePlotCreate,
       onBrush: this.props.onBrush,
       onMouseLeave: this.handleMouseLeave,
       onMouseOver: this.handleMouseOver,
+      onDraw: this.handleDraw,
       options: this.props.options,
       plothover: this.props.plothover,
       reversed: this.props.reversed,
@@ -175,9 +209,12 @@ class TimeseriesChart extends Component {
       yaxes: this.props.yaxes
     };
 
+    const annotations = this.state.annotations.map(this.renderAnnotations);
+
     return (
       <div ref="container" style={container}>
         { tooltip }
+        { annotations }
         <FlotChart {...params}/>
       </div>
     );

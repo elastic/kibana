@@ -35,6 +35,13 @@ export default function query(req, panel, annotation) {
       });
     }
 
+    if (annotation.fields) {
+      const fields = annotation.fields.split(/[,\s]+/) || [];
+      fields.forEach(field => {
+        doc.query.bool.must.push({ exists: { field } });
+      });
+    }
+
     return next(doc);
 
   };

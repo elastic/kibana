@@ -61,10 +61,10 @@ class FlotChart extends Component {
       const { series, markings } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
-      _.set(options, 'grid.markings', this.getMarkings());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
+      if (!_.isEqual(this.props.series, series)) this.handleDraw(this.plot);
     } else {
       this.renderChart();
     }
@@ -94,22 +94,8 @@ class FlotChart extends Component {
       }).reverse().value();
   }
 
-  getMarkings() {
-    const { annotations } = this.props;
-    if (annotations) {
-      return annotations.reduce((acc, item) => {
-        return acc.concat(item.series.map(series => {
-          return {
-            color: item.color,
-            lineWidth: 2,
-            xaxis: {
-              from: series[0],
-              to: series[0]
-            }
-          };
-        }));
-      }, []);
-    }
+  handleDraw(plot, canvasContext) {
+    if (this.props.onDraw) this.props.onDraw(plot);
   }
 
   getOptions() {
@@ -142,11 +128,8 @@ class FlotChart extends Component {
         borderColor: lineColor,
         hoverable: true,
         mouseActiveRadius: 200,
-        markings: this.getMarkings()
       }
     };
-
-    console.log(opts.grid.markings);
 
     if (this.props.crosshair) {
       _.set(opts, 'crosshair', {
@@ -173,6 +156,7 @@ class FlotChart extends Component {
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(target, data, this.getOptions());
+      this.handleDraw(this.plot);
 
       this.handleResize = (e) => {
         const resize = findDOMNode(this.refs.resize);
@@ -181,6 +165,7 @@ class FlotChart extends Component {
           this.plot.resize();
           this.plot.setupGrid();
           this.plot.draw();
+          this.handleDraw(this.plot);
         }
       };
 
@@ -259,6 +244,7 @@ class FlotChart extends Component {
 FlotChart.propTypes = {
   crosshair     : PropTypes.bool,
   onBrush       : PropTypes.func,
+  onPlotCreate  : PropTypes.func,
   onMouseOver   : PropTypes.func,
   onMouseLeave  : PropTypes.func,
   options       : PropTypes.object,

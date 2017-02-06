@@ -6,6 +6,7 @@ import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
 import uuid from 'node-uuid';
+import IconSelect from './icon_select';
 
 function newAnnotation() {
   return {
@@ -55,7 +56,7 @@ class AnnotationsEditor extends Component {
         <div className="vis_editor__annotations-content">
           <div className="vis_editor__row">
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Index Pattern</div>
+              <div className="vis_editor__label">Index Pattern (required)</div>
               <input
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
@@ -64,7 +65,7 @@ class AnnotationsEditor extends Component {
                 defaultValue={row.index_pattern} />
             </div>
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Time Field</div>
+              <div className="vis_editor__label">Time Field (required)</div>
               <FieldSelect
                 restrict="date"
                 value={row.time_field}
@@ -86,16 +87,15 @@ class AnnotationsEditor extends Component {
           </div>
           <div className="vis_editor__row">
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Icon (Font Awesome name: fa-flag)</div>
-              <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
-                type="text"
-                onChange={this.handleChange(row, 'icon')}
-                defaultValue={row.icon} />
+              <div className="vis_editor__label">Icon (required - Font Awesome name: fa-flag)</div>
+              <div className="vis_editor__item">
+                <IconSelect
+                  value={row.icon}
+                  onChange={this.handleChange(row, 'icon')} />
+              </div>
             </div>
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Fields (comma seperated paths)</div>
+              <div className="vis_editor__label">Fields (required - comma separated paths)</div>
               <input
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
@@ -104,7 +104,7 @@ class AnnotationsEditor extends Component {
                 defaultValue={row.fields} />
             </div>
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Row Template (eg.<code>{'{{field.name}}'}</code>)</div>
+              <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
               <input
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"

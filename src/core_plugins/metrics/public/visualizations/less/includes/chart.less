@@ -114,3 +114,46 @@
     &:first-child { border-top: none; }
   }
 }
+
+.annotation {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  z-index: 90;
+  align-items: center;
+}
+.annotation__line {
+  flex: 1 0 auto;
+}
+.annotation__icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.annotation__tooltip {
+  position: absolute;
+  bottom: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.annotation__message,
+.annotation__timestamp {
+  font-size: 12px;
+}
+.annotation__caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+.annotation__tooltip-body {
+  border-radius: 4px;
+  padding: 4px;
+  white-space: nowrap;
+}

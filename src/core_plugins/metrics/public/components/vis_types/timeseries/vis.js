@@ -4,6 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { Timeseries } from 'plugins/metrics/visualizations';
 import color from 'color';
+import replaceVars from '../../lib/replace_vars';
 
 function hasSeperateAxis(row) {
   return row.seperate_axis;
@@ -12,17 +13,23 @@ function hasSeperateAxis(row) {
 function TimeseriesVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const series = _.get(visData, `${model.id}.series`, []);
-  const annotations = model.annotations.map(annotation => {
-    const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
-      .map(item => [item.key, item.docs]);
-    return {
-      id: annotation.id,
-      template: annotation.template,
-      color: annotation.color,
-      icon: annotation.icon,
-      series: data
-    };
-  });
+  let annotations;
+  if (model.annotations && _.isArray(model.annotations)) {
+    annotations = model.annotations.map(annotation => {
+      const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
+        .map(item => [item.key, item.docs]);
+      return {
+        id: annotation.id,
+        color: annotation.color,
+        icon: annotation.icon,
+        series: data.map(s => {
+          return [s[0], s[1].map(doc => {
+            return replaceVars(annotation.template, null, doc);
+          })];
+        })
+      };
+    });
+  }
   const seriesModel = model.series.map(s => _.cloneDeep(s));
   const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
   const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
