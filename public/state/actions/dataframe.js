@@ -16,6 +16,10 @@ export function dataframeSet(dataframe) {
   return (dispatch, getState) => {
     dispatch(dataframeUnresolved(dataframe));
     dispatch(dataframeResolve(dataframe.id));
+
+    // TODO: Move this to dataframe resolve somehow. Basically we need a way for this to not fire at
+    // startup, but to fire any other time, including when the refresh button is hit
+    dispatch(dataframeSync(dataframe.id));
   };
 }
 
@@ -41,7 +45,6 @@ export function dataframeResolve(id) {
     const dataframe = getState().persistent.dataframes[id];
     const toDataframe = frameSources.byName[dataframe.type].toDataframe;
     dispatch(dataframeResolved(id, Promise.resolve(toDataframe(dataframe.value, filters))));
-    dispatch(dataframeSync(id));
   };
 };
 
