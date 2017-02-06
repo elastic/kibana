@@ -61,6 +61,9 @@ uiModules
     version: 'integer'
   };
 
+  // Order these fields to the top, the rest are alphabetical
+  SavedVis.fieldOrder = ['title', 'description'];
+
   SavedVis.searchSource = true;
 
   SavedVis.prototype._afterEsResp = function () {
