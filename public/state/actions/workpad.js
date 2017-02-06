@@ -15,8 +15,8 @@ export function workpadNew() {
 
 export function workpadInit() {
   return (dispatch, getState) => {
-    dispatch(elementResolveAll());
     dispatch(dataframeResolveAll());
+    dispatch(elementResolveAll());
   };
 }
 
