@@ -9,7 +9,16 @@
     </div>
     <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
       <div class="kuiLocalTabs">
-        <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind-template="Document {{ hit._type }}#{{ hit._id  | uriescape }}"></div>
+        <div
+          class="kuiLocalTab kuiLocalTab-isSelected"
+          ng-bind-template="Document {{ hit._type }}#{{ hit._id | uriescape }}"
+          ng-if="!!hit"
+        ></div>
+        <div
+          class="kuiLocalTab kuiLocalTab-isSelected"
+          ng-bind-template="Unknown Document"
+          ng-if="!hit"
+        ></div>
       </div>
     </div>
   </div>
