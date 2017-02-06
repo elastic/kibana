@@ -87,7 +87,7 @@ class AnnotationsEditor extends Component {
           </div>
           <div className="vis_editor__row">
             <div className="vis_editor__row-item">
-              <div className="vis_editor__label">Icon (required - Font Awesome name: fa-flag)</div>
+              <div className="vis_editor__label">Icon (required)</div>
               <div className="vis_editor__item">
                 <IconSelect
                   value={row.icon}
