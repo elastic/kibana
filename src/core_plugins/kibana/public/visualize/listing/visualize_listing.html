@@ -70,10 +70,35 @@
       </div>
     </div>
 
-    <!-- NoResults -->
-    <div class="kuiPanel kuiPanel--centered" ng-if="!listingController.items.length">
-      <div class="kuiNoResults">
+    <!-- NoItems -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && listingController.filter"
+    >
+      <div class="kuiNoItems">
         No visualizations matched your search.
+      </div>
+    </div>
+
+    <!-- PromptForItems -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && !listingController.filter"
+    >
+      <div class="kuiPromptForItems">
+        <div class="kuiPromptForItems__message">
+          Looks like you don&rsquo;t have any visualizations. Let&rsquo;s create some!
+        </div>
+
+        <div class="kuiPromptForItems__actions">
+          <a
+            class="kuiButton kuiButton--primary kuiButton--iconText"
+            href="#/visualize/new"
+          >
+            <span class="kuiButton__icon kuiIcon fa-plus"></span>
+            Create a visualization
+          </a>
+        </div>
       </div>
     </div>
 
