@@ -128,10 +128,10 @@ elements.push(new Element('circle', {
       }
     }
 
-    componentDidMount() {
+    setColumns() {
       const {args, setArg} = this.props;
       const setUndefined = (prop, value) => {
-        if (!args[prop].length) {
+        if (!_.get(args[prop], 'length')) {
           setArg(prop, value);
         }
       };
@@ -143,7 +143,13 @@ elements.push(new Element('circle', {
         setUndefined('value_column', _.get(args.dataframe.columns.ofType('number')[0], 'name'));
         setUndefined('group_by', _.get(args.dataframe.columns.ofType('string')[0], 'name'));
       }
+    }
 
+    componentWillMount() {
+      this.setColumns();
+    }
+
+    componentDidMount() {
       this.renderChart();
     }
 
@@ -152,10 +158,6 @@ elements.push(new Element('circle', {
     }
 
     render() {
-      const {args, setArg} = this.props;
-
-      const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
-      const max = _.max(_.values(valueObj));
       return (
         <div style={{width: '100%', height: '100%'}} ref="plot" className="rework--circle"></div>
       );

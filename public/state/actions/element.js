@@ -3,6 +3,7 @@ import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import { mutateElement, mutateArgument } from './lib/helpers';
 import { getElementTemplate } from '../templates';
+import Promise from 'bluebird';
 
 /*
  Exports

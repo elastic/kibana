@@ -93,13 +93,12 @@ frameSources.push(new FrameSource('timelion', {
       return (
         <div className="rework--timelion">
           <form onSubmit={this.run}>
-
             <label>Expression</label>
-            <form className="rework--timelion--input" onSubmit={this.run}>
+            <div className="rework--timelion--input">
               <TimelionExpression onChange={this.change('expression')} expression={expression}></TimelionExpression>
               <TimelionInterval onChange={this.change('interval')} interval={interval}></TimelionInterval>
-              <button className="btn rework--timelion--submit" type="submit" onClick={this.run}><i className="fa fa-play"></i></button>
-            </form>
+              <button className="btn rework--timelion--submit" type="submit"><i className="fa fa-play"></i></button>
+            </div>
           </form>
         </div>
       );

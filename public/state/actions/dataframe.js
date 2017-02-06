@@ -3,6 +3,7 @@ import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import {mutateWithId} from './lib/helpers';
 import { getDataframeTemplate } from '../templates';
+import Promise from 'bluebird';
 
 import elementTypes from 'plugins/rework/elements/elements';
 import _ from 'lodash';
@@ -39,11 +40,8 @@ export function dataframeResolve(id) {
     const filters = [{id: 'globalTimeFilter', type: 'time', value: time}];
     const dataframe = getState().persistent.dataframes[id];
     const toDataframe = frameSources.byName[dataframe.type].toDataframe;
-    Promise.resolve(toDataframe(dataframe.value, filters))
-      .then(resolvedFrame => {
-        dispatch(dataframeResolved(id, resolvedFrame));
-        dispatch(dataframeSync(id));
-      });
+    dispatch(dataframeResolved(id, Promise.resolve(toDataframe(dataframe.value, filters))));
+    dispatch(dataframeSync(id));
   };
 };
 
@@ -72,7 +70,7 @@ function dataframeSync(id) {
   };
 }
 
-// TODO: Alow really bad, since elementRemoveSlowly also loops over every page.
+// TODO: Also really bad, since elementRemoveSlowly also loops over every page.
 // We're basically looping over everything EVER. Kill me now.
 function dataframeRemoveLinkedElements(id) {
   return (dispatch, getState) => {
