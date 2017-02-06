@@ -1,14 +1,15 @@
 import _ from 'lodash';
 
 import { addComputedFields } from './utils/fields';
-import { createAnchorQuery } from './utils/queries';
+import { createAnchorQueryBody } from './utils/queries';
 
 
 async function fetchAnchor(es, indexPattern, uid, sort) {
   const indices = await indexPattern.toIndexList();
+  const queryBody = addComputedFields(indexPattern, createAnchorQueryBody(uid, sort));
   const response = await es.search({
     index: indices,
-    body: addComputedFields(indexPattern, createAnchorQuery(uid, sort)),
+    body: queryBody,
   });
 
   if (_.get(response, ['hits', 'total'], 0) < 1) {

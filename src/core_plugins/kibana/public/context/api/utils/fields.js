@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
 
-const addComputedFields = _.curry(function addComputedFields(indexPattern, query) {
+const addComputedFields = _.curry(function addComputedFields(indexPattern, queryBody) {
   const computedFields = indexPattern.getComputedFields();
 
   return Object.assign(
     {},
-    query,
+    queryBody,
     {
       script_fields: computedFields.scriptFields,
       docvalue_fields: computedFields.docvalueFields,

@@ -1,4 +1,4 @@
-function createAnchorQuery(uid, contextSort) {
+function createAnchorQueryBody(uid, contextSort) {
   return {
     _source: true,
     query: {
@@ -10,7 +10,7 @@ function createAnchorQuery(uid, contextSort) {
   };
 }
 
-function createSuccessorsQuery(anchorSortValues, contextSort, size) {
+function createSuccessorsQueryBody(anchorSortValues, contextSort, size) {
   return {
     _source: true,
     query: {
@@ -24,6 +24,6 @@ function createSuccessorsQuery(anchorSortValues, contextSort, size) {
 
 
 export {
-  createAnchorQuery,
-  createSuccessorsQuery,
+  createAnchorQueryBody,
+  createSuccessorsQueryBody,
 };
