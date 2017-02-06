@@ -42,16 +42,6 @@ module.exports = class Config {
     this.set(key, settings);
   }
 
-  removeSchema(key) {
-    if (!_.has(this[schemaExts], key)) {
-      throw new TypeError(`Unknown schema key: ${key}`);
-    }
-
-    this[schema] = null;
-    unset(this[schemaExts], key);
-    unset(this[vals], key);
-  }
-
   resetTo(obj) {
     this._commit(obj);
   }

@@ -238,24 +238,5 @@ describe('lib/config/config', function () {
       });
 
     });
-
-    describe('#removeSchema(key)', function () {
-      it('should completely remove the key', function () {
-        const config = new Config(Joi.object().keys({
-          a: Joi.number().default(1)
-        }));
-
-        expect(config.get('a')).to.be(1);
-        config.removeSchema('a');
-        expect(() => config.get('a')).to.throwException('Unknown config key');
-      });
-
-      it('only removes existing keys', function () {
-        const config = new Config(Joi.object());
-
-        expect(() => config.removeSchema('b')).to.throwException('Unknown schema');
-      });
-    });
-
   });
 });
