@@ -51,6 +51,14 @@ export function VisualizeListingController(
     });
   };
 
+  const deselectAll = () => {
+    selectedItems = [];
+  };
+
+  const selectAll = () => {
+    selectedItems = this.pageOfItems.slice(0);
+  };
+
   this.items = [];
   this.pageOfItems = [];
   this.filter = '';
@@ -95,14 +103,15 @@ export function VisualizeListingController(
       this.getSortPropertyByName(propertyName).isSelected = true;
     }
 
+    deselectAll();
     calculateItemsOnPage();
   };
 
   this.toggleAll = function toggleAll() {
     if (this.areAllItemsChecked()) {
-      selectedItems = [];
+      deselectAll();
     } else {
-      selectedItems = this.items.slice(0);
+      selectAll();
     }
   };
 
@@ -120,7 +129,7 @@ export function VisualizeListingController(
   };
 
   this.areAllItemsChecked = function areAllItemsChecked() {
-    return this.getSelectedItemsCount() === this.items.length;
+    return this.getSelectedItemsCount() === this.pageOfItems.length;
   };
 
   this.getSelectedItemsCount = function getSelectedItemsCount() {
@@ -134,7 +143,7 @@ export function VisualizeListingController(
       visualizationService.delete(selectedIds)
         .then(fetchObjects)
         .then(() => {
-          selectedItems = [];
+          deselectAll();
         })
         .catch(error => notify.error(error));
     };
@@ -148,11 +157,13 @@ export function VisualizeListingController(
   };
 
   this.onPageNext = () => {
+    deselectAll();
     this.pager.nextPage();
     calculateItemsOnPage();
   };
 
   this.onPagePrevious = () => {
+    deselectAll();
     this.pager.previousPage();
     calculateItemsOnPage();
   };
@@ -162,6 +173,7 @@ export function VisualizeListingController(
   };
 
   $scope.$watch(() => this.filter, () => {
+    deselectAll();
     fetchObjects();
   });
 }

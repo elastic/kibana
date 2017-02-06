@@ -50,6 +50,14 @@ export function DashboardListingController(
       });
   };
 
+  const deselectAll = () => {
+    selectedItems = [];
+  };
+
+  const selectAll = () => {
+    selectedItems = this.pageOfItems.slice(0);
+  };
+
   this.items = [];
   this.pageOfItems = [];
   this.filter = '';
@@ -65,14 +73,15 @@ export function DashboardListingController(
 
   this.toggleSort = function toggleSort() {
     this.isAscending = !this.isAscending;
+    deselectAll();
     calculateItemsOnPage();
   };
 
   this.toggleAll = function toggleAll() {
     if (this.areAllItemsChecked()) {
-      selectedItems = [];
+      deselectAll();
     } else {
-      selectedItems = this.items.slice(0);
+      selectAll();
     }
   };
 
@@ -90,7 +99,7 @@ export function DashboardListingController(
   };
 
   this.areAllItemsChecked = function areAllItemsChecked() {
-    return this.getSelectedItemsCount() === this.items.length;
+    return this.getSelectedItemsCount() === this.pageOfItems.length;
   };
 
   this.getSelectedItemsCount = function getSelectedItemsCount() {
@@ -104,10 +113,11 @@ export function DashboardListingController(
       dashboardService.delete(selectedIds)
         .then(fetchObjects)
         .then(() => {
-          selectedItems = [];
+          deselectAll();
         })
         .catch(error => notify.error(error));
     };
+
     confirmModal(
       'Are you sure you want to delete the selected dashboards? This action is irreversible!',
       {
@@ -117,11 +127,13 @@ export function DashboardListingController(
   };
 
   this.onPageNext = () => {
+    deselectAll();
     this.pager.nextPage();
     calculateItemsOnPage();
   };
 
   this.onPagePrevious = () => {
+    deselectAll();
     this.pager.previousPage();
     calculateItemsOnPage();
   };
@@ -131,6 +143,7 @@ export function DashboardListingController(
   };
 
   $scope.$watch(() => this.filter, () => {
+    deselectAll();
     fetchObjects();
   });
 }
