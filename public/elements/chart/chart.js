@@ -64,6 +64,22 @@ elements.push(new Element('chart', {
     }
 
     renderChart() {
+      const {args, setArg} = this.props;
+
+      let valueObj;
+      if (args.group_by) {
+        valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
+      } else {
+        valueObj = args.dataframe.aggregate[args.aggregate_with](args.value_column);
+      };
+
+      const data = [];
+      const ticks = [];
+      _.each(_.toPairs(valueObj), (pair, i) => {
+        data.push([i, pair[1]]);
+        ticks.push([i, pair[0]]);
+      });
+
       const flotConfig = {
         series: {
           bars: {
@@ -72,21 +88,12 @@ elements.push(new Element('chart', {
             align: 'center',
             fill: 1
           },
-          valueLabels: {
-            show: true,
-            showTextLabel: true,
-            yoffset: 1,
-            align: 'center',
-            font: '9pt Trebuchet MS',
-            fontcolor: 'blue'
-          }
         },
+        xaxis: {},
         yaxis: {
+          autoscaleMargin: 0.2,
           ticks: [],
           tickLength: 0
-        },
-        xaxis: {
-          mode: 'categories',
         },
         legend: {
           show: false
@@ -97,26 +104,31 @@ elements.push(new Element('chart', {
         colors: this.props.args.theme
       };
 
-      const {args, setArg} = this.props;
-
-      const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
-      const max = _.max(_.values(valueObj));
-
-      var flotSeries = _.map(valueObj, (value, label) => {
-        return [label, value];
-      });
+      flotConfig.xaxis.ticks = ticks;
 
       try {
-        $.plot($(this.refs.plot), [flotSeries], flotConfig);
+        const plot = $.plot($(this.refs.plot), [data], flotConfig);
+
+        var barWidthPixels =  plot.getOptions().series.bars.barWidth * plot.getXAxes()[0].scale;
+        _.each(plot.getData()[0].data, (point, i) => {
+          var o = plot.pointOffset({x: point[0], y: point[1]});
+          $('<div class="rework--chart-value">' + point[1] + '</div>').css({
+            position: 'absolute',
+            width: barWidthPixels,
+            height: args.value_style.object.fontSize,
+            left: o.left - (barWidthPixels / 2),
+            top: o.top - 10 - args.value_style.object.fontSize,
+          }).appendTo(plot.getPlaceholder());
+        });
       } catch (e) {
         console.log('Plot too small');
       }
     }
 
-    componentDidMount() {
+    setColumns() {
       const {args, setArg} = this.props;
       const setUndefined = (prop, value) => {
-        if (!args[prop].length) {
+        if (!_.get(args[prop], 'length')) {
           setArg(prop, value);
         }
       };
@@ -128,7 +140,13 @@ elements.push(new Element('chart', {
         setUndefined('value_column', _.get(args.dataframe.columns.ofType('number')[0], 'name'));
         setUndefined('group_by', _.get(args.dataframe.columns.ofType('string')[0], 'name'));
       }
+    }
 
+    componentWillMount() {
+      this.setColumns();
+    }
+
+    componentDidMount() {
       this.renderChart();
     }
 
@@ -137,10 +155,6 @@ elements.push(new Element('chart', {
     }
 
     render() {
-      const {args, setArg} = this.props;
-
-      const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
-      const max = _.max(_.values(valueObj));
       return (
         <div style={{width: '100%', height: '100%'}} ref="plot" className="rework--chart"></div>
       );
