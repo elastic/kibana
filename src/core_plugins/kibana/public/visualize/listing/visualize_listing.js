@@ -3,16 +3,15 @@ import 'ui/pager_control';
 import 'ui/pager';
 import _ from 'lodash';
 
-export function VisualizeListingController(
-  $filter,
-  $scope,
-  confirmModal,
-  kbnUrl,
-  Notifier,
-  pagerFactory,
-  Private,
-  timefilter
-) {
+export function VisualizeListingController($injector, $scope) {
+  const $filter = $injector.get('$filter');
+  const confirmModal = $injector.get('confirmModal');
+  const kbnUrl = $injector.get('kbnUrl');
+  const Notifier = $injector.get('Notifier');
+  const pagerFactory = $injector.get('pagerFactory');
+  const Private = $injector.get('Private');
+  const timefilter = $injector.get('timefilter');
+
   timefilter.enabled = false;
 
   const limitTo = $filter('limitTo');

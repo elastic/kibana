@@ -4,16 +4,15 @@ import 'ui/pager';
 import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
-export function DashboardListingController(
-  $filter,
-  $scope,
-  confirmModal,
-  kbnUrl,
-  Notifier,
-  pagerFactory,
-  Private,
-  timefilter
-) {
+export function DashboardListingController($injector, $scope) {
+  const $filter = $injector.get('$filter');
+  const confirmModal = $injector.get('confirmModal');
+  const kbnUrl = $injector.get('kbnUrl');
+  const Notifier = $injector.get('Notifier');
+  const pagerFactory = $injector.get('pagerFactory');
+  const Private = $injector.get('Private');
+  const timefilter = $injector.get('timefilter');
+
   timefilter.enabled = false;
 
   const limitTo = $filter('limitTo');
