@@ -8,23 +8,32 @@ import ReqStatusProvider from './req_status';
 export default function fetchService(Private, Promise) {
 
   const requestQueue = Private(RequestQueueProvider);
-  const fetchThese = Private(FetchTheseProvider);
-
+  const immediatelyFetchThese = Private(FetchTheseProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
-  function fetchQueued(strategy) {
-    const requests = requestQueue.getStartable(strategy);
-    if (!requests.length) return Promise.resolve();
-    else return fetchThese(requests);
-  }
+  const debouncedFetchThese = _.debounce(() => {
+    const requests = requestQueue.get().filter(req => req.isFetchRequested());
+    immediatelyFetchThese(requests);
+  }, {
+    wait: 10,
+    maxWait: 50
+  });
 
-  this.fetchQueued = fetchQueued;
+  const fetchTheseSoon = (requests) => {
+    requests.forEach(req => req._setFetchRequested());
+    debouncedFetchThese();
+    return Promise.all(requests.map(req => req.defer.promise));
+  };
+
+  this.fetchQueued = (strategy) => {
+    return fetchTheseSoon(requestQueue.getStartable(strategy));
+  };
 
   function fetchASource(source, strategy) {
     const defer = Promise.defer();
 
-    fetchThese([
+    fetchTheseSoon([
       source._createRequest(defer)
     ]);
 
@@ -50,7 +59,7 @@ export default function fetchService(Private, Promise) {
    * @param {array} reqs - the requests to fetch
    * @async
    */
-  this.these = fetchThese;
+  this.these = fetchTheseSoon;
 
   /**
    * Send responses to a list of requests, used when requests

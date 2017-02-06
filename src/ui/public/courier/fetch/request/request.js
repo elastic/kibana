@@ -15,12 +15,42 @@ export default function AbstractReqProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this._whenAbortedHandlers = [];
-
       requestQueue.push(this);
     }
 
+    /**
+     *  Called by the loopers to find requests that should be sent to the
+     *  fetch() module. When a module is sent to fetch() it's _fetchRequested flag
+     *  is set, and this consults that flag so requests are not send to fetch()
+     *  multiple times.
+     *
+     *  @return {Boolean}
+     */
     canStart() {
-      return Boolean(!this.stopped && !this.source._fetchDisabled);
+      return !this._fetchRequested && !this.stopped && !this.source._fetchDisabled;
+    }
+
+    /**
+     *  Used to find requests that were previously sent to the fetch() module but
+     *  have not been started yet, so they can be started.
+     *
+     *  @return {Boolean}
+     */
+    isFetchRequestedAndPending() {
+      return !!this._fetchRequested && !this.started;
+    }
+
+    /**
+     *  Called by the fetch() module when this request has been sent to
+     *  be fetched. At that point the request is somewhere between `ready-to-start`
+     *  and `started`. The fetch module then waits a short period of time to
+     *  allow requests to build up in the request queue, and then immediately
+     *  fetches all requests that return true from `isFetchRequested()`
+     *
+     *  @return {undefined}
+     */
+    _setFetchRequested() {
+      this._fetchRequested = true;
     }
 
     start() {

@@ -29,8 +29,8 @@ export class SavedObjectLoader {
    * @param id
    * @returns {Promise<SavedObject>}
    */
-  get(id, isDefered) {
-    return (new this.Class(id)).init(isDefered);
+  get(id) {
+    return (new this.Class(id)).init();
   }
 
   urlFor(id) {
