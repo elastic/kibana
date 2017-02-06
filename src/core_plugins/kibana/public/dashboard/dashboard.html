@@ -8,7 +8,11 @@
         data-transclude-slot="topLeftCorner"
       >
         <!-- Breadcrumbs. -->
-        <bread-crumbs title="getDashTitle()" use-links="true" omit-current-page="true"></bread-crumbs>
+        <bread-crumbs
+          page-title="getDashTitle()"
+          use-links="true"
+          omit-current-page="true"
+        ></bread-crumbs>
       </div>
 
       <!-- Search. -->
@@ -57,7 +61,7 @@
   </div>
 
   <dashboard-grid
-    ng-if="!hasExpandedPanel()"
+    ng-show="!hasExpandedPanel()"
     on-panel-removed="onPanelRemoved"
     panels="state.panels"
     get-vis-click-handler="filterBarClickHandler(state)"
@@ -77,4 +81,6 @@
                    save-state="saveState"
                    create-child-ui-state="createChildUiState"
                    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
+  </dashboard-panel>
+
 </dashboard-app>
