@@ -73,6 +73,10 @@ elements.push(new Element('circle', {
     }
 
     renderChart() {
+      const {args, setArg} = this.props;
+
+      if (!args.aggregate_with || !args.value_column) return;
+
       const strokeParts = this.props.args.stroke.border.match(/([0-9]+)px [a-z]+ (.*)/);
       const strokeWidth = strokeParts[1];
       const strokeColor = strokeParts[2];
@@ -108,9 +112,14 @@ elements.push(new Element('circle', {
         colors: this.props.args.theme
       };
 
-      const {args, setArg} = this.props;
 
-      const valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
+      let valueObj;
+      if (args.group_by) {
+        valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
+      } else {
+        valueObj = args.dataframe.aggregate[args.aggregate_with](args.value_column);
+      };
+
       const max = _.max(_.values(valueObj));
 
       var flotSeries = _.map(valueObj, (value, label) => {
@@ -120,6 +129,8 @@ elements.push(new Element('circle', {
           //color: series.color
         };
       });
+
+      if (!flotSeries.length) return;
 
       try {
         $.plot($(this.refs.plot), flotSeries, flotConfig);
