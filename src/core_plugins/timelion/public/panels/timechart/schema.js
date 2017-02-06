@@ -167,7 +167,12 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
         }
 
         let legendScope = $scope.$new();
+        let drawErrorTimeout;
         function drawPlot(plotConfig) {
+          if (drawErrorTimeout) {
+            clearTimeout(drawErrorTimeout);
+            drawErrorTimeout = null;
+          }
 
           if (!plotConfig || !plotConfig.length) {
             $elem.empty();
@@ -245,7 +250,9 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           try {
             $scope.plot = $.plot(canvasElem, _.compact(series), options);
           } catch (e) {
-            setTimeout(drawPlot, 500);
+            drawErrorTimeout = setTimeout(function () {
+              drawPlot(plotConfig);
+            }, 500);
           }
 
           if ($scope.plot) {
