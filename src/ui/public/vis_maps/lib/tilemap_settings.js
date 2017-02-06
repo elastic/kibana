@@ -51,6 +51,8 @@ uiModules.get('kibana')
 
         //initialize settings with the default of the configuration
         this._url = tilemapsConfig.deprecated.config.url;
+        this._enabled = tilemapsConfig.enableManifestRetrieval;
+
         this._tmsOptions = optionsFromConfig;
 
         this._invalidateSettings();
@@ -69,6 +71,12 @@ uiModules.get('kibana')
 
           if (this._settingsInitialized) {
             return true;
+          }
+
+          if (!this._enabled) {
+            this._error = new Error('Retrieval of the manifest has been disabled. Cannot retrieve map service metadata.');
+            this._settingsInitialized = true;
+            return;
           }
 
           return this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams)

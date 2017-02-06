@@ -61,7 +61,8 @@ module.exports = function (kibana) {
                 isOverridden: isOverridden,
                 config: tilemapConfig,
               },
-              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl'),
+              enableManifestRetrieval: serverConfig.get('tilemap.enableManifestRetrieval')
             },
           };
         },
