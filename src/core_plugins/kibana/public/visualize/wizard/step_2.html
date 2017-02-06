@@ -11,23 +11,30 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
-  <div class="wizard">
+  <div class="wizard kuiViewContentItem">
     <div class="wizard-column wizard-column--small">
-      <h3 class="wizard-sub-title">From a New Search, Select Index</h3>
+      <h1 class="kuiTitle kuiVerticalRhythm">
+        From a New Search, Select Index
+      </h1>
+
       <paginated-selectable-list
         per-page="20"
         list="indexPattern.list"
         user-make-url="makeUrl"
-        class="wizard-row"
+        class="wizard-row kuiVerticalRhythm"
       ></paginated-selectable-list>
     </div>
+
     <div class="wizard-column wizard-column--large">
-      <h3 class="wizard-sub-title">Or, From a Saved Search</h3>
+      <h2 class="kuiTitle kuiVerticalRhythm">
+        Or, From a Saved Search
+      </h2>
+
       <!-- Saved searches -->
       <saved-object-finder
         title="Saved Searches"
         type="searches"
-        class="wizard-row"
+        class="wizard-row kuiVerticalRhythm"
         make-url="step2WithSearchUrl"
       ></saved-object-finder>
     </div>
