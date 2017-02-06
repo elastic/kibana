@@ -9,7 +9,7 @@ import GridBlocks from 'plugins/rework/components/grid_blocks/grid_blocks';
 
 import moment from 'moment';
 import icon from './icon.svg';
-import './flot';
+import 'plugins/rework/lib/flot';
 import $ from 'jquery';
 import Arg from 'plugins/rework/arg_types/arg';
 
@@ -20,7 +20,6 @@ elements.push(new Element('circle', {
   args: [
     new Arg('dataframe', {
       type: 'dataframe',
-      default: (state) => _.keys(state.persistent.dataframes)[0]
     }),
     new Arg('value_column', {
       type: 'dataframe_column',
