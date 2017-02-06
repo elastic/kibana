@@ -24,6 +24,7 @@ import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
 import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
 import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
 import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
+import AggTypesMetricsBucketSumProvider from 'ui/agg_types/metrics/bucket_sum';
 export default function AggTypeService(Private) {
 
   const aggs = {
@@ -42,7 +43,8 @@ export default function AggTypeService(Private) {
       Private(AggTypesMetricsDerivativeProvider),
       Private(AggTypesMetricsCumulativeSumProvider),
       Private(AggTypesMetricsMovingAvgProvider),
-      Private(AggTypesMetricsSerialDiffProvider)
+      Private(AggTypesMetricsSerialDiffProvider),
+      Private(AggTypesMetricsBucketSumProvider),
     ],
     buckets: [
       Private(AggTypesBucketsDateHistogramProvider),
