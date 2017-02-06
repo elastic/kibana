@@ -209,6 +209,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // then tell gridster to "reflow" -- which is definitely not supported.
       // we may need to consider using a different library
       function reflowGridster() {
+        if ($container.hasClass('ng-hide')) {
+          return;
+        }
+
         // https://github.com/gcphost/gridster-responsive/blob/97fe43d4b312b409696b1d702e1afb6fbd3bba71/jquery.gridster.js#L1208-L1235
         const g = gridster;
 
