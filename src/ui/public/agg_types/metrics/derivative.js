@@ -38,7 +38,7 @@ export default function AggTypeMetricDerivativeProvider(Private) {
           return this.makeAgg(agg, state);
         },
         makeAgg: function (termsAgg, state) {
-          state = state || {};
+          state = state || { type: 'count' };
           state.schema = orderAggSchema;
           const orderAgg = new AggConfig(termsAgg.vis, state);
           orderAgg.id = termsAgg.id + '-orderAgg';
@@ -53,6 +53,7 @@ export default function AggTypeMetricDerivativeProvider(Private) {
       {
         name: 'metricAgg',
         editor: orderAggTemplate,
+        default: 'custom',
         controller: parentPipelineAggController,
         write: parentPipelineAggWritter
       }

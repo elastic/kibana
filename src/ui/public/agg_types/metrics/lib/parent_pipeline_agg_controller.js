@@ -1,5 +1,3 @@
-const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
-
 const parentPipelineAggController = function ($scope) {
 
   $scope.safeMakeLabel = function (agg) {
@@ -19,11 +17,9 @@ const parentPipelineAggController = function ($scope) {
     }
   });
 
-  // Returns true if the agg is not compatible with the terms bucket
   $scope.rejectAgg = function (agg) {
-    // aggFilter elements all starts with a '!'
-    // so the index of agg.type.name in a filter is 1 if it is included
-    return Boolean(aggFilter.find((filter) => filter.indexOf(agg.type.name) === 1));
+    const invalidAggs = ['top_hits', 'percentiles', 'percentile_ranks', 'median', 'std_dev'];
+    return Boolean(invalidAggs.find(invalidAgg => invalidAgg === agg.type.name));
   };
 
   function checkBuckets() {
@@ -52,6 +48,9 @@ const parentPipelineAggController = function ($scope) {
 
     // we aren't creating a custom aggConfig
     if (metricAgg !== 'custom') {
+      if (!$scope.vis.aggs.find(agg => agg.id === metricAgg)) {
+        params.metricAgg = null;
+      }
       params.customMetric = null;
       return;
     }
