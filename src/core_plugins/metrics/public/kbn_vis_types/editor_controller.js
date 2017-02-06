@@ -18,25 +18,6 @@ app.controller('MetricsEditorController', (
   const fetch = Private(require('../lib/fetch'));
   const fetchFields = Private(require('../lib/fetch_fields'));
 
-  const globalNavUnsub = $scope.$watch(() => {
-    return globalNavState.isOpen();
-  }, newValue => {
-    if (newValue) {
-      $scope.editorWidth = '180px';
-    } else {
-      $scope.editorWidth = '53px';
-    }
-  });
-
-  $scope.editorTop = '70px';
-  $scope.$watch(() => {
-    return $('.toaster-container').length && $('.toaster-container').height() || 0;
-  }, newValue => {
-    $scope.editorTop = `${newValue + 70}px`;
-  });
-
-  $scope.$on('$destory', globalNavUnsub);
-
   const debouncedFetch = _.debounce(() => {
     fetch($scope)();
   }, 300, {

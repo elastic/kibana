@@ -21,6 +21,7 @@ export default function MetricsVisProvider(Private) {
         for creating visualizations for time series based metrics using the
         powerful pipeline aggs Elasticsearch feature`,
     template: require('./vis.html'),
+    fullEditor: true,
     params: {
       editor: require('./editor.html')
     },
