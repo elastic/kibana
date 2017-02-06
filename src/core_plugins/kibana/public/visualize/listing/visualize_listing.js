@@ -9,7 +9,7 @@ export function VisualizeListingController(
   confirmModal,
   kbnUrl,
   Notifier,
-  pagerService,
+  pagerFactory,
   Private,
   timefilter
 ) {
@@ -63,7 +63,7 @@ export function VisualizeListingController(
   this.pageOfItems = [];
   this.filter = '';
 
-  this.pager = pagerService.create(this.items.length, 20, 1);
+  this.pager = pagerFactory.create(this.items.length, 20, 1);
 
   /**
    * Remember sort direction per property.

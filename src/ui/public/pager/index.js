@@ -1,1 +1,1 @@
-import './pager_service.factory';
+import './pager_factory';

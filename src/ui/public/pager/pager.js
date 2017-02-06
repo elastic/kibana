@@ -2,7 +2,7 @@ function clamp(val, min, max) {
   return Math.min(Math.max(min, val), max);
 }
 
-export class PagerService {
+export class Pager {
   constructor(totalItems, pageSize, startingPage) {
     this.currentPage = startingPage;
     this.totalItems = totalItems;

@@ -10,7 +10,7 @@ export function DashboardListingController(
   confirmModal,
   kbnUrl,
   Notifier,
-  pagerService,
+  pagerFactory,
   Private,
   timefilter
 ) {
@@ -62,7 +62,7 @@ export function DashboardListingController(
   this.pageOfItems = [];
   this.filter = '';
 
-  this.pager = pagerService.create(this.items.length, 20, 1);
+  this.pager = pagerFactory.create(this.items.length, 20, 1);
 
   /**
    * Boolean that keeps track of whether hits are sorted ascending (true)
