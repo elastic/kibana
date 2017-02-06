@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 const parentPipelineAggController = function ($scope) {
 
   $scope.safeMakeLabel = function (agg) {
@@ -23,17 +25,17 @@ const parentPipelineAggController = function ($scope) {
   };
 
   function checkBuckets() {
-    const buckets = $scope.vis.aggs.filter(agg => agg.schema.group === 'buckets');
-    const bucketHasType = buckets.length && buckets[0].type;
-    const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(buckets[0].type.name);
-    const canUseAggregation = buckets.length === 1 && bucketIsHistogram;
+    const lastBucket = _.findLast($scope.vis.aggs, agg => agg.schema.group === 'buckets');
+    const bucketHasType = lastBucket && lastBucket.type;
+    const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
+    const canUseAggregation = lastBucket && bucketIsHistogram;
     if ($scope.aggForm.agg) $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
     if (canUseAggregation) {
-      if (buckets[0].type.name === 'histogram') {
-        buckets[0].params.min_doc_count = 1;
+      if (lastBucket.type.name === 'histogram') {
+        lastBucket.params.min_doc_count = 1;
       }
       else {
-        buckets[0].params.min_doc_count = 0;
+        lastBucket.params.min_doc_count = 0;
       }
     }
   }
