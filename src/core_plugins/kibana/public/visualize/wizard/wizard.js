@@ -15,6 +15,12 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /********
 /** Wizard Step 1
 /********/
+
+// Redirect old route to new route.
+routes.when('/visualize/step/1', {
+  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_URL,
+});
+
 routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_URL, {
   template: visualizeWizardStep1Template,
   controller: 'VisualizeWizardStep1',
@@ -47,6 +53,14 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 /********
 /** Wizard Step 2
 /********/
+
+// Redirect old route to new route.
+// NOTE: Accessing this route directly means the user has entered into the wizard UX without
+// selecting a Visualization type in step 1. So we want to redirect them to step 1, not step 2.
+routes.when('/visualize/step/2', {
+  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_URL,
+});
+
 routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_URL, {
   template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
