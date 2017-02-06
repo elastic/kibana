@@ -3,6 +3,7 @@ import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import {mutateWithId} from './lib/helpers';
 import { getDataframeTemplate } from '../templates';
+import Promise from 'bluebird';
 
 import elementTypes from 'plugins/rework/elements/elements';
 import _ from 'lodash';
@@ -40,14 +41,7 @@ export function dataframeResolve(id) {
     const dataframe = getState().persistent.dataframes[id];
     const toDataframe = frameSources.byName[dataframe.type].toDataframe;
     dispatch(dataframeResolved(id, Promise.resolve(toDataframe(dataframe.value, filters))));
-
-    /*
-    Promise.resolve(toDataframe(dataframe.value, filters))
-      .then(resolvedFrame => {
-        dispatch(dataframeResolved(id, resolvedFrame));
-        dispatch(dataframeSync(id));
-      });
-    */
+    dispatch(dataframeSync(id));
   };
 };
 
