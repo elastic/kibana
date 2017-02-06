@@ -7,7 +7,7 @@ export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
 
   if (server.plugins['even-better']) {
-    kbnServer.mixin(require('./metrics'));
+    kbnServer.mixin(require('./metrics').collectMetrics);
   }
 
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
