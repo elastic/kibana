@@ -542,6 +542,9 @@ body {
 .kuiIcon--inactive {
   color: #c3c3c3; }
 
+.kuiIcon--basic {
+  color: #565656; }
+
 .kuiInfoPanel {
   padding: 14px 20px 18px;
   line-height: 1.5;
@@ -1407,7 +1410,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; }
-  .kuiTableRowCell__liner * > {
+  .kuiTableRowCell__liner > * {
     vertical-align: middle;
     /* 1 */ }
 

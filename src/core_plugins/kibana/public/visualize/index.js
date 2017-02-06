@@ -18,13 +18,18 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import uiRoutes from 'ui/routes';
 
+import visualizeListingTemplate from './listing/visualize_listing.html';
+import { VisualizeListingController } from './listing/visualize_listing';
+import { VisualizeConstants } from './visualize_constants';
 
 uiRoutes
 .defaults(/visualize/, {
   requireDefaultIndex: true
 })
-.when('/visualize', {
-  redirectTo: '/visualize/step/1'
+.when(VisualizeConstants.LANDING_PAGE_PATH, {
+  template: visualizeListingTemplate,
+  controller: VisualizeListingController,
+  controllerAs: 'listingController',
 });
 
 // preloading
