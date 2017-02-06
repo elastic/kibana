@@ -7,6 +7,7 @@ import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/creat
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 import routeBasedNotifierProvider from 'ui/route_based_notifier';
+import migrateIncludeExcludeFormat from './migrate/include_exclude';
 
 export default function TermsAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -48,15 +49,17 @@ export default function TermsAggDefinition(Private) {
       },
       {
         name: 'exclude',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'include',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'size',
