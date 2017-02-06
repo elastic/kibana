@@ -28,7 +28,8 @@ const parentPipelineAggController = function ($scope) {
 
   function checkBuckets() {
     const buckets = $scope.vis.aggs.filter(agg => agg.schema.group === 'buckets');
-    const bucketIsHistogram = buckets.length && ['date_histogram', 'histogram'].includes(buckets[0].type.name);
+    const bucketHasType = buckets.length && buckets[0].type;
+    const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(buckets[0].type.name);
     const canUseAggregation = buckets.length === 1 && bucketIsHistogram;
     if ($scope.aggForm.agg) $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
     if (canUseAggregation) {
