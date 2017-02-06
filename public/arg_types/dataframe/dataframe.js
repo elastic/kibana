@@ -16,24 +16,6 @@ argTypes.push(new ArgType('dataframe', {
   },
   cache: false, // Its ok not to cache this, this is cheap
   resolve: (dataframeId, state) => {
-    const {dataframeCache} = state.transient;
-
-    return dataframeCache[dataframeId];
-
-    /*
-    if (!dataframeCache[dataframeId]) {
-      // TODO: Remove this time filter hack
-      const time = state.persistent.workpad.time;
-      const filters = [{id: 'globalTimeFilter', type: 'time', value: time}];
-
-      // TODO You're double resolving dataframes, this is bad! This is also done in the event
-      // but you need a way to wait for the event to finish, gross.
-      const dataframe = state.persistent.dataframes[dataframeId];
-      const toDataframe = frameSources.byName[dataframe.type].toDataframe;
-      return Promise.resolve(toDataframe(dataframe.value, filters));
-    } else {
-      return dataframeCache[dataframeId];
-    }
-    */
+    return state.transient.dataframeCache[dataframeId];
   }
 }));
