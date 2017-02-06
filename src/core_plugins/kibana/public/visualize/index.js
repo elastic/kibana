@@ -26,7 +26,7 @@ uiRoutes
 .defaults(/visualize/, {
   requireDefaultIndex: true
 })
-.when(VisualizeConstants.LANDING_PAGE_URL, {
+.when(VisualizeConstants.LANDING_PAGE_PATH, {
   template: visualizeListingTemplate,
   controller: VisualizeListingController,
   controllerAs: 'listingController',

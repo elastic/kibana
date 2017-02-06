@@ -18,10 +18,10 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 
 // Redirect old route to new route.
 routes.when('/visualize/step/1', {
-  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_URL,
+  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
 });
 
-routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_URL, {
+routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   template: visualizeWizardStep1Template,
   controller: 'VisualizeWizardStep1',
 });
@@ -37,8 +37,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   $scope.visTypeUrl = function (visType) {
     const baseUrl =
       visType.requiresSearch
-      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_URL}?`
-      : `#${VisualizeConstants.CREATE_URL}?`;
+      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
+      : `#${VisualizeConstants.CREATE_PATH}?`;
 
     const params = [`type=${encodeURIComponent(visType.name)}`];
 
@@ -58,10 +58,10 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 // NOTE: Accessing this route directly means the user has entered into the wizard UX without
 // selecting a Visualization type in step 1. So we want to redirect them to step 1, not step 2.
 routes.when('/visualize/step/2', {
-  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_URL,
+  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
 });
 
-routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_URL, {
+routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
   resolve: {
@@ -79,7 +79,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
   $scope.step2WithSearchUrl = function (hit) {
     if (addToDashMode) {
       return kbnUrl.eval(
-        `#${VisualizeConstants.CREATE_URL}` +
+        `#${VisualizeConstants.CREATE_PATH}` +
         `?type={{type}}&savedSearchId={{id}}` +
         `&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
         { type: type, id: hit.id }
@@ -87,7 +87,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     }
 
     return kbnUrl.eval(
-      `#${VisualizeConstants.CREATE_URL}?type={{type}}&savedSearchId={{id}}`,
+      `#${VisualizeConstants.CREATE_PATH}?type={{type}}&savedSearchId={{id}}`,
       { type: type, id: hit.id }
     );
   };
@@ -103,11 +103,11 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     if (!pattern) return;
 
     if (addToDashMode) {
-      return `#${VisualizeConstants.CREATE_URL}` +
+      return `#${VisualizeConstants.CREATE_PATH}` +
         `?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}` +
         `&type=${type}&indexPattern=${pattern}`;
     }
 
-    return `#${VisualizeConstants.CREATE_URL}?type=${type}&indexPattern=${pattern}`;
+    return `#${VisualizeConstants.CREATE_PATH}?type=${type}&indexPattern=${pattern}`;
   };
 });
