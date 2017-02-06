@@ -25,12 +25,9 @@ export default function (kbnServer, server, config) {
           build_number: config.get('pkg.buildNum'),
           build_snapshot: matchSnapshot.test(config.get('pkg.version'))
         },
-        status: kbnServer.status.toJSON()
+        status: kbnServer.status.toJSON(),
+        metrics: kbnServer.metrics
       };
-
-      if (config.get('status.metrics')) {
-        status.metrics = kbnServer.metrics;
-      }
 
       return reply(status);
     }
