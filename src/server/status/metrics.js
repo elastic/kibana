@@ -8,12 +8,14 @@ module.exports = function (kbnServer, server, config) {
     const timestamp = new Date().toISOString();
     kbnServer.metrics = {
       last_updated: timestamp,
-      collection_time_in_millis: config.get('ops.interval'),
+      collection_interval_in_millis: config.get('ops.interval'),
       uptime_in_millis: process.uptime() * 1000,
       process: {
-        heap: {
-          total_in_bytes: _.get(event, 'psmem.heapTotal'),
-          used_in_bytes:  _.get(event, 'psmem.heapUsed')
+        memory: {
+          heap: {
+            total_in_bytes: _.get(event, 'psmem.heapTotal'),
+            used_in_bytes:  _.get(event, 'psmem.heapUsed')
+          }
         }
       },
       os: {
