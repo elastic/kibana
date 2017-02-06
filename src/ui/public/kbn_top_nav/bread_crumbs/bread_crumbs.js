@@ -39,7 +39,7 @@ module.directive('breadCrumbs', function ($location) {
 
       if ($scope.omitPages) {
         $scope.breadcrumbs = $scope.breadcrumbs.filter(breadcrumb =>
-          $scope.omitPages.indexOf(breadcrumb.toLowerCase()) === -1
+          !$scope.omitPages.includes(breadcrumb.toLowerCase())
         );
       }
 

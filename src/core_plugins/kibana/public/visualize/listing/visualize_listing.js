@@ -65,6 +65,11 @@ export function VisualizeListingController(
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
 
+  $scope.$watch(() => this.filter, () => {
+    deselectAll();
+    fetchObjects();
+  });
+
   /**
    * Remember sort direction per property.
    */
@@ -81,11 +86,11 @@ export function VisualizeListingController(
   }];
 
   this.getSortProperty = function getSortProperty() {
-    return _.find(this.sortProperties, property => property.isSelected);
+    return this.sortProperties.find(property => property.isSelected);
   };
 
   this.getSortPropertyByName = function getSortPropertyByName(name) {
-    return _.find(this.sortProperties, property => property.name === name);
+    return this.sortProperties.find(property => property.name === name);
   };
 
   this.isAscending = function isAscending() {
@@ -125,7 +130,7 @@ export function VisualizeListingController(
   };
 
   this.isItemChecked = function isItemChecked(item) {
-    return selectedItems.indexOf(item) !== -1;
+    return selectedItems.includes(item);
   };
 
   this.areAllItemsChecked = function areAllItemsChecked() {
@@ -171,9 +176,4 @@ export function VisualizeListingController(
   this.getUrlForItem = function getUrlForItem(item) {
     return `#/visualize/edit/${item.id}`;
   };
-
-  $scope.$watch(() => this.filter, () => {
-    deselectAll();
-    fetchObjects();
-  });
 }

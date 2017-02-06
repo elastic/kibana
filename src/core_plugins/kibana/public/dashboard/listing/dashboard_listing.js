@@ -64,6 +64,11 @@ export function DashboardListingController(
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
 
+  $scope.$watch(() => this.filter, () => {
+    deselectAll();
+    fetchObjects();
+  });
+
   /**
    * Boolean that keeps track of whether hits are sorted ascending (true)
    * or descending (false) by title
@@ -141,9 +146,4 @@ export function DashboardListingController(
   this.getUrlForItem = function getUrlForItem(item) {
     return `#/dashboard/${item.id}`;
   };
-
-  $scope.$watch(() => this.filter, () => {
-    deselectAll();
-    fetchObjects();
-  });
 }
