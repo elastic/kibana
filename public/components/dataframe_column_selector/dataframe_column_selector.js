@@ -3,10 +3,15 @@ import _ from 'lodash';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 
 
-export default React.createClass({
+export default class DataframeColumnSelector extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+  }
+
   select(e) {
     this.props.onChange(e.target.value);
-  },
+  }
+
   render() {
     const {onChange, value, dataframe} = this.props;
 
@@ -17,11 +22,11 @@ export default React.createClass({
     ));
     return (
       <div className="rework--dataframe-column-selector">
-        <select className="form-control" onChange={this.select} value={maybeBlank}>
+        <select className="form-control" onChange={this.select.bind(this)} value={maybeBlank}>
           <option disabled value=''>--select--</option>
           {options}
         </select>
       </div>
     );
   }
-});
+};

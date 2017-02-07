@@ -8,7 +8,6 @@ import './color_picker.less';
 export default class ArgumentForm extends React.PureComponent {
   constructor(props) {    /* Note props is passed into the constructor in order to be used */
     super(props);
-    const {position} = props;
     this.state = {popover: false};
   }
 
