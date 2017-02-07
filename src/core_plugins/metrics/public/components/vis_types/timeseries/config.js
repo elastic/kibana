@@ -89,10 +89,13 @@ class TimeseriesConfig extends Component {
               onChange={handleSelectChange('chart_type')}/>
           </div>
           <div className="vis_editor__label">Stacked</div>
-          <YesNo
-            value={model.stacked}
-            name="stacked"
-            onChange={this.props.onChange}/>
+          <div className="vis_editor__item">
+            <Select
+              clearable={false}
+              options={stackedOptions}
+              value={model.stacked}
+              onChange={handleSelectChange('stacked')}/>
+          </div>
           <div className="vis_editor__label">Fill (0 to 1)</div>
           <input
             className="vis_editor__input-grows"
