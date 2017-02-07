@@ -29,7 +29,14 @@ argTypes.push(new ArgType('palette', {
   resolve: (value, state) => {
     switch (value.type) {
       case 'gradient':
-        return (count) => _.map(tinygradient([_.first(value.seed), _.last(value.seed)]).rgb(count), tinyObj => tinyObj.toHexString());
+        return (count) => {
+          const gradientLength = count < 2 ? 3 : count;
+          const tinyColors = tinygradient([_.first(value.seed), _.last(value.seed)]).rgb(gradientLength);
+          const colors = _.map(tinyColors, tinyColor =>
+            tinyColor.toHexString());
+
+          return count < 2 ? [colors[1]] : colors;
+        };
         break;
       default:
         // TODO: Update this to actually generate colors
