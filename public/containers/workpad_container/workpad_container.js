@@ -54,8 +54,6 @@ const DataframeDialog = React.createClass({
       const reader = new FileReader();
 
       reader.onload =  () => {
-        console.log(reader.result);
-        console.log(pageId);
         this.props.dispatch(elementAdd({type: 'image', args:{image: reader.result}}, pageId));
       };
 
