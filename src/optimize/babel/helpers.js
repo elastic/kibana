@@ -12,13 +12,32 @@ if (!env.WEBPACK_BABEL_CACHE_DIR) {
 }
 
 exports.nodePresets = [
-  require.resolve('babel-preset-es2015'),
+  [
+    require.resolve('babel-preset-env'),
+    {
+      targets: {
+        node: 'current'
+      }
+    }
+  ],
   require.resolve('babel-preset-stage-1'),
 ];
 
 exports.webpackPresets = [
+  [
+    require.resolve('babel-preset-env'),
+    {
+      targets: {
+        browsers: [
+          'last 2 versions',
+          '> 5%',
+          'Safari 7' // for PhantomJS support
+        ]
+      }
+    }
+  ],
+  require.resolve('babel-preset-stage-1'),
   require.resolve('babel-preset-react'),
-  ...exports.nodePresets
 ]
 
 exports.plugins = [
