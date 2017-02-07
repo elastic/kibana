@@ -35,7 +35,7 @@ argTypes.push(new ArgType('palette', {
           const colors = _.map(tinyColors, tinyColor =>
             tinyColor.toHexString());
 
-          return count < 2 ? [colors[1]] : colors;
+          return count < 2 ? [colors[1]] : colors.reverse();
         };
         break;
       default:
