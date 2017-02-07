@@ -8,7 +8,7 @@ import * as i18nVerify from '../utils/i18n_verify_keys';
 export default function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
     const done = this.async();
-    const parsePaths = [fromRoot('/src/ui/views/*.jade')];
+    const parsePaths = [fromRoot('/src/ui/views/*.jade'), fromRoot('/src/core_plugins/kibana/public/management/sections/indices/*.html')];
 
     const serverConfig = {
       env: 'production',

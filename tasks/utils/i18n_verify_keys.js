@@ -59,7 +59,7 @@ function getFilesToVerify(verifyFilesPatterns) {
 
 function getKeys(filesToVerify) {
   const translationKeys = [];
-  const translationPattern = 'i18n\\(\'(.*)\'\\)';
+  const translationPattern = 'i18n\\(\'(.*)\'\\)|translate="(.*)"';
   const translationRegEx = new RegExp(translationPattern, 'g');
 
   const filePromises = _.map(filesToVerify, (file) => {
