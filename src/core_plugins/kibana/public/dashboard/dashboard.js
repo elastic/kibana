@@ -11,13 +11,10 @@ import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
-import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardState } from './dashboard_state';
-import { PanelUtils } from './panel/panel_utils';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -88,7 +85,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.panels = dashboardState.getPanels();
       $scope.topNavMenu = getTopNavConfig(kbnUrl);
-      $scope.options = dashboardState.getOptions();
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
@@ -120,14 +116,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
         pendingVisCount++;
-        const maxPanelIndex = PanelUtils.getMaxPanelIndex(dashboardState.getPanels());
-        dashboardState.getPanels().push(createPanelState(hit.id, 'visualization', maxPanelIndex));
+        dashboardState.addNewPanel(hit.id, 'visualization');
       };
 
       $scope.addSearch = function (hit) {
         pendingVisCount++;
-        const maxPanelIndex = PanelUtils.getMaxPanelIndex(dashboardState.getPanels());
-        dashboardState.getPanels().push(createPanelState(hit.id, 'search', maxPanelIndex));
+        dashboardState.addNewPanel(hit.id, 'search');
       };
 
       $scope.showEditHelpText = () => {
@@ -145,17 +139,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         return dashboardState.uiState.createChild(path, uiState, true);
       };
 
-      $scope.onPanelRemoved = (panelIndex) => {
-        _.remove(dashboardState.getPanels(), function (panel) {
-          if (panel.panelIndex === panelIndex) {
-            dashboardState.uiState.removeChild(getPersistedStateId(panel));
-            return true;
-          } else {
-            return false;
-          }
-        });
-        dashboardState.saveState();
-      };
+      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
       $scope.save = function () {
         // Make sure to save the latest query, even if 'enter' hasn't been hit.
@@ -175,12 +159,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }).catch(notify.fatal);
       };
 
-      $scope.$watchCollection('options', function (newVal, oldVal) {
-        if (!angular.equals(newVal, oldVal)) {
-          dashboardState.saveState();
-        }
-      });
-      $scope.$watch('options.darkTheme', setDarkTheme);
+      $scope.$watchCollection(() => dashboardState.getOptions(), () => dashboardState.saveState());
+      $scope.$watch(() => dashboardState.getOptions().darkTheme, updateTheme);
 
       $scope.$watch('model.query', function () {
         dashboardState.setQuery($scope.model.query);
@@ -200,17 +180,26 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dashboardState.destroy();
 
         // Remove dark theme to keep it from affecting the appearance of other apps.
-        setDarkTheme(false);
+        setLightTheme();
       });
 
-      function setDarkTheme(enabled) {
-        const theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
-        chrome.removeApplicationClass(['theme-dark', 'theme-light']);
-        chrome.addApplicationClass(theme);
+      function updateTheme() {
+        const useDarkTheme = dashboardState.getOptions().darkTheme;
+        useDarkTheme ? setDarkTheme() : setLightTheme();
+      }
+
+      function setDarkTheme() {
+        chrome.removeApplicationClass(['theme-light']);
+        chrome.addApplicationClass('theme-dark');
+      }
+
+      function setLightTheme() {
+        chrome.removeApplicationClass(['theme-dark']);
+        chrome.addApplicationClass('theme-light');
       }
 
       $scope.$on('ready:vis', function () {
-        if (pendingVisCount) pendingVisCount--;
+        if (pendingVisCount > 0) pendingVisCount--;
         if (pendingVisCount === 0) {
           dashboardState.saveState();
           $scope.refresh();

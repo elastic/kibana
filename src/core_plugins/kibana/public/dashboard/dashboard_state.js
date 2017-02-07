@@ -4,6 +4,8 @@ import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
 import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
+import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
+import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 function getStateDefaults(dashboard) {
   return {
@@ -65,6 +67,28 @@ export class DashboardState {
 
   getPanels() {
     return this.appState.panels;
+  }
+
+  /**
+   * Creates and initializes a basic panel, adding it to the state.
+   * @param {number} id
+   * @param {string} type
+   */
+  addNewPanel(id, type) {
+    const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
+    this.getPanels().push(createPanelState(id, type, maxPanelIndex));
+  }
+
+  removePanel(panelIndex) {
+    _.remove(this.getPanels(), (panel) => {
+      if (panel.panelIndex === panelIndex) {
+        this.uiState.removeChild(getPersistedStateId(panel));
+        return true;
+      } else {
+        return false;
+      }
+    });
+    this.saveState();
   }
 
   /**
