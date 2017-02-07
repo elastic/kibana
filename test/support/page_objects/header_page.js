@@ -42,12 +42,8 @@ export default class HeaderPage {
   }
 
   clickTimepicker() {
-    // Wait for the page to render, otherwise we will get an error if Jenkins is too slow.
-    return PageObjects.common.sleep(200).then(() => {
-      return this.remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[data-test-subj="globalTimepickerButton"]')
-        .click();
-    });
+    return PageObjects.common.findTestSubject('globalTimepickerButton')
+      .click();
   }
 
   isTimepickerOpen() {
