@@ -4,11 +4,16 @@ import elementTypes from 'plugins/rework/elements/elements';
 import './element_type_list.less';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 
-export default React.createClass({
+export default class ElementTypeList extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+  }
+
   select(elementType) {
     const {onSelect} = this.props;
     return () => onSelect(elementType);
-  },
+  }
+
   render() {
     const {onSelect} = this.props;
 
@@ -16,7 +21,7 @@ export default React.createClass({
       <Tooltip key={elementType.name} content={elementType.name}>
         <button
           className="btn btn-default"
-          onClick={this.select(elementType)}><center><img src={elementType.icon} width="30"/></center>
+          onClick={this.select(elementType).bind(this)}><center><img src={elementType.icon} width="30"/></center>
         </button>
       </Tooltip>
     ));
@@ -27,4 +32,4 @@ export default React.createClass({
       </div>
     );
   }
-});
+};
