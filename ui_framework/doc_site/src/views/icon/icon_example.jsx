@@ -17,6 +17,12 @@ export default createExample([{
     <p>Use this Icon to denote useful information.</p>
   ),
   html: require('./icon_info.html'),
+}, {
+  title: 'Basic',
+  description: (
+    <p>Use this Icon when you don't want to communicate any particular meaning with the icon's color.</p>
+  ),
+  html: require('./icon_basic.html'),
   hasDarkTheme: false,
 }, {
   title: 'Success',

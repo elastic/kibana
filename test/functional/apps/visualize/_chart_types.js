@@ -10,7 +10,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.before(function () {
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize');
+    return PageObjects.common.navigateToUrl('visualize', 'new');
   });
 
   bdd.describe('chart types', function indexPatternCreation() {

@@ -82,10 +82,7 @@ export default class VisualizePage {
   }
 
   getChartTypes() {
-
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findAllByCssSelector('.wizard-type-heading h4')
+    return PageObjects.common.findAllTestSubjects('visualizeWizardChartTypeTitle')
     .then(function (chartTypes) {
       function getChartType(chart) {
         return chart.getVisibleText();
@@ -299,11 +296,6 @@ export default class VisualizePage {
     });
   }
 
-  clickNewVisualization() {
-    return PageObjects.common.findTestSubject('visualizeNewButton')
-    .click();
-  }
-
   saveVisualization(vizName) {
     return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()
@@ -340,7 +332,11 @@ export default class VisualizePage {
   }
 
   clickLoadSavedVisButton() {
-    return PageObjects.common.findTestSubject('visualizeOpenButton')
+    // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
+    // element as a child instead of building the breadcrumbs dynamically.
+    return this.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[href="#/visualize"]')
       .click();
   }
 
@@ -376,17 +372,8 @@ export default class VisualizePage {
     });
   }
 
-  // this is for starting on the
-  // bottom half of the "Create a new visualization      Step 1" page
   openSavedVisualization(vizName) {
-    var self = this;
-    return self.filterVisByName(vizName)
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(function clickDashboardByLinkedText() {
-      return self.clickVisualizationByLinkText(vizName);
-    });
+    return this.clickVisualizationByLinkText(vizName);
   }
 
   getXAxisLabels() {
