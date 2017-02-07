@@ -58,7 +58,7 @@ elements.push(new Element('chart', {
       type: 'palette',
     }),
     new Arg('stroke', {
-      help: '',
+      help: 'Only applies to pie charts',
       type: 'container_style',
       options: {
         show: {
@@ -104,7 +104,7 @@ elements.push(new Element('chart', {
             $(this.refs.plot).text('No such chart type');
         }
       } catch (e) {
-        $(this.refs.plot).text('Failed to render chart');
+        //$(this.refs.plot).text('Failed to render chart');
       }
 
 

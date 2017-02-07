@@ -14,7 +14,7 @@ export const pie = (elem, args) => {
     valueObj = args.dataframe.aggregate[args.aggregate_with](args.value_column);
   };
 
-  var flotSeries = _.map(valueObj, (value, label) => {
+  var data = _.map(valueObj, (value, label) => {
     return {
       label: label,
       data: value,
@@ -63,12 +63,12 @@ export const pie = (elem, args) => {
     legend: {
       show: false
     },
-    colors: args.theme
+    colors: args.theme(data.length)
   };
 
   // Draw chart
 
-  if (!flotSeries.length) return;
-  $.plot($(elem), flotSeries, flotConfig);
+  if (!data.length) return;
+  $.plot($(elem), data, flotConfig);
 
 };

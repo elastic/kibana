@@ -42,7 +42,7 @@ export const verticalBar = (elem, args) => {
     grid: {
       color: 'rgba(0,0,0,0)'
     },
-    colors: args.theme
+    colors: args.theme(data.length)
   };
 
   flotConfig.xaxis.ticks = ticks;

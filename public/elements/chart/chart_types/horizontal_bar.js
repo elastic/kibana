@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import tinygradient  from 'tinygradient';
+
 
 export const horizontalBar = (elem, args) => {
 
@@ -15,7 +17,7 @@ export const horizontalBar = (elem, args) => {
   const data = [];
   const ticks = [];
   _.each(_.toPairs(valueObj), (pair, i) => {
-    data.push([pair[1], i]);
+    data.push({data: [[pair[1], i]]});
     ticks.push([i, pair[0]]);
   });
 
@@ -44,18 +46,19 @@ export const horizontalBar = (elem, args) => {
     grid: {
       color: 'rgba(0,0,0,0)'
     },
-    colors: args.theme
+    colors: args.theme(data.length)
   };
 
   flotConfig.yaxis.ticks = ticks;
 
   // Chart drawing
 
-  const plot = $.plot($(elem), [data], flotConfig);
+  const plot = $.plot($(elem), data, flotConfig);
 
   const barWidthPixels =  plot.getOptions().series.bars.barWidth * plot.getYAxes()[0].scale;
-  _.each(plot.getData()[0].data, (point, i) => {
-    var o = plot.pointOffset({x: point[0], y: point[1]});
+  _.each(plot.getData(), (series, i) => {
+    const point = series.data[0];
+    const o = plot.pointOffset({x: point[0], y: point[1]});
     $('<div class="rework--chart-value">' + point[0] + '</div>').css({
       position: 'absolute',
       height: barWidthPixels,
