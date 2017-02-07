@@ -7,6 +7,7 @@ import onStart from './on_start';
 import thunk from 'redux-thunk';
 import persistState from 'redux-localstorage';
 import rootReducer from './reducers';
+import {bindHotkeys} from './hotkeys';
 import getInitialState from './initial_state';
 import _ from 'lodash';
 
@@ -29,7 +30,7 @@ app.service('$store', (kbnVersion, basePath) => {
   );
 
   const store = createStore(rootReducer, initialState, persistentStore);
-
+  bindHotkeys(store);
 
   // TODO: Sticking this here so I can dispatch events from the console;
   window.store = store;

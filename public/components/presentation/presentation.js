@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import React from 'react';
 
+// Hot keys are managed here so this can be used independent of redux
 export default React.createClass({
   componentDidMount() {
     const {onNext, onPrev, onEsc} = this.props;
