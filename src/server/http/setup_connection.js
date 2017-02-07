@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
-import httpolyglot from 'httpolyglot';
+import httpolyglot from '@elastic/httpolyglot';
 import { map } from 'lodash';
 import secureOptions from './secure_options';
 
