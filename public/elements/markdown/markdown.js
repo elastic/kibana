@@ -24,6 +24,17 @@ elements.push(new Element('markdown', {
   args: [
     new Arg('markdown', {
       type: 'string',
+      help: `
+      <p>Standard markdown, expanded with templating.</p>
+      <p>
+        You can access aggregated dataframe column values here using simple aggregator functions such as
+        <code>sum</code>, <code>min</code>, <code>max</code>, <code>avg</code> and <code>last</code>. For example:<br>
+        <code>{{sum('price')}}</code>
+      </p>
+      <p>
+        You can also do grouping, with the <code>by</code> function. For example:<br>
+         <code>{{by('model').avg('price').Impreza}}</code>
+      </p>`,
       default: 'Your Text Here',
       options: {
         rows: 10
