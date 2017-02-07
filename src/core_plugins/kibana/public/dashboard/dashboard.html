@@ -61,7 +61,7 @@
   </div>
 
   <dashboard-grid
-    ng-if="!hasExpandedPanel()"
+    ng-show="!hasExpandedPanel()"
     on-panel-removed="onPanelRemoved"
     panels="state.panels"
     get-vis-click-handler="filterBarClickHandler(state)"
@@ -81,4 +81,6 @@
                    save-state="saveState"
                    create-child-ui-state="createChildUiState"
                    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
+  </dashboard-panel>
+
 </dashboard-app>
