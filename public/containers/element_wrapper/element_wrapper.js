@@ -42,7 +42,7 @@ const ElementWrapper = React.createClass({
     this.props.dispatch(argumentSet(this.props.element.id, arg, value));
   },
   render() {
-    const {element, page, fullscreen, layer, elementCache} = this.props;
+    const {element, page, fullscreen, editor, layer, elementCache} = this.props;
     const {id} = element;
     const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
@@ -56,7 +56,7 @@ const ElementWrapper = React.createClass({
         className="rework--element-wrapper">
         <Positionable style={{zIndex: 2000 + layer}}
           position={position}
-          interact={fullscreen ? false : true}
+          interact={(fullscreen || !editor) ? false : true}
           move={this.resizeMove(id)}
           resize={this.resizeMove(id)}
           rotate={this.rotate(id)}>
@@ -71,7 +71,8 @@ function mapStateToProps(state) {
   return {
     elements: state.persistent.elements,
     elementCache: state.transient.elementCache,
-    fullscreen: state.transient.fullscreen
+    fullscreen: state.transient.fullscreen,
+    editor: state.transient.editor
   };
 }
 
