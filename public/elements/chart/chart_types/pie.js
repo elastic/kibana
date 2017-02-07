@@ -47,11 +47,11 @@ export const pie = (elem, args) => {
           show: true,
           formatter: (label, slice) => `
             <div>
-              <div class="rework--circle-label">
-                <span class="rework--circle-label-text">${label}</span>
-                <i class="fa fa-circle rework--circle-label-color" style="color: ${slice.color}"></i>
+              <div class="rework--chart-label">
+                <span class="rework--chart-label-text">${label}</span>
+                <i class="fa fa-circle rework--chart-label-color" style="color: ${slice.color}"></i>
               </div>
-              <div class="rework--circle-value">${slice.data[0][1]}</div>
+              <div class="rework--chart-value">${slice.data[0][1]}</div>
             </div>
           `
         }
