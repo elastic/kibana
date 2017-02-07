@@ -6,7 +6,7 @@ module.exports = function (server) {
 
       return server.uiSettings().getAll(request).then((uiSettings) => {
         const config = server.config();
-        const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+        const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
         const payload = request.payload;
 
