@@ -1,5 +1,5 @@
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import orderAggTemplate from 'ui/agg_types/controls/sub_agg.html';
+import metricAggTemplate from 'ui/agg_types/controls/sub_agg.html';
 import _ from 'lodash';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import VisSchemasProvider from 'ui/vis/schemas';
@@ -40,9 +40,9 @@ export default function AggTypeMetricDerivativeProvider(Private) {
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = orderAggSchema;
-          const orderAgg = new AggConfig(termsAgg.vis, state);
-          orderAgg.id = termsAgg.id + '-orderAgg';
-          return orderAgg;
+          const metricAgg = new AggConfig(termsAgg.vis, state);
+          metricAgg.id = termsAgg.id + '-metric';
+          return metricAgg;
         },
         write: _.noop
       },
@@ -52,7 +52,7 @@ export default function AggTypeMetricDerivativeProvider(Private) {
       },
       {
         name: 'metricAgg',
-        editor: orderAggTemplate,
+        editor: metricAggTemplate,
         default: 'custom',
         controller: parentPipelineAggController,
         write: parentPipelineAggWritter

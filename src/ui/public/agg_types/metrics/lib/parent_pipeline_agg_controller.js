@@ -1,14 +1,9 @@
 import _ from 'lodash';
+import safeMakeLabel from './safe_make_label';
 
 const parentPipelineAggController = function ($scope) {
 
-  $scope.safeMakeLabel = function (agg) {
-    try {
-      return agg.makeLabel();
-    } catch (e) {
-      return '- agg not valid -';
-    }
-  };
+  $scope.safeMakeLabel = safeMakeLabel;
 
   $scope.$watch('responseValueAggs', updateOrderAgg);
   $scope.$watch('agg.params.metricAgg', updateOrderAgg);
@@ -19,7 +14,7 @@ const parentPipelineAggController = function ($scope) {
     }
   });
 
-  $scope.rejectAgg = function (agg) {
+  $scope.isDisabledAgg = function (agg) {
     const invalidAggs = ['top_hits', 'percentiles', 'percentile_ranks', 'median', 'std_dev'];
     return Boolean(invalidAggs.find(invalidAgg => invalidAgg === agg.type.name));
   };
