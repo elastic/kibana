@@ -2,7 +2,11 @@ import React from 'react';
 import argTypes from 'plugins/rework/arg_types/arg_types';
 import _ from 'lodash';
 
-export default React.createClass({
+export default class ArgumentForm extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+  }
+
   render() {
     const {type, value, commit, help, options, defaultValue} = this.props;
     const context = this.props.context || {};
@@ -27,4 +31,4 @@ export default React.createClass({
       </div>
     );
   }
-});
+};
