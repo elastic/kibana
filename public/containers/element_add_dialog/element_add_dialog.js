@@ -1,13 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ElementTypeList from 'plugins/rework/components/element_type_list';
-import {elementAdd} from 'plugins/rework/state/actions/element';
+import {elementAddType} from 'plugins/rework/state/actions/element';
 import _ from 'lodash';
 
 const DataframeDialog = React.createClass({
   onSelect(type) {
     const {dispatch, pageId} = this.props;
-    dispatch(elementAdd(type.name, pageId));
+    dispatch(elementAddType(type.name, pageId));
   },
   render() {
     const {onSelect} = this.props;

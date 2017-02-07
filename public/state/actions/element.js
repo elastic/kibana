@@ -11,30 +11,35 @@ import Promise from 'bluebird';
 
 export const elementSelect = createAction('ELEMENT_SELECT');
 export const elementProps = createAction('ELEMENT_PROPS', mutateElement);
-
 export const elementRemove = createAction('ELEMENT_REMOVE', (elementId, pageId) => {return {elementId, pageId};});
 export const elementLayer = createAction('ELEMENT_LAYER', (elementId, pageId, layer) => {return {elementId, pageId, layer};});
-
-
 export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgument);
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
-
 export const argumentsResolved = createAction('ARGUMENTS_RESOLVED', mutateElement);
 
-
-export function elementAdd(type, pageId) {
+export function elementAdd(template, pageId) {
   return (dispatch, getState) => {
-    const elementType = elementTypes.byName[type];
-    const args = _.fromPairs(
+    const elementType = elementTypes.byName[template.type];
+    const element = getElementTemplate(template);
+
+    template.args = template.args || {};
+    element.args = _.fromPairs(
       _.map(elementType.args, arg => {
-        const argDefault = getArgDefaultValue(getState(), arg.default);
-        return [arg.name, argDefault];
+        const argValue = _.isUndefined(template.args[arg.name]) ?
+          getArgDefaultValue(getState(), arg.default) : template.args[arg.name];
+        return [arg.name, argValue];
       }));
-    const element = getElementTemplate({type: elementType.name, args: args});
+
     const action = createAction('ELEMENT_ADD', (element, pageId) => {return {element, pageId};});
     dispatch(action(element, pageId));
     dispatch(elementResolve(element.id));
     dispatch(elementSelect(element.id));
+  };
+};
+
+export function elementAddType(type, pageId) {
+  return (dispatch, getState) => {
+    dispatch(elementAdd({type: type}, pageId));
   };
 }
 

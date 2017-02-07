@@ -13,6 +13,7 @@ import Stack from 'plugins/rework/components/stack/stack';
 import Page from 'plugins/rework/components/page/page';
 import Fullscreen from 'plugins/rework/components/fullscreen/fullscreen';
 import Presentation from 'plugins/rework/components/presentation/presentation';
+import Dropzone from 'react-dropzone';
 
 
 // Containers
@@ -22,7 +23,7 @@ import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
 import { pageNext, pagePrevious, pageAdd, pageRemove, pageReplace } from 'plugins/rework/state/actions/page';
 import { workpadReplace } from 'plugins/rework/state/actions/workpad';
 
-import { elementSelect } from 'plugins/rework/state/actions/element';
+import { elementSelect, elementAdd } from 'plugins/rework/state/actions/element';
 
 const DataframeDialog = React.createClass({
   pageAdd() {
@@ -47,6 +48,19 @@ const DataframeDialog = React.createClass({
   },
   changeWorkpad(workpad) {
     this.props.dispatch(workpadReplace(workpad));
+  },
+  uploadImage(pageId) {
+    return (file) => {
+      const reader = new FileReader();
+
+      reader.onload =  () => {
+        console.log(reader.result);
+        console.log(pageId);
+        this.props.dispatch(elementAdd({type: 'image', args:{image: reader.result}}, pageId));
+      };
+
+      reader.readAsDataURL(file[0]);
+    };
   },
   render() {
     const {fullscreen, workpad, elements, selectedElement, pages, elementCache} = this.props;
@@ -115,9 +129,15 @@ const DataframeDialog = React.createClass({
               <div className="rework--workspace-lower" style={{margin: 'auto'}}>
                 <Centered>
                   <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
-                  <Workpad workpad={workpad}>
-                      {stack}
-                  </Workpad>
+                  <Dropzone
+                    style={{width: null, height: null}}
+                    disableClick={true}
+                    multiple={false} accept="image/*"
+                    onDrop={this.uploadImage(currentPage.id)}>
+                    <Workpad workpad={workpad}>
+                        {stack}
+                    </Workpad>
+                  </Dropzone>
                   <Pager direction='next' handler={this.do(pageNext)}></Pager>
                 </Centered>
               </div>
