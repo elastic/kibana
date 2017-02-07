@@ -24,7 +24,7 @@ export class PaletteChooser extends React.PureComponent {
     return (
       <div className="rework--palette-chooser">
         <div className="rework--palette-chooser-preview" onClick={this.togglePopover.bind(this)} id={this.id}>
-          <Palette colors={this.props.value}/>
+          <Palette colors={this.props.value.seed}/>
         </div>
         <Popover
           placement='bottom left'
@@ -35,10 +35,10 @@ export class PaletteChooser extends React.PureComponent {
             <div className="rework--palette-chooser-options">
               {_.map(this.props.options, palette => (
                 <div
-                  key={palette.join(',')}
+                  key={palette.seed.join(',')}
                   className="rework--palette-chooser-option"
                   onClick={this.choose(palette).bind(this)}>
-                  <Palette colors={palette}/>
+                  <Palette colors={palette.seed}/>
                 </div>
               ))}
             </div>
