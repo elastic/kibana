@@ -150,9 +150,7 @@ export default class VisualizePage {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findByCssSelector('.list-group-item a')
-    .click().then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
   }
 
   setValue(newValue) {
