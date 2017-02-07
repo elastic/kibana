@@ -148,6 +148,12 @@ export default function ColumnHandler(Private) {
 
     heatmap: (cfg, data) => {
       const defaults = create()(cfg, data);
+      const seriesLimit = 25;
+      const hasCharts = defaults.charts.length;
+      const tooManySeries = defaults.charts[0].series.length > seriesLimit;
+      if (hasCharts && tooManySeries) {
+        defaults.error = 'There are too many series defined.';
+      }
       defaults.valueAxes[0].show = false;
       defaults.categoryAxes[0].style = {
         rangePadding: 0,
