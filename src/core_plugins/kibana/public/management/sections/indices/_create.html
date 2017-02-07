@@ -2,16 +2,16 @@
   <kbn-management-indices>
     <div ng-controller="managementIndicesCreate" class="kbn-management-indices-create">
       <div class="page-header">
-        <h1 translate>KIBANA-H1_CONFIGURE_INDEX_PATTERN</h1>
-          <p translate>KIBANA-MUST_CONFIGURE_INDEX_PATTERN</p>
+        <h1 translate="KIBANA-H1_CONFIGURE_INDEX_PATTERN"></h1>
+          <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"></p>
       </div>
       <div>
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
           <div class="form-group">
-            <label translate>KIBANA-INDEX_NAME_OR_PATTERN</label>
-            <p class="help-block" ng-if="!index.nameIsPattern" translate>KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS</p>
-            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern"><span translate>KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS</span> &mdash;
-              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate>KIBANA-DATE_FORMAT_DOCS</a></small></p>
+            <label translate="KIBANA-INDEX_NAME_OR_PATTERN"></label>
+            <p class="help-block" ng-if="!index.nameIsPattern" translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"></p>
+            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
+              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate="KIBANA-DATE_FORMAT_DOCS"></a></small></p>
             <input
               ng-model="index.name"
               ng-attr-placeholder="{{index.defaultName}}"
@@ -23,9 +23,9 @@
               type="text"
               class="form-control">
               <small ng-show="index.nameInterval.name == 'weeks'">
-                <strong translate>KIBANA-NOTE_COLON</strong>&nbsp;
-                <span translate>KIBANA-WEEKLY_ISO_NOTICE</span>
-                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate>KIBANA-WIKI_ISO_WEEK_DATE</a>
+                <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
+                <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
+                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
               </small>
             </div>
 
@@ -34,18 +34,18 @@
               <input
                 ng-model="index.isTimeBased"
                 type="checkbox">
-              <span translate>KIBANA-CONTAINS_TIME_BASED_EVENTS_CHECKBOX</span>
+              <span translate="KIBANA-CONTAINS_TIME_BASED_EVENTS_CHECKBOX"></span>
             </label>
           </div>
 
           <div class="form-group" ng-if="index.isTimeBased">
             <label>
-              <span translate>KIBANA-TIME_FIELD_NAME</span>
+              <span translate="KIBANA-TIME_FIELD_NAME"></span>
               &nbsp;
               <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
               &nbsp;
               <small>
-                <a ng-click="refreshFieldList();" translate>KIBANA-REFRESH_FIELDS</a>
+                <a ng-click="refreshFieldList();" translate="KIBANA-REFRESH_FIELDS"></a>
               </small>
             </label>
             <select
@@ -61,24 +61,24 @@
           <div class="form-group" ng-if="canExpandIndices()">
             <label>
               <input ng-model="index.notExpandable" type="checkbox">
-                <span translate>KIBANA-EXPAND_INDEX_PATTERN_WARNING</span>
+                <span translate="KIBANA-EXPAND_INDEX_PATTERN_WARNING"></span>
             </label>
 
             <div ng-if="index.notExpandable" class="alert alert-info">
-              <span translate>KIBANA-NOT_EXPANDABLE_PART1</span>
+              <span translate="KIBANA-NOT_EXPANDABLE_PART1"></span>
 
               <span translate="KIBANA-NOT_EXPANDABLE_PART2" translate-values="{ indexName: '{{index.name}}' }"></span>
             </div>
 
-            <p class="help-block" translate>KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_HELP</p>
+            <p class="help-block" translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_HELP"></p>
 
-            <p class="help-block" translate>KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_EXAMPLE_HELP</p>
+            <p class="help-block" translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_EXAMPLE_HELP"></p>
           </div>
 
           <div class="form-group time-and-pattern">
             <label ng-if="index.isTimeBased">
               <input ng-model="index.nameIsPattern" type="checkbox">
-              <span translate>KIBANA-INDEX_NAME_IS_PATTERN_CHECKBOX</span>
+              <span translate="KIBANA-INDEX_NAME_IS_PATTERN_CHECKBOX"></span>
             </label>
           </div>
 
@@ -86,11 +86,11 @@
             <div class="alert alert-warning">
               </p>
               <h4>KIBANA-ALERT_INDEX_PATTERN_DEPRECATED</h4>
-              <p translate>KIBANA-RECOMMEND_WILD_CARD_PATTERN</p>
-              <p Ttranslate>KIBANA-RECOMMEND_WILD_CARD_PATTERN_DETAILS</p>
+              <p translate="KIBANA-RECOMMEND_WILD_CARD_PATTERN"></p>
+              <p translate="KIBANA-RECOMMEND_WILD_CARD_PATTERN_DETAILS"></p>
             </div>
             <label>
-              <span translate>KIBANA-INDEX_PATTERN_INTERVAL</span>&nbsp;
+              <span translate="KIBANA-INDEX_PATTERN_INTERVAL"></span>&nbsp;
               <kbn-info info="The interval at which index names rotate."></kbn-info>
             </label>
             <select
@@ -107,17 +107,17 @@
             </div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              <span translate>KIBANA-SAMPLE_ALERT</span>
+              <span translate="KIBANA-SAMPLE_ALERT"></span>
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
               <button type="button" ng-click="moreSamples(true)" class="btn btn-default">
-                <span translate>KIBANA-EXPAND_SEARCH</span>
+                <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
 
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              <span translate='KIBANA-EXISTING_MATCH_PERCENT' translate-values="{ indexExistingMatchPercent: '{{index.existing.matchPercent}}' }"></span>
+              <span translate="KIBANA-EXISTING_MATCH_PERCENT" translate-values="{ indexExistingMatchPercent: '{{index.existing.matchPercent}}' }"></span>
               <ul>
                 <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -126,12 +126,12 @@
                 ng-click="moreSamples()"
                 type="button"
                 class="btn btn-default">
-                <span translate>KIBANA-EXPAND_SEARCH</span>
+                <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
 
             <div class="alert alert-info" ng-if="index.existing.failures.length">
-              <span translate>KIBANA-NON_MATCHING_INDICES_AND_ALIASES</span>
+              <span translate="KIBANA-NON_MATCHING_INDICES_AND_ALIASES"></span>
               <ul>
                 <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -139,7 +139,7 @@
                 ng-if="index.sampleCount < index.existing.matches.length"
                 ng-click="moreSamples()"
                 class="alert-link">
-                <span translate>KIBANA-MORE</span>
+                <span translate="KIBANA-MORE"></span>
               </a>
             </div>
           </section>
@@ -151,7 +151,7 @@
             type="submit"
             class="btn">
             <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
-            <span ng-show="form.name.$error.indexNameInput" translate>KIBANA-INVALID_INDEX_PATTERN</span>
+            <span ng-show="form.name.$error.indexNameInput" translate="KIBANA-INVALID_INDEX_PATTERN"></span>
           </button>
         </form>
       </div>
