@@ -77,10 +77,10 @@ bdd.describe('index result field sort', function describeIndexTests() {
   });
 
   bdd.describe('field list pagination', function () {
-    const expectedDefaultPageSize = 25;
-    const expectedFieldCount = 85;
-    const expectedLastPageCount = 10;
-    const pages = [1, 2, 3, 4];
+    const EXPECTED_DEFAULT_PAGE_SIZE = 25;
+    const EXPECTED_FIELD_COUNT = 85;
+    const EXPECTED_LAST_PAGE_COUNT = 10;
+    const LAST_PAGE_NUMBER = 4;
 
     bdd.before(function () {
       return PageObjects.settings.navigateTo()
@@ -97,7 +97,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
       return PageObjects.common.try(function () {
         return PageObjects.settings.getFieldsTabCount()
         .then(function (tabCount) {
-          expect(tabCount).to.be('' + expectedFieldCount);
+          expect(tabCount).to.be('' + EXPECTED_FIELD_COUNT);
         });
       });
     });
@@ -105,30 +105,22 @@ bdd.describe('index result field sort', function describeIndexTests() {
     bdd.it('should have correct default page size selected', function () {
       return PageObjects.settings.getPageSize()
       .then(function (pageSize) {
-        expect(pageSize).to.be('' + expectedDefaultPageSize);
+        expect(pageSize).to.be('' + EXPECTED_DEFAULT_PAGE_SIZE);
       });
     });
 
-    bdd.it('should have the correct number of rows per page', function () {
-      const pageCount = Math.ceil(expectedFieldCount / expectedDefaultPageSize);
-      const chain = pages.reduce(function (chain, val) {
-        return chain.then(function () {
-          return PageObjects.settings.goToPage(val)
-          .then(function () {
-            return PageObjects.common.sleep(1000);
-          })
-          .then(function () {
-            return PageObjects.settings.getPageFieldCount();
-          })
-          .then(function (pageCount) {
-            PageObjects.common.saveScreenshot('Settings-indices-paged');
-            const expectedSize = (val < 4) ? expectedDefaultPageSize : expectedLastPageCount;
-            expect(pageCount.length).to.be(expectedSize);
-          });
-        });
-      }, Promise.resolve());
+    bdd.it('should have the correct number of rows per page', async function () {
+      for (let pageNum = 1; pageNum <= LAST_PAGE_NUMBER; pageNum += 1) {
+        await PageObjects.settings.goToPage(pageNum);
+        const pageFieldNames = await PageObjects.common.tryMethod(PageObjects.settings, 'getFieldNames');
+        await PageObjects.common.saveScreenshot(`Settings-indexed-fields-page-${pageNum}`);
 
-      return chain.catch(PageObjects.common.createErrorHandler(this));
+        if (pageNum === LAST_PAGE_NUMBER) {
+          expect(pageFieldNames).to.have.length(EXPECTED_LAST_PAGE_COUNT);
+        } else {
+          expect(pageFieldNames).to.have.length(EXPECTED_DEFAULT_PAGE_SIZE);
+        }
+      }
     });
   }); // end describe pagination
 }); // end index result field sort

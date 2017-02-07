@@ -52,7 +52,10 @@ uiModules.get('apps/management')
             {
               markup: nameHtml,
               scope: childScope,
-              value: field.displayName
+              value: field.displayName,
+              attr: {
+                'data-test-subj': 'indexedFieldName'
+              }
             },
             {
               markup: typeHtml,

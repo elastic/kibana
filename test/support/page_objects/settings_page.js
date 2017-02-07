@@ -1,5 +1,5 @@
 
-import Bluebird from 'bluebird';
+import Bluebird, { map as mapAsync } from 'bluebird';
 
 import {
   defaultFindTimeout,
@@ -200,9 +200,11 @@ export default class SettingsPage {
     });
   }
 
-  getPageFieldCount() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
+  async getFieldNames() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern indexedFieldName');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
   }
 
   async goToPage(pageNum) {
