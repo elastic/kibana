@@ -35,8 +35,8 @@ const Element = React.createClass({
 
     return (
       <div className="rework--element" style={elementStyle} data-style={styleId}>
-        <ScopedStyle scope={`[data-style="${styleId}"]`}>{scopedStyleSheet}</ScopedStyle>
-        <ScopedStyle scope={`[data-style="${styleId}"]`}>{customStyleSheet}</ScopedStyle>
+        <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={scopedStyleSheet}></ScopedStyle>
+        <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={customStyleSheet}></ScopedStyle>
         <ElementContent args={args} setArg={setArg}></ElementContent>
       </div>
     );

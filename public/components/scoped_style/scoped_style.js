@@ -41,13 +41,13 @@ export default React.createClass({
     //$(style).appendTo('head');
   },
   render() {
-    const {scope, children} = this.props;
+    const {scope, stylesheet} = this.props;
 
     let scopedStyle;
     try {
       scopedStyle = compiler.process(`
         ${scope} {
-          ${children}
+          ${stylesheet}
         }
       `).css;
     } catch (e) {
