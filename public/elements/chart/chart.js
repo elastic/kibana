@@ -13,11 +13,22 @@ import 'plugins/rework/lib/flot';
 import $ from 'jquery';
 import Arg from 'plugins/rework/arg_types/arg';
 
+import {pie} from './chart_types/pie';
+import {verticalBar} from './chart_types/vertical_bar';
+
 elements.push(new Element('chart', {
   displayName: 'Chart',
   icon: icon,
   stylesheet: stylesheet,
   args: [
+    new Arg('chart_type', {
+      type: 'select',
+      help: '',
+      default: 'vertical_bar',
+      options: {
+        choices: ['vertical_bar', 'horizontal_bar', 'pie']
+      }
+    }),
     new Arg('dataframe', {
       type: 'dataframe',
     }),
@@ -44,6 +55,16 @@ elements.push(new Element('chart', {
     new Arg('theme', {
       type: 'palette',
     }),
+    new Arg('stroke', {
+      help: '',
+      type: 'container_style',
+      options: {
+        show: {
+          borderWidth: true,
+          borderColor: true
+        }
+      }
+    }),
   ],
   template: class Chart extends React.PureComponent {
 
@@ -64,65 +85,26 @@ elements.push(new Element('chart', {
     }
 
     renderChart() {
-      const {args, setArg} = this.props;
-
-      let valueObj;
-      if (args.group_by) {
-        valueObj = args.dataframe.aggregate.by(args.group_by)[args.aggregate_with](args.value_column);
-      } else {
-        valueObj = args.dataframe.aggregate[args.aggregate_with](args.value_column);
-      };
-
-      const data = [];
-      const ticks = [];
-      _.each(_.toPairs(valueObj), (pair, i) => {
-        data.push([i, pair[1]]);
-        ticks.push([i, pair[0]]);
-      });
-
-      const flotConfig = {
-        series: {
-          bars: {
-            show: true,
-            barWidth: 0.6,
-            align: 'center',
-            fill: 1
-          },
-        },
-        xaxis: {},
-        yaxis: {
-          autoscaleMargin: 0.2,
-          ticks: [],
-          tickLength: 0
-        },
-        legend: {
-          show: false
-        },
-        grid: {
-          color: 'rgba(0,0,0,0)'
-        },
-        colors: this.props.args.theme
-      };
-
-      flotConfig.xaxis.ticks = ticks;
+      const {args} = this.props;
 
       try {
-        const plot = $.plot($(this.refs.plot), [data], flotConfig);
-
-        var barWidthPixels =  plot.getOptions().series.bars.barWidth * plot.getXAxes()[0].scale;
-        _.each(plot.getData()[0].data, (point, i) => {
-          var o = plot.pointOffset({x: point[0], y: point[1]});
-          $('<div class="rework--chart-value">' + point[1] + '</div>').css({
-            position: 'absolute',
-            width: barWidthPixels,
-            height: args.value_style.object.fontSize,
-            left: o.left - (barWidthPixels / 2),
-            top: o.top - 10 - args.value_style.object.fontSize,
-          }).appendTo(plot.getPlaceholder());
-        });
+        switch (args.chart_type) {
+          case 'pie':
+            pie(this.refs.plot, args);
+            break;
+          case 'vertical_bar':
+            verticalBar(this.refs.plot, args);
+            break;
+          default:
+            $(this.refs.plot).text('No such chart type');
+        }
       } catch (e) {
-        console.log('Plot too small');
+        $(this.refs.plot).text('Failed to render chart');
       }
+
+
+      /* Start changes */
+      /* end changes */
     }
 
     setColumns() {
