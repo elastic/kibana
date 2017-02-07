@@ -15,6 +15,8 @@ import Arg from 'plugins/rework/arg_types/arg';
 
 import {pie} from './chart_types/pie';
 import {verticalBar} from './chart_types/vertical_bar';
+import {horizontalBar} from './chart_types/horizontal_bar';
+
 
 elements.push(new Element('chart', {
   displayName: 'Chart',
@@ -94,6 +96,9 @@ elements.push(new Element('chart', {
             break;
           case 'vertical_bar':
             verticalBar(this.refs.plot, args);
+            break;
+          case 'horizontal_bar':
+            horizontalBar(this.refs.plot, args);
             break;
           default:
             $(this.refs.plot).text('No such chart type');
