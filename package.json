@@ -1,8 +1,11 @@
 {
   "name": "rework",
-  "version": "kibana",
+  "version": "0.0.1",
   "description": "The rework was a bar",
   "main": "gulpfile.js",
+  "kibana": {
+    "version": "kibana"
+  },
   "scripts": {
     "start": "gulp dev",
     "build": "gulp build",
