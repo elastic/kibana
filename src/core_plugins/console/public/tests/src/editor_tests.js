@@ -386,7 +386,7 @@ curl -XGET "http://localhost:9200/_stats?level=shards"
 
 #in between comment
 
-curl -XPUT "http://localhost:9200/index_1/type1/1" -d'
+curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
 {
   "f": 1
 }'`.trim()
