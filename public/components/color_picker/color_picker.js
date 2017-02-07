@@ -5,24 +5,30 @@ import chroma from 'chroma-js';
 import uuid from 'uuid/v4';
 import './color_picker.less';
 
-export default React.createClass({
-  getInitialState() {
-    return {popover: false};
-  },
+export default class ArgumentForm extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+    const {position} = props;
+    this.state = {popover: false};
+  }
+
   togglePopover() {
     this.setState({
       popover: !this.state.popover
     });
-  },
+  }
+
   dismissPopover() {
     this.setState({
       popover: false
     });
-  },
+  }
+
   onChange(colorObj) {
     const {r,g,b,a} = colorObj.rgb;
     this.props.onChange(`rgba(${r},${g},${b},${a})`);
-  },
+  }
+
   render() {
     const {color, onChange, popover} = this.props;
 
@@ -40,8 +46,8 @@ export default React.createClass({
     const picker = (
       <div className="rework--color-picker">
         <center>
-          <CirclePicker width='190px' color={color} colors={colors} circleSize={24} circleSpacing={6} onChange={this.onChange}/>
-          <button onClick={setTransparent} className="rework--color-picker--transparent btn btn-default btn-xs">
+          <CirclePicker width='190px' color={color} colors={colors} circleSize={24} circleSpacing={6} onChange={this.onChange.bind(this)}/>
+          <button onClick={setTransparent.bind(this)} className="rework--color-picker--transparent btn btn-default btn-xs">
             Transparent
             { !isTransparent ? null : (
               <i className="fa fa-check"></i>
@@ -64,7 +70,7 @@ export default React.createClass({
         <button
           className="btn rework--color-picker--popover-button"
           style={{backgroundColor: color, color: pencilColor}}
-          onClick={this.togglePopover}
+          onClick={this.togglePopover.bind(this)}
           id={`colorPicker-${popoverId}`}>
           <i className="fa fa-pencil"></i>
         </button>
@@ -76,5 +82,4 @@ export default React.createClass({
       </div>
     );
   }
-
-});
+};
