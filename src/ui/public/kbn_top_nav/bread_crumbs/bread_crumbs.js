@@ -12,6 +12,11 @@ module.directive('breadCrumbs', function ($location) {
     scope: {
       omitCurrentPage: '=',
       /**
+       * Pages to omit from the breadcrumbs. Should be lower-case.
+       * @type {Array}
+       */
+      omitPages: '=',
+      /**
        * Optional title to append at the end of the breadcrumbs. Note that this can't just be
        * 'title', because that will be interpreted by browsers as an actual 'title' HTML attribute.
        * @type {String}
@@ -30,6 +35,12 @@ module.directive('breadCrumbs', function ($location) {
 
       if ($scope.omitCurrentPage === true) {
         $scope.breadcrumbs.pop();
+      }
+
+      if ($scope.omitPages) {
+        $scope.breadcrumbs = $scope.breadcrumbs.filter(breadcrumb =>
+          !$scope.omitPages.includes(breadcrumb.toLowerCase())
+        );
       }
 
       if ($scope.useLinks) {

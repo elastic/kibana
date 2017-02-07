@@ -80,6 +80,15 @@ export default class Common {
     return getUrl.baseUrl(config.servers.elasticsearch);
   }
 
+  navigateToUrl(appName, subUrl) {
+    const appConfig = Object.assign({}, config.apps[appName], {
+      // Overwrite the default hash with the URL we really want.
+      hash: `${appName}/${subUrl}`,
+    });
+    const appUrl = getUrl.noAuth(config.servers.kibana, appConfig);
+    return this.remote.get(appUrl);
+  }
+
   navigateToApp(appName, testStatusPage) {
     var self = this;
     var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);

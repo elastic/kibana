@@ -18,9 +18,10 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
+import { VisualizeConstants } from '../visualize_constants';
 
 uiRoutes
-.when('/visualize/create', {
+.when(VisualizeConstants.CREATE_URL, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
@@ -37,7 +38,7 @@ uiRoutes
     }
   }
 })
-.when('/visualize/edit/:id', {
+.when(`${VisualizeConstants.EDIT_URL}/:id`, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route) {
@@ -104,20 +105,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
-    key: 'new',
-    description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); },
-    testId: 'visualizeNewButton',
-  }, {
     key: 'save',
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
-  }, {
-    key: 'open',
-    description: 'Open Saved Visualization',
-    template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
     description: 'Share Visualization',
@@ -224,6 +215,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $state.replace();
 
+    $scope.getVisualizationTitle = function getVisualizationTitle() {
+      return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
+    };
+
     $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
       timefilter.enabled = !!timeField;
     });
@@ -292,10 +287,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     }
   };
 
-  $scope.startOver = function () {
-    kbnUrl.change('/visualize', {});
-  };
-
   /**
    * Called when the user clicks "Save" button.
    */
@@ -321,7 +312,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
-          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+          kbnUrl.change(`${VisualizeConstants.EDIT_URL}/{{id}}`, { id: savedVis.id });
         }
       }
     }, notify.fatal);
