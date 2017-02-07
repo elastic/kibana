@@ -142,8 +142,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
       $scope.save = function () {
-        // Make sure to save the latest query, even if 'enter' hasn't been hit.
-        dashboardState.updateFilters(queryFilter);
         return dashboardState.saveDashboard(angular.toJson).then(function (id) {
           $scope.kbnTopNav.close('save');
           if (id) {
