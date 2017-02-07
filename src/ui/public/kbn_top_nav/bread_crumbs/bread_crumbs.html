@@ -1,0 +1,11 @@
+<div class="kuiLocalBreadcrumbs">
+  <div class="kuiLocalBreadcrumb" ng-if="useLinks" ng-repeat="breadCrumbUrl in breadCrumbUrls">
+    <a class=kuiLocalBreadcrumb__link" href="{{breadCrumbUrl.url}}">{{breadCrumbUrl.breadcrumb}}</a>
+  </div>
+  <div class="kuiLocalBreadcrumb" ng-if="!useLinks" ng-repeat="breadcrumb in breadcrumbs">
+    {{ breadcrumb }}
+  </div>
+  <div class="kuiLocalBreadcrumb" ng-if="pageTitle">
+    {{ pageTitle }}
+  </div>
+</div>

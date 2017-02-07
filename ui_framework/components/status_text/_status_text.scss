@@ -1,0 +1,24 @@
+.kuiStatusText {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.kuiStatusText--info {
+  color: $infoColor;
+}
+
+.kuiStatusText--success {
+  color: $successColor;
+}
+
+.kuiStatusText--warning {
+  color: $warningColor;
+}
+
+.kuiStatusText--error {
+  color: $errorColor;
+}
+
+  .kuiStatusText__icon {
+    margin-right: 6px;
+  }

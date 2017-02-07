@@ -47,7 +47,7 @@ require('ui/routes')
 
 app.controller('timelion', function (
     $scope, $http, timefilter, AppState, courier, $route, $routeParams,
-    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, safeConfirm) {
+    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, confirmModal) {
 
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
@@ -86,12 +86,19 @@ app.controller('timelion', function (
     },
     run: function () {
       const title = savedSheet.title;
-      safeConfirm('Are you sure you want to delete the sheet ' + title + ' ?').then(function () {
+      function doDelete() {
         savedSheet.delete().then(() => {
           notify.info('Deleted ' + title);
           kbnUrl.change('/');
         }).catch(notify.fatal);
-      });},
+      }
+
+      const confirmModalOptions = {
+        onConfirm: doDelete,
+        confirmButtonText: 'Delete sheet'
+      };
+      confirmModal(`Are you sure you want to delete the sheet ${title}?`, confirmModalOptions);
+    },
     testId: 'timelionDeleteButton',
   }, {
     key: 'open',

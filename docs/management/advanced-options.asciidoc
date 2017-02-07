@@ -35,9 +35,12 @@ document.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
+`doc_table:highlight:all_fields`:: Improves highlighting by using a separate `highlight_query` that uses `all_fields` mode on
+`query_string` queries. Set to `false` if you are using a `default_field` in your index.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
 the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
 increase request processing time.
+`courier:ignoreFilterIfFieldNotInIndex`:: Set this property to `true` to skip filters that apply to fields that don't exist in a visualization's index. Useful when dashboards consist of visualizations from multiple index patterns.
 `fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
@@ -47,16 +50,17 @@ when necessary.
 `visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the tile map.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
+`visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.
 `csv:separator`:: A string that serves as the separator for exported values.
 `csv:quoteValues`:: Set this property to `true` to quote exported values.
 `history:limit`:: In fields that have history, such as query inputs, the value of this property limits how many recent
 values are shown.
-`shortDots:enable`:: Set this property to `true` to shorten long field names in visualizations. For example, instead of
-`foo.bar.baz`, show `f.b.baz`.
+`shortDots:enable`:: Set this property to `true` to shorten long field names in visualizations. For example, instead of `foo.bar.baz`, show `f.b.baz`.
 `truncate:maxHeight`:: This property specifies the maximum height that a cell occupies in a table. A value of 0 disables
 truncation.
 `indexPattern:fieldMapping:lookBack`:: The value of this property sets the number of recent matching patterns to query the
 field mapping for index patterns with names that contain timestamps.
+`indexPattern:placeholder`:: The default placeholder value used when adding a new index pattern to Kibana.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "_default_".
 `format:number:defaultPattern`:: Default numeral format for the "number" format.
@@ -74,3 +78,14 @@ Markdown.
 `notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
 `notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
 `notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
+
+`timelion:showTutorial`:: Set this property to `true` to show the Timelion tutorial to users when they first open Timelion.
+`timelion:es.timefield`:: Default field containing a timestamp when using the `.es()` query.
+`timelion:es.default_index`:: Default index when using the `.es()` query.
+`timelion:target_buckets`:: Used for calculating automatic intervals in visualizations, this is the number of buckets to try to represent.
+`timelion:max_buckets`:: Used for calculating automatic intervals in visualizations, this is the maximum number of buckets to represent.
+`timelion:default_columns`:: The default number of columns to use on a timelion sheet.
+`timelion:default_rows`:: The default number of rows to use on a timelion sheet.
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this it the URL of your host
+`timelion:quandl.key`:: [experimental] Used with quandl queries, this is your API key from www.quandl.com
+`state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of information there and the URL gets very long. Enabling this will store parts of the state in your browser session instead, to keep the URL shorter.

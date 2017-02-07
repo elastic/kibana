@@ -6,7 +6,8 @@ export default {
     const diff = max.diff(min);
     return {
       from: max.toISOString(),
-      to: moment(max).add(diff).toISOString()
+      to: moment(max).add(diff).toISOString(),
+      mode: 'absolute'
     };
   },
 
@@ -15,7 +16,8 @@ export default {
     const diff = max.diff(min);
     return {
       from: moment(min).subtract(diff).toISOString(),
-      to: min.toISOString()
+      to: min.toISOString(),
+      mode: 'absolute'
     };
   },
 
@@ -24,7 +26,8 @@ export default {
     const diff = max.diff(min);
     return {
       from: moment(min).subtract(diff / 2).toISOString(),
-      to: moment(max).add(diff / 2).toISOString()
+      to: moment(max).add(diff / 2).toISOString(),
+      mode: 'absolute'
     };
   },
 
@@ -33,7 +36,8 @@ export default {
     const diff = max.diff(min);
     return {
       from: moment(min).add(diff / 4).toISOString(),
-      to: moment(max).subtract(diff / 4).toISOString()
+      to: moment(max).subtract(diff / 4).toISOString(),
+      mode: 'absolute'
     };
   }
 };

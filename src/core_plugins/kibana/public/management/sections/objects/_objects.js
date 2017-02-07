@@ -15,7 +15,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise) {
+.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
@@ -37,6 +37,7 @@ uiModules.get('apps/management')
       const getData = function (filter) {
         const services = registry.all().map(function (obj) {
           const service = $injector.get(obj.service);
+
           return service.find(filter).then(function (data) {
             return {
               service: service,
@@ -100,12 +101,23 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkDelete = function () {
-        $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
-        .then(refreshData)
-        .then(function () {
-          $scope.selectedItems.length = 0;
-        })
-        .catch(error => notify.error(error));
+        function doBulkDelete() {
+          $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+            .then(refreshData)
+            .then(function () {
+              $scope.selectedItems.length = 0;
+            })
+            .catch(error => notify.error(error));
+        }
+
+        const confirmModalOptions = {
+          confirmButtonText: `Delete ${$scope.currentTab.title}`,
+          onConfirm: doBulkDelete
+        };
+        confirmModal(
+          `Are you sure you want to delete the selected ${$scope.currentTab.title}? This action is irreversible!`,
+          confirmModalOptions
+        );
       };
 
       // TODO: Migrate all scope methods to the controller.

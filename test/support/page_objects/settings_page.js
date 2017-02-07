@@ -287,11 +287,12 @@ export default class SettingsPage {
     });
     await PageObjects.common.try(async () => {
       PageObjects.common.debug('getAlertText');
-      alertText = await this.remote.getAlertText();
+      alertText = await PageObjects.common.findTestSubject('confirmModalBodyText').getVisibleText();
     });
     await PageObjects.common.try(async () => {
-      PageObjects.common.debug('acceptAlert');
-      await this.remote.acceptAlert();
+      PageObjects.common.debug('acceptConfirmation');
+      await PageObjects.common.findTestSubject('confirmModalConfirmButton')
+        .click();
     });
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();

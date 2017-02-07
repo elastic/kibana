@@ -1,8 +1,8 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'plugins/kibana/dashboard/services/_saved_dashboard';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../components/panel/lib/panel_state';
+import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
+import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
 
 describe('dashboard panels', function () {
   let $scope;
@@ -19,7 +19,18 @@ describe('dashboard panels', function () {
 
       $el = angular.element(`
         <dashboard-app>
-          <dashboard-grid style="width: 600px; height: 600px;"></dashboard-grid>
+          <dashboard-grid
+            style="width: 600px; height: 600px;"
+            ng-if="!hasExpandedPanel()"
+            on-panel-removed="onPanelRemoved"
+            panels="state.panels"
+            get-vis-click-handler="filterBarClickHandler(state)"
+            get-vis-brush-handler="brushEvent(state)"
+            save-state="saveState"
+            toggle-expand="toggleExpandPanel"
+            create-child-ui-state="createChildUiState"
+            toggle-expand="toggleExpandPanel"
+           ></dashboard-grid>
         </dashboard-app>`);
       $compile($el)($scope);
       $scope.$digest();

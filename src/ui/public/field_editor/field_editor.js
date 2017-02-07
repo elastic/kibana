@@ -14,7 +14,7 @@ import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } 
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce) {
+.directive('fieldEditor', function (Private, $sce, confirmModal) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
   const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
@@ -78,15 +78,25 @@ uiModules
       };
 
       self.delete = function () {
-        const indexPattern = self.indexPattern;
-        const field = self.field;
+        function doDelete() {
+          const indexPattern = self.indexPattern;
+          const field = self.field;
 
-        indexPattern.fields.remove({ name: field.name });
-        return indexPattern.save()
-        .then(function () {
-          notify.info('Deleted Field "' + field.name + '"');
-          redirectAway();
-        });
+          indexPattern.fields.remove({ name: field.name });
+          return indexPattern.save()
+            .then(function () {
+              notify.info('Deleted Field "' + field.name + '"');
+              redirectAway();
+            });
+        }
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: doDelete
+        };
+        confirmModal(
+          `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
+          confirmModalOptions
+        );
       };
 
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {

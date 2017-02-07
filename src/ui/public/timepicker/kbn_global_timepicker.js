@@ -19,7 +19,8 @@ UiModules
   return {
     template: toggleHtml,
     replace: true,
-    link: ($scope) => {
+    require: '^kbnTopNav',
+    link: ($scope, element, attributes, kbnTopNav) => {
       listenForUpdates($rootScope);
 
       $rootScope.timefilter = timefilter;
@@ -28,11 +29,22 @@ UiModules
       };
 
       $scope.forward = function () {
-        assign(timefilter.time, timeNavigation.stepForward(timefilter.getBounds()));
+        timefilter.time = timeNavigation.stepForward(timefilter.getBounds());
       };
 
       $scope.back = function () {
-        assign(timefilter.time, timeNavigation.stepBackward(timefilter.getBounds()));
+        timefilter.time = timeNavigation.stepBackward(timefilter.getBounds());
+      };
+
+      $scope.updateFilter = function (from, to) {
+        timefilter.time.from = from;
+        timefilter.time.to = to;
+        kbnTopNav.close('filter');
+      };
+
+      $scope.updateInterval = function (interval) {
+        timefilter.refreshInterval = interval;
+        kbnTopNav.close('interval');
       };
     },
   };

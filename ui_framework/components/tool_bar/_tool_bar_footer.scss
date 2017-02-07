@@ -1,0 +1,12 @@
+.kuiToolBarFooter {
+  @include bar;
+
+  padding: 10px;
+  height: 40px;
+  background-color: #ffffff;
+  border: $tableBorder;
+}
+
+.kuiToolBarFooterSection {
+  @include barSection;
+}

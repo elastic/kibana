@@ -1,0 +1,7 @@
+.kuiTextArea {
+  @include formControl;
+}
+
+.kuiTextArea--nonResizable {
+  resize: none;
+}

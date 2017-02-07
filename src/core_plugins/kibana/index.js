@@ -9,6 +9,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
+import handleEsError from './server/lib/handle_es_error';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -26,9 +27,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
-
-
-
+      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -45,7 +44,7 @@ module.exports = function (kibana) {
           'docViews'
         ],
 
-        injectVars: function (server, options) {
+        injectVars: function (server) {
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
@@ -140,7 +139,9 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+
       server.expose('systemApi', systemApi);
+      server.expose('handleEsError', handleEsError);
     }
   });
 };

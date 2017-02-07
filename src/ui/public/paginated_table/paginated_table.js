@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import AggConfigResult from 'ui/vis/agg_config_result';
 
 import uiModules from 'ui/modules';
 import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
@@ -14,7 +15,9 @@ uiModules
     scope: {
       rows: '=',
       columns: '=',
+      linkToTop: '=',
       perPage: '=?',
+      showBlankRows: '=?',
       sortHandler: '=?',
       sort: '=?',
       showSelector: '=?',
@@ -51,10 +54,19 @@ uiModules
         }
       };
 
+      self.rowsToShow = function (numRowsPerPage, actualNumRowsOnThisPage) {
+        if ($scope.showBlankRows === false) {
+          return actualNumRowsOnThisPage;
+        } else {
+          return numRowsPerPage;
+        }
+      };
+
       function valueGetter(row) {
         let value = row[self.sort.columnIndex];
         if (value && value.value != null) value = value.value;
         if (typeof value === 'boolean') value = value ? 0 : 1;
+        if (value instanceof AggConfigResult && value.valueOf() === null) value = false;
         return value;
       }
 

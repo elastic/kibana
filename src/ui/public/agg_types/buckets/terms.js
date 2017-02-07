@@ -16,12 +16,13 @@ export default function TermsAggDefinition(Private) {
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
+  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev'];
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
       title: 'Order Agg',
-      aggFilter: ['!percentiles', '!median', '!std_dev']
+      aggFilter: aggFilter
     }
   ])).all[0];
 
@@ -94,18 +95,28 @@ export default function TermsAggDefinition(Private) {
           $scope.$watch('responseValueAggs', updateOrderAgg);
           $scope.$watch('agg.params.orderBy', updateOrderAgg);
 
+          // Returns true if the agg is not compatible with the terms bucket
+          $scope.rejectAgg = function (agg) {
+            // aggFilter elements all starts with a '!'
+            // so the index of agg.type.name in a filter is 1 if it is included
+            return Boolean(aggFilter.find((filter) => filter.indexOf(agg.type.name) === 1));
+          };
+
           function updateOrderAgg() {
+            // abort until we get the responseValueAggs
+            if (!$scope.responseValueAggs) return;
             const agg = $scope.agg;
-            const aggs = agg.vis.aggs;
             const params = agg.params;
             const orderBy = params.orderBy;
             const paramDef = agg.type.params.byName.orderAgg;
 
             // setup the initial value of orderBy
             if (!orderBy && prevOrderBy === INIT) {
-              // abort until we get the responseValueAggs
-              if (!$scope.responseValueAggs) return;
-              params.orderBy = (_.first($scope.responseValueAggs) || { id: 'custom' }).id;
+              let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
+              if (!respAgg) {
+                respAgg = { id: '_term' };
+              }
+              params.orderBy = respAgg.id;
               return;
             }
 
@@ -115,15 +126,10 @@ export default function TermsAggDefinition(Private) {
             // we aren't creating a custom aggConfig
             if (!orderBy || orderBy !== 'custom') {
               params.orderAgg = null;
-
-              if (orderBy === '_term') {
-                params.orderBy = '_term';
-                return;
-              }
-
               // ensure that orderBy is set to a valid agg
-              if (!_.find($scope.responseValueAggs, { id: orderBy })) {
-                params.orderBy = null;
+              const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
+              if (!respAgg) {
+                params.orderBy = '_term';
               }
               return;
             }
