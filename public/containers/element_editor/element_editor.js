@@ -48,7 +48,8 @@ const Editor = React.createClass({
                   value={value}
                   help={arg.help}
                   options={arg.options}
-                  context={argValues}>
+                  context={argValues}
+                  defaultValue={arg.default}>
                   </ArgumentForm>
               </div>
             );
