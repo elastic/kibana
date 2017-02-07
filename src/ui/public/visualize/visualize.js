@@ -150,6 +150,10 @@ uiModules
           $scope.editableVis = vis;
         }
 
+        const enabledState = $scope.editableVis.getEnabledState();
+        $scope.vis.setState(enabledState);
+        $scope.editableVis.dirty = false;
+
         if (oldVis) $scope.renderbot = null;
         if (vis) {
           $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
