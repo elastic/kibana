@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
-import httpolyglot from 'httpolyglot';
+import httpolyglot from '@elastic/httpolyglot';
 
 import tlsCiphers from './tls_ciphers';
 
