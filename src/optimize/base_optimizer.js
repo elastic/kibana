@@ -49,14 +49,14 @@ class BaseOptimizer {
   async initCompiler() {
     if (this.compiler) return this.compiler;
 
-    let compilerConfig = this.getConfig();
+    const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
     this.compiler.plugin('done', stats => {
       if (!this.profile) return;
 
-      let path = resolve(this.env.workingDir, 'stats.json');
-      let content = JSON.stringify(stats.toJson());
+      const path = resolve(this.env.workingDir, 'stats.json');
+      const content = JSON.stringify(stats.toJson());
       writeFile(path, content, function (err) {
         if (err) throw err;
       });
@@ -190,7 +190,7 @@ class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    let statFormatOpts = {
+    const statFormatOpts = {
       hash: false,  // add the hash of the compilation
       version: false,  // add webpack version information
       timings: false,  // add timing information
@@ -209,7 +209,7 @@ class BaseOptimizer {
       children: false,
     };
 
-    let details = stats.toString(defaults({ colors: true }, statFormatOpts));
+    const details = stats.toString(defaults({ colors: true }, statFormatOpts));
 
     return Boom.create(
       500,

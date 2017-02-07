@@ -10,10 +10,10 @@ import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_ser
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 export default function VislibVisTypeFactory(Private) {
 
-  let VisTypeSchemas = Private(VisSchemasProvider);
-  let VisType = Private(VisVisTypeProvider);
-  let pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
-  let VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
+  const VisTypeSchemas = Private(VisSchemasProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
+  const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
 
   _.class(VislibVisType).inherits(VisType);
@@ -32,4 +32,4 @@ export default function VislibVisTypeFactory(Private) {
   };
 
   return VislibVisType;
-};
+}

@@ -16,8 +16,8 @@ var InputHighlightRules = function () {
       reg = reg.source;
     }
     return [
-      {token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL},
-      {token: tokens, regex: reg, next: normalNext}
+      { token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL },
+      { token: tokens, regex: reg, next: normalNext }
     ];
   }
 

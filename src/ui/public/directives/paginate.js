@@ -2,7 +2,7 @@ import _ from 'lodash';
 import uiModules from 'ui/modules';
 import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
 
-let PER_PAGE_DEFAULT = 10;
+const PER_PAGE_DEFAULT = 10;
 
 uiModules.get('kibana')
 .directive('paginate', function ($parse, $compile) {
@@ -22,7 +22,7 @@ uiModules.get('kibana')
           $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
         }
 
-        let paginate = $scope.paginate;
+        const paginate = $scope.paginate;
 
         // add some getters to the controller powered by attributes
         paginate.getList = $parse(attrs.list);
@@ -62,8 +62,8 @@ uiModules.get('kibana')
           self.perPageProp,
           self.otherWidthGetter
         ], function (vals, oldVals) {
-          let intChanges = vals[0] !== oldVals[0];
-          let extChanges = vals[1] !== oldVals[1];
+          const intChanges = vals[0] !== oldVals[0];
+          const extChanges = vals[1] !== oldVals[1];
 
           if (intChanges) {
             if (!setPerPage(self.perPage)) {
@@ -106,14 +106,14 @@ uiModules.get('kibana')
         $scope.pages = [];
         if (!$scope.list) return;
 
-        let perPage = _.parseInt(self.perPage);
-        let count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
+        const perPage = _.parseInt(self.perPage);
+        const count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
         _.times(count, function (i) {
           let page;
 
           if (perPage) {
-            let start = perPage * i;
+            const start = perPage * i;
             page = $scope.list.slice(start, start + perPage);
           } else {
             page = $scope.list.slice(0);
@@ -148,7 +148,7 @@ uiModules.get('kibana')
 
         // setup the list of the other pages to link to
         $scope.otherPages = [];
-        let width = +self.otherWidthGetter($scope) || 5;
+        const width = +self.otherWidthGetter($scope) || 5;
         let left = page.i - Math.round((width - 1) / 2);
         let right = left + width - 1;
 
@@ -159,14 +159,14 @@ uiModules.get('kibana')
         }
 
         // shift extra right nums to left
-        let lastI = page.count - 1;
+        const lastI = page.count - 1;
         if (right > lastI) {
           right = lastI;
           left = right - width + 1;
         }
 
         for (let i = left; i <= right; i++) {
-          let other = $scope.pages[i];
+          const other = $scope.pages[i];
 
           if (!other) continue;
 

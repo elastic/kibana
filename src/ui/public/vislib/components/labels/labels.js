@@ -20,4 +20,4 @@ export default function LabelUtilService(Private) {
     if (chartType === 'pie') { return getPieLabels(obj); }
     return getArrOfUniqLabels(createArr(obj));
   };
-};
+}

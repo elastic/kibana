@@ -90,7 +90,7 @@ module.directive('kbnTopNav', function (Private) {
 
         if (!transcludedContentContainer) {
           return;
-        };
+        }
 
         const transcludedContent = transcludedContentContainer.children;
         _.forEach(transcludedContent, transcludedItem => {

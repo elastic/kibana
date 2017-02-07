@@ -79,7 +79,7 @@ describe('kbnUrl', function () {
         }
       };
 
-      let unbind = sinon.stub();
+      const unbind = sinon.stub();
       sinon.stub($rootScope, '$on').returns(unbind);
       $route.reload = sinon.stub();
 
@@ -87,7 +87,7 @@ describe('kbnUrl', function () {
       kbnUrl.change('/url');
       expect($rootScope.$on.callCount).to.be(1);
 
-      let handler = $rootScope.$on.firstCall.args[1];
+      const handler = $rootScope.$on.firstCall.args[1];
       handler();
       expect(unbind.callCount).to.be(1);
       expect($route.reload.callCount).to.be(1);
@@ -175,9 +175,9 @@ describe('kbnUrl', function () {
     });
 
     it('should uri encode replaced params', function () {
-      let url = '/some/path/';
-      let params = { replace: faker.Lorem.words(3).join(' ') };
-      let check = encodeURIComponent(params.replace);
+      const url = '/some/path/';
+      const params = { replace: faker.Lorem.words(3).join(' ') };
+      const check = encodeURIComponent(params.replace);
       sinon.stub($location, 'url');
 
       kbnUrl.change(url + '{{replace}}', params);
@@ -187,22 +187,22 @@ describe('kbnUrl', function () {
 
     it('should parse angular expression in substitutions and uri encode the results', function () {
       // build url by piecing together these parts
-      let urlParts = ['/', '/', '?', '&', '#'];
+      const urlParts = ['/', '/', '?', '&', '#'];
       // make sure it can parse templates with weird spacing
-      let wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
+      const wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
       // make sure filters are evaluated via angular expressions
-      let objIndex = 4; // used to case one replace as an object
-      let filters = ['', 'uppercase', '', 'uppercase', 'rison'];
+      const objIndex = 4; // used to case one replace as an object
+      const filters = ['', 'uppercase', '', 'uppercase', 'rison'];
 
       // the words (template keys) used must all be unique
-      let words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
+      const words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
         if (filters[i].length) {
           return word + '|' + filters[i];
         }
         return word;
       });
 
-      let replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
+      const replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
         // make selected replacement into an object
         if (i === objIndex) {
           return { replace: word };
@@ -216,15 +216,15 @@ describe('kbnUrl', function () {
       let testUrl = '';
       urlParts.forEach(function (part, i) {
         url += part + wrappers[i][0] + words[i] + wrappers[i][1];
-        let locals = {};
+        const locals = {};
         locals[words[i].split('|')[0]] = replacements[i];
         testUrl += part + encodeURIComponent($rootScope.$eval(words[i], locals));
       });
 
       // create the locals replacement object
-      let params = {};
+      const params = {};
       replacements.forEach(function (replacement, i) {
-        let word = words[i].split('|')[0];
+        const word = words[i].split('|')[0];
         params[word] = replacement;
       });
 
@@ -237,7 +237,7 @@ describe('kbnUrl', function () {
     });
 
     it('should handle dot notation', function () {
-      let url = '/some/thing/{{that.is.substituted}}';
+      const url = '/some/thing/{{that.is.substituted}}';
 
       kbnUrl.change(url, {
         that: {
@@ -251,8 +251,8 @@ describe('kbnUrl', function () {
     });
 
     it('should throw when params are missing', function () {
-      let url = '/{{replace_me}}';
-      let params = {};
+      const url = '/{{replace_me}}';
+      const params = {};
 
       try {
         kbnUrl.change(url, params);
@@ -264,8 +264,8 @@ describe('kbnUrl', function () {
     });
 
     it('should throw when filtered params are missing', function () {
-      let url = '/{{replace_me|number}}';
-      let params = {};
+      const url = '/{{replace_me|number}}';
+      const params = {};
 
       try {
         kbnUrl.change(url, params);
@@ -277,10 +277,10 @@ describe('kbnUrl', function () {
     });
 
     it('should change the entire url', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -298,10 +298,10 @@ describe('kbnUrl', function () {
     });
 
     it('should allow setting app state on the target url', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -321,10 +321,10 @@ describe('kbnUrl', function () {
 
   describe('changePath', function () {
     it('should change just the path', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -344,10 +344,10 @@ describe('kbnUrl', function () {
 
   describe('redirect', function () {
     it('should change the entire url', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -365,10 +365,10 @@ describe('kbnUrl', function () {
     });
 
     it('should allow setting app state on the target url', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -406,10 +406,10 @@ describe('kbnUrl', function () {
 
   describe('redirectPath', function () {
     it('should only change the path', function () {
-      let path = '/test/path';
-      let search = {search: 'test'};
-      let hash = 'hash';
-      let newPath = '/new/location';
+      const path = '/test/path';
+      const search = { search: 'test' };
+      const hash = 'hash';
+      const newPath = '/new/location';
 
       $location
         .path(path)

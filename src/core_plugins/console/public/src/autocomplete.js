@@ -75,9 +75,9 @@ module.exports = function (editor) {
   function addMetaToTermsList(list, meta, template) {
     return _.map(list, function (t) {
       if (typeof t !== "object") {
-        t = {name: t};
+        t = { name: t };
       }
-      return _.defaults(t, {meta: meta, template: template});
+      return _.defaults(t, { meta: meta, template: template });
     });
   }
 
@@ -164,13 +164,13 @@ module.exports = function (editor) {
       var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
         case "paren.rparen":
-          newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
           break;
         case "punctuation.colon":
           nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
           if ((nonEmptyToken || {}).type == "paren.lparen") {
             nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-            newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+            newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
               newPos.column++;
             } // don't stand on "
@@ -179,7 +179,7 @@ module.exports = function (editor) {
         case "paren.lparen":
         case "punctuation.comma":
           tokenIter.stepForward();
-          newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
           break;
       }
       editor.moveCursorToPosition(newPos);
@@ -322,7 +322,7 @@ module.exports = function (editor) {
 
     context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
     if (!context.updatedForToken) {
-      context.updatedForToken = {value: "", start: pos.column};
+      context.updatedForToken = { value: "", start: pos.column };
     } // empty line
 
     var anchorToken = context.createdWithToken;
@@ -371,7 +371,7 @@ module.exports = function (editor) {
         break;
     }
 
-    context.textBoxPosition = {row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column};
+    context.textBoxPosition = { row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column };
 
     switch (context.autoCompleteType) {
       case "path":
@@ -509,7 +509,7 @@ module.exports = function (editor) {
 
   function addMethodAutoCompleteSetToContext(context, pos) {
     context.autoCompleteSet = _.map(["GET", "PUT", "POST", "DELETE", "HEAD"], function (m, i) {
-      return {name: m, score: -i, meta: "method"}
+      return { name: m, score: -i, meta: "method" }
     })
   }
 
@@ -838,7 +838,7 @@ module.exports = function (editor) {
         LAST_EVALUATED_TOKEN = null;
         return;
       }
-      currentToken = {start: 0, value: ""}; // empty row
+      currentToken = { start: 0, value: "" }; // empty row
     }
 
     currentToken.row = pos.row; // extend token with row. Ace doesn't supply it by default

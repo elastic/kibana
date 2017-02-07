@@ -7,16 +7,16 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import getPercentileValue from './percentiles_get_value';
 
 export default function AggTypeMetricPercentileRanksProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   // required by the values editor
 
-  let valueProps = {
+  const valueProps = {
     makeLabel: function () {
-      let field = this.getField();
-      let format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+      const field = this.getField();
+      const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
       const label = this.params.customLabel || this.getFieldDisplayName();
 
       return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + label + '"';
@@ -46,7 +46,7 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
       }
     ],
     getResponseAggs: function (agg) {
-      let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+      const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
       return agg.params.values.map(function (value) {
         return new ValueAggConfig(value);
@@ -59,4 +59,4 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
       return getPercentileValue(agg, bucket) / 100;
     }
   });
-};
+}

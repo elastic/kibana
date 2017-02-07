@@ -3,9 +3,9 @@ import 'ui/field_format_editor/numeral/numeral';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
 export default function AbstractNumeralFormatProvider(Private) {
-  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  let BoundToConfigObj = Private(BoundToConfigObjProvider);
-  let numeral = require('numeral')();
+  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const BoundToConfigObj = Private(BoundToConfigObjProvider);
+  const numeral = require('numeral')();
 
   _.class(Numeral).inherits(FieldFormat);
   function Numeral(params) {
@@ -55,4 +55,4 @@ export default function AbstractNumeralFormatProvider(Private) {
   };
 
   return Numeral;
-};
+}

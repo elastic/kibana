@@ -51,9 +51,9 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
           missing: true
         },
         boolOpts: [
-          {label: 'any', value: undefined },
-          {label: 'yes', value: true },
-          {label: 'no', value: false }
+          { label: 'any', value: undefined },
+          { label: 'yes', value: true },
+          { label: 'no', value: false }
         ],
         toggleVal: function (name, def) {
           if (filter.vals[name] !== def) filter.vals[name] = def;
@@ -204,7 +204,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
               type: type,
               aggs: [
                 agg,
-                {schema: 'metric', type: 'count', 'id': '2'}
+                { schema: 'metric', type: 'count', 'id': '2' }
               ]
             }
           })

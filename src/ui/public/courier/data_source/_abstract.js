@@ -18,7 +18,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
   const getHighlightRequest = Private(getHighlightRequestProvider);
 
   function SourceAbstract(initialState, strategy) {
-    let self = this;
+    const self = this;
     self._instanceid = _.uniqueId('data_source');
 
     self._state = (function () {
@@ -83,7 +83,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
    *   string of the state value to set
    */
   SourceAbstract.prototype.set = function (state, val) {
-    let self = this;
+    const self = this;
 
     if (typeof state === 'string') {
       // the getter and setter methods check for undefined explicitly
@@ -129,7 +129,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
    * @return {Promise}
    */
   SourceAbstract.prototype.onResults = function (handler) {
-    let self = this;
+    const self = this;
 
     return new PromiseEmitter(function (resolve, reject) {
       const defer = Promise.defer();
@@ -153,7 +153,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
    * @return {Promise}
    */
   SourceAbstract.prototype.onError = function (handler) {
-    let self = this;
+    const self = this;
 
     return new PromiseEmitter(function (resolve, reject) {
       const defer = Promise.defer();
@@ -176,7 +176,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
    * @async
    */
   SourceAbstract.prototype.fetch = function () {
-    let self = this;
+    const self = this;
     let req = _.first(self._myStartableQueued());
 
     if (!req) {
@@ -236,13 +236,13 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
    * @resolved {Object|null} - the flat state of the SourceAbstract
    */
   SourceAbstract.prototype._flatten = function () {
-    let type = this._getType();
+    const type = this._getType();
 
     // the merged state of this dataSource and it's ancestors
-    let flatState = {};
+    const flatState = {};
 
     // function used to write each property from each state object in the chain to flat state
-    let root = this;
+    const root = this;
 
     // start the chain at this source
     let current = this;
@@ -259,12 +259,12 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
           });
         }
 
-        let prom = root._mergeProp(flatState, value, key);
+        const prom = root._mergeProp(flatState, value, key);
         return Promise.is(prom) ? prom : null;
       }))
       .then(function () {
         // move to this sources parent
-        let parent = current.getParent();
+        const parent = current.getParent();
         // keep calling until we reach the top parent
         if (parent) {
           current = parent;
@@ -275,7 +275,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
     .then(function () {
       if (type === 'search') {
         // This is down here to prevent the circular dependency
-        let decorateQuery = Private(DecorateQueryProvider);
+        const decorateQuery = Private(DecorateQueryProvider);
 
         flatState.body = flatState.body || {};
 
@@ -287,7 +287,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
         }
 
         if (flatState.body.size > 0) {
-          let computedFields = flatState.index.getComputedFields();
+          const computedFields = flatState.index.getComputedFields();
           flatState.body.stored_fields = computedFields.storedFields;
           flatState.body.script_fields = flatState.body.script_fields || {};
           flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
@@ -311,7 +311,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
          *                          through otherwise it will filter out
          * @returns {function}
          */
-        let filterNegate = function (reverse) {
+        const filterNegate = function (reverse) {
           return function (filter) {
             if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
             return filter.meta && filter.meta.negate === reverse;
@@ -323,7 +323,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
         * @param  {Object} filter - The filter to translate
         * @return {Object} the query version of that filter
         */
-        let translateToQuery = function (filter) {
+        const translateToQuery = function (filter) {
           if (!filter) return;
 
           if (filter.query) {
@@ -338,7 +338,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
          * @param {object} filter The filter to clean
          * @returns {object}
          */
-        let cleanFilter = function (filter) {
+        const cleanFilter = function (filter) {
           return _.omit(filter, ['meta']);
         };
 
@@ -405,4 +405,4 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
   };
 
   return SourceAbstract;
-};
+}

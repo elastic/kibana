@@ -24,4 +24,4 @@ export default function DocSourceFactory(Private) {
   }
 
   return DocSource;
-};
+}

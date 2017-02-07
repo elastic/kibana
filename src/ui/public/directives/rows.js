@@ -7,7 +7,7 @@ import tableCellFilterHtml from './partials/table_cell_filter.html';
 const module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
-  let filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
@@ -77,18 +77,18 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         attr.kbnRowsMin
       ], function (vals) {
         let rows = vals[0];
-        let min = vals[1];
+        const min = vals[1];
 
         $el.empty();
 
         if (!_.isArray(rows)) rows = [];
-        let width = rows.reduce(maxRowSize, 0);
+        const width = rows.reduce(maxRowSize, 0);
 
         if (isFinite(min) && rows.length < min) {
           // clone the rows so that we can add elements to it without upsetting the original
           rows = _.clone(rows);
           // crate the empty row which will be pushed into the row list over and over
-          let emptyRow = new Array(width);
+          const emptyRow = new Array(width);
           // fill the empty row with values
           _.times(width, function (i) { emptyRow[i] = ''; });
           // push as many empty rows into the row array as needed
@@ -96,7 +96,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         }
 
         rows.forEach(function (row) {
-          let $tr = $(document.createElement('tr')).appendTo($el);
+          const $tr = $(document.createElement('tr')).appendTo($el);
           row.forEach(function (cell) {
             addCell($tr, cell);
           });

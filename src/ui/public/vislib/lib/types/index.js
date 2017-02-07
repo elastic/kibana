@@ -17,4 +17,4 @@ export default function TypeFactory(Private) {
     point_series: pointSeries.line,
     heatmap: pointSeries.heatmap,
   };
-};
+}

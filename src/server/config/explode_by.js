@@ -1,10 +1,10 @@
 import _ from 'lodash';
 module.exports = function (dot, flatObject) {
-  let fullObject = {};
+  const fullObject = {};
   _.each(flatObject, function (value, key) {
-    let keys = key.split(dot);
+    const keys = key.split(dot);
     (function walk(memo, keys, value) {
-      let _key = keys.shift();
+      const _key = keys.shift();
       if (keys.length === 0) {
         memo[_key] = value;
       } else {

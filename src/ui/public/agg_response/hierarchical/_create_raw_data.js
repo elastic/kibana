@@ -3,12 +3,12 @@ import extractBuckets from 'ui/agg_response/hierarchical/_extract_buckets';
 export default function (vis, resp) {
 
   // Create the initial results structure
-  let results = { rows: [] };
+  const results = { rows: [] };
 
   // Create a reference to the buckets and metrics
-  let metrics = vis.aggs.bySchemaGroup.metrics;
-  let buckets = vis.aggs.bySchemaGroup.buckets;
-  let aggs = [];
+  const metrics = vis.aggs.bySchemaGroup.metrics;
+  const buckets = vis.aggs.bySchemaGroup.buckets;
+  const aggs = [];
 
   if (buckets) {
     _.each(buckets, function (bucket) {
@@ -37,7 +37,7 @@ export default function (vis, resp) {
 
   // if there are no buckets then we need to just set the value and return
   if (!buckets) {
-    let value = resp.aggregations
+    const value = resp.aggregations
       && resp.aggregations[metrics[0].id]
       && resp.aggregations[metrics[0].id].value
       || resp.hits.total;
@@ -61,7 +61,7 @@ export default function (vis, resp) {
     // iterate through all the buckets
     _.each(extractBuckets(data[agg.id], agg), function (bucket) {
 
-      let _record = _.flattenDeep([record, bucket.key]);
+      const _record = _.flattenDeep([record, bucket.key]);
       _.each(metrics, function (metric) {
         let value = bucket.doc_count;
         if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {
@@ -74,7 +74,7 @@ export default function (vis, resp) {
       // buckets. If it does then we need to keep on walking the tree.
       // This is where the recursion happens.
       if (agg._next) {
-        let nextBucket = bucket[agg._next.id];
+        const nextBucket = bucket[agg._next.id];
         if (nextBucket && nextBucket.buckets) {
           walkBuckets(agg._next, bucket, _record);
         }
@@ -90,4 +90,4 @@ export default function (vis, resp) {
   walkBuckets(buckets[0], resp.aggregations);
 
   return results;
-};
+}

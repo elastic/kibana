@@ -28,11 +28,11 @@ describe('AggParams class', function () {
 
   describe('constructor args', function () {
     it('accepts an array of param defs', function () {
-      let params = [
+      const params = [
         { name: 'one' },
         { name: 'two' }
       ];
-      let aggParams = new AggParams(params);
+      const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams).to.be.an(Array);
@@ -42,43 +42,43 @@ describe('AggParams class', function () {
 
   describe('AggParam creation', function () {
     it('Uses the FieldAggParam class for params with the name "field"', function () {
-      let params = [
+      const params = [
         { name: 'field' }
       ];
-      let aggParams = new AggParams(params);
+      const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(FieldAggParam);
     });
 
     it('Uses the OptionedAggParam class for params of type "optioned"', function () {
-      let params = [
+      const params = [
         {
           name: 'interval',
           type: 'optioned'
         }
       ];
-      let aggParams = new AggParams(params);
+      const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedAggParam);
     });
 
     it('Uses the RegexAggParam class for params of type "regex"', function () {
-      let params = [
+      const params = [
         {
           name: 'exclude',
           type: 'regex'
         }
       ];
-      let aggParams = new AggParams(params);
+      const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(RegexAggParam);
     });
 
     it('Always converts the params to a BaseAggParam', function () {
-      let params = [
+      const params = [
         {
           name: 'height',
           editor: '<blink>high</blink>'
@@ -92,7 +92,7 @@ describe('AggParams class', function () {
           editor: '<blink>small</blink>'
         }
       ];
-      let aggParams = new AggParams(params);
+      const aggParams = new AggParams(params);
 
       expect(BaseAggParam).to.have.property('callCount', params.length);
       expect(FieldAggParam).to.have.property('callCount', 0);

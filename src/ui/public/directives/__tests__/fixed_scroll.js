@@ -10,7 +10,7 @@ describe('FixedScroll directive', function () {
 
   let compile;
   let flushPendingTasks;
-  let trash = [];
+  const trash = [];
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $rootScope, $timeout) {
@@ -25,7 +25,7 @@ describe('FixedScroll directive', function () {
 
       // since the directive works at the sibling level we create a
       // parent for everything to happen in
-      let $parent = $('<div>').css({
+      const $parent = $('<div>').css({
         position: 'fixed',
         top: 0,
         left: 0,
@@ -36,12 +36,12 @@ describe('FixedScroll directive', function () {
       $parent.appendTo(document.body);
       trash.push($parent);
 
-      let $el = $('<div fixed-scroll></div>').css({
+      const $el = $('<div fixed-scroll></div>').css({
         'overflow-x': 'auto',
         'width': $parent.width()
       }).appendTo($parent);
 
-      let $content = $('<div>').css({
+      const $content = $('<div>').css({
         width: $parent.width() * ratioX,
         height: $parent.height() * ratioY
       }).appendTo($el);
@@ -73,26 +73,26 @@ describe('FixedScroll directive', function () {
   });
 
   it('attaches a scroller below the element when the content is larger then the container', function () {
-    let els = compile(1.5);
+    const els = compile(1.5);
     expect(els.$scroller).to.have.length(1);
   });
 
   it('copies the width of the container', function () {
-    let els = compile(1.5);
+    const els = compile(1.5);
     expect(els.$scroller.width()).to.be(els.$container.width());
   });
 
   it('mimics the scrollWidth of the element', function () {
-    let els = compile(1.5);
+    const els = compile(1.5);
     expect(els.$scroller.prop('scrollWidth')).to.be(els.$container.prop('scrollWidth'));
   });
 
   describe('scroll event handling / tug of war prevention', function () {
     it('listens when needed, unlistens when not needed', function () {
-      let on = sinon.spy($.fn, 'on');
-      let off = sinon.spy($.fn, 'off');
+      const on = sinon.spy($.fn, 'on');
+      const off = sinon.spy($.fn, 'off');
 
-      let els = compile(1.5);
+      const els = compile(1.5);
       expect(on.callCount).to.be(2);
       checkThisVals('$.fn.on', on);
 
@@ -136,12 +136,12 @@ describe('FixedScroll directive', function () {
           expect(spy.callCount).to.be(2);
 
           // first call should read the scrollLeft from the $container
-          let firstCall = spy.getCall(0);
+          const firstCall = spy.getCall(0);
           expect(firstCall.thisValue.is($from)).to.be(true);
           expect(firstCall.args).to.eql([]);
 
           // second call should be setting the scrollLeft on the $scroller
-          let secondCall = spy.getCall(1);
+          const secondCall = spy.getCall(1);
           expect(secondCall.thisValue.is($to)).to.be(true);
           expect(secondCall.args).to.eql([firstCall.returnValue]);
         });

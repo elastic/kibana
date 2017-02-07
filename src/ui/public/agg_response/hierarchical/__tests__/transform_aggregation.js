@@ -34,25 +34,25 @@ describe('buildHierarchicalData()', function () {
 
       fixture.aggData = {
         buckets: [
-          { key: 'foo', doc_count: 2, agg_3: { buckets: [ { key: 'win', doc_count: 1 }, { key: 'mac', doc_count: 1 }]}},
-          { key: 'bar', doc_count: 4, agg_3: {  buckets: [ { key: 'win', doc_count: 2 }, { key: 'mac', doc_count: 2 }]}}
+          { key: 'foo', doc_count: 2, agg_3: { buckets: [ { key: 'win', doc_count: 1 }, { key: 'mac', doc_count: 1 }] } },
+          { key: 'bar', doc_count: 4, agg_3: {  buckets: [ { key: 'win', doc_count: 2 }, { key: 'mac', doc_count: 2 }] } }
         ]
       };
 
     });
 
     it('relies on metricAgg#getValue() for the size of the children', function () {
-      let aggData = {
+      const aggData = {
         buckets: [
           { key: 'foo' },
           { key: 'bar' }
         ]
       };
 
-      let football = {};
+      const football = {};
       fixture.metric.getValue = _.constant(football);
 
-      let children = transform(fixture.agg, fixture.metric, aggData);
+      const children = transform(fixture.agg, fixture.metric, aggData);
       expect(children).to.be.an(Array);
       expect(children).to.have.length(2);
       expect(children[0]).to.have.property('size', football);
@@ -60,7 +60,7 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('should create two levels of metrics', function () {
-      let children = transform(fixture.agg, fixture.metric, fixture.aggData);
+      const children = transform(fixture.agg, fixture.metric, fixture.aggData);
       fixture.metric.getValue = function (b) { return b.doc_count; };
 
       expect(children).to.be.an(Array);

@@ -68,4 +68,4 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
   }
 
   return filter;
-};
+}

@@ -3,7 +3,7 @@ import angular from 'angular';
 import { getHighlightHtml } from 'ui/highlight';
 export default function contentTypesProvider() {
 
-  let types = {
+  const types = {
     html: function (format, convert) {
       return function recurse(value, field, hit) {
         if (value == null) {
@@ -14,10 +14,10 @@ export default function contentTypesProvider() {
           return convert.call(format, value, field, hit);
         }
 
-        let subVals = value.map(function (v) {
+        const subVals = value.map(function (v) {
           return recurse(v, field, hit);
         });
-        let useMultiLine = subVals.some(function (sub) {
+        const useMultiLine = subVals.some(function (sub) {
           return sub.indexOf('\n') > -1;
         });
 
@@ -42,7 +42,7 @@ export default function contentTypesProvider() {
   }
 
   function fallbackHtml(value, field, hit) {
-    let formatted = _.escape(this.convert(value, 'text'));
+    const formatted = _.escape(this.convert(value, 'text'));
 
     if (!hit || !hit.highlight || !hit.highlight[field.name]) {
       return formatted;
@@ -52,8 +52,8 @@ export default function contentTypesProvider() {
   }
 
   function setup(format) {
-    let src = format._convert || {};
-    let converters = format._convert = {};
+    const src = format._convert || {};
+    const converters = format._convert = {};
 
     converters.text = types.text(format, src.text || fallbackText);
     converters.html = types.html(format, src.html || fallbackHtml);
@@ -65,4 +65,4 @@ export default function contentTypesProvider() {
     types: types,
     setup: setup
   };
-};
+}

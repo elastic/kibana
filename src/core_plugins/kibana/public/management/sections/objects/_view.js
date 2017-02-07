@@ -147,7 +147,7 @@ uiModules.get('apps/management')
         session.setUseSoftTabs(true);
         session.on('changeAnnotation', function () {
           const annotations = session.getAnnotations();
-          if (_.some(annotations, { type: 'error'})) {
+          if (_.some(annotations, { type: 'error' })) {
             if (!_.contains($scope.aceInvalidEditors, fieldName)) {
               $scope.aceInvalidEditors.push(fieldName);
             }

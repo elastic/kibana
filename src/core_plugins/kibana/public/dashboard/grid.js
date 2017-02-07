@@ -137,7 +137,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
               }
             });
             added.forEach(addPanel);
-          };
+          }
 
           if (added.length) {
             $scope.saveState();

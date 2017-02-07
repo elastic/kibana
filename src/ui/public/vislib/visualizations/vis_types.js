@@ -15,4 +15,4 @@ export default function VisTypeFactory(Private) {
     pie: Private(VislibVisualizationsPieChartProvider),
     point_series: Private(VislibVisualizationsPointSeriesProvider)
   };
-};
+}

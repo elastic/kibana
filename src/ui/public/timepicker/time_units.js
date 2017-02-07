@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.constant('timeUnits', {
   s: 'second',

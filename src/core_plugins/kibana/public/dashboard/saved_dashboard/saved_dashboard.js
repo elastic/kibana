@@ -59,10 +59,10 @@ module.factory('SavedDashboard', function (courier, config) {
     refreshInterval: {
       type: 'object',
       properties: {
-        display: {type: 'string'},
-        pause: { type: 'boolean'},
-        section: { type: 'integer'},
-        value: { type: 'integer'}
+        display: { type: 'string' },
+        pause: { type: 'boolean' },
+        section: { type: 'integer' },
+        value: { type: 'integer' }
       }
     }
   };

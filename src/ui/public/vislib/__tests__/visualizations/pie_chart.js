@@ -12,22 +12,22 @@ import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_respons
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const aggArray = [

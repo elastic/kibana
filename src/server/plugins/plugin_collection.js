@@ -7,8 +7,8 @@ import Collection from '../../utils/collection';
 import { transformDeprecations } from '../config/transform_deprecations';
 import { createTransform } from '../../deprecation';
 
-let byIdCache = Symbol('byIdCache');
-let pluginApis = Symbol('pluginApis');
+const byIdCache = Symbol('byIdCache');
+const pluginApis = Symbol('pluginApis');
 
 async function addPluginConfig(pluginCollection, plugin) {
   const { config, server, settings } = pluginCollection.kbnServer;
@@ -25,7 +25,7 @@ async function addPluginConfig(pluginCollection, plugin) {
 }
 
 function removePluginConfig(pluginCollection, plugin) {
-  let { config } = pluginCollection.kbnServer;
+  const { config } = pluginCollection.kbnServer;
   config.removeSchema(plugin.configPrefix);
 }
 
@@ -38,18 +38,18 @@ module.exports = class Plugins extends Collection {
   }
 
   async new(path) {
-    let api = new PluginApi(this.kbnServer, path);
+    const api = new PluginApi(this.kbnServer, path);
     this[pluginApis].add(api);
 
-    let output = [].concat(require(path)(api) || []);
-    let config = this.kbnServer.config;
+    const output = [].concat(require(path)(api) || []);
+    const config = this.kbnServer.config;
 
     if (!output.length) return;
 
     // clear the byIdCache
     this[byIdCache] = null;
 
-    for (let plugin of output) {
+    for (const plugin of output) {
       if (!plugin instanceof api.Plugin) {
         throw new TypeError('unexpected plugin export ' + inspect(plugin));
       }

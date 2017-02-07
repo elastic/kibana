@@ -5,10 +5,10 @@ import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/cre
 import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 import filtersTemplate from 'ui/agg_types/controls/filters.html';
 export default function FiltersAggDefinition(Private, Notifier) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
-  let decorateQuery = Private(DecorateQueryProvider);
-  let notif = new Notifier({ location: 'Filters Agg' });
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
+  const decorateQuery = Private(DecorateQueryProvider);
+  const notif = new Notifier({ location: 'Filters Agg' });
 
   return new BucketAggType({
     name: 'filters',
@@ -19,30 +19,30 @@ export default function FiltersAggDefinition(Private, Notifier) {
       {
         name: 'filters',
         editor: filtersTemplate,
-        default: [ {input: {}, label: ''} ],
+        default: [ { input: {}, label: '' } ],
         write: function (aggConfig, output) {
-          let inFilters = aggConfig.params.filters;
+          const inFilters = aggConfig.params.filters;
           if (!_.size(inFilters)) return;
 
-          let outFilters = _.transform(inFilters, function (filters, filter) {
-            let input = filter.input;
+          const outFilters = _.transform(inFilters, function (filters, filter) {
+            const input = filter.input;
             if (!input) return notif.log('malformed filter agg params, missing "input" query');
 
-            let query = input.query;
+            const query = input.query;
             if (!query) return notif.log('malformed filter agg params, missing "query" on input');
 
             decorateQuery(query);
 
-            let label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
+            const label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
             filters[label] = input;
           }, {});
 
           if (!_.size(outFilters)) return;
 
-          let params = output.params || (output.params = {});
+          const params = output.params || (output.params = {});
           params.filters = outFilters;
         }
       }
     ]
   });
-};
+}

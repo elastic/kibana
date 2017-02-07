@@ -1,6 +1,6 @@
 import _ from 'lodash';
 export default function buildPhraseFilter(field, value, indexPattern) {
-  let filter = { meta: { index: indexPattern.id} };
+  const filter = { meta: { index: indexPattern.id } };
 
   if (field.scripted) {
     // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
@@ -32,7 +32,7 @@ export default function buildPhraseFilter(field, value, indexPattern) {
     };
   }
   return filter;
-};
+}
 
 
 /**

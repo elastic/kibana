@@ -10,10 +10,10 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 
 export default function (Private) {
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
-  let flattenHit = Private(IndexPatternsFlattenHitProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const flattenHit = Private(IndexPatternsFlattenHitProvider);
 
-  let Field = Private(IndexPatternsFieldProvider);
+  const Field = Private(IndexPatternsFieldProvider);
 
   function StubIndexPattern(pattern, timeField, fields) {
     this.id = pattern;
@@ -53,4 +53,4 @@ export default function (Private) {
   }
 
   return StubIndexPattern;
-};
+}

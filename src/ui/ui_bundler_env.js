@@ -75,7 +75,7 @@ module.exports = class UiBundlerEnv {
     switch (type) {
       case 'noParse':
         return (plugin, spec) => {
-          for (let re of arr(spec)) this.addNoParse(re);
+          for (const re of arr(spec)) this.addNoParse(re);
         };
 
       case '__globalImportAliases__':
