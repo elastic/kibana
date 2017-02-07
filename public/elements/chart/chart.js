@@ -104,7 +104,7 @@ elements.push(new Element('chart', {
             $(this.refs.plot).text('No such chart type');
         }
       } catch (e) {
-        //$(this.refs.plot).text('Failed to render chart');
+        console.log(e);
       }
 
 
