@@ -13,7 +13,7 @@ export default class extends React.PureComponent {
   }
 
   render() {
-    const {element, dispatch} = this.props;
+    const {element} = this.props;
 
     if (!element) {
       return (
@@ -37,9 +37,11 @@ export default class extends React.PureComponent {
             const type = arg.type.name;
             const value = argValues[arg.name];
             const {name, displayName} = arg;
+
             const commit = (value) => {
-              dispatch(argumentSet(id, name, value));
+              this.props.argumentSet(id, name, value);
             };
+
             return (
               <div key={name} className="rework--editor-section">
                 <h4>{displayName.replace('_', ' ')}</h4>

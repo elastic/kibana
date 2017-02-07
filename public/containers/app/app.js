@@ -14,6 +14,7 @@ import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle'
 
 // Actions
 import { editorToggle } from 'plugins/rework/state/actions/editor';
+import { argumentSet } from 'plugins/rework/state/actions/element';
 import { dropdownOpen } from 'plugins/rework/state/actions/misc';
 
 
@@ -23,6 +24,9 @@ import './app.less';
 const App = React.createClass({
   openElementDropDown() {
     this.props.dispatch(dropdownOpen('element'));
+  },
+  argumentSet(id, name, value) {
+    this.props.dispatch(argumentSet(id, name, value));
   },
   do(action) {
     const {dispatch} = this.props;
@@ -50,7 +54,11 @@ const App = React.createClass({
           <Sidebar position="left">
             {!editor ? null : (
               <div className="rework--editor--left">
-                <ElementEditor element={currentElement} openDropDown={this.openElementDropDown}></ElementEditor>
+                <ElementEditor
+                  element={currentElement}
+                  openDropDown={this.openElementDropDown}
+                  argumentSet={this.argumentSet}>
+                </ElementEditor>
               </div>
             )}
 
