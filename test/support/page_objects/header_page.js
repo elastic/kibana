@@ -42,8 +42,10 @@ export default class HeaderPage {
   }
 
   clickTimepicker() {
-    return PageObjects.common.findTestSubject('globalTimepickerButton')
-    .click();
+    return PageObjects.common.try(() => {
+      return PageObjects.common.findTestSubject('globalTimepickerButton')
+        .click();
+    });
   }
 
   isTimepickerOpen() {
