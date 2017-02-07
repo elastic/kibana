@@ -151,8 +151,7 @@ export default class VisualizePage {
     .setFindTimeout(defaultFindTimeout)
     .findByCssSelector('.list-group-item a')
     .click().then(() => {
-      // Wait for the page to render, otherwise we will get an error if Jenkins is too slow.
-      return PageObjects.common.sleep(200);
+      return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }
 
