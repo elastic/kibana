@@ -23,7 +23,7 @@ export default React.createClass({
     return (
       <div className="rework--argument-form">
         <Form commit={commit} options={options} value={formValue} context={context}></Form>
-        <label dangerouslySetInnerHTML={{__html: helpText}}></label>
+        <small dangerouslySetInnerHTML={{__html: helpText}}></small>
       </div>
     );
   }

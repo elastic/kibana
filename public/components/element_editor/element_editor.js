@@ -7,10 +7,11 @@ import {dropdownToggle} from 'plugins/rework/state/actions/misc';
 import ArgumentForm from 'plugins/rework/components/argument_form/argument_form';
 import './element_editor.less';
 
-const Editor = React.createClass({
-  elementAdd() {
-    this.props.dispatch(dropdownToggle('element'));
-  },
+export default class extends React.PureComponent {
+  constructor(props) {    /* Note props is passed into the constructor in order to be used */
+    super(props);
+  }
+
   render() {
     const {element, dispatch} = this.props;
 
@@ -20,7 +21,7 @@ const Editor = React.createClass({
           <h4>Select an element</h4>
           <p>
             Select an element to configure it here. If you don't have any,
-            <a onClick={this.elementAdd}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
+            <a onClick={this.props.openDropDown}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
         </div>
       );
     }
@@ -57,6 +58,4 @@ const Editor = React.createClass({
       </div>
     );
   }
-});
-
-export default connect()(Editor);
+};

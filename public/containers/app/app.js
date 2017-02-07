@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 // Containers
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Nav from 'plugins/rework/containers/nav/nav';
-import ElementEditor from 'plugins/rework/containers/element_editor/element_editor';
+import ElementEditor from 'plugins/rework/components/element_editor/element_editor';
 import WorkpadContainer from 'plugins/rework/containers/workpad_container/workpad_container';
 
 // Components
@@ -14,12 +14,16 @@ import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle'
 
 // Actions
 import { editorToggle } from 'plugins/rework/state/actions/editor';
+import { dropdownOpen } from 'plugins/rework/state/actions/misc';
+
 
 
 import './app.less';
 
 const App = React.createClass({
-
+  openElementDropDown() {
+    this.props.dispatch(dropdownOpen('element'));
+  },
   do(action) {
     const {dispatch} = this.props;
     return () => dispatch(action());
@@ -46,7 +50,7 @@ const App = React.createClass({
           <Sidebar position="left">
             {!editor ? null : (
               <div className="rework--editor--left">
-                <ElementEditor element={currentElement}></ElementEditor>
+                <ElementEditor element={currentElement} openDropDown={this.openElementDropDown}></ElementEditor>
               </div>
             )}
 

@@ -101,6 +101,10 @@ function rootReducer(state = {}, action) {
 
     case 'DROPDOWN_TOGGLE':
       return setTransient('dropdown', payload === state.transient.dropdown ? null : payload);
+    case 'DROPDOWN_OPEN':
+      return setTransient('dropdown', payload);
+    case 'DROPDOWN_CLOSE':
+      return setTransient('dropdown', null);
     case 'FULLSCREEN_TOGGLE':
       return setTransient('fullscreen', state.transient.fullscreen ? false : true);
     case 'EDITOR_CLOSE':
