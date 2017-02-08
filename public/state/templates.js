@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 export const getElementTemplate = (props) => {
   const template = {
-    id: uuid(),
+    id: `element-${uuid()}`,
     type: 'json',
     height: 200,
     width: 400,
@@ -19,7 +19,7 @@ export const getElementTemplate = (props) => {
 
 export const getPageTemplate = () => {
   return {
-    id: uuid(),
+    id: `page-${uuid()}`,
     style: {
       backgroundColor: '#fff'
     },
@@ -29,7 +29,7 @@ export const getPageTemplate = () => {
 
 export const getDataframeTemplate = () => {
   return {
-    id: uuid(),
+    id: `dataframe-${uuid()}`,
     name: 'Cars',
     type: 'csv',
     value: {
