@@ -26,7 +26,10 @@ export function dataframeSet(dataframe) {
 export function dataframeResolveAll() {
   return (dispatch, getState) => {
     const ids = _.keys(getState().persistent.dataframes);
-    _.each(ids, id => dispatch(dataframeResolve(id)));
+    _.each(ids, id => {
+      dispatch(dataframeResolve(id));
+      dispatch(dataframeSync(id));
+    });
   };
 }
 
@@ -41,7 +44,14 @@ export function dataframeResolve(id) {
   return (dispatch, getState) => {
     // TODO: Wire this up to be actual filters.
     const time = getState().persistent.workpad.time;
-    const filters = [{id: 'globalTimeFilter', type: 'time', value: time}];
+    const filters = {
+      ...getState().persistent.filters,
+      'filter-globalTimeFilter': {
+        id: 'filter-globalTimeFilter',
+        type: 'time',
+        value: time
+      }
+    };
     const dataframe = getState().persistent.dataframes[id];
     const toDataframe = frameSources.byName[dataframe.type].toDataframe;
     dispatch(dataframeResolved(id, Promise.resolve(toDataframe(dataframe.value, filters))));
