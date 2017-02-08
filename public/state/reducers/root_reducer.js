@@ -1,8 +1,8 @@
-import elements from 'plugins/rework/elements/elements';
-import getInitialState from './initial_state';
-import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import _ from 'lodash';
 import move from 'lodash-move';
+import elements from 'plugins/rework/elements/elements';
+import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
+import getInitialState from 'plugins/rework/state/initial_state';
 
 function rootReducer(state = {}, action) {
   const setTransient = (prop, value) => {
