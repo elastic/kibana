@@ -122,6 +122,8 @@ function rootReducer(state = {}, action) {
 
     case 'PAGE_SET':
       return setWorkpad({page: payload});
+    case 'PAGE_SET_ORDER':
+      return setWorkpad({pages: payload});
     case 'PAGE_ADD':
       return addPage(payload);
     case 'PAGE_REMOVE':

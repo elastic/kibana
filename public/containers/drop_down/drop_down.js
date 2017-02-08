@@ -4,7 +4,7 @@ import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
 import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import WorkpadList from 'plugins/rework/components/workpad_list';
 import {workpadLoad, workpadProps} from 'plugins/rework/state/actions/workpad';
-import {pageSetById} from 'plugins/rework/state/actions/page';
+import {pageSetById, pageSetOrder} from 'plugins/rework/state/actions/page';
 
 import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
 import Timepicker from 'plugins/rework/components/timepicker/timepicker';
@@ -38,6 +38,9 @@ const DropDown = React.createClass({
   selectPage(id) {
     return () => this.props.dispatch(pageSetById(id));
   },
+  setPageOrder(pageIds) {
+    this.props.dispatch(pageSetOrder(pageIds));
+  },
   render() {
     const {dropdown, time, pageIds, currentPageId} = this.props;
     const style = {
@@ -60,7 +63,14 @@ const DropDown = React.createClass({
         case 'timepicker':
           return (<Timepicker time={time} onChange={this.updateTime}></Timepicker>);
         case 'previews':
-          return (<PagePreviews onSelect={this.selectPage} pageIds={pageIds} active={currentPageId}></PagePreviews>);
+          return (
+            <PagePreviews
+              onSelect={this.selectPage}
+              onMove={this.setPageOrder}
+              pageIds={pageIds}
+              active={currentPageId}>
+            </PagePreviews>
+          );
         default:
           return null;
       }
