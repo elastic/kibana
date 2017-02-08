@@ -1,11 +1,30 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Link',
-  html: require('./link.html'),
-  hasDarkTheme: false,
-}]);
+const linkHtml = require('./link.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Link"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: linkHtml,
+      }]}
+    >
+      <GuideDemo
+        html={linkHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

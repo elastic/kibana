@@ -1,27 +1,27 @@
-
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import AppView from './app_view.jsx';
 
 import {
   CodeViewerActions,
+  ExampleNavActions,
 } from '../actions';
 
 function mapStateToProps(state, ownProps) {
   return {
     routes: ownProps.routes,
     isCodeViewerOpen: state.codeViewer.isOpen,
-    code: state.codeViewer.code,
+    source: state.codeViewer.source,
+    sections: state.sections.sections,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   const actions = {
     openCodeViewer: CodeViewerActions.openCodeViewer,
-    updateCodeViewer: CodeViewerActions.updateCodeViewer,
     closeCodeViewer: CodeViewerActions.closeCodeViewer,
-    registerCode: CodeViewerActions.registerCode,
-    unregisterCode: CodeViewerActions.unregisterCode,
+    registerSection: ExampleNavActions.registerSection,
+    unregisterSection: ExampleNavActions.unregisterSection,
   };
 
   return bindActionCreators(actions, dispatch);

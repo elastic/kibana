@@ -1,21 +1,52 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideCode,
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Event',
-  description: (
-    <p>Events can represent updates, logs, notifications, and status changes.</p>
-  ),
-  html: require('./event.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Event Menu',
-  description: (
-    <p>You&rsquo;ll typically want to present them within a Menu.</p>
-  ),
-  html: require('./event_menu.html'),
-  hasDarkTheme: false,
-}]);
+const eventHtml = require('./event.html');
+const eventMenuHtml = require('./event_menu.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Event"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: eventHtml,
+      }]}
+    >
+      <GuideText>
+        Events can represent updates, logs, notifications, and status changes.
+      </GuideText>
+
+      <GuideDemo
+        html={eventHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Event Menu"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: eventMenuHtml,
+      }]}
+    >
+      <GuideText>
+        You&rsquo;ll typically want to present them within a Menu.
+      </GuideText>
+
+      <GuideDemo
+        html={eventMenuHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

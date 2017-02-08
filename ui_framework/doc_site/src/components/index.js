@@ -1,21 +1,10 @@
-
-export * from './guide_code_viewer/guide_code_viewer.jsx';
-export { default as GuideCodeViewer } from './guide_code_viewer/guide_code_viewer.jsx';
-
-export * from './guide_example/guide_example.jsx';
-export { default as GuideExample } from './guide_example/guide_example.jsx';
-
-export * from './guide_nav/guide_nav.jsx';
-export { default as GuideNav } from './guide_nav/guide_nav.jsx';
-
-export * from './guide_page/guide_page.jsx';
-export { default as GuidePage } from './guide_page/guide_page.jsx';
-
-export * from './guide_page_section/guide_page_section.jsx';
-export { default as GuidePageSection } from './guide_page_section/guide_page_section.jsx';
-
-export * from './guide_page_side_nav/guide_page_side_nav.jsx';
-export { default as GuidePageSideNav } from './guide_page_side_nav/guide_page_side_nav.jsx';
-
-export * from './guide_page_side_nav/guide_page_side_nav_item.jsx';
-export { default as GuidePageSideNavItem } from './guide_page_side_nav/guide_page_side_nav_item.jsx';
+export { GuideCode } from './guide_code/guide_code.jsx';
+export { GuideCodeViewer } from './guide_code_viewer/guide_code_viewer.jsx';
+export { GuideDemo } from './guide_demo/guide_demo.jsx';
+export { GuideLink } from './guide_link/guide_link.jsx';
+export { GuideNav } from './guide_nav/guide_nav.jsx';
+export { GuidePage } from './guide_page/guide_page.jsx';
+export { GuidePageSideNav } from './guide_page_side_nav/guide_page_side_nav.jsx';
+export { GuidePageSideNavItem } from './guide_page_side_nav/guide_page_side_nav_item.jsx';
+export { GuideSection } from './guide_section/guide_section.jsx';
+export { GuideText } from './guide_text/guide_text.jsx';

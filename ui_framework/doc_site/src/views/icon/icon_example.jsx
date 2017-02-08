@@ -1,55 +1,141 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideCode,
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Icon',
-  description: (
-    <p>Use the <code className="guideCode">icon</code> class instead of the <code className="guideCode">fa</code> class for FontAwesome icons. This will make it easier for us to migrate away from FontAwesome.</p>
-  ),
-  html: require('./icon.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Info',
-  description: (
-    <p>Use this Icon to denote useful information.</p>
-  ),
-  html: require('./icon_info.html'),
-}, {
-  title: 'Basic',
-  description: (
-    <p>Use this Icon when you don't want to communicate any particular meaning with the icon's color.</p>
-  ),
-  html: require('./icon_basic.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Success',
-  description: (
-    <p>Use this Icon to denote the successful completion of an action, e.g. filling out a form field correctly or a successful API request.</p>
-  ),
-  html: require('./icon_success.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Warning',
-  description: (
-    <p>Use this Icon to denote an irregularity or potential problems.</p>
-  ),
-  html: require('./icon_warning.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Error',
-  description: (
-    <p>Use this Icon to denote a failed attempt at an action, e.g. an invalid form field or an API error.</p>
-  ),
-  html: require('./icon_error.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Inactive',
-  description: (
-    <p>Use this Icon to denote a disabled, inactive, off, offline, or asleep status.</p>
-  ),
-  html: require('./icon_inactive.html'),
-  hasDarkTheme: false,
-}, ]);
+const iconHtml = require('./icon.html');
+const infoHtml = require('./icon_info.html');
+const basicHtml = require('./icon_basic.html');
+const successHtml = require('./icon_success.html');
+const warningHtml = require('./icon_warning.html');
+const errorHtml = require('./icon_error.html');
+const inactiveHtml = require('./icon_inactive.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Icon"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: iconHtml,
+      }]}
+    >
+      <GuideText>
+        Use the <GuideCode>icon</GuideCode> class instead of the <GuideCode>fa</GuideCode> class for
+        FontAwesome icons. This will make it easier for us to migrate away from FontAwesome.
+      </GuideText>
+
+      <GuideDemo
+        html={iconHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Info"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: infoHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon to denote useful information.
+      </GuideText>
+
+      <GuideDemo
+        html={infoHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Basic"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: basicHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon when you don't want to communicate any particular meaning with the icon's
+        color.
+      </GuideText>
+
+      <GuideDemo
+        html={basicHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Success"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: successHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon to denote the successful completion of an action, e.g. filling out a form
+        field correctly or a successful API request.
+      </GuideText>
+
+      <GuideDemo
+        html={successHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Warning"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: warningHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon to denote an irregularity or potential problems.
+      </GuideText>
+
+      <GuideDemo
+        html={warningHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Error"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: errorHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon to denote a failed attempt at an action, e.g. an invalid form field or an API
+        error.
+      </GuideText>
+
+      <GuideDemo
+        html={errorHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Inactive"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: inactiveHtml,
+      }]}
+    >
+      <GuideText>
+        Use this Icon to denote a disabled, inactive, off, offline, or asleep status.
+      </GuideText>
+
+      <GuideDemo
+        html={inactiveHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

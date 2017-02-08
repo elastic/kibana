@@ -1,28 +1,69 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideCode,
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Title',
-  description: (
-    <p>Works well with an <code className="guideCode">h1</code>.</p>
-  ),
-  html: require('./title.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'SubTitle',
-  description: (
-    <p>Works well with an <code className="guideCode">h2</code>.</p>
-  ),
-  html: require('./sub_title.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Text',
-  description: (
-    <p>Works well with a <code className="guideCode">p</code>.</p>
-  ),
-  html: require('./text.html'),
-  hasDarkTheme: false,
-}]);
+const titleHtml = require('./title.html');
+const subTitleHtml = require('./sub_title.html');
+const textHtml = require('./text.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Title"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: titleHtml,
+      }]}
+    >
+      <GuideText>
+        Works well with an <GuideCode>h1</GuideCode>.
+      </GuideText>
+
+      <GuideDemo
+        html={titleHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="SubTitle"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: subTitleHtml,
+      }]}
+    >
+      <GuideText>
+        Works well with an <GuideCode>h2</GuideCode>.
+      </GuideText>
+
+      <GuideDemo
+        html={subTitleHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Text"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: textHtml,
+      }]}
+    >
+      <GuideText>
+        Works well with a <GuideCode>p</GuideCode>.
+      </GuideText>
+
+      <GuideDemo
+        html={textHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

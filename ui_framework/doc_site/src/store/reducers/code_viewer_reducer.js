@@ -1,35 +1,34 @@
-
 import ActionTypes from '../../actions/action_types';
 
 const defaultState = {
   isOpen: false,
   codesBySlug: {},
-  code: undefined,
+  source: undefined,
 };
 
 export default function codeViewerReducer(state = defaultState, action) {
   switch (action.type) {
     case ActionTypes.OPEN_CODE_VIEWER: {
-      const newCode = state.codesBySlug[action.slug];
+      const source = action.source;
 
-      if (state.code === newCode) {
+      if (state.code === source) {
         // If we are opening the existing code, then close the viewer.
         return Object.assign({}, state, {
           isOpen: false,
-          code: undefined,
+          source: undefined,
         });
       }
 
       return Object.assign({}, state, {
         isOpen: true,
-        code: newCode,
+        source: source,
       });
     }
 
     case ActionTypes.UPDATE_CODE_VIEWER: {
       if (state.isOpen) {
         return Object.assign({}, state, {
-          code: state.codesBySlug[action.slug],
+          source: state.codesBySlug[action.slug],
         });
       }
       return state;
@@ -38,7 +37,7 @@ export default function codeViewerReducer(state = defaultState, action) {
     case ActionTypes.CLOSE_CODE_VIEWER: {
       return Object.assign({}, state, {
         isOpen: false,
-        code: undefined,
+        source: undefined,
       });
     }
 

@@ -1,11 +1,11 @@
 
 @import "../../variables";
 
-.guidePageSection {
+.guideSection {
   margin-bottom: 40px;
 }
 
-  .guidePageSection__header {
+  .guideSection__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -14,12 +14,12 @@
     border-bottom: 1px solid #d6d6d6;
   }
 
-  .guidePageSection__title {
+  .guideSection__title {
     font-size: 18px;
     font-weight: 700;
   }
 
-  .guidePageSection__sourceButton {
+  .guideSection__sourceButton {
     line-height: 10px;
     padding: 4px 10px;
     background-color: #19a8e0;
@@ -38,19 +38,4 @@
         inset 0 20px 20px rgba(black, 0.1),
         inset 0 2px 8px rgba(black, 0.2);
     }
-  }
-
-  .guidePageSection__description {
-    font-size: 14px;
-    line-height: 21px;
-  }
-
-  .guidePageSection__example {
-    & + & {
-      margin-top: 20px;
-    }
-  }
-
-  .guidePageSection__example--standalone {
-    margin-top: 10px;
   }

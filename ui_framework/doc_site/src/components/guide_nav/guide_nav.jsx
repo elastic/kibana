@@ -1,4 +1,3 @@
-
 import React, {
   PropTypes,
 } from 'react';
@@ -9,7 +8,7 @@ import {
 
 import classNames from 'classnames';
 
-const GuideNav = props => {
+export const GuideNav = props => {
   const classes = classNames('guideNav', {
     'is-guide-nav-open': props.isNavOpen,
   });
@@ -64,4 +63,3 @@ GuideNav.propTypes = {
   items: PropTypes.array,
 };
 
-export default GuideNav;

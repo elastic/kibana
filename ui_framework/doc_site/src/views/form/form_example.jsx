@@ -1,34 +1,99 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'TextInput',
-  html: require('./text_input.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'StaticInput',
-  description: (
-    <p>Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to edit.</p>
-  ),
-  html: require('./static_input.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'TextArea',
-  html: require('./text_area.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'TextArea, non-resizable',
-  html: require('./text_area_non_resizable.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'CheckBox',
-  html: require('./check_box.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Select',
-  html: require('./select.html'),
-  hasDarkTheme: false,
-}]);
+const textInputHtml = require('./text_input.html');
+const staticInputHtml = require('./static_input.html');
+const textAreaHtml = require('./text_area.html');
+const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
+const checkBoxHtml = require('./check_box.html');
+const selectHtml = require('./select.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="TextInput"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: textInputHtml,
+      }]}
+    >
+      <GuideDemo
+        html={textInputHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="StaticInput"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: staticInputHtml,
+      }]}
+    >
+      <GuideText>
+        Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to edit.
+      </GuideText>
+
+      <GuideDemo
+        html={staticInputHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="TextArea"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: textAreaHtml,
+      }]}
+    >
+      <GuideDemo
+        html={textAreaHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="TextArea, non-resizable"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: textAreaNonResizableHtml,
+      }]}
+    >
+      <GuideDemo
+        html={textAreaNonResizableHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="CheckBox"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: checkBoxHtml,
+      }]}
+    >
+      <GuideDemo
+        html={checkBoxHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Select"
+      source={[{
+        type: GuideSection.TYPES.HTML,
+        code: selectHtml,
+      }]}
+    >
+      <GuideDemo
+        html={selectHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);
