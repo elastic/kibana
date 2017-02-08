@@ -3,13 +3,14 @@ import expect from 'expect.js';
 import {
   createSplitStream,
   createConcatStream,
+  createPromiseFromStreams,
 } from '../';
 
 async function split(stream, input) {
   const concat = createConcatStream();
   concat.write([]);
   stream.pipe(concat);
-  const output = new Promise(r => concat.on('data', r));
+  const output = createPromiseFromStreams([concat]);
 
   input.forEach(i => {
     stream.write(i);

@@ -19,7 +19,7 @@ describe('intersperseStream', () => {
     ).to.be('to be or not to be');
   });
 
-  it('emits the intersperse value right before the second value, does not wait', async () => {
+  it('emits values as soon as possible, does not needlessly buffer', async () => {
     const str = createIntersperseStream('y');
     const stub = sinon.stub();
     str.on('data', stub);

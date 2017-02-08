@@ -1,5 +1,3 @@
-import { race } from 'bluebird';
-
 /**
  *  Take an array of streams, pipe the output
  *  from each one into the next, listening for
@@ -14,7 +12,7 @@ import { race } from 'bluebird';
  *  the promise to be rejected with that error.
  *
  *  @param  {Array<Stream>} streams
- *  @return {Promise<undefined>}
+ *  @return {Promise<any>}
  */
 export async function createPromiseFromStreams(streams) {
   const last = streams[streams.length - 1];

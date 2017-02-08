@@ -10,10 +10,10 @@ describe('concatStream', () => {
   it('accepts an initial value', async () => {
     const output = await createPromiseFromStreams([
       createListStream([1,2,3]),
-      createConcatStream([])
+      createConcatStream([0])
     ]);
 
-    expect(output).to.eql([1,2,3]);
+    expect(output).to.eql([0,1,2,3]);
   });
 
   describe(`combines using the previous value's concat method`, () => {
@@ -29,7 +29,7 @@ describe('concatStream', () => {
       expect(output).to.eql('abc');
     });
 
-    it('works with strings', async () => {
+    it('works with arrays', async () => {
       const output = await createPromiseFromStreams([
         createListStream([
           [1],
