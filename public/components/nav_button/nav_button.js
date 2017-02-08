@@ -9,17 +9,24 @@ export default class NavButton extends React.PureComponent {
   }
 
   render() {
-    const {className, onClick, tooltip, id} = this.props;
+    const {className, onClick, tooltip, id, disabled} = this.props;
+
+    const activeControl = (
+      <a className={className} onClick={onClick}>
+        {this.props.children}
+      </a>
+    );
+
+    const disabledControl = (
+      <a className={className + ' disabled'}>
+        {this.props.children}
+      </a>
+    );
 
     return (
       <div className='rework--nav-button' id={id}>
         <Tooltip content={tooltip}>
-          <a
-            className={className}
-            onClick={onClick}
-            >
-            {this.props.children}
-          </a>
+          { disabled ? disabledControl : activeControl }
         </Tooltip>
       </div>
     );
