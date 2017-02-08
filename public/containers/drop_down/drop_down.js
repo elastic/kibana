@@ -6,6 +6,8 @@ import WorkpadList from 'plugins/rework/components/workpad_list';
 import {workpadLoad, workpadProps} from 'plugins/rework/state/actions/workpad';
 import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
 import Timepicker from 'plugins/rework/components/timepicker/timepicker';
+import { PagePreviews } from 'plugins/rework/components/page_previews/page_previews';
+
 import './drop_down.less';
 import classnames from 'classnames';
 import fetch from 'isomorphic-fetch';
@@ -33,7 +35,7 @@ const DropDown = React.createClass({
     dispatch(dataframeResolveAll());
   },
   render() {
-    const {dropdown, time} = this.props;
+    const {dropdown, time, pageIds} = this.props;
     const style = {
       display: 'flex',
       position: 'relative',
@@ -53,6 +55,8 @@ const DropDown = React.createClass({
           return (<WorkpadList onSelect={this.loadWorkpad}></WorkpadList>);
         case 'timepicker':
           return (<Timepicker time={time} onChange={this.updateTime}></Timepicker>);
+        case 'previews':
+          return (<PagePreviews pageIds={pageIds}></PagePreviews>);
         default:
           return null;
       }
@@ -72,6 +76,7 @@ function mapStateToProps(state) {
   return {
     dropdown: state.transient.dropdown,
     time: state.persistent.workpad.time,
+    pageIds: state.persistent.workpad.pages,
   };
 }
 

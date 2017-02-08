@@ -85,6 +85,10 @@ const Nav = React.createClass({
             className="fa fa-plus-circle"
             onClick={this.dropdown('element')}></NavButton>
           <NavButton
+            tooltip="Pages"
+            className="fa fa-book"
+            onClick={this.dropdown('previews')}></NavButton>
+          <NavButton
             tooltip="Open Workpad"
             className="fa fa-folder-open"
             onClick={this.dropdown('workpads')}></NavButton>
