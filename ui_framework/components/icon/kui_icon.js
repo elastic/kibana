@@ -1,6 +1,7 @@
 import React from 'react';
+import classNames from 'classnames';
 
 export function KuiIcon({ className }) {
-  const classNames = ['kuiButton__icon', 'kuiIcon', className];
-  return <span aria-hidden="true" className={ classNames.join(' ') }/>;
+  const classes = classNames('kuiButton__icon kuiIcon', className);
+  return <span aria-hidden="true" className={ classes } />;
 }
