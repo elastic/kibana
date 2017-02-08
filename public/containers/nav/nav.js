@@ -17,22 +17,25 @@ import { historyUndo, historyRedo } from 'plugins/rework/state/actions/history';
 import '@elastic/kbn-react-ui/css/main.css';
 import './nav.less';
 
-
 const Nav = React.createClass({
   getInitialState() {
     return {positionPopover: false};
   },
+
   nameWorkpad(name) {
     this.props.dispatch(workpadProps({name}));
   },
+
   newWorkpad() {
     this.props.dispatch(workpadNew());
   },
+
   dropdown(name) {
     return () => {
       this.props.dispatch(dropdownToggle(name));
     };
   },
+
   elementLayer(movement) {
     return () => {
       const {dispatch, element, currentPageId} = this.props;
@@ -40,14 +43,17 @@ const Nav = React.createClass({
       this.props.dispatch(elementLayerMove(element.id, currentPageId, movement));
     };
   },
-  do(action) {
-    return () => this.props.dispatch(action());
+
+  toggleFullscreen() {
+    this.props.dispatch(fullscreenToggle());
   },
+
   togglePositionPopover() {
     this.setState({
       positionPopover: !this.state.positionPopover
     });
   },
+
   setPosition(position) {
     this.props.dispatch(elementProps(this.props.element.id, position));
   },
@@ -79,11 +85,12 @@ const Nav = React.createClass({
             onPickerClick={this.dropdown('timepicker')}
           />
         </div>
+
         <div className="rework--top-nav-bottom">
           <NavButton
             tooltip="Present"
             className="fa fa-play"
-            onClick={this.do(fullscreenToggle)}></NavButton>
+            onClick={this.toggleFullscreen}></NavButton>
 
           <vhr/>
 
@@ -110,7 +117,6 @@ const Nav = React.createClass({
 
           <vhr/>
 
-
           <div className={layerClasses.join(' ')}>
             <NavButton
               tooltip="Move to top"
@@ -128,21 +134,19 @@ const Nav = React.createClass({
               tooltip="Move to bottom"
               className="fa fa-angle-double-down"
               onClick={this.elementLayer('--')}></NavButton>
-
             <NavButton
               id='nav-position-button'
               tooltip="Position"
               className="fa fa-crosshairs"
               onClick={element ? this.togglePositionPopover : _.noop}></NavButton>
-
-              <Popover placement='bottom'
-                isOpen={this.state.positionPopover}
-                target='nav-position-button'
-                toggle={this.togglePositionPopover}>
-                <PopoverContent>
-                  <PositionForm position={position} onChange={this.setPosition}/>
-                </PopoverContent>
-              </Popover>
+            <Popover placement='bottom'
+              isOpen={this.state.positionPopover}
+              target='nav-position-button'
+              toggle={this.togglePositionPopover}>
+              <PopoverContent>
+                <PositionForm position={position} onChange={this.setPosition}/>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <vhr/>

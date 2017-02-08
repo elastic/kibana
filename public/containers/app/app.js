@@ -65,9 +65,6 @@ const App = React.createClass({
             <div className="rework--editor-toggle--left">
               <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
             </div>
-            <div className="rework--editor-toggle--left">
-              <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
-            </div>
           </Sidebar>
 
           {workpadContainerElem}
