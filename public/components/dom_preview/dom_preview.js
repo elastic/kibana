@@ -20,7 +20,7 @@ export class DomPreview extends React.PureComponent {
     //var width = 320;
     //var height = workpad.current.size.height * (width / workpad.current.size.width);
 
-    var height = 150;
+    var height = this.props.height || 100;
     var width = original.width() * (height / original.height());
 
     $(this.refs.content).html(thumb);
