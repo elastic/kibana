@@ -4,10 +4,11 @@ import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
 import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import WorkpadList from 'plugins/rework/components/workpad_list';
 import {workpadLoad, workpadProps} from 'plugins/rework/state/actions/workpad';
+import {pageSetById} from 'plugins/rework/state/actions/page';
+
 import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
 import Timepicker from 'plugins/rework/components/timepicker/timepicker';
 import { PagePreviews } from 'plugins/rework/components/page_previews/page_previews';
-
 import './drop_down.less';
 import classnames from 'classnames';
 import fetch from 'isomorphic-fetch';
@@ -34,8 +35,11 @@ const DropDown = React.createClass({
     dispatch(workpadProps({time}));
     dispatch(dataframeResolveAll());
   },
+  selectPage(id) {
+    return () => this.props.dispatch(pageSetById(id));
+  },
   render() {
-    const {dropdown, time, pageIds} = this.props;
+    const {dropdown, time, pageIds, currentPageId} = this.props;
     const style = {
       display: 'flex',
       position: 'relative',
@@ -56,7 +60,7 @@ const DropDown = React.createClass({
         case 'timepicker':
           return (<Timepicker time={time} onChange={this.updateTime}></Timepicker>);
         case 'previews':
-          return (<PagePreviews pageIds={pageIds}></PagePreviews>);
+          return (<PagePreviews onSelect={this.selectPage} pageIds={pageIds} active={currentPageId}></PagePreviews>);
         default:
           return null;
       }
@@ -77,6 +81,7 @@ function mapStateToProps(state) {
     dropdown: state.transient.dropdown,
     time: state.persistent.workpad.time,
     pageIds: state.persistent.workpad.pages,
+    currentPageId: state.persistent.workpad.pages[state.persistent.workpad.page]
   };
 }
 

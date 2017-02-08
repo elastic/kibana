@@ -15,6 +15,14 @@ export function pageAdd() {
   };
 }
 
+export function pageSetById(id) {
+  return (dispatch, getState) => {
+    const {workpad, pages} = getState().persistent;
+    const pageIndex = workpad.pages.indexOf(id);
+    dispatch(pageSet(pageIndex));
+  };
+}
+
 export function pageRemove(id) {
   return (dispatch, getState) => {
     const {workpad, pages} = getState().persistent;

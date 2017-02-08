@@ -1,6 +1,22 @@
 @import (reference) "~plugins/rework/main.less";
 
-.rework--dom-preview {
+.rework--page-preview {
   margin-right: 10px;
-  border: @rework--border
+  border: @rework--border;
+  display: inline-block;
+  background-color: #fff;
+  padding: 1px;
+  height: 104px;
+
+  &:hover, &.active {
+    border-color: @kibanaBlue2;
+    cursor: pointer;
+    padding: 0px;
+    border-width: 2px;
+  }
+
+  .rework--dom-preview {
+    pointer-events: none;
+    user-select: none;
+  }
 }

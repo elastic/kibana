@@ -63,7 +63,10 @@ export class DomPreview extends React.PureComponent {
 
   render() {
     return (
-      <div ref="container" style={{display: 'inline-block'}} className="rework--dom-preview">
+      <div
+        ref="container"
+        style={{display: 'inline-block'}}
+        className="rework--dom-preview">
         <div ref="content"></div>
       </div>
     );
