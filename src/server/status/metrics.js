@@ -16,7 +16,7 @@ export function getMetrics({ event, config }) {
     collection_interval_in_millis: config.get('ops.interval'),
     uptime_in_millis: process.uptime() * 1000,
     process: {
-      memory: {
+      mem: {
         heap: {
           total_in_bytes: _.get(event, 'psmem.heapTotal'),
           used_in_bytes:  _.get(event, 'psmem.heapUsed')
@@ -24,14 +24,16 @@ export function getMetrics({ event, config }) {
       }
     },
     os: {
-      load: {
-        '1m': _.get(event, 'osload.0'),
-        '5m': _.get(event, 'osload.1'),
-        '15m': _.get(event, 'osload.1')
+      cpu: {
+        load: {
+          '1m': _.get(event, 'osload.0'),
+          '5m': _.get(event, 'osload.1'),
+          '15m': _.get(event, 'osload.1')
+        }
       }
     },
     response_times: {
-      average_in_millis:  _.get(event, ['responseTimes', port, 'avg']),
+      avg_in_millis:  _.get(event, ['responseTimes', port, 'avg']),
       max_in_millis: _.get(event, ['responseTimes', port, 'max'])
     },
     requests:  keysToSnakeCaseShallow(_.get(event, ['requests', port])),
