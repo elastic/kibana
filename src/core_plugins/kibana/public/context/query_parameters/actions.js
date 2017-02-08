@@ -6,7 +6,7 @@ import { QUERY_PARAMETER_KEYS } from './constants';
 const MIN_CONTEXT_SIZE = 0;
 
 export function QueryParameterActionsProvider(config) {
-  const defaultSizeStep = parseInt(config.get('context:step'), 10);
+  const getDefaultSizeStep = () => parseInt(config.get('context:step'), 10);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = Math.max(
@@ -15,7 +15,7 @@ export function QueryParameterActionsProvider(config) {
     )
   );
 
-  const increasePredecessorCount = (state) => (value = defaultSizeStep) => (
+  const increasePredecessorCount = (state) => (value = getDefaultSizeStep()) => (
     setPredecessorCount(state)(state.queryParameters.predecessorCount + value)
   );
 
@@ -26,7 +26,7 @@ export function QueryParameterActionsProvider(config) {
     )
   );
 
-  const increaseSuccessorCount = (state) => (value = defaultSizeStep) => (
+  const increaseSuccessorCount = (state) => (value = getDefaultSizeStep()) => (
     setSuccessorCount(state)(state.queryParameters.successorCount + value)
   );
 
