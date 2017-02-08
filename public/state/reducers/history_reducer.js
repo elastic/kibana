@@ -21,7 +21,11 @@ const historyReducer = reducer => (state, action) => {
 
   return {
     ...newState,
-    persistent: history.current
+    persistent: history.current,
+    history: {
+      hasPrevious: history.hasPrevious,
+      hasNext: history.hasNext,
+    },
   };
 };
 
