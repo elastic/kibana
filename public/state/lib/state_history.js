@@ -31,7 +31,7 @@ const createHistoryState = (historyItems = []) => {
 
     // flush old items if not at the end of the history
     if (currentIndex !== getLastIndex()) {
-      historyItems.slice(0, currentIndex);
+      historyItems = historyItems.slice(0, currentIndex + 1);
     }
 
     historyItems.push(historyItem);
