@@ -32,26 +32,11 @@
 
       <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
-        <button
-          class="kuiButton kuiButton--danger"
-          aria-label="Delete selected objects"
-          ng-if="listingController.getSelectedItemsCount() > 0"
-          ng-click="listingController.deleteSelectedItems()"
-          tooltip="Delete selected visualizations"
-        >
-          <react-component name="TrashIconComponent"></react-component>
-        </button>
+        <react-component name="TrashButtonComponent" props="trashButtonProps"></react-component>
 
         <!-- Create visualization button -->
-        <a
-          class="kuiButton kuiButton--primary"
-          href="#/visualize/new"
-          aria-label="Create new visualization"
-          ng-if="listingController.getSelectedItemsCount() === 0"
-          tooltip="Create new visualization"
-        >
-          <react-component name="PlusIconComponent"></react-component>
-        </a>
+        <react-component name="PlusButtonComponent" props="plusButtonProps"></react-component>
+
       </div>
 
       <div class="kuiToolBarSection">
