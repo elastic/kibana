@@ -9,15 +9,15 @@ const globProm = Promise.promisify(glob);
 
 /**
  * Return all the translation keys found for the file pattern
+ * @param {String} translationPattern - regEx pattern for translations
  * @param {Array<String>} filesPatterns - List of file patterns to be checkd for translation keys
- * @param {Array<String>} translations - List of translations keys
  * @return {Promise} - A Promise object which will return a String Array of the translation keys
  * not translated then the Object will contain all non translated translation keys with value of file the key is from
  */
-export function getTranslationKeys(filesPatterns) {
+export function getTranslationKeys(translationPattern, filesPatterns) {
   return getFilesToVerify(filesPatterns)
   .then(function (filesToVerify) {
-    return getKeys(filesToVerify);
+    return getKeys(translationPattern, filesToVerify);
   });
 }
 
@@ -44,7 +44,7 @@ function getFilesToVerify(verifyFilesPatterns) {
 
   return Promise.map(verifyFilesPatterns, (verifyFilesPattern) => {
     const baseSearchDir = path.dirname(verifyFilesPattern);
-    const pattern = path.basename(verifyFilesPattern);
+    const pattern = path.join('**', path.basename(verifyFilesPattern));
     return globProm(pattern, { cwd: baseSearchDir, matchBase: true })
     .then(function (files) {
       for (const file of files) {
@@ -57,9 +57,8 @@ function getFilesToVerify(verifyFilesPatterns) {
   });
 }
 
-function getKeys(filesToVerify) {
+function getKeys(translationPattern, filesToVerify) {
   const translationKeys = [];
-  const translationPattern = 'i18n\\(\'(.*)\'\\)|translate="(.*)"';
   const translationRegEx = new RegExp(translationPattern, 'g');
 
   const filePromises = _.map(filesToVerify, (file) => {

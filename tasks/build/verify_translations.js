@@ -8,7 +8,6 @@ import * as i18nVerify from '../utils/i18n_verify_keys';
 export default function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
     const done = this.async();
-    const parsePaths = [fromRoot('/src/ui/views/*.jade'), fromRoot('/src/core_plugins/kibana/public/management/sections/indices/*.html')];
 
     const serverConfig = {
       env: 'production',
@@ -35,7 +34,7 @@ export default function (grunt) {
 
     const kbnServer = new KbnServer(serverConfig);
     kbnServer.ready()
-    .then(() => verifyTranslations(kbnServer.uiI18n, parsePaths))
+    .then(() => verifyTranslations(kbnServer.uiI18n))
     .then(() => kbnServer.close())
     .then(done)
     .catch((err) => {
@@ -45,12 +44,30 @@ export default function (grunt) {
   });
 }
 
-function verifyTranslations(uiI18nObj, parsePaths)
+function verifyTranslations(uiI18nObj)
 {
-  return uiI18nObj.getAllTranslations()
-  .then(function (translations) {
-    return i18nVerify.getTranslationKeys(parsePaths)
-    .then(function (translationKeys) {
+  const translationPatterns = [
+    { regEx: 'translate=\"([^\"]+)\"',
+      parsePaths: [fromRoot('/src/core_plugins/kibana/*.html')] },
+    { regEx: 'i18n\\(\'(.*)\'\\)',
+      parsePaths: [fromRoot('/src/ui/views/*.jade')] }
+  ];
+  const translationKeys = [];
+
+  const keyPromises = _.map(translationPatterns, (pattern) => {
+    return i18nVerify.getTranslationKeys(pattern.regEx, pattern.parsePaths)
+    .then(function (keys) {
+      const arrayLength = keys.length;
+      for (let i = 0; i < arrayLength; i++) {
+        translationKeys.push(keys[i]);
+      }
+    });
+  });
+
+  return Promise.all(keyPromises)
+  .then(function () {
+    return uiI18nObj.getAllTranslations()
+    .then(function (translations) {
       const keysNotTranslatedPerLocale = i18nVerify.getNonTranslatedKeys(translationKeys, translations);
       if (!_.isEmpty(keysNotTranslatedPerLocale)) {
         const str  = JSON.stringify(keysNotTranslatedPerLocale);
