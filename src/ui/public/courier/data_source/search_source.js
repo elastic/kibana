@@ -267,7 +267,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     }
 
     /**
-     * Add the key and val to the body of the resuest
+     * Add the key and val to the body of the request
      */
     function addToBody() {
       state.body = state.body || {};
