@@ -13,7 +13,7 @@ export default function fetchService(Private, Promise) {
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   const debouncedFetchThese = _.debounce(() => {
-    const requests = requestQueue.get().filter(req => req.isFetchRequested());
+    const requests = requestQueue.get().filter(req => req.isFetchRequestedAndPending());
     immediatelyFetchThese(requests);
   }, {
     wait: 10,
