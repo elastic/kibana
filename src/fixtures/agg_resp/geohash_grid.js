@@ -34,6 +34,8 @@ export default function GeoHashGridAggResponseFixture() {
     .sort()
     .map(function (geoHash) {
       const count = _.random(1, 5000);
+      const lat = _.random(-180, 180, true);
+      const lon = _.random(-180, 180, true);
 
       totalDocCount += count;
       docCount += count;
@@ -43,6 +45,12 @@ export default function GeoHashGridAggResponseFixture() {
         doc_count: count,
         1: {
           value: 2048 + i
+        },
+        4: {
+          location: {
+            lat: lat,
+            lon: lon
+          }
         }
       };
     });

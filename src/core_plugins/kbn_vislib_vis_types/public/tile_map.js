@@ -63,12 +63,14 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         pushFilter(filter, false, indexPatternName);
       },
       mapMoveEnd: function (event) {
+        console.log('modify the cenetr');
         const vis = _.get(event, 'chart.geohashGridAgg.vis');
         if (vis && vis.hasUiState()) {
           vis.getUiState().set('mapCenter', event.center);
         }
       },
       mapZoomEnd: function (event) {
+        console.log('modify the zoom');
         const vis = _.get(event, 'chart.geohashGridAgg.vis');
         if (vis && vis.hasUiState()) {
           vis.getUiState().set('mapZoom', event.zoom);
