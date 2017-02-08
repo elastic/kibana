@@ -1,16 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
+import { Popover, PopoverContent, PopoverTitle } from 'reactstrap';
+import { Timepicker } from '@elastic/kbn-react-ui';
+
 import TopNav from 'plugins/rework/components/top_nav/top_nav';
 import NavButton from 'plugins/rework/components/nav_button/nav_button';
 import Editable from 'plugins/rework/components/editable/editable';
 import { PositionForm } from 'plugins/rework/components/position_form/position_form';
-import { Popover, PopoverContent, PopoverTitle } from 'reactstrap';
+
 import { workpadProps, workpadNew } from 'plugins/rework/state/actions/workpad';
 import { elementLayerMove, elementProps} from 'plugins/rework/state/actions/element';
-import { dropdownToggle } from 'plugins/rework/state/actions/misc';
-import { fullscreenToggle } from 'plugins/rework/state/actions/misc';
-import { Timepicker } from '@elastic/kbn-react-ui';
+import { dropdownToggle, fullscreenToggle } from 'plugins/rework/state/actions/misc';
+import { historyUndo, historyRedo } from 'plugins/rework/state/actions/history';
 
 import '@elastic/kbn-react-ui/css/main.css';
 import './nav.less';
@@ -49,6 +51,15 @@ const Nav = React.createClass({
   setPosition(position) {
     this.props.dispatch(elementProps(this.props.element.id, position));
   },
+
+  historyUndo() {
+    this.props.dispatch(historyUndo());
+  },
+
+  historyRedo() {
+    this.props.dispatch(historyRedo());
+  },
+
   render() {
     const {workpad, element, currentPageId, time} = this.props;
     const layerClasses = ['rework--nav--layer-buttons'];
@@ -134,8 +145,18 @@ const Nav = React.createClass({
               </Popover>
           </div>
 
-        </div>
+          <vhr/>
 
+          <NavButton
+            tooltip="Undo"
+            className="fa fa-undo"
+            onClick={this.historyUndo}></NavButton>
+          <NavButton
+            tooltip="Redo"
+            className="fa fa-repeat"
+            onClick={this.historyRedo}></NavButton>
+
+        </div>
 
       </TopNav>
     );
