@@ -24,6 +24,11 @@ async function addPluginConfig(pluginCollection, plugin) {
   config.extendSchema(configSchema, transformedPluginSettings, plugin.configPrefix);
 }
 
+function removePluginConfig(pluginCollection, plugin) {
+  const { config } = pluginCollection.kbnServer;
+  config.removeSchema(plugin.configPrefix);
+}
+
 module.exports = class Plugins extends Collection {
 
   constructor(kbnServer) {
@@ -55,6 +60,7 @@ module.exports = class Plugins extends Collection {
   }
 
   async disable(plugin) {
+    removePluginConfig(this, plugin);
     this.delete(plugin);
   }
 
