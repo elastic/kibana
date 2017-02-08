@@ -37,7 +37,6 @@ uiModules.get('apps/management')
       const getData = function (filter) {
         const services = registry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-
           return service.find(filter).then(function (data) {
             return {
               service: service,
