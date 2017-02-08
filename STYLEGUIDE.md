@@ -8,6 +8,7 @@ recommended for the development of all Kibana plugins.
 - [CSS](style_guides/css_style_guide.md)
 - [HTML](style_guides/html_style_guide.md)
 - [API](style_guides/api_style_guide.md)
+- [Architecture](style_guides/architecture.md)
 
 ## Filenames
 

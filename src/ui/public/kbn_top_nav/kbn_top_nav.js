@@ -100,8 +100,8 @@ module.directive('kbnTopNav', function (Private) {
       });
 
       const extensions = getNavbarExtensions($attrs.name);
-
       let controls = _.get($scope, $attrs.config, []);
+
       if (controls instanceof KbnTopNavController) {
         controls.addItems(extensions);
       } else {

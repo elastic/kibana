@@ -65,6 +65,7 @@ export default function GeoHashAggDefinition(Private, config) {
       {
         name: 'precision',
         editor: precisionTemplate,
+        default: defaultPrecision,
         deserialize: getPrecision,
         controller: function ($scope) {
         },

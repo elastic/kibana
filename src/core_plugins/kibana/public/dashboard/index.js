@@ -14,7 +14,7 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true
   })
-  .when(DashboardConstants.LANDING_PAGE_URL, {
+  .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
     controller: DashboardListingController,
     controllerAs: 'listingController'

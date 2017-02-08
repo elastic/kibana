@@ -546,7 +546,7 @@ function SenseEditor($el) {
 
         var ret = 'curl -X' + es_method + ' "' + url + '"';
         if (es_data && es_data.length) {
-          ret += " -d'\n";
+          ret += " -H 'Content-Type: application/json' -d'\n";
           var data_as_string = utils.collapseLiteralStrings(es_data.join("\n"))
           // since Sense doesn't allow single quote json string any single qoute is within a string.
           ret += data_as_string.replace(/'/g, '\\"');
