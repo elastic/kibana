@@ -68,9 +68,16 @@ export default function MapsFactory(Private) {
     }
 
     render(data, uiState) {
+      console.log('rencer!!!');
+      console.trace();
+
       if (!data) {
         throw new Error('No valid data!');
       }
+
+      console.log(uiState);
+      console.log(data);
+
 
       this.uiState = uiState;
       this.data = new Data(data, this.uiState);
@@ -99,6 +106,9 @@ export default function MapsFactory(Private) {
       let loadedCount = 0;
       const chartSelection = d3.select(this.el).selectAll('.chart');
       chartSelection.each(function (chartData) {
+
+        console.log('barfs', chartData);
+
         const chart = new TileMapChart(self, this, chartData);
 
         self.activeEvents().forEach(function (event) {
