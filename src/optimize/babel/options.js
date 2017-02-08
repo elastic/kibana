@@ -3,11 +3,13 @@
 const {
   nodePresets,
   webpackPresets,
+  webpackCacheDir,
   plugins,
   devIgnore
 } = require('./helpers');
 
 exports.webpack = {
+  cacheDirectory: webpackCacheDir,
   presets: webpackPresets,
   plugins: plugins
 };

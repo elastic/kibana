@@ -7,9 +7,7 @@ if (!env.BABEL_CACHE_PATH) {
   env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');
 }
 
-if (!env.WEBPACK_BABEL_CACHE_DIR) {
-  env.WEBPACK_BABEL_CACHE_DIR = fromRoot('optimize/.webpack.babelcache');
-}
+exports.webpackCacheDir = env.WEBPACK_BABEL_CACHE_DIR || fromRoot('optimize/.webpack.babelcache');
 
 exports.nodePresets = [
   [
