@@ -7,12 +7,12 @@ const createHistoryState = (historyItems = []) => {
     return Math.max(historyItems.length - 1, 0);
   }
 
-  function back(amount = 1) {
+  function previous(amount = 1) {
     currentIndex -= amount;
     if (currentIndex <= 0) currentIndex = 0;
   }
 
-  function forward(amount = 1) {
+  function next(amount = 1) {
     currentIndex += amount;
     if (currentIndex >= historyItems.length) currentIndex = getLastIndex();
   }
@@ -45,10 +45,16 @@ const createHistoryState = (historyItems = []) => {
   return {
     beginning,
     end,
-    back,
-    forward,
+    previous,
+    next,
     push,
     reset,
+    get hasPrevious() {
+      return currentIndex > 0;
+    },
+    get hasNext() {
+      return currentIndex < getLastIndex();
+    },
     get current() {
       return historyItems[currentIndex];
     },

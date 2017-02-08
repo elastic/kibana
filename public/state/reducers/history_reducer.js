@@ -7,11 +7,11 @@ const historyReducer = reducer => (state, action) => {
 
   switch (action.type) {
     case 'HISTORY_UNDO':
-      history.back();
+      history.previous();
       break;
 
     case 'HISTORY_REDO':
-      history.forward();
+      history.next();
       break;
 
     default:
