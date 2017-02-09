@@ -143,6 +143,9 @@ function rootReducer(state = {}, action) {
     case 'ELEMENT_PROPS':
       return setElement(payload.id, payload.value);
 
+    case 'FILTER_SET':
+      return setPersistent('filters', {...state.persistent.filters, [payload.id]: payload});
+
     case 'DATAFRAME_REMOVE':
       return removeDataframe(payload);
 
