@@ -30,9 +30,9 @@ const Nav = React.createClass({
     this.props.dispatch(workpadNew());
   },
 
-  dropdown(name) {
+  dropdown(name, meta = {}) {
     return () => {
-      this.props.dispatch(dropdownToggle(name));
+      this.props.dispatch(dropdownToggle({ type: name, meta }));
     };
   },
 
