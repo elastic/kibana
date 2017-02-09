@@ -1,6 +1,12 @@
-
+import _ from 'lodash';
 import {
   defaultFindTimeout,
+} from '../';
+
+import {
+  scenarioManager,
+  esClient,
+  elasticDump
 } from '../';
 
 import PageObjects from './';
@@ -12,10 +18,49 @@ export default class DashboardPage {
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
-  gotoDashboardLandingPage() {
-    return this.findTimeout
+  /**
+   * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
+   * @returns {Promise<boolean>}
+   */
+  onDashboardLandingPage() {
+    return this.remote.setFindTimeout(1000)
       .findByCssSelector('a[href="#/dashboard"]')
+      .then(() => false)
+      .catch(() => true);
+  }
+
+  async gotoDashboardLandingPage() {
+    PageObjects.common.debug('Go to dashboard landing page');
+    const onPage = await this.onDashboardLandingPage();
+    if (!onPage) {
+      const link = await this.findTimeout.findByCssSelector('a[href="#/dashboard"]');
+      return link.click();
+    }
+  }
+
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
       .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  clickDoneEditing() {
+    PageObjects.common.debug('Clicking done editing');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 
   clickNewDashboard() {
@@ -73,48 +118,55 @@ export default class DashboardPage {
     });
   }
 
-  saveDashboard(dashName) {
-    return PageObjects.common.findTestSubject('dashboardSaveButton')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(() => {
-      PageObjects.common.debug('saveButton button clicked');
-      return this.findTimeout
-      .findById('dashboardTitle')
-      .type(dashName);
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    // click save button
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('clicking final Save button for named dashboard');
-        return this.findTimeout
-        .findByCssSelector('.btn-primary')
-        .click();
-      });
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
+  async storeTimeWithDashboard(on) {
+    PageObjects.common.debug('Storing time with dashboard: ' + on);
+    const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
+    const checked = await storeTimeCheckbox.getProperty('checked');
+    if (checked === true && on === false ||
+        checked === false && on === true) {
+      PageObjects.common.debug('Flipping store time checkbox');
+      await storeTimeCheckbox.click();
+    }
+  }
+
+  async filterOnPieSlice() {
+    const slices = await this.findTimeout.findAllByCssSelector('svg > g > path.slice');
+
+    PageObjects.common.debug('found slices:');
+    PageObjects.common.debug(slices.length);
+    await slices[0].click();
+  }
+
+  async saveDashboard(dashName, storeTimeWithDash) {
+    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
+
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.sleep(1000);
+
+    PageObjects.common.debug('entering new title');
+    await this.findTimeout.findById('dashboardTitle').type(dashName);
+
+    if (storeTimeWithDash !== undefined) {
+      await this.storeTimeWithDashboard(storeTimeWithDash);
+    }
+
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.common.sleep(1000);
+
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('clicking final Save button for named dashboard');
+      return this.findTimeout.findByCssSelector('.btn-primary').click();
+    });
+
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('verify toast-message for saved dashboard');
-        return this.findTimeout
-        .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-        .getVisibleText();
-      });
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('verify toast-message for saved dashboard');
+      return this.findTimeout
+      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      .getVisibleText();
     });
   }
 
@@ -127,6 +179,7 @@ export default class DashboardPage {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
+    PageObjects.common.debug('Load Saved Dashboard');
     const self = this;
     return this.gotoDashboardLandingPage()
     .then(function filterDashboard() {
@@ -216,4 +269,46 @@ export default class DashboardPage {
     });
   }
 
+  getTestVisualizationNames() {
+    return [
+      'Visualization PieChart',
+      'Visualization☺ VerticalBarChart',
+      'Visualization漢字 AreaChart',
+      'Visualization☺漢字 DataTable',
+      'Visualization漢字 LineChart',
+      'Visualization TileMap',
+      'Visualization MetricChart'
+    ];
+  }
+
+  addVisualizations(visualizations) {
+    return visualizations.reduce(function (promise, vizName) {
+      return promise
+        .then(() => PageObjects.dashboard.addVisualization(vizName));
+    }, Promise.resolve());
+  }
+
+  async setTimepickerInDataRange() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
+    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+  }
+
+  async getFilterDescriptions() {
+    const filters = await this.findTimeout.findAllByCssSelector('.filter-bar > .filter > .filter-description');
+    const descriptions = _.map(filters, async (filter) => await filter.getVisibleText());
+    return descriptions;
+  }
+
+  async initTests() {
+    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
+
+    PageObjects.common.debug('load kibana index with visualizations');
+    await elasticDump.elasticLoad('dashboard','.kibana');
+
+    await PageObjects.common.navigateToApp('dashboard');
+
+    return logstash;
+  }
 }

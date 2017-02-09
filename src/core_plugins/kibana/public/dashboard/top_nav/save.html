@@ -16,7 +16,7 @@
 
   <div class="form-group">
     <label>
-      <input type="checkbox" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">
+      <input type="checkbox" data-test-subj="storeTimeWithDashboard" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">
       Store time with {{opts.dashboard.getDisplayName()}}
       <kbn-info placement="bottom" info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
     </label>
