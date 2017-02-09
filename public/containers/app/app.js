@@ -16,22 +16,38 @@ import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle'
 import { editorToggle } from 'plugins/rework/state/actions/editor';
 import { argumentSet } from 'plugins/rework/state/actions/element';
 import { dropdownOpen } from 'plugins/rework/state/actions/misc';
+import { historyRestore } from 'plugins/rework/state/actions/history';
 
-
-
+// Styles
 import './app.less';
 
 const App = React.createClass({
   openElementDropDown() {
     this.props.dispatch(dropdownOpen('element'));
   },
+
   argumentSet(id, name, value) {
     this.props.dispatch(argumentSet(id, name, value));
   },
+
   do(action) {
     const {dispatch} = this.props;
     return () => dispatch(action());
   },
+
+  componentWillMount() {
+    // listen for window popstate changes, restore state
+    window.onpopstate = (ev) => {
+      if (!ev) return;
+      this.props.dispatch(historyRestore(ev.state));
+    };
+  },
+
+  componentWillUnmount() {
+    // remove window popstate listener
+    window.onpopstate = null;
+  },
+
   render() {
     const  {elements, editor, selectedElement, fullscreen} = this.props;
     const {resizeMove, rotate, select} = this;
