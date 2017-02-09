@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import {argumentSet} from 'plugins/rework/state/actions/element';
-import {dropdownToggle} from 'plugins/rework/state/actions/misc';
 import ArgumentForm from 'plugins/rework/components/argument_form/argument_form';
 import './element_editor.less';
 

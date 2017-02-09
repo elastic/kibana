@@ -62,7 +62,7 @@ const DataframeDialog = React.createClass({
     };
   },
   render() {
-    const {dataframes} = this.props;
+    const {dataframes, meta} = this.props;
     const {creating} = this.state;
     const dataframe = _.cloneDeep(this.state.dataframe);
 

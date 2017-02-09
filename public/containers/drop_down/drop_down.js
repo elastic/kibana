@@ -53,9 +53,9 @@ const DropDown = React.createClass({
     };
 
     const dialog = (() => {
-      switch (dropdown) {
+      switch (dropdown.type) {
         case 'dataframe':
-          return (<DataframeDialog></DataframeDialog>);
+          return (<DataframeDialog meta={dropdown.meta}></DataframeDialog>);
         case 'element':
           return (<ElementAddDialog></ElementAddDialog>);
         case 'workpads':

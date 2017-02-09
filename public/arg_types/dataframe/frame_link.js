@@ -3,12 +3,15 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
-import { dropdownToggle } from 'plugins/rework/state/actions/misc';
+import { dropdownOpen } from 'plugins/rework/state/actions/misc';
 import './frame_link.less';
 
 const LinkFrame = React.createClass({
   showEditDataframe() {
-    this.props.dispatch(dropdownToggle('dataframe'));
+    this.props.dispatch(dropdownOpen({
+      type: 'dataframe',
+      meta: null,
+    }));
   },
 
   render() {
