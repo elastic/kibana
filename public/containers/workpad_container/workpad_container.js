@@ -25,7 +25,7 @@ import { workpadReplace } from 'plugins/rework/state/actions/workpad';
 
 import { elementSelect, elementAdd } from 'plugins/rework/state/actions/element';
 
-const DataframeDialog = React.createClass({
+const WorkpadContainer = React.createClass({
   pageAdd() {
     this.props.dispatch(pageAdd());
   },
@@ -157,4 +157,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(DataframeDialog);
+export default connect(mapStateToProps)(WorkpadContainer);

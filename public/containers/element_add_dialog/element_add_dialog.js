@@ -4,7 +4,7 @@ import ElementTypeList from 'plugins/rework/components/element_type_list';
 import {elementAddType} from 'plugins/rework/state/actions/element';
 import _ from 'lodash';
 
-const DataframeDialog = React.createClass({
+const ElementAddDialog = React.createClass({
   onSelect(type) {
     const {dispatch, pageId} = this.props;
     dispatch(elementAddType(type.name, pageId));
@@ -24,4 +24,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(DataframeDialog);
+export default connect(mapStateToProps)(ElementAddDialog);
