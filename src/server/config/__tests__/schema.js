@@ -119,39 +119,6 @@ describe('Config schema', function () {
         });
       });
 
-      describe('clientAuthentication', function () {
-        it ('defaults to \'none\'', function () {
-          const config = {};
-          const { error, value } = validate({});
-          expect(error).to.be(null);
-          expect(value).to.be.an(Object);
-          expect(value.server).to.be.an(Object);
-          expect(value.server.ssl).to.be.an(Object);
-          expect(value.server.ssl.clientAuthentication).to.be('none');
-        });
-
-        ['none', 'required'].forEach((option) => {
-          it(`allows ${option}`, function () {
-            const config = {};
-            set(config, 'server.ssl.clientAuthentication', option);
-            const { error } = validate(config);
-            expect(error).to.be(null);
-          });
-        });
-
-        ['bogus', 'somethingelse'].forEach((option) => {
-          it(`rejects ${option}`, function () {
-            const config = {};
-            set(config, 'server.ssl.clientAuthentication', option);
-            const { error } = validate(config);
-            expect(error).to.be.an(Object);
-            expect(error).to.have.property('details');
-            expect(error.details[0]).to.have.property('path', 'server.ssl.clientAuthentication');
-          });
-        });
-
-      });
-
       describe('certificateAuthorities', function () {
         it('allows array of string', function () {
           const config = {};
