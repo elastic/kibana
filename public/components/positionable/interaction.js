@@ -228,7 +228,10 @@ export const resize = (elem, config) => {
 
     let currentEvent;
     const getCurrentEvent = () => currentEvent;
-    setupInteraction('mousedown.reworkResize', elem, e, () => config.onEnd(getCurrentEvent()));
+    setupInteraction('mousedown.reworkResize', elem, e, () => {
+      if (!getCurrentEvent()) return;
+      config.onEnd(getCurrentEvent());
+    });
     $(window).on('mousemove.rework', (e) => {
       currentEvent = createPositionObj(e);
       config.on(currentEvent);
@@ -272,7 +275,10 @@ export const rotate = (elem, config) => {
 
     let currentEvent;
     const getCurrentEvent = () => currentEvent;
-    setupInteraction('mousedown.reworkRotate', elem, e, () => config.onEnd(getCurrentEvent()));
+    setupInteraction('mousedown.reworkRotate', elem, e, () => {
+      if (!getCurrentEvent()) return;
+      config.onEnd(getCurrentEvent());
+    });
     $(window).on('mousemove.rework', (e) => {
       currentEvent = createRotationObj(e);
       config.on(currentEvent);
@@ -311,7 +317,10 @@ export const move = (elem, config) => {
 
     let currentEvent;
     const getCurrentEvent = () => currentEvent;
-    setupInteraction('mousedown.reworkMove', elem, e, () => config.onEnd(getCurrentEvent()));
+    setupInteraction('mousedown.reworkMove', elem, e, () => {
+      if (!getCurrentEvent()) return;
+      config.onEnd(getCurrentEvent());
+    });
     $(window).on('mousemove.rework', (e) => {
       currentEvent = createPositionObj(e);
       config.on(currentEvent);
