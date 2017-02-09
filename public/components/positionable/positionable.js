@@ -64,10 +64,17 @@ export default class Positionable extends React.PureComponent {
   componentWillUpdate(nextProps, nextState) {
     // This is gross and hacky but is needed to make updating state from props smooth.
     if (_.isEqual(this.state, nextState) && !_.isEqual(nextProps.position, this.state)) this.setState(nextProps.position);
+  }
 
+  componentDidUpdate(prevProps) {
     // If interactions have been enabled/disabled, attach/remove handlers.
-    if (this.props.interact && !nextProps.interact) this.removeHandlers(this.refs.positionableWrapper);
-    if (!this.props.interact && nextProps.interact) this.attachHandlers(this.refs.positionableWrapper);
+    if (prevProps.interact && !this.props.interact) {
+      this.removeHandlers(this.refs.positionableWrapper);
+    }
+
+    if (!prevProps.interact && this.props.interact) {
+      this.attachHandlers(this.refs.positionableWrapper);
+    }
   }
 
   componentDidMount() {
