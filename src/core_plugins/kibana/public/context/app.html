@@ -44,13 +44,20 @@
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
+      <context-size-picker
+        count="contextApp.state.queryParameters.predecessorCount"
+        data-test-subj="predecessorCountPicker"
+        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
+        on-change-count="contextApp.actions.fetchGivenPredecessorRows"
+      ></context-size-picker>
+      <span>newer entries</span>
       <context-loading-button
         data-test-subj="predecessorLoadMoreButton"
         is-disabled="contextApp.state.loadingStatus.predecessors !== contextApp.constants.LOADING_STATUS.LOADED"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
-        Load newer entries
+        Load more
       </context-loading-button>
       <span
         class="kuiStatusText kuiStatusText--warning"
@@ -58,19 +65,11 @@
           && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
       >
         <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} newer entries could be found."></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} entries newer than the anchor could be found."></span>
       </span>
     </div>
 
     <div class="kuiBarSection">
-      <div>Limit to</div>
-      <context-size-picker
-        count="contextApp.state.queryParameters.predecessorCount"
-        data-test-subj="predecessorCountPicker"
-        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
-        on-change-count="contextApp.actions.fetchGivenPredecessorRows"
-      ></context-size-picker>
-      <div>newer entries</div>
     </div>
   </div>
 
@@ -106,26 +105,6 @@
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
-      <context-loading-button
-        data-test-subj="successorLoadMoreButton"
-        is-disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
-        icon="'fa-chevron-down'"
-        ng-click="contextApp.actions.fetchMoreSuccessorRows()"
-      >
-        Load older entries
-      </context-loading-button>
-      <span
-        class="kuiStatusText kuiStatusText--warning"
-        ng-if="(contextApp.state.loadingStatus.successors === contextApp.constants.LOADING_STATUS.LOADED)
-          && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
-      >
-        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} older entries could be found."></span>
-      </span>
-    </div>
-
-    <div class="kuiBarSection">
-      <div>Limit to</div>
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
         data-test-subj="successorCountPicker"
@@ -133,6 +112,25 @@
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
       <div>older entries</div>
+      <context-loading-button
+        data-test-subj="successorLoadMoreButton"
+        is-disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
+        icon="'fa-chevron-down'"
+        ng-click="contextApp.actions.fetchMoreSuccessorRows()"
+      >
+        Load more
+      </context-loading-button>
+      <span
+        class="kuiStatusText kuiStatusText--warning"
+        ng-if="(contextApp.state.loadingStatus.successors === contextApp.constants.LOADING_STATUS.LOADED)
+          && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
+      >
+        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} entries older than the anchor could be found."></span>
+      </span>
+    </div>
+
+    <div class="kuiBarSection">
     </div>
   </div>
 </div>
