@@ -7,7 +7,7 @@ export const bindHotkeys = (store) => {
   bindShortcuts(
     [['alt+right'], pageNext, true],
     [['alt+left'], pagePrevious, true],
-    [['alt+e'], editorToggle],
+    [['alt+e', 'alt+l'], editorToggle],
     [['alt+f'], fullscreenToggle],
 
   )(store.dispatch);
