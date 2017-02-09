@@ -3,6 +3,7 @@ import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import { mutateElement, mutateArgument } from '../lib/mutation_helpers';
 import { getElementTemplate } from '../templates';
+import { editorOpen } from './editor';
 import Promise from 'bluebird';
 
 /*
@@ -19,6 +20,7 @@ export const argumentsResolved = createAction('ARGUMENTS_RESOLVED', mutateElemen
 
 export function elementAdd(template, pageId) {
   return (dispatch, getState) => {
+    dispatch(editorOpen());
     const elementType = elementTypes.byName[template.type];
     const element = getElementTemplate(template);
 
