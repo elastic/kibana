@@ -10,12 +10,12 @@ import FrameLink from './frame_link';
 
 argTypes.push(new ArgType('dataframe', {
   help: 'The source of data to link to this element',
-  default: (state) => _.keys(state.persistent.dataframes)[0],
-  form: ({commit, value}) => {
+  cache: false, // Its ok not to cache this, this is cheap
+  default(state) { return _.keys(state.persistent.dataframes)[0]; },
+  form({commit, value}) {
     return (<FrameLink value={value} select={commit}></FrameLink>);
   },
-  cache: false, // Its ok not to cache this, this is cheap
-  resolve: (dataframeId, state) => {
+  resolve(dataframeId, state) {
     return state.transient.dataframeCache[dataframeId];
   }
 }));
