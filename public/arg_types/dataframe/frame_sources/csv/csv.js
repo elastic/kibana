@@ -47,17 +47,17 @@ frameSources.push(new FrameSource('csv', {
 
     dataframe.rows = _.map(parsedArrays, (values) => _.zipObject(keys, values));
 
-    _.each(filters, filter => {
-      const fn = filterHandlers[filter.type];
-      if (!fn) return;
-      dataframe.rows = fn(filter.value, dataframe.rows);
-    });
-
     dataframe.columns = _.map(keys, (key) => {
       return {
         name: key,
         type: typeof dataframe.rows[0][key]
       };
+    });
+
+    _.each(filters, filter => {
+      const fn = filterHandlers[filter.type];
+      if (!fn) return;
+      dataframe.rows = fn(filter.value, dataframe.rows);
     });
 
     return new Dataframe(dataframe);
