@@ -37,7 +37,7 @@ export default function AbstractReqProvider(Private, Promise) {
      *  @return {Boolean}
      */
     isFetchRequestedAndPending() {
-      return !!this._fetchRequested && !this.started;
+      return this._fetchRequested && !this.started;
     }
 
     /**
@@ -45,7 +45,7 @@ export default function AbstractReqProvider(Private, Promise) {
      *  be fetched. At that point the request is somewhere between `ready-to-start`
      *  and `started`. The fetch module then waits a short period of time to
      *  allow requests to build up in the request queue, and then immediately
-     *  fetches all requests that return true from `isFetchRequested()`
+     *  fetches all requests that return true from `isFetchRequestedAndPending()`
      *
      *  @return {undefined}
      */
