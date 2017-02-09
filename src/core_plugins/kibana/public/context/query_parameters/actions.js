@@ -1,16 +1,19 @@
 import _ from 'lodash';
 
-import { QUERY_PARAMETER_KEYS } from './constants';
+import {
+  MAX_CONTEXT_SIZE,
+  MIN_CONTEXT_SIZE,
+  QUERY_PARAMETER_KEYS,
+} from './constants';
 
-
-const MIN_CONTEXT_SIZE = 0;
 
 export function QueryParameterActionsProvider(config) {
   const getDefaultSizeStep = () => parseInt(config.get('context:step'), 10);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
-    state.queryParameters.predecessorCount = Math.max(
+    state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
+      MAX_CONTEXT_SIZE,
       predecessorCount,
     )
   );
@@ -20,8 +23,9 @@ export function QueryParameterActionsProvider(config) {
   );
 
   const setSuccessorCount = (state) => (successorCount) => (
-    state.queryParameters.successorCount = Math.max(
+    state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
+      MAX_CONTEXT_SIZE,
       successorCount,
     )
   );
@@ -45,4 +49,8 @@ export function QueryParameterActionsProvider(config) {
     setQueryParameters,
     setSuccessorCount,
   };
+}
+
+function clamp(minimum, maximum, value) {
+  return Math.max(Math.min(maximum, value), minimum);
 }
