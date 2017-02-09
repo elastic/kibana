@@ -37,8 +37,6 @@ startup. Your Kibana users still need to authenticate with Elasticsearch, which 
 `server.ssl.certificate:` and `server.ssl.key:`:: Paths to the PEM-format SSL certificate and SSL key files, respectively.
 `server.ssl.keyPassphrase`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 `server.ssl.certificateAuthorities`:: List of paths to PEM encoded certificate files that should be trusted.
-`server.ssl.clientAuthentication`:: *Default: none* Controls Kibana's server behavior in regard to requesting a certificate from client connections. Valid values are `required`,
- and `none`. `required` forces a client to present a certificate, while `none` does not.
 `server.ssl.supportedProtocols`:: *Default: TLSv1, TLSv1.1, TLSv1.2*  Supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 `server.ssl.cipherSuites`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*. Details on the format, and the valid options, are available via the [OpenSSL cipher list format documentation](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT)
 `elasticsearch.ssl.cert:` and `elasticsearch.ssl.key:`:: Optional settings that provide the paths to the PEM-format SSL
