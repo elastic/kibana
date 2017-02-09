@@ -1,17 +1,18 @@
 import $ from 'jquery';
 import _ from 'lodash';
 
-function setupInteraction(eventName, elem, e) {
+function setupInteraction(eventName, elem, e, onEnd) {
   e.stopPropagation();
   const target = $(e.target);
   $('body').css({'user-select': 'none'});
   target.addClass('active');
 
-  $(window).on('mouseup', () => {
+  $(window).on('mouseup.rework', () => {
     $('body').css({'user-select': 'auto'});
     target.removeClass('active');
-    $(window).off('mouseup');
-    $(window).off('mousemove');
+    $(window).off('mouseup.rework');
+    $(window).off('mousemove.rework');
+    if (_.isFunction(onEnd)) onEnd();
   });
 }
 
@@ -149,7 +150,6 @@ export const resize = (elem, config) => {
   elem.data('rework.resize.sides', allHandles);
 
   $(allHandles, elem).on('mousedown.reworkResize', (e) => {
-    setupInteraction('mousedown.reworkResize', elem, e);
     const sides = _.chain(config.sides)
       .mapValues((side) => $(e.target).is(side))
       .omitBy((side) => !side)
@@ -226,7 +226,13 @@ export const resize = (elem, config) => {
       return result;
     }
 
-    $(window).on('mousemove', (e) => config.on(createPositionObj(e)));
+    let currentEvent;
+    const getCurrentEvent = () => currentEvent;
+    setupInteraction('mousedown.reworkResize', elem, e, () => config.onEnd(getCurrentEvent()));
+    $(window).on('mousemove.rework', (e) => {
+      currentEvent = createPositionObj(e);
+      config.on(currentEvent);
+    });
   });
 };
 
@@ -235,7 +241,6 @@ export const rotate = (elem, config) => {
   elem.data('rework.rotate.handle', config.handle);
 
   $(config.handle, elem).on('mousedown.reworkRotate', (e) => {
-    setupInteraction('mousedown.reworkRotate', elem, e);
 
     // TODO: SOoooo gross
     // Positioning goes wonky when rotated
@@ -265,7 +270,13 @@ export const rotate = (elem, config) => {
       return result;
     }
 
-    $(window).on('mousemove', (e) => config.on(createRotationObj(e)));
+    let currentEvent;
+    const getCurrentEvent = () => currentEvent;
+    setupInteraction('mousedown.reworkRotate', elem, e, () => config.onEnd(getCurrentEvent()));
+    $(window).on('mousemove.rework', (e) => {
+      currentEvent = createRotationObj(e);
+      config.on(currentEvent);
+    });
   });
 };
 
@@ -280,7 +291,6 @@ export const move = (elem, config) => {
 
     if ($(e.target).is(ignoreIf)) return;
 
-    setupInteraction('mousedown.reworkMove', elem, e);
 
     const target = $(e.target);
     const originalEvent = e;
@@ -299,7 +309,13 @@ export const move = (elem, config) => {
       return result;
     }
 
-    $(window).on('mousemove', (e) => config.on(createPositionObj(e)));
+    let currentEvent;
+    const getCurrentEvent = () => currentEvent;
+    setupInteraction('mousedown.reworkMove', elem, e, () => config.onEnd(getCurrentEvent()));
+    $(window).on('mousemove.rework', (e) => {
+      currentEvent = createPositionObj(e);
+      config.on(currentEvent);
+    });
   });
 };
 

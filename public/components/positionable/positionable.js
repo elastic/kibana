@@ -14,7 +14,7 @@ export default class Positionable extends React.PureComponent {
   attachHandlers(ref) {
     const elem = $(ref);
 
-    const stateMove = (e) => {
+    const stateMoveOrResize = (e) => {
       const {top, left, height, width} = e.interaction.absolute;
       this.setState({top, left, height, width});
     };
@@ -24,30 +24,22 @@ export default class Positionable extends React.PureComponent {
       this.setState({angle});
     };
 
-    const commitMove = _.debounce(this.props.move, 500);
-    const commitResize = _.debounce(this.props.resize, 50, {maxWait: 50});
-    const commitRotate = _.debounce(this.props.rotate, 500);
-
     move(elem, {
-      on: (e) => {
-        stateMove(e);
-        commitMove(e);
-      }
+      on: (e) => stateMoveOrResize(e),
+      onEnd: (e) => this.props.move(e)
     });
 
     rotate(elem, {
-      on: (e) => {
-        stateRotate(e);
-        commitRotate(e);
-      },
+      on: (e) => stateRotate(e),
+      onEnd: (e) => this.props.rotate(e),
       handle: '.rework--interactable-rotate-handle'
     });
 
+    const debouncedResize = _.debounce(this.props.resize, 50, {maxWait: 50});
+
     resize(elem, {
-      on: (e) => {
-        stateMove(e);
-        commitResize(e);
-      },
+      on: (e) => { stateMoveOrResize(e); debouncedResize(e); },
+      onEnd: (e) => this.props.resize(e),
       sides: {
         left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
         top:    '.rework--interactable-resize-nw, .rework--interactable-resize-ne, .rework--interactable-resize-n',
