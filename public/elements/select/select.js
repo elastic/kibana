@@ -13,8 +13,9 @@ elements.push(new Element('select', {
   args: [
     new Arg('column', {
       type: 'string',
-
-      help: 'The field on which to filter. Most sources will ignore fields they do not know about.'
+      default: 'model',
+      help: `The field on which to filter. Different sources may handle this in different ways.
+              Most sources will ignore fields they do not know about.`
     }),
     new Arg('options', {
       type: 'tags',
@@ -30,6 +31,10 @@ elements.push(new Element('select', {
 
     render() {
       const {args, setArg, setFilter, filter} = this.props;
+
+      let filterValue = _.get(filter, 'value.value');
+      filterValue = _.isUndefined(filterValue) ? undefined : {value: filterValue, label: filterValue};
+
       // Uhg, react-select mutates this if a user adds something.
       const selectOptions = _.map(args.options, opt => {
         return {label: opt, value: opt};
@@ -37,7 +42,7 @@ elements.push(new Element('select', {
 
       const onChange = (selectObj) => {
         setArg('options', _.map(selectOptions, 'value'));
-        setFilter(!selectObj.value ? undefined : {
+        setFilter(!_.get(selectObj, 'value') ? undefined : {
           type: 'exactly',
           value: {
             column: args.column,
@@ -52,8 +57,8 @@ elements.push(new Element('select', {
             multi={false}
             options={selectOptions}
             onChange={onChange}
-            value={_.get(filter, 'value.value')}
-            clearable={false}
+            value={filterValue}
+            clearable={true}
           />
         </div>
       );
