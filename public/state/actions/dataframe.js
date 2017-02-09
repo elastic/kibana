@@ -1,7 +1,7 @@
 import {argumentResolve, elementRemoveSlowly} from './element';
 import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
-import {mutateWithId} from './lib/helpers';
+import {mutateWithId} from '../lib/mutation_helpers';
 import { getDataframeTemplate } from '../templates';
 import Promise from 'bluebird';
 

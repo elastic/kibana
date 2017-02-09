@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
-import { mutateElement, mutateArgument } from './lib/helpers';
+import { mutateElement, mutateArgument } from '../lib/mutation_helpers';
 import { getElementTemplate } from '../templates';
 import Promise from 'bluebird';
 

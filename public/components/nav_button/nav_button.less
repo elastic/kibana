@@ -1,6 +1,7 @@
 @import (reference) "~plugins/rework/main.less";
 
 @rework--top-nav--section-height: 35px;
+@disabled-button-color: @kibanaGray4;
 
 .rework--nav-button {
   display: inline-block !important;
@@ -16,5 +17,9 @@
     }
   }
 
+  & > .disabled,
+  & > .disabled:hover {
+    color: @disabled-button-color;
+  }
 
 }
