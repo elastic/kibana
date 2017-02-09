@@ -1,0 +1,13 @@
+server: downgrade ECANCELED logs to debug
+
+Backports PR #9612
+
+**Commit 1:**
+server: downgrade ECANCELED logs to debug
+
+Just like we do for EPIPE and ECONNRESET, we can downgrade ECANCELED
+client errors to the debug logging level rather than treating them as
+errors.
+
+* Original sha: c2c2bbe42c614dc9fe451619bab1e87e6e40028c
+* Authored by Court Ewing <court@epixa.com> on 2016-12-22T18:41:04Z
