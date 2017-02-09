@@ -44,4 +44,23 @@ export class PanelUtils {
   static findPanelByPanelIndex(panelIndex, panels) {
     return _.find(panels, (panel) => panel.panelIndex === panelIndex);
   }
+
+  static initPanelIndexes(panels) {
+    // find the largest panelIndex in all the panels
+    let maxIndex = this.getMaxPanelIndex(panels);
+
+    // ensure that all panels have a panelIndex
+    panels.forEach(function (panel) {
+      if (!panel.panelIndex) {
+        panel.panelIndex = maxIndex++;
+      }
+    });
+  }
+
+  static getMaxPanelIndex(panels) {
+    let maxId = panels.reduce(function (id, panel) {
+      return Math.max(id, panel.panelIndex || id);
+    }, 0);
+    return ++maxId;
+  }
 }
