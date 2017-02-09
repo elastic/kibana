@@ -30,6 +30,7 @@ config/kibana.dev.yml
 coverage
 selenium
 .babelcache.json
+.webpack.babelcache
 *.swp
 *.swo
 *.out
