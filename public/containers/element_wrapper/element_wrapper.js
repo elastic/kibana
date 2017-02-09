@@ -69,8 +69,7 @@ const ElementWrapper = React.createClass({
               args={this.props.elementCache[id]}
               filter={_.get(this.props.filters, filterId)}
               setArg={this.setArg}
-              setFilter={this.setFilter(filterId)}
-              getFilter={this.getFilter}>
+              setFilter={this.setFilter(filterId)}>
             </Element>
         </Positionable>
       </div>
