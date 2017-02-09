@@ -1,4 +1,4 @@
-import {argumentResolve, elementRemoveSlowly} from './element';
+import {argumentResolve, elementRemoveSlowly, elementResolveAll} from './element';
 import {createAction} from 'redux-actions';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import {mutateWithId} from '../lib/mutation_helpers';
@@ -26,10 +26,8 @@ export function dataframeSet(dataframe) {
 export function dataframeResolveAll() {
   return (dispatch, getState) => {
     const ids = _.keys(getState().persistent.dataframes);
-    _.each(ids, id => {
-      dispatch(dataframeResolve(id));
-      dispatch(dataframeSync(id));
-    });
+    _.each(ids, id => dispatch(dataframeResolve(id)));
+    dispatch(elementResolveAll());
   };
 }
 
@@ -71,6 +69,7 @@ export function dataframeRemove(id) {
 // argument. There has to be a better way to keep these things in sync.
 function dataframeSync(id) {
   return (dispatch, getState) => {
+    //dispatch(elementResolveAll());
     const elements = getState().persistent.elements;
     _.each(elements, element => {
       const elementType = elementTypes.byName[element.type];
