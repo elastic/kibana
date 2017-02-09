@@ -67,7 +67,7 @@ const Nav = React.createClass({
   },
 
   render() {
-    const {workpad, element, currentPageId, time, history} = this.props;
+    const {workpad, element, currentPageId, time} = this.props;
     const layerClasses = ['rework--nav--layer-buttons'];
     const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
@@ -154,12 +154,10 @@ const Nav = React.createClass({
           <NavButton
             tooltip="Undo"
             className="fa fa-undo"
-            disabled={!history.hasPrevious}
             onClick={this.historyUndo}></NavButton>
           <NavButton
             tooltip="Redo"
             className="fa fa-repeat"
-            disabled={!history.hasNext}
             onClick={this.historyRedo}></NavButton>
 
         </div>
@@ -178,7 +176,6 @@ function mapStateToProps(state) {
     time: workpad.time,
     element: state.persistent.elements[state.transient.selectedElement],
     currentPageId: workpad.pages[workpad.page],
-    history,
   };
 }
 

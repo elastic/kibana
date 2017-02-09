@@ -3,10 +3,6 @@ import uuid from 'uuid/v4';
 export default () => {
   return {
     app: {}, // Kibana stuff in here
-    history: {
-      hasPrevious: false,
-      hasNext: false,
-    },
     transient: { // Things that don't survive a refresh
       fullscreen: false,
       editor: true,
