@@ -25,6 +25,7 @@ function stubbedLogstashFields() {
     ['_id',               'string',     false, false, true,  true ],
     ['_type',             'string',     false, false, true,  true ],
     ['_source',           'string',     false, false, true,  true ],
+    ['non-filterable',    'string',     false, false, true,  false],
     ['custom_user_field', 'conflict',   false, false, true,  true ],
     ['script string',     'string',     false, false, true,  false, { script: '\'i am a string\'' } ],
     ['script number',     'number',     false, false, true,  false, { script: '1234' } ],
