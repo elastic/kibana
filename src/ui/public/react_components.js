@@ -7,5 +7,9 @@ import {
 
 import uiModules from 'ui/modules';
 const app = uiModules.get('app/kibana', ['react']);
-app.value('PlusIconComponent', PlusIcon);
-app.value('TrashIconComponent', TrashIcon);
+app.directive('plusIconComponent', function (reactDirective) {
+  return reactDirective(PlusIcon);
+});
+app.directive('trashIconComponent', function (reactDirective) {
+  return reactDirective(TrashIcon);
+});
