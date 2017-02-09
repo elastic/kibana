@@ -4,7 +4,7 @@ import {parse} from './parse';
 import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_source';
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
-
+import {exactly} from './filters/exactly';
 import './csv.less';
 
 frameSources.push(new FrameSource('csv', {
@@ -23,6 +23,10 @@ frameSources.push(new FrameSource('csv', {
         '"Subaru","Outback","2017",24445\n'
   },
   toDataframe: function (value, filters) {
+    const filterHandlers = {
+      exactly: exactly
+    };
+
     const dataframe =   {
       type: 'dataframe',
       columns: [],
@@ -42,11 +46,18 @@ frameSources.push(new FrameSource('csv', {
     if (!keys.length || !parsedArrays.length) return dataframe;
 
     dataframe.rows = _.map(parsedArrays, (values) => _.zipObject(keys, values));
+
     dataframe.columns = _.map(keys, (key) => {
       return {
         name: key,
         type: typeof dataframe.rows[0][key]
       };
+    });
+
+    _.each(filters, filter => {
+      const fn = filterHandlers[filter.type];
+      if (!fn) return;
+      dataframe.rows = fn(filter.value, dataframe.rows);
     });
 
     return new Dataframe(dataframe);

@@ -6,6 +6,7 @@ import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 
 import { elementSelect, elementProps, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
+import { filterSet } from 'plugins/rework/state/actions/filter';
 
 const ElementWrapper = React.createClass({
   select(id) {
@@ -41,11 +42,14 @@ const ElementWrapper = React.createClass({
     if (_.isEqual(element.args[arg], value)) return;
     this.props.dispatch(argumentSet(this.props.element.id, arg, value));
   },
+  setFilter(filterId) {
+    return (filter) => this.props.dispatch(filterSet(filterId, filter));
+  },
   render() {
-    const {element, page, fullscreen, editor, layer, elementCache} = this.props;
-    const {id} = element;
-    const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
+    const {id} = this.props.element;
+    const filterId = `filter-${id}`;
 
+    const position = _.pick(this.props.element, ['top', 'left', 'height', 'width', 'angle']);
     return (
       <div
         style={{height: '100%'}}
@@ -54,13 +58,19 @@ const ElementWrapper = React.createClass({
         id={id}
         onKeyDown={this.handleKeypress}
         className="rework--element-wrapper">
-        <Positionable style={{zIndex: 2000 + layer}}
+        <Positionable style={{zIndex: 2000 + this.props.layer}}
           position={position}
-          interact={(fullscreen || !editor) ? false : true}
+          interact={(this.props.fullscreen || !this.props.editor) ? false : true}
           move={this.resizeMove(id)}
           resize={this.resizeMove(id)}
           rotate={this.rotate(id)}>
-            <Element type={element.type} args={elementCache[id]} setArg={this.setArg}></Element>
+            <Element
+              type={this.props.element.type}
+              args={this.props.elementCache[id]}
+              filter={_.get(this.props.filters, filterId)}
+              setArg={this.setArg}
+              setFilter={this.setFilter(filterId)}>
+            </Element>
         </Positionable>
       </div>
     );
@@ -72,7 +82,8 @@ function mapStateToProps(state) {
     elements: state.persistent.elements,
     elementCache: state.transient.elementCache,
     fullscreen: state.transient.fullscreen,
-    editor: state.transient.editor
+    editor: state.transient.editor,
+    filters: state.persistent.filters,
   };
 }
 

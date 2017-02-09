@@ -15,7 +15,7 @@ const Element = React.createClass({
     };
   },
   render() {
-    const {type, args, setArg} = this.props;
+    const {type, args, setArg, setFilter, filter} = this.props;
     const {styleId, elementType} = this.state;
 
     if (!elementType) return (<Warning>Unknown Element Type</Warning>);
@@ -41,7 +41,12 @@ const Element = React.createClass({
       <div className="rework--element" style={elementStyle} data-style={styleId}>
         <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={scopedStyleSheet}></ScopedStyle>
         <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={customStyleSheet}></ScopedStyle>
-        <ElementContent args={args} setArg={setArg}></ElementContent>
+        <ElementContent
+          args={args}
+          filter={filter}
+          setArg={setArg}
+          setFilter={setFilter}
+        ></ElementContent>
       </div>
     );
   }

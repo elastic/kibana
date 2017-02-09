@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <rect x="81.63" y="114.546" width="1138.518" height="1530.344" style="fill: rgb(216, 216, 216); stroke-linejoin: round; stroke: rgb(0, 0, 0); fill-opacity: 0; stroke-width: 135;"/>
+  <rect transform="matrix(NaN, NaN, NaN, NaN, NaN, NaN)" style="fill: rgb(216, 216, 216);"/>
+  <path style="stroke: black; fill: none;"/>
+  <path style="stroke: black; fill: none;" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 33.49592971801758, 27.215442657470703)"/>
+  <path style="stroke: black; fill: none;" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 33.49592971801758, 27.215442657470703)"/>
+  <path d="M 128.905 647.788 L 1172.873 647.788" style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 135;"/>
+  <path d="M 274.369 1320.993 L 1018.678 1320.993" style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 135;"/>
+  <rect x="1218.178" y="114.546" width="496.379" height="524.367" style="stroke-linejoin: round; stroke: rgb(0, 0, 0); stroke-width: 135;"/>
+  <path d="M 282.606 248.063" style="fill: none; stroke: black;"/>
+  <path d="M 508.703 245.97" style="fill: none; stroke: black;"/>
+  <path d="M 1484.274 -524.404 L 1660.128 -260.624 L 1308.42 -260.624 L 1484.274 -524.404 Z" transform="matrix(1, 0, 0, -1, 0, 0)" style="fill: rgb(255, 255, 255);" bx:shape="triangle 1308.42 -524.404 351.708 263.78 0.5 0 1@8f88ab47"/>
+  <path d="M 276.955 1002.59 L 1021.264 1002.59" style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 135;"/>
+</svg>

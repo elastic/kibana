@@ -101,7 +101,7 @@ elements.push(new Element('chart', {
             horizontalBar(this.refs.plot, args);
             break;
           default:
-            $(this.refs.plot).text('No such chart type');
+            console.log('No such chart type');
         }
       } catch (e) {
         console.log(e);
