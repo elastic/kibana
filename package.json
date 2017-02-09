@@ -42,6 +42,7 @@
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.16.1",
     "lodash-move": "^1.1.1",
+    "lz-string": "~1.4.4",
     "postcss-nested": "^1.0.0",
     "rc-tooltip": "^3.4.2",
     "react": "^15.4.2",
