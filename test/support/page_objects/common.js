@@ -330,4 +330,15 @@ export default class Common {
     this.debug(`Found ${elements.length} for selector ${selector}`);
     return elements;
   }
+
+  async getSharedItemTitleAndDescription() {
+    const element = await this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('[shared-item]');
+
+    return {
+      title: await element.getAttribute('data-title'),
+      description: await element.getAttribute('data-description')
+    };
+  }
 }
