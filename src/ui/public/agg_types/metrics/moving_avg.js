@@ -2,14 +2,14 @@ import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_ag
 import ParentPipelineAggHelperProvider from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 
-export default function AggTypeMetricComulativeSumProvider(Private) {
+export default function AggTypeMetricMovingAvgProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const parentPipelineAggHelper = Private(ParentPipelineAggHelperProvider);
 
   return new MetricAggType({
     name: 'moving_avg',
-    title: 'Moving Sum',
-    makeLabel: agg => makeNestedLabel(agg, 'moving sum'),
+    title: 'Moving Avg',
+    makeLabel: agg => makeNestedLabel(agg, 'moving avg'),
     params: [
       ...parentPipelineAggHelper.params()
     ]
