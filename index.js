@@ -31,6 +31,7 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/image/image',
         'plugins/rework/arg_types/palette/palette',
+        'plugins/rework/arg_types/tags/tags',
 
         'plugins/rework/arg_types/select/select',
         'plugins/rework/arg_types/style/style',
@@ -48,13 +49,13 @@ module.exports = function (kibana) {
         'plugins/rework/elements/box/box',
         'plugins/rework/elements/grow/grow',
         'plugins/rework/elements/chart/chart',
-
-
         'plugins/rework/elements/image/image',
         'plugins/rework/elements/number/number',
         'plugins/rework/elements/markdown/markdown',
         'plugins/rework/elements/table/table',
         'plugins/rework/elements/timechart/timechart',
+        'plugins/rework/elements/select/select',
+
 
 
 

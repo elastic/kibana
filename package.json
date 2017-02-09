@@ -53,6 +53,7 @@
     "react-drag-sortable": "^1.0.1",
     "react-dropzone": "^3.9.2",
     "react-redux": "^5.0.1",
+    "react-select": "^1.0.0-rc.3",
     "reactstrap": "^4.0.1",
     "redux": "^3.6.0",
     "redux-actions": "^1.2.0",
