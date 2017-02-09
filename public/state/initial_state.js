@@ -55,18 +55,7 @@ export default () => {
                 '"Subaru","Outback","2016",23470\n' +
                 '"Subaru","Outback","2017",24445\n'
           }
-        },
-        /*
-        'dataframe-0': {
-          id: 'dataframe-0',
-          name: 'Static',
-          type: 'timelion',
-          value: {
-            expression: '.static(5:10:2:10:23:11:12:13:14)',
-            interval: 'auto'
-          }
         }
-        */
       }
     },
   };
