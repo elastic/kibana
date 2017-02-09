@@ -7,7 +7,10 @@ export default () => {
       fullscreen: false,
       editor: true,
       selectedElement: null,
-      dropdown: null,
+      dropdown: {
+        type: null,
+        meta: {},
+      },
       // Element arguments are cached up here.
       elementCache: {},
       // Dataframes get written here on resolution

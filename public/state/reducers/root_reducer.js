@@ -100,17 +100,26 @@ function rootReducer(state = {}, action) {
   switch (type) {
 
     case 'DROPDOWN_TOGGLE':
-      return setTransient('dropdown', payload === state.transient.dropdown ? null : payload);
+      if (payload.type === state.transient.dropdown.type) {
+        return setTransient('dropdown', {
+          type: null,
+          meta: null,
+        });
+      }
+      return setTransient('dropdown', payload);
     case 'DROPDOWN_OPEN':
       return setTransient('dropdown', payload);
     case 'DROPDOWN_CLOSE':
       return setTransient('dropdown', null);
+
     case 'FULLSCREEN_TOGGLE':
       return setTransient('fullscreen', state.transient.fullscreen ? false : true);
+
     case 'EDITOR_CLOSE':
       return setTransient('editor', false);
     case 'EDITOR_OPEN':
       return setTransient('editor', true);
+
     case 'WORKPAD_PROPS':
       return setWorkpad(payload);
     case 'WORKPAD_NEW':
@@ -148,12 +157,10 @@ function rootReducer(state = {}, action) {
 
     case 'DATAFRAME_REMOVE':
       return removeDataframe(payload);
-
     case 'DATAFRAME_UNRESOLVED':
       return setPersistent('dataframes', {
         ...state.persistent.dataframes,
         [payload.id]: payload});
-
     case 'DATAFRAME_RESOLVED':
       return setTransient('dataframeCache', {
         ...state.transient.dataframeCache,
@@ -167,7 +174,6 @@ function rootReducer(state = {}, action) {
           ...state.transient.elementCache[payload.id],
           [payload.name]: payload.value
         }});
-
     case 'ARGUMENTS_RESOLVED':
       return setTransient('elementCache', {
         ...state.transient.elementCache,
@@ -175,8 +181,6 @@ function rootReducer(state = {}, action) {
           ...state.transient.elementCache[payload.id],
           ...payload.value
         }});
-
-
     // Soooo hideous
     case 'ARGUMENT_UNRESOLVED':
       return setPersistent('elements', {

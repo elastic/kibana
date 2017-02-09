@@ -10,7 +10,7 @@ const LinkFrame = React.createClass({
   showEditDataframe() {
     this.props.dispatch(dropdownOpen({
       type: 'dataframe',
-      meta: null,
+      meta: { selected: this.props.value },
     }));
   },
 
