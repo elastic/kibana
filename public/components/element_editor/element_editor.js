@@ -43,7 +43,7 @@ export default class extends React.PureComponent {
             };
 
             return (
-              <div key={name} className="rework--editor-section">
+              <div key={name} className="rework--editor-section" data-element-type={name}>
                 <h4>{displayName.replace('_', ' ')}</h4>
                 <ArgumentForm
                   type={type}
