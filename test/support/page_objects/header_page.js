@@ -12,28 +12,29 @@ export default class HeaderPage {
   }
 
   clickSelector(selector) {
-    return this.try(() => {
-      return this.remote.setFindTimeout(defaultFindTimeout)
+    return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector(selector)
       .then(tab => {
         return tab.click();
       });
-    });
   }
 
   clickDiscover() {
     PageObjects.common.debug('click Discover tab');
     this.clickSelector('a[href*=\'discover\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickVisualize() {
     PageObjects.common.debug('click Visualize tab');
     this.clickSelector('a[href*=\'visualize\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickDashboard() {
     PageObjects.common.debug('click Dashboard tab');
     this.clickSelector('a[href*=\'dashboard\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickSettings() {
@@ -48,6 +49,11 @@ export default class HeaderPage {
     });
   }
 
+  clickQuickButton() {
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByLinkText('Quick').click();
+  }
+
   isTimepickerOpen() {
     return this.remote.setFindTimeout(2000)
     .findDisplayedByCssSelector('.kbn-timepicker')
@@ -58,6 +64,20 @@ export default class HeaderPage {
   clickAbsoluteButton() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByLinkText('Absolute').click();
+  }
+
+  async getFromTime() {
+    await this.ensureTimePickerIsOpen();
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.from\']')
+      .getProperty('value');
+  }
+
+  async getToTime() {
+    await this.ensureTimePickerIsOpen();
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.to\']')
+      .getProperty('value');
   }
 
   setFromTime(timeString) {
@@ -129,4 +149,24 @@ export default class HeaderPage {
     .findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
   }
 
+  async ensureTimePickerIsOpen() {
+    const isOpen = await PageObjects.header.isTimepickerOpen();
+    PageObjects.common.debug(`time picker open: ${isOpen}`);
+    if (!isOpen) {
+      PageObjects.common.debug('--Opening time picker');
+      await PageObjects.header.clickTimepicker();
+    }
+  }
+
+  async setQuickTime(quickTime) {
+    await this.ensureTimePickerIsOpen();
+    PageObjects.common.debug('--Clicking Quick button');
+    await this.clickQuickButton();
+    await this.remote.setFindTimeout(defaultFindTimeout)
+      .findByLinkText(quickTime).click();
+  }
+
+  async getPrettyDuration() {
+    return await PageObjects.common.findTestSubject('globalTimepickerRange').getVisibleText();
+  }
 }
