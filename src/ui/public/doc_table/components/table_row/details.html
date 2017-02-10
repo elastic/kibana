@@ -1,18 +1,16 @@
 <td colspan="{{ columns.length + 2 }}">
   <div class="documentTableRow__actions">
     <a
-      class="kuiButton kuiButton--basic kuiButton--iconText documentTableRow__action"
+      class="kuiLink documentTableRow__action"
       ng-href="{{ getContextAppHref() }}"
       ng-if="indexPattern.hasTimeField()"
     >
-      <span class="kuiButton__icon kuiIcon fa-files-o" />
       View surrounding entries
     </a>
     <a
-      class="kuiButton kuiButton--basic kuiButton--iconText documentTableRow__action"
+      class="kuiLink documentTableRow__action"
       ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
     >
-      <span class="kuiButton__icon kuiIcon fa-file-o" />
       View single entry
     </a>
   </div>
