@@ -16,9 +16,10 @@ class DataframeDialog extends React.Component {
     const {dataframes} = this.props;
     const dataframeIds = _.keys(dataframes);
     const selectedId = _.get(props, 'meta.selected', dataframeIds[0]);
+    const createState = _.get(props, 'meta.creating', false);
 
     this.state = {
-      creating: false,
+      creating: createState,
       renaming: false,
       dataframe: _.cloneDeep(dataframes[selectedId]),
     };
@@ -26,15 +27,31 @@ class DataframeDialog extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const selectedId = _.get(nextProps, 'meta.selected');
+    const createDataframe = _.get(nextProps, 'meta.creating');
+    const invalidDataframe = !nextProps.dataframes[this.state.dataframe.id];
+
+    // update creation state if changed
+    if (createDataframe) {
+      const currentProp = _.get(this.props, 'meta.creating');
+      const newCreation = currentProp !== createDataframe;
+      if (newCreation) return this.setState({ creating: true });
+    }
 
     // update selected dataframe is prop changed
-    const newSelectedId = _.get(this.props, 'meta.selected') !== selectedId;
-    if (newSelectedId) return this.setDataframe(selectedId);
+    if (selectedId) {
+      const currentId = this.state.dataframe.id;
+      const newSelectedId = currentId !== selectedId;
+      if (newSelectedId) {
+        this.setState({ creating: false });
+        return this.setDataframe(selectedId);
+      }
+    }
 
     // update selected dataframe is current one is no longer valid
-    const dataframeIds = _.keys(nextProps.dataframes);
-    const invalidDataframe = !nextProps.dataframes[this.state.dataframe.id];
-    if (invalidDataframe) return this.setDataframe(dataframeIds[0]);
+    if (invalidDataframe) {
+      const dataframeIds = _.keys(nextProps.dataframes);
+      return this.setDataframe(dataframeIds[0]);
+    }
   }
 
   getDataframeById(id) {
