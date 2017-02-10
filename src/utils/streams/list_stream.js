@@ -7,8 +7,8 @@ import { Readable } from 'stream';
  *  @param  {Array<any>} items - the list of items to provide
  *  @return {Readable}
  */
-export function createListStream(items) {
-  const queue = [].concat(items || []);
+export function createListStream(items = []) {
+  const queue = [].concat(items);
 
   return new Readable({
     objectMode: true,
