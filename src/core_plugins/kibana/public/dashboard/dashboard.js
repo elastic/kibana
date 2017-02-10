@@ -15,6 +15,7 @@ import { DashboardConstants } from './dashboard_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
+import { TopNavIds } from './top_nav/top_nav_ids';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -84,7 +85,15 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.model = { query: dashboardState.getQuery() };
 
       $scope.panels = dashboardState.getPanels();
-      $scope.topNavMenu = getTopNavConfig(kbnUrl);
+      const navActions = {};
+      navActions[TopNavIds.SAVE] = () => $scope.save();
+      navActions[TopNavIds.CLONE] = () => {
+        dash.copyOnSave = true;
+        $scope.save();
+      };
+
+      $scope.topNavMenu = getTopNavConfig(navActions);
+
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;

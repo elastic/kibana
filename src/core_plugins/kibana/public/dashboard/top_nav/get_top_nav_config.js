@@ -1,13 +1,15 @@
-
+import { TopNavIds } from './top_nav_ids';
 /**
  * @param kbnUrl - used to change the url.
- * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration.
+ * @return {Array<{string: function}>} - Returns an array of objects for a top nav configuration.
  * Note that order matters and the top nav will be displayed in the same order.
  */
-export function getTopNavConfig(kbnUrl) {
+export function getTopNavConfig(actions) {
   return [
     getAddConfig(),
-    getSaveConfig(),
+    getSaveConfig(actions[TopNavIds.SAVE]),
+    getCloneConfig(actions[TopNavIds.CLONE]),
+    getRenameConfig(),
     getShareConfig(),
     getOptionsConfig()];
 }
@@ -17,7 +19,7 @@ export function getTopNavConfig(kbnUrl) {
  */
 function getAddConfig() {
   return {
-    key: 'add',
+    key: TopNavIds.ADD,
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
     template: require('plugins/kibana/dashboard/top_nav/add_panel.html')
@@ -27,12 +29,36 @@ function getAddConfig() {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig() {
+function getSaveConfig(action) {
   return {
-    key: 'save',
+    key: TopNavIds.SAVE,
     description: 'Save Dashboard',
     testId: 'dashboardSaveButton',
-    template: require('plugins/kibana/dashboard/top_nav/save.html')
+    run: action
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getRenameConfig() {
+  return {
+    key: TopNavIds.RENAME,
+    description: 'Rename Dashboard',
+    testId: 'dashboardRenameButton',
+    template: require('plugins/kibana/dashboard/top_nav/rename.html')
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getCloneConfig(action) {
+  return {
+    key: TopNavIds.CLONE,
+    description: 'Clone Dashboard',
+    testId: 'dashboardCloneButton',
+    run: action
   };
 }
 
@@ -41,7 +67,7 @@ function getSaveConfig() {
  */
 function getShareConfig() {
   return {
-    key: 'share',
+    key: TopNavIds.SHARE,
     description: 'Share Dashboard',
     testId: 'dashboardShareButton',
     template: require('plugins/kibana/dashboard/top_nav/share.html')
@@ -53,7 +79,7 @@ function getShareConfig() {
  */
 function getOptionsConfig() {
   return {
-    key: 'options',
+    key: TopNavIds.OPTIONS,
     description: 'Options',
     testId: 'dashboardOptionsButton',
     template: require('plugins/kibana/dashboard/top_nav/options.html')
