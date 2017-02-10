@@ -53,7 +53,10 @@
       <span>newer entries</span>
       <context-loading-button
         data-test-subj="predecessorLoadMoreButton"
-        is-disabled="contextApp.state.loadingStatus.predecessors !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-disabled="![
+          contextApp.constants.LOADING_STATUS.LOADED,
+          contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.predecessors)"
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
@@ -114,7 +117,10 @@
       <div>older entries</div>
       <context-loading-button
         data-test-subj="successorLoadMoreButton"
-        is-disabled="contextApp.state.loadingStatus.successors !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-disabled="![
+          contextApp.constants.LOADING_STATUS.LOADED,
+          contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.successors)"
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
       >
