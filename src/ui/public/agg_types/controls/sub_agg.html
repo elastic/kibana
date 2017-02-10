@@ -1,0 +1,28 @@
+<div ng-controller="aggParam.controller">
+  <div class="form-group">
+    <label>Metric</label>
+    <select
+      name="buckets_path"
+      ng-model="agg.params.buckets_path"
+      required
+      class="form-control">
+      <option
+        ng-repeat="respAgg in responseValueAggs track by respAgg.id"
+        value="{{respAgg.id}}"
+        ng-if="respAgg.type.name !== agg.type.name"
+        ng-disabled="rejectAgg(respAgg)"
+        ng-selected="agg.params.buckets_path === respAgg.id">
+        metric: {{safeMakeLabel(respAgg)}}
+      </option>
+      <option value="custom" ng-selected="agg.params.buckets_path === 'custom'">
+        Custom Metric
+      </option>
+    </select>
+  </div>
+  <ng-form name="customMetricForm" ng-if="agg.params.buckets_path === 'custom'" class="vis-editor-agg-order-agg">
+    <vis-editor-agg-params
+      agg="agg.params.customMetric"
+      group-name="'metrics'">
+    </vis-editor-agg-params>
+  </ng-form>
+</div>
