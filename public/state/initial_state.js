@@ -15,6 +15,8 @@ export default () => {
       elementCache: {},
       // Dataframes get written here on resolution
       dataframeCache: {},
+      // Workpads cached from the server
+      workpads: [],
     },
     persistent: { // Stuff that should survive, be serialized and be saved
       workpad: {

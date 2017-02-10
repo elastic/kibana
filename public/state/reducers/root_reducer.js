@@ -14,7 +14,26 @@ function rootReducer(state = {}, action) {
   };
 
   const setWorkpad = (props) => {
-    return setPersistent('workpad', {...state.persistent.workpad, ...props});
+    const { transient } = state;
+    const workpad = {...state.persistent.workpad, ...props};
+    const workpads = transient.workpads.map(pad => {
+      if (pad.id === workpad.id) {
+        return workpad;
+      }
+      return pad;
+    });
+
+    return {
+      ...state,
+      transient: {
+        ...state.transient,
+        workpads,
+      },
+      persistent: {
+        ...state.persistent,
+        workpad: {...state.persistent.workpad, ...props},
+      },
+    };
   };
 
   const addPage = (page) => {
@@ -88,15 +107,39 @@ function rootReducer(state = {}, action) {
   };
 
   const newWorkpad = (workpad) => {
-    const persistent = workpad || getInitialState().persistent;
+    const { workpads } = state.transient;
+    const { transient, persistent } = getInitialState();
+    workpads.unshift(persistent.workpad);
+
     return {
       app: {...state.app},
-      transient: {...getInitialState().transient},
+      transient: {...transient, workpads},
       persistent: {...persistent}
     };
   };
 
-  const { payload, type } = action;
+  const loadWorkpad = (workpad) => {
+    const persistent = workpad;
+    return {
+      ...state,
+      persistent
+    };
+  };
+
+  const deleteWorkpad = (id) => {
+    const { transient } = state;
+    const index = transient.workpads.map(workpad => workpad.id).indexOf(id);
+
+    // TODO: handle removal of non-existing workpads
+    if (index < 0) return { ...state };
+
+    const workpads = [...transient.workpads];
+    workpads.splice(index, 1);
+    return setTransient('workpads', workpads);
+  };
+
+
+  const { payload, type, error } = action;
   switch (type) {
 
     case 'DROPDOWN_TOGGLE':
@@ -125,9 +168,19 @@ function rootReducer(state = {}, action) {
     case 'WORKPAD_NEW':
       return newWorkpad();
     case 'WORKPAD_LOAD':
-      return newWorkpad(payload);
+      return loadWorkpad(payload);
+    case 'WORKPAD_LOAD_ALL':
+      if (error || !payload) {
+        // TODO: handle workpad fetch error
+        console.log('Load all failed', payload);
+        return setTransient('workpads', []);
+      }
+      return setTransient('workpads', payload);
+
     case 'WORKPAD_REPLACE':
       return setPersistent('workpad', payload);
+    case 'WORKPAD_DELETE_START':
+      return deleteWorkpad(payload);
 
     case 'PAGE_SET':
       return setWorkpad({page: payload});
