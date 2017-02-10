@@ -16,27 +16,47 @@ class DataframeDialog extends React.Component {
     const {dataframes} = this.props;
     const dataframeIds = _.keys(dataframes);
     const selectedId = _.get(props, 'meta.selected', dataframeIds[0]);
+    const createState = _.get(props, 'meta.creating', false);
 
     this.state = {
-      creating: false,
+      creating: createState,
       renaming: false,
-      dataframe: _.cloneDeep(dataframes[selectedId])
+      dataframe: _.cloneDeep(dataframes[selectedId]),
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const dataframeIds = _.keys(nextProps.dataframes);
+    const selectedId = _.get(nextProps, 'meta.selected');
+    const createDataframe = _.get(nextProps, 'meta.creating');
     const invalidDataframe = !nextProps.dataframes[this.state.dataframe.id];
-    const selectedDataframe = _.get(nextProps, 'meta.selected');
 
-    if (invalidDataframe || selectedDataframe) {
-      this.setDataframe(selectedDataframe);
+    // update creation state if changed
+    if (createDataframe) {
+      const currentProp = _.get(this.props, 'meta.creating');
+      const newCreation = currentProp !== createDataframe;
+      if (newCreation) return this.setState({ creating: true });
+    }
+
+    // update selected dataframe is prop changed
+    if (selectedId) {
+      const currentId = this.state.dataframe.id;
+      const newSelectedId = currentId !== selectedId;
+      if (newSelectedId) {
+        this.setState({ creating: false });
+        return this.setDataframe(selectedId);
+      }
+    }
+
+    // update selected dataframe is current one is no longer valid
+    if (invalidDataframe) {
+      const dataframeIds = _.keys(nextProps.dataframes);
+      return this.setDataframe(dataframeIds[0]);
     }
   }
 
   getDataframeById(id) {
     const {dataframes} = this.props;
-    if (!dataframes[id]) id = 0;
+    if (!dataframes[id]) id = _.keys(dataframes)[0];
     return _.cloneDeep(dataframes[id]);
   }
 
@@ -71,7 +91,10 @@ class DataframeDialog extends React.Component {
 
   connectDataframe(dataframe) {
     this.props.dispatch(dataframeAdd(dataframe));
-    this.setState({creating: false, dataframe: dataframe});
+    this.setState({
+      creating: false,
+      dataframe: dataframe
+    });
   }
 
   removeDataframe(id) {
@@ -82,7 +105,7 @@ class DataframeDialog extends React.Component {
   }
 
   render() {
-    const {dataframes, meta} = this.props;
+    const {dataframes} = this.props;
     const {creating} = this.state;
     const dataframe = _.cloneDeep(this.state.dataframe);
 

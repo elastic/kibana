@@ -14,6 +14,13 @@ const LinkFrame = React.createClass({
     }));
   },
 
+  showCreateDataframe() {
+    this.props.dispatch(dropdownOpen({
+      type: 'dataframe',
+      meta: { creating: true },
+    }));
+  },
+
   render() {
     const {dataframes, select, value, types} = this.props;
 
@@ -28,9 +35,12 @@ const LinkFrame = React.createClass({
           dataframes={showDataframes}
           selected={value}>
         </DataframeSelector>
-        <div className="rework--frame-link--edit">
+        <div className="rework--frame-link--controls">
           <Tooltip content="Edit Dataframe">
             <a onClick={this.showEditDataframe} className="fa fa-pencil"></a>
+          </Tooltip>
+          <Tooltip content="New Dataframe">
+            <a onClick={this.showCreateDataframe} className="fa fa-plus"></a>
           </Tooltip>
         </div>
       </div>
