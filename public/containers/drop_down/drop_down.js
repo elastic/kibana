@@ -41,7 +41,7 @@ const DropDown = React.createClass({
       timefilter: time
     };
 
-    const dialog = (() => {
+    const pickDialog = () => {
       switch (dropdown.type) {
         case 'dataframe':
           return (<DataframeDialog meta={dropdown.meta}></DataframeDialog>);
@@ -63,7 +63,9 @@ const DropDown = React.createClass({
         default:
           return null;
       }
-    }());
+    };
+
+    const dialog = pickDialog();
 
     const content = !dialog ? null : (
       <div className="rework--dropdown" style={style}>

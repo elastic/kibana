@@ -111,7 +111,7 @@ class DataframeDialog extends React.Component {
 
     const deleteClasses = _.keys(dataframes).length < 2 ? ['rework--no-action'] : [];
 
-    const DataframeEditOrSelect = (() => {
+    const DataframeEditOrSelect = ((() => {
       if (this.state.renaming) {
         return (
           <Editable focus={true} onDone={this.finishRename.bind(this)} value={dataframe.name}></Editable>
@@ -122,7 +122,7 @@ class DataframeDialog extends React.Component {
         <DataframeSelector dataframes={dataframes} onChange={this.setDataframe.bind(this)}
           selected={dataframe.id}></DataframeSelector>
       );
-    }());
+    })());
 
     const edit = (
       <div>
