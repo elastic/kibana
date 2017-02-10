@@ -73,7 +73,11 @@ export default class ArgumentForm extends React.PureComponent {
           id={`colorPicker-${popoverId}`}>
           <i className="fa fa-pencil"></i>
         </button>
-        <Popover placement={popover} isOpen={this.state.popover} target={`colorPicker-${popoverId}`} toggle={this.dismissPopover}>
+        <Popover
+          placement={popover}
+          isOpen={this.state.popover}
+          target={`colorPicker-${popoverId}`}
+          toggle={this.dismissPopover.bind(this)}>
           <PopoverContent>
             {picker}
           </PopoverContent>
