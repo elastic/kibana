@@ -107,7 +107,8 @@ frameSources.push(new FrameSource('timelion', {
         this.setState({[prop]: value});
       };
     },
-    run() {
+    run(e) {
+      e.preventDefault();
       this.props.commit(this.state);
     },
     render() {
