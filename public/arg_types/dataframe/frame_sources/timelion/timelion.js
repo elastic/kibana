@@ -9,6 +9,7 @@ import TimelionExpression from 'plugins/rework/arg_types/dataframe/frame_sources
 import fetch from 'isomorphic-fetch';
 import moment from 'moment';
 import './timelion.less';
+import {exactly} from './filters/exactly';
 
 //import TimelionExpression from './timelion_expression';
 
@@ -20,6 +21,10 @@ frameSources.push(new FrameSource('timelion', {
     interval: 'auto'
   },
   toDataframe: function (value, filters) {
+    const filterHandlers = {
+      exactly: exactly
+    };
+
     const dataframe =   {
       type: 'dataframe',
       columns: [{name: 'foo', type: 'string'}],
@@ -29,6 +34,7 @@ frameSources.push(new FrameSource('timelion', {
     const timeFilters = _.filter(filters, {type: 'time'});
     if (timeFilters.length !== 1) throw new Error('Timelion must have 1 and only 1 time filter');
 
+    // We need to inject other filters here
     const body = {
       sheet: [value.expression],
       time: {
@@ -38,6 +44,22 @@ frameSources.push(new FrameSource('timelion', {
         timezone: 'America/Phoenix'
       }
     };
+
+    const otherFilters = _.reject(filters, {type: 'time'});
+    const boolQuery = {bool: {}};
+    _.each(otherFilters, filter => {
+      if (!filterHandlers[filter.type]) return;
+      boolQuery.bool.must = boolQuery.bool.must || [];
+      boolQuery.bool.must.push(filterHandlers[filter.type](filter.value));
+    });
+
+    if (boolQuery.bool.must) {
+      body.extended = {
+        es: {
+          filter: boolQuery
+        }
+      };
+    }
 
     const timelionResp =  fetch('../api/timelion/run', {
       method: 'POST',
