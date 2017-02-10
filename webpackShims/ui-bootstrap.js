@@ -8,20 +8,12 @@ define(function (require) {
   .config(function ($tooltipProvider) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
   })
-  .factory('translationsLoader', function ($q) {
-      return function (options) {
-        var deferred = $q.defer();
-        const translations = chrome.getTranslations();
-        deferred.resolve(translations);
-        return deferred.promise;
-      };
-  })
-  .config(['$translateProvider', function ($translateProvider) {
-    $translateProvider.preferredLanguage('en');
-    $translateProvider.useLoader('translationsLoader');
+  .config(function ($translateProvider) {
+    $translateProvider.translations('default', chrome.getTranslations());
+    $translateProvider.preferredLanguage('default');
     // Enable escaping of HTML
     // issue in https://angular-translate.github.io/docs/#/guide/19_security
     $translateProvider.useSanitizeValueStrategy('escapeParameters');
-  }]);
+  });
 
 });
