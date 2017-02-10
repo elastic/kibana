@@ -15,12 +15,14 @@ import _ from 'lodash';
 
 const app = modules.get('apps/rework');
 
-app.service('$store', (kbnVersion, basePath) => {
+app.service('$store', (kbnVersion, basePath, config) => {
 
   const initialState = getInitialState();
   // Set the defaults from Kibana plugin
   initialState.app.kbnVersion = kbnVersion;
   initialState.app.basePath = basePath;
+  initialState.app.config = config;
+
 
   // Limit redux updates to 20FPS
   //const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
