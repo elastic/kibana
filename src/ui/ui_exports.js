@@ -81,8 +81,8 @@ class UiExports {
 
       case 'link':
       case 'links':
-        return (plugin, spec) => {
-          for (const spec of [].concat(spec || [])) {
+        return (plugin, specs) => {
+          for (const spec of [].concat(specs || [])) {
             this.navLinks.new(spec);
           }
         };
