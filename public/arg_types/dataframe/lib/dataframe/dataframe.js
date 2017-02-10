@@ -30,6 +30,7 @@ export default class Dataframe {
     this.schema = data.schema;
     this.keys = data.keys;
     this.value = data;
+    this.meta = data.meta;
   }
 
   get toTuples() {

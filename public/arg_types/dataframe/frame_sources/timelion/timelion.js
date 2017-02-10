@@ -97,7 +97,9 @@ frameSources.push(new FrameSource('timelion', {
         });
       }));
 
-      return new Dataframe({columns: columns, rows: rows, schema: 'timeseries', keys: ['label']});
+      const meta = _.map(seriesList.list, series => _.omit(series, 'data'));
+
+      return new Dataframe({meta: meta, columns: columns, rows: rows, schema: 'timeseries', keys: ['label']});
     });
 
   },
