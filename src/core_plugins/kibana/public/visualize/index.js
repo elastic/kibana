@@ -17,10 +17,11 @@ import 'plugins/kibana/visualize/editor/draggable_handle';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import uiRoutes from 'ui/routes';
-
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
+import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import savedVisusalizationProvider from 'plugins/kibana/visualize/saved_visualizations/saved_visualization_register';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -34,5 +35,4 @@ uiRoutes
 
 // preloading
 
-require('ui/saved_objects/saved_object_registry')
-.register(require('plugins/kibana/visualize/saved_visualizations/saved_visualization_register'));
+savedObjectRegistry.register(savedVisusalizationProvider);
