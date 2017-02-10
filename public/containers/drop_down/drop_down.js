@@ -16,20 +16,9 @@ import fetch from 'isomorphic-fetch';
 
 const DropDown = React.createClass({
   loadWorkpad(id) {
-    const {dispatch} = this.props;
-    fetch('../api/rework/get/' + id, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'kbn-xsrf': 'turdSandwich',
-      }
-    })
-    .then(resp => resp.json()).then(resp => {
-      console.log(resp);
-      dispatch(workpadLoad(resp.resp._source));
-    });
+    this.props.dispatch(workpadLoad(id));
   },
+
   updateTime(time) {
     const {dispatch} = this.props;
     dispatch(workpadProps({time}));
