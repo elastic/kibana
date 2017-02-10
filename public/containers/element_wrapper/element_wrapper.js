@@ -6,7 +6,7 @@ import Positionable from 'plugins/rework/components/positionable/positionable';
 import Element from 'plugins/rework/components/element/element';
 
 import { elementSelect, elementProps, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
-import { filterSet } from 'plugins/rework/state/actions/filter';
+import { filterSet, filterRemove } from 'plugins/rework/state/actions/filter';
 
 class ElementWrapper extends React.Component {
   constructor(props) {
@@ -59,7 +59,8 @@ class ElementWrapper extends React.Component {
   }
 
   componentWillUnmount() {
-    this.props.dispatch(filterSet(this.state.filterId, undefined));
+    // TODO: Do not refresh dataframes on element remove!
+    this.props.dispatch(filterRemove(this.state.filterId));
   }
 
   render() {
