@@ -20,7 +20,10 @@ POST /.kibana/the_rework_1/_mapping
     "dataframes": {
       "type": "object",
       "enabled": false
-
+    },
+    "filters": {
+      "type": "object",
+      "enabled": false
     }
   }
 }
