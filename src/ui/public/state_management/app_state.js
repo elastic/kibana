@@ -36,13 +36,6 @@ function AppStateProvider(Private, $rootScope, $location, $injector, kbnUrl) {
     AppState.getAppState._set(this);
   }
 
-  AppState.prototype.clearState = function (defaults) {
-    this.reset();
-    kbnUrl.removeParam(urlParam);
-    //AppState.Super.call(this, urlParam, defaults);
-    this.save();
-  };
-
   // if the url param is missing, write it back
   AppState.prototype._persistAcrossApps = false;
 

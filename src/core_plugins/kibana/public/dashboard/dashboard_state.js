@@ -48,14 +48,15 @@ function areTimesEqual(timeA, timeB) {
 
 export class DashboardState {
   constructor(dashboard, timefilter, timeFilterPreviouslyStored, defaultViewMode, quickTimeRanges, AppState) {
-    this.stateDefaults = getStateDefaults(dashboard);
+    this.dashboard = dashboard;
+
+    this.stateDefaults = getStateDefaults(this.dashboard);
     this.stateDefaults.viewMode = defaultViewMode;
 
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
     this.isDirty = false;
     this.timefilter = timefilter;
-    this.dashboard = dashboard;
 
     this.lastSavedDashboardFilters = this.getFilterState();
 
@@ -285,6 +286,10 @@ export class DashboardState {
       .then((id) => {
         this.stateMonitor.setInitialState(this.appState.toJSON());
         this.lastSavedDashboardFilters = this.getFilterState();
+        this.stateDefaults = getStateDefaults(this.dashboard);
+        this.stateDefaults.viewMode = DashboardViewMode.VIEW;
+        // Make sure new app state defaults are using the new defaults.
+        this.appState.setDefaults(this.stateDefaults);
         return id;
       });
   }
@@ -307,7 +312,15 @@ export class DashboardState {
   }
 
   createStateMonitor() {
+    //console.log('creating state monitor with defaults');
+    //console.log(this.stateDefaults);
+
     this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
+
+
+   // console.log('createStateMonitor:new appState defaults:');
+    //console.log(this.appState._defaults);
+
     this.stateMonitor.ignoreProps('viewMode');
     this.stateMonitor.onChange(status => {
       this.isDirty = status.dirty;
