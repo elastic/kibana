@@ -10,6 +10,8 @@ import fetch from 'isomorphic-fetch';
 import moment from 'moment';
 import './timelion.less';
 import {exactly} from './filters/exactly';
+import {range} from './filters/range';
+
 
 //import TimelionExpression from './timelion_expression';
 
@@ -22,7 +24,8 @@ frameSources.push(new FrameSource('timelion', {
   },
   toDataframe: function (value, filters) {
     const filterHandlers = {
-      exactly: exactly
+      exactly: exactly,
+      range: range
     };
 
     const dataframe =   {

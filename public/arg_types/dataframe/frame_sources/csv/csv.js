@@ -5,6 +5,8 @@ import FrameSource from 'plugins/rework/arg_types/dataframe/frame_sources/frame_
 import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import {exactly} from './filters/exactly';
+import {range} from './filters/range';
+
 import './csv.less';
 
 frameSources.push(new FrameSource('csv', {
@@ -24,7 +26,8 @@ frameSources.push(new FrameSource('csv', {
   },
   toDataframe: function (value, filters) {
     const filterHandlers = {
-      exactly: exactly
+      exactly: exactly,
+      range: range
     };
 
     const dataframe =   {
