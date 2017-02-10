@@ -9,6 +9,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -20,7 +21,7 @@ export default props => (
     <GuideSection
       title="Event"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: eventHtml,
       }]}
     >
@@ -36,7 +37,7 @@ export default props => (
     <GuideSection
       title="Event Menu"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: eventMenuHtml,
       }]}
     >

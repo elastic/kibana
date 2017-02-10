@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -23,7 +24,7 @@ export default props => (
     <GuideSection
       title="TextInput"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: textInputHtml,
       }]}
     >
@@ -35,7 +36,7 @@ export default props => (
     <GuideSection
       title="StaticInput"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: staticInputHtml,
       }]}
     >
@@ -51,7 +52,7 @@ export default props => (
     <GuideSection
       title="TextArea"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: textAreaHtml,
       }]}
     >
@@ -63,7 +64,7 @@ export default props => (
     <GuideSection
       title="TextArea, non-resizable"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: textAreaNonResizableHtml,
       }]}
     >
@@ -75,7 +76,7 @@ export default props => (
     <GuideSection
       title="CheckBox"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: checkBoxHtml,
       }]}
     >
@@ -87,7 +88,7 @@ export default props => (
     <GuideSection
       title="Select"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: selectHtml,
       }]}
     >

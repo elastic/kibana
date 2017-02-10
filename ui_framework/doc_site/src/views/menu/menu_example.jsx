@@ -9,6 +9,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
 } from '../../components';
 
 const menuHtml = require('./menu.html');
@@ -19,7 +20,7 @@ export default props => (
     <GuideSection
       title="Menu"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: menuHtml,
       }]}
     >
@@ -31,7 +32,7 @@ export default props => (
     <GuideSection
       title="Menu, contained"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: menuContainedHtml,
       }]}
     >

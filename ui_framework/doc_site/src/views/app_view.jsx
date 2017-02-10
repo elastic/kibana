@@ -17,7 +17,7 @@ import {
 // Inject version into header.
 const pkg = require('json!../../../../package.json');
 
-export default class AppView extends Component {
+export class AppView extends Component {
   constructor(props) {
     super(props);
 
@@ -28,15 +28,6 @@ export default class AppView extends Component {
     this.onClickNavItem = this.onClickNavItem.bind(this);
     this.onToggleNav = this.onToggleNav.bind(this);
     this.onCloseCodeViewer = this.onCloseCodeViewer.bind(this);
-  }
-
-  getChildContext() {
-    return {
-      openCodeViewer: this.props.openCodeViewer,
-      registerSection: this.props.registerSection,
-      unregisterSection: this.props.unregisterSection,
-      sections: this.props.sections,
-    };
   }
 
   onClickNavItem() {
@@ -84,13 +75,6 @@ export default class AppView extends Component {
     );
   }
 }
-
-AppView.childContextTypes = {
-  openCodeViewer: PropTypes.func,
-  registerSection: PropTypes.func,
-  unregisterSection: PropTypes.func,
-  sections: PropTypes.array,
-};
 
 AppView.propTypes = {
   children: PropTypes.any,

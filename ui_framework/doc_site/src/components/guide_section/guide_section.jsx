@@ -16,15 +16,15 @@ export class GuideSection extends Component {
   }
 
   onClickSource() {
-    this.context.openCodeViewer(this.props.source);
+    this.props.openCodeViewer(this.props.source);
   }
 
   componentWillMount() {
-    this.context.registerSection(this.getId(), this.props.title);
+    this.props.registerSection(this.getId(), this.props.title);
   }
 
   componentWillUnmount() {
-    this.context.unregisterSection(this.getId());
+    this.props.unregisterSection(this.getId());
   }
 
   render() {
@@ -49,19 +49,11 @@ export class GuideSection extends Component {
   }
 }
 
-GuideSection.TYPES = {
-  JS: 'JavaScript',
-  HTML: 'HTML',
-};
-
-GuideSection.contextTypes = {
-  openCodeViewer: PropTypes.func,
-  registerSection: PropTypes.func,
-  unregisterSection: PropTypes.func,
-};
-
 GuideSection.propTypes = {
   title: PropTypes.string,
   source: PropTypes.array,
   children: PropTypes.any,
+  openCodeViewer: PropTypes.func,
+  registerSection: PropTypes.func,
+  unregisterSection: PropTypes.func,
 };

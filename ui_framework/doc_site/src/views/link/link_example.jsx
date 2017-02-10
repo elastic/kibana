@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -18,7 +19,7 @@ export default props => (
     <GuideSection
       title="Link"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: linkHtml,
       }]}
     >

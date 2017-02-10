@@ -9,6 +9,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
 } from '../../components';
 
 const headerBarHtml = require('./header_bar.html');
@@ -19,7 +20,7 @@ export default props => (
     <GuideSection
       title="Header Bar"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: headerBarHtml,
       }]}
     >
@@ -31,7 +32,7 @@ export default props => (
     <GuideSection
       title="Two sections"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: twoSectionsHtml,
       }]}
     >

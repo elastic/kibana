@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -26,7 +27,7 @@ export default props => (
     <GuideSection
       title="Basic Button"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: basicHtml,
       }]}
     >
@@ -42,7 +43,7 @@ export default props => (
     <GuideSection
       title="Hollow Button"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: hollowHtml,
       }]}
     >
@@ -58,7 +59,7 @@ export default props => (
     <GuideSection
       title="Primary Button"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: primaryHtml,
       }]}
     >
@@ -75,7 +76,7 @@ export default props => (
     <GuideSection
       title="Danger Button"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: dangerHtml,
       }]}
     >
@@ -91,7 +92,7 @@ export default props => (
     <GuideSection
       title="Button with icon"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: withIconHtml,
       }]}
     >
@@ -107,7 +108,7 @@ export default props => (
     <GuideSection
       title="ButtonGroup"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: groupHtml,
       }]}
     >
@@ -123,7 +124,7 @@ export default props => (
     <GuideSection
       title="United ButtonGroup"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: groupUnitedHtml,
       }]}
     >
@@ -145,7 +146,7 @@ export default props => (
     <GuideSection
       title="In ToolBar"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: inToolBarHtml,
       }]}
     >
@@ -161,7 +162,7 @@ export default props => (
     <GuideSection
       title="Element variations"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: elementsHtml,
       }]}
     >

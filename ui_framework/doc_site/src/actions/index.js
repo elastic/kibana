@@ -1,7 +1,9 @@
 export {
-  default as CodeViewerActions,
+  openCodeViewer,
+  closeCodeViewer,
 } from './code_viewer_actions';
 
 export {
-  default as ExampleNavActions,
+  registerSection,
+  unregisterSection,
 } from './example_nav_actions';

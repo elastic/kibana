@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -21,7 +22,7 @@ export default props => (
     <GuideSection
       title="Basic MenuButton"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: basicHtml,
       }]}
     >
@@ -33,7 +34,7 @@ export default props => (
     <GuideSection
       title="Danger MenuButton"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: dangerHtml,
       }]}
     >
@@ -45,7 +46,7 @@ export default props => (
     <GuideSection
       title="MenuButton with Icon"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: withIconHtml,
       }]}
     >
@@ -61,7 +62,7 @@ export default props => (
     <GuideSection
       title="MenuButtonGroup"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: groupHtml,
       }]}
     >

@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -20,7 +21,7 @@ export default props => (
     <GuideSection
       title="Modal"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: modalHtml,
       }]}
     >
@@ -32,10 +33,10 @@ export default props => (
     <GuideSection
       title="ModalOverlay"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: modalOverlayHtml,
       }, {
-        type: GuideSection.TYPES.JS,
+        type: GuideSectionTypes.JS,
         code: modalOverlayJs,
       }]}
     >

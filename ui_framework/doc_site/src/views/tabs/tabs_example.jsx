@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -21,10 +22,10 @@ export default class TabsExample extends Component {
        <GuideSection
           title="Tabs"
           source={[{
-            type: GuideSection.TYPES.HTML,
+            type: GuideSectionTypes.HTML,
             code: html,
           }, {
-            type: GuideSection.TYPES.JS,
+            type: GuideSectionTypes.JS,
             code: js,
           }]}
         >

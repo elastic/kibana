@@ -1,27 +1,20 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { AppView } from './app_view.jsx';
+import { GuideSection } from './guide_section.jsx';
 
 import {
   openCodeViewer,
-  closeCodeViewer,
   registerSection,
   unregisterSection,
-} from '../actions';
+} from '../../actions';
 
 function mapStateToProps(state, ownProps) {
-  return {
-    routes: ownProps.routes,
-    isCodeViewerOpen: state.codeViewer.isOpen,
-    source: state.codeViewer.source,
-    sections: state.sections.sections,
-  };
+  return ownProps;
 }
 
 function mapDispatchToProps(dispatch) {
   const actions = {
     openCodeViewer,
-    closeCodeViewer,
     registerSection,
     unregisterSection,
   };
@@ -29,4 +22,4 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(actions, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AppView);
+export const GuideSectionContainer = connect(mapStateToProps, mapDispatchToProps)(GuideSection);

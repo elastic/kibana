@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -19,7 +20,7 @@ export default props => (
     <GuideSection
       title="Panel"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: panelHtml,
       }]}
     >
@@ -31,7 +32,7 @@ export default props => (
     <GuideSection
       title="Panel with PanelHeader"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: panelWithHeaderHtml,
       }]}
     >

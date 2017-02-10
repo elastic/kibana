@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -20,7 +21,7 @@ export default props => (
     <GuideSection
       title="ToolBar"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: toolBarHtml,
       }]}
     >
@@ -37,7 +38,7 @@ export default props => (
     <GuideSection
       title="ToolBar with Search only"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: toolBarSearchOnlyHtml,
       }]}
     >
@@ -49,7 +50,7 @@ export default props => (
     <GuideSection
       title="ToolBarFooter"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: toolBarFooterHtml,
       }]}
     >

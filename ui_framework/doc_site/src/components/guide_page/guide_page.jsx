@@ -28,7 +28,7 @@ export class GuidePage extends Component {
 
   renderSideNavMenu() {
     // Traverse sections and build side nav from it.
-    return this.context.sections.map((section, index) => {
+    return this.props.sections.map((section, index) => {
       return (
         <GuidePageSideNavItem
           key={index}
@@ -56,11 +56,8 @@ export class GuidePage extends Component {
   }
 }
 
-GuidePage.contextTypes = {
-  sections: PropTypes.array,
-};
-
 GuidePage.propTypes = {
   children: PropTypes.any,
   title: PropTypes.string,
+  sections: PropTypes.array,
 };

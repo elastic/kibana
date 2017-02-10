@@ -10,10 +10,6 @@ export class GuideDemo extends Component {
     this.update();
   }
 
-  shouldComponentUpdate(nextProps) {
-    return nextProps !== this.props;
-  }
-
   componentDidUpdate() {
     this.update();
   }

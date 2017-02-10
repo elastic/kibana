@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -20,7 +21,7 @@ export default props => (
     <GuideSection
       title="MicroButton"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: microButtonHtml,
       }]}
     >
@@ -36,7 +37,7 @@ export default props => (
     <GuideSection
       title="MicroButtonGroup"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: microButtonGroupHtml,
       }]}
     >
@@ -53,7 +54,7 @@ export default props => (
     <GuideSection
       title="Element variations"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: microButtonElementsHtml,
       }]}
     >

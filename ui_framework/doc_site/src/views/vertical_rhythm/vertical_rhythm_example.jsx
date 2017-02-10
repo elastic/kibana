@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -20,7 +21,7 @@ export default props => (
     <GuideSection
       title="VerticalRhythm"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: verticalRhythmHtml,
       }]}
     >
@@ -41,7 +42,7 @@ export default props => (
     <GuideSection
       title="VerticalRhythm as wrapper"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: verticalRhythmAsWrapperHtml,
       }]}
     >
@@ -58,7 +59,7 @@ export default props => (
     <GuideSection
       title="VerticalRhythm on component"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: verticalRhythmOnComponentHtml,
       }]}
     >

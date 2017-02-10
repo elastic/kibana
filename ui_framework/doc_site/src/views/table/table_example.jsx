@@ -8,6 +8,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
 } from '../../components';
 
 const tableHtml = require('./table.html');
@@ -22,10 +23,10 @@ export default props => (
     <GuideSection
       title="Table"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: tableHtml,
       }, {
-        type: GuideSection.TYPES.JS,
+        type: GuideSectionTypes.JS,
         code: tableJs,
       }]}
     >
@@ -38,7 +39,7 @@ export default props => (
     <GuideSection
       title="ControlledTable"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: controlledTableHtml,
       }]}
     >
@@ -50,7 +51,7 @@ export default props => (
     <GuideSection
       title="ControlledTable with LoadingItems"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: controlledTableWithLoadingItemsHtml,
       }]}
     >
@@ -62,7 +63,7 @@ export default props => (
     <GuideSection
       title="ControlledTable with NoItems"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: controlledTableWithNoItemsHtml,
       }]}
     >
@@ -74,7 +75,7 @@ export default props => (
     <GuideSection
       title="ControlledTable with PromptForItems"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: controlledTableWithPromptForItemsHtml,
       }]}
     >

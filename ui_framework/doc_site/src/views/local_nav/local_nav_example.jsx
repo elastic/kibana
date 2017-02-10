@@ -9,6 +9,7 @@ import {
   GuideLink,
   GuidePage,
   GuideSection,
+  GuideSectionTypes,
   GuideText,
 } from '../../components';
 
@@ -26,7 +27,7 @@ export default props => (
     <GuideSection
       title="Simple"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: simpleHtml,
       }]}
     >
@@ -47,7 +48,7 @@ export default props => (
     <GuideSection
       title="Breadcrumbs"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: breadcrumbsHtml,
       }]}
     >
@@ -68,7 +69,7 @@ export default props => (
     <GuideSection
       title="Search"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: searchHtml,
       }]}
     >
@@ -89,7 +90,7 @@ export default props => (
     <GuideSection
       title="Invalid Search"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: searchErrorHtml,
       }]}
     >
@@ -106,7 +107,7 @@ export default props => (
     <GuideSection
       title="Selected and disabled Menu Item states"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: menuItemStatesHtml,
       }]}
     >
@@ -131,7 +132,7 @@ export default props => (
     <GuideSection
       title="Dropdown"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: dropdownHtml,
       }]}
     >
@@ -152,7 +153,7 @@ export default props => (
     <GuideSection
       title="Dropdown panels"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: dropdownPanelsHtml,
       }]}
     >
@@ -173,7 +174,7 @@ export default props => (
     <GuideSection
       title="Tabs"
       source={[{
-        type: GuideSection.TYPES.HTML,
+        type: GuideSectionTypes.HTML,
         code: tabsHtml,
       }]}
     >
