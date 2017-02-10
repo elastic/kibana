@@ -15,13 +15,10 @@ import ReactTooltip from 'react-tooltip';
  * @constructor
  */
 export function KuiTooltip({ text, children }) {
-  const tooltip = text
-    ? <ReactTooltip place="bottom" id={ text }>{ text }</ReactTooltip>
-    : null;
   return <div>
       <div data-tip={ text } data-for={ text }>
         { children }
       </div>
-      { tooltip }
+      <ReactTooltip place="bottom" id={ text }>{ text }</ReactTooltip>
     </div>;
 }

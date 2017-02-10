@@ -177,16 +177,9 @@ export function VisualizeListingController($injector, $scope) {
   };
 
   const updateProps = () => {
-    $scope.plusButtonProps = {
-      href: '#/visualize/new',
-      tooltip: 'Create new visualization',
-      hide: this.getSelectedItemsCount() > 0
-    };
-
-    $scope.trashButtonProps = {
-      tooltip: 'Delete selected visualizations',
-      hide: this.getSelectedItemsCount() === 0,
-      onClick: () => this.deleteSelectedItems()
+    $scope.createOrDeleteProps = {
+      showCreate: this.getSelectedItemsCount() === 0,
+      doDelete: () => this.deleteSelectedItems()
     };
   };
   $scope.$watch(() => this.getSelectedItemsCount(), () => updateProps());

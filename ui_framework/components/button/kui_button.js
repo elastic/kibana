@@ -1,38 +1,23 @@
 import React from 'react';
 import classnames from 'classnames';
 
-import { KuiButtonLink } from './kui_button_link';
 import { KuiTooltip } from '../tooltip/kui_tooltip';
 
-export function KuiButton(props) {
-  if (props.href && props.onClick) {
-    throw new Error('Only href or onClick can be defined, not both');
-  }
+export function KuiButton({ className, onClick, tooltip, children}) {
+  const classes = classnames('kuiButton', className);
+  const button = <button
+      className={ classes }
+      aria-label={ tooltip }
+      onClick={ onClick }
+    >
+      { children }
+    </button>;
 
-  if (props.hide) return null;
-
-  const classes = classnames('kuiButton', props.className);
-
-  if (props.href) {
-    return <KuiButtonLink {...props} />;
-  } else {
-    return <KuiTooltip text={ props.tooltip }>
-      <button
-        className={ classes }
-        aria-label={ props.tooltip }
-        onClick={ props.onClick }
-      >
-        { props.children }
-      </button>
-    </KuiTooltip>;
-  }
+  return tooltip ? <KuiTooltip text={ tooltip }>{ button } </KuiTooltip> : button;
 }
 
-KuiButton.PropTypes = {
-  hide: React.PropTypes.bool,
+KuiButton.propTypes = {
   tooltip: React.PropTypes.string,
   className: React.PropTypes.string,
-  // Only one of the following must be given, not both.
-  onClick: React.PropTypes.func,
-  href: React.PropTypes.string
+  onClick: React.PropTypes.func
 };

@@ -23,6 +23,14 @@ import { VisualizeConstants } from './visualize_constants';
 import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
 import savedVisusalizationProvider from 'plugins/kibana/visualize/saved_visualizations/saved_visualization_register';
 
+import { CreateOrDeleteButton } from './listing/create_or_delete_button';
+
+import uiModules from 'ui/modules';
+const app = uiModules.get('app/visualize', ['react']);
+app.directive('createOrDeleteButton', function (reactDirective) {
+  return reactDirective(CreateOrDeleteButton);
+});
+
 uiRoutes
 .defaults(/visualize/, {
   requireDefaultIndex: true

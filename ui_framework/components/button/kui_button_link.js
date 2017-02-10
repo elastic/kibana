@@ -14,10 +14,10 @@ export function KuiButtonLink({ className, href, tooltip, children }) {
     { children }
   </a>;
 
-  return <KuiTooltip text={ tooltip }> { buttonLink } </KuiTooltip>;
+  return tooltip ? <KuiTooltip text={ tooltip }> { buttonLink } </KuiTooltip> : buttonLink;
 }
 
-KuiButtonLink.PropTypes = {
+KuiButtonLink.propTypes = {
   tooltip: React.PropTypes.string,
   href: React.PropTypes.string,
   className: React.PropTypes.string

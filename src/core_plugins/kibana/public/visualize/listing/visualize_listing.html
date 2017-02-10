@@ -32,11 +32,10 @@
 
       <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
-        <react-component name="TrashButtonComponent" props="trashButtonProps"></react-component>
-
-        <!-- Create visualization button -->
-        <react-component name="PlusButtonComponent" props="plusButtonProps"></react-component>
-
+        <create-or-delete-button
+          show-create="createOrDeleteProps.showCreate"
+          do-delete="createOrDeleteProps.doDelete"
+        ></create-or-delete-button>
       </div>
 
       <div class="kuiToolBarSection">
