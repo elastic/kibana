@@ -33,15 +33,12 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/image/image',
         'plugins/rework/arg_types/palette/palette',
         'plugins/rework/arg_types/tags/tags',
-
         'plugins/rework/arg_types/select/select',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',
         'plugins/rework/arg_types/text_style/text_style',
-
         'plugins/rework/arg_types/dataframe/dataframe',
         'plugins/rework/arg_types/dataframe_column/dataframe_column',
-
 
         // Then the elements that use them.
         // Thus, if an element plugin relies on an arg_type plugin,
@@ -56,10 +53,7 @@ module.exports = function (kibana) {
         'plugins/rework/elements/table/table',
         'plugins/rework/elements/timechart/timechart',
         'plugins/rework/elements/select/select',
-
-
-
-
+        'plugins/rework/elements/slider/slider',
       ],
     },
 
