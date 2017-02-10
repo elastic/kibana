@@ -28,6 +28,7 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion',
 
         // Then argument types
+        'plugins/rework/arg_types/number/number',
         'plugins/rework/arg_types/string/string',
         'plugins/rework/arg_types/image/image',
         'plugins/rework/arg_types/palette/palette',
