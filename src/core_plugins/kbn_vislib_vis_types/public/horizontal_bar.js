@@ -15,7 +15,9 @@ export default function PointSeriesVisType(Private) {
       defaults: {
         grid: {
           categoryLines: false,
-          color: '#eee'
+          style: {
+            color: '#eee'
+          }
         },
         categoryAxes: [
           {
@@ -40,6 +42,7 @@ export default function PointSeriesVisType(Private) {
         valueAxes: [
           {
             id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
             type: 'value',
             position: 'bottom',
             show: true,
@@ -64,7 +67,9 @@ export default function PointSeriesVisType(Private) {
           mode: 'normal',
           data: {
             label: 'Count'
-          }
+          },
+          drawLinesBetweenPoints: true,
+          showCircles: true
         }],
         addTooltip: true,
         addLegend: true,

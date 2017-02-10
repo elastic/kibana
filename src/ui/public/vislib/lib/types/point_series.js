@@ -1,10 +1,8 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
 
 export default function ColumnHandler(Private) {
 
   const createSerieFromParams = (cfg, seri) => {
-    // todo this wont work with splits ... same issue exists in dispatch
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
       return seri.aggLabel === seriConfig.data.label;
     }) : null;

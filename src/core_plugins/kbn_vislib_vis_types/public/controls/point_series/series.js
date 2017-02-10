@@ -35,21 +35,24 @@ module.directive('vislibSeries', function ($parse, $compile) {
           }
         }).join();
       }, () => {
-        let serieCount = 0;
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;
-        $scope.vis.aggs.forEach(agg => {
-          if (!agg.type) return;
-          if (agg.schema.title !== schemaTitle) return;
-          if (agg.type.type !== 'metrics') return;
-          if ($scope.vis.params.seriesParams[serieCount]) {
-            $scope.vis.params.seriesParams[serieCount].data.label = agg.makeLabel();
-          } else {
-            const serie = makeSerie(agg.makeLabel());
-            $scope.vis.params.seriesParams.push(serie);
-          }
-          serieCount++;
+
+        const metrics = $scope.vis.aggs.filter(agg => {
+          const isMetric = agg.type && agg.type.type === 'metrics';
+          return isMetric && agg.schema.title === schemaTitle;
         });
-        $scope.vis.params.seriesParams = $scope.vis.params.seriesParams.slice(0, serieCount);
+
+        // update labels for existing params or create new one
+        $scope.vis.params.seriesParams = metrics.map((agg, i) => {
+          const params = $scope.vis.params.seriesParams[i];
+          if (params) {
+            params.data.label = agg.makeLabel();
+            return params;
+          } else {
+            const series = makeSerie(agg.makeLabel());
+            return series;
+          }
+        });
       });
 
       $scope.$watch(() => {
