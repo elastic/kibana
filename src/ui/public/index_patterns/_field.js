@@ -42,7 +42,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     const scripted = !!spec.scripted;
     const searchable = !!spec.searchable || scripted;
     const aggregatable = !!spec.aggregatable || scripted;
-    const sortable = spec.name === '_score' || ((indexed || scripted || aggregatable) && type.sortable);
+    const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
     const filterable = spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
     const visualizable = aggregatable;
 
