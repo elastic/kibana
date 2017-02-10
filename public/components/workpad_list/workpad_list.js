@@ -1,49 +1,30 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import _ from 'lodash';
-import fetch from 'isomorphic-fetch';
 import moment from 'moment';
+
+import { workdpadLoadAll, workpadDelete } from 'plugins/rework/state/actions/workpad';
 import './workpad_list.less';
 
-export default React.createClass({
-  getInitialState() {
-    return {workpads: []};
-  }, // This could be initialized with the defaults for the form right?
+class WorkpadList extends React.Component {
   componentDidMount() {
     this.fetchWorkpads();
-  },
+  }
+
   fetchWorkpads() {
-    fetch('../api/rework/find?name=', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'kbn-xsrf': 'turdSandwich',
-      }
-    })
-    .then(resp => resp.json()).then(resp => {
-      this.setState({workpads: resp.workpads});
-    });
-  },
+    this.props.dispatch(workdpadLoadAll());
+  }
+
   handleDelete(id) {
-    return () => {
-      fetch('../api/rework/delete/' + id, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'turdSandwich',
-        }
-      })
-      .then(resp => resp.json()).then(resp => {
-        this.fetchWorkpads();
-      });
-    };
-  },
+    return () => this.props.dispatch(workpadDelete(id));
+  }
+
   handleSelect(id) {
-    return () => {this.props.onSelect(id);};
-  },
+    return () => this.props.onSelect(id);
+  }
+
   render() {
-    const {onSelect} = this.props;
+    const { onSelect, workpads } = this.props;
     return (
       <div className="rework--workpad-list">
         <table className="table">
@@ -55,8 +36,8 @@ export default React.createClass({
             </tr>
           </thead>
           <tbody>
-            {this.state.workpads.map(workpad => (
-              <tr key={workpad.id}>
+            {workpads.map(workpad => (
+              <tr key={workpad.id} data-id={workpad.id}>
                 <td>
                   <i onClick={this.handleDelete(workpad.id)} className="fa fa-ban rework--workpad-list-delete"></i>
                 </td>
@@ -73,4 +54,12 @@ export default React.createClass({
       </div>
     );
   }
-});
+}
+
+function mapStateToProps(state) {
+  return {
+    workpads: state.transient.workpads,
+  };
+}
+
+export default connect(mapStateToProps)(WorkpadList);
