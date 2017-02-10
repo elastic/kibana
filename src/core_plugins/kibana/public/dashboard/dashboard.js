@@ -247,7 +247,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
               onClose: _.noop,
               confirmButtonText: 'Save dashboard',
               cancelButtonText: 'Lose changes',
-              title: `Save dashboard ${dash.title}`,
+              title: `Save dashboard ${dashboardState.getTitle()}`,
               showClose: true
             }
           );
