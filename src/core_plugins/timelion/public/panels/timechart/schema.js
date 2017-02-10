@@ -15,7 +15,9 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const timezone = Private(require('plugins/timelion/services/timezone'))();
+        const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
+        const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
@@ -147,7 +149,11 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             }
 
             if (y != null) {
-              legendValueNumbers.eq(i).text('(' + y.toFixed(precision) + ')');
+              let label = y.toFixed(precision);
+              if (series.yaxis.tickFormatter) {
+                label = series.yaxis.tickFormatter(label, series.yaxis);
+              }
+              legendValueNumbers.eq(i).text(`(${label})`);
             } else {
               legendValueNumbers.eq(i).empty();
             }
@@ -223,6 +229,18 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
             return series;
           });
+
+          if (options.yaxes) {
+            options.yaxes.forEach(yaxis => {
+              if (yaxis && yaxis.units) {
+                yaxis.tickFormatter = tickFormatters[yaxis.units.type];
+                const byteModes = ['bytes', 'bytes/s'];
+                if (byteModes.includes(yaxis.units.type)) {
+                  yaxis.tickGenerator = generateTicks;
+                }
+              }
+            });
+          }
 
           try {
             $scope.plot = $.plot(canvasElem, _.compact(series), options);
