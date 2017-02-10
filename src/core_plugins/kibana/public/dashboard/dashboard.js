@@ -18,6 +18,7 @@ import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardState } from './dashboard_state';
+import { TopNavIds } from './top_nav/top_nav_ids';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -92,10 +93,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = { query: dashboardState.getQuery() };
+      $scope.model = {
+        query: dashboardState.getQuery(),
+        darkTheme: dashboardState.getDarkTheme(),
+        timeRestore: dashboardState.getTimeRestore(),
+        title: dashboardState.getTitle()
+      };
 
       $scope.panels = dashboardState.getPanels();
-      $scope.options = dashboardState.getOptions();
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
@@ -154,12 +159,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
-      $scope.$watchCollection(() => dashboardState.getOptions(), () => dashboardState.saveState());
-      $scope.$watch(() => dashboardState.getOptions().darkTheme, updateTheme);
-
-      $scope.$watch('model.query', function () {
-        dashboardState.setQuery($scope.model.query);
+      $scope.$watch('model.query', () => dashboardState.setQuery($scope.model.query));
+      $scope.$watch('model.darkTheme', () => {
+        dashboardState.setDarkTheme($scope.model.darkTheme);
+        updateTheme();
       });
+      $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
+      $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
@@ -197,8 +203,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
 
       function updateTheme() {
-        const useDarkTheme = dashboardState.getOptions().darkTheme;
-        useDarkTheme ? setDarkTheme() : setLightTheme();
+        dashboardState.getDarkTheme() ? setDarkTheme() : setLightTheme();
       }
 
       function setDarkTheme() {
@@ -211,13 +216,17 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.addApplicationClass('theme-light');
       }
 
+      // Defined up here, but filled in below, to avoid 'Defined before use' warning due to circular reference:
+      // changeViewMode uses navActions, and navActions uses changeViewMode.
+      const navActions = {};
+
       const changeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
         const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
 
         function doModeSwitch() {
           $scope.dashboardViewMode = newMode;
-          $scope.topNavMenu = getTopNavConfig(newMode, kbnUrl, changeViewMode);
+          $scope.topNavMenu = getTopNavConfig(newMode, navActions);
           dashboardState.switchViewMode(newMode);
         }
 
@@ -248,6 +257,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       };
 
+      navActions[TopNavIds.SAVE] = () => $scope.save();
+      navActions[TopNavIds.CLONE] = () => {
+        dash.copyOnSave = true;
+        $scope.save();
+      };
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => changeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => changeViewMode(DashboardViewMode.EDIT);
+
       changeViewMode(dashboardState.getViewMode());
 
       $scope.$on('ready:vis', function () {
@@ -268,10 +285,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         kbnUrl.change(`/visualize?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
-      // Setup configurable values for config directive, after objects are initialized
+
       $scope.opts = {
-        dashboard: dash,
-        ui: dashboardState.getOptions(),
         save: $scope.save,
         addVis: $scope.addVis,
         addNewVis,

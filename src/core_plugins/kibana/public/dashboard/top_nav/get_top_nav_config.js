@@ -1,18 +1,25 @@
 import { DashboardViewMode } from '../dashboard_view_mode';
+import { TopNavIds } from './top_nav_ids';
 
 /**
  * @param {DashboardMode} dashboardMode.
  * @param kbnUrl - used to change the url.
+<<<<<<< HEAD
  * @param {function} modeChange - a function to trigger a dashboard mode change.
  * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration, based on the
  * mode.
  */
-export function getTopNavConfig(dashboardMode, kbnUrl, modeChange) {
+export function getTopNavConfig(dashboardMode, actions) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
-      return [getShareConfig(), getEditConfig(modeChange)];
+      return [getShareConfig(), getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
     case DashboardViewMode.EDIT:
-      return [getAddConfig(), getSaveConfig(), getOptionsConfig(), getViewConfig(modeChange)];
+      return [
+        getAddConfig(),
+        getRenameConfig(),
+        getCloneConfig(actions[TopNavIds.CLONE]),
+        getOptionsConfig(),
+        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE])];
     default:
       return [];
   }
@@ -21,38 +28,33 @@ export function getTopNavConfig(dashboardMode, kbnUrl, modeChange) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getEditConfig(modeChange) {
+function getEditConfig(action) {
   return {
     key: 'edit',
     description: 'Switch to edit mode',
     testId: 'dashboardEditMode',
-    run: () => {
-      modeChange(DashboardViewMode.EDIT);
-    }
+    run: action
   };
 }
 
 /**
  * @returns {kbnTopNavConfig}
  */
-function getViewConfig(modeChange) {
+function getViewConfig(action) {
   return {
     key: 'done',
     description: 'Stop editing and switch to view only mode',
     testId: 'dashboardViewOnlyMode',
-    run: () => {
-      modeChange(DashboardViewMode.VIEW);
-    }
+    run: action
   };
 }
 
 /**
->>>>>>> 271b5e1a35b6f8dd694932bfa8324a76029ef9a8
  * @returns {kbnTopNavConfig}
  */
 function getAddConfig() {
   return {
-    key: 'add',
+    key: TopNavIds.ADD,
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
     template: require('plugins/kibana/dashboard/top_nav/add_panel.html')
@@ -62,12 +64,24 @@ function getAddConfig() {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig() {
+function getRenameConfig() {
   return {
-    key: 'save',
-    description: 'Save Dashboard',
-    testId: 'dashboardSaveButton',
-    template: require('plugins/kibana/dashboard/top_nav/save.html')
+    key: TopNavIds.RENAME,
+    description: 'Rename Dashboard',
+    testId: 'dashboardRenameButton',
+    template: require('plugins/kibana/dashboard/top_nav/rename.html')
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getCloneConfig(action) {
+  return {
+    key: TopNavIds.CLONE,
+    description: 'Clone Dashboard',
+    testId: 'dashboardCloneButton',
+    run: action
   };
 }
 
@@ -76,7 +90,7 @@ function getSaveConfig() {
  */
 function getShareConfig() {
   return {
-    key: 'share',
+    key: TopNavIds.SHARE,
     description: 'Share Dashboard',
     testId: 'dashboardShareButton',
     template: require('plugins/kibana/dashboard/top_nav/share.html')
@@ -88,7 +102,7 @@ function getShareConfig() {
  */
 function getOptionsConfig() {
   return {
-    key: 'options',
+    key: TopNavIds.OPTIONS,
     description: 'Options',
     testId: 'dashboardOptionsButton',
     template: require('plugins/kibana/dashboard/top_nav/options.html')

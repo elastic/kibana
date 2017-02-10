@@ -22,17 +22,13 @@ export class DashboardStrings {
       `You have unsaved changes. ${saveOrLoseMessage}`;
   }
 
-  static getFiltersDifferWarningMessage(dashboardState) {
-    const changedFilters = dashboardState.getChangedFiltersForDisplay();
-    const changedFilterList = this.createStringList(changedFilters);
-    const thoseOrThat = changedFilters.length > 1 ? 'those' : 'that';
-    const isOrAre = changedFilters.length > 1 ? 'are' : 'is';
-    return `Your current ${changedFilterList} ${isOrAre} different than ${thoseOrThat} stored with your dashboard.`;
-  }
-
   static getDashboardTitle(dashboardState) {
-    const displayTitle = dashboardState.dashboard.lastSavedTitle || `${dashboardState.dashboard.title} (unsaved)`;
     const isEditMode = dashboardState.getViewMode() === DashboardViewMode.EDIT;
+    const unsavedSuffix = isEditMode && dashboardState.getIsDirty()
+      ? ' (unsaved)'
+      : '';
+
+    const displayTitle = `${dashboardState.getTitle()}${unsavedSuffix}`;
     return isEditMode ? 'Editing ' + displayTitle : displayTitle;
   }
 }

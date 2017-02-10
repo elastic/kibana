@@ -12,6 +12,7 @@ import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state'
 function getStateDefaults(dashboard) {
   return {
     title: dashboard.title,
+    timeRestore: dashboard.timeRestore,
     panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
     uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
@@ -88,6 +89,15 @@ export class DashboardState {
     };
   }
 
+  getTitle() {
+    return this.appState.title;
+  }
+
+  setTitle(title) {
+    this.appState.title = title;
+    this.saveState();
+  }
+
   getAppState() {
     return this.appState;
   }
@@ -96,8 +106,22 @@ export class DashboardState {
     return this.appState.query;
   }
 
-  getOptions() {
-    return this.appState.options;
+  getDarkTheme() {
+    return this.appState.options.darkTheme;
+  }
+
+  setDarkTheme(darkTheme) {
+    this.appState.options.darkTheme = darkTheme;
+    this.saveState();
+  }
+
+  getTimeRestore() {
+    return this.appState.timeRestore;
+  }
+
+  setTimeRestore(timeRestore) {
+    this.appState.timeRestore = timeRestore;
+    this.saveState();
   }
 
   /**
@@ -146,7 +170,9 @@ export class DashboardState {
 
   getIsDirty() {
     // Not all filter changes are tracked by the state monitor.
-    return this.isDirty || this.getFiltersChangedFromLastSave();
+    return this.isDirty ||
+      this.getFiltersChangedFromLastSave() ||
+      this.dashboard.lastSavedTitle !== this.dashboard.title;
   }
 
   getPanels() {
@@ -246,6 +272,8 @@ export class DashboardState {
     this.saveState();
 
     const timeRestoreObj = _.pick(this.timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
+    this.dashboard.title = this.appState.title;
+    this.dashboard.timeRestore = this.appState.timeRestore;
     this.dashboard.panelsJSON = toJson(this.appState.panels);
     this.dashboard.uiStateJSON = toJson(this.uiState.getChanges());
     this.dashboard.timeFrom = this.dashboard.timeRestore ? convertTimeToString(this.timefilter.time.from) : undefined;
@@ -288,12 +316,6 @@ export class DashboardState {
 
   switchViewMode(newMode) {
     this.appState.viewMode = newMode;
-    if (newMode === DashboardViewMode.EDIT) {
-      // We don't want a difference in view mode to trigger the dirty state.
-      this.stateDefaults.viewMode = newMode;
-      this.isDirty = this.getFiltersChangedFromLastSave();
-    }
-
     this.saveState();
   }
 
