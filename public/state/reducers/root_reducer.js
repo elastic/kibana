@@ -179,7 +179,7 @@ function rootReducer(state = {}, action) {
 
     case 'WORKPAD_REPLACE':
       return setPersistent('workpad', payload);
-    case 'WORKPAD_DELETE':
+    case 'WORKPAD_DELETE_START':
       return deleteWorkpad(payload);
 
     case 'PAGE_SET':

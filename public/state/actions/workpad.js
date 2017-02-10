@@ -1,8 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { createAction } from 'redux-actions';
-import { toJson } from '../../lib/resolve_fetch';
 import { dataframeResolveAll } from './dataframe';
 import { elementResolveAll } from './element';
+import { toJson } from '../../lib/resolve_fetch';
 
 export const workpadProps = createAction('WORKPAD_PROPS');
 export const workpadReplace = createAction('WORKPAD_REPLACE');
@@ -41,7 +41,6 @@ export function workpadLoad(id) {
   };
 }
 
-
 export function workdpadLoadAll() {
   return (dispatch) => {
     const action = createAction('WORKPAD_LOAD_ALL', () => {
@@ -63,6 +62,7 @@ export function workdpadLoadAll() {
 
 export function workpadDelete(id) {
   return (dispatch) => {
+    const startAction = createAction('WORKPAD_DELETE_START');
     const action = createAction('WORKPAD_DELETE', id => {
       return fetch('../api/rework/delete/' + id, {
         method: 'GET',
@@ -75,6 +75,7 @@ export function workpadDelete(id) {
       .then(toJson('resp._id'));
     });
 
+    dispatch(startAction(id));
     dispatch(action(id));
     dispatch(workpadInit());
   };

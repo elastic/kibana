@@ -50,7 +50,6 @@ export default function (store) {
 }
 
 function savePersistedState(newState) {
-  console.log('savePersistedState')
   const storable = {
     ...newState.persistent,
     '@timestamp': moment().toISOString()
@@ -66,7 +65,6 @@ function savePersistedState(newState) {
     body: JSON.stringify(storable)
   })
   .then(toJson())
-  .then(() => console.log('save complete'))
   .catch(err => {
     // TODO: tell the user that save failed
     console.log('SAVE FAILED', err);
