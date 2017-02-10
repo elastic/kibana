@@ -23,6 +23,9 @@ elements.push(new Element('chart', {
   icon: icon,
   stylesheet: stylesheet,
   args: [
+    new Arg('dataframe', {
+      type: 'dataframe'
+    }),
     new Arg('chart_type', {
       type: 'select',
       help: '',
@@ -30,9 +33,6 @@ elements.push(new Element('chart', {
       options: {
         choices: ['vertical_bar', 'horizontal_bar', 'pie']
       }
-    }),
-    new Arg('dataframe', {
-      type: 'dataframe',
     }),
     new Arg('value_column', {
       type: 'dataframe_column',
