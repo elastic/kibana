@@ -1,15 +1,15 @@
 import 'ngreact';
 
 import {
-  PlusIcon,
-  TrashIcon,
+  CreateIcon,
+  DeleteIcon,
 } from 'ui_framework/components';
 
 import uiModules from 'ui/modules';
 const app = uiModules.get('app/kibana', ['react']);
-app.directive('plusIconComponent', function (reactDirective) {
-  return reactDirective(PlusIcon);
+app.directive('createIcon', function (reactDirective) {
+  return reactDirective(CreateIcon);
 });
-app.directive('trashIconComponent', function (reactDirective) {
-  return reactDirective(TrashIcon);
+app.directive('deleteIcon', function (reactDirective) {
+  return reactDirective(DeleteIcon);
 });

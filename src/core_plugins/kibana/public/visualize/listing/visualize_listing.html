@@ -39,7 +39,7 @@
           ng-click="listingController.deleteSelectedItems()"
           tooltip="Delete selected visualizations"
         >
-          <trash-icon-component></trash-icon-component>
+          <delete-icon></delete-icon>
         </button>
 
         <!-- Create visualization button -->
@@ -50,7 +50,7 @@
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
         >
-          <plus-icon-component></plus-icon-component>
+          <create-icon></create-icon>
         </a>
       </div>
 

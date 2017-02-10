@@ -1,2 +1,2 @@
-export { PlusIcon } from './icon/plus_icon';
-export { TrashIcon } from './icon/trash_icon';
+export { CreateIcon } from './icon/create_icon';
+export { DeleteIcon } from './icon/delete_icon';
