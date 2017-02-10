@@ -4,7 +4,8 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { batchedSubscribe } from 'redux-batched-subscribe';
 
 import onStart from './on_start';
-import thunk from 'redux-thunk';
+import thunkMiddleware from 'redux-thunk';
+import promiseMiddleware from 'redux-promise';
 import persistState from 'redux-localstorage';
 import rootReducer from './reducers';
 import {bindHotkeys} from './hotkeys';
@@ -24,7 +25,7 @@ app.service('$store', (kbnVersion, basePath) => {
   // Limit redux updates to 20FPS
   //const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
   const persistentStore = compose(
-    applyMiddleware(thunk),
+    applyMiddleware(thunkMiddleware, promiseMiddleware),
     //batchedSubscribe(debounceNotify),
     persistState('persistent', {key: 'rework-persistent'}),
   );
