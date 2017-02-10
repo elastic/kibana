@@ -259,7 +259,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       navActions[TopNavIds.SAVE] = () => $scope.save();
       navActions[TopNavIds.CLONE] = () => {
-        dash.copyOnSave = true;
+        dashboardState.setTitle(dashboardState.getTitle() + ' (Copy)');
         $scope.save();
       };
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => changeViewMode(DashboardViewMode.VIEW);
