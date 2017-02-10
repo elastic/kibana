@@ -6,6 +6,7 @@ import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
 import { transformDeprecations } from '../config/transform_deprecations';
 import { createTransform } from '../../deprecation';
+import Joi from 'joi';
 
 const byIdCache = Symbol('byIdCache');
 const pluginApis = Symbol('pluginApis');
@@ -24,9 +25,13 @@ async function addPluginConfig(pluginCollection, plugin) {
   config.extendSchema(configSchema, transformedPluginSettings, plugin.configPrefix);
 }
 
-function removePluginConfig(pluginCollection, plugin) {
+function disablePluginConfig(pluginCollection, plugin) {
+  // when disabling a plugin's config we remove the existing schema and
+  // replace it with a simple schema/config that only has enabled set to false
   const { config } = pluginCollection.kbnServer;
   config.removeSchema(plugin.configPrefix);
+  const schema = Joi.object({ enabled: Joi.bool() });
+  config.extendSchema(schema, { enabled: false }, plugin.configPrefix);
 }
 
 module.exports = class Plugins extends Collection {
@@ -60,7 +65,7 @@ module.exports = class Plugins extends Collection {
   }
 
   async disable(plugin) {
-    removePluginConfig(this, plugin);
+    disablePluginConfig(this, plugin);
     this.delete(plugin);
   }
 

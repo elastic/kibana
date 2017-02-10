@@ -59,12 +59,12 @@ uiModules
        * Returns a click handler for a visualization.
        * @type {function}
        */
-      getVisClickHandler: '&',
+      getVisClickHandler: '=',
       /**
        * Returns a brush event handler for a visualization.
        * @type {function}
        */
-      getVisBrushHandler: '&',
+      getVisBrushHandler: '=',
       /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
