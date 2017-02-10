@@ -19,7 +19,11 @@ module.directive('contextSizePicker', function ContextSizePicker() {
     scope: {
       count: '=',
       isDisabled: '=',
-      onChangeCount: '=',
+      onChangeCount: '=',  // To avoid inconsistent ngModel states this action
+                           // should make sure the new value is propagated back
+                           // to the `count` property. If that propagation
+                           // fails, the user input will be reset to the value
+                           // of `count`.
     },
     template: contextSizePickerTemplate,
   };
