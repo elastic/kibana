@@ -26,7 +26,6 @@ elements.push(new Element('select', {
   template: class SelectElement extends React.PureComponent {
     constructor(props) {
       super(props);
-      this.state = {filterId: `filter-${uuid()}`};
     }
 
     render() {
