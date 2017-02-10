@@ -1,12 +1,18 @@
 import { createAction } from 'redux-actions';
 import {dataframeResolveAll} from './dataframe';
+import _ from 'lodash';
 
 export const filterSet = (filterId, filter) => {
   return (dispatch, getState) => {
-    const action = createAction('FILTER_SET');
-    dispatch(action({...filter, id: filterId}));
+    if (_.isUndefined(filter)) {
+      const action = createAction('FILTER_REMOVE');
+      dispatch(action(filterId));
+    } else {
+      const action = createAction('FILTER_SET');
+      dispatch(action({...filter, id: filterId}));
+    }
     dispatch(dataframeResolveAll());
   };
 };
 
-//export const filterSet = createAction('FILTER_SET');
+export const filterRemove = filterSet;
