@@ -8,6 +8,7 @@ export default React.createClass({
   getInitialState() {
     return {name: 'Untitled Dataframe'};
   },
+
   connect(type) {
     return () => {
       const {name} = this.state;
@@ -18,9 +19,11 @@ export default React.createClass({
       });
     };
   },
+
   updateName(e) {
     this.setState({name: e.target.value});
   },
+
   render() {
     const {name, type} = this.state;
 
