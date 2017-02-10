@@ -15,12 +15,17 @@ const LinkFrame = React.createClass({
   },
 
   render() {
-    const {dataframes, select, value} = this.props;
+    const {dataframes, select, value, types} = this.props;
+
+    const showDataframes = !types ? dataframes : _.pickBy(dataframes, (dataframe, id) => {
+      return _.includes(types, dataframe.type);
+    });
+
     return (
       <div className="rework--frame-link">
         <DataframeSelector
           onChange={select}
-          dataframes={dataframes}
+          dataframes={showDataframes}
           selected={value}>
         </DataframeSelector>
         <div className="rework--frame-link--edit">

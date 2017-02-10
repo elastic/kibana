@@ -8,7 +8,7 @@ export default React.createClass({
   render() {
     const {onChange, dataframes, selected} = this.props;
     const options = _.map(dataframes, (dataframe, id) => (
-      <option key={id} value={id}>{dataframe.name}</option>
+      <option key={id} value={id}>{dataframe.name} ({dataframe.type})</option>
     ));
 
     return (

@@ -12,8 +12,8 @@ argTypes.push(new ArgType('dataframe', {
   help: 'The source of data to link to this element',
   cache: false, // Its ok not to cache this, this is cheap
   default(state) { return _.keys(state.persistent.dataframes)[0]; },
-  form({commit, value}) {
-    return (<FrameLink value={value} select={commit}></FrameLink>);
+  form({commit, value, options}) {
+    return (<FrameLink types={options.types} value={value} select={commit}></FrameLink>);
   },
   resolve(dataframeId, state) {
     return state.transient.dataframeCache[dataframeId];
