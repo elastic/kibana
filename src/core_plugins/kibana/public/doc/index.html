@@ -2,8 +2,8 @@
   <div class="kuiLocalNav">
     <div class="kuiLocalNavRow">
       <div class="kuiLocalNavRow__section">
-        <div class="kuiLocalBreadcrumbs">
-          <div class="kuiLocalBreadcrumb" ng-bind="indexPattern"></div>
+        <div class="kuiLocalTitle">
+          Single Entry
         </div>
       </div>
     </div>
@@ -11,14 +11,13 @@
       <div class="kuiLocalTabs">
         <div
           class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-bind-template="Document {{ hit._type }}#{{ hit._id | uriescape }}"
+          ng-bind-template="{{ hit._type }}#{{ hit._id | uriescape }}"
           ng-if="!!hit"
         ></div>
         <div
           class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-bind-template="Unknown Document"
           ng-if="!hit"
-        ></div>
+        >Unknown Id</div>
       </div>
     </div>
   </div>
