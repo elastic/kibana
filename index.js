@@ -51,7 +51,6 @@ module.exports = function (kibana) {
         'plugins/rework/elements/number/number',
         'plugins/rework/elements/markdown/markdown',
         'plugins/rework/elements/table/table',
-        'plugins/rework/elements/timechart/timechart',
         'plugins/rework/elements/timelion/timelion',
         'plugins/rework/elements/select/select',
         'plugins/rework/elements/slider/slider',
