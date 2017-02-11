@@ -3,12 +3,18 @@
 .rework--frame-link {
   display: flex;
 
-  &--controls > a {
-    margin: 5px;
+  .rework--frame-link--controls > a {
+    margin-left: 10px;
+    font-size: 20px;
+    line-height: 32px;
+    color: @rework--action-link-color;
+
+    &:hover {
+      color: @kibanaBlue2;
+    }
   }
 
   .rework--dataframe-selector, input {
     flex-grow: 1;
   }
 }
-
