@@ -13,15 +13,12 @@ export default React.createClass({
     return () => {
       const {name} = this.state;
       this.props.onConnect({
-        name, type,
+        type,
+        name: `Untitled Dataframe`,
         value:  frameSources.byName[type].defaults,
         id: uuid()
       });
     };
-  },
-
-  updateName(e) {
-    this.setState({name: e.target.value});
   },
 
   render() {
@@ -37,21 +34,12 @@ export default React.createClass({
     });
 
     return (
-      <div>
-        <div className="form-group">
-          <label>Name</label>
-          <input className="form-control" type="text" value={name} onChange={this.updateName}></input>
+      <div className="form-group">
+        <div className="rework--dataframe-connector">
+          <table className="table">
+            <tbody>{options}</tbody>
+          </table>
         </div>
-        <div className="form-group">
-          <label>Connect to</label>
-          <div className="rework--dataframe-connector">
-            <table className="table">
-              <tbody>{options}</tbody>
-            </table>
-          </div>
-        </div>
-
-
       </div>
     );
   }
