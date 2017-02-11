@@ -35,10 +35,8 @@ export default class Positionable extends React.PureComponent {
       handle: '.rework--interactable-rotate-handle'
     });
 
-    const debouncedResize = _.debounce(this.props.resize, 50, {maxWait: 50});
-
     resize(elem, {
-      on: (e) => { stateMoveOrResize(e); debouncedResize(e); },
+      on: (e) => { stateMoveOrResize(e); this.props.resize(e); },
       onEnd: (e) => this.props.resize(e),
       sides: {
         left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
