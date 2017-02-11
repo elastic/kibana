@@ -35,6 +35,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
 * https://github.com/virusu/3D_kibana_charts_vis[3D Charts] (virusu)
+* https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
 
 [float]
 === Other
