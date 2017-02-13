@@ -34,7 +34,7 @@ function extendStatsBucket(bucket, metrics, bucketSize) {
   return body;
 }
 
-module.exports = {
+export default {
   count: (bucket) => {
     return {
       bucket_script: {

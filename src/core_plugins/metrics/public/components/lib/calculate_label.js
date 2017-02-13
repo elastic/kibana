@@ -21,7 +21,7 @@ export default function calculateLabel(metric, metrics) {
   if (metric.type === 'calculation') return 'Calculation';
   if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
 
-  if (~paths.indexOf(metric.type)) {
+  if (_.includes(paths, metric.type)) {
     const targetMetric = _.find(metrics, { id: metric.field });
     const targetLabel = calculateLabel(targetMetric, metrics);
     return `${lookup[metric.type]} of ${targetLabel}`;

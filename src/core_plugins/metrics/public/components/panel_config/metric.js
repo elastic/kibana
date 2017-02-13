@@ -32,7 +32,6 @@ class MetricPanelConfig extends Component {
   render() {
     const { selectedTab } = this.state;
     const { model } = this.props;
-    const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange, this.refs);
     const positionOptions = [
       { label: 'Right', value: 'right' },
