@@ -219,7 +219,7 @@ export default function AxisFactory(Private) {
           self.axisTitle.render(selection);
         }
 
-        svg.call(self.adjustSize());
+        if (svg) svg.call(self.adjustSize());
       };
     }
   }

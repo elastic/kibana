@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import pointSeriesEditorHTML from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import LineVisTypeProvider from 'plugins/kbn_vislib_vis_types/line';
 import VisProvider from 'ui/vis';
 import AggConfigProvider from 'ui/vis/agg_config';
@@ -47,7 +46,8 @@ describe('point series editor', function () {
     $container = $(document.createElement('div'))
       .appendTo('body');
     // make the element
-    $elem = angular.element(pointSeriesEditorHTML);
+    $elem = angular.element('<div><vislib-series></vislib-series><vislib-value-axes>' +
+      '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>');
     $container.append($elem);
 
     // compile the html
