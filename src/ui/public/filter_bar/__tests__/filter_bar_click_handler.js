@@ -26,7 +26,7 @@ describe('filterBarClickHandler', function () {
           {
             type: 'terms',
             schema: 'segment',
-            params: { field: '_type' }
+            params: { field: 'non-filterable' }
           }
         ]
       });
