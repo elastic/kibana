@@ -89,6 +89,7 @@ const WorkpadContainer = React.createClass({
                   </div>
                 );
               })}
+              <div className="rework--watermark"></div>
             </Page>
           );
         })}

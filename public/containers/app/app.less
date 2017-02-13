@@ -15,6 +15,22 @@ z-indices:
   }
 }
 
+.rework--watermark {
+  &:after {
+    content: "{Re}search";
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
+    opacity: 0.1;
+    z-index: 2000;
+    pointer-events: none;
+  }
+}
+
+
 .rework--inline-form {
   display: flex;
   margin-bottom: 10px;
@@ -101,6 +117,8 @@ z-indices:
 
 
   .rework--workpad {
+
+    position: relative;
     .rework--interactable {
       overflow: none;
     }
