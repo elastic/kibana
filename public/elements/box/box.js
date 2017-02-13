@@ -8,13 +8,18 @@ elements.push(new Element('box', {
   displayName: 'Box',
   icon: icon,
   args: [],
-  template: ({args}) => {
-    const style = {
-      height: '100%',
-      width: '100%',
-    };
-    return (
-      <div style={style}></div>
-    );
+  template: class Box extends React.PureComponent {
+    constructor(props) {super(props);}
+
+    render() {
+      const style = {
+        height: '100%',
+        width: '100%',
+      };
+      return (
+        <div style={style}></div>
+      );
+    }
+
   }
 }));
