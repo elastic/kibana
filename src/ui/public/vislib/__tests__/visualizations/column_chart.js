@@ -70,7 +70,7 @@ dataTypesArray.forEach(function (dataType, i) {
       });
 
       it('should stack values', function () {
-        expect(isStacked).to.be(true);
+        expect(isStacked).to.be(mode === 'stacked' || mode === 'percentage');
       });
     });
 
