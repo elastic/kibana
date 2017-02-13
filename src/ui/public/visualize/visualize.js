@@ -142,6 +142,16 @@ uiModules
         applyClassNames();
       });
 
+      function updateVisAggs() {
+        const enabledState = $scope.editableVis.getEnabledState();
+        const shouldUpdate = enabledState.aggs.length !== $scope.vis.aggs.length;
+
+        if (shouldUpdate) {
+          $scope.vis.setState(enabledState);
+          $scope.editableVis.dirty = false;
+        }
+      }
+
       $scope.$watch('vis', prereq(function (vis, oldVis) {
         const $visEl = getVisEl();
         if (!$visEl) return;
@@ -150,10 +160,6 @@ uiModules
           $scope.editableVis = vis;
         }
 
-        const enabledState = $scope.editableVis.getEnabledState();
-        $scope.vis.setState(enabledState);
-        $scope.editableVis.dirty = false;
-
         if (oldVis) $scope.renderbot = null;
         if (vis) {
           $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
@@ -161,6 +167,7 @@ uiModules
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
+        updateVisAggs();
         if ($scope.renderbot) $scope.renderbot.updateParams();
       }));
 
