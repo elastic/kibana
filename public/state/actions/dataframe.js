@@ -35,6 +35,7 @@ export function dataframeResolveAll() {
 export function dataframeAdd(dataframe) {
   return (dispatch, getState) => {
     const newFrame = _.assign({}, getDataframeTemplate(), dataframe);
+    dispatch(dataframeSelect(newFrame.id));
     dispatch(dataframeSet(newFrame));
   };
 }

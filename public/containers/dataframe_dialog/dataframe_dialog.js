@@ -7,6 +7,7 @@ import DataframeSelector from 'plugins/rework/components/dataframe_selector/data
 import DataframeEditor from 'plugins/rework/components/dataframe_editor/dataframe_editor';
 import DataframeConnector from 'plugins/rework/components/dataframe_connector/dataframe_connector';
 import {
+  dataframeCreate,
   dataframeSelect,
   dataframeSet,
   dataframeAdd,

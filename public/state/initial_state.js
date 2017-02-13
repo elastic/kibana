@@ -16,7 +16,8 @@ export default () => {
       // Workpads cached from the server
       workpads: [],
       // Dataframe settings
-      selectedDataframe: null,
+      dataframeSelectedId: null,
+      dataframeIsCreating: false,
     },
     persistent: { // Stuff that should survive, be serialized and be saved
       workpad: {
