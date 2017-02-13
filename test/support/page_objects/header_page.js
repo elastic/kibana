@@ -100,7 +100,7 @@ export default class HeaderPage {
     .findByClassName('kbn-timepicker-go')
     .click()
     .then(function () {
-      return self.isGlobalLoadingIndicatorHidden();
+      return self.waitUntilLoadingHasFinished();
     });
   }
 
