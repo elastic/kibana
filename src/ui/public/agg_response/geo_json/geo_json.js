@@ -15,10 +15,11 @@ export default function TileMapConverterFn(Private, timefilter, $compile, $rootS
 
     const geoI = columnIndex('segment');
     const metricI = columnIndex('metric');
+    const centroidI = columnIndex('centroid');
     const geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
     const metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
 
-    const features = rowsToFeatures(table, geoI, metricI);
+    const features = rowsToFeatures(table, geoI, metricI, centroidI);
     const values = features.map(function (feature) {
       return feature.properties.value;
     });

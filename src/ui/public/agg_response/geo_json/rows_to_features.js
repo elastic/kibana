@@ -10,7 +10,7 @@ function unwrap(val) {
   return getAcr(val) ? val.value : val;
 }
 
-function convertRowsToFeatures(table, geoI, metricI) {
+function convertRowsToFeatures(table, geoI, metricI, centroidI) {
   return _.transform(table.rows, function (features, row) {
     const geohash = unwrap(row[geoI]);
     if (!geohash) return;
@@ -22,6 +22,16 @@ function convertRowsToFeatures(table, geoI, metricI) {
       location.latitude[2],
       location.longitude[2]
     ];
+
+    // fetch geo centroid and use it as point of feature if it exists
+    let point = centerLatLng;
+    const centroid = unwrap(row[centroidI]);
+    if (centroid) {
+      point = [
+        centroid.lat,
+        centroid.lon
+      ];
+    }
 
     // order is nw, ne, se, sw
     const rectangle = [
@@ -37,14 +47,15 @@ function convertRowsToFeatures(table, geoI, metricI) {
       type: 'Feature',
       geometry: {
         type: 'Point',
-        coordinates: centerLatLng.slice(0).reverse()
+        coordinates: point.slice(0).reverse()
       },
       properties: {
         geohash: geohash,
         value: unwrap(row[metricI]),
         aggConfigResult: getAcr(row[metricI]),
         center: centerLatLng,
-        rectangle: rectangle
+        rectangle: rectangle,
+        centroid: centroid
       }
     });
   }, []);

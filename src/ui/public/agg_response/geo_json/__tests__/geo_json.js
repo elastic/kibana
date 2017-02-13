@@ -29,7 +29,8 @@ describe('GeoJson Agg Response Converter', function () {
       aggs: [
         { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
         { schema: 'split', type: 'terms', params: { field: '@tags' } },
-        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
+        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } },
+        { schema: 'centroid', type: 'geo_centroid', params: { field: 'geo.coordinates' } }
       ],
       params: {
         isDesaturated: true,
@@ -40,7 +41,8 @@ describe('GeoJson Agg Response Converter', function () {
     aggs = {
       metric: vis.aggs[0],
       split: vis.aggs[1],
-      geo: vis.aggs[2]
+      geo: vis.aggs[2],
+      centroid: vis.aggs[3]
     };
   }));
 
@@ -112,12 +114,14 @@ describe('GeoJson Agg Response Converter', function () {
           let chart;
           let geoColI;
           let metricColI;
+          let centroidColI;
 
           before(function () {
             table = makeTable();
             chart = makeSingleChart(table);
             geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });
             metricColI = _.findIndex(table.columns, { aggConfig: aggs.metric });
+            centroidColI = _.findIndex(table.columns, { aggConfig: aggs.centroid });
           });
 
           it('should be geoJson format', function () {
@@ -145,10 +149,11 @@ describe('GeoJson Agg Response Converter', function () {
           it('should have value properties data', function () {
             table.rows.forEach(function (row, i) {
               const props = chart.geoJson.features[i].properties;
-              const keys = ['value', 'geohash', 'aggConfigResult', 'rectangle', 'center'];
+              const keys = ['value', 'geohash', 'aggConfigResult', 'rectangle', 'center', 'centroid'];
               expect(props).to.be.an('object');
               expect(props).to.only.have.keys(keys);
               expect(props.geohash).to.be.a('string');
+              expect(props.centroid).to.be.an('object');
               if (props.value != null) expect(props.value).to.be.a('number');
             });
           });
@@ -157,7 +162,7 @@ describe('GeoJson Agg Response Converter', function () {
             table.rows.forEach(function (row, i) {
               const geometry = chart.geoJson.features[i].geometry;
               const props = chart.geoJson.features[i].properties;
-              expect(props.center).to.eql(geometry.coordinates.slice(0).reverse());
+              expect(props.centroid).to.eql({ lat: geometry.coordinates[1], lon: geometry.coordinates[0] });
             });
           });
 
@@ -168,10 +173,12 @@ describe('GeoJson Agg Response Converter', function () {
                 expect(props.aggConfigResult).to.be(row[metricColI]);
                 expect(props.value).to.be(row[metricColI].value);
                 expect(props.geohash).to.be(row[geoColI].value);
+                expect(props.centroid).to.be(row[centroidColI].value);
               } else {
                 expect(props.aggConfigResult).to.be(null);
                 expect(props.value).to.be(row[metricColI]);
                 expect(props.geohash).to.be(row[geoColI]);
+                expect(props.centroid).to.be(row[centroidColI]);
               }
             });
           });

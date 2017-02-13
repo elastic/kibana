@@ -95,6 +95,14 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         ]
       },
       {
+        group: 'metrics',
+        name: 'centroid',
+        title: 'Geo Centroid',
+        aggFilter: 'geo_centroid',
+        min: 0,
+        max: 1
+      },
+      {
         group: 'buckets',
         name: 'segment',
         title: 'Geo Coordinates',

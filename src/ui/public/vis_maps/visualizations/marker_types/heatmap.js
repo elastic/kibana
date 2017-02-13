@@ -175,8 +175,8 @@ export default function HeatmapMarkerFactory(Private) {
       const self = this;
 
       return this.geoJson.features.map(function (feature) {
-        const lat = feature.properties.center[0];
-        const lng = feature.properties.center[1];
+        const lat = feature.geometry.coordinates[1];
+        const lng = feature.geometry.coordinates[0];
         let heatIntensity;
 
         if (!self._attr.heatNormalizeData) {
