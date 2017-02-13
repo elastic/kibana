@@ -7,17 +7,16 @@ export default () => {
       fullscreen: false,
       editor: true,
       selectedElement: null,
-      selectedDataframe: null,
-      dropdown: {
-        type: null,
-        meta: {},
-      },
+      // dropdown type
+      dropdown: null,
       // Element arguments are cached up here.
       elementCache: {},
       // Dataframes get written here on resolution
       dataframeCache: {},
       // Workpads cached from the server
       workpads: [],
+      // Dataframe settings
+      selectedDataframe: null,
     },
     persistent: { // Stuff that should survive, be serialized and be saved
       workpad: {

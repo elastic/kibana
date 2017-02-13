@@ -32,7 +32,7 @@ const Nav = React.createClass({
 
   dropdown(name, meta = {}) {
     return () => {
-      this.props.dispatch(dropdownToggle({ type: name, meta }));
+      this.props.dispatch(dropdownToggle(name));
     };
   },
 

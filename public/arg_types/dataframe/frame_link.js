@@ -8,17 +8,11 @@ import './frame_link.less';
 
 const LinkFrame = React.createClass({
   showEditDataframe() {
-    this.props.dispatch(dropdownOpen({
-      type: 'dataframe',
-      meta: { selected: this.props.value },
-    }));
+    this.props.dispatch(dropdownOpen('dataframe'));
   },
 
   showCreateDataframe() {
-    this.props.dispatch(dropdownOpen({
-      type: 'dataframe',
-      meta: { creating: true },
-    }));
+    this.props.dispatch(dropdownOpen('dataframe'));
   },
 
   render() {

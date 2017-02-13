@@ -143,11 +143,8 @@ function rootReducer(state = {}, action) {
   switch (type) {
 
     case 'DROPDOWN_TOGGLE':
-      if (payload.type === state.transient.dropdown.type) {
-        return setTransient('dropdown', {
-          type: null,
-          meta: null,
-        });
+      if (payload === state.transient.dropdown) {
+        return setTransient('dropdown', null);
       }
       return setTransient('dropdown', payload);
     case 'DROPDOWN_OPEN':
