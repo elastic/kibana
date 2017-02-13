@@ -14,9 +14,9 @@ class FilterItems extends Component {
   handleChange(item, name) {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
-      const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'currentTarget.value'));
-      handleChange(_.assign({}, item, part));
+      handleChange(_.assign({}, item, {
+        [name]: _.get(e, 'value', _.get(e, 'target.value'))
+      }));
     };
   }
 
@@ -47,7 +47,7 @@ class FilterItems extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'filter')}
-            defaultValue={row.filter}/>
+            value={row.filter}/>
         </div>
         <div className="vis_editor__split-filter-item">
           <input
@@ -56,7 +56,7 @@ class FilterItems extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'label')}
-            defaultValue={row.label}/>
+            value={row.label}/>
         </div>
         <div className="vis_editor__split-filter-control">
           <AddDeleteButtons

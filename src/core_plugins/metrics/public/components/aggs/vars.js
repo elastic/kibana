@@ -15,7 +15,7 @@ class CalculationVars extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'currentTarget.value'));
+      part[name] = _.get(e, 'value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }
@@ -32,7 +32,7 @@ class CalculationVars extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'name')}
-            defaultValue={row.name}/>
+            value={row.name}/>
         </div>
         <div className="vis_editor__calc_vars-var">
           <MetricSelect

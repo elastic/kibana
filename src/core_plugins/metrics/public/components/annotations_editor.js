@@ -29,7 +29,7 @@ class AnnotationsEditor extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'currentTarget.value'));
+      part[name] = _.get(e, 'value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }
@@ -62,7 +62,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'index_pattern')}
-                defaultValue={row.index_pattern} />
+                value={row.index_pattern} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Time Field (required)</div>
@@ -82,7 +82,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'query_string')}
-                defaultValue={row.query_string} />
+                value={row.query_string} />
             </div>
           </div>
           <div className="vis_editor__row">
@@ -101,7 +101,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'fields')}
-                defaultValue={row.fields} />
+                value={row.fields} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
@@ -110,7 +110,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'template')}
-                defaultValue={row.template} />
+                value={row.template} />
             </div>
           </div>
         </div>

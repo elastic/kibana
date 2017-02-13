@@ -44,7 +44,7 @@ class MarkdownPanelConfig extends Component {
     const { model } = this.props;
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
     const positionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
@@ -90,9 +90,8 @@ class MarkdownPanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="filter"
               onChange={handleTextChange('filter')}
-              defaultValue={model.filter}/>
+              value={model.filter}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}

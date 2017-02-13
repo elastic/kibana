@@ -29,18 +29,17 @@ class FlotChart extends Component {
 
   shutdownChart() {
     if (!this.plot) return;
-    const { target } = this.refs;
-    $(target).unbind('plothover', this.props.plothover);
-    if (this.props.onMouseOver) $(target).on('plothover', this.handleMouseOver);
-    if (this.props.onMouseLeave) $(target).on('mouseleave', this.handleMouseLeave);
-    if (this.props.onBrush) $(target).off('plotselected', this.brushChart);
+    $(this.target).unbind('plothover', this.props.plothover);
+    if (this.props.onMouseOver) $(this.target).on('plothover', this.handleMouseOver);
+    if (this.props.onMouseLeave) $(this.target).on('mouseleave', this.handleMouseLeave);
+    if (this.props.onBrush) $(this.target).off('plotselected', this.brushChart);
     this.plot.shutdown();
     if (this.props.crosshair) {
-      $(target).off('plothover', this.handlePlotover);
+      $(this.target).off('plothover', this.handlePlotover);
       eventBus.off('thorPlotover', this.handleThorPlotover);
       eventBus.off('thorPlotleave', this.handleThorPlotleave);
     }
-    findDOMNode(this.refs.resize).removeEventListener('resize', this.handleResize);
+    findDOMNode(this.resize).removeEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
@@ -147,19 +146,18 @@ class FlotChart extends Component {
   }
 
   renderChart() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
-      const { target } = this.refs;
       const { series } = this.props;
-      const parent = $(target.parentElement);
+      const parent = $(this.target.parentElement);
       const data = this.calculateData(series, this.props.show);
 
-      this.plot = $.plot(target, data, this.getOptions());
+      this.plot = $.plot(this.target, data, this.getOptions());
       this.handleDraw(this.plot);
 
       this.handleResize = (e) => {
-        const resize = findDOMNode(this.refs.resize);
+        const resize = findDOMNode(this.resize);
         if (resize.clientHeight > 0 && resize.clientHeight > 0) {
           if (!this.plot) return;
           this.plot.resize();
@@ -170,7 +168,7 @@ class FlotChart extends Component {
       };
 
       _.defer(() => this.handleResize());
-      findDOMNode(this.refs.resize).addEventListener('resize', this.handleResize);
+      findDOMNode(this.resize).addEventListener('resize', this.handleResize);
 
 
       this.handleMouseOver = (...args) => {
@@ -181,8 +179,8 @@ class FlotChart extends Component {
         if (this.props.onMouseLeave) this.props.onMouseLeave(...args, this.plot);
       };
 
-      $(target).on('plothover', this.handleMouseOver);
-      $(target).on('mouseleave', this.handleMouseLeave);
+      $(this.target).on('plothover', this.handleMouseOver);
+      $(this.target).on('mouseleave', this.handleMouseLeave);
 
       if (this.props.crosshair) {
 
@@ -201,17 +199,17 @@ class FlotChart extends Component {
           if (this.props.plothover) this.props.plothover(e);
         };
 
-        $(target).on('plothover', this.handlePlotover);
-        $(target).on('mouseleave', this.handlePlotleave);
+        $(this.target).on('plothover', this.handlePlotover);
+        $(this.target).on('mouseleave', this.handlePlotleave);
         eventBus.on('thorPlotover', this.handleThorPlotover);
         eventBus.on('thorPlotleave', this.handleThorPlotleave);
       }
 
       if (_.isFunction(this.props.plothover)) {
-        $(target).bind('plothover', this.props.plothover);
+        $(this.target).bind('plothover', this.props.plothover);
       }
 
-      $(target).on('mouseleave', (e) => {
+      $(this.target).on('mouseleave', (e) => {
         eventBus.trigger('thorPlotleave');
       });
 
@@ -221,7 +219,7 @@ class FlotChart extends Component {
           this.plot.clearSelection();
         };
 
-        $(target).on('plotselected', this.brushChart);
+        $(this.target).on('plotselected', this.brushChart);
       }
     }
   }
@@ -234,8 +232,8 @@ class FlotChart extends Component {
       flex: '1 0 auto',
     };
     return (
-      <ResizeAware ref="resize" style={style}>
-        <div ref="target" style={style}/>
+      <ResizeAware ref={(el) => this.resize = el} style={style}>
+        <div ref={(el) => this.target = el} style={style}/>
       </ResizeAware>);
   }
 

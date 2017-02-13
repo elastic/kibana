@@ -16,7 +16,7 @@ class ColorRules extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = cast(_.get(e, 'value', _.get(e, 'currentTarget.value')));
+      part[name] = cast(_.get(e, 'value', _.get(e, 'target.value')));
       if (part[name] === 'undefined') part[name] = undefined;
       handleChange(_.assign({}, item, part));
     };
@@ -65,7 +65,7 @@ class ColorRules extends Component {
         <input
           className="color_rules__input"
           type="text"
-          defaultValue={row.value}
+          value={row.value}
           onChange={this.handleChange(row, 'value', Number)}/>
         <div className="color_rules__control">
           <AddDeleteButtons

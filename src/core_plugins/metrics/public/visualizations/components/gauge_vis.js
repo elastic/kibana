@@ -20,8 +20,8 @@ class GaugeVis extends Component {
   }
 
   calculateCorrdinates() {
-    const inner = findDOMNode(this.refs.inner);
-    const resize = findDOMNode(this.refs.resize);
+    const inner = findDOMNode(this.inner);
+    const resize = findDOMNode(this.resize);
     let scale = this.state.scale;
 
     // Let's start by scaling to the largest dimension
@@ -56,14 +56,14 @@ class GaugeVis extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.addEventListener('resize', this.handleResize);
     this.handleResize();
   }
 
   componentWillUnmount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.removeEventListener('resize', this.handleResize);
   }
@@ -162,8 +162,8 @@ class GaugeVis extends Component {
       );
     }
     return (
-      <ResizeAware ref="resize" style={styles.resize}>
-        <div style={styles.svg} ref="inner">
+      <ResizeAware ref={(el) => this.resize = el} style={styles.resize}>
+        <div style={styles.svg} ref={(el) => this.inner = el}>
           {svg}
         </div>
       </ResizeAware>

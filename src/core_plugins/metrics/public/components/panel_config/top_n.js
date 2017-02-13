@@ -38,7 +38,7 @@ class TopNPanelConfig extends Component {
     const { selectedTab } = this.state;
     const { fields, model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
     const positionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
@@ -62,9 +62,8 @@ class TopNPanelConfig extends Component {
               <code>{'{{key}}'}</code> is set to the term)</div>
             <input
               className="vis_editor__input-grows"
-              ref="drilldown_url"
               onChange={handleTextChange('drilldown_url')}
-              defaultValue={model.drilldown_url}/>
+              value={model.drilldown_url}/>
           </div>
           <IndexPattern
             fields={this.props.fields}
@@ -80,9 +79,8 @@ class TopNPanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="filter"
               onChange={handleTextChange('filter')}
-              defaultValue={model.filter}/>
+              value={model.filter}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}

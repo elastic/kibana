@@ -39,8 +39,8 @@ class GaugePanelConfig extends Component {
     const { selectedTab } = this.state;
     const { model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
-    const handleNumberChange = createNumberHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
+    const handleNumberChange = createNumberHandler(this.props.onChange);
     const positionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
@@ -72,9 +72,8 @@ class GaugePanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="filter"
               onChange={handleTextChange('filter')}
-              defaultValue={model.filter}/>
+              value={model.filter}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
@@ -91,10 +90,9 @@ class GaugePanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="number"
-              ref="gauge_max"
               onChange={handleTextChange('gauge_max')}
               style={{ width: '20px' }}
-              defaultValue={model.gauge_max}/>
+              value={model.gauge_max}/>
             <div className="vis_editor__label">Gauge Style</div>
             <Select
               autosize={false}
@@ -114,18 +112,16 @@ class GaugePanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="number"
-              ref="gauge_inner_width"
               style={{ width: '20px' }}
               onChange={handleTextChange('gauge_inner_width')}
-              defaultValue={model.gauge_inner_width}/>
+              value={model.gauge_inner_width}/>
             <div className="vis_editor__label">Gauge Line Width</div>
             <input
               className="vis_editor__input-grows"
               type="number"
               style={{ width: 20 }}
-              ref="gauge_width"
               onChange={handleTextChange('gauge_width')}
-              defaultValue={model.gauge_width}/>
+              value={model.gauge_width}/>
           </div>
           <div className="vis_editor__label" style={{ margin: '0 10px 0 0' }}>Color Rules</div>
           <div className="vis_editor__vis_config-row">

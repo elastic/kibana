@@ -1,10 +1,10 @@
 import _ from 'lodash';
-export default (handleChange, refs) => {
+export default (handleChange) => {
   return (name, defaultValue) => (e) => {
     e.preventDefault();
-    const part = {};
-    const refKey = `${name}.value`;
-    part[name] = _.get(refs, refKey, defaultValue);
-    if (_.isFunction(handleChange)) return handleChange(part);
+    const value = _.get(e, 'target.value', defaultValue);
+    if (_.isFunction(handleChange)) {
+      return handleChange({ [name]: value });
+    }
   };
 };

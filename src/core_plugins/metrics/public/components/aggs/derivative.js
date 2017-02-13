@@ -14,7 +14,7 @@ class DerivativeAgg extends Component {
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleTextChange = createTextHandler(handleChange, this.refs);
+    const handleTextChange = createTextHandler(handleChange);
 
     return (
       <AggRow
@@ -43,9 +43,8 @@ class DerivativeAgg extends Component {
           <div className="vis_editor__label">Units (1s, 1m, etc)</div>
           <input
             className="vis_editor__input"
-            ref="unit"
             onChange={handleTextChange('unit')}
-            defaultValue={model.unit}
+            value={model.unit}
             type="text"/>
         </div>
       </AggRow>

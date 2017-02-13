@@ -4,7 +4,6 @@ import createSelectHandler from '../create_select_handler';
 
 describe('createSelectHandler()', () => {
 
-  let refs;
   let handleChange;
   let changeHandler;
   let event;

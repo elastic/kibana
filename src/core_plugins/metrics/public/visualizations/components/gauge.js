@@ -25,8 +25,8 @@ class Gauge extends Component {
   }
 
   calculateCorrdinates() {
-    const inner = findDOMNode(this.refs.inner);
-    const resize = findDOMNode(this.refs.resize);
+    const inner = findDOMNode(this.inner);
+    const resize = findDOMNode(this.resize);
     let scale = this.state.scale;
 
     if (!inner || !resize) return;
@@ -63,14 +63,14 @@ class Gauge extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.addEventListener('resize', this.handleResize);
     this.handleResize();
   }
 
   componentWillUnmount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.removeEventListener('resize', this.handleResize);
   }
@@ -136,7 +136,7 @@ class Gauge extends Component {
         metrics = (
           <div
             className="thorHalfGauge__metrics"
-            ref="inner"
+            ref={(el) => this.inner = el}
             style={styles.inner}>
             <div
               className="thorHalfGauge__label"
@@ -168,7 +168,7 @@ class Gauge extends Component {
     if (this.props.reversed) className = `reversed ${className}`;
     return (
       <div className={className}>
-        <ResizeAware className={`${className}__resize`} ref="resize">
+        <ResizeAware className={`${className}__resize`} ref={(el) => this.resize = el}>
           { metrics }
           <GaugeVis {...gaugeProps}/>
         </ResizeAware>

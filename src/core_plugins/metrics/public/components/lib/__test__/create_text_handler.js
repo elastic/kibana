@@ -4,16 +4,14 @@ import createTextHandler from '../create_text_handler';
 
 describe('createTextHandler()', () => {
 
-  let refs;
   let handleChange;
   let changeHandler;
   let event;
 
   beforeEach(() => {
-    refs = { test: { value: 'foo' } };
     handleChange = sinon.spy();
-    changeHandler = createTextHandler(handleChange, refs);
-    event = { preventDefault: sinon.spy() };
+    changeHandler = createTextHandler(handleChange);
+    event = { preventDefault: sinon.spy(), target: { value: 'foo' } };
     const fn = changeHandler('test');
     fn(event);
   });

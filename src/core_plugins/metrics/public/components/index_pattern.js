@@ -8,7 +8,7 @@ class IndexPattern extends Component {
   render() {
     const { model, fields, prefix } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
     const timeFieldName = `${prefix}time_field`;
     const indexPatternName = `${prefix}index_pattern`;
     const intervalName = `${prefix}interval`;
@@ -17,10 +17,9 @@ class IndexPattern extends Component {
         <div className="vis_editor__label">Index Pattern</div>
         <input
           className="vis_editor__input"
-          ref={indexPatternName}
           disabled={this.props.disabled}
           onChange={handleTextChange(indexPatternName, '*')}
-          defaultValue={model[indexPatternName] || '*'}/>
+          value={model[indexPatternName] || '*'}/>
         <div className="vis_editor__label">Time Field</div>
         <div className="vis_editor__index_pattern-fields">
           <FieldSelect
@@ -34,10 +33,9 @@ class IndexPattern extends Component {
         <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y)</div>
         <input
           className="vis_editor__input"
-          ref={intervalName}
           disabled={this.props.disabled}
           onChange={handleTextChange(intervalName, 'auto')}
-          defaultValue={model[intervalName] || 'auto'}/>
+          value={model[intervalName] || 'auto'}/>
       </div>
     );
   }

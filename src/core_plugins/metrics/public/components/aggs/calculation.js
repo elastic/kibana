@@ -24,7 +24,7 @@ class CalculationAgg extends Component {
     const { model, panel, siblings } = this.props;
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleTextChange = createTextHandler(handleChange, this.refs);
+    const handleTextChange = createTextHandler(handleChange);
 
     return (
       <AggRow
@@ -55,9 +55,8 @@ class CalculationAgg extends Component {
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
                 type="text"
-                ref="script"
                 onChange={handleTextChange('script')}
-                defaultValue={model.script}/>
+                value={model.script}/>
             </div>
           </div>
         </div>

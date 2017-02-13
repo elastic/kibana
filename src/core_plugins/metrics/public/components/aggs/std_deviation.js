@@ -22,7 +22,7 @@ class StandardDeviationAgg extends Component {
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleTextChange = createTextHandler(handleChange, this.refs);
+    const handleTextChange = createTextHandler(handleChange);
 
     const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
@@ -55,8 +55,7 @@ class StandardDeviationAgg extends Component {
           <div className="vis_editor__label">Sigma</div>
           <input
             className="vis_editor__std_deviation-sigma"
-            ref="sigma"
-            defaultValue={model.sigma}
+            value={model.sigma}
             onChange={handleTextChange('sigma')}/>
         </div>
         <div className="vis_editor__row_item">

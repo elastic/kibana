@@ -8,7 +8,7 @@ import MetricSelect from '../aggs/metric_select';
 class SplitByTerms extends Component {
 
   render() {
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const { indexPattern, model } = this.props;
     const { metrics } = model;
@@ -34,10 +34,9 @@ class SplitByTerms extends Component {
         <input
           placeholder="Size..."
           type="number"
-          defaultValue={model.terms_size || 10}
+          value={model.terms_size || 10}
           className="vis_editor__split-term_count"
-          onChange={handleTextChange('terms_size')}
-          ref="terms_size"/>
+          onChange={handleTextChange('terms_size')} />
         <div className="vis_editor__label">Order By</div>
         <div className="vis_editor__split-aggs">
           <MetricSelect

@@ -20,21 +20,21 @@ class Metric extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.addEventListener('resize', this.handleResize);
     this.handleResize();
   }
 
   componentWillUnmount() {
-    const resize = findDOMNode(this.refs.resize);
+    const resize = findDOMNode(this.resize);
     if (!resize) return;
     resize.removeEventListener('resize', this.handleResize);
   }
 
   calculateCorrdinates() {
-    const inner = findDOMNode(this.refs.inner);
-    const resize = findDOMNode(this.refs.resize);
+    const inner = findDOMNode(this.inner);
+    const resize = findDOMNode(this.resize);
     let scale = this.state.scale;
 
     // Let's start by scaling to the largest dimension
@@ -158,9 +158,9 @@ class Metric extends Component {
     }
 
     return (
-      <div className="rhythm_metric" ref="container" style={styles.container}>
-        <ResizeAware ref="resize" className="rhythm_metric__resize">
-          <div ref="inner" className="rhythm_metric__inner" style={styles.inner}>
+      <div className="rhythm_metric" style={styles.container}>
+        <ResizeAware ref={(el) => this.resize = el} className="rhythm_metric__resize">
+          <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }
               <div style={styles.primary_value} className="rhythm_metric__primary-value">{ primaryValue }</div>

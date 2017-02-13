@@ -6,8 +6,8 @@ import React, { Component, PropTypes } from 'react';
 class SplitByFilter extends Component {
 
   render() {
-    const { onChange, model, refs } = this.props;
-    const handleTextChange = createTextHandler(onChange, refs);
+    const { onChange, model } = this.props;
+    const handleTextChange = createTextHandler(onChange);
     const handleSelectChange = createSelectHandler(onChange);
     return (
       <div className="vis_editor__split-container">
@@ -20,9 +20,8 @@ class SplitByFilter extends Component {
         <div className="vis_editor__label">Query String</div>
         <input
           className="vis_editor__split-filter"
-          defaultValue={model.filter}
-          onChange={handleTextChange('filter')}
-          ref="filter"/>
+          value={model.filter}
+          onChange={handleTextChange('filter')} />
       </div>
     );
   }

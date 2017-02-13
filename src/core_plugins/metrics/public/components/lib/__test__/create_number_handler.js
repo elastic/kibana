@@ -4,16 +4,14 @@ import createNumberHandler from '../create_number_handler';
 
 describe('createNumberHandler()', () => {
 
-  let refs;
   let handleChange;
   let changeHandler;
   let event;
 
   beforeEach(() => {
-    refs = { test: { value: '1' } };
     handleChange = sinon.spy();
-    changeHandler = createNumberHandler(handleChange, refs);
-    event = { preventDefault: sinon.spy() };
+    changeHandler = createNumberHandler(handleChange);
+    event = { preventDefault: sinon.spy(), target: { value: '1' } };
     const fn = changeHandler('test');
     fn(event);
   });

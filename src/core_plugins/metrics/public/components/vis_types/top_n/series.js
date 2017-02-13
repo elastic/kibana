@@ -10,90 +10,87 @@ import Split from '../../split';
 import { handleChange } from '../../lib/collection_actions';
 import createAggRowRender from '../../lib/create_agg_row_render';
 
-class TopNSeries extends Component {
+function TopNSeries(props) {
+  const {
+    panel,
+    model,
+    fields,
+    onAdd,
+    onDelete,
+    disableDelete,
+    disableAdd,
+    selectedTab,
+    visible,
+  } = props;
 
-  render() {
-    const {
-      panel,
-      model,
-      fields,
-      onAdd,
-      onDelete,
-      disableDelete,
-      disableAdd,
-      selectedTab,
-      visible,
-    } = this.props;
+  const aggs = model.metrics.map(createAggRowRender(props));
 
-    const aggs = model.metrics.map(createAggRowRender(this.props));
+  let caretClassName = 'fa fa-caret-down';
+  if (!visible) caretClassName = 'fa fa-caret-right';
 
-    let caretClassName = 'fa fa-caret-down';
-    if (!visible) caretClassName = 'fa fa-caret-right';
-
-    let body = (<div style={{ display: 'none' }}/>);
-    if (visible) {
-      let metricsClassName = 'kbnTabs__tab';
-      let optionsClassname = 'kbnTabs__tab';
-      if (selectedTab === 'metrics') metricsClassName += '-active';
-      if (selectedTab === 'options') optionsClassname += '-active';
-      let seriesBody;
-      if (selectedTab === 'metrics') {
-        const handleSort = (data) => {
-          const metrics = data.map(id => model.metrics.find(m => m.id === id));
-          this.props.onChange({ metrics });
-        };
-        seriesBody = (
-          <div>
-            <Sortable
-              style={{ cursor: 'default' }}
-              dynamic={true}
-              direction="vertical"
-              onSort={handleSort}
-              sortHandle="vis_editor__agg_sort">
-              { aggs }
-            </Sortable>
-            <div className="vis_editor__agg_row">
-              <div className="vis_editor__agg_row-item">
-                <Split
-                  onChange={this.props.onChange}
-                  fields={fields}
-                  panel={panel}
-                  model={model}/>
-              </div>
+  let body = (<div style={{ display: 'none' }}/>);
+  if (visible) {
+    let metricsClassName = 'kbnTabs__tab';
+    let optionsClassname = 'kbnTabs__tab';
+    if (selectedTab === 'metrics') metricsClassName += '-active';
+    if (selectedTab === 'options') optionsClassname += '-active';
+    let seriesBody;
+    if (selectedTab === 'metrics') {
+      const handleSort = (data) => {
+        const metrics = data.map(id => model.metrics.find(m => m.id === id));
+        props.onChange({ metrics });
+      };
+      seriesBody = (
+        <div>
+          <Sortable
+            style={{ cursor: 'default' }}
+            dynamic={true}
+            direction="vertical"
+            onSort={handleSort}
+            sortHandle="vis_editor__agg_sort">
+            { aggs }
+          </Sortable>
+          <div className="vis_editor__agg_row">
+            <div className="vis_editor__agg_row-item">
+              <Split
+                onChange={props.onChange}
+                fields={fields}
+                panel={panel}
+                model={model}/>
             </div>
           </div>
-        );
-      } else {
-        seriesBody = (
-          <SeriesConfig
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange} />
-        );
-      }
-      body = (
-        <div className="vis_editor__series-row">
-          <div className="kbnTabs sm">
-            <div className={metricsClassName}
-              onClick={e => this.props.switchTab('metrics')}>Metrics</div>
-            <div className={optionsClassname}
-              onClick={e => this.props.switchTab('options')}>Options</div>
-          </div>
-          {seriesBody}
         </div>
       );
+    } else {
+      seriesBody = (
+        <SeriesConfig
+          fields={props.fields}
+          model={props.model}
+          onChange={props.onChange} />
+      );
     }
-
-    return (
-      <div
-        className={`${this.props.className} vis_editor__series`}
-        style={this.props.style}
-        onMouseDown={this.props.onMouseDown}
-        onTouchStart={this.props.onTouchStart}>
-        { body }
+    body = (
+      <div className="vis_editor__series-row">
+        <div className="kbnTabs sm">
+          <div className={metricsClassName}
+            onClick={e => props.switchTab('metrics')}>Metrics</div>
+          <div className={optionsClassname}
+            onClick={e => props.switchTab('options')}>Options</div>
+        </div>
+        {seriesBody}
       </div>
     );
   }
+
+  return (
+    <div
+      className={`${props.className} vis_editor__series`}
+      style={props.style}
+      onMouseDown={props.onMouseDown}
+      onTouchStart={props.onTouchStart}>
+      { body }
+    </div>
+  );
 
 }
 

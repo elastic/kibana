@@ -13,8 +13,8 @@ class MovingAverageAgg extends Component {
     const { model, panel, siblings } = this.props;
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleTextChange = createTextHandler(handleChange, this.refs);
-    const handleNumberChange = createNumberHandler(handleChange, this.refs);
+    const handleTextChange = createTextHandler(handleChange);
+    const handleNumberChange = createNumberHandler(handleChange);
     const modelOptions = [
       { label: 'Simple', value: 'simple' },
       { label: 'Linear', value: 'linear' },
@@ -68,9 +68,8 @@ class MovingAverageAgg extends Component {
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
                 type="text"
-                ref="window"
                 onChange={handleNumberChange('window')}
-                defaultValue={model.window}/>
+                value={model.window}/>
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Minimize</div>
@@ -88,9 +87,8 @@ class MovingAverageAgg extends Component {
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
                 type="text"
-                ref="script"
                 onChange={handleTextChange('script')}
-                defaultValue={model.script}/>
+                value={model.script}/>
             </div>
           </div>
         </div>

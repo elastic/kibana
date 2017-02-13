@@ -10,7 +10,7 @@ class SeriesConfig extends Component {
   render() {
     const { fields, model } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
 
     return (
       <div>
@@ -23,15 +23,13 @@ class SeriesConfig extends Component {
             <input
               className="vis_editor__input-grows"
               onChange={handleTextChange('value_template')}
-              ref="value_template"
-              defaultValue={model.value_template}/>
+              value={model.value_template}/>
             <div className="vis_editor__label">Offset series time by (1m, 1h, 1w, 1d)</div>
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="offset_time"
               onChange={handleTextChange('offset_time')}
-              defaultValue={model.offset_time}/>
+              value={model.offset_time}/>
           </div>
           <div className="vis_editor__series_config-row">
             <div className="vis_editor__label">Override Index Pattern</div>

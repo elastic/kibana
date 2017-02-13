@@ -14,7 +14,7 @@ class SerialDiffAgg extends Component {
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleNumberChange = createNumberHandler(handleChange, this.refs);
+    const handleNumberChange = createNumberHandler(handleChange);
 
     return (
       <AggRow
@@ -43,9 +43,8 @@ class SerialDiffAgg extends Component {
           <div className="vis_editor__label">Lag</div>
           <input
             className="vis_editor__input"
-            ref="lag"
             onChange={handleNumberChange('lag')}
-            defaultValue={model.lag}
+            value={model.lag}
             type="text"/>
         </div>
       </AggRow>

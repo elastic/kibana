@@ -24,7 +24,7 @@ class TimeseriesPanelConfig extends Component {
     const { model } = this.props;
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange, this.refs);
+    const handleTextChange = createTextHandler(this.props.onChange);
     const positionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
@@ -63,16 +63,14 @@ class TimeseriesPanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="axis_min"
               onChange={handleTextChange('axis_min')}
-              defaultValue={model.axis_min}/>
+              value={model.axis_min}/>
             <div className="vis_editor__label">Axis Max</div>
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="axis_max"
               onChange={handleTextChange('axis_max')}
-              defaultValue={model.axis_max}/>
+              value={model.axis_max}/>
             <div className="vis_editor__label">Axis Position</div>
             <div className="vis_editor__row_item">
               <Select
@@ -108,9 +106,8 @@ class TimeseriesPanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="text"
-              ref="filter"
               onChange={handleTextChange('filter')}
-              defaultValue={model.filter}/>
+              value={model.filter}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}

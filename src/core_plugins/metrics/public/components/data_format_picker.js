@@ -18,14 +18,13 @@ class DataFormatPicker extends Component {
     }
   }
 
-  handleCustomChange() {
-    this.props.onChange({
-      value: _.get(this.refs, 'custom.value', '')
-    });
-  }
-
   render() {
     const { value } = this.props;
+    const handleChange = (e) => {
+      this.props.onChange({
+        value: _.get(e, 'target.value', '')
+      });
+    };
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
@@ -46,9 +45,8 @@ class DataFormatPicker extends Component {
           </div>
           <input
             className="vis_editor__input"
-            defaultValue={value}
-            onChange={this.handleCustomChange}
-            ref="custom"
+            value={value}
+            onChange={handleChange}
             type="text"/>
         </div>
       );

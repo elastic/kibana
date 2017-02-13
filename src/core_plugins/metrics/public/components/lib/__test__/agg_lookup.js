@@ -16,7 +16,7 @@ describe('aggLookup', () => {
 
     it('returns options for all aggs', () => {
       const options = createOptions();
-      expect(options).to.have.length(23);
+      expect(options).to.have.length(24);
       options.forEach((option) => {
         expect(option).to.have.property('label');
         expect(option).to.have.property('value');
@@ -32,13 +32,13 @@ describe('aggLookup', () => {
 
     it('returns options for pipeline', () => {
       const options = createOptions('pipeline');
-      expect(options).to.have.length(12);
+      expect(options).to.have.length(13);
       expect(options.every(opt => !isBasicAgg({ type: opt.value }))).to.equal(true);
     });
 
     it('returns options for all if given unknown key', () => {
       const options = createOptions('foo');
-      expect(options).to.have.length(23);
+      expect(options).to.have.length(24);
     });
 
   });
