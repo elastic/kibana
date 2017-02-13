@@ -36,7 +36,7 @@ export default class Positionable extends React.PureComponent {
     });
 
     resize(elem, {
-      on: (e) => { stateMoveOrResize(e); this.props.resize(e); },
+      on: (e) => stateMoveOrResize(e),
       onEnd: (e) => this.props.resize(e),
       sides: {
         left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
