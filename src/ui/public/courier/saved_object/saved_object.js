@@ -18,6 +18,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
+import { getTitleAlreadyExists } from './get_title_already_exists';
 
 export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
@@ -36,6 +37,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
 
     // type name for this object, used as the ES-type
     const type = config.type;
+    this.type = type;
+    this.index = kbnIndex;
 
     this.getDisplayName = function () {
       return type;
@@ -96,7 +99,9 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * @return {Promise<IndexPattern | null>}
      */
     const hydrateIndexPattern = () => {
-      if (!this.searchSource) { return Promise.resolve(null); }
+      if (!this.searchSource) {
+        return Promise.resolve(null);
+      }
 
       if (config.clearSavedIndexPattern) {
         this.searchSource.set('index', undefined);
@@ -105,7 +110,9 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
 
       let index = config.indexPattern || this.searchSource.getOwn('index');
 
-      if (!index) { return Promise.resolve(null); }
+      if (!index) {
+        return Promise.resolve(null);
+      }
 
       // If index is not an IndexPattern object at this point, then it's a string id of an index.
       if (!(index instanceof indexPatterns.IndexPattern)) {
@@ -263,6 +270,11 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * @type {string}
      */
     const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+    /**
+     * An error message to be used when the user rejects a confirm save with duplicate title.
+     * @type {string}
+     */
+    const SAVE_DUPLICATE_REJECTED = 'Save with duplicate title confirmation was rejected';
 
     /**
      * Attempts to create the current object using the serialized source. If an object already
@@ -290,6 +302,26 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         });
     };
 
+    /**
+     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
+     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
+     */
+    const warnIfDuplicateTitle = () => {
+      // Don't warn if the user isn't updating the title, otherwise that would become very annoying to have
+      // to confirm the save every time.
+      if (this.title === this.lastSavedTitle) {
+        return Promise.resolve();
+      }
+
+      return getTitleAlreadyExists(this, esAdmin)
+        .then((isDuplicate) => {
+          if (!isDuplicate) return true;
+          const confirmMessage = `A ${type} with the title '${this.title}' already exists. Would you like to save anyway?`;
+
+          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${type}` })
+            .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+        });
+    };
 
     /**
      * @typedef {Object} SaveOptions
@@ -325,9 +357,14 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       const source = this.serialize();
 
       this.isSaving = true;
-      const doSave = saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
-      return doSave
-        .then((id) => { this.id = id; })
+
+      return warnIfDuplicateTitle()
+        .then(() => {
+          return saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+        })
+        .then((id) => {
+          this.id = id;
+        })
         .then(refreshIndex)
         .then(() => {
           this.isSaving = false;
@@ -337,7 +374,11 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           this.isSaving = false;
           this.id = originalId;
-          if (err && err.message === OVERWRITE_REJECTED) return;
+          if (err && (
+            err.message === OVERWRITE_REJECTED ||
+            err.message === SAVE_DUPLICATE_REJECTED)) {
+            return;
+          }
           return Promise.reject(err);
         });
     };
@@ -360,7 +401,9 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
           type: type,
           id: this.id
         })
-        .then(() => { return refreshIndex(); });
+        .then(() => {
+          return refreshIndex();
+        });
     };
   }
 

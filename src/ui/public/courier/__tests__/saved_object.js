@@ -85,6 +85,7 @@ describe('Saved Object', function () {
    */
   function createInitializedSavedObject(config = {}) {
     const savedObject = new SavedObject(config);
+    savedObject.title = 'my saved object';
     return savedObject.init();
   }
 

@@ -41,7 +41,9 @@ export default class DashboardPage {
     PageObjects.common.debug('Go to dashboard landing page');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
+      return PageObjects.common.try(() =>
+        PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click()
+      );
     }
   }
 
@@ -131,13 +133,28 @@ export default class DashboardPage {
   }
 
   async saveDashboard(dashName, storeTimeWithDash) {
+    await this.enterDashboardTitleAndClickSave(dashName, storeTimeWithDash);
+
+    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+
+    // verify that green message at the top of the page.
+    // it's only there for about 5 seconds
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('verify toast-message for saved dashboard');
+      return this.findTimeout
+        .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+        .getVisibleText();
+    });
+  }
+
+  async enterDashboardTitleAndClickSave(dashboardTitle, storeTimeWithDash) {
     await PageObjects.common.findTestSubject('dashboardSaveButton').click();
 
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
 
     PageObjects.common.debug('entering new title');
-    await this.findTimeout.findById('dashboardTitle').type(dashName);
+    await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
 
     if (storeTimeWithDash !== undefined) {
       await this.storeTimeWithDashboard(storeTimeWithDash);
@@ -150,17 +167,7 @@ export default class DashboardPage {
       PageObjects.common.debug('clicking final Save button for named dashboard');
       return this.findTimeout.findByCssSelector('.btn-primary').click();
     });
-
     await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // verify that green message at the top of the page.
-    // it's only there for about 5 seconds
-    await PageObjects.common.try(() => {
-      PageObjects.common.debug('verify toast-message for saved dashboard');
-      return this.findTimeout
-        .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-        .getVisibleText();
-    });
   }
 
   clickDashboardByLinkText(dashName) {
@@ -169,18 +176,35 @@ export default class DashboardPage {
     .click();
   }
 
-  // use the search filter box to narrow the results down to a single
-  // entry, or at least to a single page of results
-  async loadSavedDashboard(dashName) {
-    PageObjects.common.debug(`Load Saved Dashboard ${dashName}`);
-    const self = this;
+  async searchForDashboardWithName(dashName) {
+    PageObjects.common.debug(`searchForDashboardWithName: ${dashName}`);
+
     await this.gotoDashboardLandingPage();
     const searchBox = await PageObjects.common.findTestSubject('searchFilter');
     await searchBox.click();
+
+    // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
     await searchBox.type(dashName.replace('-',' '));
 
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
+    return await PageObjects.header.isGlobalLoadingIndicatorHidden();
+  }
+
+  async getDashboardCountWithName(dashName) {
+    PageObjects.common.debug(`getDashboardCountWithName: ${dashName}`);
+
+    await this.searchForDashboardWithName(dashName);
+    const links = await this.findTimeout.findAllByLinkText(dashName);
+    return links.length;
+  }
+
+  // use the search filter box to narrow the results down to a single
+  // entry, or at least to a single page of results
+  async loadSavedDashboard(dashName) {
+    PageObjects.common.debug(`Load Saved Dashboard ${dashName}`);
+
+    await this.searchForDashboardWithName(dashName);
     await this.clickDashboardByLinkText(dashName);
     return PageObjects.header.waitUntilLoadingHasFinished();
   }
