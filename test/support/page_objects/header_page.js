@@ -148,7 +148,7 @@ export default class HeaderPage {
     try {
       await this.isGlobalLoadingIndicatorVisible();
     } catch (exception) {
-      if (exception.name === 'NoSuchElement') {
+      if (exception.name === 'ElementNotVisible') {
         // selenium might just have been too slow to catch it
       } else {
         throw exception;
@@ -158,8 +158,7 @@ export default class HeaderPage {
   }
 
   isGlobalLoadingIndicatorVisible() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[data-test-subj="globalLoadingIndicator"]:not(.ng-hide)');
+    return PageObjects.common.findTestSubject('globalLoadingIndicator');
   }
 
   isGlobalLoadingIndicatorHidden() {
