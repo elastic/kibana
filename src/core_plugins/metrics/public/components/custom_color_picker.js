@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import reactCSS from 'reactcss';
 
 import { ColorWrap as colorWrap, Saturation, Hue, Alpha, Checkboard } from 'react-color/lib/components/common';
 import ChromeFields from 'react-color/lib/components/chrome/ChromeFields';
@@ -12,8 +11,11 @@ import shallowCompare from 'react-addons-shallow-compare';
 export class CustomColorPicker extends Component {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = shallowCompare.bind(this, this, arguments[0], arguments[1]);
     this.handleChange = this.handleChange.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(nextProps, nextState);
   }
 
   handleChange(data) {
@@ -22,92 +24,21 @@ export class CustomColorPicker extends Component {
 
   render() {
     const rgb = this.props.rgb;
-    const styles = reactCSS({
-      'default': {
-        picker: {
-          background: '#fff',
-          borderRadius: '2px',
-          boxShadow: '0 0 2px rgba(0,0,0,.3), 0 4px 8px rgba(0,0,0,.3)',
-          boxSizing: 'initial',
-          width: '275px',
-          fontFamily: 'Menlo',
-        },
-        saturation: {
-          width: '100%',
-          paddingBottom: '55%',
-          position: 'relative',
-          borderRadius: '2px 2px 0 0',
-          overflow: 'hidden',
-        },
-        Saturation: {
-          radius: '2px 2px 0 0',
-        },
-        body: {
-          padding: '16px 16px 12px',
-        },
-        controls: {
-          display: 'flex',
-        },
-        color: {
-          width: '32px',
-        },
-        swatch: {
-          marginTop: '6px',
-          width: '16px',
-          height: '16px',
-          borderRadius: '8px',
-          position: 'relative',
-          overflow: 'hidden',
-        },
-        active: {
-          absolute: '0px 0px 0px 0px',
-          borderRadius: '8px',
-          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.1)',
-          background: `rgba(${ rgb.r }, ${ rgb.g }, ${ rgb.b }, ${ rgb.a })`,
-          zIndex: '2',
-        },
-        toggles: {
-          flex: '1',
-        },
-        hue: {
-          height: '10px',
-          position: 'relative',
-          marginBottom: '8px',
-        },
-        Hue: {
-          radius: '2px',
-        },
-        alpha: {
-          height: '10px',
-          position: 'relative',
-        },
-        Alpha: {
-          radius: '2px',
-        },
-        swatches: {
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          marginTop: '10px'
-        }
+
+    const styles = {
+      active: {
+        background: `rgba(${ rgb.r }, ${ rgb.g }, ${ rgb.b }, ${ rgb.a })`,
       },
-      'disableAlpha': {
-        color: {
-          width: '22px',
-        },
-        alpha: {
-          display: 'none',
-        },
-        hue: {
-          marginBottom: '0px',
-        },
-        swatch: {
-          width: '10px',
-          height: '10px',
-          marginTop: '0px',
-        },
+      Saturation: {
+        radius: '2px 2px 0 0 '
       },
-    }, this.props);
+      Hue: {
+        radius: '2px',
+      },
+      Alpha: {
+        radius: '2px',
+      }
+    };
 
     const handleSwatchChange = (data) => {
       if (data.hex) {
@@ -130,8 +61,8 @@ export class CustomColorPicker extends Component {
     });
 
     return (
-      <div style={styles.picker} className="custom-picker">
-        <div style={styles.saturation}>
+      <div className="custom-picker color_picker">
+        <div className="color_picker__saturation">
           <Saturation
             style={styles.Saturation}
             { ...this.props }
@@ -139,16 +70,16 @@ export class CustomColorPicker extends Component {
             onChange={this.handleChange}
           />
         </div>
-        <div style={styles.body}>
-          <div style={styles.controls} className="flexbox-fix">
-            <div style={styles.color}>
-              <div style={styles.swatch}>
-                <div style={styles.active} />
+        <div className="color_picker__body">
+          <div className="color_picker__controls flexbox-fix">
+            <div className={ this.props.disableAlpha ? 'color_picker__color-disable_alpha' : 'color_picker__color' }>
+              <div className={ this.props.disableAlpha ? 'color_picker__swatch-disable_alpha' : 'color_picker__swatch' }>
+                <div className="color_picker__active" />
                 <Checkboard />
               </div>
             </div>
-            <div style={styles.toggles}>
-              <div style={styles.hue}>
+            <div className="color_picker__toggles">
+              <div className={ this.props.disableAlpha ? 'color_picker__hue-disable_alpha' : 'color_picker__hue' }>
                 <Hue
                   style={styles.Hue}
                   {...this.props}
@@ -156,7 +87,7 @@ export class CustomColorPicker extends Component {
                   onChange={this.handleChange}
                 />
               </div>
-              <div style={styles.alpha}>
+              <div className={ this.props.disableAlpha ? 'color_picker__alpha-disable_alpha' : 'color_picker__alpha'}>
                 <Alpha
                   style={styles.Alpha}
                   {...this.props}
@@ -171,7 +102,7 @@ export class CustomColorPicker extends Component {
             onChange={this.handleChange}
             disableAlpha={this.props.disableAlpha}
           />
-          <div style={styles.swatches} className="flexbox-fix">
+          <div className="color_picker__swatches flexbox-fix">
             {swatches}
           </div>
         </div>
@@ -181,7 +112,8 @@ export class CustomColorPicker extends Component {
 }
 
 CustomColorPicker.defaultProps = {
-  colors: ['#4D4D4D', '#999999', '#FFFFFF', '#F44E3B', '#FE9200', '#FCDC00',
+  colors: [
+    '#4D4D4D', '#999999', '#FFFFFF', '#F44E3B', '#FE9200', '#FCDC00',
     '#DBDF00', '#A4DD00', '#68CCCA', '#73D8FF', '#AEA1FF', '#FDA1FF',
     '#333333', '#808080', '#cccccc', '#D33115', '#E27300', '#FCC400',
     '#B0BC00', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF',
