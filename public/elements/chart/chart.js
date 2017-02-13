@@ -5,7 +5,8 @@ import elements from 'plugins/rework/elements/elements';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
 import stylesheet from '!!raw!./chart.less';
 import Warning from 'plugins/rework/components/warning/warning';
-import GridBlocks from 'plugins/rework/components/grid_blocks/grid_blocks';
+import observeResize from 'plugins/timelion/lib/observe_resize';
+
 
 import moment from 'moment';
 import icon from './icon.svg';
@@ -131,10 +132,16 @@ elements.push(new Element('chart', {
 
     componentWillMount() {
       this.setColumns();
+
     }
 
     componentDidMount() {
       this.renderChart();
+      this.cancelResize = observeResize($(this.refs.plot), this.renderChart.bind(this), 100);
+    }
+
+    componentWillUnmount() {
+      this.cancelResize();
     }
 
     componentDidUpdate() {
