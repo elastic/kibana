@@ -55,7 +55,7 @@ export default function PointSeriesVisType(Private) {
             labels: {
               show: true,
               rotate: 75,
-              filter: false,
+              filter: true,
               truncate: 100
             },
             title: {}

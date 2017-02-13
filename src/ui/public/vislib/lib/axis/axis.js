@@ -169,6 +169,7 @@ export default function AxisFactory(Private) {
     }
 
     draw() {
+      let svg;
       const self = this;
       const config = this.axisConfig;
       const style = config.get('style');
@@ -190,7 +191,7 @@ export default function AxisFactory(Private) {
           const axis = self.getAxis(length);
 
           if (config.get('show')) {
-            const svg = div.append('svg')
+            svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
 
@@ -211,13 +212,14 @@ export default function AxisFactory(Private) {
               .style('stroke-opacity', style.opacity);
             }
             if (self.axisLabels) self.axisLabels.render(svg);
-            svg.call(self.adjustSize());
           }
         });
 
         if (self.axisTitle && ['right', 'bottom'].includes(config.get('position'))) {
           self.axisTitle.render(selection);
         }
+
+        svg.call(self.adjustSize());
       };
     }
   }
