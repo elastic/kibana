@@ -1,4 +1,8 @@
 ---
-extends: '@elastic/kibana'
 rules:
   no-unused-vars: off
+plugins:
+  ['react']
+extends:
+  ['@elastic/kibana',
+   'plugin:react/recommended']

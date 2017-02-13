@@ -5,11 +5,15 @@ import { DeleteButton } from 'ui_framework/components/button/delete_button';
 
 export function CreateOrDeleteButton({ showCreate, doDelete }) {
   if (showCreate) {
-    return <CreateButtonLink href = "#/visualize/new"
-                             tooltip = "Create new visualization" />;
+    return <CreateButtonLink
+      href = "#/visualize/new"
+      tooltip = "Create new visualization"
+    />;
   } else {
-    return <DeleteButton onClick={() => doDelete() }
-                         tooltip="Delete selected visualizations" />;
+    return <DeleteButton
+      onClick={() => doDelete() }
+      tooltip="Delete selected visualizations"
+    />;
   }
 }
 

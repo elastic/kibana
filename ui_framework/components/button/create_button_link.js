@@ -1,10 +1,13 @@
 import React from 'react';
 
+import classnames from 'classnames';
 import { KuiButtonLink } from './kui_button_link';
-import { CreateIcon } from '../icon/create_icon';
+import { CreateIcon } from '../icon';
 
 export function CreateButtonLink(props) {
-  return <KuiButtonLink className="kuiButton--primary" {...props}>
+  const { className, ...rest } = props;
+  const classes = classnames('kuiButton--primary', className);
+  return <KuiButtonLink className={classes} {...rest}>
     <CreateIcon />
   </KuiButtonLink>;
 }
