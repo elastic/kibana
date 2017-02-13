@@ -31,7 +31,7 @@ export default class extends React.PureComponent {
     const args = elementTypes.byName[type].args;
 
     return (
-      <div className="rework--editor">
+      <div className="rework--editor" key={element.id}>
           {_.map(args, (arg) => {
             const type = arg.type.name;
             const value = argValues[arg.name];
