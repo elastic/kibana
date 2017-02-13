@@ -64,10 +64,10 @@ class Split extends Component {
 }
 
 Split.propTypes = {
-  fields   : PropTypes.object,
-  model    : PropTypes.object,
-  onChange : PropTypes.func,
-  panel    : PropTypes.object
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  panel: PropTypes.object
 };
 
 export default Split;

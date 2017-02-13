@@ -175,10 +175,10 @@ class Metric extends Component {
 }
 
 Metric.propTypes = {
-  backgroundColor : PropTypes.string,
-  metric          : PropTypes.object,
-  secondary       : PropTypes.object,
-  reversed        : PropTypes.bool
+  backgroundColor: PropTypes.string,
+  metric: PropTypes.object,
+  secondary: PropTypes.object,
+  reversed: PropTypes.bool
 };
 
 export default Metric;

@@ -40,7 +40,7 @@ describe('getAggValue', () => {
   describe('percentile', () => {
     const row = {
       'test': {
-        'values' : {
+        'values': {
           '1.0': 15,
           '5.0': 20,
           '25.0': 23,

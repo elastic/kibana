@@ -10,14 +10,14 @@ function Legend(props) {
 }
 
 Legend.propTypes = {
-  legendPosition : PropTypes.string,
-  onClick        : PropTypes.func,
-  onToggle       : PropTypes.func,
-  series         : PropTypes.array,
-  showLegend     : PropTypes.bool,
-  seriesValues   : PropTypes.object,
-  seriesFilter   : PropTypes.array,
-  tickFormatter  : PropTypes.func
+  legendPosition: PropTypes.string,
+  onClick: PropTypes.func,
+  onToggle: PropTypes.func,
+  series: PropTypes.array,
+  showLegend: PropTypes.bool,
+  seriesValues: PropTypes.object,
+  seriesFilter: PropTypes.array,
+  tickFormatter: PropTypes.func
 };
 
 export default Legend;

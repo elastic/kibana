@@ -70,10 +70,10 @@ CalculationVars.defaultProps = {
 };
 
 CalculationVars.propTypes = {
-  metrics  : PropTypes.array,
-  model    : PropTypes.object,
-  name     : PropTypes.string,
-  onChange : PropTypes.func
+  metrics: PropTypes.array,
+  model: PropTypes.object,
+  name: PropTypes.string,
+  onChange: PropTypes.func
 };
 
 export default CalculationVars;

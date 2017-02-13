@@ -179,20 +179,20 @@ class Gauge extends Component {
 }
 
 Gauge.defaultProps = {
-  type      : 'half',
-  innerLine : 2,
-  gaugeLine : 10
+  type: 'half',
+  innerLine: 2,
+  gaugeLine: 10
 };
 
 Gauge.propTypes = {
-  gaugeLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  innerColor : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  innerLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  max        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  metric     : PropTypes.object,
-  reversed   : PropTypes.bool,
-  type       : PropTypes.oneOf(['half', 'circle']),
-  valueColor : PropTypes.string,
+  gaugeLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerColor: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  metric: PropTypes.object,
+  reversed: PropTypes.bool,
+  type: PropTypes.oneOf(['half', 'circle']),
+  valueColor: PropTypes.string,
 };
 
 export default Gauge;

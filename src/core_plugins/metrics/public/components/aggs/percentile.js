@@ -173,15 +173,15 @@ class PercentileAgg extends Component {
 }
 
 PercentileAgg.propTypes = {
-  disableDelete             : PropTypes.bool,
-  fields                    : PropTypes.object,
-  model                     : PropTypes.object,
-  onAdd                     : PropTypes.func,
-  onChange                  : PropTypes.func,
-  onDelete                  : PropTypes.func,
-  panel                     : PropTypes.object,
-  series                    : PropTypes.object,
-  siblings                  : PropTypes.array,
+  disableDelete: PropTypes.bool,
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onAdd: PropTypes.func,
+  onChange: PropTypes.func,
+  onDelete: PropTypes.func,
+  panel: PropTypes.object,
+  series: PropTypes.object,
+  siblings: PropTypes.array,
 };
 
 export default PercentileAgg;

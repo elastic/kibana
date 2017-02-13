@@ -224,16 +224,16 @@ class TimeseriesChart extends Component {
 }
 
 TimeseriesChart.propTypes = {
-  crosshair     : PropTypes.bool,
-  onBrush       : PropTypes.func,
-  options       : PropTypes.object,
-  plothover     : PropTypes.func,
-  reversed      : PropTypes.bool,
-  series        : PropTypes.array,
-  annotations   : PropTypes.array,
-  show          : PropTypes.array,
-  tickFormatter : PropTypes.func,
-  yaxes         : PropTypes.array,
+  crosshair: PropTypes.bool,
+  onBrush: PropTypes.func,
+  options: PropTypes.object,
+  plothover: PropTypes.func,
+  reversed: PropTypes.bool,
+  series: PropTypes.array,
+  annotations: PropTypes.array,
+  show: PropTypes.array,
+  tickFormatter: PropTypes.func,
+  yaxes: PropTypes.array,
 };
 
 export default TimeseriesChart;

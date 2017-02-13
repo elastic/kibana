@@ -68,15 +68,15 @@ class TopN extends Component {
 }
 
 TopN.defaultProps = {
-  tickFormatter : n => n,
-  onClick       : i => i
+  tickFormatter: n => n,
+  onClick: i => i
 };
 
 TopN.propTypes = {
-  tickFormatter : PropTypes.func,
-  onClick       : PropTypes.func,
-  series        : PropTypes.array,
-  reversed      : PropTypes.bool
+  tickFormatter: PropTypes.func,
+  onClick: PropTypes.func,
+  series: PropTypes.array,
+  reversed: PropTypes.bool
 };
 
 export default TopN;

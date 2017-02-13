@@ -49,13 +49,13 @@ function MarkdownVisualization(props) {
 }
 
 MarkdownVisualization.propTypes = {
-  backgroundColor : PropTypes.string,
-  className       : PropTypes.string,
-  model           : PropTypes.object,
-  onBrush         : PropTypes.func,
-  onChange        : PropTypes.func,
-  reversed        : PropTypes.bool,
-  visData         : PropTypes.object
+  backgroundColor: PropTypes.string,
+  className: PropTypes.string,
+  model: PropTypes.object,
+  onBrush: PropTypes.func,
+  onChange: PropTypes.func,
+  reversed: PropTypes.bool,
+  visData: PropTypes.object
 };
 
 export default MarkdownVisualization;

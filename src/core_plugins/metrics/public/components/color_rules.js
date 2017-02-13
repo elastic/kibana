@@ -91,23 +91,23 @@ class ColorRules extends Component {
 }
 
 ColorRules.defaultProps = {
-  name             : 'color_rules',
-  primaryName      : 'background',
-  primaryVarName   : 'background_color',
-  secondaryName    : 'text',
-  secondaryVarName : 'color',
-  hideSecondary    : false
+  name: 'color_rules',
+  primaryName: 'background',
+  primaryVarName: 'background_color',
+  secondaryName: 'text',
+  secondaryVarName: 'color',
+  hideSecondary: false
 };
 
 ColorRules.propTypes = {
-  name             : PropTypes.string,
-  model            : PropTypes.object,
-  onChange         : PropTypes.func,
-  primaryName      : PropTypes.string,
-  primaryVarName   : PropTypes.string,
-  secondaryName    : PropTypes.string,
-  secondaryVarName : PropTypes.string,
-  hideSecondary    : PropTypes.bool
+  name: PropTypes.string,
+  model: PropTypes.object,
+  onChange: PropTypes.func,
+  primaryName: PropTypes.string,
+  primaryVarName: PropTypes.string,
+  secondaryName: PropTypes.string,
+  secondaryVarName: PropTypes.string,
+  hideSecondary: PropTypes.bool
 };
 
 export default ColorRules;

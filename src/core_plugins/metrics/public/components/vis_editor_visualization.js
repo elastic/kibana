@@ -69,10 +69,10 @@ class VisEditorVisualization extends Component {
 }
 
 VisEditorVisualization.propTypes = {
-  model    : PropTypes.object,
-  onBrush  : PropTypes.func,
-  onChange : PropTypes.func,
-  visData  : PropTypes.object
+  model: PropTypes.object,
+  onBrush: PropTypes.func,
+  onChange: PropTypes.func,
+  visData: PropTypes.object
 };
 
 export default VisEditorVisualization;

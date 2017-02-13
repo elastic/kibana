@@ -32,20 +32,20 @@ function Agg(props) {
 }
 
 Agg.propTypes = {
-  disableDelete             : PropTypes.bool,
-  fields                    : PropTypes.object,
-  model                     : PropTypes.object,
-  onAdd                     : PropTypes.func,
-  onChange                  : PropTypes.func,
-  onDelete                  : PropTypes.func,
-  onMouseDown               : PropTypes.func,
-  onSortableItemMount       : PropTypes.func,
-  onSortableItemReadyToMove : PropTypes.func,
-  onTouchStart              : PropTypes.func,
-  panel                     : PropTypes.object,
-  series                    : PropTypes.object,
-  siblings                  : PropTypes.array,
-  sortData                  : PropTypes.string,
+  disableDelete: PropTypes.bool,
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onAdd: PropTypes.func,
+  onChange: PropTypes.func,
+  onDelete: PropTypes.func,
+  onMouseDown: PropTypes.func,
+  onSortableItemMount: PropTypes.func,
+  onSortableItemReadyToMove: PropTypes.func,
+  onTouchStart: PropTypes.func,
+  panel: PropTypes.object,
+  series: PropTypes.object,
+  siblings: PropTypes.array,
+  sortData: PropTypes.string,
 };
 
 export default sortable(Agg);

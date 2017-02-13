@@ -17,10 +17,10 @@ function AggSelect(props) {
 }
 
 AggSelect.propTypes = {
-  onChange  : PropTypes.func,
-  panelType : PropTypes.string,
-  siblings  : PropTypes.array,
-  value     : PropTypes.string
+  onChange: PropTypes.func,
+  panelType: PropTypes.string,
+  siblings: PropTypes.array,
+  value: PropTypes.string
 };
 
 export default AggSelect;

@@ -173,20 +173,20 @@ class GaugeVis extends Component {
 }
 
 GaugeVis.defaultProps = {
-  innerLine : 2,
-  gaugeLine : 10
+  innerLine: 2,
+  gaugeLine: 10
 };
 
 GaugeVis.propTypes = {
-  color      : PropTypes.string,
-  gaugeLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  innerColor : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  innerLine  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  max        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  metric     : PropTypes.object,
-  reversed   : PropTypes.bool,
-  value      : PropTypes.number,
-  type       : PropTypes.oneOf(['half', 'circle'])
+  color: PropTypes.string,
+  gaugeLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerColor: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  innerLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  metric: PropTypes.object,
+  reversed: PropTypes.bool,
+  value: PropTypes.number,
+  type: PropTypes.oneOf(['half', 'circle'])
 };
 
 export default GaugeVis;

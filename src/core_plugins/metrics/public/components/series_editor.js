@@ -66,18 +66,18 @@ class SeriesEditor extends Component {
 
 }
 SeriesEditor.defaultProps = {
-  name        : 'series',
-  limit       : Infinity,
-  colorPicker : true
+  name: 'series',
+  limit: Infinity,
+  colorPicker: true
 };
 
 SeriesEditor.propTypes = {
-  colorPicker : PropTypes.bool,
-  fields      : PropTypes.object,
-  limit       : PropTypes.number,
-  model       : PropTypes.object,
-  name        : PropTypes.string,
-  onChange    : PropTypes.func
+  colorPicker: PropTypes.bool,
+  fields: PropTypes.object,
+  limit: PropTypes.number,
+  model: PropTypes.object,
+  name: PropTypes.string,
+  onChange: PropTypes.func
 };
 
 export default SeriesEditor;

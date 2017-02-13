@@ -205,9 +205,9 @@ class TimeseriesConfig extends Component {
 }
 
 TimeseriesConfig.propTypes = {
-  fields   : PropTypes.object,
-  model    : PropTypes.object,
-  onChange : PropTypes.func
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func
 };
 
 export default TimeseriesConfig;

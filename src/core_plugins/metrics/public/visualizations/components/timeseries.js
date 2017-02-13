@@ -153,14 +153,14 @@ Timeseries.defaultProps = {
 };
 
 Timeseries.propTypes = {
-  legend         : PropTypes.bool,
-  legendPosition : PropTypes.string,
-  onFilter       : PropTypes.func,
-  series         : PropTypes.array,
-  annotations    : PropTypes.array,
-  reversed       : PropTypes.bool,
-  options        : PropTypes.object,
-  tickFormatter  : PropTypes.func
+  legend: PropTypes.bool,
+  legendPosition: PropTypes.string,
+  onFilter: PropTypes.func,
+  series: PropTypes.array,
+  annotations: PropTypes.array,
+  reversed: PropTypes.bool,
+  options: PropTypes.object,
+  tickFormatter: PropTypes.func
 };
 
 export default Timeseries;

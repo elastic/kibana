@@ -53,12 +53,12 @@ MetricSelect.defaultProps = {
 };
 
 MetricSelect.propTypes = {
-  additionalOptions : PropTypes.array,
-  exclude           : PropTypes.array,
-  metric            : PropTypes.object,
-  onChange          : PropTypes.func,
-  restrict          : PropTypes.string,
-  value             : PropTypes.string
+  additionalOptions: PropTypes.array,
+  exclude: PropTypes.array,
+  metric: PropTypes.object,
+  onChange: PropTypes.func,
+  restrict: PropTypes.string,
+  value: PropTypes.string
 };
 
 export default MetricSelect;

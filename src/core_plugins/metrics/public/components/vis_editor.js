@@ -33,11 +33,11 @@ function VisEditor(props) {
 }
 
 VisEditor.propTypes = {
-  fields   : PropTypes.object,
-  model    : PropTypes.object,
-  onBrush  : PropTypes.func,
-  onChange : PropTypes.func,
-  visData  : PropTypes.object
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onBrush: PropTypes.func,
+  onChange: PropTypes.func,
+  visData: PropTypes.object
 };
 
 export default VisEditor;

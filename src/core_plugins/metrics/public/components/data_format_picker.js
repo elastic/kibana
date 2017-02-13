@@ -77,9 +77,9 @@ DataFormatPicker.defaultProps = {
 };
 
 DataFormatPicker.propTypes = {
-  value    : PropTypes.string,
-  label    : PropTypes.string,
-  onChange : PropTypes.func
+  value: PropTypes.string,
+  label: PropTypes.string,
+  onChange: PropTypes.func
 };
 
 export default DataFormatPicker;

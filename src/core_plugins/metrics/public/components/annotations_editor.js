@@ -161,10 +161,10 @@ AnnotationsEditor.defaultProps = {
 };
 
 AnnotationsEditor.propTypes = {
-  fields      : PropTypes.object,
-  model       : PropTypes.object,
-  name        : PropTypes.string,
-  onChange    : PropTypes.func
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  name: PropTypes.string,
+  onChange: PropTypes.func
 };
 
 export default AnnotationsEditor;

@@ -191,9 +191,9 @@ CustomColorPicker.defaultProps = {
 };
 
 CustomColorPicker.propTypes = {
-  color            : PropTypes.string,
-  onChangeComplete : PropTypes.func,
-  onChange         : PropTypes.func
+  color: PropTypes.string,
+  onChangeComplete: PropTypes.func,
+  onChange: PropTypes.func
 };
 
 export default colorWrap(CustomColorPicker);

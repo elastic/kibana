@@ -44,18 +44,18 @@ class IndexPattern extends Component {
 }
 
 IndexPattern.defaultProps = {
-  prefix    : '',
-  disabled  : false,
-  className : 'vis_editor__row'
+  prefix: '',
+  disabled: false,
+  className: 'vis_editor__row'
 };
 
 IndexPattern.propTypes = {
-  model     : PropTypes.object.isRequired,
-  fields    : PropTypes.object.isRequired,
-  onChange  : PropTypes.func.isRequired,
-  prefix    : PropTypes.string,
-  disabled  : PropTypes.bool,
-  className : PropTypes.string
+  model: PropTypes.object.isRequired,
+  fields: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  prefix: PropTypes.string,
+  disabled: PropTypes.bool,
+  className: PropTypes.string
 };
 
 export default IndexPattern;

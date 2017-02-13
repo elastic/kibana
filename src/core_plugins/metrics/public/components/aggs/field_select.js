@@ -26,21 +26,21 @@ function FieldSelect(props) {
 }
 
 FieldSelect.defaultProps = {
-  indexPattern : '*',
-  disabled     : false,
-  restrict     : 'none',
-  style        : {}
+  indexPattern: '*',
+  disabled: false,
+  restrict: 'none',
+  style: {}
 };
 
 FieldSelect.propTypes = {
-  disabled     : PropTypes.bool,
-  fields       : PropTypes.object,
-  indexPattern : PropTypes.string,
-  onChange     : PropTypes.func,
-  restrict     : PropTypes.string,
-  style        : PropTypes.object,
-  type         : PropTypes.string,
-  value        : PropTypes.string
+  disabled: PropTypes.bool,
+  fields: PropTypes.object,
+  indexPattern: PropTypes.string,
+  onChange: PropTypes.func,
+  restrict: PropTypes.string,
+  style: PropTypes.object,
+  type: PropTypes.string,
+  value: PropTypes.string
 };
 
 export default FieldSelect;

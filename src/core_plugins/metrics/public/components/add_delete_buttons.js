@@ -48,11 +48,11 @@ function AddDeleteButtons(props) {
 }
 
 AddDeleteButtons.propTypes = {
-  disableAdd    : PropTypes.bool,
-  disableDelete : PropTypes.bool,
-  onClone       : PropTypes.func,
-  onAdd         : PropTypes.func,
-  onDelete      : PropTypes.func
+  disableAdd: PropTypes.bool,
+  disableDelete: PropTypes.bool,
+  onClone: PropTypes.func,
+  onAdd: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export default AddDeleteButtons;

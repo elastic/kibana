@@ -14,13 +14,13 @@ function TooltipComponent(props) {
 }
 
 TooltipComponent.defaultProps = {
-  placement : 'top',
-  text      : 'Tip!'
+  placement: 'top',
+  text: 'Tip!'
 };
 
 TooltipComponent.propTypes = {
-  placement : PropTypes.string,
-  text      : PropTypes.node
+  placement: PropTypes.string,
+  text: PropTypes.node
 };
 
 export default TooltipComponent;

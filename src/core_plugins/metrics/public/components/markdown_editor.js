@@ -136,9 +136,9 @@ class MarkdownEditor extends Component {
 }
 
 MarkdownEditor.propTypes = {
-  onChange : PropTypes.func,
-  model    : PropTypes.object,
-  visData  : PropTypes.object
+  onChange: PropTypes.func,
+  model: PropTypes.object,
+  visData: PropTypes.object
 };
 
 export default MarkdownEditor;

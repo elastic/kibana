@@ -30,12 +30,12 @@ function Visualization(props) {
   const component = types[model.type];
   if (component) {
     return React.createElement(component, {
-      reversed        : props.reversed,
-      backgroundColor : props.backgroundColor,
-      model           : props.model,
-      onBrush         : props.onBrush,
-      onChange        : props.onChange,
-      visData         : props.visData
+      reversed: props.reversed,
+      backgroundColor: props.backgroundColor,
+      model: props.model,
+      onBrush: props.onBrush,
+      onChange: props.onChange,
+      visData: props.visData
     });
   }
   return (<div className={props.className}></div>);
@@ -46,13 +46,13 @@ Visualization.defaultProps = {
 };
 
 Visualization.propTypes = {
-  backgroundColor : PropTypes.string,
-  className       : PropTypes.string,
-  model           : PropTypes.object,
-  onBrush         : PropTypes.func,
-  onChange        : PropTypes.func,
-  reversed        : PropTypes.bool,
-  visData         : PropTypes.object
+  backgroundColor: PropTypes.string,
+  className: PropTypes.string,
+  model: PropTypes.object,
+  onBrush: PropTypes.func,
+  onChange: PropTypes.func,
+  reversed: PropTypes.bool,
+  visData: PropTypes.object
 };
 
 export default Visualization;

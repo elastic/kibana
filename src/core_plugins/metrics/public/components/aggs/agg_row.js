@@ -43,11 +43,11 @@ function AggRow(props) {
 }
 
 AggRow.propTypes = {
-  disableDelete : PropTypes.bool,
-  model         : PropTypes.object,
-  onAdd         : PropTypes.func,
-  onDelete      : PropTypes.func,
-  siblings      : PropTypes.array,
+  disableDelete: PropTypes.bool,
+  model: PropTypes.object,
+  onAdd: PropTypes.func,
+  onDelete: PropTypes.func,
+  siblings: PropTypes.array,
 };
 
 export default AggRow;

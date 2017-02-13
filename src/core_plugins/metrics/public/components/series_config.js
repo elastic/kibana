@@ -55,9 +55,9 @@ class SeriesConfig extends Component {
 }
 
 SeriesConfig.propTypes = {
-  fields   : PropTypes.object,
-  model    : PropTypes.object,
-  onChange : PropTypes.func
+  fields: PropTypes.object,
+  model: PropTypes.object,
+  onChange: PropTypes.func
 };
 
 export default SeriesConfig;

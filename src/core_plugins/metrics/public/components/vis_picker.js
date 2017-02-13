@@ -23,11 +23,11 @@ function VisPickerItem(props) {
 }
 
 VisPickerItem.propTypes = {
-  icon     : PropTypes.string,
-  label    : PropTypes.string,
-  onClick  : PropTypes.func,
-  type     : PropTypes.string,
-  selected : PropTypes.bool
+  icon: PropTypes.string,
+  label: PropTypes.string,
+  onClick: PropTypes.func,
+  type: PropTypes.string,
+  selected: PropTypes.bool
 };
 
 function VisPicker(props) {
@@ -61,8 +61,8 @@ function VisPicker(props) {
 }
 
 VisPicker.propTypes = {
-  model    : PropTypes.object,
-  onChange : PropTypes.func
+  model: PropTypes.object,
+  onChange: PropTypes.func
 };
 
 export default VisPicker;
