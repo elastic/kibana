@@ -99,7 +99,7 @@ frameSources.push(new FrameSource('timelion', {
 
       const meta = _.map(seriesList.list, series => _.omit(series, 'data'));
 
-      return new Dataframe({meta: meta, columns: columns, rows: rows, schema: 'timeseries', keys: ['label']});
+      return new Dataframe({meta: meta, columns: columns, rows: rows, schema: 'timelion', keys: ['label']});
     });
 
   },
