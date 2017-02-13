@@ -15,7 +15,7 @@ class DataframeDialog extends React.Component {
 
     const {dataframes} = this.props;
     const dataframeIds = _.keys(dataframes);
-    const selectedId = _.get(props, 'meta.selected', dataframeIds[0]);
+    const selectedId = _.get(props, 'meta.selected', this.getDefaultDataframe());
     const createState = _.get(props, 'meta.creating', false);
 
     this.state = {
@@ -52,6 +52,11 @@ class DataframeDialog extends React.Component {
       const dataframeIds = _.keys(nextProps.dataframes);
       return this.setDataframe(dataframeIds[0]);
     }
+  }
+
+  getDefaultDataframe() {
+    const dataframeIds = _.keys(this.props.dataframes);
+    return dataframeIds[0];
   }
 
   getDataframeById(id) {
