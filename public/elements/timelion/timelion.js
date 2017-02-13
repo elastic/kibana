@@ -5,6 +5,9 @@ import elements from 'plugins/rework/elements/elements';
 import stylesheet from '!!raw!./timelion.less';
 import Warning from 'plugins/rework/components/warning/warning';
 
+import observeResize from 'plugins/timelion/lib/observe_resize';
+
+
 import moment from 'moment';
 import icon from './icon.svg';
 import Arg from 'plugins/rework/arg_types/arg';
@@ -30,7 +33,7 @@ elements.push(new Element('timelion', {
       type: 'text_style'
     })
   ],
-  template: class Timechart extends React.PureComponent {
+  template: class Timelion extends React.PureComponent {
 
     constructor(props) {
       super(props);
@@ -120,15 +123,19 @@ elements.push(new Element('timelion', {
       } catch (e) {
         // ....
       }
-
     }
 
     componentDidMount(nextProps) {
       this.plot();
+      this.cancelResize = observeResize($(this.refs.target), this.plot.bind(this), 100);
     }
 
     componentDidUpdate(nextProps) {
       this.plot();
+    }
+
+    componentWillUnmount() {
+      this.cancelResize();
     }
 
     render() {
