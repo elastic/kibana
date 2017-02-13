@@ -7,6 +7,7 @@ export default () => {
       fullscreen: false,
       editor: true,
       selectedElement: null,
+      selectedDataframe: null,
       dropdown: {
         type: null,
         meta: {},
