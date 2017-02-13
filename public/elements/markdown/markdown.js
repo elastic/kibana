@@ -9,6 +9,9 @@ import _ from 'lodash';
 import stylesheet from '!!raw!./markdown.less';
 import handlebars from 'handlebars/dist/handlebars';
 import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
+import observeResize from 'plugins/timelion/lib/observe_resize';
+import $ from 'jquery';
+
 
 
 const md = new Remarkable('full', {
@@ -48,9 +51,10 @@ elements.push(new Element('markdown', {
       type: 'text_style',
     }),
   ],
-  template: ({args}) => {
+  template: class Markdown extends React.PureComponent {
 
-    function getContent() {
+    getContent() {
+      const {args} = this.props;
       let markdown;
       try {
         //const template = handlebars.compile(args.markdown || '');
@@ -65,12 +69,24 @@ elements.push(new Element('markdown', {
       return {__html: md.render(markdown)};
     }
 
-    return (
-      <FontResize height={true} width={true} max={_.get(args.text_style, 'object.fontSize')}>
-        <div style={{display: 'inline-block', margin: '2px'}}
-          className="rework--markdown"
-          dangerouslySetInnerHTML={getContent()}></div>
-      </FontResize>
-    );
+    componentDidMount() {
+      this.cancelResize = observeResize($(this.refs.content), this.forceUpdate.bind(this), 10);
+    }
+
+    componentWillUnmount() {
+      this.cancelResize();
+    }
+
+    render() {
+      return (
+        <FontResize height={true} width={true} max={_.get(this.props.args.text_style, 'object.fontSize')}>
+          <div style={{display: 'inline-block', margin: '2px'}}
+            ref="content"
+            className="rework--markdown"
+            dangerouslySetInnerHTML={this.getContent()}></div>
+        </FontResize>
+      );
+    }
+
   }
 }));
