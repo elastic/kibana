@@ -35,8 +35,9 @@ const parentPipelineAggController = function ($scope) {
       lastBucket.params.min_doc_count = (lastBucket.type.name === 'histogram') ? 1 : 0;
     } else {
       if (lastBucket) {
-        const type = $scope.agg.type.name;
-        lastBucket.error = `Last bucket must be "date histogram" or "histogram" when using ${type} metric!`;
+        const type = $scope.agg.type.title;
+        lastBucket.error = `Last bucket aggregation must be "Date Histogram" or 
+        "Histogram" when using "${type}" metric aggregation!`;
       }
     }
   }
