@@ -93,25 +93,26 @@ describe('Derivative metric', function () {
     init({
       metricAgg: 'custom',
       customMetric: {
-        id:'2-orderAgg',
+        id:'2-metric',
         type: 'max',
         params: { field: 'bytes' },
         schema: 'orderAgg'
       }
     });
-    expect(aggDsl.parentAggs['2-orderAgg'].max.field).to.be('bytes');
+    expect(aggDsl.derivative.buckets_path).to.be('2-metric');
+    expect(aggDsl.parentAggs['2-metric'].max.field).to.be('bytes');
   });
 
   it('should set nested parent aggs', function () {
     init({
       metricAgg: 'custom',
       customMetric: {
-        id:'2-orderAgg',
+        id:'2-metric',
         type: 'derivative',
         params: {
           buckets_path: 'custom',
           customMetric: {
-            id:'2-orderAgg-orderAgg',
+            id:'2-metric-metric',
             type: 'max',
             params: { field: 'bytes' },
             schema: 'orderAgg'
@@ -120,7 +121,8 @@ describe('Derivative metric', function () {
         schema: 'orderAgg'
       }
     });
-    expect(aggDsl.parentAggs['2-orderAgg'].derivative.buckets_path).to.be('2-orderAgg-orderAgg');
+    expect(aggDsl.derivative.buckets_path).to.be('2-metric');
+    expect(aggDsl.parentAggs['2-metric'].derivative.buckets_path).to.be('2-metric-metric');
   });
 
 });
