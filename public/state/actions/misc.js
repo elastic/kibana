@@ -5,5 +5,7 @@ export const dropdownOpen = createAction('DROPDOWN_OPEN');
 export const dropdownClose = createAction('DROPDOWN_CLOSE');
 
 export const fullscreenToggle = createAction('FULLSCREEN_TOGGLE');
+export const watermarkToggle = createAction('WATERMARK_TOGGLE');
+
 
 window.fullscreenToggle = fullscreenToggle;
