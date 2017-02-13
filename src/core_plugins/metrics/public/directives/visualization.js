@@ -5,7 +5,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import Visualization from '../components/visualization';
 import addScope from '../lib/add_scope';
 import modules from 'ui/modules';
-import moment from 'moment';
 import createBrushHandler from '../lib/create_brush_handler';
 const app = modules.get('apps/metrics/directives');
 app.directive('metricsVisualization', (timefilter) => {
