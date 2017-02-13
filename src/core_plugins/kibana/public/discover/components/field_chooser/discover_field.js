@@ -39,7 +39,7 @@ app.directive('discoverField', function ($compile) {
               ' Values such as foo-bar will be broken into foo and bar.');
           }
 
-          if (!field.indexed) {
+          if (!field.indexed && !field.searchable) {
             warnings.push('This field is not indexed and might not be usable in visualizations.');
           }
         }
