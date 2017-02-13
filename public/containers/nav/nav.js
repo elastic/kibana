@@ -10,7 +10,7 @@ import Editable from 'plugins/rework/components/editable/editable';
 import { PositionForm } from 'plugins/rework/components/position_form/position_form';
 
 import { workpadProps, workpadNew } from 'plugins/rework/state/actions/workpad';
-import { elementLayerMove, elementProps} from 'plugins/rework/state/actions/element';
+import { elementLayerMove, elementProps, elementClone} from 'plugins/rework/state/actions/element';
 import { dropdownToggle, fullscreenToggle } from 'plugins/rework/state/actions/misc';
 import { historyUndo, historyRedo } from 'plugins/rework/state/actions/history';
 
@@ -67,7 +67,7 @@ const Nav = React.createClass({
   },
 
   render() {
-    const {workpad, element, currentPageId, time} = this.props;
+    const {workpad, element, currentPageId, time, dispatch} = this.props;
     const layerClasses = ['rework--nav--layer-buttons'];
     const position = _.pick(element, ['top', 'left', 'height', 'width', 'angle']);
 
@@ -139,6 +139,12 @@ const Nav = React.createClass({
               tooltip="Position"
               className="fa fa-crosshairs"
               onClick={element ? this.togglePositionPopover : _.noop}></NavButton>
+            <NavButton
+              tooltip="Clone"
+              className="fa fa-copy"
+              onClick={element ? () => dispatch(elementClone(element.id, currentPageId)) : _.noop}></NavButton>
+
+
             <Popover placement='bottom'
               isOpen={this.state.positionPopover}
               target='nav-position-button'

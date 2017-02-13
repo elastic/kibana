@@ -3,7 +3,6 @@ import _ from 'lodash';
 
 export const getElementTemplate = (props) => {
   const template = {
-    id: `element-${uuid()}`,
     type: 'json',
     height: 200,
     width: 400,
@@ -14,22 +13,27 @@ export const getElementTemplate = (props) => {
   };
 
   const element = Object.assign({}, template, props);
+
+  element.id = `element-${uuid()}`;
+
   return element;
 };
 
 export const getPageTemplate = () => {
-  return {
-    id: `page-${uuid()}`,
+  const page = {
     style: {
       backgroundColor: '#fff'
     },
     elements: [] // Same deal here. I'm watching you.
   };
+
+  page.id = `page-${uuid()}`;
+
+  return page;
 };
 
 export const getDataframeTemplate = () => {
-  return {
-    id: `dataframe-${uuid()}`,
+  const df = {
     name: 'Cars',
     type: 'csv',
     value: {
@@ -45,4 +49,8 @@ export const getDataframeTemplate = () => {
           '"Subaru","Outback",2005,24445\n'
     }
   };
+
+  df.id = `dataframe-${uuid()}`;
+
+  return df;
 };

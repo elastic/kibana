@@ -18,6 +18,15 @@ export const argumentUnresolved = createAction('ARGUMENT_UNRESOLVED', mutateArgu
 export const argumentResolved = createAction('ARGUMENT_RESOLVED', mutateArgument);
 export const argumentsResolved = createAction('ARGUMENTS_RESOLVED', mutateElement);
 
+export function elementClone(elementId, pageId) {
+  return (dispatch, getState) => {
+    const elementTemplate = _.cloneDeep(getState().persistent.elements[elementId]);
+    elementTemplate.top += 20;
+    elementTemplate.left += 20;
+    dispatch(elementAdd(elementTemplate, pageId));
+  };
+}
+
 export function elementAdd(template, pageId) {
   return (dispatch, getState) => {
     dispatch(editorOpen());
