@@ -65,9 +65,13 @@ class DataframeDialog extends React.Component {
   }
 
   connectDataframe(dataframe) {
-    this.props.dispatch(dataframeCreate(false));
+    this.closeConnectDataframe();
     this.props.dispatch(dataframeAdd(dataframe));
     this.props.dispatch(dataframeSelect(dataframe.id));
+  }
+
+  closeConnectDataframe() {
+    this.props.dispatch(dataframeCreate(false));
   }
 
   removeDataframe(id) {
@@ -122,7 +126,15 @@ class DataframeDialog extends React.Component {
   renderCreate() {
     return (
       <div>
-        <h4>Connect a new Dataframe</h4>
+        <h4>
+          Connect a new Dataframe
+          <small>
+            &nbsp;
+            <a onClick={this.closeConnectDataframe.bind(this)}>
+              <i className="fa fa-times-circle"></i> cancel
+            </a>
+          </small>
+        </h4>
         <DataframeConnector onConnect={this.connectDataframe.bind(this)}></DataframeConnector>
       </div>
     );
