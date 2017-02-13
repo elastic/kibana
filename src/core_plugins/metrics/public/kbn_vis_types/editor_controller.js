@@ -8,10 +8,8 @@ import angular from 'angular';
 const app = modules.get('kibana/metrics_vis');
 app.controller('MetricsEditorController', (
   $scope,
-  $element,
   Private,
-  timefilter,
-  globalNavState
+  timefilter
 ) => {
 
   const queryFilter = Private(require('ui/filter_bar/query_filter'));
