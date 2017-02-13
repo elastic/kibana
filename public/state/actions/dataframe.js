@@ -23,6 +23,8 @@ export function dataframeSet(dataframe) {
   };
 }
 
+export const dataframeSelect = createAction('DATAFRAME_SELECT');
+
 export function dataframeResolveAll() {
   return (dispatch, getState) => {
     const ids = _.keys(getState().persistent.dataframes);

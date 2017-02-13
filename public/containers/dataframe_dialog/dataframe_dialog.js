@@ -6,7 +6,12 @@ import Editable from 'plugins/rework/components/editable/editable';
 import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 import DataframeEditor from 'plugins/rework/components/dataframe_editor/dataframe_editor';
 import DataframeConnector from 'plugins/rework/components/dataframe_connector/dataframe_connector';
-import {dataframeSet, dataframeAdd, dataframeRemove} from 'plugins/rework/state/actions/dataframe';
+import {
+  dataframeSelect,
+  dataframeSet,
+  dataframeAdd,
+  dataframeRemove
+} from 'plugins/rework/state/actions/dataframe';
 import './dataframe_dialog.less';
 
 class DataframeDialog extends React.Component {
@@ -56,7 +61,7 @@ class DataframeDialog extends React.Component {
 
   getDefaultDataframe() {
     const dataframeIds = _.keys(this.props.dataframes);
-    return dataframeIds[0];
+    return _.get(this.props, 'selectedDataframe') || dataframeIds[0];
   }
 
   getDataframeById(id) {
@@ -66,6 +71,7 @@ class DataframeDialog extends React.Component {
   }
 
   setDataframe(id) {
+    this.props.dispatch(dataframeSelect(id));
     this.setState({ dataframe: this.getDataframeById(id) });
   }
 
@@ -165,6 +171,7 @@ class DataframeDialog extends React.Component {
 function mapStateToProps(state) {
   return {
     dataframes: state.persistent.dataframes,
+    selectedDataframe: state.transient.selectedDataframe,
   };
 }
 

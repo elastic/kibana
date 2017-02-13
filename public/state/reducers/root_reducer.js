@@ -211,6 +211,8 @@ function rootReducer(state = {}, action) {
     case 'FILTER_REMOVE':
       return setPersistent('filters', _.omit(state.persistent.filters, payload));
 
+    case 'DATAFRAME_SELECT':
+      return setTransient('selectedDataframe', payload);
     case 'DATAFRAME_REMOVE':
       return removeDataframe(payload);
     case 'DATAFRAME_UNRESOLVED':
