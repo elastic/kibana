@@ -23,8 +23,17 @@ module.exports.send = function (method, path, data, server, disable_auth_alert) 
     try {
       JSON.parse(data);
       contentType = 'application/json';
-    } catch (e) {
-      contentType = 'text/plain';
+    }
+    catch (e) {
+      try {
+        data.split('\n').forEach(line => {
+          if (!line) return;
+          JSON.parse(line);
+        });
+        contentType = 'application/x-ndjson';
+      } catch (e){
+        contentType = 'text/plain';
+      }
     }
   }
 

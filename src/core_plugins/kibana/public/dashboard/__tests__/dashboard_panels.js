@@ -23,9 +23,9 @@ describe('dashboard panels', function () {
             style="width: 600px; height: 600px;"
             ng-if="!hasExpandedPanel()"
             on-panel-removed="onPanelRemoved"
-            panels="state.panels"
-            get-vis-click-handler="filterBarClickHandler(state)"
-            get-vis-brush-handler="brushEvent(state)"
+            panels="panels"
+            get-vis-click-handler="filterBarClickHandler"
+            get-vis-brush-handler="brushEvent"
             save-state="saveState"
             toggle-expand="toggleExpandPanel"
             create-child-ui-state="createChildUiState"
@@ -38,7 +38,7 @@ describe('dashboard panels', function () {
   }
 
   function findPanelWithVisualizationId(id) {
-    return $scope.state.panels.find((panel) => { return panel.id === id; });
+    return $scope.panels.find((panel) => { return panel.id === id; });
   }
 
   beforeEach(() => {
@@ -56,7 +56,7 @@ describe('dashboard panels', function () {
       dash.init();
       compile(dash);
     });
-    expect($scope.state.panels.length).to.be(0);
+    expect($scope.panels.length).to.be(0);
   });
 
   it('loads one vizualization', function () {
@@ -66,7 +66,7 @@ describe('dashboard panels', function () {
       dash.panelsJSON = `[{"col":3,"id":"foo1","row":1,"size_x":2,"size_y":2,"type":"visualization"}]`;
       compile(dash);
     });
-    expect($scope.state.panels.length).to.be(1);
+    expect($scope.panels.length).to.be(1);
   });
 
   it('loads vizualizations in correct order', function () {
@@ -92,7 +92,7 @@ describe('dashboard panels', function () {
         {"col":1,"id":"foo17","row":3,"size_x":4,"size_y":3,"type":"visualization"}]`;
       compile(dash);
     });
-    expect($scope.state.panels.length).to.be(16);
+    expect($scope.panels.length).to.be(16);
     const foo8Panel = findPanelWithVisualizationId('foo8');
     expect(foo8Panel).to.not.be(null);
     expect(foo8Panel.row).to.be(8);
@@ -108,7 +108,7 @@ describe('dashboard panels', function () {
         {"col":5,"id":"foo2","row":1,"size_x":5,"size_y":9,"type":"visualization"}]`;
       compile(dash);
     });
-    expect($scope.state.panels.length).to.be(2);
+    expect($scope.panels.length).to.be(2);
     const foo1Panel = findPanelWithVisualizationId('foo1');
     expect(foo1Panel).to.not.be(null);
     expect(foo1Panel.size_x).to.be(DEFAULT_PANEL_WIDTH);

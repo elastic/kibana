@@ -5,7 +5,7 @@ import fromRoot from '../../src/utils/from_root';
 import KbnServer from '../../src/server/kbn_server';
 import * as i18nVerify from '../utils/i18n_verify_keys';
 
-module.exports = function (grunt) {
+export default function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
     const done = this.async();
     const parsePaths = [fromRoot('/src/ui/views/*.jade')];
@@ -43,7 +43,7 @@ module.exports = function (grunt) {
       .then(() => done(err));
     });
   });
-};
+}
 
 function verifyTranslations(uiI18nObj, parsePaths)
 {

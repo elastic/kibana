@@ -7,7 +7,6 @@ const expect = require('chai').expect;
 const invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, () => {
-
   let seriesList;
   beforeEach(() => {
     seriesList = require('./fixtures/seriesList.js')();
@@ -65,6 +64,32 @@ describe(filename, () => {
         expect(r.output.list[0]._global.yaxes[1].max).to.equal(10);
       }),
     ]);
+  });
+
+  it('sets the units (default: no unit', () => {
+    return Promise.all([
+      invoke(fn, [seriesList, 1, null, null, null, null, null, null]).then((r) => {
+        expect(r.output.list[0]._global.yaxes[0].units).to.equal(undefined);
+      }),
+      invoke(fn, [seriesList, 2, null, null, null, null, null, 'bits']).then((r) => {
+        expect(r.output.list[0]._global.yaxes[1].units).to.be.an('object');
+      }),
+    ]);
+  });
+
+  it('throws an error if currency is not three letter code', () => {
+    invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:abcde']).catch(e => {
+      expect(e).to.be.an(Error);
+    });
+    invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:12']).catch(e => {
+      expect(e).to.be.an(Error);
+    });
+    invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:$#']).catch(e => {
+      expect(e).to.be.an(Error);
+    });
+    invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:ab']).catch(e => {
+      expect(e).to.be.an(Error);
+    });
   });
 
 });
