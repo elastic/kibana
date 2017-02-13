@@ -96,7 +96,8 @@ export default function AreaChartFactory(Private) {
 
       function y1(d) {
         const y0 = d.y0 || 0;
-        return yScale(y0 + d.y);
+        const y = d.y || 0;
+        return yScale(y0 + y);
       }
 
       function y0(d) {
@@ -125,7 +126,9 @@ export default function AreaChartFactory(Private) {
           return !_.isNull(d.y);
         })
         .interpolate(interpolate);
-        return area(data.values);
+        return area(data.values.filter(function (d) {
+          return !_.isNull(d.y);
+        }));
       });
 
       return path;
@@ -185,10 +188,11 @@ export default function AreaChartFactory(Private) {
       }
 
       function cy(d) {
+        const y = d.y || 0;
         if (isOverlapping) {
-          return yScale(d.y);
+          return yScale(y);
         }
-        return yScale(d.y0 + d.y);
+        return yScale(d.y0 + y);
       }
 
       // update
