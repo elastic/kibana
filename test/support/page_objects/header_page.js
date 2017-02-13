@@ -123,7 +123,7 @@ export default class HeaderPage {
       return this.clickGoButton();
     })
     .then(() => {
-      return this.isGlobalLoadingIndicatorHidden();
+      return this.waitUntilLoadingHasFinished();
     });
   }
 
@@ -142,6 +142,24 @@ export default class HeaderPage {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button[ng-if="notif.accept"]')
     .click();
+  }
+
+  async waitUntilLoadingHasFinished() {
+    try {
+      await this.isGlobalLoadingIndicatorVisible();
+    } catch (exception) {
+      if (exception.name === 'NoSuchElement') {
+        // selenium might just have been too slow to catch it
+      } else {
+        throw exception;
+      }
+    }
+    await this.isGlobalLoadingIndicatorHidden();
+  }
+
+  isGlobalLoadingIndicatorVisible() {
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[data-test-subj="globalLoadingIndicator"]:not(.ng-hide)');
   }
 
   isGlobalLoadingIndicatorHidden() {
