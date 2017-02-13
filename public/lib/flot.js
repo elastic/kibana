@@ -1,3 +1,5 @@
+const $ = require('jquery');
+if (window) window.jQuery = $;
 require('jquery.flot');
 require('jquery.flot.categories');
 require('jquery.flot.time');
@@ -8,3 +10,4 @@ require('jquery.flot.stack');
 require('jquery.flot.axislabels');
 require('jquery.flot.pie');
 require('jquery.flot.valuelabels');
+module.exports = $;
