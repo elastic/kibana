@@ -22,7 +22,7 @@ const md = new Remarkable('full', {
 
 elements.push(new Element('markdown', {
   stylesheet: stylesheet,
-  displayName: 'markdown',
+  displayName: 'Markdown',
   icon: icon,
   args: [
     new Arg('markdown', {

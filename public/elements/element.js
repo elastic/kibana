@@ -7,7 +7,7 @@ export default class Element {
     this.name = name;
 
     // The name to show users
-    this.displayName = props.displayName;
+    this.displayName = props.displayName || name;
 
     // A React components that receives ({args}), the resolved form of the arguments below.
     this.template = props.template;

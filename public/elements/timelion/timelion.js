@@ -17,7 +17,7 @@ import $ from 'jquery';
 
 
 elements.push(new Element('timelion', {
-  displayName: 'Time Chart',
+  displayName: 'Timelion Expression Chart',
   icon: icon,
   stylesheet: stylesheet,
   args: [

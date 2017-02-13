@@ -6,6 +6,7 @@ import icon from './icon.svg';
 import _ from 'lodash';
 
 elements.push(new Element('json', {
+  displayName: 'Debug',
   args: [],
   icon: icon,
   template: ({args}) => {
