@@ -143,11 +143,8 @@ function rootReducer(state = {}, action) {
   switch (type) {
 
     case 'DROPDOWN_TOGGLE':
-      if (payload.type === state.transient.dropdown.type) {
-        return setTransient('dropdown', {
-          type: null,
-          meta: null,
-        });
+      if (payload === state.transient.dropdown) {
+        return setTransient('dropdown', null);
       }
       return setTransient('dropdown', payload);
     case 'DROPDOWN_OPEN':
@@ -211,6 +208,11 @@ function rootReducer(state = {}, action) {
     case 'FILTER_REMOVE':
       return setPersistent('filters', _.omit(state.persistent.filters, payload));
 
+    case 'DATAFRAME_CREATE':
+      const val = (payload == null) ? true : Boolean(payload);
+      return setTransient('dataframeIsCreating', val);
+    case 'DATAFRAME_SELECT':
+      return setTransient('dataframeSelectedId', payload);
     case 'DATAFRAME_REMOVE':
       return removeDataframe(payload);
     case 'DATAFRAME_UNRESOLVED':

@@ -1,7 +1,6 @@
 import React from 'react';
 import modules from 'ui/modules';
 import { createStore, applyMiddleware, compose } from 'redux';
-import { batchedSubscribe } from 'redux-batched-subscribe';
 
 import onStart from './on_start';
 import thunkMiddleware from 'redux-thunk';
@@ -15,20 +14,16 @@ import _ from 'lodash';
 
 const app = modules.get('apps/rework');
 
-app.service('$store', (kbnVersion, basePath, config) => {
+app.service('$store', (kbnVersion, basePath) => {
 
   const initialState = getInitialState();
   // Set the defaults from Kibana plugin
-  initialState.app.kbnVersion = kbnVersion;
-  initialState.app.basePath = basePath;
-  initialState.app.config = config;
-
+  initialState.app = { kbnVersion, basePath };
 
   // Limit redux updates to 20FPS
   //const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
   const persistentStore = compose(
     applyMiddleware(thunkMiddleware, promiseMiddleware),
-    //batchedSubscribe(debounceNotify),
     persistState('persistent', {key: 'rework-persistent'}),
   );
 

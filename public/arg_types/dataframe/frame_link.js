@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
 import { dropdownOpen } from 'plugins/rework/state/actions/misc';
+import { dataframeSelect, dataframeCreate } from 'plugins/rework/state/actions/dataframe';
 import './frame_link.less';
 
 class LinkFrame extends React.PureComponent {
@@ -13,17 +14,13 @@ class LinkFrame extends React.PureComponent {
   }
 
   showEditDataframe() {
-    this.props.dispatch(dropdownOpen({
-      type: 'dataframe',
-      meta: { selected: this.props.value },
-    }));
+    this.props.dispatch(dataframeSelect(this.props.value));
+    this.props.dispatch(dropdownOpen('dataframe'));
   }
 
   showCreateDataframe() {
-    this.props.dispatch(dropdownOpen({
-      type: 'dataframe',
-      meta: { creating: true },
-    }));
+    this.props.dispatch(dataframeCreate());
+    this.props.dispatch(dropdownOpen('dataframe'));
   }
 
   filterDataframes() {

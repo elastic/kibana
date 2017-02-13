@@ -31,10 +31,7 @@ POST /.kibana/the_rework_1/_mapping
 // Stuff todo when you bootstrap the store
 export default function (store) {
   let currentState;
-  const safeSave = _.debounce(saveOnChange, 1000, {
-    leading: true,
-    maxWait: 5000
-  });
+  const safeSave = _.debounce(saveOnChange, 1000, { maxWait: 5000 });
 
   function propDidChange(previousState, currentState, prop) {
     return (_.get(previousState, prop) !== _.get(currentState, prop));

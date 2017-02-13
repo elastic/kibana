@@ -6,70 +6,45 @@ import Editable from 'plugins/rework/components/editable/editable';
 import DataframeSelector from 'plugins/rework/components/dataframe_selector/dataframe_selector';
 import DataframeEditor from 'plugins/rework/components/dataframe_editor/dataframe_editor';
 import DataframeConnector from 'plugins/rework/components/dataframe_connector/dataframe_connector';
-import {dataframeSet, dataframeAdd, dataframeRemove} from 'plugins/rework/state/actions/dataframe';
+import {
+  dataframeCreate,
+  dataframeSelect,
+  dataframeSet,
+  dataframeAdd,
+  dataframeRemove
+} from 'plugins/rework/state/actions/dataframe';
 import './dataframe_dialog.less';
 
 class DataframeDialog extends React.Component {
   constructor(props) {
     super(props);
 
-    const {dataframes} = this.props;
-    const dataframeIds = _.keys(dataframes);
-    const selectedId = _.get(props, 'meta.selected', dataframeIds[0]);
-    const createState = _.get(props, 'meta.creating', false);
-
     this.state = {
-      creating: createState,
       renaming: false,
-      dataframe: _.cloneDeep(dataframes[selectedId]),
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    const selectedId = _.get(nextProps, 'meta.selected');
-    const createDataframe = _.get(nextProps, 'meta.creating');
-    const invalidDataframe = !nextProps.dataframes[this.state.dataframe.id];
-
-    // update creation state if changed
-    if (createDataframe) {
-      const currentProp = _.get(this.props, 'meta.creating');
-      const newCreation = currentProp !== createDataframe;
-      if (newCreation) return this.setState({ creating: true });
-    }
-
-    // update selected dataframe is prop changed
-    if (selectedId) {
-      const currentId = this.state.dataframe.id;
-      const newSelectedId = currentId !== selectedId;
-      if (newSelectedId) {
-        this.setState({ creating: false });
-        return this.setDataframe(selectedId);
-      }
-    }
-
-    // update selected dataframe is current one is no longer valid
-    if (invalidDataframe) {
-      const dataframeIds = _.keys(nextProps.dataframes);
-      return this.setDataframe(dataframeIds[0]);
-    }
+  getDefaultDataframe() {
+    const dataframeIds = _.keys(this.props.dataframes);
+    return _.get(this.props, 'selectedId') || dataframeIds[0];
   }
 
-  getDataframeById(id) {
-    const {dataframes} = this.props;
+  getDataframeById(id, props = this.props) {
+    const {dataframes} = props;
     if (!dataframes[id]) id = _.keys(dataframes)[0];
     return _.cloneDeep(dataframes[id]);
   }
 
-  setDataframe(id) {
-    this.setState({ dataframe: this.getDataframeById(id) });
+  setDataframe(id, props) {
+    const dataframe = this.getDataframeById(id, props);
+    this.props.dispatch(dataframeSelect(dataframe.id));
   }
 
   // Keep this function, accessing state here will cause pass-by-reference issues
   commit(value) {
     const {dispatch, dataframes} = this.props;
-    const {dataframe} = this.state;
-    const newFrame = _.assign(dataframe, {value});
-    this.setState({dataframe: newFrame});
+    const dataframe = this.getDataframeById(this.props.selectedId);
+    const newFrame = _.assign({}, dataframe, {value});
     dispatch(dataframeSet(newFrame));
   }
 
@@ -79,52 +54,57 @@ class DataframeDialog extends React.Component {
 
   finishRename(name) {
     const {dispatch, dataframes} = this.props;
-    const {dataframe} = this.state;
-    const newFrame = _.assign(dataframe, {name});
-    dispatch(dataframeSet(newFrame));
+    const dataframe = this.getDataframeById(this.props.selectedId);
+    const newFrame = _.assign({}, dataframe, {name});
     this.setState({renaming: false});
+    dispatch(dataframeSet(newFrame));
   }
 
   startCreating() {
-    this.setState({creating: true});
+    this.props.dispatch(dataframeCreate(true));
   }
 
   connectDataframe(dataframe) {
+    this.closeConnectDataframe();
     this.props.dispatch(dataframeAdd(dataframe));
-    this.setState({
-      creating: false,
-      dataframe: dataframe
-    });
+    this.props.dispatch(dataframeSelect(dataframe.id));
+  }
+
+  closeConnectDataframe() {
+    this.props.dispatch(dataframeCreate(false));
   }
 
   removeDataframe(id) {
+    const { dispatch, dataframes, selectedId } = this.props;
     return () => {
-      if (_.keys(this.props.dataframes).length < 2) return;
-      this.props.dispatch(dataframeRemove(id));
+      if (_.keys(dataframes).length < 2) return;
+      dispatch(dataframeRemove(id));
+      if (selectedId === id) {
+        this.setDataframe();
+      }
     };
   }
 
-  render() {
-    const {dataframes} = this.props;
-    const {creating} = this.state;
-    const dataframe = _.cloneDeep(this.state.dataframe);
-
+  renderEdit() {
+    const { dataframes } = this.props;
+    const dataframe = this.getDataframeById(this.props.selectedId);
     const deleteClasses = _.keys(dataframes).length < 2 ? ['rework--no-action'] : [];
 
-    const DataframeEditOrSelect = ((() => {
-      if (this.state.renaming) {
-        return (
-          <Editable focus={true} onDone={this.finishRename.bind(this)} value={dataframe.name}></Editable>
-        );
-      }
+    const DataframeEditOrSelect = (this.state.renaming) ? (
+      <Editable
+        focus={true}
+        onDone={this.finishRename.bind(this)}
+        value={dataframe.name}>
+      </Editable>
+    ) : (
+      <DataframeSelector
+        dataframes={dataframes}
+        onChange={this.setDataframe.bind(this)}
+        selected={dataframe.id}>
+      </DataframeSelector>
+    );
 
-      return (
-        <DataframeSelector dataframes={dataframes} onChange={this.setDataframe.bind(this)}
-          selected={dataframe.id}></DataframeSelector>
-      );
-    })());
-
-    const edit = (
+    return (
       <div>
         <h4>Edit Dataframe
           <small> or <a onClick={this.startCreating.bind(this)}><i className="fa fa-plus-circle"></i> connect a new Dataframe</a></small>
@@ -141,22 +121,35 @@ class DataframeDialog extends React.Component {
         <DataframeEditor key={dataframe.id} dataframe={dataframe} commit={this.commit.bind(this)}></DataframeEditor>
       </div>
     );
+  }
 
-    const create = (
+  renderCreate() {
+    return (
       <div>
-        <h4>Connect a new Dataframe</h4>
+        <h4>
+          Connect a new Dataframe
+          <small>
+            &nbsp;
+            <a onClick={this.closeConnectDataframe.bind(this)}>
+              <i className="fa fa-times-circle"></i> cancel
+            </a>
+          </small>
+        </h4>
         <p>
           Dataframes take complex data from disparate sources, and turn it into a simple row and column structure that
           Cavnas elements can work with easily.
         </p>
-
         <DataframeConnector onConnect={this.connectDataframe.bind(this)}></DataframeConnector>
       </div>
     );
+  }
+
+  render() {
+    const {dataframes, isCreating} = this.props;
 
     return (
       <div className="rework--dataframe-dropdown" style={{width: '100%', overflow: 'auto'}}>
-        {creating ? create : edit}
+        {isCreating ? this.renderCreate() : this.renderEdit()}
       </div>
     );
   }
@@ -165,6 +158,8 @@ class DataframeDialog extends React.Component {
 function mapStateToProps(state) {
   return {
     dataframes: state.persistent.dataframes,
+    selectedId: state.transient.dataframeSelectedId,
+    isCreating: state.transient.dataframeIsCreating,
   };
 }
 

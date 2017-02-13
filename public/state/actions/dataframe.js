@@ -1,16 +1,17 @@
-import {argumentResolve, elementRemoveSlowly, elementResolveAll} from './element';
-import {createAction} from 'redux-actions';
-import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
-import {mutateWithId} from '../lib/mutation_helpers';
-import { getDataframeTemplate } from '../templates';
-import Promise from 'bluebird';
-
-import elementTypes from 'plugins/rework/elements/elements';
 import _ from 'lodash';
+import { argumentResolve, elementRemoveSlowly, elementResolveAll } from './element';
+import { createAction } from 'redux-actions';
 
+import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
+import elementTypes from 'plugins/rework/elements/elements';
+import { mutateWithId } from 'plugins/rework/state/lib/mutation_helpers';
+import { getDataframeTemplate } from '../templates';
 
 export const dataframeUnresolved = createAction('DATAFRAME_UNRESOLVED');
 export const dataframeResolved = createAction('DATAFRAME_RESOLVED', mutateWithId);
+
+export const dataframeSelect = createAction('DATAFRAME_SELECT');
+export const dataframeCreate = createAction('DATAFRAME_CREATE');
 
 export function dataframeSet(dataframe) {
   return (dispatch, getState) => {
@@ -34,6 +35,7 @@ export function dataframeResolveAll() {
 export function dataframeAdd(dataframe) {
   return (dispatch, getState) => {
     const newFrame = _.assign({}, getDataframeTemplate(), dataframe);
+    dispatch(dataframeSelect(newFrame.id));
     dispatch(dataframeSet(newFrame));
   };
 }

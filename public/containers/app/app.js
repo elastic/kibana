@@ -23,7 +23,7 @@ import './app.less';
 
 const App = React.createClass({
   openElementDropDown() {
-    this.props.dispatch(dropdownOpen({ type: 'element' }));
+    this.props.dispatch(dropdownOpen('element'));
   },
 
   argumentSet(id, name, value) {
