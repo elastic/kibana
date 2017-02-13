@@ -145,6 +145,11 @@ class DataframeDialog extends React.Component {
     const create = (
       <div>
         <h4>Connect a new Dataframe</h4>
+        <p>
+          Dataframes take complex data from disparate sources, and turn it into a simple row and column structure that
+          Cavnas elements can work with easily.
+        </p>
+
         <DataframeConnector onConnect={this.connectDataframe.bind(this)}></DataframeConnector>
       </div>
     );
