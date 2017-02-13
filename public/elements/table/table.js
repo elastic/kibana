@@ -33,7 +33,7 @@ elements.push(new Element('table', {
     });
 
     return (
-      <div>
+      <div style={{height: '100%', overflow: 'auto'}}>
         <table className="table">
           <thead><tr>{header}</tr></thead>
           <tbody>{rows}</tbody>
