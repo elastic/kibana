@@ -209,7 +209,8 @@ function rootReducer(state = {}, action) {
       return setPersistent('filters', _.omit(state.persistent.filters, payload));
 
     case 'DATAFRAME_CREATE':
-      return setTransient('dataframeIsCreating', Boolean(payload));
+      const val = (payload == null) ? true : Boolean(payload);
+      return setTransient('dataframeIsCreating', val);
     case 'DATAFRAME_SELECT':
       return setTransient('dataframeSelectedId', payload);
     case 'DATAFRAME_REMOVE':
