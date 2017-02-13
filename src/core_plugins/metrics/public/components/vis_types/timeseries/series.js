@@ -25,7 +25,7 @@ class TimeseriesSeries extends Component {
 
     const handleFieldChange = (name) => {
       return (e) => {
-        e.preventDefault;
+        e.preventDefault();
         const part = {};
         part[name] = this.refs[name].value;
         this.props.onChange(part);
