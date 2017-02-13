@@ -3,32 +3,29 @@ import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import './element_type_list.less';
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
+import IconSelect from 'plugins/rework/components/icon_select/icon_select';
 
 export default class ElementTypeList extends React.PureComponent {
   constructor(props) {    /* Note props is passed into the constructor in order to be used */
     super(props);
   }
 
-  select(elementType) {
-    const {onSelect} = this.props;
-    return () => onSelect(elementType);
-  }
-
   render() {
-    const {onSelect} = this.props;
 
-    const elementButtons = _.map(elementTypes, (elementType) => (
-      <Tooltip key={elementType.name} content={elementType.name}>
-        <button
-          className="btn btn-default"
-          onClick={this.select(elementType).bind(this)}><center><img src={elementType.icon} width="30"/></center>
-        </button>
-      </Tooltip>
-    ));
+    const options = _.chain(elementTypes)
+      .map(elementType => {
+        return {
+          label: elementType.displayName,
+          icon: elementType.icon,
+          value: elementType
+        };
+      })
+      .sortBy('label')
+      .value();
 
     return (
       <div className="rework--element-type-list">
-        {elementButtons}
+        <IconSelect onSelect={this.props.onSelect.bind(this)} options={options}/>
       </div>
     );
   }
