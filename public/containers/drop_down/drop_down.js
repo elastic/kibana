@@ -1,18 +1,17 @@
 import React from 'react';
+import classnames from 'classnames';
 import { connect } from 'react-redux';
+
 import DataframeDialog from 'plugins/rework/containers/dataframe_dialog';
 import ElementAddDialog from 'plugins/rework/containers/element_add_dialog';
 import WorkpadList from 'plugins/rework/components/workpad_list';
-import {workpadLoad, workpadProps} from 'plugins/rework/state/actions/workpad';
-import {pageSetById, pageSetOrder} from 'plugins/rework/state/actions/page';
-
-import {dataframeResolveAll} from 'plugins/rework/state/actions/dataframe';
+import { workpadLoad, workpadProps } from 'plugins/rework/state/actions/workpad';
+import { pageSetById, pageSetOrder } from 'plugins/rework/state/actions/page';
+import { dataframeResolveAll } from 'plugins/rework/state/actions/dataframe';
 import Timepicker from 'plugins/rework/components/timepicker/timepicker';
 import { PagePreviews } from 'plugins/rework/components/page_previews/page_previews';
-import './drop_down.less';
-import classnames from 'classnames';
-import fetch from 'isomorphic-fetch';
 
+import './drop_down.less';
 
 const DropDown = React.createClass({
   loadWorkpad(id) {
