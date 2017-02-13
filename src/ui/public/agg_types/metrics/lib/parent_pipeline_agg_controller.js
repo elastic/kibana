@@ -24,13 +24,19 @@ const parentPipelineAggController = function ($scope) {
     const bucketHasType = lastBucket && lastBucket.type;
     const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
     const canUseAggregation = lastBucket && bucketIsHistogram;
-    if ($scope.aggForm.agg) $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
+
+    // remove errors on all buckets
+    _.each($scope.vis.aggs, agg => { if (agg.error) delete agg.error; });
+
+    if ($scope.aggForm.agg) {
+      $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
+    }
     if (canUseAggregation) {
-      if (lastBucket.type.name === 'histogram') {
-        lastBucket.params.min_doc_count = 1;
-      }
-      else {
-        lastBucket.params.min_doc_count = 0;
+      lastBucket.params.min_doc_count = (lastBucket.type.name === 'histogram') ? 1 : 0;
+    } else {
+      if (lastBucket) {
+        const type = $scope.agg.type.name;
+        lastBucket.error = `Last bucket must be "date histogram" or "histogram" when using ${type} metric!`;
       }
     }
   }
