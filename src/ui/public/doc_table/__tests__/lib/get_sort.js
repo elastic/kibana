@@ -25,11 +25,11 @@ describe('docTable', function () {
     });
 
     it('should sort by the default when passed an unsortable field', function () {
-      expect(getSort(['_id', 'asc'], indexPattern)).to.eql(defaultSort);
+      expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql(defaultSort);
       expect(getSort(['lol_nope', 'asc'], indexPattern)).to.eql(defaultSort);
 
       delete indexPattern.timeFieldName;
-      expect(getSort(['_id', 'asc'], indexPattern)).to.eql({ _score: 'desc' });
+      expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql({ _score: 'desc' });
     });
 
     it('should sort in reverse chrono order otherwise on time based patterns', function () {
