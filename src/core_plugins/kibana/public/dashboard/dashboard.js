@@ -14,6 +14,7 @@ import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants } from './dashboard_constants';
+import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { FilterUtils } from './filter_utils';
@@ -285,7 +286,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       }
 
       const addNewVis = function addNewVis() {
-        kbnUrl.change(`/visualize?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
+        kbnUrl.change(
+          `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
       $scope.addSearch = function (hit) {
