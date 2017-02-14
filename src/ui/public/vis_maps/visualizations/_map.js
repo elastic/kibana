@@ -38,7 +38,7 @@ export default function MapFactory(Private, tilemapSettings) {
       this._events = _.get(params, 'events');
       this._markerType = markerTypes[params.markerType] ? params.markerType : defaultMarkerType;
       this._valueFormatter = params.valueFormatter || _.identity;
-      this._tooltipFormatter = params.tooltipFormatter || _.identity;
+      this._tooltipFormatter = params.tooltipFormatter;
       this._geoJson = _.get(this._chartData, 'geoJson');
       this._attr = params.attr || {};
 
