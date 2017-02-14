@@ -7,25 +7,41 @@
   width: 100%;
   height: 100%;
 
-  .rework--workpad-list-name, .rework--workpad-list-timestamp {
-    line-height: 27px;
+  tr:hover {
+    background-color: @kibanaGray6;
+  }
 
+  &-name, &-timestamp, &-controls {
+    line-height: 27px !important;
+  }
+
+  &-name, &-timestamp {
     &:hover {
       cursor: pointer;
     }
   }
 
-  tr:hover {
-    background-color: @kibanaGray6;
-  }
-}
+  &-controls {
+    font-size: 20px;
+    width: 80px;
 
-.rework--workpad-list-delete {
-  font-size: 20px;
-  line-height: 27px;
+    a {
+      text-decoration: none;
+      color: @rework--action-link-color;
+      margin-right: 10px;
 
-  &:hover {
-    color: @kibanaPink1;
-    cursor: pointer;
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &:hover {
+        color: @kibanaBlue2;
+      }
+
+      &.fa-ban:hover {
+        color: @kibanaPink1;
+      }
+    }
+
   }
 }
