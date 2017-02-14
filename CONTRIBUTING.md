@@ -148,6 +148,14 @@ Now you can point your web browser to https://localhost:5601 and start using Kib
 
 The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
 
+#### Potential Optimization Pitfalls
+
+In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
+
+ - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
+ - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
+ - (if you discover other scenarios, please send a PR!)
+
 #### Setting Up SSL
 
 When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the certificate.
