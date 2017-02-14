@@ -1,9 +1,9 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import _ from 'lodash';
 import elementTypes from 'plugins/rework/elements/elements';
 import {argumentSet} from 'plugins/rework/state/actions/element';
 import ArgumentForm from 'plugins/rework/components/argument_form/argument_form';
+import EditorSection from 'plugins/rework/components/editor_section/editor_section';
 import './element_editor.less';
 
 export default class extends React.PureComponent {
@@ -33,39 +33,31 @@ export default class extends React.PureComponent {
     const argValues = element.args;
     const args = elementTypes.byName[type].args;
 
-    const formElements = _.map(args, (arg) => {
-      const type = arg.type.name;
-      const value = argValues[arg.name];
-      const { name, displayName } = arg;
-
-      const commit = (value) => {
-        this.props.argumentSet(id, name, value);
-      };
-
-      return (
-        <div
-          key={name}
-          className="rework--editor-section"
-          data-name={name}
-          data-type={type}
-          data-element-type={name}>
-          <h4>{displayName.replace('_', ' ')}</h4>
-          <ArgumentForm
-            type={type}
-            commit={commit}
-            value={value}
-            help={arg.help}
-            options={arg.options}
-            context={argValues}
-            defaultValue={arg.default}>
-            </ArgumentForm>
-        </div>
-      );
-    });
-
     return (
       <div className="rework--editor" key={element.id}>
-          {formElements}
+          {_.map(args, (arg) => {
+            const type = arg.type.name;
+            const value = argValues[arg.name];
+            const {name, displayName} = arg;
+
+            const commit = (value) => {
+              this.props.argumentSet(id, name, value);
+            };
+
+            return (
+              <EditorSection key={name} label={displayName.replace('_', ' ')}>
+                <ArgumentForm
+                  type={type}
+                  commit={commit}
+                  value={value}
+                  help={arg.help}
+                  options={arg.options}
+                  context={argValues}
+                  defaultValue={arg.default}>
+                  </ArgumentForm>
+              </EditorSection>
+            );
+          })}
       </div>
     );
   }
