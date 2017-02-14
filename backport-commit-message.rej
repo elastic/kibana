@@ -1,0 +1,9 @@
+Fix the link for adding a new vis to dashboard
+
+Backports PR #10327
+
+**Commit 1:**
+fix the link path
+
+* Original sha: ed331f28b789b83f32b2ef8d21864e20446dcbc0
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-13T21:59:50Z
