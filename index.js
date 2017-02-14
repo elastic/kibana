@@ -34,6 +34,7 @@ module.exports = function (kibana) {
         'plugins/rework/arg_types/palette/palette',
         'plugins/rework/arg_types/tags/tags',
         'plugins/rework/arg_types/select/select',
+        'plugins/rework/arg_types/icon_select/icon_select',
         'plugins/rework/arg_types/style/style',
         'plugins/rework/arg_types/container_style/container_style',
         'plugins/rework/arg_types/text_style/text_style',

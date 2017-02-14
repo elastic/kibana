@@ -15,8 +15,13 @@ import $ from 'jquery';
 import Arg from 'plugins/rework/arg_types/arg';
 
 import {pie} from './chart_types/pie';
+import pieIcon from './chart_types/pie.svg';
+
 import {verticalBar} from './chart_types/vertical_bar';
+import verticalBarIcon from './chart_types/vertical_bar.svg';
+
 import {horizontalBar} from './chart_types/horizontal_bar';
+import horizontalBarIcon from './chart_types/horizontal_bar.svg';
 
 
 elements.push(new Element('chart', {
@@ -24,16 +29,32 @@ elements.push(new Element('chart', {
   icon: icon,
   stylesheet: stylesheet,
   args: [
-    new Arg('dataframe', {
-      type: 'dataframe'
-    }),
     new Arg('chart_type', {
-      type: 'select',
+      type: 'icon_select',
       help: '',
       default: 'vertical_bar',
       options: {
-        choices: ['vertical_bar', 'horizontal_bar', 'pie']
+        choices: [
+          {
+            label: 'Vertical Bar',
+            icon: verticalBarIcon,
+            value: 'vertical_bar'
+          },
+          {
+            label: 'Horizontal Bar',
+            icon: horizontalBarIcon,
+            value: 'horizontal_bar'
+          },
+          {
+            label: 'Pie Chart',
+            icon: pieIcon,
+            value: 'pie'
+          }
+        ]
       }
+    }),
+    new Arg('dataframe', {
+      type: 'dataframe'
     }),
     new Arg('value_column', {
       type: 'dataframe_column',
