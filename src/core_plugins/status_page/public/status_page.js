@@ -51,7 +51,7 @@ const chrome = require('ui/chrome')
           type: 'ms'
         }, {
           name: 'Requests Per Second',
-          value: _.get(metrics, 'requests.total') * 1000 / _.get(metrics, 'collection_time_in_millis')
+          value: _.get(metrics, 'requests.total') * 1000 / _.get(metrics, 'collection_interval_in_millis')
         }];
       }
 
