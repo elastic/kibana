@@ -120,7 +120,7 @@ class MarkdownEditor extends Component {
               {rows}
             </tbody>
           </table>
-          <div style={{ marginBottom: 10 }}>There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for creating lists with data from a group by...</div>
+          <div className="vis_editor__markdown-code-desc">There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for creating lists with data from a group by...</div>
           <pre>
             <code>{`# All servers:
 

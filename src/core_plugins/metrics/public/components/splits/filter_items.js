@@ -33,7 +33,7 @@ class FilterItems extends Component {
       .bind(null, this.props, row);
     return  (
       <div className="vis_editor__split-filter-row" key={row.id}>
-        <div style={{ marginRight: '10px' }}>
+        <div className="vis_editor__split-filter-color">
           <ColorPicker
             disableTrash={true}
             onChange={handleChange}
@@ -43,8 +43,7 @@ class FilterItems extends Component {
         <div className="vis_editor__split-filter-item">
           <input
             placeholder="Filter"
-            style={{ width: '100%' }}
-            className="vis_editor__input-grows"
+            className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'filter')}
             value={row.filter || ''}/>
@@ -52,8 +51,7 @@ class FilterItems extends Component {
         <div className="vis_editor__split-filter-item">
           <input
             placeholder="Label"
-            style={{ width: '100%' }}
-            className="vis_editor__input-grows"
+            className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'label')}
             value={row.label || ''}/>

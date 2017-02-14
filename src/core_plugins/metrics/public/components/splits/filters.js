@@ -6,7 +6,7 @@ function SplitByFilters(props) {
   const { onChange, model } = props;
   const handleSelectChange = createSelectHandler(onChange);
   return(
-    <div style={{ flexGrow: 1 }}>
+    <div className="vis_editor__item">
       <div className="vis_editor__split-container">
         <div className="vis_editor__label">Group By</div>
         <div className="vis_editor__split-selects">

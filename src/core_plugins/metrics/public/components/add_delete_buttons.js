@@ -4,7 +4,7 @@ import Tooltip from './tooltip';
 function AddDeleteButtons(props) {
   const createDelete = () => {
     if (props.disableDelete) {
-      return (<span style={{ display: 'none' }}/>);
+      return null;
     }
     return (
       <Tooltip text="Delete">
@@ -16,7 +16,7 @@ function AddDeleteButtons(props) {
   };
   const createAdd = () => {
     if (props.disableAdd) {
-      return (<span style={{ display: 'none' }}/>);
+      return null;
     }
     return (
       <Tooltip text="Add">

@@ -7,7 +7,7 @@ import generateByTypeFilter from '../lib/generate_by_type_filter';
 function FieldSelect(props) {
   const { type, fields, indexPattern } = props;
   if (type === 'count') {
-    return (<div style={{ display: 'none' }}/>);
+    return null;
   }
   const options = (fields[indexPattern] || [])
     .filter(generateByTypeFilter(props.restrict))
@@ -28,8 +28,7 @@ function FieldSelect(props) {
 FieldSelect.defaultProps = {
   indexPattern: '*',
   disabled: false,
-  restrict: 'none',
-  style: {}
+  restrict: 'none'
 };
 
 FieldSelect.propTypes = {
@@ -38,7 +37,6 @@ FieldSelect.propTypes = {
   indexPattern: PropTypes.string,
   onChange: PropTypes.func,
   restrict: PropTypes.string,
-  style: PropTypes.object,
   type: PropTypes.string,
   value: PropTypes.string
 };

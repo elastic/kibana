@@ -38,6 +38,7 @@ app.controller('MetricsVisController', (
   // All those need to be consolidated
   $scope.$listen(timefilter, 'fetch', fetch($scope));
   $scope.$listen(queryFilter, 'fetch', fetch($scope));
+
   $scope.$on('courier:searchRefresh', fetch($scope));
   $scope.$on('fetch', fetch($scope));
 

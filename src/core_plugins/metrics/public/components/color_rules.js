@@ -38,7 +38,7 @@ class ColorRules extends Component {
     let secondary;
     if (!this.props.hideSecondary) {
       secondary = (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="color_rules__secondary">
           <div className="color_rules__label">and {this.props.secondaryName} to</div>
           <ColorPicker
             onChange={handleColorChange}

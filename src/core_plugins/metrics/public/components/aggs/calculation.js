@@ -41,7 +41,7 @@ class CalculationAgg extends Component {
               panelType={panel.type}
               value={model.type}
               onChange={handleSelectChange('type')}/>
-            <div className="vis_editor__row_item" style={{ margin: '10px 0' }}>
+            <div className="vis_editor__variables">
               <div className="vis_editor__label">Variables</div>
               <Vars
                 metrics={siblings}
@@ -52,8 +52,7 @@ class CalculationAgg extends Component {
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Script (Painless)</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('script')}
                 value={model.script || ''}/>

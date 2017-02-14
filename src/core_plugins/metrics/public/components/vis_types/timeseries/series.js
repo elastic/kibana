@@ -30,7 +30,7 @@ function TimeseriesSeries(props) {
   let caretClassName = 'fa fa-caret-down';
   if (!visible) caretClassName = 'fa fa-caret-right';
 
-  let body = (<div style={{ display: 'none' }}/>);
+  let body = null;
   if (visible) {
     let metricsClassName = 'kbnTabs__tab';
     let optionsClassname = 'kbnTabs__tab';
@@ -52,8 +52,8 @@ function TimeseriesSeries(props) {
             sortHandle="vis_editor__agg_sort">
             { aggs }
           </Sortable>
-          <div className="vis_editor__agg_row">
-            <div className="vis_editor__agg_row-item">
+          <div className="vis_editor__series_row">
+            <div className="vis_editor__series_row-item">
               <Split
                 onChange={props.onChange}
                 fields={fields}
@@ -116,7 +116,7 @@ function TimeseriesSeries(props) {
         <div className="vis_editor__series-details">
           <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
           { colorPicker }
-          <div className="vis_editor__row_item" style={{ display: 'flex' }}>
+          <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}

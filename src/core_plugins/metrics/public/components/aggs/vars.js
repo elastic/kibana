@@ -28,8 +28,7 @@ class CalculationVars extends Component {
         <div className="vis_editor__calc_vars-name">
           <input
             placeholder="Variable Name"
-            style={{ width: '100%' }}
-            className="vis_editor__input-grows"
+            className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}
             value={row.name || ''} />

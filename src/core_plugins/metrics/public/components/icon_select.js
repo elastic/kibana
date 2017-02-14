@@ -28,9 +28,6 @@ class IconOption extends Component {
   render() {
     const icon = this.props.option.value;
     const title = this.props.option.label;
-    const iconStyle = {
-      margin: '0 5px'
-    };
     return (
       <div className={this.props.className}
         onMouseEnter={this.handleMouseEnter}
@@ -38,7 +35,7 @@ class IconOption extends Component {
         onMouseMove={this.handleMouseMove}
         title={title}>
         <span className="Select-value-label">
-          <i className={`fa ${icon}`} style={iconStyle}></i>
+          <i className={`vis_editor__icon_select-option fa ${icon}`}></i>
           { this.props.children }
         </span>
       </div>
@@ -62,13 +59,10 @@ IconOption.propTypes = {
 function IconValue(props) {
   const icon = props.value && props.value.value;
   const label = props.value && props.value.label;
-  const iconStyle = {
-    marginRight: '5px'
-  };
   return (
     <div className="Select-value" title={label}>
       <span className="Select-value-label">
-        <i className={`fa ${icon}`} style={iconStyle}></i>
+        <i className={`vis_editor__icon_select-value fa ${icon}`}></i>
         { props.children }
       </span>
     </div>

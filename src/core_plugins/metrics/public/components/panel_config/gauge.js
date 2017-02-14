@@ -91,7 +91,6 @@ class GaugePanelConfig extends Component {
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_max')}
-              style={{ width: '20px' }}
               value={model.gauge_max || ''}/>
             <div className="vis_editor__label">Gauge Style</div>
             <Select
@@ -112,18 +111,18 @@ class GaugePanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               type="number"
-              style={{ width: '20px' }}
               onChange={handleTextChange('gauge_inner_width')}
               value={model.gauge_inner_width || ''}/>
             <div className="vis_editor__label">Gauge Line Width</div>
             <input
               className="vis_editor__input-grows"
               type="number"
-              style={{ width: 20 }}
               onChange={handleTextChange('gauge_width')}
               value={model.gauge_width || ''} />
           </div>
-          <div className="vis_editor__label" style={{ margin: '0 10px 0 0' }}>Color Rules</div>
+          <div>
+            <div className="vis_editor__label">Color Rules</div>
+          </div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
               primaryName="gauge color"

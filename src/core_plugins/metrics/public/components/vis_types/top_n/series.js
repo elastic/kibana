@@ -28,7 +28,7 @@ function TopNSeries(props) {
   let caretClassName = 'fa fa-caret-down';
   if (!visible) caretClassName = 'fa fa-caret-right';
 
-  let body = (<div style={{ display: 'none' }}/>);
+  let body = null;
   if (visible) {
     let metricsClassName = 'kbnTabs__tab';
     let optionsClassname = 'kbnTabs__tab';
@@ -50,8 +50,8 @@ function TopNSeries(props) {
             sortHandle="vis_editor__agg_sort">
             { aggs }
           </Sortable>
-          <div className="vis_editor__agg_row">
-            <div className="vis_editor__agg_row-item">
+          <div className="vis_editor__series_row">
+            <div className="vis_editor__series_row-item">
               <Split
                 onChange={props.onChange}
                 fields={fields}

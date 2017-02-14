@@ -53,7 +53,8 @@
   }
 }
 .vis_editor__input { padding: 8px 10px; border-radius: @borderRadius; border: 1px solid @grayLight; }
-.vis_editor__input-grows { .vis_editor__input; flex-grow: 1 }
+.vis_editor__input-grows { .vis_editor__input; flex-grow: 1; }
+.vis_editor__input-grows-100 { .vis_editor__input-grows; width: 100%; }
 .vis_editor__row { display: flex; align-items: center; }
 .vis_editor__item { flex-grow: 1; }
 .vis_editor__row_item { flex-grow: 1; margin-right: 10px; }
@@ -82,8 +83,17 @@
 .vis_editor__color_picker-cover { position: fixed; top: 0px; right: 0px; left: 0px; bottom: 0px; }
 
 // data_format_picker
-.vis_editor__data_format_picker-container { display: flex; align-items: center; flex-grow: 1; }
-.vis_editor__data_format_picker-custom_row { display: flex; align-items: center; }
+.vis_editor__data_format_picker-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+.vis_editor__data_format_picker-custom_row {
+  display: flex;
+  align-items: center;
+  > .vis_editor__label { margin-left: 10px; }
+}
+
 
 // index_pattern.js
 .vis_editor__index_pattern-fields { margin-right: 10px; flex-grow: 1; }
@@ -210,7 +220,7 @@
   &.last { color: @grayDark }
 }
 
-.vis_editor__agg_row {
+.vis_editor__series_row {
   display: flex;
   background-color: @grayLightest;
   margin-bottom: 2px;
@@ -219,9 +229,18 @@
   .vis_editor__label { margin-bottom: 5px; font-size: 12px; }
 }
 
-.vis_editor__agg_row-item {
+.vis_editor__agg_row {
+  .vis_editor__series_row;
+}
+
+.vis_editor__series_row-item {
   display: flex;
   flex-grow: 1;
+}
+
+.vis_editor__agg_row-item {
+  .vis_editor__series_row-item;
+  margin-bottom: 10px;
 }
 
 // aggs/std_deviation.js
@@ -262,6 +281,10 @@
 }
 
 .vis_editor__percentiles,
+.vis_editor__variables {
+  .vis_editor__row_item;
+  margin: 10px 0;
+}
 .vis_editor__calc_vars {
   // background-color: @white;
   // padding: 10px;
@@ -320,6 +343,10 @@
   }
 }
 
+.vis_editor__markdown-code-desc {
+  margin-bottom: 10px;
+}
+
 .vis_editor__ace-editor {
   border: 2px solid @lineColor;
 }
@@ -346,8 +373,8 @@
   margin-right: 10px;
 }
 
-.vis_editor__annotations {
-
+.vis_editor__split-filter-color {
+  margin-right: 10px;
 }
 
 .vis_editor__annotations-color,
@@ -385,4 +412,11 @@
       margin-bottom: 4px;
     }
   }
+}
+
+.vis_editor__icon_select-option {
+  margin: 0 5px;
+}
+.vis_editor__icon_select-value {
+  margin: 0 5px 0 0;
 }

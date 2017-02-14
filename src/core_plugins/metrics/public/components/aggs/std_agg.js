@@ -42,7 +42,7 @@ function StandardAgg(props) {
           indexPattern={indexPattern}
           value={model.field}
           onChange={handleSelectChange('field')}/>
-      </div>) : (<div style={{ display: 'none' }}/>) }
+      </div>) : null }
     </AggRow>
   );
 

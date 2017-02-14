@@ -10,6 +10,10 @@ class DataFormatPicker extends Component {
     this.handleCustomChange = this.handleCustomChange.bind(this);
   }
 
+  handleCustomChange() {
+    this.props.onChange({ value: this.custom && this.custom.value || '' });
+  }
+
   handleChange(value) {
     if (value.value === 'custom') {
       this.handleCustomChange();
@@ -20,11 +24,6 @@ class DataFormatPicker extends Component {
 
   render() {
     const { value } = this.props;
-    const handleChange = (e) => {
-      this.props.onChange({
-        value: _.get(e, 'target.value', '')
-      });
-    };
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
@@ -40,20 +39,21 @@ class DataFormatPicker extends Component {
     if (defaultValue === 'custom') {
       custom = (
         <div className="vis_editor__data_format_picker-custom_row">
-          <div className="vis_editor__label" style={{ marginLeft: 10 }}>
+          <div className="vis_editor__label">
             Format String (See <a href="http://numeraljs.com/" target="_BLANK">Numeral.js</a>)
           </div>
           <input
             className="vis_editor__input"
             value={value || ''}
-            onChange={handleChange}
+            ref={(el) => this.custom = el}
+            onChange={this.handleCustomChange}
             type="text"/>
         </div>
       );
     }
     return (
       <div className="vis_editor__data_format_picker-container">
-        <div className="vis_editor__label" style={{ marginLeft: 10 }}>
+        <div className="vis_editor__label">
           {this.props.label}
         </div>
         <div className="vis_editor__item">

@@ -58,8 +58,7 @@ class AnnotationsEditor extends Component {
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Index Pattern (required)</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(row, 'index_pattern')}
                 value={row.index_pattern || ''} />
@@ -78,8 +77,7 @@ class AnnotationsEditor extends Component {
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Query String</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(row, 'query_string')}
                 value={row.query_string || ''} />
@@ -97,8 +95,7 @@ class AnnotationsEditor extends Component {
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Fields (required - comma separated paths)</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(row, 'fields')}
                 value={row.fields || ''} />
@@ -106,8 +103,7 @@ class AnnotationsEditor extends Component {
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(row, 'template')}
                 value={row.template || ''} />

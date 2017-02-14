@@ -141,7 +141,7 @@ class PercentileAgg extends Component {
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}>
         <div className="vis_editor__row_item">
-          <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
+          <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect

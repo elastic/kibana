@@ -34,7 +34,7 @@ class MovingAverageAgg extends Component {
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}>
         <div className="vis_editor__row_item">
-          <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
+          <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
@@ -52,7 +52,7 @@ class MovingAverageAgg extends Component {
                 value={model.field}/>
             </div>
           </div>
-          <div className="vis_editor__agg_row-item" style={{ marginBottom: 10 }}>
+          <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Model</div>
               <Select
@@ -65,8 +65,7 @@ class MovingAverageAgg extends Component {
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Window Size</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleNumberChange('window')}
                 value={model.window || ''}/>
@@ -84,8 +83,7 @@ class MovingAverageAgg extends Component {
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Settings (<code>Key=Value</code> space seperated)</div>
               <input
-                style={{ width: '100%' }}
-                className="vis_editor__input-grows"
+                className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('settings')}
                 value={model.settings || ''}/>

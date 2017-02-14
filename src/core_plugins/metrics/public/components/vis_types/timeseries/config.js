@@ -151,7 +151,7 @@ function TimeseriesConfig(props) {
             value={model.seperate_axis}
             name="seperate_axis"
             onChange={props.onChange}/>
-          <div className="vis_editor__label" style={{ marginLeft: 10 }}>Axis Min</div>
+          <div className="vis_editor__label">Axis Min</div>
           <input
             className="vis_editor__input-grows"
             type="text"

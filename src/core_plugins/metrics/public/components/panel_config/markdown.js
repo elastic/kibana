@@ -114,7 +114,9 @@ class MarkdownPanelConfig extends Component {
                 onChange={handleSelectChange('markdown_vertical_align')}/>
             </div>
           </div>
-          <div className="vis_editor__label" style={{ margin: '0 0 10px 0' }}>Custom CSS (supports Less)</div>
+          <div className="vis_editor__vis_config-row">
+            <div className="vis_editor__label">Custom CSS (supports Less)</div>
+        </div>
           <div className="vis_editor__ace-editor">
             <AceEditor
               mode="less"

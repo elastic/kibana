@@ -151,9 +151,29 @@
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
+  border-top: 5px solid rgba(0,0,0,0.7);
+}
+.annotation__caret-reversed {
+  .annotation__caret;
+  border-top: none;
+  border-bottom: 5px solid rgba(0,0,0,0.7);
 }
 .annotation__tooltip-body {
   border-radius: 4px;
   padding: 4px;
   white-space: nowrap;
+  color: white;
+  background-color: rgba(0,0,0,0.7);
+}
+.annotation__tooltip-body-reversed {
+  .annotation__tooltip-body;
+  color: black;
+  background-color: rgba(255,255,255,0.7);
+}
+.annotation__timestamp {
+  color: rgba(255,255,255,0.7);
+
+}
+.annotation__timestamp-reversed {
+  color: rgba(0,0,0,0.7);
 }

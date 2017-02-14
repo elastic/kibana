@@ -15,32 +15,7 @@ class Annotation extends Component {
   renderTooltip() {
     if (!this.state.showTooltip) return null;
     const [ timestamp, messageSource ] = this.props.series;
-    const styles = reactcss({
-      default: {
-        tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          color: 'white'
-        },
-        caret: {
-          borderTop: '5px solid rgba(0,0,0,0.7)'
-        },
-        timestamp: {
-          color: 'rgba(255,255,255,0.7)'
-        }
-      },
-      reversed: {
-        tooltip: {
-          backgroundColor: 'rgba(255,255,255,0.7)',
-          color: 'black'
-        },
-        caret: {
-          borderTop: '5px solid rgba(255,255,255,0.7)'
-        },
-        timestamp: {
-          color: 'rgba(0,0,0,0.7)'
-        }
-      }
-    }, this.props);
+    const reversed = this.props.reversed ? '-reversed' : '';
     const messages = messageSource.map((message, i) => {
       return (
         <div key={`${message}-${i}`}
@@ -49,11 +24,11 @@ class Annotation extends Component {
     });
     return (
       <div className="annotation__tooltip">
-        <div className="annotation__tooltip-body" style={styles.tooltip}>
-          <div className="annotation__timestamp" style={styles.timestamp}>{ moment(timestamp).format('lll') }</div>
+        <div className={`annotation__tooltip-body${reversed}`}>
+          <div className={`annotation__timestamp${reversed}`}>{ moment(timestamp).format('lll') }</div>
           { messages }
         </div>
-        <div className="annotation__caret" style={styles.caret}></div>
+        <div className={`annotation__caret${reversed}`}></div>
       </div>
     );
   }

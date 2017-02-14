@@ -68,7 +68,9 @@ class MetricPanelConfig extends Component {
               name="ignore_global_filter"
               onChange={this.props.onChange}/>
           </div>
-          <div className="vis_editor__label" style={{ margin: '0 10px 0 0' }}>Color Rules</div>
+          <div>
+            <div className="vis_editor__label">Color Rules</div>
+          </div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
               model={model}
