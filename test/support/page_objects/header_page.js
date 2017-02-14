@@ -158,7 +158,7 @@ export default class HeaderPage {
   }
 
   isGlobalLoadingIndicatorVisible() {
-    return PageObjects.common.findTestSubject('globalLoadingIndicator');
+    return PageObjects.common.findTestSubject('globalLoadingIndicator', defaultFindTimeout / 5);
   }
 
   isGlobalLoadingIndicatorHidden() {
