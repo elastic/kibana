@@ -71,6 +71,36 @@ export function workpadExport(id) {
   };
 }
 
+export function workpadImport(file) {
+  return (dispatch) => {
+    const startAction = createAction('WORKPAD_IMPORT_START');
+    const action = createAction('WORKPAD_IMPORT', file => {
+      console.log('WORKPAD_IMPORT', file.name);
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsBinaryString(file);
+      })
+      .then(data => {
+        console.log('data', data.length);
+        return fetch('../api/rework/import/', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'turdSandwich',
+          },
+          body: data,
+        })
+        .then(toJson());
+      });
+    });
+
+    dispatch(startAction());
+    dispatch(action(file));
+  };
+}
+
 export function workpadDelete(id) {
   return (dispatch) => {
     const startAction = createAction('WORKPAD_DELETE_START');
