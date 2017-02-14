@@ -10,7 +10,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
     return PageObjects.dashboard.initTests();
   });
 
-  bdd.it('warns on duplicate name', async function() {
+  bdd.it('warns on duplicate name for new dashboard', async function() {
     await PageObjects.dashboard.clickNewDashboard();
     await PageObjects.dashboard.saveDashboard(dashboardName);
 
@@ -30,7 +30,6 @@ bdd.describe('dashboard save', function describeIndexTests() {
 
     const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
     expect(countOfDashboards).to.equal(1);
-
   });
 
   bdd.it('Saves on confirm duplicate title warning', async function() {
@@ -44,12 +43,21 @@ bdd.describe('dashboard save', function describeIndexTests() {
     expect(countOfDashboards).to.equal(2);
   });
 
-  bdd.it('Does not warn when saving a duplicate title that remains unchanged', async function() {
+  bdd.it('Does not warn when saving a duplicate title that remains unchanged for an existing dashboard', async function() {
     await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.dashboard.saveDashboard(dashboardName);
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
     expect(isConfirmOpen).to.equal(false);
+  });
+
+  bdd.it('Warns when saving a duplicate title that remains unchanged when Save as New Dashboard is checked', async function() {
+    await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: true });
+
+    const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+    expect(isConfirmOpen).to.equal(true);
+
+    await PageObjects.common.clickCancelOnModal();
   });
 });

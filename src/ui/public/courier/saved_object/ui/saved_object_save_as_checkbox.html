@@ -3,7 +3,7 @@
     In previous versions of Kibana, changing the name of a {{savedObject.getDisplayName()}} would make a copy with the new name. Use the 'Save as a new {{savedObject.getDisplayName()}}' checkbox to do this now.
   </div>
   <label>
-    <input type="checkbox" ng-model="savedObject.copyOnSave" ng-checked="savedObject.copyOnSave">
+    <input type="checkbox" data-test-subj="saveAsNewCheckbox" ng-model="savedObject.copyOnSave" ng-checked="savedObject.copyOnSave">
     Save as a new {{savedObject.getDisplayName()}}
   </label>
 </div>

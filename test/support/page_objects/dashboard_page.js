@@ -132,8 +132,13 @@ export default class DashboardPage {
     });
   }
 
-  async saveDashboard(dashName, storeTimeWithDash) {
-    await this.enterDashboardTitleAndClickSave(dashName, storeTimeWithDash);
+  /**
+   *
+   * @param dashName {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async saveDashboard(dashName, saveOptions = {}) {
+    await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
 
@@ -147,7 +152,12 @@ export default class DashboardPage {
     });
   }
 
-  async enterDashboardTitleAndClickSave(dashboardTitle, storeTimeWithDash) {
+  /**
+   *
+   * @param dashboardTitle {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
     await PageObjects.common.findTestSubject('dashboardSaveButton').click();
 
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -156,8 +166,12 @@ export default class DashboardPage {
     PageObjects.common.debug('entering new title');
     await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
 
-    if (storeTimeWithDash !== undefined) {
-      await this.storeTimeWithDashboard(storeTimeWithDash);
+    if (saveOptions.storeTimeWithDashboard !== undefined) {
+      await this.storeTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+    }
+
+    if (saveOptions.saveAsNew !== undefined) {
+      await this.saveAsNewCheckbox(saveOptions.saveAsNew);
     }
 
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -304,8 +318,19 @@ export default class DashboardPage {
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
   }
 
-  async storeTimeWithDashboard(on) {
+  async saveAsNewCheckbox(on) {
     PageObjects.common.debug('Storing time with dashboard: ' + on);
+    const saveAsNewCheckbox = await PageObjects.common.findTestSubject('saveAsNewCheckbox');
+    const checked = await saveAsNewCheckbox.getProperty('checked');
+    if (checked === true && on === false ||
+        checked === false && on === true) {
+      PageObjects.common.debug('Flipping save as new checkbox');
+      await saveAsNewCheckbox.click();
+    }
+  }
+
+  async storeTimeWithDashboard(on) {
+    PageObjects.common.debug('saveAsNewCheckbox: ' + on);
     const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
     const checked = await storeTimeCheckbox.getProperty('checked');
     if (checked === true && on === false ||

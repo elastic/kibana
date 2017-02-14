@@ -308,8 +308,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      */
     const warnIfDuplicateTitle = () => {
       // Don't warn if the user isn't updating the title, otherwise that would become very annoying to have
-      // to confirm the save every time.
-      if (this.title === this.lastSavedTitle) {
+      // to confirm the save every time, except when copyOnSave is true, then we do want to check.
+      if (this.title === this.lastSavedTitle && !this.copyOnSave) {
         return Promise.resolve();
       }
 
