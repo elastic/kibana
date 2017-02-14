@@ -82,6 +82,7 @@ class ElementWrapper extends React.Component {
           resize={this.resizeMove(id).bind(this)}
           rotate={this.rotate(id).bind(this)}>
             <Element
+              key={this.props.element.id}
               type={this.props.element.type}
               args={this.props.elementCache[id]}
               filter={_.get(this.props.filters, this.state.filterId)}
