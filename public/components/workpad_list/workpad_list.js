@@ -79,6 +79,11 @@ class WorkpadList extends React.Component {
             {workpadElements}
           </tbody>
         </table>
+
+        <div className="rework--workpad-import-export">
+          <a>Import</a>
+          <a>Export All</a>
+        </div>
       </div>
     );
   }
