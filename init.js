@@ -7,6 +7,7 @@ module.exports = function (server, options) {
   require('./server/routes/get.js')(server);
   require('./server/routes/save.js')(server);
   require('./server/routes/find.js')(server);
+  require('./server/routes/export.js')(server);
   require('./server/routes/delete.js')(server);
 
 };

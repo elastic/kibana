@@ -15,6 +15,9 @@ export default () => {
       dataframeCache: {},
       // Workpads cached from the server
       workpads: [],
+      // Workpad download state
+      workpadExporting: false,
+      workpadExportData: {},
       // Dataframe settings
       dataframeSelectedId: null,
       dataframeIsCreating: false,
