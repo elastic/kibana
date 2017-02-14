@@ -27,9 +27,9 @@ module.exports = function (server) {
         callWithRequest(request, 'search', searchQuery)
         .then(function (resp) {
           const response = reply({
-            ok: true,
-            resp: resp.hits.hits.map(hit => hit._source),
+            workpads: resp.hits.hits.map(hit => hit._source)
           });
+          response.type('application/json');
         }).catch(function (resp) {
           reply({
             ok: false,

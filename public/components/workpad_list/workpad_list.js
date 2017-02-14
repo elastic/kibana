@@ -40,41 +40,6 @@ class WorkpadList extends React.Component {
     return () => this.props.onSelect(id);
   }
 
-  handleExport(id) {
-    return () => this.props.dispatch(workpadExport(id));
-  }
-
-  renderExport(workpad) {
-    return (
-      <a onClick={this.handleExport(workpad.id)} className="fa fa-download"></a>
-    );
-  }
-
-  renderDownload() {
-    try {
-      const { workpadExportData } = this.props;
-      const json = JSON.stringify(workpadExportData, null, 2);
-      const fileBlob = new Blob([json], { type: 'application/json' });
-      const url = window.URL || window.webkitURL;
-      const exportBlob = url.createObjectURL(fileBlob);
-
-      return (
-        <a className="fa fa-save"
-          href={exportBlob}
-          download={`${workpadExportData.workpad.name}.json`}>
-        </a>
-      );
-    } catch (e) {
-      // TODO: better error handling
-      console.log('export failed', e);
-      return (
-        <Tooltip content="Export Failed">
-          <i className="fa fa-times"></i>
-        </Tooltip>
-      );
-    }
-  }
-
   render() {
     const { onSelect, workpads } = this.props;
     const isExported = id => {
@@ -92,7 +57,9 @@ class WorkpadList extends React.Component {
         </td>
         <td className="rework--workpad-list-controls">
           <a onClick={this.handleDelete(workpad.id)} className="fa fa-ban"></a>
-          { isExported(workpad.id) ? this.renderDownload() : this.renderExport(workpad) }
+          <a href={`${this.props.basePath}/api/rework/export/${workpad.id}`}
+            download={`${workpad.name}.json`}
+            className="fa fa-download"></a>
         </td>
 
       </tr>
@@ -119,6 +86,7 @@ class WorkpadList extends React.Component {
 
 function mapStateToProps(state) {
   return {
+    basePath: state.app.basePath,
     workpads: state.transient.workpads,
     workpadState: state.persistent,
     workpadExporting: state.transient.workpadExporting,
