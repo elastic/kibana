@@ -53,9 +53,9 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function clickGo() {
       return PageObjects.visualize.clickGo();
     })
-    .then(function isGlobalLoadingIndicatorHidden() {
+    .then(function waitUntilLoadingHasFinished() {
       PageObjects.common.debug('Waiting...');
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 

@@ -77,7 +77,7 @@ export default class DashboardPage {
     return PageObjects.common.findTestSubject('dashboardSaveButton')
     .click()
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -89,7 +89,7 @@ export default class DashboardPage {
       .type(dashName);
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -104,7 +104,7 @@ export default class DashboardPage {
       });
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -136,7 +136,7 @@ export default class DashboardPage {
         .type(dashName.replace('-',' '));
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -146,7 +146,7 @@ export default class DashboardPage {
       .clickDashboardByLinkText(dashName);
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 

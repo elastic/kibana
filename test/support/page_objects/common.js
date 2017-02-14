@@ -272,11 +272,20 @@ export default class Common {
     }
   }
 
-  findTestSubject(selector) {
+  findTestSubject(selector, timeout = defaultFindTimeout) {
     this.debug('in findTestSubject: ' + testSubjSelector(selector));
+    let originalFindTimeout = null;
     return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector(testSubjSelector(selector));
+      .getFindTimeout()
+      .then((findTimeout) => originalFindTimeout = findTimeout)
+      .setFindTimeout(timeout)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(
+        (result) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => result),
+        (error) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => { throw error; }),
+      );
   }
 
   async findAllTestSubjects(selector) {
