@@ -47,7 +47,7 @@ class FilterItems extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'filter')}
-            value={row.filter}/>
+            value={row.filter || ''}/>
         </div>
         <div className="vis_editor__split-filter-item">
           <input
@@ -56,7 +56,7 @@ class FilterItems extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'label')}
-            value={row.label}/>
+            value={row.label || ''}/>
         </div>
         <div className="vis_editor__split-filter-control">
           <AddDeleteButtons

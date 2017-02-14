@@ -56,7 +56,7 @@ class CalculationAgg extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={handleTextChange('script')}
-                value={model.script}/>
+                value={model.script || ''}/>
             </div>
           </div>
         </div>

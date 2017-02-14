@@ -62,7 +62,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'index_pattern')}
-                value={row.index_pattern} />
+                value={row.index_pattern || ''} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Time Field (required)</div>
@@ -82,7 +82,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'query_string')}
-                value={row.query_string} />
+                value={row.query_string || ''} />
             </div>
           </div>
           <div className="vis_editor__row">
@@ -101,7 +101,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'fields')}
-                value={row.fields} />
+                value={row.fields || ''} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
@@ -110,7 +110,7 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={this.handleChange(row, 'template')}
-                value={row.template} />
+                value={row.template || ''} />
             </div>
           </div>
         </div>

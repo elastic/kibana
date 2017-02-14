@@ -63,7 +63,7 @@ class TopNPanelConfig extends Component {
             <input
               className="vis_editor__input-grows"
               onChange={handleTextChange('drilldown_url')}
-              value={model.drilldown_url}/>
+              value={model.drilldown_url || ''}/>
           </div>
           <IndexPattern
             fields={this.props.fields}
@@ -80,7 +80,7 @@ class TopNPanelConfig extends Component {
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter || ''}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}

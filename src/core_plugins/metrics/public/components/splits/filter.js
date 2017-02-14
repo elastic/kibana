@@ -20,7 +20,7 @@ class SplitByFilter extends Component {
         <div className="vis_editor__label">Query String</div>
         <input
           className="vis_editor__split-filter"
-          value={model.filter}
+          value={model.filter || ''}
           onChange={handleTextChange('filter')} />
       </div>
     );

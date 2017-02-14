@@ -44,7 +44,7 @@ class DerivativeAgg extends Component {
           <input
             className="vis_editor__input"
             onChange={handleTextChange('unit')}
-            value={model.unit}
+            value={model.unit || ''}
             type="text"/>
         </div>
       </AggRow>

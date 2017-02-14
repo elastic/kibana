@@ -32,7 +32,7 @@ class CalculationVars extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleChange(row, 'name')}
-            value={row.name}/>
+            value={row.name || ''} />
         </div>
         <div className="vis_editor__calc_vars-var">
           <MetricSelect

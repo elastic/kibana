@@ -59,7 +59,7 @@ class Percentiles extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleNumberChange(row, 'value')}
-            value={row.value}/>
+            value={row.value || ''}/>
           <div className="vis_editor__label">Mode</div>
           <div className="vis_editor__row_item">
             <Select
@@ -74,14 +74,14 @@ class Percentiles extends Component {
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleNumberChange(row, 'percentile')}
-            value={row.percentile}/>
+            value={row.percentile || ''}/>
           <div style={optionsStyle} className="vis_editor__label">Shade (0 to 1)</div>
           <input
             style={optionsStyle}
             className="vis_editor__input-grows"
             type="text"
             onChange={this.handleNumberChange(row, 'shade')}
-            value={row.shade}/>
+            value={row.shade || ''}/>
         </div>
         <AddDeleteButtons
           onAdd={handleAdd}

@@ -120,7 +120,7 @@ function MetricSeries(props) {
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label}/>
+              value={model.label || ''}/>
           </div>
           { dragHandle }
           <AddDeleteButtons

@@ -45,7 +45,7 @@ class DataFormatPicker extends Component {
           </div>
           <input
             className="vis_editor__input"
-            value={value}
+            value={value || ''}
             onChange={handleChange}
             type="text"/>
         </div>

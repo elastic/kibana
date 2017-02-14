@@ -69,7 +69,7 @@ class MovingAverageAgg extends Component {
                 className="vis_editor__input-grows"
                 type="text"
                 onChange={handleNumberChange('window')}
-                value={model.window}/>
+                value={model.window || ''}/>
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Minimize</div>
@@ -87,8 +87,8 @@ class MovingAverageAgg extends Component {
                 style={{ width: '100%' }}
                 className="vis_editor__input-grows"
                 type="text"
-                onChange={handleTextChange('script')}
-                value={model.script}/>
+                onChange={handleTextChange('settings')}
+                value={model.settings || ''}/>
             </div>
           </div>
         </div>

@@ -99,12 +99,12 @@ function MarkdownSeries(props) {
               style={{ marginRight: 10 }}
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label}/>
+              value={model.label || ''}/>
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('var_name')}
               placeholder='Variable Name'
-              value={model.var_name}/>
+              value={model.var_name || ''}/>
           </div>
           <AddDeleteButtons
             onDelete={onDelete}

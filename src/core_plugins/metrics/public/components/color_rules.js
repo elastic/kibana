@@ -65,7 +65,7 @@ class ColorRules extends Component {
         <input
           className="color_rules__input"
           type="text"
-          value={row.value}
+          value={row.value || ''}
           onChange={this.handleChange(row, 'value', Number)}/>
         <div className="color_rules__control">
           <AddDeleteButtons

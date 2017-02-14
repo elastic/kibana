@@ -44,7 +44,7 @@ class SerialDiffAgg extends Component {
           <input
             className="vis_editor__input"
             onChange={handleNumberChange('lag')}
-            value={model.lag}
+            value={model.lag || ''}
             type="text"/>
         </div>
       </AggRow>

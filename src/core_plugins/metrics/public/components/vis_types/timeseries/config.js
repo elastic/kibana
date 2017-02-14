@@ -57,13 +57,13 @@ function TimeseriesConfig(props) {
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('fill')}
-          value={model.fill}/>
+          value={model.fill || ''}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('line_width')}
-          value={model.line_width}/>
+          value={model.line_width || ''}/>
         <div className="vis_editor__label">Point Size</div>
         <input
           className="vis_editor__input-grows"
@@ -97,13 +97,13 @@ function TimeseriesConfig(props) {
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('fill')}
-          value={model.fill}/>
+          value={model.fill || ''}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('line_width')}
-          value={model.line_width}/>
+          value={model.line_width || ''}/>
       </div>
     );
   }
@@ -121,7 +121,7 @@ function TimeseriesConfig(props) {
           <input
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
-            value={model.value_template}/>
+            value={model.value_template || ''}/>
         </div>
         { type }
         <div className="vis_editor__series_config-row">
@@ -130,7 +130,7 @@ function TimeseriesConfig(props) {
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
-            value={model.offset_time}/>
+            value={model.offset_time || ''}/>
           <div className="vis_editor__label">Hide in Legend</div>
           <YesNo
             value={model.hide_in_legend}
@@ -157,14 +157,14 @@ function TimeseriesConfig(props) {
             type="text"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_min')}
-            value={model.axis_min}/>
+            value={model.axis_min || ''}/>
           <div className="vis_editor__label">Axis Max</div>
           <input
             className="vis_editor__input-grows"
             type="text"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_max')}
-            value={model.axis_max}/>
+            value={model.axis_max || ''}/>
           <div className="vis_editor__label">Axis Position</div>
           <div className="vis_editor__row_item">
             <Select

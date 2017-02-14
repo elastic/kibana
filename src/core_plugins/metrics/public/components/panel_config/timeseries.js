@@ -64,13 +64,13 @@ class TimeseriesPanelConfig extends Component {
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_min')}
-              value={model.axis_min}/>
+              value={model.axis_min || ''}/>
             <div className="vis_editor__label">Axis Max</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_max')}
-              value={model.axis_max}/>
+              value={model.axis_max || ''}/>
             <div className="vis_editor__label">Axis Position</div>
             <div className="vis_editor__row_item">
               <Select
@@ -107,7 +107,7 @@ class TimeseriesPanelConfig extends Component {
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter || ''}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
