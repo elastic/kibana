@@ -4,7 +4,13 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import Tooltip from 'plugins/rework/components/tooltip/tooltip';
-import { workdpadLoadAll, workpadDelete, workpadExport } from 'plugins/rework/state/actions/workpad';
+import {
+  workdpadLoadAll,
+  workpadDelete,
+  workpadExport,
+  workpadImport,
+} from 'plugins/rework/state/actions/workpad';
+
 import './workpad_list.less';
 
 class WorkpadList extends React.Component {
@@ -32,12 +38,23 @@ class WorkpadList extends React.Component {
     this.props.dispatch(workdpadLoadAll());
   }
 
+  importFile() {
+    const file = _.get(this.importInput, 'files.0');
+    if (file) {
+      this.props.dispatch(workpadImport(file));
+    }
+  }
+
   handleDelete(id) {
     return () => this.props.dispatch(workpadDelete(id));
   }
 
   handleSelect(id) {
     return () => this.props.onSelect(id);
+  }
+
+  handleImport(files) {
+    this.importInput.click();
   }
 
   render() {
@@ -81,8 +98,14 @@ class WorkpadList extends React.Component {
         </table>
 
         <div className="rework--workpad-import-export">
-          <a>Import</a>
-          <a>Export All</a>
+          <input style={{display: 'none'}}
+            accept="application/json"
+            type="file"
+            onChange={this.importFile.bind(this)}
+            ref={input => this.importInput = input}>
+          </input>
+          <a onClick={this.handleImport.bind(this)}>Import</a>
+          <a href={`${this.props.basePath}/api/rework/export/`} download="workpads.json">Export All</a>
         </div>
       </div>
     );
