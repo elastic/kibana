@@ -30,7 +30,7 @@
               parse-query
               input-focus
               kbn-typeahead-input
-              ng-model="state.query"
+              ng-model="model.query"
               placeholder="Filter..."
               aria-label="Filter input"
               type="text"
@@ -61,11 +61,11 @@
   </div>
 
   <dashboard-grid
-    ng-if="!hasExpandedPanel()"
+    ng-show="!hasExpandedPanel()"
     on-panel-removed="onPanelRemoved"
-    panels="state.panels"
-    get-vis-click-handler="filterBarClickHandler(state)"
-    get-vis-brush-handler="brushEvent(state)"
+    panels="panels"
+    get-vis-click-handler="getFilterBarClickHandler"
+    get-vis-brush-handler="getBrushEvent"
     save-state="saveState"
     toggle-expand="toggleExpandPanel"
     create-child-ui-state="createChildUiState"
@@ -76,9 +76,11 @@
                    panel="expandedPanel"
                    is-full-screen-mode="!chrome.getVisible()"
                    is-expanded="true"
-                   get-vis-click-handler="filterBarClickHandler(state)"
-                   get-vis-brush-handler="brushEvent(state)"
+                   get-vis-click-handler="getFilterBarClickHandler"
+                   get-vis-brush-handler="getBrushEvent"
                    save-state="saveState"
                    create-child-ui-state="createChildUiState"
                    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
+  </dashboard-panel>
+
 </dashboard-app>

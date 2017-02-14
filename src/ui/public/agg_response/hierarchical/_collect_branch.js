@@ -9,7 +9,7 @@ define(function () {
       // doesn't exist (which means it's an _all agg) then use the level for
       // the field name
       const { aggConfig } = item;
-      const field = (aggConfig && aggConfig.getFieldDisplayName())
+      const field = (aggConfig && aggConfig.makeLabel())
         || (aggConfig && aggConfig.label)
         || ('level ' + item.depth);
 

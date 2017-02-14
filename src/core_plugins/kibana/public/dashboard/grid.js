@@ -31,12 +31,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * Returns a click handler for a visualization.
        * @type {function}
        */
-      getVisClickHandler: '&',
+      getVisClickHandler: '=',
       /**
        * Returns a brush event handler for a visualization.
        * @type {function}
        */
-      getVisBrushHandler: '&',
+      getVisBrushHandler: '=',
       /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
@@ -173,8 +173,8 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   panel="findPanelByPanelIndex(${panel.panelIndex}, panels)"
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
-                  get-vis-click-handler="getVisClickHandler(state)"
-                  get-vis-brush-handler="getVisBrushHandler(state)"
+                  get-vis-click-handler="getVisClickHandler"
+                  get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">
@@ -209,6 +209,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // then tell gridster to "reflow" -- which is definitely not supported.
       // we may need to consider using a different library
       function reflowGridster() {
+        if ($container.hasClass('ng-hide')) {
+          return;
+        }
+
         // https://github.com/gcphost/gridster-responsive/blob/97fe43d4b312b409696b1d702e1afb6fbd3bba71/jquery.gridster.js#L1208-L1235
         const g = gridster;
 

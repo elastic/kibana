@@ -5,6 +5,22 @@ import { fromRoot, pkg } from '../utils';
 import Config from './config/config';
 import loggingConfiguration from './logging/configuration';
 
+import configSetupMixin from './config/setup';
+import httpMixin from './http';
+import loggingMixin from './logging';
+import deprecationWarningsMixin from './config/deprecation_warnings';
+import warningsMixin from './warnings';
+import statusMixin from './status';
+import pidMixin from './pid';
+import pluginsScanMixin from './plugins/scan';
+import pluginsCheckEnabledMixin from './plugins/check_enabled';
+import pluginsCheckVersionMixin from './plugins/check_version';
+import configCompleteMixin from './config/complete';
+import uiMixin from '../ui';
+import uiSettingsMixin from '../ui/settings';
+import optimizeMixin from '../optimize';
+import pluginsInitializeMixin from './plugins/initialize';
+
 const rootDir = fromRoot('.');
 
 module.exports = class KbnServer {
@@ -16,41 +32,37 @@ module.exports = class KbnServer {
     this.settings = settings || {};
 
     this.ready = constant(this.mixin(
-      require('./config/setup'), // sets this.config, reads this.settings
-      require('./http'), // sets this.server
-      require('./logging'),
-      require('./config/deprecation_warnings'),
-      require('./warnings'),
-      require('./status'),
-
+      // sets this.config, reads this.settings
+      configSetupMixin,
+      // sets this.server
+      httpMixin,
+      loggingMixin,
+      warningsMixin,
+      statusMixin,
       // writes pid file
-      require('./pid'),
-
+      pidMixin,
       // find plugins and set this.plugins
-      require('./plugins/scan'),
+      pluginsScanMixin,
 
       // disable the plugins that are disabled through configuration
-      require('./plugins/check_enabled'),
+      pluginsCheckEnabledMixin,
 
       // disable the plugins that are incompatible with the current version of Kibana
-      require('./plugins/check_version'),
+      pluginsCheckVersionMixin,
 
       // tell the config we are done loading plugins
-      require('./config/complete'),
-
+      configCompleteMixin,
       // setup this.uiExports and this.bundles
-      require('../ui'),
+      uiMixin,
 
       // setup server.uiSettings
-      require('../ui/settings'),
+      uiSettingsMixin,
 
       // ensure that all bundles are built, or that the
       // lazy bundle server is running
-      require('../optimize'),
-
+      optimizeMixin,
       // finally, initialize the plugins
-      require('./plugins/initialize'),
-
+      pluginsInitializeMixin,
       () => {
         if (this.config.get('server.autoListen')) {
           this.ready = constant(resolve());

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import errors from 'ui/errors';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 export default function ColumnChartFactory(Private) {
@@ -39,7 +38,9 @@ export default function ColumnChartFactory(Private) {
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')
-      .data(data.values);
+      .data(data.values.filter(function (d) {
+        return !_.isNull(d.y);
+      }));
 
       bars
       .exit()

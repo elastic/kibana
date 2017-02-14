@@ -16,7 +16,7 @@ export default function TermsAggDefinition(Private) {
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
-  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev'];
+  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev', '!derivative'];
   const orderAggSchema = (new Schemas([
     {
       group: 'none',

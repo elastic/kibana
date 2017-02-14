@@ -217,6 +217,13 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       });
     }
 
+    if (output.parentAggs) {
+      const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
+      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+      });
+    }
+
     return configDsl;
   };
 

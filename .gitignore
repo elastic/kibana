@@ -31,6 +31,7 @@ config/*
 coverage
 selenium
 .babelcache.json
+.webpack.babelcache
 *.swp
 *.swo
 *.out

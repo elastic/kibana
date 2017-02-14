@@ -14,7 +14,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickLineChart');
       return PageObjects.visualize.clickLineChart();
