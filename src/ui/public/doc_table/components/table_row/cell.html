@@ -8,7 +8,7 @@ if (timefield) {
   attributes='class="discover-table-datafield"';
 }
 %>
-<td <%= attributes %>>
+<td <%= attributes %> data-test-subj="docTableField">
   <%= formatted %>
   <span class="table-cell-filter">
     <% if (filterable) { %>

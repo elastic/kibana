@@ -37,7 +37,8 @@
         filter="filter"
         class="discover-table-row"
         ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
-        data-test-subj="docTableRow"></tr>
+        data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+      ></tr>
     </tbody>
   </table>
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>

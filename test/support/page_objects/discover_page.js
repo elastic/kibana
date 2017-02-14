@@ -291,7 +291,10 @@ export default class DiscoverPage {
   }
 
   async clickFieldListItemAdd(field) {
-    await PageObjects.common.findTestSubject('fieldToggle-' + field).click();
+    const listEntry = await PageObjects.common.findTestSubject(`field-${field}`);
+    await this.remote.moveMouseTo(listEntry);
+    await PageObjects.common.findTestSubject(`fieldToggle-${field}`)
+      .click();
   }
 
   async clickFieldListItemVisualize(field) {

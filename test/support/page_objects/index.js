@@ -9,6 +9,7 @@ import SettingsPage from './settings_page';
 import ShieldPage from './shield_page';
 import VisualizePage from './visualize_page';
 import MonitoringPage from './monitoring_page';
+import DocTable from './doc_table';
 
 const common = new Common();
 const consolePage = new ConsolePage();
@@ -20,6 +21,8 @@ const settingsPage = new SettingsPage();
 const shieldPage = new ShieldPage();
 const visualizePage = new VisualizePage();
 const monitoringPage = new MonitoringPage();
+
+const docTable = new DocTable();
 
 class PageObjects {
 
@@ -37,6 +40,7 @@ class PageObjects {
       shieldPage,
       visualizePage,
       monitoringPage,
+      docTable,
     ];
   }
 
@@ -91,6 +95,10 @@ class PageObjects {
 
   get monitoring() {
     return this.assertInitialized() && monitoringPage;
+  }
+
+  get docTable() {
+    return this.assertInitialized() && docTable;
   }
 
 }

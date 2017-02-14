@@ -23,5 +23,6 @@ bdd.describe('context app', function () {
     return scenarioManager.unload('logstashFunctional');
   });
 
-  require('./_size.js');
+  require('./_discover_navigation');
+  require('./_size');
 });

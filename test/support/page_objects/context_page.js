@@ -26,27 +26,7 @@ export default class ContextPage {
 
     await this.remote.get(appUrl);
     await this.remote.refresh();
-  }
-
-  waitForDocTable() {
-    return PageObjects.common.try(() => PageObjects.common.findTestSubject('docTable'));
-  }
-
-  async getDocTableHeaderTexts() {
-    const tableHeaderElements = await this.remote.findAllByCssSelector(
-      '[data-test-subj="docTable"] thead th'
-    );
-    const tableHeaderTexts = await Promise.all(tableHeaderElements.map(
-      (tableHeaderElement) => tableHeaderElement.getVisibleText()
-    ));
-
-    return tableHeaderTexts;
-  }
-
-  getDocTableBodyRows() {
-    return this.remote.findAllByCssSelector(
-      '[data-test-subj="docTableRow"]'
-    );
+    await this.waitUntilContextLoadingHasFinished();
   }
 
   getPredecessorCountPicker() {
@@ -63,5 +43,16 @@ export default class ContextPage {
 
   getSuccessorLoadMoreButton() {
     return PageObjects.common.findTestSubject('predecessorLoadMoreButton');
+  }
+
+  waitUntilContextLoadingHasFinished() {
+    return PageObjects.common.try(async () => {
+      if (
+        !(await this.getSuccessorLoadMoreButton().isEnabled())
+        || !(await this.getPredecessorLoadMoreButton().isEnabled())
+      ) {
+        throw new Error('loading context rows');
+      }
+    });
   }
 }

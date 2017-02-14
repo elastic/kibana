@@ -29,28 +29,26 @@ bdd.describe('context size', function contextSize() {
   });
 
   bdd.it('should increase according to the `context:step` setting when clicking the `load newer` button', async function() {
-    await esClient.updateConfigDoc({ 'context:step': `${TEST_STEP_SIZE}` });
     await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-    await PageObjects.context.waitForDocTable();
 
+    const docTable = await PageObjects.docTable.getTable();
     await (await PageObjects.context.getPredecessorLoadMoreButton()).click();
     await PageObjects.common.try(async function () {
-      expect(await PageObjects.context.getDocTableBodyRows()).to.have.length(
+      expect(await PageObjects.docTable.getBodyRows(docTable)).to.have.length(
         2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
       );
     });
   });
 
   bdd.it('should increase according to the `context:step` setting when clicking the `load older` button', async function() {
-    await esClient.updateConfigDoc({ 'context:step': `${TEST_STEP_SIZE}` });
     await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-    await PageObjects.context.waitForDocTable();
 
+    const docTable = await PageObjects.docTable.getTable();
     const successorLoadMoreButton = await PageObjects.context.getSuccessorLoadMoreButton();
-    await this.remote.moveMouseTo(successorLoadMoreButton);
+    await this.remote.moveMouseTo(successorLoadMoreButton);  // possibly scroll until the button is visible
     await successorLoadMoreButton.click();
     await PageObjects.common.try(async function () {
-      expect(await PageObjects.context.getDocTableBodyRows()).to.have.length(
+      expect(await PageObjects.docTable.getBodyRows(docTable)).to.have.length(
         2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
       );
     });

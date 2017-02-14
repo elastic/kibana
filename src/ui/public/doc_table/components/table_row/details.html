@@ -2,6 +2,7 @@
   <div class="documentTableRow__actions">
     <a
       class="kuiLink documentTableRow__action"
+      data-test-subj="docTableRowAction"
       ng-href="{{ getContextAppHref() }}"
       ng-if="indexPattern.hasTimeField()"
     >
@@ -9,6 +10,7 @@
     </a>
     <a
       class="kuiLink documentTableRow__action"
+      data-test-subj="docTableRowAction"
       ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
     >
       View single entry
