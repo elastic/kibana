@@ -13,7 +13,7 @@ module.directive('heatmapOptions', function () {
       $scope.showLabels = false;
       $scope.customColors = false;
       $scope.options = {
-        rotateLabels: false
+        rotateLabels: $scope.vis.params.valueAxes[0].labels.rotate === 270
       };
 
       $scope.valueAxis = $scope.vis.params.valueAxes[0];
