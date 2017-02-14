@@ -173,11 +173,21 @@ function rootReducer(state = {}, action) {
         return setTransient('workpads', []);
       }
       return setTransient('workpads', payload);
-
     case 'WORKPAD_REPLACE':
       return setPersistent('workpad', payload);
     case 'WORKPAD_DELETE_START':
       return deleteWorkpad(payload);
+    case 'WORKPAD_EXPORT_START':
+      return setTransient('workpadExporting', true);
+    case 'WORKPAD_EXPORT':
+      return {
+        ...state,
+        transient: {
+          ...state.transient,
+          workpadExporting: false,
+          workpadExportData: payload,
+        }
+      };
 
     case 'PAGE_SET':
       return setWorkpad({page: payload});
