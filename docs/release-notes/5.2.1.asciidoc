@@ -1,0 +1,18 @@
+[[release-notes-5.2.1]]
+== 5.2.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.2.1]]
+=== Bug fixes
+Core::
+* Bump Node.js to version 6.9.5. This was a low severity security release for Node.js, which has minimal impact to Kibana, but is still worth upgrading. {pull}10135[#10135]
+Discover::
+* Prevented a background action that was causing unnecessary CPU cycles {pull}10036[#10036]
+Management::
+* Delete button for color formatters no longer overlaps format dropdown {issue}8864[#8864]
+Visualize::
+* Fixed regression where certain visualizations were being limited to 25 series {issue}10132[#10132]
+* Fixed typo on a tag cloud warning message {pull}10092[#10092]
+* Fixed a bug where data table visualizations would incorrectly appear empty in certain circumstances {issue}9757[#9757]
