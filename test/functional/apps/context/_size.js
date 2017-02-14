@@ -11,12 +11,19 @@ const TEST_DEFAULT_CONTEXT_SIZE = 7;
 const TEST_STEP_SIZE = 3;
 
 bdd.describe('context size', function contextSize() {
+  bdd.before(async function() {
+    await esClient.updateConfigDoc({
+      'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
+      'context:step': `${TEST_STEP_SIZE}`,
+    });
+  });
+
   bdd.it('should default to the `context:defaultSize` setting', async function () {
-    await esClient.updateConfigDoc({ 'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}` });
     await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
+    const docTable = await PageObjects.docTable.getTable();
     await PageObjects.common.try(async function () {
-      expect(await PageObjects.context.getDocTableBodyRows()).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
+      expect(await PageObjects.docTable.getBodyRows(docTable)).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
     });
     await PageObjects.common.try(async function() {
       const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
