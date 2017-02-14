@@ -39,13 +39,13 @@ export default class SettingsPage {
   async setAdvancedSettings(propertyName, propertyValue) {
     const self = this;
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
     await this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + propertyValue + '"]').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async navigateTo() {
@@ -79,7 +79,7 @@ export default class SettingsPage {
     (await this.getTimeFieldNameField()).click();
     // close dropdown, keep focus
     (await this.getTimeFieldNameField()).click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.try(async () => {
       (await this.getTimeFieldOption(selection)).click();
       const selected = (await this.getTimeFieldOption(selection)).isSelected();
@@ -100,7 +100,7 @@ export default class SettingsPage {
   async clickDefaultIndexButton() {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-scope').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async clickDeletePattern() {
@@ -133,7 +133,7 @@ export default class SettingsPage {
           if (chartString === columnName) {
             return chart.click()
             .then(function () {
-              return PageObjects.header.isGlobalLoadingIndicatorHidden();
+              return PageObjects.header.waitUntilLoadingHasFinished();
             });
           }
         });
@@ -212,7 +212,7 @@ export default class SettingsPage {
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
       (pageNum + 1) + ') a.ng-binding')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async openControlsRow(row) {
@@ -232,7 +232,7 @@ export default class SettingsPage {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   getPopularity() {
@@ -245,21 +245,21 @@ export default class SettingsPage {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async controlChangeSave() {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async setPageSize(size) {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async createIndexPattern() {
@@ -269,7 +269,7 @@ export default class SettingsPage {
       await this.selectTimeFieldOption('@timestamp');
       await this.getCreateButton().click();
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();
       PageObjects.common.log('currentUrl', currentUrl);
