@@ -41,9 +41,11 @@ export default class DashboardPage {
     PageObjects.common.debug('Go to dashboard landing page');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      return PageObjects.common.try(() =>
-        PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click()
+      await PageObjects.common.try(async () =>
+        await PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click()
       );
+      // Once the searchFilter can be found, we know the page finished loading.
+      await PageObjects.common.try(async () => await PageObjects.common.findTestSubject('searchFilter'));
     }
   }
 
@@ -140,7 +142,7 @@ export default class DashboardPage {
   async saveDashboard(dashName, saveOptions = {}) {
     await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
 
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -161,7 +163,6 @@ export default class DashboardPage {
     await PageObjects.common.findTestSubject('dashboardSaveButton').click();
 
     await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
 
     PageObjects.common.debug('entering new title');
     await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
@@ -174,14 +175,10 @@ export default class DashboardPage {
       await this.saveAsNewCheckbox(saveOptions.saveAsNew);
     }
 
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
     await PageObjects.common.try(() => {
       PageObjects.common.debug('clicking final Save button for named dashboard');
       return this.findTimeout.findByCssSelector('.btn-primary').click();
     });
-    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   clickDashboardByLinkText(dashName) {
@@ -194,6 +191,7 @@ export default class DashboardPage {
     PageObjects.common.debug(`searchForDashboardWithName: ${dashName}`);
 
     await this.gotoDashboardLandingPage();
+
     const searchBox = await PageObjects.common.findTestSubject('searchFilter');
     await searchBox.click();
 

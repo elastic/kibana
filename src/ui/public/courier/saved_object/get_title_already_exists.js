@@ -1,9 +1,11 @@
 import _ from 'lodash';
 /**
- * Returns true if the given saved object has a title that already exists, false otherwise.
+ * Returns true if the given saved object has a title that already exists, false otherwise. Search is case
+ * insensitive.
  * @param savedObject {SavedObject} The object with the title to check.
  * @param esAdmin {Object} Used to query es
- * @returns {Promise<bool>}
+ * @returns {Promise<string|undefined>} Returns the title that matches. Because this search is not case
+ * sensitive, it may not exactly match the title of the object.
  */
 export function getTitleAlreadyExists(savedObject, esAdmin) {
   const { index, title, type, id } = savedObject;
@@ -25,9 +27,9 @@ export function getTitleAlreadyExists(savedObject, esAdmin) {
   const size = 10;
   return esAdmin.search({ index, type, body, size })
     .then((response) => {
-      const titleMatch = _.find(response.hits.hits, function currentVersion(hit) {
-        return hit._source.title === title;
+      const match = _.find(response.hits.hits, function currentVersion(hit) {
+        return hit._source.title.toLowerCase() === title.toLowerCase();
       });
-      return !!titleMatch;
+      return match ? match._source.title : undefined;
     });
 }

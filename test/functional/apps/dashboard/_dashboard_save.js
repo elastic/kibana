@@ -53,7 +53,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
   });
 
   bdd.it('Warns when saving a duplicate title that remains unchanged when Save as New Dashboard is checked', async function() {
-    await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: true });
+    await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
     expect(isConfirmOpen).to.equal(true);
@@ -68,10 +68,12 @@ bdd.describe('dashboard save', function describeIndexTests() {
     expect(isConfirmOpen).to.equal(false);
   });
 
-  bdd.it('Does not warn when case is different', async function() {
-    await PageObjects.dashboard.saveDashboard(dashboardName.toUpperCase());
+  bdd.it('Warns when case is different', async function() {
+    await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-    expect(isConfirmOpen).to.equal(false);
+    expect(isConfirmOpen).to.equal(true);
+
+    await PageObjects.common.clickCancelOnModal();
   });
 });

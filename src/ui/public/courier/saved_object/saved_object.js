@@ -314,10 +314,10 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       }
 
       return getTitleAlreadyExists(this, esAdmin)
-        .then((isDuplicate) => {
-          if (!isDuplicate) return true;
+        .then((duplicateTitle) => {
+          if (!duplicateTitle) return true;
           const confirmMessage =
-            `A ${type} with the title '${this.title}' already exists. Would you like to save a duplicate with the same name?`;
+            `A ${type} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${type}` })
             .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
