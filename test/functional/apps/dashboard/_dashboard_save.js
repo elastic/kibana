@@ -60,4 +60,18 @@ bdd.describe('dashboard save', function describeIndexTests() {
 
     await PageObjects.common.clickCancelOnModal();
   });
+
+  bdd.it('Does not warn when only the prefix matches', async function() {
+    await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
+
+    const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+    expect(isConfirmOpen).to.equal(false);
+  });
+
+  bdd.it('Does not warn when case is different', async function() {
+    await PageObjects.dashboard.saveDashboard(dashboardName.toUpperCase());
+
+    const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+    expect(isConfirmOpen).to.equal(false);
+  });
 });

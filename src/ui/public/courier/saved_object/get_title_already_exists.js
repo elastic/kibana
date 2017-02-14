@@ -1,3 +1,4 @@
+import _ from 'lodash';
 /**
  * Returns true if the given saved object has a title that already exists, false otherwise.
  * @param savedObject {SavedObject} The object with the title to check.
@@ -13,15 +14,20 @@ export function getTitleAlreadyExists(savedObject, esAdmin) {
   const body = {
     query: {
       bool: {
-        must: [{ match: { title } }],
-        must_not: [{ match: { id } }]
+        must: { match_phrase: { title } },
+        must_not: { match: { id } }
       }
     }
   };
 
-  const size = 0;
+  // Elastic search will return the most relevant results first, which means exact matches should come
+  // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
+  const size = 10;
   return esAdmin.search({ index, type, body, size })
     .then((response) => {
-      return response.hits.total > 0 ? true : false;
+      const titleMatch = _.find(response.hits.hits, function currentVersion(hit) {
+        return hit._source.title === title;
+      });
+      return !!titleMatch;
     });
 }
