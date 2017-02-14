@@ -122,6 +122,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.timefilter = timefilter;
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
+      dash.searchSource.highlightAll(true);
       courier.setRootSearchSource(dash.searchSource);
 
       const docTitle = Private(DocTitleProvider);
