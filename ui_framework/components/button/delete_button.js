@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { KuiButton } from './kui_button';
-import { DeleteIcon } from '../icon/delete_icon';
+import { DeleteIcon } from '../icon';
 
 export function DeleteButton(props) {
   return <KuiButton className="kuiButton--danger" {...props}>

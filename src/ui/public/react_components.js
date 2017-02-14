@@ -2,7 +2,9 @@ import 'ngreact';
 
 import {
   CreateButtonLink,
-  DeleteButton
+  DeleteButton,
+  CreateIcon,
+  DeleteIcon
 } from 'ui_framework/components';
 
 import uiModules from 'ui/modules';
@@ -12,4 +14,10 @@ app.directive('createButtonLink', function (reactDirective) {
 });
 app.directive('deleteButton', function (reactDirective) {
   return reactDirective(DeleteButton);
+});
+app.directive('createIcon', function (reactDirective) {
+  return reactDirective(CreateIcon);
+});
+app.directive('deleteIcon', function (reactDirective) {
+  return reactDirective(DeleteIcon);
 });
