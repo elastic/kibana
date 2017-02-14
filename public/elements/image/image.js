@@ -19,19 +19,26 @@ elements.push(new Element('image', {
       }
     })
   ],
-  template: ({args}) => {
-    const style = {
-      height: '100%',
-      width: '100%',
-    };
-    return (
-      <div style={{
+  template: class Image extends React.PureComponent {
+    constructor(props) {
+      super(props);
+    }
+
+    render() {
+      const style = {
         height: '100%',
-        backgroundImage: `url(${args.image})`,
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: args.mode
-      }}/>
-    );
+        width: '100%',
+      };
+      return (
+        <div style={{
+          height: '100%',
+          backgroundImage: `url(${this.props.args.image})`,
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: this.props.args.mode
+        }}/>
+      );
+    }
+
   }
 }));

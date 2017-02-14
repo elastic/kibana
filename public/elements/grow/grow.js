@@ -45,13 +45,22 @@ elements.push(new Element('grow', {
   ],
   template: class Grow extends React.PureComponent {
 
+    componentDidMount() {
+      console.log('ZGrow mounted');
+    }
+
     componentWillUpdate(nextProps) {
       const {args, setArg} = nextProps;
+      const setUndefined = (prop, value) => {
+        if (!_.get(args[prop], 'length')) {
+          setArg(prop, value);
+        }
+      };
 
       if (args.dataframe.schema === 'timeseries' || args.dataframe.schema === 'timelion') {
-        setArg('time_column', 'time');
-        setArg('value_column', 'value');
-        setArg('group_by', 'label');
+        setUndefined('time_column', 'time');
+        setUndefined('value_column', 'value');
+        setUndefined('group_by', 'label');
       };
     }
 
