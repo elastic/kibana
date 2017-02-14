@@ -40,10 +40,11 @@ export default function licenses(grunt) {
         const licenses = [].concat(overrides.hasOwnProperty(key) ? overrides[key] : value.licenses);
         if (!licenses.length || licenses.includes('UNKNOWN')) return grunt.fail.fatal(`Unknown license for ${key}`);
 
+        const licenseFile = value.licenseFile && fs.readFileSync(value.licenseFile);
         const licenseText = licenses.length > 1 ? `the\n"${licenses.join('", ')} licenses` : `a\n"${licenses[0]}" license`;
-        const noticeText =
-          `This product bundles ${key} which is available under ${licenseText}.  `
-          + `For details, see ${packagePaths[key]}/.\n\n---\n`;
+        const licenseFileText = licenseFile ? `\n\n${licenseFile}` : `  For details, see ${packagePaths[key]}/.`;
+        const noticeText = `This product bundles ${key} which is available under ${licenseText}.${licenseFileText}\n\n---\n`;
+
         fs.appendFileSync(fd, noticeText);
       });
       fs.closeSync(fd);
