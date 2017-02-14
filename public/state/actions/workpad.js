@@ -47,7 +47,6 @@ export function workdpadLoadAll() {
     });
 
     dispatch(action());
-    dispatch(workpadInit());
   };
 }
 
@@ -88,7 +87,6 @@ export function workpadDelete(id) {
 
     dispatch(startAction(id));
     dispatch(action(id));
-    dispatch(workpadInit());
   };
 }
 
