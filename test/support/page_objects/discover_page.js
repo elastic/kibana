@@ -52,7 +52,7 @@ export default class DiscoverPage {
       this.findTimeout.findByLinkText(searchName).click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -81,7 +81,7 @@ export default class DiscoverPage {
     let yAxisLabel = 0;
     let yAxisHeight;
 
-    return PageObjects.header.isGlobalLoadingIndicatorHidden()
+    return PageObjects.header.waitUntilLoadingHasFinished()
     .then(() => {
       return this.findTimeout
         .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
@@ -167,12 +167,12 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
   getHitCount() {
-    return PageObjects.header.isGlobalLoadingIndicatorHidden()
+    return PageObjects.header.waitUntilLoadingHasFinished()
     .then(() => {
       return PageObjects.common.findTestSubject('discoverQueryHits')
       .getVisibleText();
@@ -190,7 +190,7 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
