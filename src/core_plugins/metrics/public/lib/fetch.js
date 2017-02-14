@@ -15,7 +15,7 @@ export default (
         panels: [panel]
       };
 
-      $http.post('../api/metrics/vis/data', params)
+      return $http.post('../api/metrics/vis/data', params)
         .success(resp => {
           $scope.visData = resp;
         })
@@ -26,6 +26,7 @@ export default (
           notify.error(err);
         });
     }
+    return Promise.resolve();
   };
 };
 

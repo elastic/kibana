@@ -1,4 +1,5 @@
 import modules from 'ui/modules';
+import '../services/executor';
 import 'plugins/timelion/directives/refresh_hack';
 import $ from 'jquery';
 import createNewPanel from '../lib/create_new_panel';
@@ -9,7 +10,8 @@ const app = modules.get('kibana/metrics_vis');
 app.controller('MetricsEditorController', (
   $scope,
   Private,
-  timefilter
+  timefilter,
+  metricsExecutor
 ) => {
 
   const queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -70,11 +72,19 @@ app.controller('MetricsEditorController', (
   $scope.visData = {};
   $scope.fields = {};
   // All those need to be consolidated
-  $scope.$listen(timefilter, 'fetch', fetch($scope));
   $scope.$listen(queryFilter, 'fetch', fetch($scope));
-  $scope.$on('courier:searchRefresh', fetch($scope));
   $scope.$on('fetch', fetch($scope));
+
   fetchFields($scope)($scope.model.index_pattern);
+
+  // Register fetch
+  metricsExecutor.register({ execute: fetch($scope) });
+
+  // Start the executor
+  metricsExecutor.start();
+
+  // Destory the executor
+  $scope.$on('$destroy', metricsExecutor.destroy);
 
 });
 

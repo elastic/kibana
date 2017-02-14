@@ -4,7 +4,7 @@ export default (
 ) => {
   const notify = new Notifier({ location: 'Metrics' });
   return $scope => (indexPattern = '*') => {
-    $http.get(`../api/metrics/fields?index=${indexPattern}`)
+    return $http.get(`../api/metrics/fields?index=${indexPattern}`)
       .success(resp => {
         if (!$scope.fields) $scope.fields = {};
         if (resp.length && indexPattern) {
