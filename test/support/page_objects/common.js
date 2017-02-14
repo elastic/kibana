@@ -321,4 +321,24 @@ export default class Common {
     this.debug(`Found ${elements.length} for selector ${selector}`);
     return elements;
   }
+
+  async clickConfirmOnModal() {
+    this.debug('Clicking modal confirm');
+    await this.findTestSubject('confirmModalConfirmButton').click();
+    await PageObjects.common.sleep(1000);
+  }
+
+  async clickCancelOnModal() {
+    this.debug('Clicking modal cancel');
+    await this.findTestSubject('confirmModalCancelButton').click();
+    await PageObjects.common.sleep(1000);
+  }
+
+  async isConfirmModalOpen() {
+    await this.remote.setFindTimeout(2000);
+    let isOpen = true;
+    await this.findTestSubject('confirmModalCancelButton').catch(() => isOpen = false);
+    await this.remote.setFindTimeout(defaultFindTimeout);
+    return isOpen;
+  }
 }
