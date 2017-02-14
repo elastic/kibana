@@ -1,7 +1,9 @@
 .kuiHeaderBar {
   @include bar;
+  align-items: baseline;
+  padding-bottom: 4px;
 
-  border-bottom: $tableBorder;
+  border-bottom: $tableRowBorder;
 }
 
 /**
@@ -9,6 +11,7 @@
  */
 .kuiHeaderBarSection {
   @include barSection;
+  align-items: baseline;
 
   &:only-child {
     margin-left: 0; /* 1 */

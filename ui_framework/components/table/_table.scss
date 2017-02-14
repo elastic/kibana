@@ -12,14 +12,15 @@
 
 .kuiTable {
   width: 100%;
-  border: $tableBorder;
+  // border: $tableBorder;
   border-collapse: collapse;
   background-color: #FFFFFF;
 }
 
 .kuiTableHeaderCell {
   @include tableCell;
-  color: #a7a7a7;
+  color: #444;
+  font-size: 12px;
 }
 
 /**
@@ -46,8 +47,16 @@
 
 .kuiTableRow {
   &:hover {
+    background-color: #f7f7f7;
+
     .kuiTableRowHoverReveal {
       display: inline-block;
+    }
+  }
+
+  &:last-child {
+    .kuiTableRowCell {
+      border-bottom: $tableRowBorder;
     }
   }
 }

@@ -3,9 +3,10 @@
  */
 .kuiTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
+  font-weight: 300; /* 1 */
   color: $fontColor;
-  font-size: 22px;
+  font-size: 26px;
+  -webkit-font-smoothing: antialiased;
 }
 
 /**
@@ -13,9 +14,10 @@
  */
 .kuiSubTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
+  font-weight: 300; /* 1 */
   color: $fontColor;
-  font-size: 18px;
+  font-size: 20px;
+  -webkit-font-smoothing: antialiased;
 }
 
 /**
@@ -27,4 +29,5 @@
   color: $fontColor;
   line-height: $lineHeight;
   font-size: $fontSize;
+  -webkit-font-smoothing: antialiased;
 }

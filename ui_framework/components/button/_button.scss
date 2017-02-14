@@ -7,13 +7,14 @@
   display: inline-block; /* 1 */
   appearance: none;
   cursor: pointer;
-  padding: 4px 12px 5px;
+  padding: 4px 16px 5px;
   font-size: $fontSize;
-  font-weight: 400;
+  font-weight: normal;
   line-height: $lineHeight;
   text-decoration: none;
-  border: none;
+  border: 1px solid;
   border-radius: $buttonBorderRadius;
+  -webkit-font-smoothing: antialiased;
 
   &:disabled {
     cursor: default;
@@ -46,7 +47,8 @@
  */
 .kuiButton--basic {
   color: #5a5a5a;
-  background-color: #F2F2F2;
+  background-color: transparent;
+  border-color: #e2e2e2;
 
   // Goes before hover, so that hover can override it.
   &:focus {
@@ -55,8 +57,8 @@
 
   &:hover:enabled,
   &:active:enabled {
-    color: #ffffff !important; /* 1 */
-    background-color: #9B9B9B;
+    // color: #ffffff !important; /* 1 */
+    background-color: #F2F2F2;
   }
 
   &:disabled {
@@ -69,16 +71,19 @@
  */
 .kuiButton--primary {
   color: #FFFFFF;
-  background-color: #6EADC1;
+  background-color: #00a9e5;
+  border-color: #00a9e5;
 
   &:hover:enabled,
   &:active:enabled {
     color: #FFFFFF !important; /* 1 */
-    background-color: #006E8A;
+    background-color: #005571;
+    border-color: #005571;
   }
 
   &:disabled {
     background-color: #B6D6E0;
+    border-color: #B6D6E0;
   }
 
   &:focus {
@@ -91,16 +96,19 @@
  */
 .kuiButton--danger {
   color: #FFFFFF;
-  background-color: #D76051;
+  background-color: #f34833;
+  border-color: #f34833;
 
   &:hover:enabled,
   &:active:enabled {
     color: #FFFFFF !important; /* 1 */
-    background-color: #A52E1F;
+    background-color: #b9200d;
+    border-color: #b9200d;
   }
 
   &:disabled {
     background-color: #efc0ba;
+    border-color: #efc0ba;
   }
 
   &:focus {
@@ -114,16 +122,18 @@
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: $linkColor !important; /* 2 */
+  color: #00a9e5 !important; /* 2 */
   background-color: transparent;
+  border-color: #00a9e5;
 
   &:hover:enabled,
   &:active:enabled {
-    color: $linkHoverColor !important; /* 1 */
-    text-decoration: underline;
+    // color: $linkHoverColor !important; /* 1 */
+    background-color: rgba(0,169,224,0.1);
   }
 
   &:disabled {
-    color: #dddddd !important; /* 1 */
+    color: #9B9B9B !important; /* 1 */
+    border-color: #e2e2e2;
   }
 }
