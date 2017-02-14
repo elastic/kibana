@@ -9,7 +9,7 @@ import ElementEditor from 'plugins/rework/components/element_editor/element_edit
 import WorkpadContainer from 'plugins/rework/containers/workpad_container/workpad_container';
 
 // Components
-import Sidebar from 'plugins/rework/components/sidebar/sidebar';
+import LeftSidebar from 'plugins/rework/components/left_sidebar/left_sidebar';
 import EditorToggle from 'plugins/rework/components/editor_toggle/editor_toggle';
 
 // Actions
@@ -67,21 +67,13 @@ const App = React.createClass({
 
         <div className="rework--workspace">
 
-          <Sidebar position="left">
-            {!editor ? null : (
-              <div className="rework--editor--left">
-                <ElementEditor
-                  element={currentElement}
-                  openDropDown={this.openElementDropDown}
-                  argumentSet={this.argumentSet}>
-                </ElementEditor>
-              </div>
-            )}
-
-            <div className="rework--editor-toggle--left">
-              <EditorToggle toggle={this.do(editorToggle)} status={editor}></EditorToggle>
-            </div>
-          </Sidebar>
+          <LeftSidebar
+            isOpen={editor}
+            toggle={this.do(editorToggle)}
+            argumentSet={this.argumentSet}
+            openElementDropDown={this.openElementDropDown}
+            element={currentElement}>
+          </LeftSidebar>
 
           {workpadContainerElem}
 

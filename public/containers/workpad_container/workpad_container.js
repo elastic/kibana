@@ -25,30 +25,36 @@ import { workpadReplace } from 'plugins/rework/state/actions/workpad';
 
 import { elementSelect, elementAdd } from 'plugins/rework/state/actions/element';
 
-const WorkpadContainer = React.createClass({
+class WorkpadContainer extends React.PureComponent {
   pageAdd() {
     this.props.dispatch(pageAdd());
-  },
+  }
+
   pageRemove() {
     const {page, pages} = this.props.workpad;
     this.props.dispatch(pageRemove(pages[page]));
-  },
+  }
+
   select(id) {
     return (e) => {
       e.stopPropagation();
       this.props.dispatch(elementSelect(id));
     };
-  },
+  }
+
   do(action) {
     const {dispatch} = this.props;
     return () => dispatch(action());
-  },
+  }
+
   changePage(page) {
     this.props.dispatch(pageReplace(page));
-  },
+  }
+
   changeWorkpad(workpad) {
     this.props.dispatch(workpadReplace(workpad));
-  },
+  }
+
   uploadImage(pageId) {
     return (file) => {
       const reader = new FileReader();
@@ -59,7 +65,8 @@ const WorkpadContainer = React.createClass({
 
       reader.readAsDataURL(file[0]);
     };
-  },
+  }
+
   render() {
     const {fullscreen, workpad, elements, selectedElement, pages, elementCache} = this.props;
     const {rotate, resizeMove} = this;
@@ -101,7 +108,10 @@ const WorkpadContainer = React.createClass({
     if (fullscreen) {
       return (
         <Fullscreen height={workpad.height} width={workpad.width}>
-          <Presentation onNext={this.do(pageNext)} onPrev={this.do(pagePrevious)} onEsc={this.do(fullscreenToggle)}>
+          <Presentation
+            onNext={this.do(pageNext).bind(this)}
+            onPrev={this.do(pagePrevious).bind(this)}
+            onEsc={this.do(fullscreenToggle).bind(this)}>
             <Centered>
               <Workpad workpad={workpad}>
                 {stack}
@@ -116,28 +126,28 @@ const WorkpadContainer = React.createClass({
             <div style={{margin: 'auto'}}>
               <div className="rework--workspace-upper" style={{textAlign: 'center', padding: '10px 0', height: '60px'}}>
                 <PageManager
-                  add={this.pageAdd}
-                  remove={this.pageRemove}
+                  add={this.pageAdd.bind(this)}
+                  remove={this.pageRemove.bind(this)}
                   pageCount={workpad.pages.length}
                   page={currentPage}
-                  onPageChange={this.changePage}
+                  onPageChange={this.changePage.bind(this)}
                   workpad={workpad}
-                  onWorkpadChange={this.changeWorkpad}>
+                  onWorkpadChange={this.changeWorkpad.bind(this)}>
                 </PageManager>
               </div>
               <div className="rework--workspace-lower" style={{margin: 'auto'}}>
                 <Centered>
-                  <Pager direction='previous' handler={this.do(pagePrevious)}></Pager>
+                  <Pager direction='previous' handler={this.do(pagePrevious).bind(this)}></Pager>
                   <Dropzone
                     style={{width: null, height: null}}
                     disableClick={true}
                     multiple={false} accept="image/*"
-                    onDrop={this.uploadImage(currentPage.id)}>
+                    onDrop={this.uploadImage(currentPage.id).bind(this)}>
                     <Workpad workpad={workpad}>
                         {stack}
                     </Workpad>
                   </Dropzone>
-                  <Pager direction='next' handler={this.do(pageNext)}></Pager>
+                  <Pager direction='next' handler={this.do(pageNext).bind(this)}></Pager>
                 </Centered>
               </div>
             </div>
@@ -145,7 +155,7 @@ const WorkpadContainer = React.createClass({
       );
     }
   }
-});
+};
 
 function mapStateToProps(state) {
   return {
