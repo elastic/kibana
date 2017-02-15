@@ -9,8 +9,9 @@ export default function AggTypeMetricDerivativeProvider(Private) {
 
   return new MetricAggType({
     name: 'sum_bucket',
-    title: 'Bucket Sum',
+    title: 'Sum Bucket',
     makeLabel: agg => makeNestedLabel(agg, 'overall sum'),
+    group: 'Pipeline Aggregations',
     params: [
       ...siblingPipelineHelper.params()
     ]

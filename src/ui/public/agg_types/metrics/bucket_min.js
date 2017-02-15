@@ -8,8 +8,9 @@ export default function AggTypeMetricDerivativeProvider(Private) {
 
   return new MetricAggType({
     name: 'min_bucket',
-    title: 'Bucket Min',
+    title: 'Min Bucket',
     makeLabel: agg => makeNestedLabel(agg, 'overall min'),
+    group: 'Pipeline Aggregations',
     params: [
       ...siblingPipelineHelper.params()
     ]

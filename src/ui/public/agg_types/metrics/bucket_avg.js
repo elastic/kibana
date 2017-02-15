@@ -8,8 +8,9 @@ export default function AggTypeMetricDerivativeProvider(Private) {
 
   return new MetricAggType({
     name: 'avg_bucket',
-    title: 'Bucket Average',
+    title: 'Average Bucket',
     makeLabel: agg => makeNestedLabel(agg, 'overall average'),
+    group: 'Pipeline Aggregations',
     params: [
       ...siblingPipelineHelper.params()
     ]

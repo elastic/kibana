@@ -8,8 +8,9 @@ export default function AggTypeMetricDerivativeProvider(Private) {
 
   return new MetricAggType({
     name: 'max_bucket',
-    title: 'Bucket Max',
+    title: 'Max Bucket',
     makeLabel: agg => makeNestedLabel(agg, 'overall max'),
+    group: 'Pipeline Aggregations',
     params: [
       ...siblingPipelineHelper.params()
     ]
