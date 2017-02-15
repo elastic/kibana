@@ -7,6 +7,7 @@ import Element from 'plugins/rework/components/element/element';
 
 import { elementSelect, elementProps, elementRemove, argumentSet } from 'plugins/rework/state/actions/element';
 import { filterSet, filterRemove } from 'plugins/rework/state/actions/filter';
+import { dataframeSelect } from 'plugins/rework/state/actions/dataframe';
 
 class ElementWrapper extends React.Component {
   constructor(props) {
@@ -16,11 +17,13 @@ class ElementWrapper extends React.Component {
     };
   }
 
-  select(id) {
+  select(element) {
+    const { id, args } = element;
     return (e) => {
       e.stopPropagation();
       const {dispatch} = this.props;
       dispatch(elementSelect(id));
+      if (args.dataframe) dispatch(dataframeSelect(args.dataframe));
     };
   }
 
@@ -64,14 +67,14 @@ class ElementWrapper extends React.Component {
   }
 
   render() {
-    const {id} = this.props.element;
+    const { id } = this.props.element;
 
     const position = _.pick(this.props.element, ['top', 'left', 'height', 'width', 'angle']);
     return (
       <div
         style={{height: '100%'}}
         tabIndex="0"
-        onFocus={this.select(id)}
+        onFocus={this.select(this.props.element)}
         id={id}
         onKeyDown={this.handleKeypress.bind(this)}
         className="rework--element-wrapper">
