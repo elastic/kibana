@@ -42,13 +42,14 @@ describe('tilemaptest - Marker Tests', function () {
   let mapData;
   let markerLayer;
 
-  function createMarker(MarkerClass, geoJson) {
+  function createMarker(MarkerClass, geoJson, tooltipFormatter) {
     mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
     mapData.properties.allmin = mapData.properties.min;
     mapData.properties.allmax = mapData.properties.max;
 
     return new MarkerClass(mockMap, mapData, {
-      valueFormatter: geoJsonData.valueFormatter
+      valueFormatter: geoJsonData.valueFormatter,
+      tooltipFormatter: tooltipFormatter || null
     });
   }
 
@@ -143,15 +144,14 @@ describe('tilemaptest - Marker Tests', function () {
 
     describe('showTooltip', function () {
       it('should use the tooltip formatter', function () {
-        let content;
         const sample = _.sample(mapData.features);
 
+        markerLayer = createMarker(MarkerClass, null, Function.prototype);//create marker with tooltip
+        markerLayer._attr.addTooltip = true;
         const stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
           return;
         });
-
         markerLayer._showTooltip(sample);
-
         expect(stub.callCount).to.equal(1);
         expect(stub.firstCall.calledWith(sample)).to.be(true);
       });

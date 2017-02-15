@@ -133,7 +133,7 @@ export default class DashboardPage {
   async saveDashboard(dashName, storeTimeWithDash) {
     await PageObjects.common.findTestSubject('dashboardSaveButton').click();
 
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
 
     PageObjects.common.debug('entering new title');
@@ -143,7 +143,7 @@ export default class DashboardPage {
       await this.storeTimeWithDashboard(storeTimeWithDash);
     }
 
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
 
     await PageObjects.common.try(() => {
@@ -151,7 +151,7 @@ export default class DashboardPage {
       return this.findTimeout.findByCssSelector('.btn-primary').click();
     });
 
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
 
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -179,10 +179,10 @@ export default class DashboardPage {
     await searchBox.click();
     await searchBox.type(dashName.replace('-',' '));
 
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
     await this.clickDashboardByLinkText(dashName);
-    return PageObjects.header.isGlobalLoadingIndicatorHidden();
+    return PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   getPanelTitles() {

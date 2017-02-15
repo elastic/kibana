@@ -1,0 +1,27 @@
+[[release-notes-5.2.1]]
+== 5.2.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.2.1]]
+=== Security fix
+When previous versions of Kibana 5 are configured for SSL client access, file
+descriptors will fail to be cleaned up after certain requests and will
+accumulate over time until the process crashes. Requests that are canceled
+before data is sent can also crash the process. +
+{security}[ESA-2017-02] ({pull}10225[#10225])
+
+[float]
+[[bug-5.2.1]]
+=== Bug fixes
+Core::
+* Bump Node.js to version 6.9.5. This was a low severity security release for Node.js, which has minimal impact to Kibana, but is still worth upgrading. {pull}10135[#10135]
+Discover::
+* Prevented a background action that was causing unnecessary CPU cycles {pull}10036[#10036]
+Management::
+* Delete button for color formatters no longer overlaps format dropdown {issue}8864[#8864]
+Visualize::
+* Fixed regression where certain visualizations were being limited to 25 series {issue}10132[#10132]
+* Fixed typo on a tag cloud warning message {pull}10092[#10092]
+* Fixed a bug where data table visualizations would incorrectly appear empty in certain circumstances {issue}9757[#9757]
