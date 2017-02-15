@@ -31,19 +31,23 @@ const chrome = require('ui/chrome')
       if (metrics) {
         ui.metrics = [{
           name: 'Heap Total',
-          value: _.get(metrics, 'process.heap.total_in_bytes'),
+          value: _.get(metrics, 'process.mem.heap_max_in_bytes'),
           type: 'byte'
         }, {
-          name: 'Heap used',
-          value: _.get(metrics, 'process.heap.used_in_bytes'),
+          name: 'Heap Used',
+          value: _.get(metrics, 'process.mem.heap_used_in_bytes'),
           type: 'byte'
         }, {
           name: 'Load',
-          value: [_.get(metrics, 'os.load.1m'), _.get(metrics, 'os.load.5m'), _.get(metrics, 'os.load.15m')],
+          value: [
+            _.get(metrics, 'os.cpu.load_average.1m'),
+            _.get(metrics, 'os.cpu.load_average.5m'),
+            _.get(metrics, 'os.cpu.load_average.15m')
+          ],
           type: 'float'
         }, {
           name: 'Response Time Avg',
-          value: _.get(metrics, 'response_times.average_in_millis'),
+          value: _.get(metrics, 'response_times.avg_in_millis'),
           type: 'ms'
         }, {
           name: 'Response Time Max',

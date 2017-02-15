@@ -17,15 +17,13 @@ export function getMetrics({ event, config }) {
     uptime_in_millis: process.uptime() * 1000,
     process: {
       mem: {
-        heap: {
-          total_in_bytes: _.get(event, 'psmem.heapTotal'),
-          used_in_bytes:  _.get(event, 'psmem.heapUsed')
-        }
+        heap_max_in_bytes: _.get(event, 'psmem.heapTotal'),
+        heap_used_in_bytes:  _.get(event, 'psmem.heapUsed')
       }
     },
     os: {
       cpu: {
-        load: {
+        load_average: {
           '1m': _.get(event, 'osload.0'),
           '5m': _.get(event, 'osload.1'),
           '15m': _.get(event, 'osload.1')
