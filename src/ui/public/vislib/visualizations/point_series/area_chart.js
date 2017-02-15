@@ -79,9 +79,8 @@ export default function AreaChartFactory(Private) {
       // Append path
       const path = layer.append('path')
       .attr('data-label', data.label)
-      .style('fill', () => {
-        return color(data.label);
-      })
+      .style('fill', () => color(data.label))
+      .style('stroke', () => color(data.label))
       .classed('overlap_area', function () {
         return isOverlapping;
       })
