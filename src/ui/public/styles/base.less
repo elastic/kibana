@@ -903,6 +903,7 @@ fieldset {
 .kuiSideBarSelect {
   // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
   height: 24px;
+  width: 100%;
   font-size: 12px;
   padding: 0 15px;
 }
@@ -923,12 +924,21 @@ fieldset {
   margin-bottom: 6px;
 }
 
+.kuiSideBarSection__main {
+  margin-bottom: 25px;
+}
+
 .kuiSideBarSectionTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
   border-bottom: 1px solid #D4D4D4;
+}
+
+.kuiSideBarSection__main .kuiSideBarSectionTitle {
+  background-color: #E4E4E4;
+  padding: 2px 10px;
 }
 
 .kuiSideBarSectionTitle__text {
