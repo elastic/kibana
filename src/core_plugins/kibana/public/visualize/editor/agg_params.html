@@ -10,6 +10,12 @@
     style="display: none;">
 </div>
 
+<div ng-if="agg.error" class="form-group ng-scope">
+  <p class="vis-editor-agg-error ng-binding">
+    {{agg.error}}
+  </p>
+</div>
+
 <div ng-if="agg.schema.deprecate" class="form-group">
   <p ng-show="agg.schema.deprecateMessage" class="vis-editor-agg-error">
     {{ agg.schema.deprecateMessage }}

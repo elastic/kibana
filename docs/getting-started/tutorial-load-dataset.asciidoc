@@ -58,7 +58,7 @@ Before we load the Shakespeare and logs data sets, we need to set up {es-ref}map
 Mapping divides the documents in the index into logical groups and specifies a field's characteristics, such as the
 field's searchability or whether or not it's _tokenized_, or broken up into separate words.
 
-Use the following command to set up a mapping for the Shakespeare data set:
+Use the following command in a terminal (eg `bash`) to set up a mapping for the Shakespeare data set:
 
 [source,shell]
 curl -XPUT http://localhost:9200/shakespeare -d '

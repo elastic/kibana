@@ -14,12 +14,20 @@ describe('collectBranch()', function () {
       depth: 3,
       size: 6,
       field: { format: { convert: convert } },
-      aggConfig: { getFieldDisplayName: _.constant('field3'), fieldFormatter: _.constant(String) },
+      aggConfig: {
+        getFieldDisplayName: _.constant('field3'),
+        fieldFormatter: _.constant(String),
+        makeLabel: () => {},
+      },
       parent: {
         name: 'bucket2',
         depth: 2,
         size: 12,
-        aggConfig: { fieldFormatter: _.constant(String), getFieldDisplayName: _.constant('field2') },
+        aggConfig: {
+          fieldFormatter: _.constant(String),
+          getFieldDisplayName: _.constant('field2'),
+          makeLabel: () => {},
+        },
         parent: {
           name: 'bucket1',
           depth: 1,
@@ -43,13 +51,13 @@ describe('collectBranch()', function () {
     expect(results[1]).to.have.property('metric', 12);
     expect(results[1]).to.have.property('depth', 1);
     expect(results[1]).to.have.property('bucket', 'bucket2');
-    expect(results[1]).to.have.property('field', 'field2');
+    expect(results[1]).to.have.property('field', 'level 2');
     expect(results[1]).to.have.property('aggConfig');
 
     expect(results[2]).to.have.property('metric', 6);
     expect(results[2]).to.have.property('depth', 2);
     expect(results[2]).to.have.property('bucket', 'bucket3');
-    expect(results[2]).to.have.property('field', 'field3');
+    expect(results[2]).to.have.property('field', 'level 3');
     expect(results[2]).to.have.property('aggConfig');
 
   });
