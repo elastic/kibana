@@ -15,4 +15,9 @@ export const filterSet = (filterId, filter) => {
   };
 };
 
-export const filterRemove = filterSet;
+export const filterRemove = (filterId) => {
+  return (dispatch, getState) => {
+    if (!getState().persistent.filters[filterId]) return;
+    else dispatch(filterSet(filterId));
+  };
+};
