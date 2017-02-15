@@ -6,7 +6,7 @@ import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
 import _ from 'lodash';
 import angular from 'angular';
-const app = modules.get('kibana/metrics_vis');
+const app = modules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
   $scope,
   Private,
@@ -30,8 +30,19 @@ app.controller('MetricsEditorController', (
     trailing: true
   });
 
+  // If the model doesn't exist we need to either intialize it with a copy from
+  // the $scope.vis.params or create a new panel all together.
+  if (!$scope.model) {
+    if ($scope.vis.params.type) {
+      $scope.model = _.assign({}, $scope.vis.params);
+    } else {
+      $scope.model = createNewPanel();
+      angular.copy($scope.model, $scope.vis._editableVis.params);
+    }
+  }
+
   $scope.$watchCollection('model', (newValue, oldValue) => {
-    angular.copy(newValue, $scope.vis.params);
+    angular.copy(newValue, $scope.vis._editableVis.params);
     // When the content of the model changes we need to stage the changes to
     // the Editable visualization. Normally this is done through clicking the
     // play which triggers `stageEditableVis` in kibana/public/visualize/editor/editor.js
@@ -58,16 +69,6 @@ app.controller('MetricsEditorController', (
       });
     }
   });
-
-  // If the model doesn't exist we need to either intialize it with a copy from
-  // the $scope.vis.params or create a new panel all together.
-  if (!$scope.model) {
-    if ($scope.vis.params.type) {
-      $scope.model = _.assign({}, $scope.vis.params);
-    } else {
-      $scope.model = createNewPanel();
-    }
-  }
 
   $scope.visData = {};
   $scope.fields = {};
