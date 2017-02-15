@@ -39,7 +39,7 @@ module.exports = function (server) {
             ok: true,
             resp: { workpads },
           });
-        })
+        });
       })
       .catch(function (resp) {
         reply({
