@@ -2,8 +2,8 @@
   <div class="container-fluid">
     <div class="row">
       <div class="input-group form-group finder-form col-md-7">
-        <span class="input-group-addon">
-          <i class="fa fa-search"></i>
+        <span class="input-group-addon savedObjectFinderSearchIcon">
+          <span class="fa fa-search"></span>
         </span>
         <input
           input-focus
@@ -13,7 +13,8 @@
           class="form-control"
           name="filter"
           type="text"
-          autocomplete="off" />
+          autocomplete="off"
+        />
       </div>
       <div class="finder-hit-count col-md-2">
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
@@ -36,10 +37,10 @@
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">
         Name
-        <i
+        <span
           class="fa"
           ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-        </i>
+        </span>
       </span>
     </li>
     <li
@@ -52,7 +53,7 @@
       <a ng-href="{{finder.makeUrl(hit)}}"
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
-          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+          <span aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></span>
           <span>{{hit.title}}</span>
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
