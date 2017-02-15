@@ -135,12 +135,14 @@
         class="kuiTableRow"
       >
         <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-          <input
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="listingController.toggleItem(item)"
-            ng-checked="listingController.isItemChecked(item)"
-          >
+          <div class="kuiTableRowCell__liner">
+            <input
+              type="checkbox"
+              class="kuiCheckBox"
+              ng-click="listingController.toggleItem(item)"
+              ng-checked="listingController.isItemChecked(item)"
+            >
+          </div>
         </td>
 
         <td class="kuiTableRowCell">
