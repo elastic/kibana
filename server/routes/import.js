@@ -30,7 +30,10 @@ module.exports = function (server) {
           ]);
         }, []);
 
-        return callWithRequest(request, 'bulk', { body })
+        return callWithRequest(request, 'bulk', {
+          refresh: 'wait_for',
+          body,
+        })
         .then(function (resp) {
           reply({
             ok: true,

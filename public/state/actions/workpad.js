@@ -97,7 +97,10 @@ export function workpadImport(file) {
           },
           body: JSON.stringify(body),
         })
-        .then(toJson());
+        .then(resp => {
+          dispatch(workdpadLoadAll());
+          return toJson()(resp);
+        });
       });
     });
 
