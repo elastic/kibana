@@ -30,13 +30,8 @@ export default React.createClass({
     console.log(e.key);
   },
   render() {
-    const style = {
-      width: '100%',
-      height: '100%',
-    };
-
     return (
-      <div style={style}>
+      <div>
         {this.props.children}
       </div>
     );
