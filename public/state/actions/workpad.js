@@ -26,10 +26,11 @@ export function workpadInit() {
 
 export function workpadLoad(id) {
   return (dispatch, getState) => {
-    const action = createAction('WORKPAD_LOAD', id => getWorkpad(id));
-
-    dispatch(action(id));
-    dispatch(workpadInit());
+    getWorkpad(id).then((resp) => {
+      const action = createAction('WORKPAD_LOAD');
+      dispatch(action(resp));
+      dispatch(workpadInit());
+    });
   };
 }
 
