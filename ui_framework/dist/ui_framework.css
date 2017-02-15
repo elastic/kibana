@@ -25,6 +25,8 @@
  */
 * {
   box-sizing: border-box; }
+  *:before, *:after {
+    box-sizing: border-box; }
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
@@ -302,8 +304,7 @@ body {
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
-    top: -0.05em;
-    left: 0.15em;
+    left: 0.25em;
     font-family: FontAwesome;
     content: "\F00C";
     font-size: 1em;
@@ -1663,12 +1664,14 @@ body {
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  position: relative; }
+  position: relative;
+  font-size: 14px; }
 
 .kuiToolBarSearchBox__icon {
   position: absolute;
-  top: 6px;
-  left: 8px;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
   font-size: 14px;
   color: #ACACAC; }
 
@@ -1678,15 +1681,18 @@ body {
 .kuiToolBarSearchBox__input {
   width: 100%;
   min-width: 200px;
-  padding: 5px 12px 6px 28px;
+  padding: 4px 12px 5px 28px;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  /* 1 */
   background-color: #FFFFFF;
   color: #191E23;
-  border: 1px solid #FFFFFF;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 1em;
   border: 1px solid #ffffff;
   line-height: normal;
-  /* 1 */ }
+  /* 1 */
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
     border-color: #6EADC1; }
