@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import $ from 'jquery';
-import _ from 'lodash';
 export default function AxisLabelsFactory(Private) {
   class AxisLabels {
     constructor(axisConfig, scale) {
@@ -19,29 +18,37 @@ export default function AxisLabelsFactory(Private) {
 
         if (config.get('labels.rotate')) {
           text
-          .style('text-anchor', function () {
-            return config.get('labels.rotateAnchor') === 'center' ? 'center' : 'end';
+          .style('text-anchor', function (d, i) {
+            const currentValue = $(this).css('text-anchor');
+            const rotateDeg = config.get('labels.rotate');
+            if (!rotateDeg) return currentValue;
+            else {
+              const position = config.get('position');
+              switch (position) {
+                case 'top': return 'end';
+                case 'bottom': return 'end';
+                default:
+                  if (rotateDeg === 90 || rotateDeg === -90) return 'middle';
+                  return currentValue;
+              }
+            }
           })
           .attr('dy', function () {
-            if (config.isHorizontal()) {
-              if (config.get('position') === 'top') return '-0.9em';
-              else return '0.3em';
-            }
-            return '0';
-          })
-          .attr('dx', function () {
-            return config.isHorizontal() ? '-0.9em' : '0';
+            return config.isHorizontal() ? '0.3em' : '0';
           })
           .attr('transform', function rotate(d, j) {
-            let rotateDeg = config.get('labels.rotate');
-            if (config.get('labels.rotateAnchor') === 'center') {
+            const position = config.get('position');
+            const rotateDeg = position === 'top' ? config.get('labels.rotate') : -config.get('labels.rotate');
+
+            if ($(this).css('text-anchor') === 'middle') {
               const coord = text[0][j].getBBox();
               const transX = ((coord.x) + (coord.width / 2));
               const transY = ((coord.y) + (coord.height / 2));
               return `rotate(${rotateDeg}, ${transX}, ${transY})`;
             } else {
-              rotateDeg = config.get('position') === 'top' ? rotateDeg : -rotateDeg;
-              return `rotate(${rotateDeg})`;
+              const transX = this.attributes.x.nodeValue;
+              const transY = this.attributes.y.nodeValue;
+              return `rotate(${rotateDeg}, ${transX}, ${transY})`;
             }
           });
         }
