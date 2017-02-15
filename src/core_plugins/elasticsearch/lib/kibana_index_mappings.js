@@ -1,4 +1,7 @@
 export const mappings = {
+  '_default_': {
+    'dynamic': 'false'
+  },
   config: {
     properties: {
       buildNum: {
