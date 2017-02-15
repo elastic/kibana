@@ -236,9 +236,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       });
 
       $scope.$watch('state.interval', function (interval, oldInterval) {
-        if (interval !== oldInterval && interval === 'auto') {
-          $scope.showInterval = false;
-        }
         $scope.fetch();
       });
 
