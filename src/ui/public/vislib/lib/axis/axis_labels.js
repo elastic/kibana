@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import $ from 'jquery';
-import _ from 'lodash';
 export default function AxisLabelsFactory(Private) {
   class AxisLabels {
     constructor(axisConfig, scale) {

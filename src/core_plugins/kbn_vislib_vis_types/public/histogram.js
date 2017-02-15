@@ -104,7 +104,7 @@ export default function PointSeriesVisType(Private) {
       optionTabs: [
         {
           name: 'advanced',
-          title: 'Axes & Metrics',
+          title: 'Metrics & Axes',
           editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
           '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },

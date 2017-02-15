@@ -73,7 +73,7 @@ The category axis is defined by the bucket aggregation you chose under Data tab.
 *Position*:: You can choose where you want to display category axis. If you position your category axis on the left or right the chart will turn to the horizontal type.
 *Advanced Options*::
 *Labels - Show Labels*:::: Allows you to hide axis labels
-*Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough spave to display them
+*Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough space to display them
 *Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
 *Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
 
@@ -91,7 +91,7 @@ Each value axis has this options:
 
 *Show*:: You can decide to hide the value axis completely
 *Label*:: Allows to define a custom label
-*Position*:: Options for position depend on the position of your category axis. If category axis is positioned on the top or bottom you can position value axis on the left or right. In the oposite case you can position your value axis on the top or bottom.
+*Position*:: Options for position depend on the position of your category axis. If category axis is positioned on the top or bottom you can position value axis on the left or right. In the opposite case you can position your value axis on the top or bottom.
 *Mode*:: Mode allows you to define how value axis represents the values. You can choose among the following:
 _wiggle_:::: Displays the aggregations as a https://en.wikipedia.org/wiki/Streamgraph[streamgraph].
 _percentage_:::: Displays each aggregation as a proportion of the total.

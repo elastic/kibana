@@ -17,6 +17,8 @@ export default function VislibVisTypeFactory(Private) {
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
   const updateParams = function (params) {
+    if (!params.seriesParams || !params.seriesParams.length) return;
+
     const updateIfSet = (from, to, prop, func) => {
       if (from[prop]) {
         to[prop] = func ? func(from[prop]) : from[prop];
