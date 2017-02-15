@@ -97,7 +97,8 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'aggs',
     'from',
     'size',
-    'source'
+    'source',
+    'version'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {

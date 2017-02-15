@@ -30,7 +30,7 @@
       sorting="sorting">
     </thead>
     <tbody>
-      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score"
+      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
         kbn-table-row="row"
         columns="columns"
         sorting="sorting"
