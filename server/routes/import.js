@@ -1,4 +1,5 @@
 import uuid from 'uuid/v4';
+import moment from 'moment';
 
 module.exports = function (server) {
   server.route({
@@ -15,7 +16,9 @@ module.exports = function (server) {
           _type: server.plugins.rework.kibanaType,
         };
 
+        const timestamp = request.payload['@timestamp'] || moment().toISOString();
         const workpads = request.payload.workpads.map(workpad => {
+          workpad['@timestamp'] = timestamp;
           workpad.workpad.id = `workpad-${uuid()}`;
           return workpad;
         });
