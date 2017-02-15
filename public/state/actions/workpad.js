@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import moment from 'moment';
 import { get } from 'lodash';
 import { createAction } from 'redux-actions';
 import { dataframeResolveAll } from './dataframe';
@@ -68,6 +69,43 @@ export function workpadExport(id) {
 
     dispatch(startAction());
     dispatch(action(id));
+  };
+}
+
+export function workpadImport(file) {
+  return (dispatch) => {
+    const startAction = createAction('WORKPAD_IMPORT_START');
+    const action = createAction('WORKPAD_IMPORT');
+
+    new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        resolve(JSON.parse(e.target.result));
+      };
+      reader.readAsBinaryString(file);
+    })
+    .then(data => {
+      const body = {
+        ...data,
+        '@timestamp': moment().toISOString(),
+      };
+      return fetch('../api/rework/import/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'kbn-xsrf': 'turdSandwich',
+        },
+        body: JSON.stringify(body),
+      })
+      .then(toJson());
+    })
+    .then(() => {
+      dispatch(action(file));
+      dispatch(workdpadLoadAll());
+    });
+
+    dispatch(startAction());
   };
 }
 

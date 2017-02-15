@@ -94,8 +94,8 @@ elements.push(new Element('chart', {
 
     shouldComponentUpdate(nextProps) {
       let result = false;
-      const height = $(this.refs.plot).height();
-      const width = $(this.refs.plot).width();
+      const height = $(this.plot).height();
+      const width = $(this.plot).width();
 
       // Update if the height/width have changed, or the arguments have changed.
       if (height !== this.height
@@ -114,13 +114,13 @@ elements.push(new Element('chart', {
       try {
         switch (args.chart_type) {
           case 'pie':
-            pie(this.refs.plot, args);
+            pie(this.plot, args);
             break;
           case 'vertical_bar':
-            verticalBar(this.refs.plot, args);
+            verticalBar(this.plot, args);
             break;
           case 'horizontal_bar':
-            horizontalBar(this.refs.plot, args);
+            horizontalBar(this.plot, args);
             break;
           default:
             console.log('No such chart type');
@@ -158,7 +158,7 @@ elements.push(new Element('chart', {
 
     componentDidMount() {
       this.renderChart();
-      this.cancelResize = observeResize($(this.refs.plot), this.renderChart.bind(this), 100);
+      this.cancelResize = observeResize($(this.plot), this.renderChart.bind(this), 100);
     }
 
     componentWillUnmount() {
@@ -171,7 +171,7 @@ elements.push(new Element('chart', {
 
     render() {
       return (
-        <div style={{width: '100%', height: '100%'}} ref="plot" className="rework--chart"></div>
+        <div style={{width: '100%', height: '100%'}} ref={plot => this.plot = plot} className="rework--chart"></div>
       );
 
     };

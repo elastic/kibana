@@ -1,3 +1,5 @@
+const exportVersion = 1;
+
 module.exports = function (server) {
   server.route({
     method: 'GET',
@@ -27,7 +29,8 @@ module.exports = function (server) {
         callWithRequest(request, 'search', searchQuery)
         .then(function (resp) {
           const response = reply({
-            workpads: resp.hits.hits.map(hit => hit._source)
+            workpads: resp.hits.hits.map(hit => hit._source),
+            version: exportVersion,
           });
           response.type('application/json');
         }).catch(function (resp) {

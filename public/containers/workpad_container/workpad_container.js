@@ -112,11 +112,9 @@ class WorkpadContainer extends React.PureComponent {
             onNext={this.do(pageNext).bind(this)}
             onPrev={this.do(pagePrevious).bind(this)}
             onEsc={this.do(fullscreenToggle).bind(this)}>
-            <Centered>
               <Workpad workpad={workpad}>
                 {stack}
               </Workpad>
-            </Centered>
           </Presentation>
         </Fullscreen>
       );

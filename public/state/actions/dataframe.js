@@ -13,6 +13,22 @@ export const dataframeResolved = createAction('DATAFRAME_RESOLVED', mutateWithId
 export const dataframeSelect = createAction('DATAFRAME_SELECT');
 export const dataframeCreate = createAction('DATAFRAME_CREATE');
 
+export function dataframeDuplicate(id) {
+  return (dispatch, getState) => {
+    const { dataframes } = getState().persistent;
+    const dataframe = dataframes[id] ? _.cloneDeep(dataframes[id]) : false;
+
+    // TODO: handle missing id error
+    if (!dataframe) return;
+
+    // remove the id and update the name
+    dataframe.name = dataframe.name + ' COPY';
+    delete dataframe.id;
+
+    dispatch(dataframeAdd(dataframe));
+  };
+}
+
 export function dataframeSet(dataframe) {
   return (dispatch, getState) => {
     dispatch(dataframeUnresolved(dataframe));

@@ -11,6 +11,7 @@ import {
   dataframeSelect,
   dataframeSet,
   dataframeAdd,
+  dataframeDuplicate,
   dataframeRemove
 } from 'plugins/rework/state/actions/dataframe';
 import './dataframe_dialog.less';
@@ -74,6 +75,12 @@ class DataframeDialog extends React.Component {
     this.props.dispatch(dataframeCreate(false));
   }
 
+  duplicateDataframe(id) {
+    return () => {
+      this.props.dispatch(dataframeDuplicate(id));
+    };
+  }
+
   removeDataframe(id) {
     const { dispatch, dataframes, selectedId } = this.props;
     return () => {
@@ -112,9 +119,14 @@ class DataframeDialog extends React.Component {
         <div className="rework--dataframe-dropdown-actions">
           {DataframeEditOrSelect}
 
-          <Tooltip place="left" content="Rename"><a onClick={this.startRename.bind(this)} className="fa fa-pencil"></a></Tooltip>
+          <Tooltip place="left" content="Rename">
+            <a onClick={this.startRename.bind(this)} className="fa fa-pencil"></a>
+          </Tooltip>
           <Tooltip place="left" content="Delete frame and all linked elements">
             <a onClick={this.removeDataframe(dataframe.id)} className={['fa fa-ban', ...deleteClasses].join(' ')}></a>
+          </Tooltip>
+          <Tooltip place="left" content="Duplicate">
+            <a onClick={this.duplicateDataframe(dataframe.id)} className="fa fa-copy"></a>
           </Tooltip>
         </div>
 
