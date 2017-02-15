@@ -33,7 +33,7 @@ export class FilterUtils {
    * @returns {QueryFilter}
    */
   static getQueryFilterForDashboard(dashboard) {
-    const defaultQueryFilter = { query_string: { query: '*' } };
+    const defaultQueryFilter = { match_all: {} };
     const dashboardFilters = this.getDashboardFilters(dashboard);
     const dashboardQueryFilter = _.find(dashboardFilters, this.isQueryFilter);
     return dashboardQueryFilter ? dashboardQueryFilter.query : defaultQueryFilter;
