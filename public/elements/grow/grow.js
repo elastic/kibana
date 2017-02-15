@@ -77,16 +77,8 @@ elements.push(new Element('grow', {
               return (
                 <div className="rework--grow-wrapper" key={key}>
                   <div
-                    style={{
-                      display: 'inline-block',
-                      height: '100%',
-                      width: '100%',
-                      backgroundImage: `url(${args.image})`,
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: 'contain',
-                      transform: `scale(${scale})`
-                    }}>
+                    className="rework--grow-content"
+                    style={{transform: `scale(${scale})`}}>
                   </div>
                   <div className="rework--grow-label" style={{
                     height: _.get(args.label_style, 'object.fontSize') + 'px'
