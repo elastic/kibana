@@ -4,6 +4,7 @@ import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
+import 'ui/partials/saved_object_finder.less';
 const module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
