@@ -11,31 +11,34 @@ module.exports = function (server) {
         const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
         const index = {
-          index: {
-            _index: config.get('kibana.index'),
-            _type: server.plugins.rework.kibanaType,
-          },
+          _index: config.get('kibana.index'),
+          _type: server.plugins.rework.kibanaType,
         };
+
         const workpads = request.payload.workpads.map(workpad => {
           workpad.workpad.id = `workpad-${uuid()}`;
           return workpad;
         });
 
         const body = workpads.reduce((ctx, workpad) => {
-          return ctx.concat([index, workpad]);
+          return ctx.concat([
+            { index: Object.assign({ _id: workpad.workpad.id }, index) },
+            workpad,
+          ]);
         }, []);
 
-        callWithRequest(request, 'bulk', { body })
+        return callWithRequest(request, 'bulk', { body })
         .then(function (resp) {
           reply({
             ok: true,
             resp: { workpads },
           });
-        }).catch(function (resp) {
-          reply({
-            ok: false,
-            resp: resp
-          });
+        })
+      })
+      .catch(function (resp) {
+        reply({
+          ok: false,
+          resp: resp
         });
       });
     }
