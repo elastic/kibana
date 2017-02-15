@@ -1,4 +1,9 @@
-import { bdd, defaultTimeout, scenarioManager, esClient, common } from '../../../support';
+import {
+  bdd,
+  defaultTimeout,
+  esArchiver,
+  common,
+} from '../../../support';
 
 bdd.describe('settings app', function () {
   this.timeout = defaultTimeout;
@@ -6,13 +11,14 @@ bdd.describe('settings app', function () {
   // on setup, we create an settingsPage instance
   // that we will use for all the tests
   bdd.before(async function () {
-    await scenarioManager.unload('logstashFunctional');
-    await scenarioManager.loadIfEmpty('makelogs');
+    await esArchiver.unload('logstash_functional');
+    await esArchiver.load('empty_kibana');
+    await esArchiver.loadIfNeeded('makelogs');
   });
 
   bdd.after(async function () {
-    await scenarioManager.unload('makelogs');
-    await esClient.delete('.kibana');
+    await esArchiver.unload('makelogs');
+    await esArchiver.unload('empty_kibana');
   });
 
   require('./_initial_state');

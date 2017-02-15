@@ -6,9 +6,7 @@ import {
 
 import {
   bdd,
-  scenarioManager,
   esClient,
-  elasticDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';

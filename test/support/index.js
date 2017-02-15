@@ -1,12 +1,13 @@
-
+import { resolve } from 'path';
 import url from 'url';
 
+import pkg from '../../package.json';
 import {
   BddWrapper,
-  ElasticDump,
   EsClient,
+  Log
 } from './utils';
-import ScenarioManager from '../fixtures/scenario_manager';
+import { EsArchiver } from '../../src/es_archiver';
 import PageObjects from './page_objects';
 
 // Intern values provided via the root index file of the test suite.
@@ -21,10 +22,13 @@ exports.defaultTryTimeout = config.defaultTryTimeout;
 exports.defaultFindTimeout = config.defaultFindTimeout;
 
 // Helper instances
-exports.scenarioManager =
-  new ScenarioManager(url.format(config.servers.elasticsearch));
-exports.elasticDump = new ElasticDump();
 exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
+exports.esArchiver = new EsArchiver({
+  client: exports.esClient.client,
+  dir: resolve(__dirname, '../../src/fixtures/es_archives'),
+  log: Log,
+  kibanaVersion: pkg.version
+});
 
 // TODO: We're using this facade to avoid breaking existing functionality as
 // we migrate test suites to the PageObject service. Once they're all migrated

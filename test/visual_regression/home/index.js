@@ -1,7 +1,6 @@
 import {
   bdd,
   remote,
-  scenarioManager,
   defaultTimeout
 } from '../../support';
 

@@ -1,6 +1,5 @@
 import {
   bdd,
-  scenarioManager,
   common,
   consolePage
 } from '../../support';

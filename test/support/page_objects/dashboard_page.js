@@ -2,9 +2,8 @@ import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
 import {
-  scenarioManager,
+  esArchiver,
   esClient,
-  elasticDump
 } from '../';
 import PageObjects from './';
 
@@ -16,11 +15,11 @@ export default class DashboardPage {
   }
 
   async initTests() {
-    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = esArchiver.loadIfNeeded('logstash_functional');
     await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
 
     PageObjects.common.debug('load kibana index with visualizations');
-    await elasticDump.elasticLoad('dashboard','.kibana');
+    await esArchiver.load('dashboard');
 
     await PageObjects.common.navigateToApp('dashboard');
 

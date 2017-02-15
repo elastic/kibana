@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import {
   bdd,
   defaultTimeout,
-  scenarioManager,
   esClient
 } from '../../../support';
 
