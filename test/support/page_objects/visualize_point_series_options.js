@@ -14,7 +14,14 @@ export default class VisualizePointSeriesOptions {
   clickOptions() {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Options')
+      .findByPartialLinkText('Panel Settings')
+      .click();
+  }
+
+  clickAxisOptions() {
+    return this.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Metrics & Axes')
       .click();
   }
 
@@ -88,7 +95,7 @@ export default class VisualizePointSeriesOptions {
   setGridValueAxis(axis) {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector(`select#gridAxis option[label="${axis}"]`)
+      .findByCssSelector(`select#gridAxis option[value="string:${axis}"]`)
       .click();
   }
 
@@ -150,7 +157,7 @@ export default class VisualizePointSeriesOptions {
   setSeriesAxis(series, axis) {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector(`select#seriesValueAxis${series} option[label="${axis}"]`)
+      .findByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`)
       .click();
   }
 

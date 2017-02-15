@@ -12,7 +12,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickLineChart');
       return PageObjects.visualize.clickLineChart();
@@ -25,8 +25,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function clickBucket() {
-      PageObjects.common.debug('Bucket = Split Chart');
-      return PageObjects.visualize.clickBucket(PageObjects.visualize.xAxisBucket);
+      PageObjects.common.debug('Bucket = X-Axis');
+      return PageObjects.visualize.clickBucket('X-Axis');
     })
     .then(function selectAggregation() {
       PageObjects.common.debug('Aggregation = Date Histogram');
@@ -43,7 +43,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function () {
       PageObjects.common.debug('Metric = Value Axis');
-      return PageObjects.visualize.clickBucket(PageObjects.visualize.yAxisBucket);
+      return PageObjects.visualize.clickBucket('Y-Axis');
     })
     .then(function selectAggregation() {
       PageObjects.common.debug('Aggregation = Average');
@@ -54,9 +54,9 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectField('machine.ram', 'metrics');
     })
     // go to options page
-    .then(function gotoOptions() {
-      PageObjects.common.debug('Going to options');
-      return PageObjects.visualizeOptions.clickOptions();
+    .then(function gotoAxisOptions() {
+      PageObjects.common.debug('Going to axis options');
+      return PageObjects.visualizeOptions.clickAxisOptions();
     })
     // add another value axis
     .then(function addAxis() {
@@ -115,28 +115,15 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should put secondary axis on the right', function () {
-      return PageObjects.visualizeOptions.toggleCollapsibleTitle('ValueAxis-2')
-        .then(function () {
-          return PageObjects.visualizeOptions.setValueAxisPosition(1, 'right');
-        })
-        .then(function () {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.common.sleep(2000);
-        })
-        .then(function checkAxisPosition() {
-          PageObjects.visualizeOptions.getRightValueAxes().then(length => {
-            expect(length).to.be(1);
-          });
-        });
+      PageObjects.visualizeOptions.getRightValueAxes().then(length => {
+        expect(length).to.be(1);
+      });
     });
-
   });
 
   bdd.describe('multiple chart types', function () {
     bdd.it('should change average series type to histogram', function () {
-      return PageObjects.visualizeOptions.toggleCollapsibleTitle('ValueAxis-2')
+      return PageObjects.visualizeOptions.toggleCollapsibleTitle('RightAxis-1')
         .then(function () {
           return PageObjects.visualizeOptions.setSeriesType(1, 'histogram');
         })
@@ -156,7 +143,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.describe('grid lines', function () {
     bdd.before(function () {
-      return PageObjects.visualizeOptions.toggleCollapsibleTitle('Grid');
+      return PageObjects.visualizeOptions.clickOptions();
     });
 
     bdd.it('should show category grid lines', function () {

@@ -28,7 +28,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function clickBucket() {
       PageObjects.common.debug('Bucket = X-Axis');
-      return PageObjects.visualize.clickBucket('Category Axis');
+      return PageObjects.visualize.clickBucket('X-Axis');
     })
     .then(function selectAggregation() {
       PageObjects.common.debug('Aggregation = Date Histogram');
