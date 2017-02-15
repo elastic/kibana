@@ -39,6 +39,7 @@
           aria-label="Delete selected objects"
           ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected dashboards"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
         </button>
@@ -51,6 +52,7 @@
           data-test-subj="newDashboardLink"
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new dashboard"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>
