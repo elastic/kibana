@@ -1352,6 +1352,13 @@ body {
   border-top: none;
   /* 2 */ }
 
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
 .kuiTable {
   width: 100%;
   border: 2px solid #E4E4E4;
@@ -1361,9 +1368,11 @@ body {
 .kuiTableHeaderCell {
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.5;
-  padding: 7px 8px 8px;
   text-align: left;
+  max-width: 20px;
+  /* 1 */
+  padding: 7px 8px 8px;
+  line-height: 1.5;
   color: #a7a7a7; }
   .kuiTableHeaderCell:last-child {
     padding-right: 16px; }
@@ -1396,9 +1405,9 @@ body {
 .kuiTableRowCell {
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.5;
-  padding: 7px 8px 8px;
   text-align: left;
+  max-width: 20px;
+  /* 1 */
   color: #191E23;
   border-top: 1px solid #E4E4E4; }
   .kuiTableRowCell:last-child {
@@ -1406,11 +1415,20 @@ body {
 
 /**
    * 1. Vertically align all children.
+   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+   *    the padding was on the cell, the ellipsis would be cropped.
    */
 .kuiTableRowCell__liner {
   white-space: nowrap;
+  /* 2 */
   overflow: hidden;
-  text-overflow: ellipsis; }
+  /* 2 */
+  text-overflow: ellipsis;
+  /* 2 */
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */ }
   .kuiTableRowCell__liner > * {
     vertical-align: middle;
     /* 1 */ }
@@ -1423,13 +1441,19 @@ body {
 /**
  * 1. Rendered width of cell with checkbox inside of it.
  * 2. Align checkbox with text in other cells.
+ * 3. Show the checkbox in Edge; otherwise it gets cropped.
  */
 .kuiTableHeaderCell--checkBox,
 .kuiTableRowCell--checkBox {
   width: 28px;
   /* 1 */
   padding-right: 0;
-  line-height: 1; }
+  line-height: 1;
+  /* 2 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    overflow: visible;
+    /* 3 */ }
 
 .kuiTabs {
   display: -webkit-box;
