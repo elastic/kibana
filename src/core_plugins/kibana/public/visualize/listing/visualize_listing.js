@@ -3,6 +3,14 @@ import 'ui/pager_control';
 import 'ui/pager';
 import _ from 'lodash';
 
+import { CreateOrDeleteButton } from './create_or_delete_button';
+
+import uiModules from 'ui/modules';
+const app = uiModules.get('app/visualize', ['react']);
+app.directive('createOrDeleteButton', function (reactDirective) {
+  return reactDirective(CreateOrDeleteButton);
+});
+
 export function VisualizeListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
@@ -175,4 +183,12 @@ export function VisualizeListingController($injector, $scope) {
   this.getUrlForItem = function getUrlForItem(item) {
     return `#/visualize/edit/${item.id}`;
   };
+
+  const updateProps = () => {
+    $scope.createOrDeleteProps = {
+      showCreate: this.getSelectedItemsCount() === 0,
+      doDelete: () => this.deleteSelectedItems()
+    };
+  };
+  $scope.$watch(() => this.getSelectedItemsCount(), () => updateProps());
 }
