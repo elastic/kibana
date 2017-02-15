@@ -69,8 +69,16 @@ dataTypesArray.forEach(function (dataType, i) {
         });
       });
 
-      it('should stack values', function () {
-        expect(isStacked).to.be(true);
+      it('should stack values when mode is stacked', function () {
+        if (mode === 'stacked') {
+          expect(isStacked).to.be(true);
+        }
+      });
+
+      it('should stack values when mode is percentage', function () {
+        if (mode === 'percentage') {
+          expect(isStacked).to.be(true);
+        }
       });
     });
 

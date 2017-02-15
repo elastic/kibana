@@ -141,6 +141,7 @@ export default function AxisConfigFactory() {
           break;
         case SCALE_MODES.GROUPED:
           offset = 'group';
+          stacked = false;
           break;
         case SCALE_MODES.PERCENTAGE:
           offset = 'expand';
