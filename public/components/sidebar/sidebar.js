@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default React.createClass({
+export default class Sidebar extends React.PureComponent {
   render() {
     const {position} = this.props;
     const style = {
@@ -16,4 +16,4 @@ export default React.createClass({
       </div>
     );
   }
-});
+};

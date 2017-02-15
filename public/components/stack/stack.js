@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default React.createClass({
+export default class Stack extends React.PureComponent {
   render() {
     const { top, children } = this.props;
     const style = {
@@ -22,4 +22,4 @@ export default React.createClass({
       <div style={style}>{stack}</div>
     );
   }
-});
+};

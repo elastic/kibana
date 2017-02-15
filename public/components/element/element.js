@@ -6,21 +6,32 @@ import uuid from 'uuid/v4';
 import handlebars from 'handlebars/dist/handlebars';
 import Warning from 'plugins/rework/components/warning/warning';
 
-const Element = React.createClass({
-  getInitialState() {
+export default class Element extends React.PureComponent {
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillMount() {
     const {type} = this.props;
-    return {
-      styleId: uuid(),
-      elementType: elementTypes.byName[type]
-    };
-  },
+    this.styleId = `style-${uuid()}`;
+    this.elementType = elementTypes.byName[type];
+    this.template = this.props.args ? this.elementType.template : () => (<Loading />);
+  }
+
+  shouldComponentUpdate(nextProps) {
+    return nextProps.args !== this.props.args;
+  }
+
+  componentWillUpdate(nextProps) {
+    if (!this.props.args && nextProps.args) this.template = this.elementType.template;
+  }
+
   render() {
-    const {type, args, setArg, setFilter, filter} = this.props;
-    const {styleId, elementType} = this.state;
+    const {args} = this.props;
 
-    if (!elementType) return (<Warning>Unknown Element Type</Warning>);
+    if (!this.elementType) return (<Warning>Unknown Element Type</Warning>);
 
-    const ElementContent = args ? elementType.template : () => (<Loading />);
+    const ElementContent = this.template;
 
     // Build the inline style for the wrapper
     const containerStyle = args ? args._container_style : {};
@@ -31,25 +42,24 @@ const Element = React.createClass({
     };
 
     // Build the templatable stylesheet
-    const styleSheet = elementType.stylesheet;
+    const styleSheet = this.elementType.stylesheet;
     const customStyleSheet = args ? args._custom_style : '';
 
     const styleTemplate = handlebars.compile(styleSheet);
     const scopedStyleSheet = styleTemplate(args);
 
     return (
-      <div className="rework--element" style={elementStyle} data-style={styleId}>
-        <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={scopedStyleSheet}></ScopedStyle>
-        <ScopedStyle scope={`[data-style="${styleId}"]`} stylesheet={customStyleSheet}></ScopedStyle>
+      <div className="rework--element" style={elementStyle} data-style={this.styleId}>
+        <ScopedStyle scope={`[data-style="${this.styleId}"]`} stylesheet={scopedStyleSheet}></ScopedStyle>
+        <ScopedStyle scope={`[data-style="${this.styleId}"]`} stylesheet={customStyleSheet}></ScopedStyle>
         <ElementContent
+          key={this.styleId}
           args={args}
-          filter={filter}
-          setArg={setArg}
-          setFilter={setFilter}
+          filter={this.props.filter}
+          setArg={this.props.setArg}
+          setFilter={this.props.setFilter}
         ></ElementContent>
       </div>
     );
   }
-});
-
-export default Element;
+};
