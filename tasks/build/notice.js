@@ -7,12 +7,9 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 
 export default function licenses(grunt) {
-  grunt.registerTask('_build:notice', 'Adds a notice', async function () {
-    const overrides = grunt.config.get('licenses.options.overrides');
+  grunt.registerTask('_build:notice', 'Adds a notice', function () {
     const done = this.async();
     const buildPath = path.join(grunt.config.get('buildDir'), 'kibana');
-    const noticePath = path.join(buildPath, 'NOTICE.txt');
-    const fd = fs.openSync(noticePath, 'w');
 
     function getPackagePaths() {
       const packagePaths = {};
@@ -41,18 +38,19 @@ export default function licenses(grunt) {
       return content;
     }
 
-    fs.appendFileSync(fd,
-    'Elasticsearch Kibana\nCopyright 2012-2017 Elasticsearch' +
-    '\n\n---\n'
-    );
-    npmLicense.init({
-      start: buildPath,
-      production: true,
-      json: true
-    }, (result, error) => {
-      if (error) return grunt.fail.fatal(error);
+    function getNodeInfo() {
+      const nodeVersion = grunt.config.get('nodeVersion');
+      const nodeDir = path.join(grunt.config.get('root'), '.node_binaries', nodeVersion);
+      const licensePath = path.join(nodeDir, 'linux-x64', 'LICENSE');
+      const license = fs.readFileSync(licensePath);
+      return `This product bundles Node.js.\n\n${license}`;
+    }
+
+    function getPackageInfo(packages) {
       const packagePaths = getPackagePaths();
-      _.forOwn(result, (value, key) => {
+      const overrides = grunt.config.get('licenses.options.overrides');
+      let content = '';
+      _.forOwn(packages, (value, key) => {
         const licenses = [].concat(overrides.hasOwnProperty(key) ? overrides[key] : value.licenses);
         if (!licenses.length || licenses.includes('UNKNOWN')) return grunt.fail.fatal(`Unknown license for ${key}`);
         const packagePath = packagePaths[key];
@@ -61,8 +59,22 @@ export default function licenses(grunt) {
         const licenseAndNotice = readLicenseAndNotice ? `\n${readLicenseAndNotice}` : `  For details, see ${packagePath.relative}/.`;
         const combinedText = `This product bundles ${key} which is available under ${licenseOverview}.${licenseAndNotice}\n---\n`;
 
-        fs.appendFileSync(fd, combinedText);
+        content += combinedText;
       });
+      return content;
+    }
+
+    npmLicense.init({
+      start: buildPath,
+      production: true,
+      json: true
+    }, (result, error) => {
+      if (error) return grunt.fail.fatal(error);
+      const noticePath = path.join(buildPath, 'NOTICE.txt');
+      const fd = fs.openSync(noticePath, 'w');
+      fs.appendFileSync(fd, 'Elasticsearch Kibana\nCopyright 2012-2017 Elasticsearch\n\n---\n');
+      fs.appendFileSync(fd, getPackageInfo(result));
+      fs.appendFileSync(fd, getNodeInfo());
       fs.closeSync(fd);
       done();
     });
