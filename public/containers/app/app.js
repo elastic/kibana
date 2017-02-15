@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 // Containers
 import DropDown from 'plugins/rework/containers/drop_down/drop_down';
 import Nav from 'plugins/rework/containers/nav/nav';
-import ElementEditor from 'plugins/rework/components/element_editor/element_editor';
 import WorkpadContainer from 'plugins/rework/containers/workpad_container/workpad_container';
 
 // Components

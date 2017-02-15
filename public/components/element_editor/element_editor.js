@@ -11,51 +11,61 @@ export default class extends React.PureComponent {
     super(props);
   }
 
+  renderNotSelected() {
+    return (
+      <div className="rework--editor">
+        <h4>Select an element</h4>
+        <p>
+          Select an element to configure it here. If you don't have any,
+          <a onClick={this.props.openDropDown}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
+      </div>
+    );
+  }
+
   render() {
     const {element} = this.props;
 
-    if (!element) {
-      return (
-        <div className="rework--editor">
-          <h4>Select an element</h4>
-          <p>
-            Select an element to configure it here. If you don't have any,
-            <a onClick={this.props.openDropDown}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
-        </div>
-      );
-    }
+    // element is not selected, render alternate view
+    if (!element) return this.renderNotSelected();
 
     const {id, type} = element;
 
     const argValues = element.args;
     const args = elementTypes.byName[type].args;
 
+    const formElements = _.map(args, (arg) => {
+      const type = arg.type.name;
+      const value = argValues[arg.name];
+      const { name, displayName } = arg;
+
+      const commit = (value) => {
+        this.props.argumentSet(id, name, value);
+      };
+
+      return (
+        <div
+          key={name}
+          className="rework--editor-section"
+          data-name={name}
+          data-type={type}
+          data-element-type={name}>
+          <h4>{displayName.replace('_', ' ')}</h4>
+          <ArgumentForm
+            type={type}
+            commit={commit}
+            value={value}
+            help={arg.help}
+            options={arg.options}
+            context={argValues}
+            defaultValue={arg.default}>
+            </ArgumentForm>
+        </div>
+      );
+    });
+
     return (
       <div className="rework--editor" key={element.id}>
-          {_.map(args, (arg) => {
-            const type = arg.type.name;
-            const value = argValues[arg.name];
-            const {name, displayName} = arg;
-
-            const commit = (value) => {
-              this.props.argumentSet(id, name, value);
-            };
-
-            return (
-              <div key={name} className="rework--editor-section" data-element-type={name}>
-                <h4>{displayName.replace('_', ' ')}</h4>
-                <ArgumentForm
-                  type={type}
-                  commit={commit}
-                  value={value}
-                  help={arg.help}
-                  options={arg.options}
-                  context={argValues}
-                  defaultValue={arg.default}>
-                  </ArgumentForm>
-              </div>
-            );
-          })}
+          {formElements}
       </div>
     );
   }
