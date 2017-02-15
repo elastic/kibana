@@ -52,7 +52,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function selectField() {
         PageObjects.common.debug('Field = machine.ram');
-        return PageObjects.visualize.selectField('machine.ram');
+        return PageObjects.visualize.selectField('machine.ram', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -73,7 +73,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Sum')
       .then(function selectField() {
         PageObjects.common.debug('Field = phpmemory');
-        return PageObjects.visualize.selectField('phpmemory');
+        return PageObjects.visualize.selectField('phpmemory', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -95,7 +95,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Median')
       .then(function selectField() {
         PageObjects.common.debug('Field = bytes');
-        return PageObjects.visualize.selectField('bytes');
+        return PageObjects.visualize.selectField('bytes', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -117,7 +117,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Min')
       .then(function selectField() {
         PageObjects.common.debug('Field = @timestamp');
-        return PageObjects.visualize.selectField('@timestamp');
+        return PageObjects.visualize.selectField('@timestamp', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -138,7 +138,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Max')
       .then(function selectField() {
         PageObjects.common.debug('Field = relatedContent.article:modified_time');
-        return PageObjects.visualize.selectField('relatedContent.article:modified_time');
+        return PageObjects.visualize.selectField('relatedContent.article:modified_time', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -162,7 +162,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Standard Deviation')
       .then(function selectField() {
         PageObjects.common.debug('Field = bytes');
-        return PageObjects.visualize.selectField('bytes');
+        return PageObjects.visualize.selectField('bytes', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -183,7 +183,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Unique Count')
       .then(function selectField() {
         PageObjects.common.debug('Field = clientip');
-        return PageObjects.visualize.selectField('clientip');
+        return PageObjects.visualize.selectField('clientip', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -220,7 +220,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Percentiles')
       .then(function selectField() {
         PageObjects.common.debug('Field =  machine.ram');
-        return PageObjects.visualize.selectField('machine.ram');
+        return PageObjects.visualize.selectField('machine.ram', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -241,7 +241,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Percentile Ranks')
       .then(function selectField() {
         PageObjects.common.debug('Field =  bytes');
-        return PageObjects.visualize.selectField('memory');
+        return PageObjects.visualize.selectField('memory', 'metrics');
       })
       .then(function selectField() {
         PageObjects.common.debug('Values =  99');
