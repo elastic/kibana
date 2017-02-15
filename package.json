@@ -249,6 +249,7 @@
     "makelogs": "3.2.3",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.5.3",
+    "mock-fs": "4.0.0",
     "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
     "nock": "8.0.0",
