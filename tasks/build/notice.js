@@ -64,6 +64,10 @@ export default function licenses(grunt) {
       return content;
     }
 
+    function getBaseNotice() {
+      return fs.readFileSync(path.join(__dirname, 'notice', 'base_notice.txt'));
+    }
+
     npmLicense.init({
       start: buildPath,
       production: true,
@@ -72,7 +76,7 @@ export default function licenses(grunt) {
       if (error) return grunt.fail.fatal(error);
       const noticePath = path.join(buildPath, 'NOTICE.txt');
       const fd = fs.openSync(noticePath, 'w');
-      fs.appendFileSync(fd, 'Elasticsearch Kibana\nCopyright 2012-2017 Elasticsearch\n\n---\n');
+      fs.appendFileSync(fd, getBaseNotice());
       fs.appendFileSync(fd, getPackageInfo(result));
       fs.appendFileSync(fd, getNodeInfo());
       fs.closeSync(fd);
