@@ -91,6 +91,7 @@ class BaseOptimizer {
     };
 
     return {
+      node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.bundles.toWebpackEntries(),
 
