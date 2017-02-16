@@ -17,9 +17,12 @@ export default function SearchLooperService(Private, Promise, Notifier, $rootSco
    */
   const searchLooper = new Looper(null, function () {
     $rootScope.$broadcast('courier:searchRefresh');
-    return fetch.these(
-      requestQueue.getInactive(searchStrategy)
-    );
+    const requests = requestQueue.getInactive(searchStrategy);
+    // promise returned from fetch.these() only resolves when
+    // the requests complete, but we want to continue even if
+    // the requests abort so we make our own
+    fetch.these(requests);
+    return Promise.all(requests.map(r => r.getCompleteOrAbortedPromise()));
   });
 
   searchLooper.onHastyLoop = function () {

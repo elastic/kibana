@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
+import { race } from 'bluebird';
 
 import errors from 'ui/errors';
 
@@ -14,7 +15,7 @@ export default function AbstractReqProvider(Private, Promise) {
     constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
-      this._whenAbortedHandlers = [];
+      this.abortedDefer = Promise.defer();
       requestQueue.push(this);
     }
 
@@ -120,17 +121,26 @@ export default function AbstractReqProvider(Private, Promise) {
       this._markStopped();
       this.defer = null;
       this.aborted = true;
-      _.callEach(this._whenAbortedHandlers);
+      this.abortedDefer.resolve();
+      this.abortedDefer = null;
     }
 
     whenAborted(cb) {
-      this._whenAbortedHandlers.push(cb);
+      this.abortedDefer.promise.then(cb);
     }
 
     complete() {
       this._markStopped();
       this.ms = this.moment.diff() * -1;
       this.defer.resolve(this.resp);
+    }
+
+    getCompletePromise() {
+      return this.defer.promise;
+    }
+
+    getCompleteOrAbortedPromise() {
+      return race([ this.defer.promise, this.abortedDefer.promise ]);
     }
 
     clone() {
