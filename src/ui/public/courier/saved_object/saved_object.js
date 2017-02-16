@@ -36,12 +36,17 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     const docSource = new DocSource();
 
     // type name for this object, used as the ES-type
-    const type = config.type;
-    this.type = type;
+    const esType = config.type;
     this.index = kbnIndex;
 
     this.getDisplayName = function () {
-      return type;
+      return esType;
+    };
+
+    // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
+    // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
+    this.getEsType = function () {
+      return esType;
     };
 
     /**
@@ -54,7 +59,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
 
     // Create a notifier for sending alerts
     const notify = new Notifier({
-      location: 'Saved ' + type
+      location: 'Saved ' + this.getDisplayName()
     });
 
     // mapping definition for the fields that this object will expose
@@ -135,17 +140,17 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
      * @resolved {SavedObject}
      */
     this.init = _.once(() => {
-      // ensure that the type is defined
-      if (!type) throw new Error('You must define a type name to use SavedObject objects.');
+      // ensure that the esType is defined
+      if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
 
       // tell the docSource where to find the doc
       docSource
         .index(kbnIndex)
-        .type(type)
+        .type(esType)
         .id(this.id);
 
-      // check that the mapping for this type is defined
-      return mappingSetup.isDefined(type)
+      // check that the mapping for this esType is defined
+      return mappingSetup.isDefined(esType)
         .then(function (defined) {
           // if it is already defined skip this step
           if (defined) return true;
@@ -159,8 +164,8 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
             }
           };
 
-          // tell mappingSetup to set type
-          return mappingSetup.setup(type, mapping);
+          // tell mappingSetup to set esType
+          return mappingSetup.setup(esType, mapping);
         })
         .then(() => {
           // If there is not id, then there is no document to fetch from elasticsearch
@@ -187,7 +192,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
 
-      if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, this.id);
+      if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(esType, this.id);
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
@@ -317,9 +322,9 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .then((duplicateTitle) => {
           if (!duplicateTitle) return true;
           const confirmMessage =
-            `A ${type} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
+            `A ${this.getDisplayName()} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${type}` })
+          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
             .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
         });
     };
@@ -399,7 +404,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
       return esAdmin.delete(
         {
           index: kbnIndex,
-          type: type,
+          type: esType,
           id: this.id
         })
         .then(() => {
