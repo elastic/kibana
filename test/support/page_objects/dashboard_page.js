@@ -43,17 +43,11 @@ export default class DashboardPage {
     if (!onPage) {
       await PageObjects.common.try(async () => {
         const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
-        PageObjects.common.debug('Clicking dashboard landing page link');
         await goToDashboardLink.click();
-        await PageObjects.common.sleep(1000);
-      });
-      // Once the searchFilter can be found, we know the page finished loading.
-      await PageObjects.common.try(async () => {
+        // Once the searchFilter can be found, we know the page finished loading.
         const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
-        PageObjects.common.debug('Search Filter object found: ' + searchFilter);
       });
     }
-    PageObjects.common.debug('Leaving go to dashboard landing page');
   }
 
   clickNewDashboard() {
