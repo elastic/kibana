@@ -107,7 +107,10 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
           newHtmls.push(cellTemplate({
             timefield: true,
             formatted: _displayField(row, indexPattern.timeFieldName),
-            filterable: mapping[indexPattern.timeFieldName].filterable,
+            filterable: (
+              mapping[indexPattern.timeFieldName].filterable
+              && _.isFunction($scope.filter)
+            ),
             column: indexPattern.timeFieldName
           }));
         }
@@ -115,7 +118,8 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         $scope.columns.forEach(function (column) {
           const isFilterable = $scope.flattenedRow[column] !== undefined
             && mapping[column]
-            && mapping[column].filterable;
+            && mapping[column].filterable
+            && _.isFunction($scope.filter);
 
           newHtmls.push(cellTemplate({
             timefield: false,
