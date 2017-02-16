@@ -11,8 +11,11 @@ const SiblingPipelineAggHelperProvider = function (Private) {
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
-    '!sum_bucket', '!avg_bucket', '!min_bucket', '!max_bucket'];
+  const metricAggFilter = [
+    '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
+    '!sum_bucket', '!avg_bucket', '!min_bucket', '!max_bucket',
+    '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum'
+  ];
 
   const metricAggSchema = (new Schemas([
     {
@@ -34,6 +37,7 @@ const SiblingPipelineAggHelperProvider = function (Private) {
   ])).all[0];
 
   return {
+    subtype: 'Pipeline Aggregations',
     params: function () {
       return [
         {

@@ -9,7 +9,7 @@ export default function AggTypeMetricDerivativeProvider(Private) {
   return new MetricAggType({
     name: 'derivative',
     title: 'Derivative',
-    group: 'Pipeline Aggregations',
+    subtype: parentPipelineAggHelper.subtype,
     makeLabel: agg => makeNestedLabel(agg, 'derivative'),
     params: [
       ...parentPipelineAggHelper.params()

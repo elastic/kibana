@@ -7,6 +7,6 @@
     ng-model="agg.type"
     required
     auto-select-if-only-one="aggTypeOptions | aggFilter:agg.schema.aggFilter"
-    ng-options="agg as agg.title group by agg.group for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
+    ng-options="agg as agg.title group by agg.subtype for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
   </select>
 </div>

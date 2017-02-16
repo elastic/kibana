@@ -22,6 +22,7 @@ const ParentPipelineAggHelperProvider = function (Private) {
   ])).all[0];
 
   return {
+    subtype: 'Pipeline Aggregations',
     params: function () {
       return [
         {
