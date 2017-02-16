@@ -13,17 +13,15 @@ if (timefield) {
   <span class="table-cell-filter">
     <% if (filterable) { %>
       <span
-        ng-click="inlineFilter($event, '+')"
+        ng-click="inlineFilter('<%- column %>', '+')"
         class="fa fa-search-plus docTableRowFilterIcon"
-        data-column="<%- column %>"
         tooltip="Filter for value"
         tooltip-append-to-body="1"
       ></span>
 
       <span
-        ng-click="inlineFilter($event, '-')"
+        ng-click="inlineFilter('<%- column %>', '-')"
         class="fa fa-search-minus docTableRowFilterIcon"
-        data-column="<%- column %>"
         tooltip="Filter out value"
         tooltip-append-to-body="1"
       ></span>

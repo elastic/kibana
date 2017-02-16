@@ -9,7 +9,6 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import uiModules from 'ui/modules';
-import FilterManagerProvider from 'ui/filter_manager';
 const module = uiModules.get('app/discover');
 
 
@@ -25,10 +24,9 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Private) {
+module.directive('kbnTableRow', ['$compile', function ($compile) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
-  const filterManager = Private(FilterManagerProvider);
 
   return {
     restrict: 'A',
@@ -85,11 +83,9 @@ module.directive('kbnTableRow', ['$compile', 'Private', function ($compile, Priv
         createSummaryRow($scope.row, $scope.row._id);
       });
 
-      $scope.inlineFilter = function inlineFilter($event, type) {
-        const column = $($event.target).data().column;
+      $scope.inlineFilter = function inlineFilter(column, type) {
         const field = $scope.indexPattern.fields.byName[column];
-        $scope.indexPattern.popularizeField(field, 1);
-        filterManager.add(field, $scope.flattenedRow[column], type, $scope.indexPattern.id);
+        $scope.filter(field, $scope.flattenedRow[column], type);
       };
 
       // create a tr element that lists the value for each *column*
