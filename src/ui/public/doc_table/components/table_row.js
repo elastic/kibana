@@ -83,7 +83,8 @@ module.directive('kbnTableRow', ['$compile', function ($compile) {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
-      $scope.inlineFilter = function inlineFilter(column, type) {
+      $scope.inlineFilter = function inlineFilter($event, type) {
+        const column = $($event.target).data().column;
         const field = $scope.indexPattern.fields.byName[column];
         $scope.filter(field, $scope.flattenedRow[column], type);
       };
