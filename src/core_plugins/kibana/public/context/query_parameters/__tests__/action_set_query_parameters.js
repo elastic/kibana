@@ -1,15 +1,13 @@
 import expect from 'expect.js';
 
-import { createConfigStub, createStateStub } from './_utils';
+import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
   describe('action setQueryParameters', function () {
     it('should update the queryParameters with certain values from the given object', function () {
-      const { setQueryParameters } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub({
         queryParameters: {
           additionalParameter: 'ADDITIONAL_PARAMETER',
@@ -19,6 +17,7 @@ describe('context app', function () {
       setQueryParameters(state)({
         anchorUid: 'ANCHOR_UID',
         columns: ['column'],
+        defaultStepSize: 3,
         indexPattern: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
@@ -29,6 +28,7 @@ describe('context app', function () {
         additionalParameter: 'ADDITIONAL_PARAMETER',
         anchorUid: 'ANCHOR_UID',
         columns: ['column'],
+        defaultStepSize: 3,
         indexPattern: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
@@ -37,9 +37,7 @@ describe('context app', function () {
     });
 
     it('should ignore additional new values', function () {
-      const { setQueryParameters } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       setQueryParameters(state)({

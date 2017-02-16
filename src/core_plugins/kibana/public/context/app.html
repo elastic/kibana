@@ -53,7 +53,7 @@
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
-        Load more
+        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
@@ -117,7 +117,7 @@
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
       >
-        Load more
+        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"

@@ -1,15 +1,13 @@
 import expect from 'expect.js';
 
-import { createConfigStub, createStateStub } from './_utils';
+import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
   describe('action increaseSuccessorCount', function () {
     it('should increase the successorCount by the given value', function () {
-      const { increaseSuccessorCount } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { increaseSuccessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increaseSuccessorCount(state)(20);
@@ -18,9 +16,7 @@ describe('context app', function () {
     });
 
     it('should increase the successorCount by the default step size if not value is given', function () {
-      const { increaseSuccessorCount } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { increaseSuccessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increaseSuccessorCount(state)();
@@ -29,9 +25,7 @@ describe('context app', function () {
     });
 
     it('should limit the successorCount to 0 as a lower bound', function () {
-      const { increaseSuccessorCount } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { increaseSuccessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increaseSuccessorCount(state)(-20);
@@ -40,9 +34,7 @@ describe('context app', function () {
     });
 
     it('should limit the successorCount to 10000 as an upper bound', function () {
-      const { increaseSuccessorCount } = new QueryParameterActionsProvider(
-        createConfigStub()
-      );
+      const { increaseSuccessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increaseSuccessorCount(state)(20000);

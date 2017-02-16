@@ -42,11 +42,14 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, Private) {
+function ContextAppController($scope, config, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
-  this.state = createInitialState(this.discoverUrl);
+  this.state = createInitialState(
+    parseInt(config.get('context:step'), 10),
+    this.discoverUrl,
+  );
 
   this.actions = _.mapValues(Object.assign(
     {},
@@ -85,9 +88,9 @@ function ContextAppController($scope, Private) {
   );
 }
 
-function createInitialState(discoverUrl) {
+function createInitialState(defaultStepSize, discoverUrl) {
   return {
-    queryParameters: createInitialQueryParametersState(),
+    queryParameters: createInitialQueryParametersState(defaultStepSize),
     rows: {
       all: [],
       anchor: null,
