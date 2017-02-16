@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { race } from 'bluebird';
 
 import errors from 'ui/errors';
 
@@ -140,7 +139,7 @@ export default function AbstractReqProvider(Private, Promise) {
     }
 
     getCompleteOrAbortedPromise() {
-      return race([ this.defer.promise, this.abortedDefer.promise ]);
+      return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
     }
 
     clone() {
