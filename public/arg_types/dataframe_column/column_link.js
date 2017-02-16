@@ -5,7 +5,7 @@ import Loading from 'plugins/rework/components/loading/loading';
 import DataframeColumnSelector from 'plugins/rework/components/dataframe_column_selector/dataframe_column_selector';
 import Promise from 'bluebird';
 
-class LinkFrame extends React.PureComponent {
+class ColumnLink extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
@@ -39,4 +39,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(LinkFrame);
+export default connect(mapStateToProps)(ColumnLink);

@@ -10,7 +10,10 @@ import './frame_link.less';
 class LinkFrame extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = {showDataframes: [], dataframeNames: []};
+    this.state = {
+      showDataframes: [],
+      dataframeNames: [],
+    };
   }
 
   showEditDataframe() {

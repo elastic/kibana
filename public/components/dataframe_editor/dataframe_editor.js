@@ -6,6 +6,7 @@ export default React.createClass({
   componentWillReceiveProps(nextProps) {
     console.log('editor', nextProps.dataframe.value);
   },
+
   render() {
     const {dataframe, commit} = this.props;
 

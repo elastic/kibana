@@ -1,12 +1,8 @@
 import React from 'react';
+import _ from 'lodash';
 import ArgType from 'plugins/rework/arg_types/arg_type';
 import argTypes from 'plugins/rework/arg_types/arg_types';
-import frameSources from 'plugins/rework/arg_types/dataframe/frame_sources/frame_sources';
-import Dataframe from 'plugins/rework/arg_types/dataframe/lib/dataframe';
-import Promise from 'bluebird';
-import _ from 'lodash';
-
-import FrameLink from './frame_link';
+import FrameLink from 'plugins/rework/arg_types/dataframe/frame_link';
 
 argTypes.push(new ArgType('dataframe', {
   help: 'The source of data to link to this element',

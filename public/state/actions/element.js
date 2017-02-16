@@ -4,7 +4,6 @@ import elementTypes from 'plugins/rework/elements/elements';
 import { mutateElement, mutateArgument } from '../lib/mutation_helpers';
 import { getElementTemplate } from '../templates';
 import { editorOpen } from './editor';
-import Promise from 'bluebird';
 
 /*
  Exports
