@@ -75,7 +75,7 @@
                             class="vis-editor-full-options"></vis-editor-vis-options>
 
     <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
-      <vis-editor-sidebar class="vis-editor-sidebar"></vis-editor-sidebar>
+      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
     </div>
 
     <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">

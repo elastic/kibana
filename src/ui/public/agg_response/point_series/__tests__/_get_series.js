@@ -31,7 +31,7 @@ describe('getSeries', function () {
     const chart = {
       aspects: {
         x: { i: 0 },
-        y: { i: 1, col: yCol },
+        y: { i: 1, col: yCol, agg: { id: 'id' } },
         z: { i: 2 }
       }
     };
@@ -119,7 +119,7 @@ describe('getSeries', function () {
       aspects: {
         x: { i: -1 },
         series: { i: 0, agg: agg },
-        y: { i: 1, col: { title: '0' } }
+        y: { i: 1, col: { title: '0' }, agg: agg }
       }
     };
 

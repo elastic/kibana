@@ -15,7 +15,8 @@ export default function VisConfigFactory(Private) {
     },
     alerts: [],
     categoryAxes: [],
-    valueAxes: []
+    valueAxes: [],
+    grid: {}
   };
 
 

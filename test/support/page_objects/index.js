@@ -8,6 +8,7 @@ import HeaderPage from './header_page';
 import SettingsPage from './settings_page';
 import ShieldPage from './shield_page';
 import VisualizePage from './visualize_page';
+import VisualizePointSeriesOptions from './visualize_point_series_options';
 import MonitoringPage from './monitoring_page';
 import DocTable from './doc_table';
 
@@ -20,6 +21,7 @@ const headerPage = new HeaderPage();
 const settingsPage = new SettingsPage();
 const shieldPage = new ShieldPage();
 const visualizePage = new VisualizePage();
+const visualizePointSeriesOptions = new VisualizePointSeriesOptions();
 const monitoringPage = new MonitoringPage();
 
 const docTable = new DocTable();
@@ -39,6 +41,7 @@ class PageObjects {
       settingsPage,
       shieldPage,
       visualizePage,
+      visualizePointSeriesOptions,
       monitoringPage,
       docTable,
     ];
@@ -91,6 +94,10 @@ class PageObjects {
 
   get visualize() {
     return this.assertInitialized() && visualizePage;
+  }
+
+  get visualizeOptions() {
+    return this.assertInitialized() && visualizePointSeriesOptions;
   }
 
   get monitoring() {
