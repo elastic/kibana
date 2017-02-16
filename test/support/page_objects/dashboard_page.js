@@ -41,12 +41,19 @@ export default class DashboardPage {
     PageObjects.common.debug('Go to dashboard landing page');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      await PageObjects.common.try(async () =>
-        await PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click()
-      );
+      await PageObjects.common.try(async () => {
+        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
+        PageObjects.common.debug('Clicking dashboard landing page link');
+        await goToDashboardLink.click();
+        await PageObjects.common.sleep(1000);
+      });
       // Once the searchFilter can be found, we know the page finished loading.
-      await PageObjects.common.try(async () => await PageObjects.common.findTestSubject('searchFilter'));
+      await PageObjects.common.try(async () => {
+        const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+        PageObjects.common.debug('Search Filter object found: ' + searchFilter);
+      });
     }
+    PageObjects.common.debug('Leaving go to dashboard landing page');
   }
 
   clickNewDashboard() {
@@ -192,15 +199,15 @@ export default class DashboardPage {
 
     await this.gotoDashboardLandingPage();
 
-    const searchBox = await PageObjects.common.findTestSubject('searchFilter');
-    await searchBox.click();
+    await PageObjects.common.try(async () => {
+      const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+      PageObjects.common.debug('searchForDashboardWithName: search Filter object found: ' + searchFilter);
+      await searchFilter.click();
+      // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+      await searchFilter.type(dashName.replace('-',' '));
+    });
 
-    // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-    await searchBox.type(dashName.replace('-',' '));
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-    return await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    return await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async getDashboardCountWithName(dashName) {
