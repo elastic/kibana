@@ -95,11 +95,11 @@ module.service('Promise', function ($q, $timeout) {
       });
     });
   };
-  Promise.race = function (arr) {
+  Promise.race = function (iterable) {
     return new Promise((resolve, reject) => {
-      arr.forEach(p => {
-        Promise.resolve(p).then(resolve, reject);
-      });
+      for (const i of iterable) {
+        Promise.resolve(i).then(resolve, reject);
+      }
     });
   };
 
