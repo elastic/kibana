@@ -126,6 +126,9 @@
                 columns="state.columns"
                 infinite-scroll="true"
                 filter="filterQuery"
+                shared-item
+                shared-item-title="{{opts.savedSearch.lastSavedTitle}}"
+                shared-item-description="{{opts.savedSearch.description}}"
                 render-counter>
               </doc-table>
 
