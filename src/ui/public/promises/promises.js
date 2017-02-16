@@ -95,6 +95,13 @@ module.service('Promise', function ($q, $timeout) {
       });
     });
   };
+  Promise.race = function (iterable) {
+    return new Promise((resolve, reject) => {
+      for (const i of iterable) {
+        Promise.resolve(i).then(resolve, reject);
+      }
+    });
+  };
 
   return Promise;
 });
