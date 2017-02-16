@@ -1,5 +1,5 @@
 import management from 'ui/management';
-import 'plugins/kibana/management/sections/indices/_create';
+import 'plugins/kibana/management/sections/indices/create_index_pattern';
 import 'plugins/kibana/management/sections/indices/_edit';
 import 'plugins/kibana/management/sections/indices/_field_editor';
 import uiRoutes from 'ui/routes';
