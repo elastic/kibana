@@ -1,13 +1,20 @@
 <kbn-management-app section="kibana">
   <kbn-management-indices>
-    <div ng-controller="managementIndicesCreate" class="kbn-management-indices-create">
-      <div class="page-header">
-        <h1>Configure an index pattern</h1>
+    <div
+      ng-controller="managementIndicesCreate"
+      class="kuiViewContent"
+    >
+      <h1 class="kuiTitle kuiVerticalRhythm">
+        Configure an index pattern
+      </h1>
+
+      <p class="kuiText kuiVerticalRhythm">
         In order to use Kibana you must configure at least one index pattern. Index patterns are
         used to identify the Elasticsearch index to run search and analytics against. They are also
         used to configure fields.
-      </div>
-      <div>
+      </p>
+
+      <div class="kuiVerticalRhythm">
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
           <div class="form-group">
             <label>
