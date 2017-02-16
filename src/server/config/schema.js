@@ -122,20 +122,28 @@ module.exports = () => Joi.object({
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi
-      .alternatives()
-      .try(
-        Joi.boolean(),
-        Joi.string().regex(/^\/.+\/$/)
-      )
-      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
-    sourceMaps: Joi
-      .alternatives()
-      .try(
-        Joi.string().required(),
-        Joi.boolean()
-      )
-      .default(Joi.ref('$dev')),
+    unsafeCache: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.boolean(),
+          Joi.string().regex(/^\/.+\/$/)
+        )
+        .default(true),
+    }),
+    sourceMaps: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.string().required(),
+          Joi.boolean()
+        )
+        .default('#cheap-source-map'),
+    }),
     profile: Joi.boolean().default(false)
   }).default(),
 
