@@ -7,6 +7,7 @@ import routes from 'ui/routes';
 import modules from 'ui/modules';
 
 import kibanaLogoUrl from 'ui/images/kibana.svg';
+import 'ui/react_components';
 import 'ui/autoload/all';
 import 'plugins/kibana/discover/index';
 import 'plugins/kibana/visualize/index';

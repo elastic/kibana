@@ -31,6 +31,7 @@ module.exports = function (grunt) {
         'Public domain',
         'Unlicense',
         'WTFPL',
+        '(GPL-2.0 OR MIT)',
         'new BSD, and MIT'
       ],
       overrides: {

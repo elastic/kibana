@@ -1,7 +1,18 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import _ from 'lodash';
+import { ItemTableState } from 'ui/saved_object_table/item_table_state';
+import { ItemTableActions } from 'ui/saved_object_table/item_table_actions';
+import { TITLE_COLUMN_ID } from 'ui/saved_object_table/get_title_column';
+
+import { VisualizeConstants } from '../visualize_constants';
+import { VisualizeLandingPageTable } from './visualize_landing_page_table';
+
+import uiModules from 'ui/modules';
+const app = uiModules.get('app/visualize', ['react']);
+app.directive('visualizeLandingPageTable', function (reactDirective) {
+  return reactDirective(VisualizeLandingPageTable);
+});
 
 export function VisualizeListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -14,145 +25,20 @@ export function VisualizeListingController($injector, $scope) {
 
   timefilter.enabled = false;
 
-  const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
   const notify = new Notifier({ location: 'Visualize' });
+  const itemTableState = new ItemTableState(pagerFactory, VisualizeConstants.EDIT_PATH, kbnUrl);
 
-  let selectedItems = [];
+  const fetchObjects = (filter) => ItemTableActions.doFilter(itemTableState, filter, visualizationService);
 
-  /**
-   * Sorts hits either ascending or descending
-   * @param  {Array} hits Array of saved finder object hits
-   * @return {Array} Array sorted either ascending or descending
-   */
-  const sortItems = () => {
-    const sortProperty = this.getSortProperty();
-
-    this.items =
-      sortProperty.isAscending
-      ? _.sortBy(this.items, sortProperty.getValue)
-      : _.sortBy(this.items, sortProperty.getValue).reverse();
-  };
-
-  const calculateItemsOnPage = () => {
-    sortItems();
-    this.pager.setTotalItems(this.items.length);
-    this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
-  };
-
-  const fetchItems = () => {
-    this.isFetchingItems = true;
-
-    visualizationService.find(this.filter)
-      .then(result => {
-        this.isFetchingItems = false;
-        this.items = result.hits;
-        calculateItemsOnPage();
-      });
-  };
-
-  const deselectAll = () => {
-    selectedItems = [];
-  };
-
-  const selectAll = () => {
-    selectedItems = this.pageOfItems.slice(0);
-  };
-
-  this.isFetchingItems = false;
-  this.items = [];
-  this.pageOfItems = [];
-  this.filter = '';
-
-  this.pager = pagerFactory.create(this.items.length, 20, 1);
-
-  $scope.$watch(() => this.filter, () => {
-    deselectAll();
-    fetchItems();
-  });
-
-  /**
-   * Remember sort direction per property.
-   */
-  this.sortProperties = [{
-    name: 'title',
-    getValue: item => item.title,
-    isSelected: true,
-    isAscending: true,
-  }, {
-    name: 'type',
-    getValue: item => item.type.title,
-    isSelected: false,
-    isAscending: true,
-  }];
-
-  this.getSortProperty = function getSortProperty() {
-    return this.sortProperties.find(property => property.isSelected);
-  };
-
-  this.getSortPropertyByName = function getSortPropertyByName(name) {
-    return this.sortProperties.find(property => property.name === name);
-  };
-
-  this.isAscending = function isAscending() {
-    const sortProperty = this.getSortProperty();
-    return sortProperty.isAscending;
-  };
-
-  this.sortOn = function sortOn(propertyName) {
-    const sortProperty = this.getSortProperty();
-
-    if (sortProperty.name === propertyName) {
-      sortProperty.isAscending = !sortProperty.isAscending;
-    } else {
-      sortProperty.isSelected = false;
-      this.getSortPropertyByName(propertyName).isSelected = true;
-    }
-
-    deselectAll();
-    calculateItemsOnPage();
-  };
-
-  this.toggleAll = function toggleAll() {
-    if (this.areAllItemsChecked()) {
-      deselectAll();
-    } else {
-      selectAll();
-    }
-  };
-
-  this.toggleItem = function toggleItem(item) {
-    if (this.isItemChecked(item)) {
-      const index = selectedItems.indexOf(item);
-      selectedItems.splice(index, 1);
-    } else {
-      selectedItems.push(item);
-    }
-  };
-
-  this.isItemChecked = function isItemChecked(item) {
-    return selectedItems.includes(item);
-  };
-
-  this.areAllItemsChecked = function areAllItemsChecked() {
-    return this.getSelectedItemsCount() === this.pageOfItems.length;
-  };
-
-  this.getSelectedItemsCount = function getSelectedItemsCount() {
-    return selectedItems.length;
-  };
-
-  this.deleteSelectedItems = function deleteSelectedItems() {
+  this.deleteItems = function deleteItems(items) {
     const doDelete = () => {
-      const selectedIds = selectedItems.map(item => item.id);
+      const selectedIds = items.map(item => item.id);
 
       visualizationService.delete(selectedIds)
-        .then(fetchItems)
-        .then(() => {
-          deselectAll();
-        })
+        .then(() => fetchObjects(itemTableState.filter))
         .catch(error => notify.error(error));
     };
 
@@ -164,19 +50,17 @@ export function VisualizeListingController($injector, $scope) {
       });
   };
 
-  this.onPageNext = () => {
-    deselectAll();
-    this.pager.nextPage();
-    calculateItemsOnPage();
+  const updateProps = () => {
+    $scope.tableProps = {
+      itemTableState,
+      deleteItems: () => this.deleteItems(itemTableState.selectedItems),
+      doFilter: fetchObjects
+    };
   };
 
-  this.onPagePrevious = () => {
-    deselectAll();
-    this.pager.previousPage();
-    calculateItemsOnPage();
-  };
-
-  this.getUrlForItem = function getUrlForItem(item) {
-    return `#/visualize/edit/${item.id}`;
-  };
+  $scope.$watch(() => itemTableState.items, () => updateProps());
+  $scope.$watch(() => itemTableState.selectedItems, () => updateProps());
+  $scope.$watch(() => itemTableState.pageOfItems, () => updateProps());
+  updateProps();
+  fetchObjects();
 }
