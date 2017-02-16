@@ -21,7 +21,7 @@ import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants
 import { VisualizeConstants } from '../visualize_constants';
 
 uiRoutes
-.when(VisualizeConstants.CREATE_URL, {
+.when(VisualizeConstants.CREATE_PATH, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
@@ -38,7 +38,7 @@ uiRoutes
     }
   }
 })
-.when(`${VisualizeConstants.EDIT_URL}/:id`, {
+.when(`${VisualizeConstants.EDIT_PATH}/:id`, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route) {
@@ -293,6 +293,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.doSave = function () {
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
+    $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
@@ -312,7 +313,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
-          kbnUrl.change(`${VisualizeConstants.EDIT_URL}/{{id}}`, { id: savedVis.id });
+          kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
         }
       }
     }, notify.fatal);

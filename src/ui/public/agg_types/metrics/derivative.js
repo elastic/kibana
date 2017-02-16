@@ -1,62 +1,17 @@
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import metricAggTemplate from 'ui/agg_types/controls/sub_agg.html';
-import _ from 'lodash';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import VisSchemasProvider from 'ui/vis/schemas';
+import ParentPipelineAggHelperProvider from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
-import { parentPipelineAggController } from './lib/parent_pipeline_agg_controller';
-import { parentPipelineAggWritter } from './lib/parent_pipeline_agg_writter';
 
 export default function AggTypeMetricDerivativeProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  const AggConfig = Private(VisAggConfigProvider);
-  const Schemas = Private(VisSchemasProvider);
-
-  const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
-  const orderAggSchema = (new Schemas([
-    {
-      group: 'none',
-      name: 'orderAgg',
-      title: 'Order Agg',
-      aggFilter: aggFilter
-    }
-  ])).all[0];
+  const parentPipelineAggHelper = Private(ParentPipelineAggHelperProvider);
 
   return new MetricAggType({
     name: 'derivative',
     title: 'Derivative',
     makeLabel: agg => makeNestedLabel(agg, 'derivative'),
     params: [
-      {
-        name: 'customMetric',
-        type: AggConfig,
-        default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
-        makeAgg: function (termsAgg, state) {
-          state = state || { type: 'count' };
-          state.schema = orderAggSchema;
-          const metricAgg = new AggConfig(termsAgg.vis, state);
-          metricAgg.id = termsAgg.id + '-metric';
-          return metricAgg;
-        },
-        write: _.noop
-      },
-      {
-        name: 'buckets_path',
-        write: _.noop
-      },
-      {
-        name: 'metricAgg',
-        editor: metricAggTemplate,
-        default: 'custom',
-        controller: parentPipelineAggController,
-        write: parentPipelineAggWritter
-      }
+      ...parentPipelineAggHelper.params()
     ]
   });
 }
