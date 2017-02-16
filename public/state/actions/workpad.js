@@ -111,21 +111,26 @@ export function workpadImport(file) {
 
 export function workpadDelete(id) {
   return (dispatch) => {
-    const startAction = createAction('WORKPAD_DELETE_START');
-    const action = createAction('WORKPAD_DELETE', id => {
-      return fetch('../api/rework/delete/' + id, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'turdSandwich',
-        }
-      })
-      .then(toJson('resp._id'));
-    });
+    const msg = 'You are about to remove this workpad, along with its dataframes and pages.\n\n' +
+      'You can use the undo button to restore it.';
 
-    dispatch(startAction(id));
-    dispatch(action(id));
+    if (window.confirm(msg)) {
+      const startAction = createAction('WORKPAD_DELETE_START');
+      const action = createAction('WORKPAD_DELETE', id => {
+        return fetch('../api/rework/delete/' + id, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'turdSandwich',
+          }
+        })
+        .then(toJson('resp._id'));
+      });
+
+      dispatch(startAction(id));
+      dispatch(action(id));
+    }
   };
 }
 

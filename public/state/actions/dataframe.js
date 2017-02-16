@@ -75,10 +75,16 @@ export function dataframeResolve(id) {
 };
 
 export function dataframeRemove(id) {
-  return (dispatch, getState) => {
-    const action = createAction('DATAFRAME_REMOVE');
-    dispatch(dataframeRemoveLinkedElements(id));
-    dispatch(action(id));
+  return (dispatch) => {
+    const msg = 'You are about to remove this dataframe.\n\n' +
+      'This will also remove all of the associated elements on all pages.\n\n' +
+      'You can use the undo button to restore it.';
+
+    if (window.confirm(msg)) {
+      const action = createAction('DATAFRAME_REMOVE');
+      dispatch(dataframeRemoveLinkedElements(id));
+      dispatch(action(id));
+    }
   };
 }
 
