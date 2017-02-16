@@ -2,7 +2,7 @@
   <div class="kuiLocalNavRow">
     <div class="kuiLocalNavRow__section">
       <div class="kuiLocalTitle">
-        Surrounding Entries in {{ contextApp.state.queryParameters.indexPattern.id }}
+        Surrounding Documents in {{ contextApp.state.queryParameters.indexPattern.id }}
       </div>
     </div>
   </div>
@@ -61,14 +61,14 @@
         is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
       ></context-size-picker>
-      <span>newer entries</span>
+      <span>newer documents</span>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.predecessors === contextApp.constants.LOADING_STATUS.LOADED)
           && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
       >
         <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} entries newer than the anchor could be found."></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} documents newer than the anchor could be found."></span>
       </span>
     </div>
 
@@ -125,14 +125,14 @@
         is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
-      <div>older entries</div>
+      <div>older documents</div>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.successors === contextApp.constants.LOADING_STATUS.LOADED)
           && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
       >
         <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} entries older than the anchor could be found."></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} documents older than the anchor could be found."></span>
       </span>
     </div>
 

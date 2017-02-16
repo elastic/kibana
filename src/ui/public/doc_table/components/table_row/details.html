@@ -6,14 +6,14 @@
       ng-href="{{ getContextAppHref() }}"
       ng-if="indexPattern.hasTimeField()"
     >
-      View surrounding entries
+      View surrounding documents
     </a>
     <a
       class="kuiLink documentTableRow__action"
       data-test-subj="docTableRowAction"
       ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
     >
-      View single entry
+      View single document
     </a>
   </div>
   <doc-viewer hit="row" filter="filter" columns="columns" index-pattern="indexPattern"></doc-viewer>
