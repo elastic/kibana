@@ -80,19 +80,29 @@ frameSources.push(new FrameSource('timelion', {
 
       const columns = [
         {name: 'label', type: 'string'},
-        {name: 'time', type: 'string'},
+        {name: 'time', type: 'date'},
         {name: 'value', type: 'number'},
-        {name: 'color', type: 'string'}
+        {name: '-color', type: 'string'}
       ];
 
+      const hasColumn = (name) => _.filter(columns, {name: name}).length > 0 ? true : false;
+
       const rows = [].concat.apply([], _.map(seriesList.list, series => {
+        const seriesColumns = _.get(series, 'meta.columns');
+        if (seriesColumns) {
+          _.each(seriesColumns, (val, name) => {
+            if (!hasColumn(name)) columns.push({name: name, type: 'string'});
+          });
+        }
+
         const color = series.color;
         return _.map(series.data, point => {
           return {
             label: series.label,
             time: moment(point[0]).format(),
-            color: color,
-            value: point[1]
+            '-color': color,
+            value: point[1],
+            ...seriesColumns
           };
         });
       }));
