@@ -26,7 +26,8 @@ target
 data
 disabledPlugins
 webpackstats.json
-config/kibana.dev.yml
+config/*
+!config/kibana.yml
 coverage
 selenium
 .babelcache.json
