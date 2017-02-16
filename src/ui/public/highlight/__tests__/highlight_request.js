@@ -79,4 +79,14 @@ describe('getHighlightRequest', () => {
     const request = getHighlightRequest(queryStringQuery);
     expect(request.fields['*']).to.not.have.property('highlight_query');
   });
+
+  it('should enable/disable highlighting if config is changed', () => {
+    getHighlightRequest = getHighlightRequestProvider(config);
+    let request = getHighlightRequest(queryStringQuery);
+    expect(request).to.not.be(undefined);
+
+    config.set('doc_table:highlight', false);
+    request = getHighlightRequest(queryStringQuery);
+    expect(request).to.be(undefined);
+  });
 });

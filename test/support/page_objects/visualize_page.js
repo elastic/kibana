@@ -9,6 +9,8 @@ export default class VisualizePage {
 
   init(remote) {
     this.remote = remote;
+    this.xAxisBucket = 'Category Axis';
+    this.yAxisBucket = 'Value Axis';
   }
 
   clickAreaChart() {
@@ -37,6 +39,13 @@ export default class VisualizePage {
     .setFindTimeout(defaultFindTimeout)
     .findByPartialLinkText('Markdown widget')
     .click();
+  }
+
+  clickAddMetric() {
+    return this.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[group-name="metrics"] .vis-editor-agg-add .vis-editor-agg-wide-btn div.btn')
+      .click();
   }
 
   clickMetric() {
@@ -220,7 +229,7 @@ export default class VisualizePage {
   selectAggregation(myString) {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('option[label="' + myString + '"]')
+    .findByCssSelector('vis-editor-agg-params:not(.ng-hide) option[label="' + myString + '"]')
     .click();
   }
 
@@ -231,13 +240,13 @@ export default class VisualizePage {
     .getVisibleText();
   }
 
-  selectField(fieldValue) {
+  selectField(fieldValue, groupName = 'buckets') {
     const self = this;
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(defaultFindTimeout)
       // the css below should be more selective
-      .findByCssSelector('option[label="' + fieldValue + '"]')
+      .findByCssSelector(`[group-name="${groupName}"] option[label="${fieldValue}"]`)
       .click();
     });
   }
@@ -292,7 +301,7 @@ export default class VisualizePage {
     .findByCssSelector('.btn-success')
     .click()
     .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -316,7 +325,7 @@ export default class VisualizePage {
       .click();
     })
     .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -474,7 +483,7 @@ export default class VisualizePage {
 
 
   // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-  getLineChartData(cssPart) {
+  getLineChartData(cssPart, axis = 'ValueAxis-1') {
     const self = this.remote;
     let yAxisLabel = 0;
     let yAxisHeight;
@@ -482,10 +491,10 @@ export default class VisualizePage {
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
+      .findByCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`)
       .getVisibleText()
       .then(function (yLabel) {
-        yAxisLabel = yLabel.replace(',', '');
+        yAxisLabel = yLabel.replace(/,/g, '');
         PageObjects.common.debug('yAxisLabel = ' + yAxisLabel);
         return yLabel;
       })
@@ -505,18 +514,13 @@ export default class VisualizePage {
       .then(function getChartWrapper() {
         return self
         .setFindTimeout(defaultFindTimeout * 2)
-        .findAllByCssSelector('.chart-wrapper')
+        .findAllByCssSelector(`.chart-wrapper circle[${cssPart}]`)
         .then(function (chartTypes) {
 
           // 5). for each chart element, find the green circle, then the cy position
           function getChartType(chart) {
             return chart
-            .findByCssSelector(`circle[${cssPart}]`)
-            .then(function (circleObject) {
-              // PageObjects.common.debug('circleObject = ' + circleObject + ' yAxisHeight= ' + yAxisHeight + ' yAxisLabel= ' + yAxisLabel);
-              return circleObject
-              .getAttribute('cy');
-            })
+            .getAttribute('cy')
             .then(function (cy) {
               // PageObjects.common.debug(' yAxisHeight=' + yAxisHeight + ' yAxisLabel=' + yAxisLabel + '  cy=' + cy +
               //   ' ((yAxisHeight - cy)/yAxisHeight * yAxisLabel)=' + ((yAxisHeight - cy) / yAxisHeight * yAxisLabel));
@@ -712,7 +716,7 @@ export default class VisualizePage {
       return PageObjects.common.sleep(1000);
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 

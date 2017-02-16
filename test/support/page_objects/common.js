@@ -6,14 +6,12 @@ import bluebird, {
 import fs from 'fs';
 import _ from 'lodash';
 import mkdirp from 'mkdirp';
-import moment from 'moment';
 import path from 'path';
 import testSubjSelector from '@spalger/test-subj-selector';
 import {
   format,
   parse
 } from 'url';
-import util from 'util';
 
 import getUrl from '../../utils/get_url';
 
@@ -272,18 +270,64 @@ export default class Common {
     }
   }
 
-  findTestSubject(selector) {
+  async doesCssSelectorExist(selector) {
+    PageObjects.common.debug(`doesCssSelectorExist ${selector}`);
+    const exists = await this.remote
+      .setFindTimeout(1000)
+      .findByCssSelector(selector)
+      .then(() => true)
+      .catch(() => false);
+    this.remote.setFindTimeout(defaultFindTimeout);
+
+    PageObjects.common.debug(`exists? ${exists}`);
+    return exists;
+  }
+
+  findByCssSelector(selector) {
+    PageObjects.common.debug(`findByCssSelector ${selector}`);
+    return this.remote.setFindTimeout(defaultFindTimeout).findByCssSelector(selector);
+  }
+
+  async doesTestSubjectExist(selector) {
+    PageObjects.common.debug(`doesTestSubjectExist ${selector}`);
+    const exists = await this.remote
+      .setFindTimeout(1000)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(() => true)
+      .catch(() => false);
+    this.remote.setFindTimeout(defaultFindTimeout);
+    return exists;
+  }
+
+  findTestSubject(selector, timeout = defaultFindTimeout) {
     this.debug('in findTestSubject: ' + testSubjSelector(selector));
+    let originalFindTimeout = null;
     return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector(testSubjSelector(selector));
+      .getFindTimeout()
+      .then((findTimeout) => originalFindTimeout = findTimeout)
+      .setFindTimeout(timeout)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(
+        (result) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => result),
+        (error) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => { throw error; }),
+      );
   }
 
   async findAllTestSubjects(selector) {
     this.debug('in findAllTestSubjects: ' + testSubjSelector(selector));
-    const remote = this.remote.setFindTimeout(defaultFindTimeout);
-    const all = await remote.findAllByCssSelector(testSubjSelector(selector));
+    const all = await this.findAllByCssSelector(testSubjSelector(selector));
     return await filterAsync(all, el => el.isDisplayed());
   }
 
+  async findAllByCssSelector(selector, timeout = defaultFindTimeout) {
+    this.debug('in findAllByCssSelector: ' + selector);
+    const remote = this.remote.setFindTimeout(timeout);
+    let elements = await remote.findAllByCssSelector(selector);
+    this.remote.setFindTimeout(defaultFindTimeout);
+    if (!elements) elements = [];
+    this.debug(`Found ${elements.length} for selector ${selector}`);
+    return elements;
+  }
 }

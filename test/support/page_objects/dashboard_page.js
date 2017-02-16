@@ -1,8 +1,11 @@
+import _ from 'lodash';
+import { defaultFindTimeout } from '../';
 
 import {
-  defaultFindTimeout,
+  scenarioManager,
+  esClient,
+  elasticDump
 } from '../';
-
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -12,20 +15,74 @@ export default class DashboardPage {
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
-  gotoDashboardLandingPage() {
-    return this.findTimeout
-      .findByCssSelector('a[href="#/dashboard"]')
-      .click();
+  async initTests() {
+    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
+
+    PageObjects.common.debug('load kibana index with visualizations');
+    await elasticDump.elasticLoad('dashboard','.kibana');
+
+    await PageObjects.common.navigateToApp('dashboard');
+
+    return logstash;
+  }
+
+  /**
+   * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
+   * @returns {Promise<boolean>}
+   */
+  async onDashboardLandingPage() {
+    PageObjects.common.debug(`onDashboardLandingPage`);
+    const exists = await PageObjects.common.doesCssSelectorExist('a[href="#/dashboard"]');
+    return !exists;
+  }
+
+  async gotoDashboardLandingPage() {
+    PageObjects.common.debug('Go to dashboard landing page');
+    const onPage = await this.onDashboardLandingPage();
+    if (!onPage) {
+      return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
+    }
   }
 
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('newDashboardLink')
-      .click();
+    return PageObjects.common.findTestSubject('newDashboardLink').click();
   }
 
   clickAddVisualization() {
-    return PageObjects.common.findTestSubject('dashboardAddPanelButton')
-    .click();
+    return PageObjects.common.findTestSubject('dashboardAddPanelButton').click();
+  }
+
+  clickOptions() {
+    return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+  }
+
+  isOptionsOpen() {
+    PageObjects.common.debug('isOptionsOpen');
+    return PageObjects.common.doesTestSubjectExist('dashboardDarkThemeCheckbox');
+  }
+
+  async openOptions() {
+    PageObjects.common.debug('openOptions');
+    const isOpen = await this.isOptionsOpen();
+    if (!isOpen) {
+      return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+    }
+  }
+
+  async isDarkThemeOn() {
+    PageObjects.common.debug('isDarkThemeOn');
+    await this.openOptions();
+    const darkThemeCheckbox = await PageObjects.common.findTestSubject('dashboardDarkThemeCheckbox');
+    return await darkThemeCheckbox.getProperty('checked');
+  }
+
+  async useDarkTheme(on) {
+    await this.openOptions();
+    const isDarkThemeOn = await this.isDarkThemeOn();
+    if (isDarkThemeOn !== on) {
+      return PageObjects.common.findTestSubject('dashboardDarkThemeCheckbox').click();
+    }
   }
 
   filterVizNames(vizName) {
@@ -42,7 +99,7 @@ export default class DashboardPage {
   }
 
   closeAddVizualizationPanel() {
-    PageObjects.common.debug('-------------close panel');
+    PageObjects.common.debug('closeAddVizualizationPanel');
     return this.findTimeout
     .findByCssSelector('i.fa fa-chevron-up')
     .click();
@@ -73,48 +130,36 @@ export default class DashboardPage {
     });
   }
 
-  saveDashboard(dashName) {
-    return PageObjects.common.findTestSubject('dashboardSaveButton')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(() => {
-      PageObjects.common.debug('saveButton button clicked');
-      return this.findTimeout
-      .findById('dashboardTitle')
-      .type(dashName);
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    // click save button
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('clicking final Save button for named dashboard');
-        return this.findTimeout
-        .findByCssSelector('.btn-primary')
-        .click();
-      });
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
+  async saveDashboard(dashName, storeTimeWithDash) {
+    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.sleep(1000);
+
+    PageObjects.common.debug('entering new title');
+    await this.findTimeout.findById('dashboardTitle').type(dashName);
+
+    if (storeTimeWithDash !== undefined) {
+      await this.storeTimeWithDashboard(storeTimeWithDash);
+    }
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.sleep(1000);
+
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('clicking final Save button for named dashboard');
+      return this.findTimeout.findByCssSelector('.btn-primary').click();
+    });
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('verify toast-message for saved dashboard');
-        return this.findTimeout
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('verify toast-message for saved dashboard');
+      return this.findTimeout
         .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
         .getVisibleText();
-      });
     });
   }
 
@@ -126,28 +171,18 @@ export default class DashboardPage {
 
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
-  loadSavedDashboard(dashName) {
+  async loadSavedDashboard(dashName) {
+    PageObjects.common.debug(`Load Saved Dashboard ${dashName}`);
     const self = this;
-    return this.gotoDashboardLandingPage()
-    .then(function filterDashboard() {
-      PageObjects.common.debug('Load Saved Dashboard button clicked');
-      return PageObjects.common.findTestSubject('searchFilter')
-        .click()
-        .type(dashName.replace('-',' '));
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(function clickDashboardByLinkedText() {
-      return self
-      .clickDashboardByLinkText(dashName);
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    await this.gotoDashboardLandingPage();
+    const searchBox = await PageObjects.common.findTestSubject('searchFilter');
+    await searchBox.click();
+    await searchBox.type(dashName.replace('-',' '));
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.sleep(1000);
+    await this.clickDashboardByLinkText(dashName);
+    return PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   getPanelTitles() {
@@ -214,6 +249,56 @@ export default class DashboardPage {
       const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
+  }
+
+  getTestVisualizationNames() {
+    return [
+      'Visualization PieChart',
+      'Visualization☺ VerticalBarChart',
+      'Visualization漢字 AreaChart',
+      'Visualization☺漢字 DataTable',
+      'Visualization漢字 LineChart',
+      'Visualization TileMap',
+      'Visualization MetricChart'
+    ];
+  }
+
+  addVisualizations(visualizations) {
+    return visualizations.reduce(function (promise, vizName) {
+      return promise
+        .then(() => PageObjects.dashboard.addVisualization(vizName));
+    }, Promise.resolve());
+  }
+
+  async setTimepickerInDataRange() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
+    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+  }
+
+  async storeTimeWithDashboard(on) {
+    PageObjects.common.debug('Storing time with dashboard: ' + on);
+    const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
+    const checked = await storeTimeCheckbox.getProperty('checked');
+    if (checked === true && on === false ||
+      checked === false && on === true) {
+      PageObjects.common.debug('Flipping store time checkbox');
+      await storeTimeCheckbox.click();
+    }
+  }
+
+  async getFilterDescriptions(timeout = defaultFindTimeout) {
+    const filters = await PageObjects.common.findAllByCssSelector(
+      '.filter-bar > .filter > .filter-description',
+      timeout);
+    return _.map(filters, async (filter) => await filter.getVisibleText());
+  }
+
+  async filterOnPieSlice() {
+    PageObjects.common.debug('Filtering on a pie slice');
+    const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
+    PageObjects.common.debug('Slices found:' + slices.length);
+    return slices[0].click();
   }
 
 }

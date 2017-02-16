@@ -1,6 +1,15 @@
+import _ from 'lodash';
 const alter = require('../lib/alter.js');
 
 const Chainable = require('../lib/classes/chainable');
+const tickFormatters = {
+  'bits':'bits',
+  'bits/s':'bits/s',
+  'bytes':'bytes',
+  'bytes/s':'bytes/s',
+  'currency':'currency(:ISO 4217 currency code)',
+  'custom':'custom(:prefix:suffix)'
+};
 module.exports = new Chainable('yaxis', {
   args: [
     {
@@ -37,10 +46,15 @@ module.exports = new Chainable('yaxis', {
       types: ['string', 'null'],
       help: 'Color of axis label'
     },
+    {
+      name: 'units',
+      types: ['string', 'null'],
+      help: 'The function to use for formatting y-axis labels. One of: ' + _.values(tickFormatters).join(', ')
+    },
   ],
   help: 'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   fn: function yaxisFn(args) {
-    return alter(args, function (eachSeries, yaxis, min, max, position, label, color) {
+    return alter(args, function (eachSeries, yaxis, min, max, position, label, color, units) {
       yaxis = yaxis || 1;
 
       eachSeries.yaxis = yaxis;
@@ -58,7 +72,25 @@ module.exports = new Chainable('yaxis', {
       myAxis.axisLabelColour = color;
       myAxis.axisLabelUseCanvas = true;
 
+      if (units) {
+        const unitTokens = units.split(':');
+        if (!tickFormatters[unitTokens[0]]) {
+          throw new Error (`${units} is not a supported unit type.`);
+        }
+        if (unitTokens[0] === 'currency') {
+          const threeLetterCode = /^[A-Za-z]{3}$/;
+          const currency = unitTokens[1];
+          if (currency && !threeLetterCode.test(currency)) {
+            throw new Error('Currency must be a three letter code');
+          }
+        }
 
+        myAxis.units = {
+          type: unitTokens[0],
+          prefix: unitTokens[1] || '',
+          suffix: unitTokens[2] || ''
+        };
+      }
 
       return eachSeries;
     });

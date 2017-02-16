@@ -73,6 +73,22 @@ export default function AggConfigsFactory(Private) {
     return true;
   };
 
+  function removeParentAggs(obj) {
+    for(const prop in obj) {
+      if (prop === 'parentAggs') delete obj[prop];
+      else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+    }
+  }
+
+  function parseParentAggs(dslLvlCursor, dsl) {
+    if (dsl.parentAggs) {
+      _.each(dsl.parentAggs, (agg, key) => {
+        dslLvlCursor[key] = agg;
+        parseParentAggs(dslLvlCursor, agg);
+      });
+    }
+  }
+
   AggConfigs.prototype.toDsl = function () {
     const dslTopLvl = {};
     let dslLvlCursor;
@@ -114,6 +130,8 @@ export default function AggConfigsFactory(Private) {
       const dsl = dslLvlCursor[config.id] = config.toDsl();
       let subAggs;
 
+      parseParentAggs(dslLvlCursor, dsl);
+
       if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
         subAggs = dsl.aggs || (dsl.aggs = {});
@@ -125,6 +143,8 @@ export default function AggConfigsFactory(Private) {
         });
       }
     });
+
+    removeParentAggs(dslTopLvl);
 
     return dslTopLvl;
   };
