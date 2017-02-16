@@ -24,7 +24,7 @@ module.exports = function (kibana) {
       },
       hacks: [
         // Dataframes first
-        'plugins/rework/arg_types/dataframe/frame_sources/csv/csv',
+        //'plugins/rework/arg_types/dataframe/frame_sources/csv/csv',
         'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion',
 
         // Then argument types

@@ -48,22 +48,14 @@ export default () => {
       elements: {},
       filters: {},
       dataframes: {
-        'dataframe-1': {
-          id: 'dataframe-1',
-          name: 'Cars',
-          type: 'csv',
+        'dataframe-0': {
+          id: 'dataframe-0',
+          name: 'Default Dataframe',
+          type: 'timelion',
           value: {
-            csv:'"make","model","year","price"\n' +
-                '"Subaru","Impreza","2015",17695\n' +
-                '"Subaru","Impreza","2016",18020\n' +
-                '"Subaru","Impreza","2017",18245\n' +
-                '"Subaru","Baja","2015",21995\n' +
-                '"Subaru","Baja","2016",21995\n' +
-                '"Subaru","Baja","2017",22345\n' +
-                '"Subaru","Outback","2015",23245\n' +
-                '"Subaru","Outback","2016",23470\n' +
-                '"Subaru","Outback","2017",24445\n'
-          }
+            expression: '.cv(split=user:2), .cv(split=geo.country_code:2)',
+            interval: 'auto'
+          },
         }
       }
     },
