@@ -107,6 +107,7 @@ body {
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
  * 2. Disable for Angular.
+ * 3. Safari won't respect :enabled:active on links.
  */
 .kuiButton {
   display: inline-block;
@@ -126,7 +127,8 @@ body {
     cursor: default;
     pointer-events: none;
     /* 2 */ }
-  .kuiButton:active:enabled {
+  .kuiButton:active {
+    /* 3 */
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
   .kuiButton:focus {
@@ -145,6 +147,7 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--basic {
   color: #5a5a5a;
@@ -152,7 +155,8 @@ body {
   .kuiButton--basic:focus {
     color: #5a5a5a !important;
     /* 1 */ }
-  .kuiButton--basic:hover:enabled, .kuiButton--basic:active:enabled {
+  .kuiButton--basic:hover, .kuiButton--basic:active {
+    /* 2 */
     color: #ffffff !important;
     /* 1 */
     background-color: #9B9B9B; }
@@ -161,11 +165,13 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1; }
-  .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
+  .kuiButton--primary:hover, .kuiButton--primary:active {
+    /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #006E8A; }
@@ -177,11 +183,13 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051; }
-  .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
+  .kuiButton--danger:hover, .kuiButton--danger:active {
+    /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #A52E1F; }
@@ -200,12 +208,14 @@ body {
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
+ * 3. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--hollow {
   color: #3CAED2 !important;
   /* 2 */
   background-color: transparent; }
-  .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
+  .kuiButton--hollow:hover, .kuiButton--hollow:active {
+    /* 3 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
