@@ -42,12 +42,15 @@ export function VisualizeListingController($injector, $scope) {
     this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
   };
 
-  const fetchObjects = () => {
+  const fetchItems = () => {
+    this.isFetchingItems = true;
+
     visualizationService.find(this.filter)
-    .then(result => {
-      this.items = result.hits;
-      calculateItemsOnPage();
-    });
+      .then(result => {
+        this.isFetchingItems = false;
+        this.items = result.hits;
+        calculateItemsOnPage();
+      });
   };
 
   const deselectAll = () => {
@@ -58,6 +61,7 @@ export function VisualizeListingController($injector, $scope) {
     selectedItems = this.pageOfItems.slice(0);
   };
 
+  this.isFetchingItems = false;
   this.items = [];
   this.pageOfItems = [];
   this.filter = '';
@@ -66,7 +70,7 @@ export function VisualizeListingController($injector, $scope) {
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();
-    fetchObjects();
+    fetchItems();
   });
 
   /**
@@ -145,7 +149,7 @@ export function VisualizeListingController($injector, $scope) {
       const selectedIds = selectedItems.map(item => item.id);
 
       visualizationService.delete(selectedIds)
-        .then(fetchObjects)
+        .then(fetchItems)
         .then(() => {
           deselectAll();
         })
