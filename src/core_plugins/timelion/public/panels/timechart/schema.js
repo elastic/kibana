@@ -187,7 +187,8 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             time.min.valueOf(),
             time.max.valueOf(),
             config.get('timelion:target_buckets') || 200,
-            $scope.interval
+            $scope.interval,
+            config.get('timelion:min_interval') || '1ms',
           );
           const format = getxAxisFormatter(interval);
 
