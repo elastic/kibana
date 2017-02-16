@@ -102,19 +102,24 @@ uiModules
             function sum(tableRows) {
               return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
             }
+            const formatter = agg.fieldFormatter('html');
 
             switch ($scope.totalFunc) {
               case 'sum':
-                formattedColumn.total = sum(table.rows);
+                if (!field || field.type !== 'date') {
+                  formattedColumn.total = formatter(sum(table.rows));
+                }
                 break;
               case 'avg':
-                formattedColumn.total = sum(table.rows) / table.rows.length;
+                if (!field || field.type !== 'date') {
+                  formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
+                }
                 break;
               case 'min':
-                formattedColumn.total = _.chain(table.rows).map(i).map('value').min().value();
+                formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').min().value());
                 break;
               case 'max':
-                formattedColumn.total = _.chain(table.rows).map(i).map('value').max().value();
+                formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').max().value());
                 break;
               case 'count':
                 formattedColumn.total = table.rows.length;
