@@ -23,7 +23,7 @@ export default function fetchService(Private, Promise) {
   const fetchTheseSoon = (requests) => {
     requests.forEach(req => req._setFetchRequested());
     debouncedFetchThese();
-    return Promise.all(requests.map(req => req.defer.promise));
+    return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
   this.fetchQueued = (strategy) => {
