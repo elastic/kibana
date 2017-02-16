@@ -85,7 +85,7 @@
     <!-- PromptForItems -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
-      ng-if="!listingController.items.length && !listingController.filter"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
     >
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
