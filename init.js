@@ -9,4 +9,6 @@ module.exports = function (server, options) {
   require('./server/routes/export.js')(server);
   require('./server/routes/import.js')(server);
   require('./server/routes/delete.js')(server);
+
+  server.plugins.timelion.addFunction(require('./server/timelion/canvas/index'));
 };
