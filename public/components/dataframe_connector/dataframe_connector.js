@@ -16,9 +16,13 @@ export default React.createClass({
         type,
         name: `Untitled Dataframe`,
         value:  frameSources.byName[type].defaults,
-        id: uuid()
+        id: `dataframe-${uuid()}`
       });
     };
+  },
+
+  componentWillMount() {
+    if (frameSources.length === 1) this.connect(frameSources[0].name)();
   },
 
   render() {
