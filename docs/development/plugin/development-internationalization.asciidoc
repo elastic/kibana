@@ -4,31 +4,36 @@ Translating Kibana
 
 [[background]]
 Background
-~~~~~~~~~~
+~~~~~~~~~
 
 Please see https://github.com/elastic/kibana/issues/6515[kibana#6515]
 for background discussion on the Kibana translation work.
 
 [[prerequisites]]
 Prerequisites
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 Kibana must be installed and operational, see README.md
 
 [[audience]]
 Audience
-~~~~~~~~
+~~~~~~~
 
-There are three audiences for this document: - those that want to
-contribute translations to Kibana - those that want to enable
-translation of Kibana - those that want to create a Kibana Plugin
+There are three audiences for this document:
 
-[[contributing-translations]]
-Contributing Translations
-~~~~~~~~~~~~~~~~~~~~~~~~~
+* those that want to contribute language packs to Kibana
+* those that want to enable translations in existing Kibana plugins
+* those that want to create a new Kibana Plugin
+
+[[contributing-language-packs]]
+Contributing Language Packs
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For this example, we will demonstrate translation into Maltese (Language
-code `mt`).
+code `mt`). Add-on functionality for Kibana is implemented with plug-in modules.
+Refer to
+https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html[Kibana
+Plugins] for more details.
 
 * Fork the `kibana` source, and ensure you have an up to date copy of
 the source.
@@ -46,46 +51,45 @@ the right language code”]
 * Create a new branch for your work:
 +
 git checkout -b translate-mt
-* For each translation scope (see link:#Scoping%20Translations[Scoping
-Translations], below), copy the translation plugin template directory
-`translation_plugin_template` to `<kibana_root>/plugins` changing the
-directory name to _plugin_-_languagecode_:
+* For each translation scope (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], below), generate a Kibana plugin with name _plugin_-_languagecode_ using the https://github.com/elastic/generator-kibana-plugin[Kibana Plugin Yeoman Generator]:
 +
-cp -r src/fixtures/translation_plugin_template src/plugins; mv
-src/plugins/translation_plugin_template src/plugins/kibana-mt …
-* Replace the the `en.json` English source with _languagecode_`.json`:
-mv src/plugins/kibana-mt/translations/en.json
-src/plugins/kibana-mt/translations/mt.json
+* Replace the the `es.json` translation file with _languagecode_`.json`:
+`mv src/plugins/kibana-mt/translations/es.json src/plugins/kibana-mt/translations/mt.json`
 * Translate the `mt.json` file in a JSON editor
-* Edit index file (`src/plugins/kibana-mt/index.js`), updating the
-'translations' item as per your plugin translation(s) and changing
-plugin id to you plugin name (`kibana-mt`)
-* Edit package file (`src/plugins/kibana-mt/package`), updating the
-'name' field to your plugin name (`kibana-mt`)
-* See `src/fixtures/translation_plugin_template/README.mt` for more
-details
-* Start up Kibana and verify the translation works as expected.
+* Edit index file (`kibana-mt/index.js`), updating the
+'translations' item in 'uiExports' as per your plugin translation file(s)
+* Copy translations plugin (`kibana-mt/`) to the Kibana plugins (`<kibana_root>/plugins`) directory
+* Start up Kibana and verify the translation works as expected
 * Ensure Kibana tests pass
 * Commit the `kibana-mt` directory and files, and push them to your own
 fork of `kibana`
 * Open a pull request titled `Translation: Maltese (mt)`
 
-[[scoping-translations]]
-Scoping Translations
-~~~~~~~~~~~~~~~~~~~~
+[[enabling-ranslations-on-existing-plugins]]
+Enabling Translations on Existing Plugins
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Kibana translates according to plugin scope, so there is a `.json` file
 in `translations` subdirectory for each plugin.
 
 [[enabling-translation-of-an-angular-view]]
 Enabling Translation of an Angular view
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Determine which views share a plugin scope. In this example, `create`
 and `edit` will share scope.
 * If it does not already exist, Create the appropriate `translation`
 directory and the new translation file `en.json` inside it. In the above
 example, it would be: `src/core_plugins/kibana/translations/en.json`
+* If it does not exist add 'translations' item to the 'uiExports' in the plugin creation (`src/core_plugins/kibana/translations/en.json`) as follows:
+-------------------------------------------------------------------------
+uiExports {
+  translations: [ 
+    resolve(__dirname, './translations/en.json')
+  ], ….
+}
+-------------------------------------------------------------------------
+
 * In the view (HTML) file, such as
 `src/core_plugins/kibana/public/management/sections/indices/_create.html`
 Replace English text with translation keys, and copy the English text
@@ -127,32 +131,24 @@ After
 * Refresh the Kibana page and verify the UI looks the same.
 * Refer to Kibana core plugin (`src/core_plugins/kibana/`) for examples.
 
-[[plugin-authors]]
-Plugin Authors
-~~~~~~~~~~~~~~
+[[new-plugin-authors]]
+New Plugin Authors
+~~~~~~~~~~~~~~~~~
 
 Add-on functionality for Kibana is implemented with plug-in modules.
 Refer to
 https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html[Kibana
 Plugins] for more details. It is recommended that when creating a plugin
-you enable translations (see link:#Scoping%20Translations[Scoping
-Translations], above).
+you enable translations (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], above).
 
 [[enabling-translation-in-a-plugin]]
-Enabling Translation in a Plugin
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Enabling Translation in a New Plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* If the plugin does not exist already, create the plugin. In this
+* Generate a Kibana plugin using the https://github.com/elastic/generator-kibana-plugin[Kibana Plugin Yeoman Generator]. In this
 example, `plugin1`
-* Create the appropriate `translation` directory and the new translation
-file `en.json` inside it. In the above example, it would be:
-`src/plugins/plugin1/translations/en.json`
-* A plugin publishes its translation file(s) via `uiExports` by adding
-the `translations` key and listing the path(s) to the translation
-file(s) in the plugin creation code (`return new kibana.Plugin`) as
-follows:
-`uiExports: {   translations: [     resolve(__dirname, './translations/en.json')   ] }`
-* Refer to link:#Scoping%20Translations[Scoping Translations] for more
+* Add the translation IDs to the views
+* Add the corresponding translation IDs and text to the default translation file (`translations/en.json`)
+* Refer to link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins] for more
 details on enabling translation in your plugin views and refer to Kibana
 core plugin (`src/core_plugins/kibana/`) for an example.
-
