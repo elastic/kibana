@@ -102,7 +102,9 @@
           data-test-subj="tab-{{ editSection.index }}"
         >
           {{ editSection.title }}
-          ({{ editSection.count }})
+          <span data-test-subj="tab-count-{{ editSection.index }}">
+            ({{ editSection.count }})
+          </span>
         </button>
       </div>
 
