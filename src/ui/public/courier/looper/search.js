@@ -22,7 +22,7 @@ export default function SearchLooperService(Private, Promise, Notifier, $rootSco
     // the requests complete, but we want to continue even if
     // the requests abort so we make our own
     fetch.these(requests);
-    return Promise.all(requests.map(r => r.getCompleteOrAbortedPromise()));
+    return Promise.all(requests.map(request => request.getCompleteOrAbortedPromise()));
   });
 
   searchLooper.onHastyLoop = function () {
