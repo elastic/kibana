@@ -186,4 +186,12 @@ export default class HeaderPage {
   async getPrettyDuration() {
     return await PageObjects.common.findTestSubject('globalTimepickerRange').getVisibleText();
   }
+
+  async isSharedTimefilterEnabled() {
+    const element = await this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findByCssSelector(`[shared-timefilter=true]`);
+
+    return new Boolean(element);
+  }
 }
