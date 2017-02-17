@@ -76,11 +76,19 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       });
 
       $scope.$watch('absolute.from', function (date) {
-        if (_.isDate(date)) $scope.absolute.from = moment(date);
+        // If it is a date, it was set from the timepicker, so we set it to the start of day and transform it into a moment
+        if (_.isDate(date)) {
+          date.setHours(0, 0, 0, 0); // Start of day
+          $scope.absolute.from = moment(date);
+        }
       });
 
       $scope.$watch('absolute.to', function (date) {
-        if (_.isDate(date)) $scope.absolute.to = moment(date);
+        // If it is a date, it was set from the timepicker, so we set it to the end of day and transform it into a moment
+        if (_.isDate(date)) {
+          date.setHours(23, 59, 59, 999); // End of day
+          $scope.absolute.to = moment(date);
+        }
       });
 
       $scope.setMode = function (thisMode) {

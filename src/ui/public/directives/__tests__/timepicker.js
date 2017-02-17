@@ -421,6 +421,15 @@ describe('timepicker directive', function () {
       done();
     });
 
-  });
+    it('should set from/to to start/end of day if set from timepicker', function (done) {
+      $scope.absolute.from = new Date('2012-02-01 12:00');
+      $scope.absolute.to = new Date('2012-02-11 12:00');
 
+      $scope.$digest();
+
+      expect($scope.absolute.from.valueOf()).to.be(moment('2012-02-01 00:00:00.000').valueOf());
+      expect($scope.absolute.to.valueOf()).to.be(moment('2012-02-11 23:59:59.999').valueOf());
+      done();
+    });
+  });
 });
