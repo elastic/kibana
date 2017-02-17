@@ -1,10 +1,9 @@
 import { connect } from 'react-redux';
+import { getSections } from '../../store';
 import { GuidePage } from './guide_page.jsx';
 
-function mapStateToProps(state, ownProps) {
-  return Object.assign({}, ownProps, {
-    sections: state.sections.sections,
-  });
-}
+const mapStateToProps = state => ({
+  sections: getSections(state),
+});
 
 export const GuidePageContainer = connect(mapStateToProps)(GuidePage);

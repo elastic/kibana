@@ -1,7 +1,12 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { AppView } from './app_view.jsx';
 
+import {
+  getIsCodeViewerOpen,
+  getSections,
+  getSource,
+} from '../store';
+import { AppView } from './app_view.jsx';
 import {
   openCodeViewer,
   closeCodeViewer,
@@ -12,9 +17,9 @@ import {
 function mapStateToProps(state, ownProps) {
   return {
     routes: ownProps.routes,
-    isCodeViewerOpen: state.codeViewer.isOpen,
-    source: state.codeViewer.source,
-    sections: state.sections.sections,
+    isCodeViewerOpen: getIsCodeViewerOpen(state),
+    source: getSource(state),
+    sections: getSections(state),
   };
 }
 
