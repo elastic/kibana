@@ -33,31 +33,38 @@ export default class extends React.PureComponent {
     const argValues = element.args;
     const args = elementTypes.byName[type].args;
 
+    const formElements = _.map(args, (arg) => {
+      const type = arg.type.name;
+      const value = argValues[arg.name];
+      const { name, displayName } = arg;
+
+      const commit = (value) => {
+        this.props.argumentSet(id, name, value);
+      };
+
+      return (
+        <EditorSection label={displayName.replace('_', ' ')} open={arg.expand} key={name}>
+          <div
+            data-name={name}
+            data-type={type}
+            data-element-type={name}>
+            <ArgumentForm
+              type={type}
+              commit={commit}
+              value={value}
+              help={arg.help}
+              options={arg.options}
+              context={argValues}
+              defaultValue={arg.default}>
+              </ArgumentForm>
+          </div>
+        </EditorSection>
+      );
+    });
+
     return (
       <div className="rework--editor" key={element.id}>
-          {_.map(args, (arg) => {
-            const type = arg.type.name;
-            const value = argValues[arg.name];
-            const {name, displayName} = arg;
-
-            const commit = (value) => {
-              this.props.argumentSet(id, name, value);
-            };
-
-            return (
-              <EditorSection key={name} label={displayName.replace('_', ' ')}>
-                <ArgumentForm
-                  type={type}
-                  commit={commit}
-                  value={value}
-                  help={arg.help}
-                  options={arg.options}
-                  context={argValues}
-                  defaultValue={arg.default}>
-                  </ArgumentForm>
-              </EditorSection>
-            );
-          })}
+          {formElements}
       </div>
     );
   }

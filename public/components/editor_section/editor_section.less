@@ -1,16 +1,31 @@
 @import (reference) "~plugins/rework/main.less";
 
 .rework--editor-section {
+  padding: 10px;
+
   label {
     font-weight: normal;
     font-size: 12px !important;
   }
 
+
+
   h4 {
     text-transform: capitalize;
+    margin: 0;
+
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
+    }
 
     i {
       font-size: 15px;
+      margin-right: 20px;
     }
   }
+}
+
+.rework--editor-section-content {
+  margin-top: 5px;
 }
