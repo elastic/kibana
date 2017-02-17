@@ -42,15 +42,11 @@ export default class DashboardPage {
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
       await PageObjects.common.try(async () => {
-        PageObjects.common.debug('gotoDashboardLandingPage: Trying to find dashboard landing page link');
         const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
-        PageObjects.common.debug('gotoDashboardLandingPage: Click dashboard landing page link');
         await goToDashboardLink.click();
         // Once the searchFilter can be found, we know the page finished loading.
         const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
-        PageObjects.common.debug('gotoDashboardLandingPage: search filter found? ' + searchFilter);
       });
-      await PageObjects.common.saveScreenshot('dashboard-should-be-on-landing-page');
     }
   }
 
@@ -199,9 +195,7 @@ export default class DashboardPage {
 
     await PageObjects.common.try(async () => {
       const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
-      PageObjects.common.debug('searchForDashboardWithName: search Filter object found: ' + searchFilter);
       await searchFilter.click();
-      await PageObjects.common.saveScreenshot('searchForDashboardWithName-after-click');
       // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
       await searchFilter.type(dashName.replace('-',' '));
     });
