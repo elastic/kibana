@@ -33,12 +33,8 @@ elements.push(new Element('markdown', {
         rows: 10
       }
     }),
-    new Arg('dataframe', {
-      displayName: 'Data Source',
-      type: 'dataframe',
-      default: (state) => _.keys(state.transient.dataframeCache)[0]
-    }),
     new Arg('text_style', {
+      expand: true,
       type: 'text_style',
     }),
   ],
