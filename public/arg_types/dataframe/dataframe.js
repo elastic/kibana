@@ -7,6 +7,7 @@ import FrameLink from 'plugins/rework/arg_types/dataframe/frame_link';
 argTypes.push(new ArgType('dataframe', {
   help: 'The source of data to link to this element',
   cache: false, // Its ok not to cache this, this is cheap
+  expand: true,
   default(state) { return _.keys(state.persistent.dataframes)[0]; },
   form({commit, value, options}) {
     return (<FrameLink types={options.types} value={value} select={commit}></FrameLink>);

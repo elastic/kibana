@@ -27,6 +27,7 @@ elements.push(new Element('markdown', {
   args: [
     new Arg('markdown', {
       type: 'string',
+      expand: true,
       help: `
       <p>Standard markdown, expanded with templating.</p>
       <p>

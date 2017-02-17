@@ -21,6 +21,7 @@ elements.push(new Element('grow', {
       default: (state) => _.keys(state.transient.dataframeCache)[0]
     }),
     new Arg('image', {
+      expand: true,
       type: 'image',
     }),
     new Arg('value_column', {

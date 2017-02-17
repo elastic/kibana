@@ -23,7 +23,8 @@ elements.push(new Element('number', {
     new Arg('column', {
       type: 'dataframe_column',
       help: 'Column of which to show the value',
-      default: 'value'
+      default: 'value',
+      expand: true,
     }),
     new Arg('aggregate_with', {
       type: 'select',
@@ -31,10 +32,12 @@ elements.push(new Element('number', {
       default: 'last',
       options: {
         choices: ['sum', 'min', 'max', 'avg', 'last']
-      }
+      },
+      expand: true,
     }),
     new Arg('label_by', {
       type: 'dataframe_column',
+      expand: true,
     }),
     new Arg('value_style', {
       type: 'text_style',

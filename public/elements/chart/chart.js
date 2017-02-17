@@ -57,9 +57,11 @@ elements.push(new Element('chart', {
       type: 'dataframe'
     }),
     new Arg('value_column', {
+      expand: true,
       type: 'dataframe_column',
     }),
     new Arg('aggregate_with', {
+      expand: true,
       type: 'select',
       help: 'Function to use for aggregating values when the column contains more than a single value',
       default: 'last',
@@ -68,6 +70,7 @@ elements.push(new Element('chart', {
       }
     }),
     new Arg('group_by', {
+      expand: true,
       type: 'dataframe_column',
     }),
     new Arg('label_style', {

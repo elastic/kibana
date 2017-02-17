@@ -9,6 +9,7 @@ elements.push(new Element('image', {
   icon: icon,
   args: [
     new Arg('image', {
+      expand: true,
       type: 'image'
     }),
     new Arg('mode', {

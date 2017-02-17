@@ -30,6 +30,7 @@ elements.push(new Element('timelion', {
       }
     }),
     new Arg('axis_style', {
+      expand: true,
       type: 'text_style'
     })
   ],

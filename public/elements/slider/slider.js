@@ -32,16 +32,19 @@ elements.push(new Element('slider', {
       type: 'string',
       default: 'price',
       help: `The field on which to filter. Different sources may handle this in different ways.
-              Most sources will ignore fields they do not know about.`
+              Most sources will ignore fields they do not know about.`,
+      expand: true,
     }),
     new Arg('min', {
       type: 'number',
       default: -10000000000,
+      expand: true,
       help: 'The lowest value permitted',
     }),
     new Arg('max', {
       type: 'number',
       default: 10000000000,
+      expand: true,
       help: 'The largest value permitted',
     }),
   ],

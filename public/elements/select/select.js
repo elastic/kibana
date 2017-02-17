@@ -12,12 +12,14 @@ elements.push(new Element('select', {
   icon: icon,
   args: [
     new Arg('column', {
+      expand: true,
       type: 'string',
       default: 'model',
       help: `The field on which to filter. Different sources may handle this in different ways.
               Most sources will ignore fields they do not know about.`
     }),
     new Arg('options', {
+      expand: true,
       type: 'tags',
       default: ['Baja', 'Impreza', 'Outback'],
       help: '',
