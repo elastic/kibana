@@ -20,6 +20,26 @@ import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
 
+/**
+ * An error message to be used when the user rejects a confirm overwrite.
+ * @type {string}
+ */
+const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+/**
+ * An error message to be used when the user rejects a confirm save with duplicate title.
+ * @type {string}
+ */
+const SAVE_DUPLICATE_REJECTED = 'Save with duplicate title confirmation was rejected';
+
+/**
+ * @param error {Error} the error
+ * @return {boolean}
+ */
+function isErrorNonFatal(error) {
+  if (!error) return false;
+  return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
+}
+
 export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
   const DocSource = Private(DocSourceProvider);
@@ -271,17 +291,6 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     }
 
     /**
-     * An error message to be used when the user rejects a confirm overwrite.
-     * @type {string}
-     */
-    const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
-    /**
-     * An error message to be used when the user rejects a confirm save with duplicate title.
-     * @type {string}
-     */
-    const SAVE_DUPLICATE_REJECTED = 'Save with duplicate title confirmation was rejected';
-
-    /**
      * Attempts to create the current object using the serialized source. If an object already
      * exists, a warning message requests an overwrite confirmation.
      * @param source - serialized version of this object (return value from this.serialize())
@@ -380,9 +389,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .catch((err) => {
           this.isSaving = false;
           this.id = originalId;
-          if (err && (
-            err.message === OVERWRITE_REJECTED ||
-            err.message === SAVE_DUPLICATE_REJECTED)) {
+          if (isErrorNonFatal(err)) {
             return;
           }
           return Promise.reject(err);

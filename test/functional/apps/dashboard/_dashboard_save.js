@@ -48,16 +48,18 @@ bdd.describe('dashboard save', function describeIndexTests() {
     expect(countOfDashboards).to.equal(2);
   });
 
-  bdd.it('Does not warn when saving a duplicate title that remains unchanged for an existing dashboard', async function() {
-    await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
-    await PageObjects.dashboard.saveDashboard(dashboardName);
+  bdd.it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate',
+    async function() {
+      await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+      await PageObjects.header.isGlobalLoadingIndicatorHidden();
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
-    const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-    expect(isConfirmOpen).to.equal(false);
-  });
+      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+      expect(isConfirmOpen).to.equal(false);
+    }
+  );
 
-  bdd.it('Warns when saving a duplicate title that remains unchanged when Save as New Dashboard is checked', async function() {
+  bdd.it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function() {
     await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();

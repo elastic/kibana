@@ -169,11 +169,11 @@ export default class DashboardPage {
     await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
-      await this.storeTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
     }
 
     if (saveOptions.saveAsNew !== undefined) {
-      await this.saveAsNewCheckbox(saveOptions.saveAsNew);
+      await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
     }
 
     await PageObjects.common.try(() => {
@@ -316,23 +316,21 @@ export default class DashboardPage {
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
   }
 
-  async saveAsNewCheckbox(on) {
-    PageObjects.common.debug('Storing time with dashboard: ' + on);
+  async setSaveAsNewCheckBox(checked) {
+    PageObjects.common.debug('saveAsNewCheckbox: ' + checked);
     const saveAsNewCheckbox = await PageObjects.common.findTestSubject('saveAsNewCheckbox');
-    const checked = await saveAsNewCheckbox.getProperty('checked');
-    if (checked === true && on === false ||
-        checked === false && on === true) {
+    const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping save as new checkbox');
       await saveAsNewCheckbox.click();
     }
   }
 
-  async storeTimeWithDashboard(on) {
-    PageObjects.common.debug('saveAsNewCheckbox: ' + on);
+  async setStoreTimeWithDashboard(checked) {
+    PageObjects.common.debug('Storing time with dashboard: ' + checked);
     const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
-    const checked = await storeTimeCheckbox.getProperty('checked');
-    if (checked === true && on === false ||
-      checked === false && on === true) {
+    const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping store time checkbox');
       await storeTimeCheckbox.click();
     }
