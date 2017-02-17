@@ -50,6 +50,7 @@ export default class DashboardPage {
         const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
         PageObjects.common.debug('gotoDashboardLandingPage: search filter found? ' + searchFilter);
       });
+      await PageObjects.common.saveScreenshot('dashboard-should-be-on-landing-page');
     }
   }
 
@@ -200,11 +201,12 @@ export default class DashboardPage {
       const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
       PageObjects.common.debug('searchForDashboardWithName: search Filter object found: ' + searchFilter);
       await searchFilter.click();
+      await PageObjects.common.saveScreenshot('searchForDashboardWithName-after-click');
       // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
       await searchFilter.type(dashName.replace('-',' '));
     });
 
-    return await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async getDashboardCountWithName(dashName) {

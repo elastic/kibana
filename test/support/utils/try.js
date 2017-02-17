@@ -18,7 +18,6 @@ class Try {
     let prevMessage;
 
     function attempt() {
-      Log.debug('--- tryForTime: Retrying...');
       lastTry = Date.now();
 
       if (lastTry - start > timeout) {

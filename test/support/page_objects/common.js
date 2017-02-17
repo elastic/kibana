@@ -277,7 +277,7 @@ export default class Common {
       .findByCssSelector(selector)
       .then(() => true)
       .catch(() => false);
-    this.remote.setFindTimeout(defaultFindTimeout);
+    await this.remote.setFindTimeout(defaultFindTimeout);
 
     PageObjects.common.debug(`exists? ${exists}`);
     return exists;
