@@ -42,4 +42,5 @@ bdd.describe('visualize app', function () {
   require('./_vertical_bar_chart');
   require('./_heatmap_chart');
   require('./_point_series_options');
+  require('./_shared_item');
 });

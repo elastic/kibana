@@ -359,14 +359,14 @@ export default class VisualizePage {
       .type(vizName.replace('-',' '));
   }
 
-  clickVisualizationByLinkText(vizName) {
+  clickVisualizationByName(vizName) {
     const self = this;
     PageObjects.common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByLinkText(vizName)
+      .findByPartialLinkText(vizName)
       .click();
     });
   }
@@ -382,7 +382,7 @@ export default class VisualizePage {
   }
 
   openSavedVisualization(vizName) {
-    return this.clickVisualizationByLinkText(vizName);
+    return this.clickVisualizationByName(vizName);
   }
 
   getXAxisLabels() {
