@@ -37,13 +37,15 @@ frameSources.push(new FrameSource('timelion', {
     const timeFilters = _.filter(filters, {type: 'time'});
     if (timeFilters.length !== 1) throw new Error('Timelion must have 1 and only 1 time filter');
 
+    const interval = value.interval === 'none' ? '365000000000d' : value.interval;
+
     // We need to inject other filters here
     const body = {
       sheet: [value.expression],
       time: {
         from: timeFilters[0].value.from,
         to: timeFilters[0].value.to,
-        interval: value.interval,
+        interval: interval,
         timezone: 'America/Phoenix'
       }
     };
@@ -99,7 +101,7 @@ frameSources.push(new FrameSource('timelion', {
         return _.map(series.data, point => {
           return {
             label: series.label,
-            time: moment(point[0]).format(),
+            time: value.interval === 'none' ? moment().format() : moment(point[0]).format(),
             '-color': color,
             value: point[1],
             ...seriesColumns
@@ -133,9 +135,17 @@ frameSources.push(new FrameSource('timelion', {
           <form onSubmit={this.run}>
             <label>Expression</label>
             <div className="rework--timelion--input">
-              <TimelionExpression onChange={this.change('expression')} expression={expression}></TimelionExpression>
-              <TimelionInterval onChange={this.change('interval')} interval={interval}></TimelionInterval>
-              <button className="btn rework--timelion--submit" type="submit"><i className="fa fa-play"></i></button>
+              <div className="rework--timelion--input-expression">
+                <TimelionExpression onChange={this.change('expression')} expression={expression}></TimelionExpression>
+                <label>For syntax help check out the built-in <a href="../app/timelion">timelion tutorial</a></label>
+              </div>
+              <div className="rework--timelion--input-interval">
+                <TimelionInterval onChange={this.change('interval')} interval={interval}></TimelionInterval>
+                <label>Interval</label>
+              </div>
+              <div>
+                <button className="btn rework--timelion--submit" type="submit"><i className="fa fa-play"></i></button>
+              </div>
             </div>
           </form>
         </div>
