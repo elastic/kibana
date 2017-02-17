@@ -14,10 +14,12 @@ export default class extends React.PureComponent {
   renderNotSelected() {
     return (
       <div className="rework--editor">
-        <h4>Select an element</h4>
-        <p>
-          Select an element to configure it here. If you don't have any,
-          <a onClick={this.props.openDropDown}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
+        <div className="rework--no-element">
+          <h4>Select an element</h4>
+          <p>
+            Select an element to configure it here. If you don't have any,
+            <a onClick={this.props.openDropDown}> <i className="fa fa-plus-circle"></i> add a new element</a></p>
+        </div>
       </div>
     );
   }
