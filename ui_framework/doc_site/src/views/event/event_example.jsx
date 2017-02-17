@@ -18,4 +18,13 @@ export default createExample([{
   ),
   html: require('./event_menu.html'),
   hasDarkTheme: false,
+}, {
+  title: 'Static page',
+  description: (
+    <div>
+      <p><a href="static_pages/events.html" target="_blank">See static page</a></p>
+    </div>
+  ),
+  source: require('../../static_pages/events.html'),
+  hasDarkTheme: false,
 }]);

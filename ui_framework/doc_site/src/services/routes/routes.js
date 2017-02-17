@@ -64,6 +64,9 @@ import TypographyExample
 import VerticalRhythmExample
   from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
 
+import ViewExample
+  from '../../views/view/view_example.jsx';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'ActionItem',
@@ -128,6 +131,9 @@ const components = [{
 }, {
   name: 'VerticalRhythm',
   component: VerticalRhythmExample,
+}, {
+  name: 'View',
+  component: ViewExample,
 }];
 
 export default {

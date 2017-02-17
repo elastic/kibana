@@ -133,6 +133,7 @@ GuidePageSection.propTypes = {
   title: PropTypes.string,
   slug: PropTypes.string,
   html: PropTypes.string,
+  source: PropTypes.string,
   js: PropTypes.string,
   children: PropTypes.any,
   hasDarkTheme: PropTypes.bool,

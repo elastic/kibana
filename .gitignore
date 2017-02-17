@@ -35,4 +35,5 @@ selenium
 *.swp
 *.swo
 *.out
-ui_framework/doc_site/build/*.js*
+ui_framework/doc_site/build/**/*
+!ui_framework/doc_site/build/index.html
