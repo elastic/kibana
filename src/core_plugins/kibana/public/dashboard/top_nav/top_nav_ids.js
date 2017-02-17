@@ -4,6 +4,7 @@ export const TopNavIds = {
   OPTIONS: 'options',
   RENAME: 'rename',
   CLONE: 'clone',
+  SAVE: 'save',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode'
 };

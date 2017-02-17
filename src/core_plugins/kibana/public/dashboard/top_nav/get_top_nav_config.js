@@ -19,6 +19,7 @@ export function getTopNavConfig(dashboardMode, actions) {
         getRenameConfig(),
         getCloneConfig(actions[TopNavIds.CLONE]),
         getOptionsConfig(),
+        getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE])];
     default:
       return [];
@@ -40,10 +41,22 @@ function getEditConfig(action) {
 /**
  * @returns {kbnTopNavConfig}
  */
+function getSaveConfig(action) {
+  return {
+    key: 'save',
+    description: 'Save your dashboard',
+    testId: 'dashboardSaveButton',
+    run: action
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
 function getViewConfig(action) {
   return {
-    key: 'done',
-    description: 'Stop editing and switch to view only mode',
+    key: 'cancel',
+    description: 'Cancel editing and switch to view only mode',
     testId: 'dashboardViewOnlyMode',
     run: action
   };

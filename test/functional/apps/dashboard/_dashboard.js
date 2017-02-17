@@ -40,7 +40,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           PageObjects.common.saveScreenshot('Dashboard-has-visualizations');
         });
     });
-    
+
     bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
       const width = DEFAULT_PANEL_WIDTH;
       const height = DEFAULT_PANEL_HEIGHT;

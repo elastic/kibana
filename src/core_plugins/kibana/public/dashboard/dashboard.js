@@ -261,9 +261,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       };
 
-      navActions[TopNavIds.SAVE] = () => $scope.save();
+      navActions[TopNavIds.SAVE] = () => {
+        $scope.save().then(() => changeViewMode(DashboardViewMode.VIEW));
+      };
       navActions[TopNavIds.CLONE] = () => {
         dashboardState.setTitle(dashboardState.getTitle() + ' (Copy)');
+        dash.copyOnSave = true;
         $scope.save();
       };
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => changeViewMode(DashboardViewMode.VIEW);
@@ -292,6 +295,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
 
       $scope.opts = {
+        displayName: dash.getDisplayName(),
         save: $scope.save,
         addVis: $scope.addVis,
         addNewVis,

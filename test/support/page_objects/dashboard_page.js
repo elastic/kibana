@@ -157,27 +157,21 @@ export default class DashboardPage {
     });
   }
 
-  async saveDashboard(dashName, storeTimeWithDash) {
-    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    PageObjects.common.debug('entering new title');
+  async renameDashboard(dashName) {
+    PageObjects.common.debug(`Naming dashboard ` + dashName);
+    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
     await this.findTimeout.findById('dashboardTitle').type(dashName);
+  }
+
+  async saveDashboard(dashName, storeTimeWithDash) {
+    await this.renameDashboard(dashName);
 
     if (storeTimeWithDash !== undefined) {
+      await PageObjects.common.findTestSubject('dashboardOptionsButton').click();
       await this.storeTimeWithDashboard(storeTimeWithDash);
     }
 
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    await PageObjects.common.try(() => {
-      PageObjects.common.debug('clicking final Save button for named dashboard');
-      return this.findTimeout.findByCssSelector('.btn-primary').click();
-    });
-
+    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // verify that green message at the top of the page.

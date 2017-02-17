@@ -22,7 +22,7 @@ function getStateDefaults(dashboard) {
 }
 
 function cleanFiltersForComparison(filters) {
-  return _.map(filters, (filter) => _.omit(filter, '$$hashKey'));
+  return _.map(filters, (filter) => _.omit(filter, ['$$hashKey', '$state']));
 }
 
 /**
@@ -170,10 +170,14 @@ export class DashboardState {
   }
 
   getIsDirty() {
+    const existingTitleChanged =
+      this.dashboard.lastSavedTitle &&
+      this.dashboard.lastSavedTitle !== this.dashboard.title;
+
     // Not all filter changes are tracked by the state monitor.
     return this.isDirty ||
       this.getFiltersChangedFromLastSave() ||
-      this.dashboard.lastSavedTitle !== this.dashboard.title;
+      existingTitleChanged;
   }
 
   getPanels() {
@@ -312,16 +316,11 @@ export class DashboardState {
   }
 
   createStateMonitor() {
-    //console.log('creating state monitor with defaults');
-    //console.log(this.stateDefaults);
-
     this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
 
-
-   // console.log('createStateMonitor:new appState defaults:');
-    //console.log(this.appState._defaults);
-
     this.stateMonitor.ignoreProps('viewMode');
+    this.stateMonitor.ignoreProps('filters'); // Filters need some tweaking to compare correctly.
+
     this.stateMonitor.onChange(status => {
       this.isDirty = status.dirty;
     });

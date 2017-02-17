@@ -98,23 +98,19 @@ module.directive('kbnTopNav', function (Private) {
           $scope.transcludes[transclusionSlot] = transcludedItem;
         });
       });
-
       const extensions = getNavbarExtensions($attrs.name);
-      let initialized = false;
 
       function initTopNavForConfigChanges(newConfig, oldConfig) {
-        if (initialized && _.isEqual(oldConfig, newConfig)) return;
+        if (_.isEqual(oldConfig, newConfig)) return;
 
-        initialized = true;
-        let controls = newConfig;
-        if (controls instanceof KbnTopNavController) {
-          controls.addItems(extensions);
+        if (newConfig instanceof KbnTopNavController) {
+          newConfig.addItems(extensions);
+          $scope.kbnTopNav = newConfig;
         } else {
-          controls = controls.concat(extensions);
+          newConfig = newConfig.concat(extensions);
+          $scope.kbnTopNav = new KbnTopNavController(newConfig);
+          $scope.kbnTopNav._link($scope, $element);
         }
-
-        $scope.kbnTopNav = new KbnTopNavController(controls);
-        $scope.kbnTopNav._link($scope, $element);
       }
 
       const getTopNavConfig = () => _.get($scope, $attrs.config, []);
