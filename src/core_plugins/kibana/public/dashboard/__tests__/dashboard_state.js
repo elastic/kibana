@@ -2,6 +2,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { DashboardState } from '../dashboard_state';
+import { DashboardViewMode } from '../dashboard_view_mode';
 
 describe('DashboardState', function () {
   let AppState;
@@ -12,7 +13,7 @@ describe('DashboardState', function () {
   let quickTimeRanges;
 
   function initDashboardState() {
-    dashboardState = new DashboardState(savedDashboard, timefilter, true, quickTimeRanges, AppState);
+    dashboardState = new DashboardState(savedDashboard, timefilter, true, DashboardViewMode.VIEW, quickTimeRanges, AppState);
   }
 
   beforeEach(ngMock.module('kibana'));

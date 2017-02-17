@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+
 import {
   scenarioManager,
   esClient,
   elasticDump
 } from '../';
+
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -43,6 +45,31 @@ export default class DashboardPage {
     if (!onPage) {
       return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
     }
+  }
+
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
+      .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  clickDoneEditing() {
+    PageObjects.common.debug('Clicking done editing');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 
   clickNewDashboard() {
@@ -333,5 +360,4 @@ export default class DashboardPage {
       }));
     });
   }
-
 }

@@ -7,6 +7,7 @@ import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
+import { DashboardViewMode } from '../dashboard_view_mode';
 
 uiModules
 .get('app/dashboard')
@@ -25,6 +26,11 @@ uiModules
     restrict: 'E',
     template: panelTemplate,
     scope: {
+      /**
+       * What view mode the dashboard is currently in - edit or view only.
+       * @type {DashboardViewMode}
+       */
+      dashboardViewMode: '=',
       /**
        * Whether or not the dashboard this panel is contained on is in 'full screen mode'.
        * @type {boolean}
@@ -138,6 +144,14 @@ uiModules
 
           $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
         });
+
+      /**
+       * Determines whether or not to show edit controls.
+       * @returns {boolean}
+       */
+      $scope.isViewOnlyMode = () => {
+        return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
+      };
     }
   };
 });
