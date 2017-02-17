@@ -64,7 +64,8 @@ export default function defaultSettingsProvider() {
     },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index', '_score'],
-      description: 'Fields that exist outside of _source to merge into our document when displaying it',
+      description: 'Fields that exist outside of _source to merge into our document when displaying it.' +
+        'These fields are mapped to a Meta Field per index when an index pattern is created',
     },
     'discover:sampleSize': {
       value: 500,

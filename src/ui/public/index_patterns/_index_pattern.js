@@ -46,7 +46,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
-    metaFieldsVersion: 'number',
+    metaFieldsVersion: 'boolean',
     fieldFormatMap: {
       type: 'text',
       _serialize(map = {}) {
@@ -113,9 +113,13 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
 
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
-    } else if (indexPattern.metaFieldsVersion <= 0) {
-      promise = indexPattern.refreshFields();
-      indexPattern.metaFieldsVersion = 1;
+    } else if (!indexPattern.metaFieldsVersion) {
+      config.get('metaFields').forEach(function (meta) {
+        if (meta !== '_source') {
+          indexPattern.addMetaField(meta);
+        }
+      });
+      indexPattern.metaFieldsVersion = true;
     }
 
     return promise.then(() => {initFields(indexPattern);});
@@ -159,10 +163,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       const scripted = indexPattern.getScriptedFields();
       const fieldsWithScripted = fields.concat(scripted);
       const meta = indexPattern.getMetaFields();
-      const allDups = meta.concat(fieldsWithScripted);
-      const all = _.uniq(allDups, function (item) {
-        return item.name;
-      });
+      const all = meta.concat(fieldsWithScripted);
       initFields(indexPattern, all);
     });
   }
