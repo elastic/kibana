@@ -1,4 +1,3 @@
-
 import React, {
   Component,
   PropTypes,
@@ -7,8 +6,7 @@ import React, {
 import classNames from 'classnames';
 import hljs from 'highlight.js';
 
-export default class GuideCodeViewer extends Component {
-
+export class GuideCodeViewer extends Component {
   constructor(props) {
     super(props);
   }
@@ -23,19 +21,26 @@ export default class GuideCodeViewer extends Component {
     }
   }
 
-  renderSection(title, content, codeClass) {
-    if (content) {
+  renderSection(type, code) {
+    const typeToCodeClassMap = {
+      JavaScript: 'javascript',
+      HTML: 'html',
+    };
+
+    const codeClass = typeToCodeClassMap[type];
+
+    if (code) {
       return (
-        <div className="guideCodeViewer__section">
+        <div className="guideCodeViewer__section" key={type}>
           <div className="guideCodeViewer__title">
-            {title}
+            {type}
           </div>
           <pre className="guideCodeViewer__content">
             <code
               ref={codeClass}
               className={codeClass}
             >
-              {content}
+              {code}
             </code>
           </pre>
         </div>
@@ -48,6 +53,10 @@ export default class GuideCodeViewer extends Component {
       'is-code-viewer-open': this.props.isOpen,
     });
 
+    const codeSections = this.props.source.map(sourceObject => (
+      this.renderSection(sourceObject.type, sourceObject.code)
+    ));
+
     return (
       <div className={classes}>
         <div className="guideCodeViewer__header">
@@ -59,18 +68,15 @@ export default class GuideCodeViewer extends Component {
           onClick={this.props.onClose}
         />
 
-        {this.renderSection('HTML', this.props.html, 'html')}
-        {this.renderSection('JavaScript', this.props.js, 'javascript')}
+        {codeSections}
       </div>
     );
   }
-
 }
 
 GuideCodeViewer.propTypes = {
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,
   title: PropTypes.string,
-  html: PropTypes.string,
-  js: PropTypes.string,
+  source: PropTypes.array,
 };
