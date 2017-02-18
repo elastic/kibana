@@ -1,0 +1,128 @@
+<div>
+  <label class="kuiLabel kuiVerticalRhythm">
+    Index name or pattern
+  </label>
+
+  <p
+    class="kuiText kuiVerticalRhythm"
+    ng-if="!timeFieldIndexPatternForm.index.nameIsPattern"
+  >
+    Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*
+  </p>
+
+  <p
+    class="kuiText kuiVerticalRhythm"
+    ng-if="timeFieldIndexPatternForm.index.isTimeBased && timeFieldIndexPatternForm.index.nameIsPattern"
+  >
+    Patterns allow you to define dynamic index names. Static text in an index name is denoted using brackets. Example: [logstash-]YYYY.MM.DD. Please note that weeks are setup to use ISO weeks which start on Monday. &mdash;
+    <small>
+      <a
+        arget="_blank"
+        href="http://momentjs.com/docs/#/displaying/format/"
+        class="kuiLink"
+      >
+        Date Format Documentation
+      </a>
+    </small>
+  </p>
+
+  <input
+    ng-model="timeFieldIndexPatternForm.index.name"
+    ng-attr-placeholder="{{timeFieldIndexPatternForm.index.defaultName}}"
+    ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+    validate-index-name
+    allow-wildcard
+    name="name"
+    required
+    type="text"
+    class="kuiTextInput kuiVerticalRhythm fullWidth"
+  />
+
+  <small
+    class="kuiVerticalRhythm"
+    ng-show="timeFieldIndexPatternForm.index.nameInterval.name == 'weeks'"
+  >
+    <strong>Note: </strong>
+    I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
+    See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
+  </small>
+
+  <div
+    class="kuiVerticalRhythm"
+    ng-if="timeFieldIndexPatternForm.index.isTimeBased"
+  >
+    <label class="kuiLabel kuiVerticalRhythm">
+      Time-field name
+      &nbsp;
+      <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
+      &nbsp;
+      <small>
+        <a ng-click="timeFieldIndexPatternForm.refreshFieldList()"> refresh fields</a>
+      </small>
+    </label>
+
+    <div class="kuiVerticalRhythm">
+      <select
+        ng-disabled="timeFieldIndexPatternForm.index.fetchFieldsError"
+        ng-required="!timeFieldIndexPatternForm.index.fetchFieldsError"
+        ng-options="field.name for field in timeFieldIndexPatternForm.index.dateFields"
+        ng-model="timeFieldIndexPatternForm.index.timeField"
+        auto-select-if-only-one="timeFieldIndexPatternForm.index.dateFields"
+        class="kuiSelect"
+      ></select>
+    </div>
+  </div>
+
+  <div
+    class="kuiVerticalRhythm"
+    ng-if="timeFieldIndexPatternForm.canExpandIndices()"
+  >
+    <label class="kuiVerticalRhythm">
+      <input
+        class="kuiCheckBox"
+        ng-model="timeFieldIndexPatternForm.index.notExpandable"
+        type="checkbox"
+      >
+      Do not expand index pattern when searching <small>(Not recommended)</small>
+    </label>
+
+    <div
+      ng-if="timeFieldIndexPatternForm.index.notExpandable"
+      class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+    >
+      <div class="kuiInfoPanelHeader">
+        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+        <span class="kuiInfoPanelHeader__title">
+          Non-performant index pattern
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          This index pattern will be queried directly rather than being
+          expanded into more performant searches against individual indices.
+        </div>
+
+        <div class="kuiInfoPanelBody__message">
+          Elasticsearch will receive a query against <em>{{index.name}}</em>
+          and will have to search through all matching indices regardless
+          of whether they have data that matches the current time range.
+        </div>
+      </div>
+    </div>
+
+    <p class="kuiText kuiVerticalRhythm">
+      By default, searches against any time-based index pattern that
+      contains a wildcard will automatically be expanded to query only
+      the indices that contain data within the currently selected time
+      range.
+    </p>
+
+    <p class="kuiText kuiVerticalRhythm">
+      Searching against the index pattern <em>logstash-*</em> will
+      actually query elasticsearch for the specific matching indices
+      (e.g. <em>logstash-2015.12.21</em>) that fall within the current
+      time range.
+    </p>
+  </div>
+</div>
