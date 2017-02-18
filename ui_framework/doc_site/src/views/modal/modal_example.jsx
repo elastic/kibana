@@ -1,16 +1,49 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideSectionTypes,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Modal',
-  html: require('./modal.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'ModalOverlay',
-  html: require('./modal_overlay.html'),
-  js: require('raw!./modal_overlay.js'),
-  hasDarkTheme: false,
-}]);
+const modalHtml = require('./modal.html');
+const modalOverlayHtml = require('./modal_overlay.html');
+const modalOverlayJs = require('raw!./modal_overlay.js');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Modal"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: modalHtml,
+      }]}
+    >
+      <GuideDemo
+        html={modalHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="ModalOverlay"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: modalOverlayHtml,
+      }, {
+        type: GuideSectionTypes.JS,
+        code: modalOverlayJs,
+      }]}
+    >
+      <GuideDemo
+        html={modalOverlayHtml}
+        js={modalOverlayJs}
+      />
+    </GuideSection>
+  </GuidePage>
+);
