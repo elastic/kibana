@@ -32,14 +32,12 @@ export class GuideDemo extends Component {
 
   render() {
     const classes = classNames('guideDemo', {
+      'guideDemo--fullScreen': this.props.isFullScreen,
       'theme-dark': this.props.isDarkTheme,
     });
 
     return (
-      <div className={classes}>
-        <div
-          ref={c => (this.content = c)}
-        />
+      <div className={classes} ref={c => (this.content = c)}>
       </div>
     );
   }
@@ -49,6 +47,7 @@ GuideDemo.propTypes = {
   js: PropTypes.string.isRequired,
   html: PropTypes.string.isRequired,
   css: PropTypes.string.isRequired,
+  isFullScreen: PropTypes.bool.isRequired,
   isDarkTheme: PropTypes.bool.isRequired,
 };
 
@@ -56,5 +55,6 @@ GuideDemo.defaultProps = {
   js: '',
   html: '',
   css: '',
+  isFullScreen: false,
   isDarkTheme: false,
 };
