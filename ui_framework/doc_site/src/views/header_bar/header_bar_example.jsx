@@ -1,15 +1,44 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideCode,
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideSectionTypes,
+} from '../../components';
 
-export default createExample([{
-  title: 'Header Bar',
-  html: require('./header_bar.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Two sections',
-  html: require('./header_bar_two_sections.html'),
-  hasDarkTheme: false,
-}]);
+const headerBarHtml = require('./header_bar.html');
+const twoSectionsHtml = require('./header_bar_two_sections.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Header Bar"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: headerBarHtml,
+      }]}
+    >
+      <GuideDemo
+        html={headerBarHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Two sections"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: twoSectionsHtml,
+      }]}
+    >
+      <GuideDemo
+        html={twoSectionsHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);
