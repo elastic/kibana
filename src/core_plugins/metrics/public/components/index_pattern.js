@@ -6,12 +6,18 @@ import createTextHandler from './lib/create_text_handler';
 
 class IndexPattern extends Component {
   render() {
-    const { model, fields, prefix } = this.props;
+    const { fields, prefix } = this.props;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const timeFieldName = `${prefix}time_field`;
     const indexPatternName = `${prefix}index_pattern`;
     const intervalName = `${prefix}interval`;
+
+    const defaults = {
+      [indexPatternName]: '*'
+    };
+
+    const model = { ...defaults, ...this.props.model };
     return (
       <div className={this.props.className}>
         <div className="vis_editor__label">Index Pattern</div>
@@ -19,7 +25,7 @@ class IndexPattern extends Component {
           className="vis_editor__input"
           disabled={this.props.disabled}
           onChange={handleTextChange(indexPatternName, '*')}
-          value={model[indexPatternName] || '*'}/>
+          value={model[indexPatternName]}/>
         <div className="vis_editor__label">Time Field</div>
         <div className="vis_editor__index_pattern-fields">
           <FieldSelect

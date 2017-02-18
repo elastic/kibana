@@ -31,10 +31,10 @@ app.controller('MetricsEditorController', (
   });
 
   // If the model doesn't exist we need to either intialize it with a copy from
-  // the $scope.vis.params or create a new panel all together.
+  // the $scope.vis._editableVis.params or create a new panel all together.
   if (!$scope.model) {
-    if ($scope.vis.params.type) {
-      $scope.model = _.assign({}, $scope.vis.params);
+    if ($scope.vis._editableVis.params.type) {
+      $scope.model = _.assign({}, $scope.vis._editableVis.params);
     } else {
       $scope.model = createNewPanel();
       angular.copy($scope.model, $scope.vis._editableVis.params);

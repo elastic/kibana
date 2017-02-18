@@ -8,6 +8,7 @@ import StdDeviation from '../aggs/std_deviation';
 import StdSibling from '../aggs/std_sibling';
 import SeriesAgg from '../aggs/series_agg';
 import SerialDiff from '../aggs/serial_diff';
+import FilterRatio from '../aggs/filter_ratio';
 export default {
   count: StdAgg,
   avg: StdAgg,
@@ -32,7 +33,8 @@ export default {
   moving_average: MovingAverage,
   derivative: Derivative,
   series_agg: SeriesAgg,
-  serial_diff: SerialDiff
+  serial_diff: SerialDiff,
+  filter_ratio: FilterRatio
 };
 
 

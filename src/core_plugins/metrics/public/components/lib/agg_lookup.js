@@ -23,7 +23,8 @@ const lookup = {
   'sum_of_squares_bucket': 'Overall Sum of Sq.',
   'std_deviation_bucket': 'Overall Std. Deviation',
   'series_agg': 'Series Agg',
-  'serial_diff': 'Serial Difference'
+  'serial_diff': 'Serial Difference',
+  'filter_ratio': 'Filter Ratio'
 };
 
 const pipeline = [
