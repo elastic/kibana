@@ -130,15 +130,17 @@ const components = [{
 }, {
   name: 'VerticalRhythm',
   component: VerticalRhythmExample,
-}, {
+}];
+
+const sandboxes = [{
   name: 'View',
   component: ViewSandbox,
 }];
 
 export default {
   components: Slugify.each(components, 'name', 'path'),
+  sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    const list = this.components;
-    return list.slice(0);
+    return this.components.concat(this.sandboxes);
   },
 };
