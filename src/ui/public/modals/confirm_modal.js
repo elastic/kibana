@@ -72,7 +72,7 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     };
 
     const modalInstance = $compile(template)(confirmScope);
-    modalPopover = new ModalOverlay(modalInstance);
+    modalPopover = new ModalOverlay(modalInstance, confirmScope);
     modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
 
     function destroy() {
