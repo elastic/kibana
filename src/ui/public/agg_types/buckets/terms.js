@@ -32,6 +32,21 @@ export default function TermsAggDefinition(Private) {
     };
   }
 
+  const migrateIncludeExcludeFormat = {
+    serialize: function (value) {
+      if (!value || _.isString(value)) return value;
+      else return value.pattern;
+    },
+    write: function (aggConfig, output) {
+      const value = aggConfig.params[this.name];
+      if (_.isObject(value)) {
+        output.params[this.name] = value.pattern;
+      } else if (value) {
+        output.params[this.name] = value;
+      }
+    }
+  };
+
   return new BucketAggType({
     name: 'terms',
     title: 'Terms',
@@ -47,15 +62,17 @@ export default function TermsAggDefinition(Private) {
       },
       {
         name: 'exclude',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'include',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'size',
