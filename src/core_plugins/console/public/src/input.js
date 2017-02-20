@@ -178,8 +178,13 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
             var warnings = xhr.getResponseHeader("warning");
             if (warnings) {
-              warnings = _.map(warnings.split(", "), function (warning) {
-                  return "#! Deprecation: " + warning;
+              // pattern for valid warning header
+              var re = /\d{3} [^ ]+ \"([^"]*)\"( \"[^"]*\")/
+              // split on any comma that is followed by an even number of quotes
+              warnings = _.map(warnings.split(/, (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/), function (warning) {
+                var match = re.exec(warning)
+                // extract the actual warning
+                return "#! Deprecation: " + match[1]
               });
               value = warnings.join("\n") + "\n" + value;
             }
