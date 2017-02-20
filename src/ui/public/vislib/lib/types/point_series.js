@@ -190,6 +190,7 @@ export default function ColumnHandler(Private) {
           inverted: true
         },
         labels: {
+          filter: false,
           axisFormatter: val => val
         },
         style: {
