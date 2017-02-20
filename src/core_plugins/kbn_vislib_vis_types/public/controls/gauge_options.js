@@ -10,6 +10,8 @@ module.directive('gaugeOptions', function () {
     replace: true,
     link: function ($scope) {
 
+      $scope.showColorRange = true;
+
       $scope.$watch('vis.params.gauge.gaugeType', type => {
         switch (type) {
           case 'Meter':
@@ -61,6 +63,36 @@ module.directive('gaugeOptions', function () {
         }
       });
 
+      $scope.resetColors = function () {
+        $scope.uiState.set('vis.colors', null);
+        $scope.customColors = false;
+      };
+
+      $scope.getGreaterThan = function (index) {
+        if (index === 0) return;
+        return $scope.vis.params.gauge.colorsRange[index - 1].to;
+      };
+
+      $scope.addRange = function () {
+        const previousRange = _.last($scope.vis.params.gauge.colorsRange);
+        const from = previousRange ? previousRange.to : 0;
+        $scope.vis.params.gauge.colorsRange.push({ from: from, to: null });
+      };
+
+      $scope.removeRange = function (index) {
+        $scope.vis.params.gauge.colorsRange.splice(index, 1);
+      };
+
+      $scope.getColor = function (index) {
+        const defaultColors = this.uiState.get('vis.defaultColors');
+        const overwriteColors = this.uiState.get('vis.colors');
+        const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
+        return colors ? Object.values(colors)[index] : 'transparent';
+      };
+
+      $scope.uiState.on('colorChanged', () => {
+        $scope.customColors = true;
+      });
 
     }
   };

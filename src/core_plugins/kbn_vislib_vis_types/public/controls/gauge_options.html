@@ -22,31 +22,127 @@
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="minExtent">
-      Minimum
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <input
-        id="minExtent"
-        class="kuiInput kuiSideBarInput"
-        ng-model="vis.params.gauge.extents[0]"
-        type="number"
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorRange = !showColorRange"
       >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          Ranges
+        </span>
+      </div>
+    </div>
+
+    <div ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
+          <tr>
+            <th>
+              <label>From</label>
+            </th>
+            <th colspan="2">
+              <label>To</label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in vis.params.gauge.colorsRange track by $index">
+            <td>
+              <input
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-or-equal-than="{{getGreaterThan($index)}}"
+                step="any" />
+            </td>
+            <td>
+              <input
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-than="range.from"
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                class="btn btn-danger btn-xs">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!vis.params.gauge.colorsRange.length">
+          <p>
+            <i class="fa fa-danger text-danger"></i>
+            <strong>Required:</strong> You must specify at least one range.
+          </p>
+        </div>
+
+        <div
+          ng-click="addRange()"
+          class="sidebar-item-button primary">
+          Add Range
+        </div>
+        <div class="text text-center text-info">Note: colors can be changed in the legend</div>
+      </div>
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="maxExtent">
-      Maximum
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <input
-        id="maxExtent"
-        class="kuiInput kuiSideBarInput"
-        ng-model="vis.params.gauge.extents[1]"
-        type="number"
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorOptions = !showColorOptions"
       >
+        <span
+          aria-hidden="true"
+          ng-class="{
+          'fa-caret-down': showColorOptions,
+          'fa-caret-right': !showColorOptions
+          }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          Color Options
+        </span>
+      </div>
+    </div>
+    <div ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="colorSchema">
+            Color Schema
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="colorSchema"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="vis.params.gauge.colorSchema"
+              ng-options="mode for mode in vis.type.params.colorSchemas"
+            ></select>
+          </div>
+          <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="invertColors">
+            Reverse Color Schema
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="vis.params.gauge.invertColors">
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -76,11 +172,7 @@
             Show Scale
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input aria-label="enable"
-                   id="showScale"
-                   ng-model="vis.params.gauge.scale.show"
-                   class="kuiInput kuiSideBarInput"
-            >
+            <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="vis.params.gauge.scale.show">
           </div>
         </div>
         <div class="kuiSideBarFormRow">

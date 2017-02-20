@@ -1,6 +1,7 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
+import heatmapColors from 'ui/vislib/components/color/colormaps';
 
 export default function GaugeVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -16,12 +17,18 @@ export default function GaugeVisType(Private) {
       defaults: {
         addTooltip: true,
         addLegend: false,
+
         gauge: {
           percentageMode: true,
           gaugeType: 'Meter',
           gaugeStyle: 'Full',
-          extents: [0, 100],
+          backStyle: 'Full',
           orientation: 'vertical',
+          colorSchema: 'Yellow to Red',
+          colorsRange: [
+            { from: 0, to: 100 }
+          ],
+          invertColors: false,
           labels: {
             show: true,
             color: 'black'
@@ -44,6 +51,8 @@ export default function GaugeVisType(Private) {
       },
       gaugeTypes: ['Meter', 'Circle'],
       gaugeStyles: ['Full', 'Bars', 'Lines'],
+      scales: ['linear', 'log', 'square root'],
+      colorSchemas: Object.keys(heatmapColors),
       editor: gaugeTemplate
     },
     implementsRenderComplete: true,

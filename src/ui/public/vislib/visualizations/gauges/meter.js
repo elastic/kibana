@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import getColor from 'ui/vislib/components/color/heatmap_color';
 
 export default function GaugeChartFactory(Private) {
 
@@ -14,7 +15,7 @@ export default function GaugeChartFactory(Private) {
     scale: {
       show: true,
       color: '#666',
-      width: 1,
+      width: 2,
       ticks: 10,
       tickLength: 5,
     },
@@ -38,6 +39,72 @@ export default function GaugeChartFactory(Private) {
       this.gaugeConfig = gaugeChart.gaugeConfig;
       this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
       this.randomNumber = Math.round(Math.random() * 100000);
+
+      this.gaugeChart.handler.visConfig.set('legend', {
+        labels: this.getLabels(),
+        colors: this.getColors()
+      });
+
+      const colors = this.gaugeChart.handler.visConfig.get('legend.colors', null);
+      if (colors) {
+        this.gaugeChart.handler.vis.uiState.setSilent('vis.defaultColors', null);
+        this.gaugeChart.handler.vis.uiState.setSilent('vis.defaultColors', colors);
+      }
+
+      this.colorFunc = this.gaugeChart.handler.data.getColorFunc();
+    }
+
+    getLabels() {
+      const percentageMode = this.gaugeConfig.percentageMode;
+      const colorsRange = this.gaugeConfig.colorsRange;
+      const labels = [];
+      colorsRange.forEach(range => {
+        const from = range.from;
+        const to = range.to;
+        labels.push(`${from} - ${to}`);
+      });
+
+      return labels;
+    }
+
+    getColors() {
+      const invertColors = this.gaugeConfig.invertColors;
+      const colorSchema = this.gaugeConfig.colorSchema;
+      const colorsRange = this.gaugeConfig.colorsRange;
+      const labels = this.getLabels();
+      const colors = {};
+      for (const i in labels) {
+        if (labels[i]) {
+          const val = invertColors ? 1 - i / colorsRange.length : i / colorsRange.length;
+          colors[labels[i]] = getColor(val, colorSchema);
+        }
+      }
+      return colors;
+    }
+
+    getBucket(val) {
+      let bucket = _.findIndex(this.gaugeConfig.colorsRange, range => {
+        return range.from <= val && range.to > val;
+      });
+
+      if (bucket === -1) {
+        if (val < this.gaugeConfig.colorsRange[0].from) bucket = 0;
+        else bucket = this.gaugeConfig.colorsRange.length - 1;
+      }
+
+      return bucket;
+    }
+
+    getLabel(val) {
+      const bucket = this.getBucket(val);
+      const labels = this.gaugeChart.handler.visConfig.get('legend.labels');
+      return labels[bucket];
+    }
+
+    getColorBucket(val) {
+      const bucket = this.getBucket(val);
+      const labels = this.gaugeChart.handler.visConfig.get('legend.labels');
+      return this.colorFunc(labels[bucket]);
     }
 
     drawScale(svg, data, radius, angle) {
@@ -46,20 +113,25 @@ export default function GaugeChartFactory(Private) {
       const scaleWidth = this.gaugeConfig.scale.width;
       const tickLength = this.gaugeConfig.scale.tickLength;
       const scaleTicks = this.gaugeConfig.scale.ticks;
-      const scaleColor = this.gaugeConfig.scale.color;
 
       const scale = svg.append('g');
 
-      const scaleArc = d3.svg.arc()
-        .startAngle(minAngle)
-        .endAngle(maxAngle)
-        .innerRadius(radius)
-        .outerRadius(radius + scaleWidth);
+      this.gaugeConfig.colorsRange.forEach(range => {
+        const color = this.getColorBucket(range.from);
 
-      scale
-        .append('path')
-        .attr('d', scaleArc)
-        .style('stroke', scaleColor);
+        const scaleArc = d3.svg.arc()
+          .startAngle(angle(range.from))
+          .endAngle(angle(range.to))
+          .innerRadius(radius)
+          .outerRadius(radius + scaleWidth);
+
+        scale
+          .append('path')
+          .attr('d', scaleArc)
+          .style('stroke', color)
+          .style('fill', color);
+      });
+
 
       const extents = angle.domain();
       for (let i = 0; i <= scaleTicks; i++) {
@@ -69,11 +141,12 @@ export default function GaugeChartFactory(Private) {
         const x1 = Math.cos(tickAngle) * (radius - tickLength);
         const y0 = Math.sin(tickAngle) * radius;
         const y1 = Math.sin(tickAngle) * (radius - tickLength);
+        const color = this.getColorBucket(val);
         scale.append('line')
           .attr('x1', x0).attr('x2', x1)
           .attr('y1', y0).attr('y2', y1)
           .style('stroke-width', scaleWidth)
-          .style('stroke', scaleColor);
+          .style('stroke', color);
       }
 
       return scale;
@@ -116,7 +189,6 @@ export default function GaugeChartFactory(Private) {
 
     drawGauge(svg, data, width, height) {
       const marginFactor = 0.95;
-      const color = this.gaugeChart.handler.data.getColorFunc();
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const maxAngle = this.gaugeConfig.maxAngle;
@@ -127,9 +199,11 @@ export default function GaugeChartFactory(Private) {
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
       const randomNumber = this.randomNumber;
 
+      const min = this.gaugeConfig.colorsRange[0].from;
+      const max = _.last(this.gaugeConfig.colorsRange).to;
       const angle = d3.scale.linear()
         .range([minAngle, maxAngle])
-        .domain(this.gaugeConfig.extents);
+        .domain([min, max]);
       const radius = d3.scale.linear()
         .range([0, maxRadius])
         .domain([this.gaugeConfig.innerSpace + 1, 0]);
@@ -165,7 +239,8 @@ export default function GaugeChartFactory(Private) {
         .data([data])
         .enter()
         .append('g')
-        .call(this.gaugeChart._addIdentifier);
+        .attr('data-label', (d) => this.getLabel(d.values[0].y));
+
 
       const gauges = gaugeHolders
         .selectAll('g')
@@ -194,12 +269,12 @@ export default function GaugeChartFactory(Private) {
         paths.call(this.drawBarMask(radius, angle, maskBars, maskPadding, 'back'));
       }
 
+      const self = this;
       const series = gauges
         .append('path')
         .attr('d', arc)
         .style('fill', function (d) {
-          const label = d3.select(this.parentNode).attr('data-label');
-          return color(label);
+          return self.getColorBucket(d.y);
         })
         .attr('mask', (d, i, j) => {
           return applyMask ? `url(#gauge-mask-front-${randomNumber}-${j})` : '';
@@ -218,8 +293,7 @@ export default function GaugeChartFactory(Private) {
           .attr('class', 'chart-label')
           .text(d => {
             if (this.gaugeConfig.percentageMode) {
-              const extents = this.gaugeConfig.extents;
-              const percentage = Math.round(100 * (d.y - extents[0]) / (extents[1] - extents[0]));
+              const percentage = Math.round(100 * (d.y - min) / (max - min));
               return `${percentage}%`;
             }
             return d.y;
