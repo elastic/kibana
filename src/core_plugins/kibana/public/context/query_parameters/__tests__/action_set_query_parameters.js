@@ -6,7 +6,7 @@ import { QueryParameterActionsProvider } from '../actions';
 
 describe('context app', function () {
   describe('action setQueryParameters', function () {
-    it('should update the queryParameters with certain values from the given object', function () {
+    it('should update the queryParameters with valid properties from the given object', function () {
       const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub({
         queryParameters: {
@@ -36,7 +36,7 @@ describe('context app', function () {
       });
     });
 
-    it('should ignore additional new values', function () {
+    it('should ignore invalid properties', function () {
       const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
