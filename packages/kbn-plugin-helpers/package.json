@@ -38,10 +38,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/spalger/kibana-plugin-helpers.git"
+    "url": "git+https://github.com/elastic/kibana-plugin-helpers.git"
   },
   "bugs": {
-    "url": "https://github.com/spalger/kibana-plugin-helpers/issues"
+    "url": "https://github.com/elastic/kibana-plugin-helpers/issues"
   },
-  "homepage": "https://github.com/spalger/kibana-plugin-helpers#readme"
+  "homepage": "https://github.com/elastic/kibana-plugin-helpers#readme"
 }
