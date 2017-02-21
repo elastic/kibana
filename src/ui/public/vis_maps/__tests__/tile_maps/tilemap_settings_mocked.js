@@ -10,6 +10,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('tilemapsConfig', () => ({
       manifestServiceUrl: 'http://foo.bar/manifest',
+      enableManifestRetrieval: true,
       deprecated: {
         isOverridden: false,
         config: {
