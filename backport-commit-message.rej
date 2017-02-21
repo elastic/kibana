@@ -1,0 +1,10 @@
+Added a visualization to known-plugins.asciidoc
+
+Backports PR #9693
+
+**Commit 1:**
+Update known-plugins.asciidoc
+
+* Original sha: 71fbaac8f3b172111354d45c1b7ac3eef278f3c2
+* Authored by Dean Fenster <deanf@users.noreply.github.com> on 2017-01-01T00:00:28Z
+* Committed by GitHub <noreply@github.com> on 2017-01-01T00:00:28Z
