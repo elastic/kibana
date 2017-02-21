@@ -24,7 +24,7 @@ export default function GaugeVisType(Private) {
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
-          colorSchema: 'Yellow to Red',
+          colorSchema: 'Green to Red',
           colorsRange: [
             { from: 0, to: 100 }
           ],
@@ -36,7 +36,8 @@ export default function GaugeVisType(Private) {
           scale: {
             show: true,
             labels: false,
-            color: '#333'
+            color: '#333',
+            width: 2
           },
           type: 'meter',
           style: {
@@ -46,6 +47,7 @@ export default function GaugeVisType(Private) {
             bgMask: false,
             maskBars: 50,
             bgFill: '#eee',
+            subText: '',
           }
         }
       },
@@ -66,6 +68,14 @@ export default function GaugeVisType(Private) {
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
+      },
+      {
+        group: 'buckets',
+        name: 'group',
+        title: 'Split Group',
+        min: 0,
+        max: 1,
+        aggFilter: '!geohash_grid'
       },
       {
         group: 'buckets',
