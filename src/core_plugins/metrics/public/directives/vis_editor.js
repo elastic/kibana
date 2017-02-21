@@ -11,13 +11,13 @@ app.directive('metricsVisEditor', (timefilter) => {
   return {
     restrict: 'E',
     link: ($scope, $el, $attrs) => {
-      const addToState = ['fields', 'model', 'visData'];
+      const addToState = ['fields', 'visData'];
       const Component = addScope(VisEditor, $scope, addToState);
       const handleBrush = createBrushHandler($scope, timefilter);
       const handleChange = part => {
         $scope.$evalAsync(() => angular.copy(part, $scope.model));
       };
-      render(<Component onChange={handleChange} onBrush={handleBrush} />, $el[0]);
+      render(<Component model={$scope.model} onChange={handleChange} onBrush={handleBrush} />, $el[0]);
       $scope.$on('$destroy', () => {
         unmountComponentAtNode($el[0]);
       });
