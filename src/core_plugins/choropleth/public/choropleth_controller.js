@@ -1,7 +1,8 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import KibanaMap from 'ui/vis_maps/kibana_map.js';
+import KibanaMap from 'ui/vis_maps/kibana_map';
+import ChoroplethLayer from 'ui/vis_maps/choropleth_layer';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import colorramps from 'ui/vislib/components/color/colormaps';
 
@@ -19,19 +20,10 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
-  kibanaMap.on('choropleth:select', function (event) {
-    const appState = getAppState();
-    const clickHandler = filterBarClickHandler(appState);
-    const aggs = $scope.vis.aggs.getResponseAggs();
-    const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-    clickHandler({ point: { aggConfigResult: aggConfigResult } });
-  });
+  let choroplethLayer = null;
 
   $scope.$watch('esResponse', async function (response) {
-
-
     const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
-
     let results;
     if (!response || !response.aggregations) {
       results = [];
@@ -46,20 +38,13 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       });
     }
 
-
-
     const options = $scope.vis.params;
-    // if (!options.selectedLayer.url || !options.selectedJoinField) {
-    //   console.log('invalid selection');//todo: fix this
-    //   return;
-    // }
-
     if (!options.selectedJoinField) {
       options.selectedJoinField = options.selectedLayer.fields[0];
     }
 
-    kibanaMap.setChoroplethLayer(options.selectedLayer.url, options.selectedJoinField);
-    kibanaMap.setChoroplethMetrics(results);
+    updateChoroplethLayer(options.selectedLayer.url);
+    choroplethLayer.setChoroplethMetrics(results);
     kibanaMap.resize();
 
   });
@@ -68,8 +53,10 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     if (!options.selectedJoinField) {
       options.selectedJoinField = options.selectedLayer.fields[0];
     }
-    kibanaMap.setChoroplethLayer(options.selectedLayer.url, options.selectedJoinField);
-    kibanaMap.setChoroplethColorRamp(colorramps[options.colorSchema]);
+
+    updateChoroplethLayer(options.selectedLayer.url);
+    choroplethLayer.setChoroplethJoinField(options.selectedJoinField);
+    choroplethLayer.setChoroplethColorRamp(colorramps[options.colorSchema]);
     kibanaMap.resize();
   });
 
@@ -80,6 +67,28 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
   function getContainerSize() {
     return { width: $element.width(), height: $element.height() };
   }
+
+
+  function updateChoroplethLayer(url) {
+
+    if (choroplethLayer && choroplethLayer.equalsGeoJsonUrl(url)) {
+      return;
+    }
+    kibanaMap.removeLayer(choroplethLayer);
+    choroplethLayer = new ChoroplethLayer(url);
+    choroplethLayer.on('select', function (event) {
+      console.log('select!', arguments);
+      const appState = getAppState();
+      const clickHandler = filterBarClickHandler(appState);
+      const aggs = $scope.vis.aggs.getResponseAggs();
+      const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
+      clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    });
+    kibanaMap.addLayer(choroplethLayer);
+  }
+
+
+
 
 });
 
