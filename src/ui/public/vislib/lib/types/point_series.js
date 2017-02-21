@@ -42,6 +42,7 @@ export default function ColumnHandler(Private) {
   const createSeries = (cfg, series) => {
     return {
       type: 'point_series',
+      addTimeMarker: cfg.addTimeMarker,
       series: _.map(series, (seri) => {
         return createSerieFromParams(cfg, seri);
       })
