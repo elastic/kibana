@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import moment from 'moment';
+import offsetTime from './vis_data/offset_time';
 
-function getParams(req, indexPattern, timeField) {
-  const from = moment.utc(req.payload.timerange.min);
-  const to = moment.utc(req.payload.timerange.max);
+function getParams(req, indexPattern, timeField, offsetBy) {
+
+  const { from, to } = offsetTime(req, offsetBy);
 
   const indexConstraints = {};
   indexConstraints[timeField] = {
@@ -32,10 +33,10 @@ function handleResponse(resp) {
   return indices;
 }
 
-function calculateIndices(req, indexPattern = '*', timeField = '@timestamp') {
+function calculateIndices(req, indexPattern = '*', timeField = '@timestamp', offsetBy) {
   const { server } = req;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const params = getParams(req, indexPattern, timeField);
+  const params = getParams(req, indexPattern, timeField, offsetBy);
   return callWithRequest(req, 'fieldStats', params)
     .then(handleResponse);
 }
