@@ -1,279 +1,8 @@
 import { EventEmitter } from 'events';
 import L from 'leaflet';
-import _ from 'lodash';
-import d3 from 'd3';
-import $ from 'jquery';
-import colorramps from 'ui/vislib/components/color/colormaps';
 import zoomToPrecision from 'ui/utils/zoom_to_precision';
 // import Notifier from 'ui/notify/notifier';
 
-
-class GeohashGridOverlay {
-
-  constructor(featureCollection, layerOptions, targetZoom) {
-    this._featureCollection = featureCollection;
-    this._zoom = targetZoom;
-    this.createLeafletLayer(layerOptions);
-  }
-
-  createLeafletLayer(ignoreLayerOptions) {
-    this._leafletLayer = L.geoJson(null, {
-      pointToLayer: this.getMarkerFunction(),
-      style: this.getStyleFunction()
-    });
-    this._leafletLayer.addData(this._featureCollection);
-  }
-
-  getFeatureCollection() {
-    return this._featureCollection;
-  }
-
-  addToLeafletMap(leafletMap) {
-    leafletMap.invalidateSize();
-    this._leafletLayer.addTo(leafletMap);
-  }
-
-  removeFromMap(leafletMap) {
-    leafletMap.removeLayer(this._leafletLayer);
-  }
-
-  getMarkerFunction() {
-    throw new Error('should implement getMarkerFunction');
-  }
-
-  getStyleFunction() {
-    const min = _.get(this._featureCollection, 'properties.min', 0);
-    const max = _.get(this._featureCollection, 'properties.max', 1);
-    this._legendColors = makeCircleMarkerLegendColors(min, max);
-    const styleFunction = makeStyleFunction(min, max, this._legendColors);
-    return styleFunction;
-  }
-
-  _setStyle() {
-    const style = this.getStyleFunction();
-    this._leafletLayer.setStyle(style);
-  }
-
-
-}
-
-
-class ScaledCircleOverlay extends GeohashGridOverlay {
-  constructor() {
-    super(...arguments);
-  }
-
-  getMarkerFunction() {
-    const scaleFactor = 0.6;
-    return (feature, latlng) => {
-      const value = feature.properties.value;
-      const scaledRadius = this._radiusScale(value) * scaleFactor;
-      return L.circleMarker(latlng).setRadius(scaledRadius);
-    };
-  }
-
-  /**
-   * radiusScale returns a number for scaled circle markers
-   * for relative sizing of markers
-   *
-   * @method _radiusScale
-   * @param value {Number}
-   * @return {Number}
-   */
-  _radiusScale(value) {
-    const precisionBiasBase = 5;
-    const precisionBiasNumerator = 200;
-    // const zoom = this._featureCollection.properties.zoom;
-
-    const zoom = this._zoom;
-    const maxValue = this._featureCollection.properties.max;
-    const precision = _.max(this._featureCollection.features.map((feature) => {
-      return String(feature.properties.geohash).length;
-    }));
-
-    const pct = Math.abs(value) / Math.abs(maxValue);
-    const zoomRadius = 0.5 * Math.pow(2, zoom);
-    const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
-
-    // square root value percentage
-    return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
-  }
-
-  getBounds() {
-    return this._leafletLayer.getBounds();
-  }
-
-
-}
-
-
-/**
- * Map overlay: canvas layer with leaflet.heat plugin
- *
- * @param map {Leaflet Object}
- * @param geoJson {geoJson Object}
- * @param params {Object}
- */
-class HeatmapOverlay extends GeohashGridOverlay {
-
-  constructor(featureCollection, layerOptions) {
-    super(...arguments);
-    // super(map, geoJson, params);
-    // this._disableTooltips = false;
-    //
-    // this._createMarkerGroup({
-    //   radius: +this._attr.heatRadius,
-    //   blur: +this._attr.heatBlur,
-    //   maxZoom: +this._attr.heatMaxZoom,
-    //   minOpacity: +this._attr.heatMinOpacity
-    // });
-    //
-    // this.addLegend = _.noop;
-    //
-    // this._getLatLng = _.memoize(function (feature) {
-    //   return L.latLng(
-    //     feature.geometry.coordinates[1],
-    //     feature.geometry.coordinates[0]
-    //   );
-    // }, function (feature) {
-    //   // turn coords into a string for the memoize cache
-    //   return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
-    // });
-  }
-
-
-  createLeafletLayer(heatmapOptions) {
-    const max = _.get(this._featureCollection, 'properties.max');
-    const points = dataToHeatArray(max, heatmapOptions.heatNormalizeData, this._featureCollection);
-    this._leafletLayer = L.heatLayer(points, heatmapOptions);
-    // this._fixTooltips();
-    // this._addToMap();
-  }
-
-  // _createMarkerGroup(options) {
-  //   const max = _.get(this.geoJson, 'properties.allmax');
-  //   const points = this._dataToHeatArray(max);
-  //
-  //   this._markerGroup = L.heatLayer(points, options);
-  //   this._fixTooltips();
-  //   this._addToMap();
-  // }
-  //
-  // _fixTooltips() {
-  //   const self = this;
-  //   const debouncedMouseMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
-  //     'leading': true,
-  //     'trailing': false
-  //   });
-  //
-  //   if (!this._disableTooltips && this._attr.addTooltip) {
-  //     this.map.on('mousemove', debouncedMouseMoveLocation);
-  //     this.map.on('mouseout', function () {
-  //       self.map.closePopup();
-  //     });
-  //     this.map.on('mousedown', function () {
-  //       self._disableTooltips = true;
-  //       self.map.closePopup();
-  //     });
-  //     this.map.on('mouseup', function () {
-  //       self._disableTooltips = false;
-  //     });
-  //   }
-  //
-  //   function mouseMoveLocation(e) {
-  //     const latlng = e.latlng;
-  //
-  //     this.map.closePopup();
-  //
-  //     // unhighlight all svgs
-  //     d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
-  //
-  //     if (!this.geoJson.features.length || this._disableTooltips) {
-  //       return;
-  //     }
-  //
-  //     // find nearest feature to event latlng
-  //     const feature = this._nearestFeature(latlng);
-  //
-  //     // show tooltip if close enough to event latlng
-  //     if (this._tooltipProximity(latlng, feature)) {
-  //       this._showTooltip(feature, latlng);
-  //     }
-  //   }
-  // }
-  //
-  // /**
-  //  * Finds nearest feature in mapData to event latlng
-  //  *
-  //  * @method _nearestFeature
-  //  * @param latLng {Leaflet latLng}
-  //  * @return nearestPoint {Leaflet latLng}
-  //  */
-  // _nearestFeature(latLng) {
-  //   const self = this;
-  //   let nearest;
-  //
-  //   if (latLng.lng < -180 || latLng.lng > 180) {
-  //     return;
-  //   }
-  //
-  //   _.reduce(this.geoJson.features, function (distance, feature) {
-  //     const featureLatLng = self._getLatLng(feature);
-  //     const dist = latLng.distanceTo(featureLatLng);
-  //
-  //     if (dist < distance) {
-  //       nearest = feature;
-  //       return dist;
-  //     }
-  //
-  //     return distance;
-  //   }, Infinity);
-  //
-  //   return nearest;
-  // }
-  //
-  // /**
-  //  * display tooltip if feature is close enough to event latlng
-  //  *
-  //  * @method _tooltipProximity
-  //  * @param latlng {Leaflet latLng  Object}
-  //  * @param feature {geoJson Object}
-  //  * @return {Boolean}
-  //  */
-  // _tooltipProximity(latlng, feature) {
-  //   if (!feature) return;
-  //
-  //   let showTip = false;
-  //   const featureLatLng = this._getLatLng(feature);
-  //
-  //   // zoomScale takes map zoom and returns proximity value for tooltip display
-  //   // domain (input values) is map zoom (min 1 and max 18)
-  //   // range (output values) is distance in meters
-  //   // used to compare proximity of event latlng to feature latlng
-  //   const zoomScale = d3.scale.linear()
-  //     .domain([1, 4, 7, 10, 13, 16, 18])
-  //     .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
-  //
-  //   const proximity = zoomScale(this.map.getZoom());
-  //   const distance = latlng.distanceTo(featureLatLng);
-  //
-  //   // maxLngDif is max difference in longitudes
-  //   // to prevent feature tooltip from appearing 360°
-  //   // away from event latlng
-  //   const maxLngDif = 40;
-  //   const lngDif = Math.abs(latlng.lng - featureLatLng.lng);
-  //
-  //   if (distance < proximity && lngDif < maxLngDif) {
-  //     showTip = true;
-  //   }
-  //
-  //   d3.scale.pow().exponent(0.2)
-  //     .domain([1, 18])
-  //     .range([1500000, 50]);
-  //   return showTip;
-  // }
-
-}
 
 
 /**
@@ -286,8 +15,12 @@ class KibanaMap extends EventEmitter {
 
     super();
 
+
+    this._leafletBaseLayer = null;
+    this._leafletDrawControl = null;
+    this._layers = [];
     this._leafletMap = L.map(domNode, {//todo: read this from meta
-      minZoom: 2,
+      minZoom: 0,
       maxZoom: 10
     });
 
@@ -356,18 +89,9 @@ class KibanaMap extends EventEmitter {
           })
         });
       }
-
-
     });
 
     this.resize();
-
-    this._leafletBaseLayer = null;
-    this._geohashGridOverlay = null;
-    this._leafletDrawControl = null;
-    this._geohashOptions = {};
-
-    this._layers = [];
 
   }
 
@@ -405,7 +129,6 @@ class KibanaMap extends EventEmitter {
     }
   }
 
-
   setZoomLevel(zoomLevel) {
     if (this._leafletMap.getZoom() !== zoomLevel) {
       this._leafletMap.setZoom(zoomLevel);
@@ -419,10 +142,6 @@ class KibanaMap extends EventEmitter {
   getAutoPrecision() {
     //todo: not correct, should take into account settigns...
     return zoomToPrecision(this._leafletMap.getZoom(), 12);
-  }
-
-  getLeafletBounds() {
-    return this._leafletMap.getBounds();
   }
 
   getBounds() {
@@ -523,89 +242,6 @@ class KibanaMap extends EventEmitter {
     this._leafletMap.addControl(this._leafletDrawControl);
   }
 
-
-  _recreateOverlay() {
-
-    if (!this._featureCollection) {
-      return;
-    }
-
-    if (this._geohashGridOverlay) {
-      this._geohashGridOverlay.removeFromMap(this._leafletMap);
-    }
-
-    switch (this._geohashOptions.mapType) {
-      case 'Scaled Circle Markers':
-        this._geohashGridOverlay = new ScaledCircleOverlay(this._featureCollection, {}, this._leafletMap.getZoom());
-        break;
-      case 'Heatmap':
-        this._geohashGridOverlay = new HeatmapOverlay(this._featureCollection, {
-          radius: this._geohashOptions.heatmap.heatRadius,
-          blur: this._geohashOptions.heatmap.heatBlur,
-          maxZoom: this._geohashOptions.heatmap.heatMaxZoom,
-          minOpaxity: this._geohashOptions.heatmap.heatMinOpacity,
-          heatNormalizeData: this._geohashOptions.heatmap.heatNormalizeData
-        });
-        break;
-      default:
-        throw new Error(`${this._geohashOptions.mapType} mapType not recognized`);
-
-    }
-
-    this._geohashGridOverlay.addToLeafletMap(this._leafletMap);
-    // this.fitIfNotVisible(this._featureCollection);
-
-  }
-
-  // fitIfNotVisible(featureCollection) {
-  //   const bounds = _.pluck(featureCollection.features, 'properties.rectangle');
-  //   const mapBounds = this._leafletMap.getBounds();
-  //
-  //   //layerbounds is sometimes empty:
-  //   try {
-  //     const layerbounds = this._geohashGridOverlay.getBounds();
-  //     if (mapBounds && layerbounds && !mapBounds.intersects(layerbounds)) {
-  //       this._leafletMap.fitBounds(bounds);
-  //     }
-  //   } catch (e) {
-  //     //todo; shouldn't do this under zooming, only when play button is pressed.
-  //   }
-  // }
-
-  recreateGeohashOverlay() {
-    this._recreateOverlay();
-  }
-
-  setGeohashFeatureCollection(featureCollection) {
-    // if (this._geohashGridOverlay && _.isEqual(this._geohashGridOverlay.getFeatureCollection(), featureCollection)) {
-    //   no need to recreate layer.
-    // return;
-    // }
-    this._featureCollection = featureCollection;
-    this._recreateOverlay();
-  }
-
-  setGeohashLayerOptions(options) {
-
-    if (_.isEqual(this._geohashOptions, options)) {
-      return;
-    }
-
-    const previousOptions = this._geohashOptions;
-    this._geohashOptions = options;
-
-    //do smart refresh. only required changes.
-    if (previousOptions) {
-      if (this._geohashOptions.mapType !== previousOptions.mapType) {
-        this._recreateOverlay();
-      } else if (this._geohashOptions.mapType === 'Heatmap' && !_.isEqual(this._geohashOptions.heatmap, previousOptions)) {
-        this._recreateOverlay();//todo: can be optimized. does not require full refresh
-      }
-    }
-    //todo: when other configurations change (tooltip, etc... do NOT recreate the layer
-
-  }
-
   resize() {
     this._leafletMap.invalidateSize();
   }
@@ -613,78 +249,6 @@ class KibanaMap extends EventEmitter {
 }
 
 
-/**
- * d3 quantize scale returns a hex color, used for marker fill color
- *
- * @method quantizeLegendColors
- * return {undefined}
- */
-function makeCircleMarkerLegendColors(min, max) {
-  const reds1 = ['#ff6128'];
-  const reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
-  const reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-  const bottomCutoff = 2;
-  const middleCutoff = 24;
-  let legendColors;
-  if (max - min <= bottomCutoff) {
-    legendColors = reds1;
-  } else if (max - min <= middleCutoff) {
-    legendColors = reds3;
-  } else {
-    legendColors = reds5;
-  }
-  return legendColors;
-}
-
-function makeColorDarker(color) {
-  const amount = 1.3;//magic number, carry over from earlier
-  return d3.hcl(color).darker(amount).toString();
-}
-
-function makeStyleFunction(min, max, legendColors) {
-  const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
-  const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
-  return (feature) => {
-    const value = _.get(feature, 'properties.value');
-    const color = legendQuantizer(value);
-    return {
-      fillColor: color,
-      color: makeColorDarker(color),
-      weight: 1.5,
-      opacity: 1,
-      fillOpacity: 0.75
-    };
-  };
-}
-
-/**
- * returns data for data for heat map intensity
- * if heatNormalizeData attribute is checked/true
- • normalizes data for heat map intensity
- *
- * @method _dataToHeatArray
- * @param max {Number}
- * @return {Array}
- */
-function dataToHeatArray(max, heatNormalizeData, featureCollection) {
-
-  return featureCollection.features.map((feature) => {
-    // const lat = feature.properties.center[0];
-    // const lng = feature.properties.center[1];
-    const lat = feature.geometry.coordinates[1];
-    const lng = feature.geometry.coordinates[0];
-    let heatIntensity;
-    if (!heatNormalizeData) {
-      // show bucket value on heatmap
-      heatIntensity = feature.properties.value;
-    } else {
-      // show bucket value normalized to max value
-      heatIntensity = feature.properties.value / max;
-    }
-
-    return [lat, lng, heatIntensity];
-  });
-}
 
 
 export default KibanaMap;

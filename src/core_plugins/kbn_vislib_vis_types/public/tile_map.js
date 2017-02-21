@@ -45,7 +45,12 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         value: 'topright',
         text: 'top right',
       }],
-      mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
+      // mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
+      mapTypes: ['Scaled Circle Markers',
+        // 'Shaded Circle Markers',
+        // 'Shaded Geohash Grid',
+        'Heatmap'
+      ],
       canDesaturate: !!supports.cssFilters,
       editor: tileMapTemplate
     },
