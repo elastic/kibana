@@ -10,7 +10,14 @@ import createNumberHandler from '../lib/create_number_handler';
 
 class MovingAverageAgg extends Component {
   render() {
-    const { model, panel, siblings } = this.props;
+    const { panel, siblings } = this.props;
+    const defaults = {
+      settings: '',
+      minimize: 0,
+      window: '',
+      model: 'simple'
+    };
+    const model = { ...defaults, ...this.props.model };
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange);
@@ -59,7 +66,7 @@ class MovingAverageAgg extends Component {
                 clearable={false}
                 placeholder="Select..."
                 onChange={ handleSelectChange('model') }
-                value={this.props.model.model || 'simple'}
+                value={this.props.model.model}
                 options={ modelOptions }/>
             </div>
             <div className="vis_editor__row_item">
@@ -68,14 +75,14 @@ class MovingAverageAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleNumberChange('window')}
-                value={model.window || ''}/>
+                value={model.window}/>
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Minimize</div>
               <Select
                 placeholder="Select..."
                 onChange={ handleSelectChange('minimize') }
-                value={model.minimize || 0 }
+                value={model.minimize}
                 options={ minimizeOptions }/>
             </div>
           </div>
@@ -86,7 +93,7 @@ class MovingAverageAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('settings')}
-                value={model.settings || ''}/>
+                value={model.settings}/>
             </div>
           </div>
         </div>

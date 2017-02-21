@@ -123,7 +123,7 @@ CustomColorPicker.defaultProps = {
 };
 
 CustomColorPicker.propTypes = {
-  color: PropTypes.string,
+  color: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onChangeComplete: PropTypes.func,
   onChange: PropTypes.func
 };

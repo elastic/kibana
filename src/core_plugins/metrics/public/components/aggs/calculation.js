@@ -21,7 +21,11 @@ class CalculationAgg extends Component {
   }
 
   render() {
-    const { model, panel, siblings } = this.props;
+    const { panel, siblings } = this.props;
+
+    const defaults = { script: '' };
+    const model = { ...defaults, ...this.props.model };
+
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange);
@@ -55,7 +59,7 @@ class CalculationAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('script')}
-                value={model.script || ''}/>
+                value={model.script}/>
             </div>
           </div>
         </div>

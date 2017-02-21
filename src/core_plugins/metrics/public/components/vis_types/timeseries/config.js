@@ -7,9 +7,22 @@ import createTextHandler from '../../lib/create_text_handler';
 import IndexPattern from '../../index_pattern';
 
 function TimeseriesConfig(props) {
-  const { fields, model } = props;
+  const { fields } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
+
+  const defaults = {
+    fill: '',
+    line_width: '',
+    point_size: '',
+    value_template: '{{value}}',
+    offset_time: '',
+    split_color_mode: 'gradient',
+    axis_min: '',
+    axis_max: '',
+    stacked: 'none'
+  };
+  const model = { ...defaults, ...props.model };
 
   const stackedOptions = [
     { label: 'None', value: 'none' },
@@ -57,19 +70,19 @@ function TimeseriesConfig(props) {
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('fill')}
-          value={model.fill || ''}/>
+          value={model.fill}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('line_width')}
-          value={model.line_width || ''}/>
+          value={model.line_width}/>
         <div className="vis_editor__label">Point Size</div>
         <input
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('point_size')}
-          value={model.point_size != null ? model.point_size : model.line_width}/>
+          value={model.point_size}/>
       </div>
     );
   }
@@ -97,13 +110,13 @@ function TimeseriesConfig(props) {
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('fill')}
-          value={model.fill || ''}/>
+          value={model.fill}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="text"
           onChange={handleTextChange('line_width')}
-          value={model.line_width || ''}/>
+          value={model.line_width}/>
       </div>
     );
   }
@@ -121,7 +134,7 @@ function TimeseriesConfig(props) {
           <input
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
-            value={model.value_template || ''}/>
+            value={model.value_template}/>
         </div>
         { type }
         <div className="vis_editor__series_config-row">
@@ -130,7 +143,7 @@ function TimeseriesConfig(props) {
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
-            value={model.offset_time || ''}/>
+            value={model.offset_time}/>
           <div className="vis_editor__label">Hide in Legend</div>
           <YesNo
             value={model.hide_in_legend}
@@ -141,7 +154,7 @@ function TimeseriesConfig(props) {
             <Select
               clearable={false}
               options={splitColorOptions}
-              value={model.split_color_mode || 'gradient' }
+              value={model.split_color_mode}
               onChange={handleSelectChange('split_color_mode')}/>
           </div>
         </div>
@@ -157,14 +170,14 @@ function TimeseriesConfig(props) {
             type="text"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_min')}
-            value={model.axis_min || ''}/>
+            value={model.axis_min}/>
           <div className="vis_editor__label">Axis Max</div>
           <input
             className="vis_editor__input-grows"
             type="text"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_max')}
-            value={model.axis_max || ''}/>
+            value={model.axis_max}/>
           <div className="vis_editor__label">Axis Position</div>
           <div className="vis_editor__row_item">
             <Select

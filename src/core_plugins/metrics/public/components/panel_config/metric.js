@@ -31,7 +31,8 @@ class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const { model } = this.props;
+    const defaults = { filter: '' };
+    const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
     const positionOptions = [
       { label: 'Right', value: 'right' },
@@ -61,7 +62,7 @@ class MetricPanelConfig extends Component {
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter || ''}/>
+              value={model.filter}/>
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}

@@ -12,7 +12,6 @@ import createTextHandler from '../../lib/create_text_handler';
 function GaugeSeries(props) {
   const {
     panel,
-    model,
     fields,
     onAdd,
     onChange,
@@ -22,6 +21,9 @@ function GaugeSeries(props) {
     selectedTab,
     visible
   } = props;
+
+  const defaults = { label: '' };
+  const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
@@ -120,7 +122,7 @@ function GaugeSeries(props) {
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label || ''}/>
+              value={model.label}/>
           </div>
           { dragHandle }
           <AddDeleteButtons

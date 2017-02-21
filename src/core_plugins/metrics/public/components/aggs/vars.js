@@ -21,6 +21,8 @@ class CalculationVars extends Component {
   }
 
   renderRow(row, i, items) {
+    const defaults = { name: '' };
+    const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
     return  (
@@ -31,7 +33,7 @@ class CalculationVars extends Component {
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}
-            value={row.name || ''} />
+            value={row.name} />
         </div>
         <div className="vis_editor__calc_vars-var">
           <MetricSelect

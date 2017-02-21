@@ -10,7 +10,10 @@ import createTextHandler from '../lib/create_text_handler';
 class DerivativeAgg extends Component {
 
   render() {
-    const { model, siblings, panel } = this.props;
+    const { siblings, panel } = this.props;
+
+    const defaults = { unit: '' };
+    const model = { ...defaults, ...this.props.model };
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -44,7 +47,7 @@ class DerivativeAgg extends Component {
           <input
             className="vis_editor__input"
             onChange={handleTextChange('unit')}
-            value={model.unit || ''}
+            value={model.unit}
             type="text"/>
         </div>
       </AggRow>

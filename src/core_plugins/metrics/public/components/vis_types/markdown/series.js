@@ -13,7 +13,6 @@ import createTextHandler from '../../lib/create_text_handler';
 function MarkdownSeries(props) {
   const {
     panel,
-    model,
     fields,
     onAdd,
     onChange,
@@ -23,6 +22,9 @@ function MarkdownSeries(props) {
     selectedTab,
     visible
   } = props;
+
+  const defaults = { label: '', var_name: '' };
+  const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
@@ -98,12 +100,12 @@ function MarkdownSeries(props) {
               className="vis_editor__input-grows vis_editor__row_item"
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label || ''}/>
+              value={model.label}/>
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('var_name')}
               placeholder='Variable Name'
-              value={model.var_name || ''}/>
+              value={model.var_name}/>
           </div>
           <AddDeleteButtons
             onDelete={onDelete}

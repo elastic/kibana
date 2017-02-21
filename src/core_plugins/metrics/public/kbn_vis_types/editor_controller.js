@@ -20,12 +20,12 @@ app.controller('MetricsEditorController', (
 
   const debouncedFetch = _.debounce(() => {
     fetch($scope)();
-  }, 300, {
+  }, 1000, {
     leading: false,
     trailing: true
   });
 
-  const debouncedFetchFields = _.debounce(fetchFields($scope), 300, {
+  const debouncedFetchFields = _.debounce(fetchFields($scope), 1000, {
     leading: false,
     trailing: true
   });

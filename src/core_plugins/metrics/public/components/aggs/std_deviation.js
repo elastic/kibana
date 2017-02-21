@@ -11,7 +11,9 @@ import createTextHandler from '../lib/create_text_handler';
 class StandardDeviationAgg extends Component {
 
   render() {
-    const { model, series, panel, fields } = this.props;
+    const { series, panel, fields } = this.props;
+    const defaults = { sigma: '' };
+    const model = { ...defaults, ...this.props.model };
 
     const modeOptions = [
       { label: 'Raw', value: 'raw' },
@@ -55,7 +57,7 @@ class StandardDeviationAgg extends Component {
           <div className="vis_editor__label">Sigma</div>
           <input
             className="vis_editor__std_deviation-sigma"
-            value={model.sigma || ''}
+            value={model.sigma}
             onChange={handleTextChange('sigma')}/>
         </div>
         <div className="vis_editor__row_item">

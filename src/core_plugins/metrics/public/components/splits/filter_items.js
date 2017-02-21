@@ -21,40 +21,41 @@ class FilterItems extends Component {
   }
 
   renderRow(row, i, items) {
-    const{ model } = this.props;
+    const defaults = { filter: '', label: '' };
+    const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
-      fn(_.assign({}, row, part));
+      fn(_.assign({}, model, part));
     };
-    const newFilter = () => ({ color: model.color, id: uuid.v1() });
+    const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, row);
+      .bind(null, this.props, model);
     return  (
-      <div className="vis_editor__split-filter-row" key={row.id}>
+      <div className="vis_editor__split-filter-row" key={model.id}>
         <div className="vis_editor__split-filter-color">
           <ColorPicker
             disableTrash={true}
             onChange={handleChange}
             name="color"
-            value={row.color}/>
+            value={model.color}/>
         </div>
         <div className="vis_editor__split-filter-item">
           <input
             placeholder="Filter"
             className="vis_editor__input-grows-100"
             type="text"
-            onChange={this.handleChange(row, 'filter')}
-            value={row.filter || ''}/>
+            onChange={this.handleChange(model, 'filter')}
+            value={model.filter}/>
         </div>
         <div className="vis_editor__split-filter-item">
           <input
             placeholder="Label"
             className="vis_editor__input-grows-100"
             type="text"
-            onChange={this.handleChange(row, 'label')}
-            value={row.label || ''}/>
+            onChange={this.handleChange(model, 'label')}
+            value={model.label}/>
         </div>
         <div className="vis_editor__split-filter-control">
           <AddDeleteButtons

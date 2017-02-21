@@ -23,7 +23,7 @@ class DataFormatPicker extends Component {
   }
 
   render() {
-    const { value } = this.props;
+    const value = this.props.value || '';
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
@@ -44,7 +44,7 @@ class DataFormatPicker extends Component {
           </div>
           <input
             className="vis_editor__input"
-            value={value || ''}
+            defaultValue={value}
             ref={(el) => this.custom = el}
             onChange={this.handleCustomChange}
             type="text"/>

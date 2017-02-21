@@ -10,7 +10,9 @@ class SplitByTerms extends Component {
   render() {
     const handleTextChange = createTextHandler(this.props.onChange);
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const { indexPattern, model } = this.props;
+    const { indexPattern } = this.props;
+    const defaults = { terms_size: 10, terms_order_by: '_count' };
+    const model = { ...defaults, ...this.props.model };
     const { metrics } = model;
     const defaultCount = { value: '_count', label: 'Doc Count (default)' };
 
@@ -34,7 +36,7 @@ class SplitByTerms extends Component {
         <input
           placeholder="Size..."
           type="number"
-          value={model.terms_size || 10}
+          value={model.terms_size}
           className="vis_editor__split-term_count"
           onChange={handleTextChange('terms_size')} />
         <div className="vis_editor__label">Order By</div>
@@ -45,7 +47,7 @@ class SplitByTerms extends Component {
             additionalOptions={[defaultCount]}
             onChange={handleSelectChange('terms_order_by')}
             restrict="basic"
-            value={model.terms_order_by || '_count'}/>
+            value={model.terms_order_by}/>
         </div>
       </div>
     );

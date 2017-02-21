@@ -41,47 +41,49 @@ class Percentiles extends Component {
   }
 
   renderRow(row, i, items) {
+    const defaults = { value: '', percentile: '', shade: '' };
+    const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
-    const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const modeOptions = [
       { label: 'Line', value: 'line' },
       { label: 'Band', value: 'band' }
     ];
     const optionsStyle = {};
-    if (row.mode === 'line') {
+    if (model.mode === 'line') {
       optionsStyle.display = 'none';
     }
     return  (
-      <div className="vis_editor__percentiles-row" key={row.id}>
+      <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
           <input
             placeholder="Percentile"
             className="vis_editor__input-grows"
             type="text"
-            onChange={this.handleNumberChange(row, 'value')}
-            value={row.value || ''}/>
+            onChange={this.handleNumberChange(model, 'value')}
+            value={model.value}/>
           <div className="vis_editor__label">Mode</div>
           <div className="vis_editor__row_item">
             <Select
               clearable={false}
-              onChange={this.handleTextChange(row, 'mode')}
+              onChange={this.handleTextChange(model, 'mode')}
               options={modeOptions}
-              value={row.mode}/>
+              value={model.mode}/>
           </div>
           <div style={optionsStyle} className="vis_editor__label">Fill To</div>
           <input
             style={optionsStyle}
             className="vis_editor__input-grows"
             type="text"
-            onChange={this.handleNumberChange(row, 'percentile')}
-            value={row.percentile || ''}/>
+            onChange={this.handleNumberChange(model, 'percentile')}
+            value={model.percentile}/>
           <div style={optionsStyle} className="vis_editor__label">Shade (0 to 1)</div>
           <input
             style={optionsStyle}
             className="vis_editor__input-grows"
             type="text"
-            onChange={this.handleNumberChange(row, 'shade')}
-            value={row.shade || ''}/>
+            onChange={this.handleNumberChange(model, 'shade')}
+            value={model.shade}/>
         </div>
         <AddDeleteButtons
           onAdd={handleAdd}

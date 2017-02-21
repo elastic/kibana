@@ -10,7 +10,9 @@ import createNumberHandler from '../lib/create_number_handler';
 class SerialDiffAgg extends Component {
 
   render() {
-    const { model, siblings, panel } = this.props;
+    const { siblings, panel } = this.props;
+    const defaults = { lag: '' };
+    const model = { ...defaults, ...this.props.model };
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -44,7 +46,7 @@ class SerialDiffAgg extends Component {
           <input
             className="vis_editor__input"
             onChange={handleNumberChange('lag')}
-            value={model.lag || ''}
+            value={model.lag}
             type="text"/>
         </div>
       </AggRow>

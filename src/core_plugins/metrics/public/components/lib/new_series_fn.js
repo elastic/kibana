@@ -14,6 +14,6 @@ export default (obj = {}) => {
     line_width: 1,
     point_size: 1,
     fill: 0,
-    stacked: 0
+    stacked: 'none'
   }, obj);
 };

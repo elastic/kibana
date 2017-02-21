@@ -14,7 +14,8 @@ class IndexPattern extends Component {
     const intervalName = `${prefix}interval`;
 
     const defaults = {
-      [indexPatternName]: '*'
+      [indexPatternName]: '*',
+      [intervalName]: 'auto'
     };
 
     const model = { ...defaults, ...this.props.model };
@@ -41,7 +42,7 @@ class IndexPattern extends Component {
           className="vis_editor__input"
           disabled={this.props.disabled}
           onChange={handleTextChange(intervalName, 'auto')}
-          value={model[intervalName] || 'auto'}/>
+          value={model[intervalName]}/>
       </div>
     );
   }

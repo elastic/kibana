@@ -11,7 +11,9 @@ import createTextHandler from '../lib/create_text_handler';
 class StandardSiblingAgg extends Component {
 
   render() {
-    const { model, siblings, panel } = this.props;
+    const { siblings, panel } = this.props;
+    const defaults = { sigma: '' };
+    const model = { ...defaults, ...this.props.model };
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -24,7 +26,7 @@ class StandardSiblingAgg extends Component {
           <div className="vis_editor__label">Sigma</div>
           <input
             className="vis_editor__std_deviation-sigma"
-            value={model.sigma || ''}
+            value={model.sigma}
             onChange={handleTextChange('sigma')}/>
         </div>
       );

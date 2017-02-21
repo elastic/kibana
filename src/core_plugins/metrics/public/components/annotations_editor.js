@@ -35,23 +35,25 @@ class AnnotationsEditor extends Component {
   }
 
   renderRow(row, i, items) {
-    const { fields, model } = this.props;
+    const { fields } = this.props;
+    const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
+    const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
-      fn(_.assign({}, row, part));
+      fn(_.assign({}, model, part));
     };
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, row);
+      .bind(null, this.props, model);
     return (
-      <div className="vis_editor__annotations-row" key={row.id}>
+      <div className="vis_editor__annotations-row" key={model.id}>
         <div className="vis_editor__annotations-color">
           <ColorPicker
             disableTrash={true}
             onChange={handleChange}
             name="color"
-            value={row.color}/>
+            value={model.color}/>
         </div>
         <div className="vis_editor__annotations-content">
           <div className="vis_editor__row">
@@ -60,16 +62,16 @@ class AnnotationsEditor extends Component {
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
-                onChange={this.handleChange(row, 'index_pattern')}
-                value={row.index_pattern || ''} />
+                onChange={this.handleChange(model, 'index_pattern')}
+                value={model.index_pattern} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Time Field (required)</div>
               <FieldSelect
                 restrict="date"
-                value={row.time_field}
-                onChange={this.handleChange(row, 'time_field')}
-                indexPattern={row.index_pattern}
+                value={model.time_field}
+                onChange={this.handleChange(model, 'time_field')}
+                indexPattern={model.index_pattern}
                 fields={this.props.fields}/>
             </div>
           </div>
@@ -79,8 +81,8 @@ class AnnotationsEditor extends Component {
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
-                onChange={this.handleChange(row, 'query_string')}
-                value={row.query_string || ''} />
+                onChange={this.handleChange(model, 'query_string')}
+                value={model.query_string} />
             </div>
           </div>
           <div className="vis_editor__row">
@@ -88,8 +90,8 @@ class AnnotationsEditor extends Component {
               <div className="vis_editor__label">Icon (required)</div>
               <div className="vis_editor__item">
                 <IconSelect
-                  value={row.icon}
-                  onChange={this.handleChange(row, 'icon')} />
+                  value={model.icon}
+                  onChange={this.handleChange(model, 'icon')} />
               </div>
             </div>
             <div className="vis_editor__row-item">
@@ -97,16 +99,16 @@ class AnnotationsEditor extends Component {
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
-                onChange={this.handleChange(row, 'fields')}
-                value={row.fields || ''} />
+                onChange={this.handleChange(model, 'fields')}
+                value={model.fields} />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
-                onChange={this.handleChange(row, 'template')}
-                value={row.template || ''} />
+                onChange={this.handleChange(model, 'template')}
+                value={model.template} />
             </div>
           </div>
         </div>
