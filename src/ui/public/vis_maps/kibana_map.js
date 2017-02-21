@@ -301,7 +301,9 @@ class KibanaMap extends EventEmitter {
       }
     });
 
-    this._leafletMap.on('zoomend', e => {this.emit('zoomend');});
+    this._leafletMap.on('zoomend', e => {
+      this.emit('zoomend');
+    });
     this._leafletMap.on('moveend', e => this.emit('moveend'));
 
     this._leafletMap.on('draw:created', event => {
@@ -518,34 +520,40 @@ class KibanaMap extends EventEmitter {
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
         this._leafletMap.removeLayer(this._leafletBaseLayer);
+        this._leafletBaseLayer = null;
       }
       return;
     }
 
-    //
+    if (this._leafletBaseLayer) {
+      //todo: do this correctly, by checking if there is a difference.
+      this._leafletMap.removeLayer(this._leafletBaseLayer);
+      this._leafletBaseLayer = null;
+    }
+
+    let baseLayer;
     if (settings.baseLayerType === 'wms') {
-      this._setWMSBaseLayer(settings.options);
-    } else {
-      this._setTMSBaseLayer((settings.options));
+      baseLayer = this._getWMSBaseLayer(settings.options);
+    } else if (settings.baseLayerType === 'tms') {
+      baseLayer = this._getTMSBaseLayer((settings.options));
     }
 
 
+    this._leafletBaseLayer = baseLayer;
+    this._leafletBaseLayer.addTo(this._leafletMap);
+    this._leafletBaseLayer.bringToBack();
+    this.resize();
+
   }
 
-  _setTMSBaseLayer(options) {
-    if (!this._leafletBaseLayer) {
-      this._leafletBaseLayer = L.tileLayer(options.url, {});
-      this._leafletBaseLayer.addTo(this._leafletMap);
-      this._leafletBaseLayer.bringToBack();
-      this.resize();
-      return;
-    }
-
-    //todo: make changes if settings change
+  _getTMSBaseLayer(options) {
+    return L.tileLayer(options.url, {
+      //todo
+    });
   }
 
-  _setWMSBaseLayer(options) {
-    // console.log('todo: _setWMSBaseLayer', arguments);
+  _getWMSBaseLayer(options) {
+    return L.tileLayer.wms(options.url, options);
   }
 
   addDrawControl() {
@@ -600,6 +608,7 @@ class KibanaMap extends EventEmitter {
     // this.fitIfNotVisible(this._featureCollection);
 
   }
+
   fitIfNotVisible(featureCollection) {
     const bounds = _.pluck(featureCollection.features, 'properties.rectangle');
     const mapBounds = this._leafletMap.getBounds();
@@ -622,7 +631,7 @@ class KibanaMap extends EventEmitter {
   setGeohashFeatureCollection(featureCollection) {
     // if (this._geohashGridOverlay && _.isEqual(this._geohashGridOverlay.getFeatureCollection(), featureCollection)) {
     //   no need to recreate layer.
-      // return;
+    // return;
     // }
     this._featureCollection = featureCollection;
     this._recreateOverlay();
