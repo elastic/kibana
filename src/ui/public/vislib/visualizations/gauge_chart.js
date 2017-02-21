@@ -38,21 +38,30 @@ export default function GaugeChartFactory(Private) {
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const width = $(this).width();
-          const height = $(this).height() / data.series.length;
+          const width = $(this).width() / data.series.length;
+          const height = $(this).height() - 25;
           const transformX = width / 2;
           const transformY = self.gaugeConfig.gaugeType === 'Meter' ? height / 1.5 : height / 2;
+
+
 
           data.series.forEach(series => {
             const svg = div.append('svg')
               .attr('width', width)
               .attr('height', height)
-              .append('g')
+              .style('display', 'inline-block');
+
+            const g = svg.append('g')
               .attr('transform', `translate(${transformX}, ${transformY})`);
 
-            const gauges = self.gauge.drawGauge(svg, series, width, height);
+            const gauges = self.gauge.drawGauge(g, series, width, height);
             self.addEvents(gauges);
           });
+
+          div.append('div')
+            .attr('class', 'chart-title')
+            .style('text-align', 'center')
+            .text(data.label || data.yAxisLabel);
 
           self.events.emit('rendered', {
             chart: data
