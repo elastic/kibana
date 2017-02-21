@@ -4,6 +4,7 @@ import VisRenderbotProvider from 'ui/vis/renderbot';
 import MapsVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 import KibanaMap from './kibana_map';
+import GeohashLayer from './geohash_layer';
 import './lib/tilemap_settings';
 import './styles/_tilemap.less';
 
@@ -28,10 +29,10 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         notify.warning(tilemapSettings.getError().message);
       }
       const containerElement = $($el)[0];
+
       this._kibanaMap = new KibanaMap(containerElement);
       this._kibanaMap.addDrawControl();
 
-      this._configureGeoHashLayer();
       this._useUIState();
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
@@ -47,17 +48,30 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         if (precisionChange) {
           courier.fetch();
         } else {
-          this._kibanaMap.recreateGeohashOverlay();
+          this._recreateGeohashLayer();
         }
       });
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this.mapsData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
-      this._kibanaMap.on('drawCreated:polygon', event => {
-        addSpatialFilter(_.get(this.mapsData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
-      });
+
+
+      this._geohashLayer = null;
 
     }
+
+    _recreateGeohashLayer() {
+      if (this._geohashLayer) {
+        this._kibanaMap.removeLayer(this._geohashLayer);
+      }
+      if (!this._geohashGeoJson) {
+        return;
+      }
+      const geohashOptions = this._getGeohashOptions();
+      this._geohashLayer = new GeohashLayer(this.mapsData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel());
+      this._kibanaMap.addLayer(this._geohashLayer);
+    }
+
 
     /**
      * called on data change
@@ -65,9 +79,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      */
     render(esResponse) {
       this.mapsData = this._buildChartData(esResponse);
-      // const params = this._getMapsParams();
-      // this.mapsParams = params;
-      this._kibanaMap.setGeohashFeatureCollection(this.mapsData.geoJson);
+
+      this._geohashGeoJson = this.mapsData.geoJson;
+      this._recreateGeohashLayer();
       this._useUIState();
       this._kibanaMap.resize();
     }
@@ -77,15 +91,10 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     }
 
     /**
-     * called on options change
+     * called on options change (vis.params change)
      */
     updateParams() {
       const newParams = this._getMapsParams();
-      this._configureGeoHashLayer();
-
-
-      // http://leafletjs.com/reference.html#tilelayer-wms-options
-
       if (newParams.wms.enabled) {
         const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
         this._kibanaMap.setBaseLayer({
@@ -106,7 +115,16 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         });
       }
 
+
+      const geohashOptions = this._getGeohashOptions();
+      if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
+        this._recreateGeohashLayer();
+      }
+
+      //todo: all other options (e.g. tooltips...)
+
       this._useUIState();
+      this._kibanaMap.resize();
     }
 
 
@@ -153,9 +171,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     }
 
 
-    _configureGeoHashLayer() {
+    _getGeohashOptions() {
       const newParams = this._getMapsParams();
-      this._kibanaMap.setGeohashLayerOptions({
+      return {
         mapType: newParams.mapType,
         heatmap: {
           heatBlur: newParams.heatBlur,
@@ -164,8 +182,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
           heatNormalizeData: newParams.heatNormalizeData,
           heatRadius: newParams.heatRadius
         }
-      });
+      };
     }
+
   }
 
 

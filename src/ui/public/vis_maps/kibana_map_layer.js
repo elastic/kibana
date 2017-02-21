@@ -1,6 +1,4 @@
 import { EventEmitter } from 'events';
-// import L from 'leaflet';
-// import $ from 'jquery';
 
 
 export default class KibanaMapLayer extends EventEmitter {
@@ -8,9 +6,7 @@ export default class KibanaMapLayer extends EventEmitter {
     super();
     this._leafletLayer = null;
   }
-
   destroy() {
-
   }
 
   addToLeafletMap(leafletMap) {
