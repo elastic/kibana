@@ -148,7 +148,8 @@ module.exports = () => Joi.object({
   }).default(),
 
   status: Joi.object({
-    allowAnonymous: Joi.boolean().default(false)
+    allowAnonymous: Joi.boolean().default(false),
+    v6Api: Joi.boolean().default(true)
   }).default(),
   tilemap: Joi.object({
     manifestServiceUrl: Joi.string().default('https://tiles.elastic.co/v2/manifest'),

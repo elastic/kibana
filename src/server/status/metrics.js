@@ -47,7 +47,7 @@ export function getV6Metrics({ event, config }) {
         load_average: {
           '1m': _.get(event, 'osload.0'),
           '5m': _.get(event, 'osload.1'),
-          '15m': _.get(event, 'osload.1')
+          '15m': _.get(event, 'osload.2')
         }
       }
     },

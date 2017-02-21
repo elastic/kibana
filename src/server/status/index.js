@@ -16,7 +16,7 @@ export default function (kbnServer, server, config) {
     method: 'GET',
     path: '/api/status',
     handler: function (request, reply) {
-      const v6Format = 'v6' in request.query;
+      const v6Format = config.get('status.v6Api');
       if (v6Format) {
         return reply({
           name: config.get('server.name'),
