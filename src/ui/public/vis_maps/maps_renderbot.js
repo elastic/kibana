@@ -83,10 +83,16 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       const newParams = this._getMapsParams();
       this._configureGeoHashLayer();
 
+
+      // http://leafletjs.com/reference.html#tilelayer-wms-options
+
       if (newParams.wms.enabled) {
+        const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
         this._kibanaMap.setBaseLayer({
           baseLayerType: 'wms',
           options: {
+            minZoom: minZoom,
+            maxZoom: maxZoom,
             url: newParams.wms.url,
             ...newParams.wms.options
           }
