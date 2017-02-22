@@ -55,7 +55,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         addSpatialFilter(_.get(this.mapsData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
 
-
       this._geohashLayer = null;
 
     }
@@ -79,7 +78,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      */
     render(esResponse) {
       this.mapsData = this._buildChartData(esResponse);
-
       this._geohashGeoJson = this.mapsData.geoJson;
       this._recreateGeohashLayer();
       this._useUIState();
@@ -120,8 +118,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
         this._recreateGeohashLayer();
       }
-
-      //todo: all other options (e.g. tooltips...)
+      this._kibanaMap.setDesaturateBaseLayer(newParams.isDesaturated);
 
       this._useUIState();
       this._kibanaMap.resize();

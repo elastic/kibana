@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
 import L from 'leaflet';
+import $ from 'jquery';
+import _ from 'lodash';
 import zoomToPrecision from 'ui/utils/zoom_to_precision';
 // import Notifier from 'ui/notify/notifier';
 
@@ -15,9 +17,12 @@ class KibanaMap extends EventEmitter {
 
     super();
 
-
     this._leafletBaseLayer = null;
+    this._baseLayerSettings = null;
+    this._baseLayerIsDesaturated = true;
+
     this._leafletDrawControl = null;
+
     this._layers = [];
     this._leafletMap = L.map(domNode, {//todo: read this from meta
       minZoom: 0,
@@ -29,7 +34,7 @@ class KibanaMap extends EventEmitter {
     this._leafletMap.fitWorld();//todo: pass in from UI-state (if any)
 
     let previousZoom = this._leafletMap.getZoom();
-    this._leafletMap.on('zoomend', e=> {
+    this._leafletMap.on('zoomend', () => {
       if (previousZoom !== this._leafletMap.getZoom()) {
         previousZoom = this._leafletMap.getZoom();
         this.emit('zoomchange');
@@ -184,43 +189,9 @@ class KibanaMap extends EventEmitter {
   }
 
 
-  setBaseLayer(settings) {
-    if (settings === null) {
-      if (this._leafletBaseLayer && this._leafletMap) {
-        this._leafletMap.removeLayer(this._leafletBaseLayer);
-        this._leafletBaseLayer = null;
-      }
-      return;
-    }
+  setDesaturateBaseLayer(isDesaturated) {
+    this._baseLayerIsDesaturated = isDesaturated;
 
-    if (this._leafletBaseLayer) {
-      //todo: do this correctly, by checking if there is a difference.
-      this._leafletMap.removeLayer(this._leafletBaseLayer);
-      this._leafletBaseLayer = null;
-    }
-
-    let baseLayer;
-    if (settings.baseLayerType === 'wms') {
-      baseLayer = this._getWMSBaseLayer(settings.options);
-    } else if (settings.baseLayerType === 'tms') {
-      baseLayer = this._getTMSBaseLayer((settings.options));
-    }
-
-    this._leafletBaseLayer = baseLayer;
-    this._leafletBaseLayer.addTo(this._leafletMap);
-    this._leafletBaseLayer.bringToBack();
-    this.resize();
-
-  }
-
-  _getTMSBaseLayer(options) {
-    return L.tileLayer(options.url, {
-      //todo
-    });
-  }
-
-  _getWMSBaseLayer(options) {
-    return L.tileLayer.wms(options.url, options);
   }
 
   addDrawControl() {
@@ -245,6 +216,65 @@ class KibanaMap extends EventEmitter {
   resize() {
     this._leafletMap.invalidateSize();
   }
+
+
+  setBaseLayer(settings) {
+
+    if (_.isEqual(settings, this._baseLayerSettings)) {
+      this._updateDesaturation();
+      this._leafletBaseLayer.redraw();
+      return;
+    }
+
+    this._baseLayerSettings = settings;
+    if (settings === null) {
+      if (this._leafletBaseLayer && this._leafletMap) {
+        this._leafletMap.removeLayer(this._leafletBaseLayer);
+        this._leafletBaseLayer = null;
+      }
+      return;
+    }
+
+    if (this._leafletBaseLayer) {
+      this._leafletMap.removeLayer(this._leafletBaseLayer);
+      this._leafletBaseLayer = null;
+    }
+
+    let baseLayer;
+    if (settings.baseLayerType === 'wms') {
+      baseLayer = this._getWMSBaseLayer(settings.options);
+    } else if (settings.baseLayerType === 'tms') {
+      baseLayer = this._getTMSBaseLayer((settings.options));
+    }
+
+    baseLayer.on('tileload', () => this._updateDesaturation());
+
+    this._leafletBaseLayer = baseLayer;
+    this._leafletBaseLayer.addTo(this._leafletMap);
+    this._leafletBaseLayer.bringToBack();
+    this.resize();
+
+  }
+
+  _getTMSBaseLayer(options) {
+    return L.tileLayer(options.url, {
+      //todo
+    });
+  }
+
+  _getWMSBaseLayer(options) {
+    return L.tileLayer.wms(options.url, options);
+  }
+
+  _updateDesaturation() {
+    const tiles = $('img.leaflet-tile-loaded');
+    if (this._baseLayerIsDesaturated) {
+      tiles.removeClass('filters-off');
+    } else if (!this._baseLayerIsDesaturated) {
+      tiles.addClass('filters-off');
+    }
+  }
+
 
 }
 
