@@ -159,7 +159,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns'),
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))

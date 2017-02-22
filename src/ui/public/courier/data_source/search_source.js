@@ -175,7 +175,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
 
       // return promises created by the completion handler so that
       // errors will bubble properly
-      return req.defer.promise.then(addRequest);
+      return req.getCompletePromise().then(addRequest);
     });
   };
 

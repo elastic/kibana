@@ -49,7 +49,7 @@ export default class DiscoverPage {
   loadSavedSearch(searchName) {
     return this.clickLoadSavedSearchButton()
     .then(() => {
-      this.findTimeout.findByLinkText(searchName).click();
+      this.findTimeout.findByPartialLinkText(searchName).click();
     })
     .then(() => {
       return PageObjects.header.waitUntilLoadingHasFinished();
