@@ -92,7 +92,6 @@ describe('Vis Class', function () {
       expect(vis).to.have.property('params');
       expect(vis.params).to.have.property('addLegend', true);
       expect(vis.params).to.have.property('addTooltip', true);
-      expect(vis.params).to.have.property('mode', 'stacked');
     });
   });
 

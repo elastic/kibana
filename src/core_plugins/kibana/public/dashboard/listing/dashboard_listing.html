@@ -39,6 +39,7 @@
           aria-label="Delete selected objects"
           ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected dashboards"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
         </button>
@@ -51,6 +52,7 @@
           data-test-subj="newDashboardLink"
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new dashboard"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>
@@ -85,7 +87,7 @@
     <!-- PromptForItems -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
-      ng-if="!listingController.items.length && !listingController.filter"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
     >
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
@@ -133,12 +135,14 @@
         class="kuiTableRow"
       >
         <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-          <input
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="listingController.toggleItem(item)"
-            ng-checked="listingController.isItemChecked(item)"
-          >
+          <div class="kuiTableRowCell__liner">
+            <input
+              type="checkbox"
+              class="kuiCheckBox"
+              ng-click="listingController.toggleItem(item)"
+              ng-checked="listingController.isItemChecked(item)"
+            >
+          </div>
         </td>
 
         <td class="kuiTableRowCell">

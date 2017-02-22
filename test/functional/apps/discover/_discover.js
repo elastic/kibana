@@ -19,7 +19,7 @@ bdd.describe('discover app', function describeIndexTests() {
     // delete .kibana index and update configDoc
     await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
     PageObjects.common.debug('load kibana index with default index pattern');
-    await esArchiver.load('visualize');
+    await esArchiver.load('discover');
 
     // and load a set of makelogs data
     await esArchiver.loadIfNeeded('logstash_functional');
@@ -31,6 +31,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
   bdd.describe('query', function () {
     const queryName1 = 'Query # 1';
+    const queryDescription1 = 'Query # 1 Description';
 
     bdd.it('should show correct time range string by timepicker', async function () {
       const actualTimeString = await PageObjects.discover.getTimespanText();
@@ -223,6 +224,21 @@ bdd.describe('discover app', function describeIndexTests() {
 
       await noResultsTimepickerLink.click();
       expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
+    });
+  });
+
+
+  bdd.describe('shared-item', function () {
+    bdd.it('should have correct shared-item title and description', async () => {
+      const expected = {
+        title: 'A Saved Search',
+        description: 'A Saved Search Description'
+      };
+
+      await PageObjects.discover.loadSavedSearch(expected.title);
+      const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+      expect(title).to.eql(expected.title);
+      expect(description).to.eql(expected.description);
     });
   });
 });

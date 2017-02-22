@@ -80,7 +80,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
       // try sleeping a bit before getting that data
-      return PageObjects.common.sleep(5000)
+      return PageObjects.common.sleep(50000)
       .then(function () {
         return PageObjects.visualize.getBarChartData();
       })

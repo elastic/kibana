@@ -1,10 +1,9 @@
-
 import React, {
   Component,
   PropTypes,
 } from 'react';
 
-export default class GuidePageSideNavItem extends Component {
+export class GuidePageSideNavItem extends Component {
 
   constructor(props) {
     super(props);
@@ -13,7 +12,7 @@ export default class GuidePageSideNavItem extends Component {
   }
 
   onClick() {
-    this.props.onClick(this.props.slug);
+    this.props.onClick(this.props.id);
   }
 
   render() {
@@ -32,7 +31,7 @@ export default class GuidePageSideNavItem extends Component {
 }
 
 GuidePageSideNavItem.propTypes = {
-  slug: PropTypes.string,
+  id: PropTypes.string,
   children: PropTypes.any,
   onClick: PropTypes.func,
 };

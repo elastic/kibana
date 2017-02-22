@@ -15,7 +15,7 @@ export default function PointSeriesGetSeries(Private) {
     .transform(function (series, row) {
       if (!multiY) {
         const point = partGetPoint(row, aspects.y, aspects.z);
-        if (point) addToSiri(series, point, point.series);
+        if (point) addToSiri(series, point, point.series, point.series, aspects.y.agg);
         return;
       }
 
@@ -35,7 +35,7 @@ export default function PointSeriesGetSeries(Private) {
           seriesLabel = prefix + seriesLabel;
         }
 
-        addToSiri(series, point, seriesId, seriesLabel);
+        addToSiri(series, point, seriesId, seriesLabel, y.agg);
       });
 
     }, new Map())

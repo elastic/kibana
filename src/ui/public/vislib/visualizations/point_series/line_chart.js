@@ -69,8 +69,9 @@ export default function LineChartFactory(Private) {
       }
 
       function cy(d) {
+        const y0 = d.y0 || 0;
         const y = d.y || 0;
-        return yScale(y);
+        return yScale(y0 + y);
       }
 
       function cColor(d) {
@@ -158,7 +159,8 @@ export default function LineChartFactory(Private) {
 
       function cy(d) {
         const y = d.y || 0;
-        return yScale(y);
+        const y0 = d.y0 || 0;
+        return yScale(y0 + y);
       }
 
       line.append('path')

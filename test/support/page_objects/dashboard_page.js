@@ -93,7 +93,7 @@ export default class DashboardPage {
 
   clickVizNameLink(vizName) {
     return this.findTimeout
-    .findByLinkText(vizName)
+    .findByPartialLinkText(vizName)
     .click();
   }
 
@@ -199,8 +199,8 @@ export default class DashboardPage {
     });
   }
 
-  getPanelData() {
-    PageObjects.common.debug('in getPanelData');
+  getPanelSizeData() {
+    PageObjects.common.debug('in getPanelSizeData');
     return this.findTimeout
     .findAllByCssSelector('li.gs-w')
     .then(function (titleObjects) {
@@ -250,16 +250,20 @@ export default class DashboardPage {
     });
   }
 
-  getTestVisualizationNames() {
+  getTestVisualizations() {
     return [
-      'Visualization PieChart',
-      'Visualization☺ VerticalBarChart',
-      'Visualization漢字 AreaChart',
-      'Visualization☺漢字 DataTable',
-      'Visualization漢字 LineChart',
-      'Visualization TileMap',
-      'Visualization MetricChart'
+      { name: 'Visualization PieChart', description: 'PieChart' },
+      { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
+      { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
+      { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
+      { name: 'Visualization漢字 LineChart', description: 'LineChart' },
+      { name: 'Visualization TileMap', description: 'TileMap' },
+      { name: 'Visualization MetricChart', description: 'MetricChart' }
     ];
+  }
+
+  getTestVisualizationNames() {
+    return this.getTestVisualizations().map(visualization => visualization.name);
   }
 
   addVisualizations(visualizations) {
@@ -298,6 +302,35 @@ export default class DashboardPage {
     const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
     PageObjects.common.debug('Slices found:' + slices.length);
     return slices[0].click();
+  }
+
+  getSharedItemsCount() {
+    PageObjects.common.debug('in getSharedItemsCount');
+    const attributeName = 'shared-items-count';
+    return this.findTimeout
+    .findByCssSelector(`[${attributeName}]`)
+    .then(function (element) {
+      if (element) {
+        return element.getAttribute(attributeName);
+      }
+
+      return Promise.reject();
+    });
+  }
+
+  getPanelSharedItemData() {
+    PageObjects.common.debug('in getPanelSharedItemData');
+    return this.findTimeout
+    .findAllByCssSelector('li.gs-w')
+    .then(function (elements) {
+      return Promise.all(elements.map(async element => {
+        const sharedItem = await element.findByCssSelector('[shared-item]');
+        return {
+          title: await sharedItem.getAttribute('data-title'),
+          description: await sharedItem.getAttribute('data-description')
+        };
+      }));
+    });
   }
 
 }
