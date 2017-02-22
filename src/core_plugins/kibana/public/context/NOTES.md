@@ -75,10 +75,10 @@ binding it to the `AppState`.
 **app.js**: Defines the `<context-app>` directive, that is at the root of the
 application. Creates the store, reducer and bound actions/selectors.
 
-**query.js**: Exports the actions, reducers and selectors related to the
+**query**: Exports the actions, reducers and selectors related to the
 query status and results.
 
-**query_parameters.js**: Exports the actions, reducers and selectors related to
+**query_parameters**: Exports the actions, reducers and selectors related to
 the parameters used to construct the query.
 
 **components/loading_button**: Defines the `<context-loading-button>`
