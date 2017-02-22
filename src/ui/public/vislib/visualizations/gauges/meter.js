@@ -55,12 +55,13 @@ export default function GaugeChartFactory(Private) {
     }
 
     getLabels() {
-      const percentageMode = this.gaugeConfig.percentageMode;
+      const isPercentageMode = this.gaugeConfig.percentageMode;
       const colorsRange = this.gaugeConfig.colorsRange;
+      const max = _.last(colorsRange).to;
       const labels = [];
       colorsRange.forEach(range => {
-        const from = range.from;
-        const to = range.to;
+        const from = isPercentageMode ? Math.round(100 * range.from / max) : range.from;
+        const to = isPercentageMode ? Math.round(100 * range.to / max) : range.to;
         labels.push(`${from} - ${to}`);
       });
 
