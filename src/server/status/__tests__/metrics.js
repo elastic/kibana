@@ -30,8 +30,8 @@ describe('Metrics', function () {
   };
 
   let metrics;
-  beforeEach(() => {
-    metrics = getMetrics({
+  beforeEach(async () => {
+    metrics = await getMetrics({
       event: _.cloneDeep(mockOps),
       config: {
         get: path => _.get(config, path)
