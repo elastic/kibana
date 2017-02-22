@@ -7,7 +7,7 @@ export default series => {
       show: series.chart_type === 'line' && series.line_width !== 0,
       fill: Number(series.fill),
       lineWidth: Number(series.line_width),
-      steps: series.steps
+      steps: series.steps || false
     },
     points: {
       show: showPoints,

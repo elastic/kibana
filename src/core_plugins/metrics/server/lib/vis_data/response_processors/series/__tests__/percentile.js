@@ -81,7 +81,7 @@ describe('percentile(resp, panel, series)', () => {
     expect(results[0].lines).to.eql({
       fill: 0.2,
       lineWidth: 0,
-      show: true
+      show: true,
     });
     expect(results[0]).to.have.property('points');
     expect(results[0].points).to.eql({ show: false });
@@ -98,7 +98,7 @@ describe('percentile(resp, panel, series)', () => {
     expect(results[1].lines).to.eql({
       fill: false,
       lineWidth: 0,
-      show: true
+      show: true,
     });
     expect(results[1]).to.have.property('points');
     expect(results[1].points).to.eql({ show: false });
@@ -115,7 +115,8 @@ describe('percentile(resp, panel, series)', () => {
     expect(results[2].lines).to.eql({
       fill: 0,
       lineWidth: 1,
-      show: true
+      show: true,
+      steps: false
     });
     expect(results[2]).to.have.property('bars');
     expect(results[2].bars).to.eql({
