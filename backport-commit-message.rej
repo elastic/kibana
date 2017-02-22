@@ -1,0 +1,9 @@
+Fixing a naming collision the shared-item visualize tests were hitting
+
+Backports PR #10517
+
+**Commit 1:**
+Fixing a naming collision the shared-item visualize tests were hitting
+
+* Original sha: 2a163c8b2bbf29abb53a0c735340e62f7a012278
+* Authored by kobelb <brandon.kobel@elastic.co> on 2017-02-22T19:02:25Z
