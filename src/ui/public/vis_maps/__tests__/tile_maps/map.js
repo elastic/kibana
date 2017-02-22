@@ -13,7 +13,7 @@ import VislibVisualizationsMapProvider from 'ui/vis_maps/visualizations/_map';
 // const dataArray = [
 //   ['geojson', require('fixtures/vislib/mock_data/geohash/_geo_json')],
 //   ['columns', require('fixtures/vislib/mock_data/geohash/_columns')],
-//   ['rows', require('fixtures/vislib/mock_data/geohash/_rows')],
+//   ['rows', require('fixtures/vislib/mock_data/geohash/_rows')],N
 // ];
 
 // TODO: Test the specific behavior of each these
