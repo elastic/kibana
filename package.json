@@ -222,7 +222,7 @@
     "keymirror": "0.1.1",
     "license-checker": "5.1.2",
     "load-grunt-config": "0.19.2",
-    "makelogs": "3.2.2",
+    "makelogs": "3.2.3",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.5.3",
     "murmurhash3js": "3.0.1",
