@@ -10,6 +10,7 @@ const lookup = {
   'min': 'Min',
   'sum': 'Sum',
   'percentile': 'Percentile',
+  'percentile_rank': 'Percentile Rank',
   'cardinality': 'Cardinality',
   'value_count': 'Value Count',
   'derivative': 'Derivative',

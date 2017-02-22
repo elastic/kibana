@@ -57,6 +57,17 @@ export default {
   variance: extendStats,
   std_deviation: extendStats,
 
+  percentile_rank: bucket => {
+    checkMetric(bucket, ['type', 'field', 'value']);
+    const body = {
+      percentile_ranks: {
+        field: bucket.field,
+        values: [bucket.value]
+      }
+    };
+    return body;
+  },
+
   avg_bucket: extendStatsBucket,
   max_bucket: extendStatsBucket,
   min_bucket: extendStatsBucket,

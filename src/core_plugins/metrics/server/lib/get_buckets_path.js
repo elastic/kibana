@@ -11,6 +11,9 @@ export default (id, metrics) => {
       const percentileKey = /\./.test(`${metric.percent}`) ? `${metric.percent}` : `${metric.percent}.0`;
       bucketsPath += `[${percentileKey}]`;
       break;
+    case 'percentile_rank':
+      bucketsPath += `[${metric.value}]`;
+      break;
     case 'std_deviation':
     case 'variance':
     case 'sum_of_squares':

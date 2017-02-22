@@ -20,6 +20,11 @@ export default (row, metric) => {
     return row[metric.id].values[percentileKey];
   }
 
+  if (metric.type === 'percentile_rank') {
+    const percentileRankKey = `${metric.value}`;
+    return row[metric.id] && row[metric.id].values[percentileRankKey];
+  }
+
   // Derivatives
   const normalizedValue = _.get(row, `${metric.id}.normalized_value`, null);
 

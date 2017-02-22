@@ -22,6 +22,10 @@ export default function calculateLabel(metric, metrics) {
   if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
   if (metric.type === 'filter_ratio') return 'Filter Ratio';
 
+  if (metric.type === 'percentile_rank') {
+    return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;
+  }
+
   if (_.includes(paths, metric.type)) {
     const targetMetric = _.find(metrics, { id: metric.field });
     const targetLabel = calculateLabel(targetMetric, metrics);

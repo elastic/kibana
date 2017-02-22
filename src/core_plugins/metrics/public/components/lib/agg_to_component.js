@@ -9,6 +9,7 @@ import StdSibling from '../aggs/std_sibling';
 import SeriesAgg from '../aggs/series_agg';
 import SerialDiff from '../aggs/serial_diff';
 import FilterRatio from '../aggs/filter_ratio';
+import PercentileRank from '../aggs/percentile_rank';
 export default {
   count: StdAgg,
   avg: StdAgg,
@@ -26,6 +27,7 @@ export default {
   sum_of_squares_bucket: StdSibling,
   std_deviation_bucket: StdSibling,
   percentile: Percentile,
+  percentile_rank: PercentileRank,
   cardinality: StdAgg,
   value_count: StdAgg,
   calculation: Calculation,
