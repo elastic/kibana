@@ -14,6 +14,11 @@ uiRoutes
   template: objectIndexHTML
 });
 
+uiRoutes
+.when('/management/kibana/objects/:service', {
+  redirectTo: '/management/kibana/objects'
+});
+
 uiModules.get('apps/management')
 .directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
   return {
