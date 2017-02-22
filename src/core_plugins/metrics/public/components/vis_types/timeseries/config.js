@@ -20,7 +20,8 @@ function TimeseriesConfig(props) {
     split_color_mode: 'gradient',
     axis_min: '',
     axis_max: '',
-    stacked: 'none'
+    stacked: 'none',
+    steps: 0
   };
   const model = { ...defaults, ...props.model };
 
@@ -83,6 +84,11 @@ function TimeseriesConfig(props) {
           type="text"
           onChange={handleTextChange('point_size')}
           value={model.point_size}/>
+        <div className="vis_editor__label">Steps</div>
+        <YesNo
+          value={model.steps}
+          name="steps"
+          onChange={props.onChange}/>
       </div>
     );
   }

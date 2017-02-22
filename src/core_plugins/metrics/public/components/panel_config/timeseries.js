@@ -21,7 +21,12 @@ class TimeseriesPanelConfig extends Component {
   }
 
   render() {
-    const defaults = { filter: '', axis_max: '', axis_min: '' };
+    const defaults = {
+      filter: '',
+      axis_max: '',
+      axis_min: '',
+      legend_position: 'right'
+    };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);

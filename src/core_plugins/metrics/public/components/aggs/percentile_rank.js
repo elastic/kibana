@@ -47,7 +47,7 @@ class PercentileRankAgg extends Component {
             value={model.field}
             onChange={handleSelectChange('field')}/>
         </div>
-        <div className="vis_editor__row_item">
+        <div className="vis_editor__percentile_rank_value">
           <div className="vis_editor__label">Value</div>
           <input
             className="vis_editor__input-grows"
