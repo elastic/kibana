@@ -168,11 +168,13 @@ uiModules.get('apps/management')
           const { service } = find($scope.services, { type: doc._type }) || {};
 
           if (!service) {
-            const msg = `Skipped import of "${doc._source.title}" (${doc._id}), ` +
-              `invalid type: "${doc._type}"`;
-            notify.warning(msg, {
+            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+            const reason = `Invalid type: "${doc._type}"`;
+
+            notify.warning(`${msg}, ${reason}`, {
               lifetime: 0,
             });
+
             return;
           }
 
