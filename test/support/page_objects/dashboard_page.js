@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+
 import {
   scenarioManager,
   esClient,
   elasticDump
 } from '../';
+
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -43,6 +45,31 @@ export default class DashboardPage {
     if (!onPage) {
       return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
     }
+  }
+
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
+      .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  clickDoneEditing() {
+    PageObjects.common.debug('Clicking done editing');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 
   clickNewDashboard() {
@@ -130,27 +157,21 @@ export default class DashboardPage {
     });
   }
 
-  async saveDashboard(dashName, storeTimeWithDash) {
-    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    PageObjects.common.debug('entering new title');
+  async renameDashboard(dashName) {
+    PageObjects.common.debug(`Naming dashboard ` + dashName);
+    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
     await this.findTimeout.findById('dashboardTitle').type(dashName);
+  }
+
+  async saveDashboard(dashName, storeTimeWithDash) {
+    await this.renameDashboard(dashName);
 
     if (storeTimeWithDash !== undefined) {
+      await PageObjects.common.findTestSubject('dashboardOptionsButton').click();
       await this.storeTimeWithDashboard(storeTimeWithDash);
     }
 
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    await PageObjects.common.try(() => {
-      PageObjects.common.debug('clicking final Save button for named dashboard');
-      return this.findTimeout.findByCssSelector('.btn-primary').click();
-    });
-
+    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // verify that green message at the top of the page.
@@ -333,5 +354,4 @@ export default class DashboardPage {
       }));
     });
   }
-
 }

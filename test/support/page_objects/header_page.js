@@ -63,7 +63,26 @@ export default class HeaderPage {
 
   clickAbsoluteButton() {
     return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByLinkText('Absolute').click();
+      .findByLinkText('Absolute').click();
+  }
+
+  clickQuickButton() {
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByLinkText('Quick').click();
+  }
+
+  async getFromTime(timeString) {
+    await this.ensureTimePickerIsOpen();
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.from\']')
+      .getProperty('value');
+  }
+
+  async getToTime(timeString) {
+    await this.ensureTimePickerIsOpen();
+    return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model=\'absolute.to\']')
+      .getProperty('value');
   }
 
   async getFromTime() {
@@ -107,24 +126,58 @@ export default class HeaderPage {
   setAbsoluteRange(fromTime, toTime) {
     PageObjects.common.debug('clickTimepicker');
     return this.clickTimepicker()
-    .then(() => {
-      PageObjects.common.debug('--Clicking Absolute button');
-      return this.clickAbsoluteButton();
-    })
-    .then(() => {
-      PageObjects.common.debug('--Setting From Time : ' + fromTime);
-      return this.setFromTime(fromTime);
-    })
-    .then(() => {
-      PageObjects.common.debug('--Setting To Time : ' + toTime);
-      return this.setToTime(toTime);
-    })
-    .then(() => {
-      return this.clickGoButton();
-    })
-    .then(() => {
-      return this.waitUntilLoadingHasFinished();
-    });
+      .then(() => {
+        PageObjects.common.debug('--Clicking Absolute button');
+        return this.clickAbsoluteButton();
+      })
+      .then(() => {
+        PageObjects.common.debug('--Setting From Time : ' + fromTime);
+        return this.setFromTime(fromTime);
+      })
+      .then(() => {
+        PageObjects.common.debug('--Setting To Time : ' + toTime);
+        return this.setToTime(toTime);
+      })
+      .then(() => {
+        return this.clickGoButton();
+      })
+      .then(() => {
+        return this.waitUntilLoadingHasFinished();
+      });
+  }
+
+  async ensureTimePickerIsOpen() {
+    const isOpen = await PageObjects.header.isTimepickerOpen();
+    PageObjects.common.debug(`time picker open: ${isOpen}`);
+    if (!isOpen) {
+      PageObjects.common.debug('--Opening time picker');
+      await PageObjects.header.clickTimepicker();
+    }
+  }
+
+  async setAbsoluteRange(fromTime, toTime) {
+    PageObjects.common.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+    await this.ensureTimePickerIsOpen();
+    PageObjects.common.debug('--Clicking Absolute button');
+    await this.clickAbsoluteButton();
+    PageObjects.common.debug('--Setting From Time : ' + fromTime);
+    await this.setFromTime(fromTime);
+    PageObjects.common.debug('--Setting To Time : ' + toTime);
+    await this.setToTime(toTime);
+    await this.clickGoButton();
+    await this.isGlobalLoadingIndicatorHidden();
+  }
+
+  async setQuickTime(quickTime) {
+    await this.ensureTimePickerIsOpen();
+    PageObjects.common.debug('--Clicking Quick button');
+    await this.clickQuickButton();
+    await this.remote.setFindTimeout(defaultFindTimeout)
+      .findByLinkText(quickTime).click();
+  }
+
+  async getPrettyDuration() {
+    return await PageObjects.common.findTestSubject('globalTimepickerRange').getVisibleText();
   }
 
   getToastMessage() {

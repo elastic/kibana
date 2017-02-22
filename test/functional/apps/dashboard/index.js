@@ -13,6 +13,7 @@ bdd.describe('dashboard app', function () {
     return remote.setWindowSize(1200,800);
   });
 
-  require('./_dashboard');
-  require('./_dashboard_time');
+  //require('./_dashboard');
+  //require('./_dashboard_time');
+  require('./_view_edit');
 });

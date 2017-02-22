@@ -29,13 +29,13 @@ define(function (require) {
     });
 
     const apps = [
-      'intern/dojo/node!./apps/xpack',
-      'intern/dojo/node!./apps/discover',
-      'intern/dojo/node!./apps/management',
-      'intern/dojo/node!./apps/visualize',
-      'intern/dojo/node!./apps/console',
+      // 'intern/dojo/node!./apps/xpack',
+      // 'intern/dojo/node!./apps/discover',
+      // 'intern/dojo/node!./apps/management',
+      // 'intern/dojo/node!./apps/visualize',
+      // 'intern/dojo/node!./apps/console',
       'intern/dojo/node!./apps/dashboard',
-      'intern/dojo/node!./status_page'
+      //'intern/dojo/node!./status_page'
     ].filter((suite) => {
       if (!requestedApps) return true;
       return requestedApps.reduce((previous, app) => {
