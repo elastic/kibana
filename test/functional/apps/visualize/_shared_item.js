@@ -21,11 +21,13 @@ bdd.describe('visualize app', function describeIndexTests() {
         description: 'AreaChart'
       };
       return PageObjects.visualize.clickVisualizationByName('Visualization AreaChart')
-        .then(() => PageObjects.common.getSharedItemTitleAndDescription())
-        .then(({ title, description }) => {
-          expect(title).to.eql(expected.title);
-          expect(description).to.eql(expected.description);
-        });
+        .then (() => PageObjects.common.try(function () {
+          return PageObjects.common.getSharedItemTitleAndDescription()
+            .then(({ title, description }) => {
+              expect(title).to.eql(expected.title);
+              expect(description).to.eql(expected.description);
+            });
+        }));
     });
   });
 });
