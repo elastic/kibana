@@ -20,7 +20,7 @@ export class ItemTableActions {
     }
   }
 
-  static updateItems(itemTableState, newItems) {
+  static replaceItems(itemTableState, newItems) {
     itemTableState.items = newItems;
 
 
@@ -39,7 +39,7 @@ export class ItemTableActions {
     itemTableState.pageOfItems = itemTableState.items.slice(startItemIndex, endItemIndex);
   }
 
-  static doSort(itemTableState, property) {
+  static sort(itemTableState, property) {
     if (itemTableState.currentSortedColumn === property) {
       itemTableState.currentSortOrder = ItemSorter.getFlippedSortOrder(itemTableState.currentSortOrder);
     } else {
@@ -55,23 +55,40 @@ export class ItemTableActions {
     this.calculateItemsOnPage(itemTableState);
   }
 
-  static onPageNext(itemTableState) {
+  static turnToNextPage(itemTableState) {
     ItemSelector.deselectAll(itemTableState);
     itemTableState.pager.nextPage();
     this.calculateItemsOnPage(itemTableState);
   }
 
-  static onPagePrevious(itemTableState) {
+  static turnToPreviousPage(itemTableState) {
     ItemSelector.deselectAll(itemTableState);
     itemTableState.pager.previousPage();
     this.calculateItemsOnPage(itemTableState);
   }
 
-  static doFilter(itemTableState, filter, service) {
+  static filter(itemTableState, filter, service) {
     return service.find(filter)
       .then(result => {
-        this.updateItems(itemTableState, result.hits);
+        this.replaceItems(itemTableState, result.hits);
         itemTableState.filter = filter;
+      });
+  }
+
+  static deleteSelectedItems(itemTableState, service, notifier, confirmModal, pluralTypeName) {
+    const doDelete = () => {
+      const selectedIds = itemTableState.selectedItems.map(item => item.id);
+
+      service.delete(selectedIds)
+        .then(() => this.filter(itemTableState, itemTableState.filter, service))
+        .catch(error => notifier.error(error));
+    };
+
+    confirmModal(
+      `Are you sure you want to delete the selected ${pluralTypeName}? This action is irreversible!`,
+      {
+        confirmButtonText: 'Delete',
+        onConfirm: doDelete
       });
   }
 }

@@ -17,8 +17,9 @@
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <dashboard-landing-page-table
       item-table-state="tableProps.itemTableState"
-      delete-items="tableProps.deleteItems"
-      filter-items="tableProps.doFilter"
+      on-delete-items="tableProps.deleteItems"
+      on-filter-items="tableProps.filter"
+      is-fetching-items="tableProps.isFetchingItems"
     ></dashboard-landing-page-table>
   </div>
 </div>

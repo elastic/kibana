@@ -13,6 +13,6 @@ export function KuiTableCellIcon({ title, icon }) {
 }
 
 KuiTableCellIcon.propTypes = {
-  title: React.PropTypes.any.isRequired,
+  title: React.PropTypes.node.isRequired,
   icon: React.PropTypes.string
 };

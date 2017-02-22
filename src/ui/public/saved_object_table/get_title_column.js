@@ -6,7 +6,7 @@ export const TITLE_COLUMN_ID = 'title';
 
 export function SortableTitleHeader({ itemTableState }) {
   return <SortableTableHeaderColumn
-    onSort={() => ItemTableActions.doSort(itemTableState, TITLE_COLUMN_ID)}
+    onSort={() => ItemTableActions.sort(itemTableState, TITLE_COLUMN_ID)}
     sortOrder={itemTableState.getSortOrderFor(TITLE_COLUMN_ID)}>
     Title
   </SortableTableHeaderColumn>;

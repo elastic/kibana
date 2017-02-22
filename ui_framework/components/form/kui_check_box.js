@@ -1,11 +1,6 @@
 import React from 'react';
 
-export function KuiCheckBox({ onClick, isChecked }) {
-  function onChange(event) {
-    if (onClick) {
-      onClick(event.target.checked);
-    }
-  }
+export function KuiCheckBox({ onChange, isChecked }) {
 
   return <input
       type="checkbox"
@@ -16,6 +11,6 @@ export function KuiCheckBox({ onClick, isChecked }) {
 }
 
 KuiCheckBox.propTypes = {
-  onClick: React.PropTypes.func,
+  onChange: React.PropTypes.func,
   isChecked: React.PropTypes.bool
 };

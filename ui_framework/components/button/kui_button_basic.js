@@ -18,6 +18,6 @@ KuiButtonBasic.propTypes = {
   tooltip: React.PropTypes.string,
   className: React.PropTypes.string,
   onClick: React.PropTypes.func.isRequired,
-  children: React.PropTypes.any,
+  children: React.PropTypes.node,
   disabled: React.PropTypes.bool
 };

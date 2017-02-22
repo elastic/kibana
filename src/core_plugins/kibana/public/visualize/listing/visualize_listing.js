@@ -31,30 +31,29 @@ export function VisualizeListingController($injector, $scope) {
   const notify = new Notifier({ location: 'Visualize' });
   const itemTableState = new ItemTableState(pagerFactory, VisualizeConstants.EDIT_PATH, kbnUrl);
 
-  const fetchObjects = (filter) => ItemTableActions.doFilter(itemTableState, filter, visualizationService);
+  let isFetchingItems = true;
 
-  this.deleteItems = function deleteItems(items) {
-    const doDelete = () => {
-      const selectedIds = items.map(item => item.id);
+  const filter = (filter) => {
+    ItemTableActions.filter(itemTableState, filter, visualizationService).then(() => {
+      isFetchingItems = false;
+    });
+  };
 
-      visualizationService.delete(selectedIds)
-        .then(() => fetchObjects(itemTableState.filter))
-        .catch(error => notify.error(error));
-    };
-
-    confirmModal(
-      'Are you sure you want to delete the selected visualizations? This action is irreversible!',
-      {
-        confirmButtonText: 'Delete',
-        onConfirm: doDelete
-      });
+  const deleteItems = () => {
+    ItemTableActions.deleteSelectedItems(
+      itemTableState,
+      visualizationService,
+      notify,
+      confirmModal,
+      VisualizeConstants.SAVED_VIS_TYPE_PLURAL);
   };
 
   const updateProps = () => {
     $scope.tableProps = {
       itemTableState,
-      deleteItems: () => this.deleteItems(itemTableState.selectedItems),
-      doFilter: fetchObjects
+      deleteItems,
+      filter,
+      isFetchingItems
     };
   };
 
@@ -62,5 +61,5 @@ export function VisualizeListingController($injector, $scope) {
   $scope.$watch(() => itemTableState.selectedItems, () => updateProps());
   $scope.$watch(() => itemTableState.pageOfItems, () => updateProps());
   updateProps();
-  fetchObjects();
+  filter();
 }

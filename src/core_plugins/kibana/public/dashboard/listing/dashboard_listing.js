@@ -29,30 +29,30 @@ export function DashboardListingController($injector, $scope) {
   const dashboardService = services.dashboards;
   const notify = new Notifier({ location: 'Dashboard' });
   const itemTableState = new ItemTableState(pagerFactory, DashboardConstants.EDIT_PATH, kbnUrl);
-  const fetchObjects = (filter) => ItemTableActions.doFilter(itemTableState, filter, dashboardService);
 
-  this.deleteItems = function deleteItems(items) {
-    const doDelete = () => {
-      const selectedIds = items.map(item => item.id);
+  let isFetchingItems = true;
 
-      dashboardService.delete(selectedIds)
-        .then(() => fetchObjects(itemTableState.filter))
-        .catch(error => notify.error(error));
-    };
+  const filter = (filter) => {
+    ItemTableActions.filter(itemTableState, filter, dashboardService).then(() => {
+      isFetchingItems = false;
+    });
+  };
 
-    confirmModal(
-      `Are you sure you want to delete the selected ${DashboardConstants.TYPE_NAME_PLURAL}? This action is irreversible!`,
-      {
-        confirmButtonText: 'Delete',
-        onConfirm: doDelete
-      });
+  const deleteItems = () => {
+    ItemTableActions.deleteSelectedItems(
+      itemTableState,
+      dashboardService,
+      notify,
+      confirmModal,
+      DashboardConstants.TYPE_NAME_PLURAL);
   };
 
   const updateProps = () => {
     $scope.tableProps = {
       itemTableState,
-      deleteItems: () => this.deleteItems(itemTableState.selectedItems),
-      doFilter: fetchObjects
+      deleteItems,
+      filter,
+      isFetchingItems
     };
   };
 
@@ -60,5 +60,5 @@ export function DashboardListingController($injector, $scope) {
   $scope.$watch(() => itemTableState.selectedItems, () => updateProps());
   $scope.$watch(() => itemTableState.pageOfItems, () => updateProps());
   updateProps();
-  fetchObjects();
+  filter();
 }

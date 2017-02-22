@@ -5,7 +5,7 @@ import { KuiTh } from './kui_table';
 
 export function CheckBoxTableHeader({ onClick, isChecked }) {
   return <KuiTh className="kuiTableHeaderCell--checkBox">
-    <KuiCheckBox onClick={onClick} isChecked={isChecked} />
+    <KuiCheckBox onChange={onClick} isChecked={isChecked} />
   </KuiTh>;
 }
 

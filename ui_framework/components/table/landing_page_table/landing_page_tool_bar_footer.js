@@ -1,18 +1,15 @@
 import React from 'react';
 
-import { KuiToolBarPagerSection, KuiToolBarFooterSection, KuiToolBarText } from '../../tool_bar';
+import { KuiToolBarPagerSection } from '../../tool_bar';
+import { KuiSelectedItemsFooterSection } from '../../tool_bar/kui_selected_items_footer_section';
 
 export function LandingPageToolBarFooter({ selectedItemsCount, pagerState, onPreviousPage, onNextPage }) {
-  function getSelectedItemsSection() {
-    if (selectedItemsCount === 0) return null;
-
-    return <KuiToolBarFooterSection>
-      <KuiToolBarText>{selectedItemsCount} selected</KuiToolBarText>
-    </KuiToolBarFooterSection>;
-  }
-
   return <div className="kuiToolBarFooter">
-      { getSelectedItemsSection() }
+      {
+        selectedItemsCount > 0
+          ? <KuiSelectedItemsFooterSection selectedItemsCount={selectedItemsCount}/>
+          : null
+      }
       <KuiToolBarPagerSection
         pagerState={pagerState}
         onNextPage={onNextPage}

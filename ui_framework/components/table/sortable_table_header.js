@@ -25,5 +25,5 @@ export function SortableTableHeaderColumn({ sortOrder, onSort, children }) {
 SortableTableHeaderColumn.propTypes = {
   sortOrder: React.PropTypes.string.isRequired,
   onSort: React.PropTypes.func.isRequired,
-  children: React.PropTypes.any
+  children: React.PropTypes.node
 };

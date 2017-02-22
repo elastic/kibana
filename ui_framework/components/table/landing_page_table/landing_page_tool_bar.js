@@ -11,21 +11,21 @@ import { CreateButtonLink, DeleteButton } from '../../button';
 
 export function LandingPageToolBar({
     filter,
-    doFilter,
+    onFilter,
     pagerState,
     onNextPage,
     onPreviousPage,
-    doDelete,
+    onDelete,
     addHref,
     selectedItemsCount }) {
   return <KuiToolBar>
     <KuiToolBarSection>
-      <KuiToolBarSearchBox filter={filter} doFilter={doFilter}/>
+      <KuiToolBarSearchBox filter={filter} onFilter={onFilter}/>
     </KuiToolBarSection>
 
     <KuiToolBarSection>
       { selectedItemsCount > 0
-        ? <DeleteButton onClick={doDelete}/>
+        ? <DeleteButton onClick={onDelete}/>
         : <CreateButtonLink href={addHref}/>
       }
     </KuiToolBarSection>
@@ -39,9 +39,9 @@ export function LandingPageToolBar({
 
 LandingPageToolBar.propTypes = {
   filter: React.PropTypes.string,
-  doFilter: React.PropTypes.func.isRequired,
+  onFilter: React.PropTypes.func.isRequired,
   pagerState: React.PropTypes.any.isRequired,
-  doDelete: React.PropTypes.func.isRequired,
+  onDelete: React.PropTypes.func.isRequired,
   addHref: React.PropTypes.string.isRequired,
   selectedItemsCount: React.PropTypes.number.isRequired,
   onNextPage: React.PropTypes.func.isRequired,
