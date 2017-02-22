@@ -37,6 +37,8 @@ class Metric extends Component {
     const resize = findDOMNode(this.resize);
     let scale = this.state.scale;
 
+    if (!resize) return;
+
     // Let's start by scaling to the largest dimension
     if (resize.clientWidth - resize.clientHeight < 0) {
       scale = resize.clientWidth / inner.clientWidth;

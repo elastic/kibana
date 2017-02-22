@@ -18,8 +18,7 @@ class FlotChart extends Component {
       // We need to rerender if the axis change
       const valuesChanged = props.yaxes.some((axis, i) => {
         if (this.props.yaxes[i]) {
-          return axis.tickFormatter !== this.props.yaxes[i].tickFormatter ||
-          axis.position !== this.props.yaxes[i].position ||
+          return axis.position !== this.props.yaxes[i].position ||
           axis.max !== this.props.yaxes[i].max ||
           axis.min !== this.props.yaxes[i].min;
         }
@@ -162,7 +161,7 @@ class FlotChart extends Component {
 
       this.handleResize = (e) => {
         const resize = findDOMNode(this.resize);
-        if (resize.clientHeight > 0 && resize.clientHeight > 0) {
+        if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
           if (!this.plot) return;
           this.plot.resize();
           this.plot.setupGrid();

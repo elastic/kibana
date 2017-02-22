@@ -52,21 +52,30 @@ app.controller('MetricsEditorController', (
     visAppScope.stageEditableVis();
     debouncedFetch();
 
+    const patternsToFetch = [];
     // Fetch any missing index patterns
-    if (!$scope.fields[newValue.index_pattern]) debouncedFetchFields(newValue.index_pattern);
+    if (!$scope.fields[newValue.index_pattern]) {
+      patternsToFetch.push(newValue.index_pattern);
+    }
+
     newValue.series.forEach(series => {
       if (series.override_index_pattern &&
         !$scope.fields[series.series_index_pattern]) {
-        debouncedFetchFields(series.series_index_pattern);
+        patternsToFetch.push(series.series_index_pattern);
       }
     });
+
     if (newValue.annotations) {
       newValue.annotations.forEach(item => {
         if (item.index_pattern &&
           !$scope.fields[item.index_pattern]) {
-          debouncedFetchFields(item.index_pattern);
+          patternsToFetch.push(item.index_pattern);
         }
       });
+    }
+
+    if(patternsToFetch.length) {
+      debouncedFetchFields(_.unique(patternsToFetch));
     }
   });
 
