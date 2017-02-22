@@ -284,20 +284,21 @@ export default function GaugeChartFactory(Private) {
         .append('text')
         .attr('class', 'chart-label')
         .text(data.label)
-        .attr('y', -50)
+        .attr('y', -30)
         .attr('style', 'dominant-baseline: central; text-anchor: middle;');
 
       svg
         .append('text')
         .attr('class', 'chart-label')
         .text(this.gaugeConfig.style.subText)
+        .attr('y', 20)
         .attr('style', 'dominant-baseline: central; text-anchor: middle;');
 
       if (this.gaugeConfig.labels.show) {
         gauges
           .append('text')
           .attr('class', 'chart-label')
-          .attr('y', -25)
+          .attr('y', -5)
           .text(d => {
             if (this.gaugeConfig.percentageMode) {
               const percentage = Math.round(100 * (d.y - min) / (max - min));
