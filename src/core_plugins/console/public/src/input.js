@@ -181,10 +181,10 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
               // pattern for valid warning header
               var re = /\d{3} [^ ]+ \"([^"]*)\"( \"[^"]*\")/
               // split on any comma that is followed by an even number of quotes
-              warnings = _.map(warnings.split(/, (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/), function (warning) {
+              warnings = _.map(warnings.split(/, (?=(?:[^"]*\"[^"]*\")*[^"]*$)/), function (warning) {
                 var match = re.exec(warning)
-                // extract the actual warning
-                return "#! Deprecation: " + match[1]
+                // extract the actual warning if there was a match
+                return "#! Deprecation: " + (match !== null ? match[1] : warning)
               });
               value = warnings.join("\n") + "\n" + value;
             }
