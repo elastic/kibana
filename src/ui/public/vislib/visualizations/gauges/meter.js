@@ -281,19 +281,37 @@ export default function GaugeChartFactory(Private) {
           return applyMask ? `url(#gauge-mask-front-${randomNumber}-${j})` : '';
         });
 
+      let hiddenLabels = false;
+
       svg
         .append('text')
         .attr('class', 'chart-label')
         .text(data.label)
         .attr('y', -30)
-        .attr('style', 'dominant-baseline: central; text-anchor: middle;');
+        .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+        .style('display', function () {
+          const textLength = this.getBBox().width;
+          const textTooLong = textLength > maxRadius;
+          if (textTooLong) {
+            hiddenLabels = true;
+          }
+          return textTooLong ? 'none' : 'initial';
+        });
 
       svg
         .append('text')
         .attr('class', 'chart-label')
         .text(this.gaugeConfig.style.subText)
         .attr('y', 20)
-        .attr('style', 'dominant-baseline: central; text-anchor: middle;');
+        .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+        .style('display', function () {
+          const textLength = this.getBBox().width;
+          const textTooLong = textLength > maxRadius;
+          if (textTooLong) {
+            hiddenLabels = true;
+          }
+          return textTooLong ? 'none' : 'initial';
+        });
 
       if (this.gaugeConfig.labels.show) {
         gauges
@@ -310,7 +328,15 @@ export default function GaugeChartFactory(Private) {
           })
           .attr('style', 'dominant-baseline: central;')
           .style('text-anchor', 'middle')
-          .style('font-size', '2em');
+          .style('font-size', '2em')
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            const textTooLong = textLength > maxRadius;
+            if (textTooLong) {
+              hiddenLabels = true;
+            }
+            return textTooLong ? 'none' : 'initial';
+          });
       }
 
       if (this.gaugeConfig.scale.show) {
@@ -322,6 +348,10 @@ export default function GaugeChartFactory(Private) {
           const gauge = d3.select(this);
           gauge.call(tooltip.render());
         });
+      }
+
+      if (hiddenLabels) {
+        this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constrains');
       }
 
       return series;

@@ -49,6 +49,10 @@ export default function ColumnLayoutFactory(Private) {
               },
               {
                 type: 'div',
+                class: 'vis-alerts'
+              },
+              {
+                type: 'div',
                 class: 'x-axis-chart-title',
                 //splits: chartTitleSplit
               }
