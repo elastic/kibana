@@ -65,13 +65,6 @@
           }
         }
       },
-      "server": {
-        "properties": {
-          "uuid": {
-            "type": "keyword"
-          }
-        }
-      },
       "search": {
         "properties": {
           "columns": {
@@ -94,54 +87,6 @@
             "type": "text"
           },
           "title": {
-            "type": "text"
-          },
-          "version": {
-            "type": "integer"
-          }
-        }
-      },
-      "config": {
-        "properties": {
-          "buildNum": {
-            "type": "keyword"
-          }
-        }
-      },
-      "dashboard": {
-        "properties": {
-          "description": {
-            "type": "text"
-          },
-          "hits": {
-            "type": "integer"
-          },
-          "kibanaSavedObjectMeta": {
-            "properties": {
-              "searchSourceJSON": {
-                "type": "text"
-              }
-            }
-          },
-          "optionsJSON": {
-            "type": "text"
-          },
-          "panelsJSON": {
-            "type": "text"
-          },
-          "timeFrom": {
-            "type": "text"
-          },
-          "timeRestore": {
-            "type": "boolean"
-          },
-          "timeTo": {
-            "type": "text"
-          },
-          "title": {
-            "type": "text"
-          },
-          "uiStateJSON": {
             "type": "text"
           },
           "version": {
@@ -186,6 +131,61 @@
                 "ignore_above": 256
               }
             }
+          }
+        }
+      },
+      "dashboard": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "optionsJSON": {
+            "type": "text"
+          },
+          "panelsJSON": {
+            "type": "text"
+          },
+          "timeFrom": {
+            "type": "text"
+          },
+          "timeRestore": {
+            "type": "boolean"
+          },
+          "timeTo": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "uiStateJSON": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "server": {
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          }
+        }
+      },
+      "config": {
+        "properties": {
+          "buildNum": {
+            "type": "keyword"
           }
         }
       }

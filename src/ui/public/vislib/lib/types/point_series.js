@@ -105,6 +105,12 @@ export default function ColumnHandler(Private) {
             }
           }
         ];
+      } else {
+        config.valueAxes.forEach(axis => {
+          if (axis.labels) {
+            axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
+          }
+        });
       }
 
       if (!config.categoryAxes) {
@@ -191,7 +197,8 @@ export default function ColumnHandler(Private) {
           inverted: true
         },
         labels: {
-          axisFormatter: val => val
+          filter: false,
+          axisFormatter: data.data.yAxisFormatter
         },
         style: {
           rangePadding: 0,
