@@ -1,6 +1,8 @@
 import { get, set, isObject } from 'lodash';
 import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
-import { getAllStats } from './cgroup';
+import { getAllStats as cGroupStats } from './cgroup';
+
+let cGroupStatsAvailable = true;
 
 export function collectMetrics(kbnServer, server, config) {
   server.plugins['even-better'].monitor.on('ops', function (event) {
@@ -11,7 +13,7 @@ export function collectMetrics(kbnServer, server, config) {
 export async function getMetrics({ event, config }) {
   const port = config.get('server.port');
   const timestamp = new Date().toISOString();
-  const cgroup = await getAllStats();
+  const cgroup = await cGroupStatsIfAvailable();
 
   const metrics = {
     last_updated: timestamp,
@@ -39,6 +41,20 @@ export async function getMetrics({ event, config }) {
     requests:  keysToSnakeCaseShallow(get(event, ['requests', port])),
     concurrent_connections: get(event, ['concurrents', port])
   };
+
+  async function cGroupStatsIfAvailable() {
+    if (!cGroupStatsAvailable) {
+      return;
+    }
+
+    const cgroup = await cGroupStats();
+
+    if (isObject(cgroup)) {
+      return cgroup;
+    }
+
+    cGroupStatsAvailable = false;
+  }
 
   if (isObject(cgroup)) {
     set(metrics, 'os.cgroup', cgroup);
