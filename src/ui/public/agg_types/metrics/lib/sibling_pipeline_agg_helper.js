@@ -51,7 +51,7 @@ const SiblingPipelineAggHelperProvider = function (Private) {
             return this.makeAgg(agg, state);
           },
           makeAgg: function (agg, state) {
-            state = state || {};
+            state = state || { type: 'date_histogram' };
             state.schema = bucketAggSchema;
             const orderAgg = new AggConfig(agg.vis, state);
             orderAgg.id = agg.id + '-bucket';
@@ -72,7 +72,7 @@ const SiblingPipelineAggHelperProvider = function (Private) {
             return this.makeAgg(agg, state);
           },
           makeAgg: function (agg, state) {
-            state = state || {};
+            state = state || { type: 'count' };
             state.schema = metricAggSchema;
             const orderAgg = new AggConfig(agg.vis, state);
             orderAgg.id = agg.id + '-metric';
