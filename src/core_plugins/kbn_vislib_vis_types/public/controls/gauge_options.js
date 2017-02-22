@@ -69,14 +69,15 @@ module.directive('gaugeOptions', function () {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return;
+        if (index === 0) return 0;
         return $scope.vis.params.gauge.colorsRange[index - 1].to;
       };
 
       $scope.addRange = function () {
         const previousRange = _.last($scope.vis.params.gauge.colorsRange);
         const from = previousRange ? previousRange.to : 0;
-        $scope.vis.params.gauge.colorsRange.push({ from: from, to: null });
+        const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
+        $scope.vis.params.gauge.colorsRange.push({ from: from, to: to });
       };
 
       $scope.removeRange = function (index) {

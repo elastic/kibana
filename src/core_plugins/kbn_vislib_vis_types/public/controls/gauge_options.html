@@ -59,6 +59,7 @@
                 class="form-control"
                 name="range.from"
                 greater-or-equal-than="{{getGreaterThan($index)}}"
+                required
                 step="any" />
             </td>
             <td>
@@ -67,13 +68,15 @@
                 type="number"
                 class="form-control"
                 name="range.to"
-                greater-than="range.from"
+                greater-or-equal-than="{{range.from}}"
+                required
                 step="any" />
             </td>
             <td>
               <button
                 type="button"
                 ng-click="removeRange($index)"
+                ng-show="vis.params.gauge.colorsRange.length > 1"
                 class="btn btn-danger btn-xs">
                 <i class="fa fa-times"></i>
               </button>
