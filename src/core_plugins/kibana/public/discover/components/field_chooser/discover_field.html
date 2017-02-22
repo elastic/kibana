@@ -1,5 +1,9 @@
 
-    <li class="sidebar-item" attr-field="{{::field.name}}">
+    <li
+      class="sidebar-item"
+      attr-field="{{::field.name}}"
+      data-test-subj="field-{{::field.name}}"
+    >
       <div ng-click="toggleDetails(field)" class="sidebar-item-title">
         <field-name field="field"></field-name>
         <button
