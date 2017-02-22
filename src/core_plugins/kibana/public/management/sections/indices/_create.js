@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
 
 uiRoutes
-.when('/management/kibana/index/', {
+.when('/management/kibana/index', {
   template: createTemplate
 });
 

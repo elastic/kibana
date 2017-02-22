@@ -1,6 +1,8 @@
+import _ from 'lodash';
 /**
  * @typedef BreadCrumbUrl {Object}
- * @property breadcrumb {String} a breadcrumb
+ * @property title {String} the display title for the breadcrumb
+ * @property path {String} the subdirectory for this particular breadcrumb
  * @property url {String} a url for the breadcrumb
  */
 
@@ -13,11 +15,13 @@
  * was generated for.
  */
 export function getBreadCrumbUrls(breadcrumbs, url) {
-  return breadcrumbs.map(breadcrumb => {
-    const breadCrumbStartIndex = url.toLowerCase().lastIndexOf(breadcrumb.toLowerCase());
+  // the url should not have a slash on the end or else the route will not be properly built
+  const urlBase = url.replace(/\/+$/, '').replace(breadcrumbs.join('/'), '');
+  return breadcrumbs.map((path, index) => {
     return {
-      breadcrumb,
-      url: url.substring(0, breadCrumbStartIndex + breadcrumb.length)
+      path: path,
+      title: _.startCase(path),
+      url: urlBase + breadcrumbs.slice(0, index + 1).join('/')
     };
   });
 }
