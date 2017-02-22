@@ -164,8 +164,18 @@ uiModules.get('apps/management')
           notify.error('The file could not be processed.');
         }
 
-        return Promise.map(docs, function (doc) {
-          const service = find($scope.services, { type: doc._type }).service;
+        return Promise.map(docs, (doc) => {
+          const { service } = find($scope.services, { type: doc._type }) || {};
+
+          if (!service) {
+            const msg = `Skipped import of "${doc._source.title}" (${doc._id}), ` +
+              `invalid type: "${doc._type}"`;
+            notify.warning(msg, {
+              lifetime: 0,
+            });
+            return;
+          }
+
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
@@ -174,7 +184,8 @@ uiModules.get('apps/management')
           });
         })
         .then(refreshIndex)
-        .then(refreshData, notify.error);
+        .then(refreshData)
+        .catch(notify.error);
       };
 
       function refreshIndex() {
