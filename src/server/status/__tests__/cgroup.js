@@ -3,18 +3,19 @@ import mockFs from 'mock-fs';
 import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
 
 describe('Control Group', function () {
+  const hierarchy = Math.random().toString(36).substring(7);
+
   const cGroupContents = [
-    '11:blkio:/user.slice/elastic',
-    '10:cpuset:/elastic',
-    '9:pids:/user.slice/user-1000.slice/elastic',
-    '8:cpu,cpuacct:/user.slice/elastic',
-    '7:memory:/user.slice/elastic',
-    '6:net_cls,net_prio:/elastic',
-    '5:hugetlb:/elastic',
-    '4:freezer:/elastic',
-    '3:perf_event:/elastic',
-    '2:devices:/user.slice/elastic',
-    '1:name=systemd:/user.slice/user-1000.slice/session-88.scope/elastic'
+    '10:freezer:/',
+    '9:net_cls,net_prio:/',
+    '8:pids:/',
+    '7:blkio:/',
+    '6:memory:/',
+    '5:devices:/user.slice',
+    '4:hugetlb:/',
+    '3:perf_event:/',
+    '2:cpu,cpuacct,cpuset:/' + hierarchy,
+    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope'
   ].join('\n');
 
   const cpuStatContents = [
@@ -33,19 +34,19 @@ describe('Control Group', function () {
       const cGroup = await readControlGroups();
 
       expect(cGroup).to.eql({
-        'blkio': '/user.slice/elastic',
-        'cpu': '/user.slice/elastic',
-        'cpuacct': '/user.slice/elastic',
-        'cpuset': '/elastic',
-        'devices': '/user.slice/elastic',
-        'freezer': '/elastic',
-        'hugetlb': '/elastic',
-        'memory': '/user.slice/elastic',
-        'name=systemd': '/user.slice/user-1000.slice/session-88.scope/elastic',
-        'net_cls': '/elastic',
-        'net_prio': '/elastic',
-        'perf_event': '/elastic',
-        'pids': '/user.slice/user-1000.slice/elastic'
+        freezer: '/',
+        net_cls: '/',
+        net_prio: '/',
+        pids: '/',
+        blkio: '/',
+        memory: '/',
+        devices: '/user.slice',
+        hugetlb: '/',
+        perf_event: '/',
+        cpu: `/${hierarchy}`,
+        cpuacct: `/${hierarchy}`,
+        cpuset: `/${hierarchy}`,
+        'name=systemd': '/user.slice/user-1000.slice/session-2359.scope'
       });
     });
   });
@@ -75,12 +76,14 @@ describe('Control Group', function () {
   });
 
   describe('getAllStats', () => {
+    const cpuAcctDir = `/sys/fs/cgroup/cpuacct/${hierarchy}`;
+    const cpuDir = `/sys/fs/cgroup/cpu/${hierarchy}`;
     const files = {
       '/proc/self/cgroup': cGroupContents,
-      '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpuacct.usage': '357753491408',
-      '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpu.cfs_period_us': '100000',
-      '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpu.cfs_quota_us': '5000',
-      '/sys/fs/cgroup/cpu/user.slice/elastic/cpu.stat': cpuStatContents
+      [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
+      [`${cpuAcctDir}/cpu.cfs_period_us`]: '100000',
+      [`${cpuAcctDir}/cpu.cfs_quota_us`]: '5000',
+      [`${cpuDir}/cpu.stat`]: cpuStatContents,
     };
 
     it('extracts control group stats', async () => {
@@ -89,11 +92,11 @@ describe('Control Group', function () {
 
       expect(stats).to.eql({
         cpuacct: {
-          control_group: '/user.slice/elastic',
+          control_group: `/${hierarchy}`,
           usage_nanos: 357753491408,
         },
         cpu: {
-          control_group: '/user.slice/elastic',
+          control_group: `/${hierarchy}`,
           cfs_period_micros: 100000,
           cfs_quota_micros: 5000,
           stat: {
@@ -114,7 +117,7 @@ describe('Control Group', function () {
     it('returns null if CPU accounting files are missing', async () => {
       mockFs({
         '/proc/self/cgroup': cGroupContents,
-        '/sys/fs/cgroup/cpu/user.slice/elastic/cpu.stat': cpuStatContents
+        [`${cpuDir}/cpu.stat`]: cpuStatContents
       });
       const stats = await getAllStats();
       mockFs.restore();
@@ -125,9 +128,9 @@ describe('Control Group', function () {
     it('returns null if cpuStat file is missing', async () => {
       mockFs({
         '/proc/self/cgroup': cGroupContents,
-        '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpuacct.usage': '357753491408',
-        '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpu.cfs_period_us': '100000',
-        '/sys/fs/cgroup/cpuacct/user.slice/elastic/cpu.cfs_quota_us': '5000',
+        [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
+        [`${cpuAcctDir}/cpu.cfs_period_us`]: '100000',
+        [`${cpuAcctDir}/cpu.cfs_quota_us`]: '5000'
       });
       const stats = await getAllStats();
 

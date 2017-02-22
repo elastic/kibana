@@ -4,7 +4,7 @@ import { join as joinPath } from 'path';
 
 // Logic from elasticsearch/core/src/main/java/org/elasticsearch/monitor/os/OsProbe.java
 
-const CONTROL_GROUP_RE = new RegExp('\\d+:([^:,]+(?:,[^:,]+)?):(/.*)');
+const CONTROL_GROUP_RE = new RegExp('\\d+:([^:]+):(/.*)');
 const CONTROLLER_SEPERATOR_RE = ',';
 
 const PROC_SELF_CGROUP_FILE = '/proc/self/cgroup';
