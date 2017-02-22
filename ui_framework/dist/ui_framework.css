@@ -1375,6 +1375,17 @@ body {
   border-collapse: collapse;
   background-color: #FFFFFF; }
 
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto;
+  /* 1 */ }
+  .kuiTable--fluid .kuiTableHeaderCell,
+  .kuiTable--fluid .kuiTableRowCell {
+    max-width: none;
+    /* 1 */ }
+
 .kuiTableHeaderCell {
   font-size: 14px;
   font-weight: 400;

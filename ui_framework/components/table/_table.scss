@@ -25,6 +25,18 @@ $tableCellPadding: 7px 8px 8px;
   background-color: #FFFFFF;
 }
 
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto; /* 1 */
+
+  .kuiTableHeaderCell,
+  .kuiTableRowCell {
+    max-width: none; /* 1 */
+  }
+}
+
 .kuiTableHeaderCell {
   @include tableCell;
   padding: $tableCellPadding;
