@@ -59,7 +59,6 @@ export default function (chrome, internals) {
         }
 
         return path.substr(1, length)
-          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
           .split('/');
       };
 
