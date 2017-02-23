@@ -15,6 +15,7 @@ import {
 const tableHtml = require('./table.html');
 const tableJs = require('raw!./table.js');
 const fluidTableHtml = require('./fluid_table.html');
+const tableWithMenuButtonsHtml = require('./table_with_menu_buttons.html');
 const controlledTableHtml = require('./controlled_table.html');
 const controlledTableWithLoadingItemsHtml = require('./controlled_table_loading_items.html');
 const controlledTableWithNoItemsHtml = require('./controlled_table_no_items.html');
@@ -51,6 +52,18 @@ export default props => (
 
       <GuideDemo
         html={fluidTableHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Table with MenuButtons"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: tableWithMenuButtonsHtml,
+      }]}
+    >
+      <GuideDemo
+        html={tableWithMenuButtonsHtml}
       />
     </GuideSection>
 
