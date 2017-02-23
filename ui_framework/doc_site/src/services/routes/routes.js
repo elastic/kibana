@@ -12,11 +12,17 @@ import ButtonExample
 import EventExample
   from '../../views/event/event_example.jsx';
 
+import EventsSandbox
+  from '../../views/event/events_sandbox.jsx';
+
 import FormExample
   from '../../views/form/form_example.jsx';
 
 import HeaderBarExample
   from '../../views/header_bar/header_bar_example.jsx';
+
+import HeaderBarSandbox
+  from '../../views/header_bar/header_bar_sandbox.jsx';
 
 import IconExample
   from '../../views/icon/icon_example.jsx';
@@ -133,6 +139,12 @@ const components = [{
 }];
 
 const sandboxes = [{
+  name: 'Events',
+  component: EventsSandbox,
+}, {
+  name: 'HeaderBar with Table',
+  component: HeaderBarSandbox,
+}, {
   name: 'View',
   component: ViewSandbox,
 }];
