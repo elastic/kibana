@@ -10,6 +10,7 @@ export function loadSavedObject(loaders, panel) {
   if (!loader) {
     throw new Error(`No loader for object of type ${panel.type}`);
   }
-  return loader.get(panel.id)
+  const isDefered = true;
+  return loader.get(panel.id, isDefered)
     .then(savedObj => ({ savedObj, editUrl: loader.urlFor(panel.id) }));
 }
