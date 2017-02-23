@@ -110,6 +110,172 @@ data.threeTermBuckets = {
   }
 };
 
+data.oneTermOneHistogramBucketWithTwoMetrics = {
+  hits: { total: 1000, hits: [], max_score: 0 },
+  aggregations: {
+    agg_3: {
+      buckets: [
+        {
+          key: 'png',
+          doc_count: 50,
+          agg_1: { value: 412032 },
+          agg_2: { value: 1411862400000 },
+          agg_4: {
+            buckets: [
+              {
+                key_as_string: '2014-09-28T00:00:00.000Z',
+                key: 1411862400000,
+                doc_count: 1,
+                agg_1: { value: 9283 },
+                agg_2: { value: 1411862400000 },
+              },
+              {
+                key_as_string: '2014-09-29T00:00:00.000Z',
+                key: 1411948800000,
+                doc_count: 2,
+                agg_1: { value: 28349 },
+                agg_2: { value: 1411948800000 },
+              },
+              {
+                key_as_string: '2014-09-30T00:00:00.000Z',
+                key: 1412035200000,
+                doc_count: 3,
+                agg_1: { value: 84330 },
+                agg_2: { value: 1412035200000 },
+              },
+              {
+                key_as_string: '2014-10-01T00:00:00.000Z',
+                key: 1412121600000,
+                doc_count: 4,
+                agg_1: { value: 34992 },
+                agg_2: { value: 1412121600000 },
+              },
+              {
+                key_as_string: '2014-10-02T00:00:00.000Z',
+                key: 1412208000000,
+                doc_count: 5,
+                agg_1: { value: 145432 },
+                agg_2: { value: 1412208000000 },
+              },
+              {
+                key_as_string: '2014-10-03T00:00:00.000Z',
+                key: 1412294400000,
+                doc_count: 35,
+                agg_1: { value: 220943 },
+                agg_2: { value: 1412294400000 },
+              }
+            ]
+          }
+        },
+        {
+          key: 'css',
+          doc_count: 20,
+          agg_1: { value: 412032 },
+          agg_2: { value: 1411862400000 },
+          agg_4: {
+            buckets: [
+              {
+                key_as_string: '2014-09-28T00:00:00.000Z',
+                key: 1411862400000,
+                doc_count: 1,
+                agg_1: { value: 9283 },
+                agg_2: { value: 1411862400000 },
+              },
+              {
+                key_as_string: '2014-09-29T00:00:00.000Z',
+                key: 1411948800000,
+                doc_count: 2,
+                agg_1: { value: 28349 },
+                agg_2: { value: 1411948800000 },
+              },
+              {
+                key_as_string: '2014-09-30T00:00:00.000Z',
+                key: 1412035200000,
+                doc_count: 3,
+                agg_1: { value: 84330 },
+                agg_2: { value: 1412035200000 },
+              },
+              {
+                key_as_string: '2014-10-01T00:00:00.000Z',
+                key: 1412121600000,
+                doc_count: 4,
+                agg_1: { value: 34992 },
+                agg_2: { value: 1412121600000 },
+              },
+              {
+                key_as_string: '2014-10-02T00:00:00.000Z',
+                key: 1412208000000,
+                doc_count: 5,
+                agg_1: { value: 145432 },
+                agg_2: { value: 1412208000000 },
+              },
+              {
+                key_as_string: '2014-10-03T00:00:00.000Z',
+                key: 1412294400000,
+                doc_count: 5,
+                agg_1: { value: 220943 },
+                agg_2: { value: 1412294400000 },
+              }
+            ]
+          }
+        },
+        {
+          key: 'html',
+          doc_count: 90,
+          agg_1: { value: 412032 },
+          agg_2: { value: 1411862400000 },
+          agg_4: {
+            buckets: [
+              {
+                key_as_string: '2014-09-28T00:00:00.000Z',
+                key: 1411862400000,
+                doc_count: 10,
+                agg_1: { value: 9283 },
+                agg_2: { value: 1411862400000 },
+              },
+              {
+                key_as_string: '2014-09-29T00:00:00.000Z',
+                key: 1411948800000,
+                doc_count: 20,
+                agg_1: { value: 28349 },
+                agg_2: { value: 1411948800000 },
+              },
+              {
+                key_as_string: '2014-09-30T00:00:00.000Z',
+                key: 1412035200000,
+                doc_count: 30,
+                agg_1: { value: 84330 },
+                agg_2: { value: 1412035200000 },
+              },
+              {
+                key_as_string: '2014-10-01T00:00:00.000Z',
+                key: 1412121600000,
+                doc_count: 11,
+                agg_1: { value: 34992 },
+                agg_2: { value: 1412121600000 },
+              },
+              {
+                key_as_string: '2014-10-02T00:00:00.000Z',
+                key: 1412208000000,
+                doc_count: 12,
+                agg_1: { value: 145432 },
+                agg_2: { value: 1412208000000 },
+              },
+              {
+                key_as_string: '2014-10-03T00:00:00.000Z',
+                key: 1412294400000,
+                doc_count: 7,
+                agg_1: { value: 220943 },
+                agg_2: { value: 1412294400000 },
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+};
+
 data.oneRangeBucket = {
   'took': 35,
   'timed_out': false,

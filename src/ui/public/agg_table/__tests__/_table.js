@@ -107,6 +107,80 @@ describe('AggTable Directive', function () {
     });
   });
 
+  describe('renders totals row', function () {
+    function totalsRowTest(totalFunc, expected) {
+      const vis = new Vis(indexPattern, {
+        type: 'table',
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } }
+        ]
+      });
+      vis.aggs.forEach(function (agg, i) {
+        agg.id = 'agg_' + (i + 1);
+      });
+
+      $scope.table = tabifyAggResponse(vis,
+        fixtures.oneTermOneHistogramBucketWithTwoMetrics,
+        { canSplit: false, minimalColumns: true, asAggConfigResults: true }
+      );
+      $scope.showTotal = true;
+      $scope.totalFunc = totalFunc;
+      const $el = $('<kbn-agg-table table="table" show-total="showTotal" total-func="totalFunc"></kbn-agg-table>');
+      $compile($el)($scope);
+      $scope.$digest();
+
+      expect($el.find('tfoot').size()).to.be(1);
+
+      const $rows = $el.find('tfoot tr');
+      expect($rows.size()).to.be(1);
+
+      const $cells = $($rows[0]).find('th');
+      expect($cells.size()).to.be(4);
+
+      for (let i = 0; i < 4; i++) {
+        expect($($cells[i]).text()).to.be(expected[i]);
+      }
+    }
+    it('as count', function () {
+      totalsRowTest('count', ['', '18', '18', '18']);
+    });
+    it('as min', function () {
+      totalsRowTest('min', [
+        '',
+        'September 27th 2014, 18:00:00.000',
+        '9,283',
+        'September 27th 2014, 18:00:00.000'
+      ]);
+    });
+    it('as max', function () {
+      totalsRowTest('max', [
+        '',
+        'October 2nd 2014, 18:00:00.000',
+        '220,943',
+        'October 2nd 2014, 18:00:00.000'
+      ]);
+    });
+    it('as avg', function () {
+      totalsRowTest('avg', [
+        '',
+        '',
+        '87,221.5',
+        ''
+      ]);
+    });
+    it('as sum', function () {
+      totalsRowTest('sum', [
+        '',
+        '',
+        '1,569,987',
+        ''
+      ]);
+    });
+  });
+
   describe('aggTable.toCsv()', function () {
     it('escapes and formats the rows and columns properly', function () {
       const $el = $compile('<kbn-agg-table table="table">')($scope);

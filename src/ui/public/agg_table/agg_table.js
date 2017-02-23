@@ -4,10 +4,13 @@ import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 
 uiModules
 .get('kibana')
 .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('html');
 
   return {
     restrict: 'E',
@@ -96,9 +99,9 @@ uiModules
           }
 
           const isFieldNumeric = (field && field.type === 'number');
-          const isFirstValueNumeric = _.isNumber(_.get(table, `rows[0][${i}].value`));
+          const isFieldDate = (field && field.type === 'date');
 
-          if (isFieldNumeric || isFirstValueNumeric) {
+          if (isFieldNumeric || isFieldDate) {
             function sum(tableRows) {
               return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
             }
@@ -106,12 +109,12 @@ uiModules
 
             switch ($scope.totalFunc) {
               case 'sum':
-                if (!field || field.type !== 'date') {
+                if (!isFieldDate) {
                   formattedColumn.total = formatter(sum(table.rows));
                 }
                 break;
               case 'avg':
-                if (!field || field.type !== 'date') {
+                if (!isFieldDate) {
                   formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
                 }
                 break;
@@ -122,7 +125,7 @@ uiModules
                 formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').max().value());
                 break;
               case 'count':
-                formattedColumn.total = table.rows.length;
+                formattedColumn.total = numberFormatter(table.rows.length);
                 break;
               default:
                 break;
