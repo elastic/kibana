@@ -90,7 +90,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       let stateMonitor;
       const $state = $scope.state = new AppState(stateDefaults);
       const $uiState = $scope.uiState = $state.makeStateful('uiState');
-      const $appStatus = $scope.appStatus = this.appStatus = {};
+      const $appStatus = $scope.appStatus = this.appStatus = { dirty: !dash.id };
 
       $scope.$watchCollection('state.options', function (newVal, oldVal) {
         if (!angular.equals(newVal, oldVal)) $state.save();
@@ -122,7 +122,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         // watch for state changes and update the appStatus.dirty value
         stateMonitor = stateMonitorFactory.create($state, stateDefaults);
         stateMonitor.onChange((status) => {
-          $appStatus.dirty = status.dirty;
+          $appStatus.dirty = status.dirty || !dash.id;
         });
 
         $scope.$on('$destroy', () => {
