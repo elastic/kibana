@@ -8,7 +8,8 @@ module.exports = function (server) {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1
+        number_of_shards: 1,
+        'index.mapper.dynamic': false,
       },
       mappings
     }
