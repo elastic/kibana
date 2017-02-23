@@ -8,7 +8,7 @@ const expect = require('expect.js');
 
 bdd.describe('status page', function () {
   bdd.before(function () {
-    return PageObjects.common.navigateToApp('status_page', false);
+    return PageObjects.common.navigateToApp('status_page');
   });
 
   bdd.it('should show the kibana plugin as ready', function () {
