@@ -1485,6 +1485,7 @@ body {
 
 /**
    * 1. Override button styles (some of which are from Bootstrap).
+   * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
    */
 .kuiTab {
   -webkit-appearance: none;
@@ -1498,16 +1499,20 @@ body {
   background-color: #ffffff;
   /* 1 */
   border: 1px solid #E4E4E4;
-  border-bottom: none;
+  border-bottom-color: transparent;
   border-radius: 0;
   /* 1 */ }
   .kuiTab + .kuiTab {
     border-left: none; }
+    .kuiTab + .kuiTab:focus {
+      margin-left: -1px;
+      /* 2 */ }
   .kuiTab:focus {
     color: #3CAED2;
     z-index: 1;
-    outline: 1px solid #6EADC1 !important;
-    /* 1 */ }
+    outline: none;
+    /* 1 */
+    border: 1px solid #6EADC1 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #006E8A; }
   .kuiTab:active {
