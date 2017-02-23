@@ -1486,6 +1486,9 @@ body {
 /**
    * 1. Override button styles (some of which are from Bootstrap).
    * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
+   * 3. Move the tab down so that its bottom border covers the container's bottom border.
+   * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
+   *    of padding to make sure the text doesn't shift down.
    */
 .kuiTab {
   -webkit-appearance: none;
@@ -1499,9 +1502,11 @@ body {
   background-color: #ffffff;
   /* 1 */
   border: 1px solid #E4E4E4;
-  border-bottom-color: transparent;
+  border-bottom-width: 2px;
   border-radius: 0;
-  /* 1 */ }
+  /* 1 */
+  margin-bottom: -2px;
+  /* 3 */ }
   .kuiTab + .kuiTab {
     border-left: none; }
     .kuiTab + .kuiTab:focus {
@@ -1512,19 +1517,16 @@ body {
     z-index: 1;
     outline: none;
     /* 1 */
-    border: 1px solid #6EADC1 !important; }
+    border: 1px solid #6EADC1 !important;
+    padding-bottom: 11px;
+    /* 4 */ }
   .kuiTab:hover:not(.kuiTab-isSelected) {
-    color: #006E8A; }
-  .kuiTab:active {
-    outline: none;
-    border-color: #ffffff;
-    box-shadow: none;
-    /* 1 */
-    color: #3CAED2 !important; }
+    color: #006E8A;
+    background-color: #F2F2F2; }
   .kuiTab.kuiTab-isSelected {
+    cursor: default;
     color: #191E23;
-    background-color: #F2F2F2;
-    cursor: default; }
+    border-bottom-color: #FFFFFF; }
 
 .kuiToolBar {
   display: -webkit-box;
