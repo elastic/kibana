@@ -72,12 +72,23 @@
   align-content: flex-start;
 }
 
+.guideNavSectionTitle {
+  min-width: 200px;
+  padding: 8px 20px;
+  margin-left: 5px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
 .guideNavItem {
+  min-width: 200px;
   color: white;
   text-decoration: none;
   font-size: 20px;
   line-height: 20px;
   padding: 8px 20px;
+  margin-left: 5px;
   border-radius: 3px;
 
   &:hover {
