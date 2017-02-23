@@ -160,7 +160,9 @@ export default function AxisConfigFactory() {
 
     get(property, defaults) {
       if (typeof defaults !== 'undefined' || _.has(this._values, property)) {
-        return _.get(this._values, property, defaults);
+        const val = _.get(this._values, property, defaults);
+        if (val == null && defaults != null) return defaults;
+        return val;
       } else {
         throw new Error(`Accessing invalid config property: ${property}`);
         return defaults;
