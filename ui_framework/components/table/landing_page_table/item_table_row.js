@@ -11,8 +11,5 @@ export function ItemTableRow({ item, columns }) {
 
 ItemTableRow.propTypes = {
   item: React.PropTypes.any.isRequired,
-  /**
-   * @type {Array.<ColumnDefinition>}
-   */
-  columns: columnPropType
+  columns: React.PropTypes.arrayOf(columnPropType)
 };

@@ -1,17 +1,19 @@
 import { SortOrder } from 'ui_framework/components/table/sort_order';
 
 export class ItemTableState {
-  constructor(pagerFactory, editPath, kbnUrl) {
+  constructor(pagerFactory, editPath) {
+    this.isFetchingItems = false;
+
     this.items = [];
-    this.pageOfItems = [];
-    this.selectedItems = [];
     this.editPath = editPath;
-    this.kbnUrl = kbnUrl;
+
+    this.selectedIds = [];
 
     this.currentSortedColumn = undefined;
     this.currentSortOrder = SortOrder.NONE;
 
-    const itemsPerPage = 20;
+    this.pageOfItems = [];
+    const itemsPerPage = 10;
     const startingPage = 1;
     this.pager = pagerFactory.create(this.items.length, itemsPerPage, startingPage);
   }
@@ -21,18 +23,18 @@ export class ItemTableState {
   }
 
   areAllItemsSelected() {
-    return this.selectedItems.length === this.pageOfItems.length;
+    return this.selectedIds.length === this.pageOfItems.length;
   }
 
   isItemSelected(item) {
-    return this.selectedItems.indexOf(item) >= 0;
+    return this.selectedIds.indexOf(item.id) >= 0;
   }
 
   getSelectedItemsCount() {
-    return this.selectedItems.length;
+    return this.selectedIds.length;
   }
 
-  getEditUrl(item) {
-    return this.kbnUrl.eval(`#${this.editPath}/{{id}}`, { id: item.id });
+  getEditUrl(item, kbnUrl) {
+    return kbnUrl.eval(`#${this.editPath}/{{id}}`, { id: item.id });
   }
 }

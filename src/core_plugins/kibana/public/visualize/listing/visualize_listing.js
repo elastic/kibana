@@ -29,20 +29,11 @@ export function VisualizeListingController($injector, $scope) {
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
   const notify = new Notifier({ location: 'Visualize' });
-  const itemTableState = new ItemTableState(pagerFactory, VisualizeConstants.EDIT_PATH, kbnUrl);
-
-  let isFetchingItems = true;
-
-  const filter = (filter) => {
-    ItemTableActions.filter(itemTableState, filter, visualizationService).then(() => {
-      isFetchingItems = false;
-    });
-  };
+  const itemTableState = new ItemTableState(pagerFactory, VisualizeConstants.EDIT_PATH);
+  const tableActions = new ItemTableActions(itemTableState, visualizationService);
 
   const deleteItems = () => {
-    ItemTableActions.deleteSelectedItems(
-      itemTableState,
-      visualizationService,
+    tableActions.deleteSelectedItems(
       notify,
       confirmModal,
       VisualizeConstants.SAVED_VIS_TYPE_PLURAL);
@@ -50,10 +41,9 @@ export function VisualizeListingController($injector, $scope) {
 
   const updateProps = () => {
     $scope.tableProps = {
-      itemTableState,
+      tableActions,
       deleteItems,
-      filter,
-      isFetchingItems
+      kbnUrl
     };
   };
 
@@ -61,5 +51,4 @@ export function VisualizeListingController($injector, $scope) {
   $scope.$watch(() => itemTableState.selectedItems, () => updateProps());
   $scope.$watch(() => itemTableState.pageOfItems, () => updateProps());
   updateProps();
-  filter();
 }

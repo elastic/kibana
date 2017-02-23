@@ -17,10 +17,9 @@
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- Table -->
     <visualize-landing-page-table
-      item-table-state="tableProps.itemTableState"
+      table-actions="tableProps.tableActions"
       on-delete-items="tableProps.deleteItems"
-      on-filter-items="tableProps.filter"
-      is-fetching-items="tableProps.isFetchingItems"
+      kbn-url="tableProps.kbnUrl"
     ></visualize-landing-page-table>
   </div>
 </div>

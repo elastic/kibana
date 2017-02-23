@@ -5,11 +5,9 @@ import { KuiTd } from './kui_table';
 import { KuiTableCellLiner } from './kui_table_cell_liner';
 
 export function CheckBoxTableCell({ onClick, isChecked }) {
-  return <KuiTd className="kuiTableRowCell--checkBox">
-    <KuiTableCellLiner>
+  return <KuiTableCellLiner className="kuiTableRowCell--checkBox">
       <KuiCheckBox onChange={onClick} isChecked={isChecked} />
-    </KuiTableCellLiner>
-  </KuiTd>;
+    </KuiTableCellLiner>;
 }
 
 CheckBoxTableCell.propTypes = {

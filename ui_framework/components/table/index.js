@@ -6,3 +6,5 @@ export { KuiTableCellLink } from './kui_table_cell_link';
 export { SortableTableHeaderColumn } from './sortable_table_header';
 export { CheckBoxTableHeader } from './check_box_table_header';
 export { CheckBoxTableCell } from './check_box_table_cell';
+export { ItemTable } from './landing_page_table/item_table';
+export { columnPropType } from './landing_page_table/column_prop_type';

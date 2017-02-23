@@ -14,7 +14,7 @@ export function DashboardLandingPageTable({ itemTableState, onDeleteItems, onFil
     addHref={'#' + DashboardConstants.CREATE_NEW_DASHBOARD_URL}
     items={itemTableState.pageOfItems}
     onDeleteItems={(items) => onDeleteItems(items)}
-    onFilterItems={(filter) => onFilterItems(filter)}
+    onFilterItems={onFilterItems}
     pagerState={itemTableState.pager}
     onNextPage={() => ItemTableActions.turnToNextPage(itemTableState)}
     onPreviousPage={() => ItemTableActions.turnToPreviousPage(itemTableState)}

@@ -1,86 +1,109 @@
-import { ItemSelector } from './item_selector';
+import { ItemSelectionActions } from './item_selection_actions';
 import { ItemSorter } from './item_sorter';
 import { SortOrder } from 'ui_framework/components/table/sort_order';
 import { TITLE_COLUMN_ID } from './get_title_column';
 
 export class ItemTableActions {
-  static toggleItem(itemTableState, item) {
-    if (itemTableState.isItemSelected(item)) {
-      ItemSelector.deselectItem(itemTableState, item);
+  /**
+   *
+   * @param state {ItemTableState}
+   * @param service {SavedObjectLoader} A class that provides the ability to query for items.
+   * Should this be in here??  Other option is to pass in to functions but because the service is
+   * from angular, it has to be passed along externally then.
+   */
+  constructor(state, service) {
+    // This is awkward, but service has a circular reference and cause max stack size
+    // exceeded errors if stored in here and passed around via react.
+    this.find = service.find.bind(service);
+    this.delete = service.delete.bind(service);
+
+    this.state = state;
+    this.selectionActions = new ItemSelectionActions(state);
+    this.filter();
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  toggleItem(item) {
+    if (this.state.isItemSelected(item)) {
+      this.selectionActions.deselectItem(item);
     } else {
-      ItemSelector.selectItem(itemTableState, item);
+      this.selectionActions.selectItem(item);
     }
   }
 
-  static toggleAll(itemTableState) {
-    if (itemTableState.areAllItemsSelected()) {
-      ItemSelector.deselectAll(itemTableState);
+  toggleAll() {
+    if (this.state.areAllItemsSelected()) {
+      this.selectionActions.deselectAll();
     } else {
-      ItemSelector.selectAll(itemTableState);
+      this.selectionActions.selectAll();
     }
   }
 
-  static replaceItems(itemTableState, newItems) {
-    itemTableState.items = newItems;
+  replaceItems(newItems) {
+    this.state.items = newItems;
 
-
-    ItemSelector.deselectAll(itemTableState);
-    itemTableState.items = ItemSorter.sortItems(
-      itemTableState.items,
-      itemTableState.currentSortedColumn || TITLE_COLUMN_ID,
-      itemTableState.currentSortOrder === SortOrder.NONE ? SortOrder.ASC : itemTableState.currentSortOrder);
-    this.calculateItemsOnPage(itemTableState);
+    this.selectionActions.deselectAll();
+    this.state.items = ItemSorter.sortItems(
+      this.state.items,
+      this.state.currentSortedColumn || TITLE_COLUMN_ID,
+      this.state.currentSortOrder === SortOrder.NONE ? SortOrder.ASC : this.state.currentSortOrder);
+    this.calculateItemsOnPage();
   }
 
-  static calculateItemsOnPage(itemTableState) {
-    itemTableState.pager.setTotalItems(itemTableState.items.length);
-    const startItemIndex = itemTableState.pager.startItem - 1;
-    const endItemIndex = itemTableState.pager.endItem;
-    itemTableState.pageOfItems = itemTableState.items.slice(startItemIndex, endItemIndex);
+  calculateItemsOnPage() {
+    this.state.pager.setTotalItems(this.state.items.length);
+    const startItemIndex = this.state.pager.startItem - 1;
+    const endItemIndex = this.state.pager.endItem;
+    this.state.pageOfItems = this.state.items.slice(startItemIndex, endItemIndex);
   }
 
-  static sort(itemTableState, property) {
-    if (itemTableState.currentSortedColumn === property) {
-      itemTableState.currentSortOrder = ItemSorter.getFlippedSortOrder(itemTableState.currentSortOrder);
+  sort(property) {
+    if (this.state.currentSortedColumn === property) {
+      this.state.currentSortOrder = ItemSorter.getFlippedSortOrder(this.state.currentSortOrder);
     } else {
-      itemTableState.currentSortedColumn = property;
-      itemTableState.currentSortOrder = SortOrder.ASC;
+      this.state.currentSortedColumn = property;
+      this.state.currentSortOrder = SortOrder.ASC;
     }
 
-    itemTableState.items = ItemSorter.sortItems(
-      itemTableState.items,
-      itemTableState.currentSortedColumn,
-      itemTableState.currentSortOrder);
-    ItemSelector.deselectAll(itemTableState);
-    this.calculateItemsOnPage(itemTableState);
+    this.state.items = ItemSorter.sortItems(
+      this.state.items,
+      this.state.currentSortedColumn,
+      this.state.currentSortOrder);
+    this.selectionActions.deselectAll();
+    this.calculateItemsOnPage();
   }
 
-  static turnToNextPage(itemTableState) {
-    ItemSelector.deselectAll(itemTableState);
-    itemTableState.pager.nextPage();
-    this.calculateItemsOnPage(itemTableState);
+  turnToNextPage() {
+    this.selectionActions.deselectAll();
+    this.state.pager.nextPage();
+    this.calculateItemsOnPage();
   }
 
-  static turnToPreviousPage(itemTableState) {
-    ItemSelector.deselectAll(itemTableState);
-    itemTableState.pager.previousPage();
-    this.calculateItemsOnPage(itemTableState);
+  turnToPreviousPage() {
+    this.selectionActions.deselectAll();
+    this.state.pager.previousPage();
+    this.calculateItemsOnPage();
   }
 
-  static filter(itemTableState, filter, service) {
-    return service.find(filter)
+  filter(filter) {
+    this.state.isFetchingItems = true;
+    return this.find(filter)
       .then(result => {
-        this.replaceItems(itemTableState, result.hits);
-        itemTableState.filter = filter;
+        this.replaceItems(result.hits);
+        this.state.filter = filter;
+        this.state.isFetchingItems = false;
       });
   }
 
-  static deleteSelectedItems(itemTableState, service, notifier, confirmModal, pluralTypeName) {
+  deleteSelectedItems(notifier, confirmModal, pluralTypeName) {
     const doDelete = () => {
-      const selectedIds = itemTableState.selectedItems.map(item => item.id);
+      const selectedIds = this.state.selectedItems.map(item => item.id);
 
-      service.delete(selectedIds)
-        .then(() => this.filter(itemTableState, itemTableState.filter, service))
+      this.delete(selectedIds)
+        .then(() => this.filter(this.state.filter))
         .catch(error => notifier.error(error));
     };
 
