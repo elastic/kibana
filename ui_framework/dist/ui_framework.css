@@ -1121,6 +1121,12 @@ body {
   .kuiMenuButtonGroup .kuiMenuButton + .kuiMenuButton {
     margin-left: 4px; }
 
+.kuiMenuButtonGroup--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -1395,8 +1401,6 @@ body {
   padding: 7px 8px 8px;
   line-height: 1.5;
   color: #a7a7a7; }
-  .kuiTableHeaderCell:last-child {
-    padding-right: 16px; }
 
 /**
  * 1. Prevent rapid clicking from selecting text.
@@ -1431,8 +1435,6 @@ body {
   /* 1 */
   color: #191E23;
   border-top: 1px solid #E4E4E4; }
-  .kuiTableRowCell:last-child {
-    padding-right: 16px; }
 
 /**
    * 1. Vertically align all children.
