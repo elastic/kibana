@@ -1,3 +1,4 @@
+import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import { saveAs } from '@spalger/filesaver';
 import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
@@ -25,6 +26,7 @@ uiModules.get('apps/management')
     restrict: 'E',
     controllerAs: 'managementObjectsController',
     controller: function ($scope, $injector, $q, AppState, esAdmin) {
+      const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
       const notify = new Notifier({ location: 'Saved Objects' });
 
       // TODO: Migrate all scope variables to the controller.
@@ -178,15 +180,9 @@ uiModules.get('apps/management')
             });
           });
         })
-        .then(refreshIndex)
+        .then(refreshKibanaIndex)
         .then(refreshData, notify.error);
       };
-
-      function refreshIndex() {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        });
-      }
 
       // TODO: Migrate all scope methods to the controller.
       $scope.changeTab = function (tab) {
