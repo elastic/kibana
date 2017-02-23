@@ -63,6 +63,9 @@ import TypographyExample
 import VerticalRhythmExample
   from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
 
+import ViewSandbox
+  from '../../views/view/view_sandbox.jsx';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'ActionItem',
@@ -129,10 +132,15 @@ const components = [{
   component: VerticalRhythmExample,
 }];
 
+const sandboxes = [{
+  name: 'View',
+  component: ViewSandbox,
+}];
+
 export default {
   components: Slugify.each(components, 'name', 'path'),
+  sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    const list = this.components;
-    return list.slice(0);
+    return this.components.concat(this.sandboxes);
   },
 };

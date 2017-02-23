@@ -58,7 +58,8 @@ export class AppView extends Component {
           onToggleNav={this.onToggleNav}
           onClickNavItem={this.onClickNavItem}
           version={pkg.version}
-          items={Routes.components}
+          components={Routes.components}
+          sandboxes={Routes.sandboxes}
         />
 
         <div className={contentClasses}>
