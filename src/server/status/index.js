@@ -16,7 +16,7 @@ export default function (kbnServer, server, config) {
     method: 'GET',
     path: '/api/status',
     handler: function (request, reply) {
-      const v6Format = config.get('status.v6Api');
+      const v6Format = config.get('status.v6ApiFormat');
       if (v6Format) {
         return reply({
           name: config.get('server.name'),
@@ -28,7 +28,7 @@ export default function (kbnServer, server, config) {
             build_snapshot: matchSnapshot.test(config.get('pkg.version'))
           },
           status: kbnServer.status.toJSON(),
-          metrics: kbnServer.v6Metrics
+          metrics: kbnServer.metrics
         });
       }
 
@@ -39,7 +39,7 @@ export default function (kbnServer, server, config) {
         buildSha: config.get('pkg.buildSha'),
         uuid: config.get('server.uuid'),
         status: kbnServer.status.toJSON(),
-        metrics: kbnServer.metrics
+        metrics: kbnServer.legacyMetrics
       });
     }
   }));

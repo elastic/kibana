@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 
-import { getV6Metrics } from '../metrics';
+import { getMetrics } from '../metrics';
 
 describe('Metrics', function () {
   const mockOps = {
@@ -31,7 +31,7 @@ describe('Metrics', function () {
 
   let metrics;
   beforeEach(() => {
-    metrics = getV6Metrics({
+    metrics = getMetrics({
       event: _.cloneDeep(mockOps),
       config: {
         get: path => _.get(config, path)

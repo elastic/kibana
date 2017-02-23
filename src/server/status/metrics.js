@@ -4,10 +4,10 @@ import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
 
 export function collectMetrics(kbnServer, server, config) {
   let lastReport = Date.now();
-  kbnServer.metrics = new Samples(12);
+  kbnServer.legacyMetrics = new Samples(12);
 
   server.plugins['even-better'].monitor.on('ops', function (event) {
-    kbnServer.v6Metrics = getV6Metrics({ event, config });
+    kbnServer.metrics = getMetrics({ event, config });
 
     const now = Date.now();
     const secSinceLast = (now - lastReport) / 1000;
@@ -17,7 +17,7 @@ export function collectMetrics(kbnServer, server, config) {
     const requests = _.get(event, ['requests', port, 'total'], 0);
     const requestsPerSecond = requests / secSinceLast;
 
-    kbnServer.metrics.add({
+    kbnServer.legacyMetrics.add({
       heapTotal: _.get(event, 'psmem.heapTotal'),
       heapUsed: _.get(event, 'psmem.heapUsed'),
       load: event.osload,
@@ -29,7 +29,7 @@ export function collectMetrics(kbnServer, server, config) {
   });
 }
 
-export function getV6Metrics({ event, config }) {
+export function getMetrics({ event, config }) {
   const port = config.get('server.port');
   const timestamp = new Date().toISOString();
   return {
