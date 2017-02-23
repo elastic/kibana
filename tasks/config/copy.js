@@ -14,7 +14,6 @@ module.exports = function (grunt) {
         '!src/ui_framework/doc_site/**',
         '!src/es_archiver/**',
         'bin/**',
-        '!bin/es_archiver',
         'ui_framework/dist/**',
         'webpackShims/**',
         'config/kibana.yml',

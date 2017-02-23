@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Run `./bin/es_archiver -- --help` for usage information
+ *  Run `node scripts/es_archiver -- --help` for usage information
  *
  *************************************************************/
 
@@ -15,7 +15,7 @@ import pkg from '../../package.json';
 import { EsArchiver } from './es_archiver';
 import { createLog } from './lib';
 
-const cmd = new Command('./bin/es_archiver --');
+const cmd = new Command('node scripts/es_archiver');
 
 cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
