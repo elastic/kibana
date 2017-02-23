@@ -11,7 +11,6 @@ import { format as formatUrl } from 'url';
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
-import pkg from '../../package.json';
 import { EsArchiver } from './es_archiver';
 import { createLog } from './lib';
 
@@ -21,7 +20,6 @@ cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
   .option('--es-url [url]', 'url for elasticsearch')
   .option(`--dir [path]`, 'where archives are stored')
-  .option('--no-kibana-version', 'Disable auto matching of kibana docs to current kibana version')
   .option('--verbose', 'turn on verbose logging')
   .option('--config [path]', 'path to a functional test config file to use for default values')
   .on('--help', () => {
@@ -33,6 +31,9 @@ cmd.command('save <name> <indices...>')
 
 cmd.command('load <name>')
   .action(name => execute('load', { name }));
+
+cmd.command('unload <name>')
+  .action(name => execute('unload', { name }));
 
 cmd.command('rebuild-all')
   .action(name => execute('rebuildAll'));
@@ -80,8 +81,7 @@ async function execute(operation, options) {
       const esArchiver = new EsArchiver({
         log,
         client,
-        dir: resolve(cmd.dir),
-        kibanaVersion: cmd.kibanaVersion ? pkg.version : undefined,
+        dir: resolve(cmd.dir)
       });
       await esArchiver[operation](options);
     } finally {

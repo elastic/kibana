@@ -1,10 +1,12 @@
 import { Transform } from 'stream';
 
+import { get } from 'lodash';
+
 export function createCreateIndexStream({ client, stats, skipExisting }) {
-  const preexistingIndexes = new Set();
+  const skipDocsFromIndices = new Set();
 
   async function handleDoc(stream, record) {
-    if (skipExisting && preexistingIndexes.has(record.value.index)) {
+    if (skipDocsFromIndices.has(record.value.index)) {
       return;
     }
 
@@ -13,23 +15,34 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
 
   async function handleIndex(stream, record) {
     const { index, settings, mappings } = record.value;
-    if (await client.indices.exists({ index })) {
-      preexistingIndexes.add(index);
-      if (skipExisting) {
-        stats.skipping(index);
+
+    async function attemptToCreate(attemptNumber = 1) {
+      try {
+        const resp = await client.indices.create({
+          method: 'PUT',
+          index,
+          body: { settings, mappings },
+        });
+        stats.createdIndex(index, { settings });
+      } catch (err) {
+        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+          throw err;
+        }
+
+        if (skipExisting) {
+          skipDocsFromIndices.add(index);
+          stats.skippedIndex(index);
+          return;
+        }
+
+        await client.indices.delete({ index });
+        stats.deletedIndex(index);
+        await attemptToCreate(attemptNumber + 1);
         return;
       }
-
-      stats.deleting(index);
-      await client.indices.delete({ index });
     }
 
-    stats.creating(index, { settings });
-    await client.indices.create({
-      method: 'PUT',
-      index,
-      body: { settings, mappings }
-    });
+    await attemptToCreate();
   }
 
   return new Transform({
@@ -37,17 +50,18 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
     writableObjectMode: true,
     async transform(record, enc, callback) {
       try {
-        switch (record.type) {
+        switch (record && record.type) {
           case 'index':
             await handleIndex(this, record);
             break;
 
-          case 'hit':
+          case 'doc':
             await handleDoc(this, record);
             break;
 
           default:
-            throw new Error(`unexpected record type "${record.type}"`);
+            this.push(record);
+            break;
         }
 
         callback(null);

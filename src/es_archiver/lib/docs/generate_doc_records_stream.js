@@ -1,5 +1,8 @@
 import { Transform } from 'stream';
 
+const SCROLL_SIZE = 1000;
+const SCROLL_TIMEOUT = '1m';
+
 export function createGenerateDocRecordsStream(client, stats) {
   return new Transform({
     writableObjectMode: true,
@@ -13,23 +16,23 @@ export function createGenerateDocRecordsStream(client, stats) {
           if (!resp) {
             resp = await client.search({
               index: index,
-              scroll: '1m',
-              size: 1000,
+              scroll: SCROLL_TIMEOUT,
+              size: SCROLL_SIZE,
               _source: true
             });
             remainingHits = resp.hits.total;
           } else {
             resp = await client.scroll({
               scrollId: resp._scroll_id,
-              scroll: '1m'
+              scroll: SCROLL_TIMEOUT
             });
           }
 
           for (const hit of resp.hits.hits) {
             remainingHits -= 1;
-            stats.archivingDoc(hit._index);
+            stats.archivedDoc(hit._index);
             this.push({
-              type: 'hit',
+              type: 'doc',
               value: {
                 index: hit._index,
                 type: hit._type,

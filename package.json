@@ -181,6 +181,7 @@
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "6.1.2",
     "chai": "3.5.0",
+    "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
     "chromedriver": "2.24.1",

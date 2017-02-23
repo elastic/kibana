@@ -8,7 +8,7 @@ export function createIndexDocRecordsStream(client, stats) {
     const body = [];
 
     docs.forEach(doc => {
-      stats.indexingDoc(doc.index);
+      stats.indexedDoc(doc.index);
       body.push(
         {
           index: {

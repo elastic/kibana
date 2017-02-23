@@ -1,10 +1,13 @@
 export {
   isGzip,
   getArchiveFiles,
-  prioritizeMappings
+  prioritizeMappings,
 } from './filenames';
 
 export {
   createReadArchiveStreams,
+} from './read';
+
+export {
   createWriteArchiveStreams,
-} from './read_write';
+} from './write';

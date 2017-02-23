@@ -19,7 +19,7 @@ export function createGenerateIndexRecordsStream(client, stats) {
         });
 
         const { settings, mappings } = resp[index];
-        stats.archiving(index, { settings, mappings });
+        stats.archivedIndex(index, { settings, mappings });
         callback(null, {
           type: 'index',
           value: {

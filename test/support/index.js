@@ -1,7 +1,6 @@
 import { resolve } from 'path';
 import url from 'url';
 
-import pkg from '../../package.json';
 import {
   BddWrapper,
   EsClient,
@@ -27,7 +26,6 @@ exports.esArchiver = new EsArchiver({
   client: exports.esClient.client,
   dir: resolve(__dirname, '../../src/fixtures/es_archives'),
   log: Log,
-  kibanaVersion: pkg.version
 });
 
 // TODO: We're using this facade to avoid breaking existing functionality as

@@ -13,8 +13,6 @@ import {
   isGzip,
   createReadArchiveStreams,
   createWriteArchiveStreams,
-  createUpgradeConfigDocsStream,
-  createTagConfigDocsStream,
   createIndexDocRecordsStream,
   createGenerateDocRecordsStream,
   createCreateIndexStream,
@@ -27,11 +25,10 @@ import {
 } from './lib';
 
 export class EsArchiver {
-  constructor({ client, dir, log, kibanaVersion }) {
+  constructor({ client, dir, log }) {
     this.client = client;
     this.dir = dir;
     this.log = log;
-    this.kibanaVersion = kibanaVersion;
   }
 
   /**
@@ -46,7 +43,7 @@ export class EsArchiver {
    *  @return Promise<Stats>
    */
   async save({ name, indices }) {
-    const { client, dir, log, kibanaVersion } = this;
+    const { client, dir, log } = this;
 
     const outputDir = resolve(dir, name);
     const dataOutputFile = resolve(outputDir, 'data.json.gz');
@@ -74,7 +71,6 @@ export class EsArchiver {
       createPromiseFromStreams([
         createListStream(resolvedIndexes),
         createGenerateDocRecordsStream(client, stats),
-        createTagConfigDocsStream(kibanaVersion, stats),
         ...createWriteArchiveStreams(dataOutputFile),
       ])
     ]);
@@ -101,7 +97,7 @@ export class EsArchiver {
     }
 
     const { name, skipExisting } = options;
-    const { client, dir, log, kibanaVersion } = this;
+    const { client, dir, log } = this;
     const inputDir = resolve(dir, name);
     const stats = createStats(name, log);
 
@@ -112,7 +108,6 @@ export class EsArchiver {
       await createPromiseFromStreams([
         ...createReadArchiveStreams(resolve(inputDir, filename)),
         createCreateIndexStream({ client, stats, skipExisting }),
-        createUpgradeConfigDocsStream(kibanaVersion, stats),
         createIndexDocRecordsStream(client, stats),
       ]);
     }
@@ -124,8 +119,13 @@ export class EsArchiver {
     return stats.toJSON();
   }
 
-  async unload(name) {
-    const { client, dir, log, kibanaVersion } = this;
+  async unload(options) {
+    if (typeof options === 'string') {
+      options = { name: options };
+    }
+
+    const { name } = options;
+    const { client, dir, log } = this;
     const inputDir = resolve(dir, name);
     const stats = createStats(name, log);
 

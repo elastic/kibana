@@ -1,0 +1,9 @@
+{
+  "type": "test",
+  "value": { "name": "foo" }
+}
+
+{
+  "type": "test",
+  "value": { "name": "bar" }
+}

@@ -1,9 +1,4 @@
 export {
-  createUpgradeConfigDocsStream,
-  createTagConfigDocsStream,
-} from './config_docs';
-
-export {
   createIndexDocRecordsStream,
   createGenerateDocRecordsStream,
 } from './docs';
