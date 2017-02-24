@@ -4,7 +4,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 
 class GeohashMarkers {
-
   constructor(featureCollection, layerOptions, targetZoom) {
     this._geohashGeoJson = featureCollection;
     this._zoom = targetZoom;

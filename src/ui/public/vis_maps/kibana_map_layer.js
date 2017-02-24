@@ -6,7 +6,8 @@ export default class KibanaMapLayer extends EventEmitter {
     super();
     this._leafletLayer = null;
   }
-  destroy() {
+  getLeafletLayer() {
+    return this._leafletLayer;
   }
 
   addToLeafletMap(leafletMap) {

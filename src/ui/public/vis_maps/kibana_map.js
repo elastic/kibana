@@ -6,6 +6,29 @@ import zoomToPrecision from 'ui/utils/zoom_to_precision';
 // import Notifier from 'ui/notify/notifier';
 
 
+const FitControl = L.Control.extend({
+  options: {
+    position: 'topleft'
+  },
+  initialize: function (fitContainer, kibanaMap) {
+    this._fitContainer = fitContainer;
+    this._kibanaMap = kibanaMap;
+    this._leafletMap = null;
+  },
+  onAdd: function (leafletMap) {
+    this._leafletMap = leafletMap;
+    $(this._fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+      .on('click', e => {
+        e.preventDefault();
+        this._kibanaMap.fitToData();
+      });
+
+    return this._fitContainer;
+  },
+  onRemove: function () {
+    $(this._fitContainer).off('click');
+  }
+});
 
 /**
  * Collects map functionality required for Kibana.
@@ -13,18 +36,21 @@ import zoomToPrecision from 'ui/utils/zoom_to_precision';
  */
 class KibanaMap extends EventEmitter {
 
-  constructor(domNode) {
+  constructor(containerNode) {
 
     super();
 
+
+    this._containerNode = containerNode;
     this._leafletBaseLayer = null;
     this._baseLayerSettings = null;
     this._baseLayerIsDesaturated = true;
 
     this._leafletDrawControl = null;
+    this._leafletFitControl = null;
 
     this._layers = [];
-    this._leafletMap = L.map(domNode, {//todo: read this from meta
+    this._leafletMap = L.map(containerNode, {//todo: read this from meta
       minZoom: 0,
       maxZoom: 10
     });
@@ -114,12 +140,18 @@ class KibanaMap extends EventEmitter {
   }
 
   destroy() {
+    if (this._leafletFitControl) {
+      this._leafletMap.removeControl(this._leafletFitControl);
+    }
+    if (this._leafletDrawControl) {
+      this._leafletMap.removeControl(this._leafletDrawControl);
+    }
     this.setBaseLayer(null);
     for (const layer of this._layers) {
       layer.removeFromLeafletMap(this._leafletMap);
-      layer.destroy();
     }
     this._leafletMap.remove();
+    this._containerNode.innerHTML = '';
   }
 
   getCenter() {
@@ -213,6 +245,17 @@ class KibanaMap extends EventEmitter {
     this._leafletMap.addControl(this._leafletDrawControl);
   }
 
+  addFitControl() {
+
+    if (this._leafletFitControl || !this._leafletMap) {
+      return;
+    }
+
+    const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
+    this._leafletFitControl = new FitControl(fitContainer, this);
+    this._leafletMap.addControl(this._leafletFitControl);
+  }
+
   resize() {
     this._leafletMap.invalidateSize();
   }
@@ -256,6 +299,28 @@ class KibanaMap extends EventEmitter {
 
   }
 
+  fitToData() {
+
+    if (!this._leafletMap) {
+      return;
+    }
+
+    let bounds = null;
+    this._layers.forEach(layer => {
+      const l = layer.getLeafletLayer();
+      const b = l.getBounds();
+      if (bounds) {
+        bounds.extend(b);
+      } else {
+        bounds = b;
+      }
+    });
+
+    if (bounds) {
+      this._leafletMap.fitBounds(bounds);
+    }
+  }
+
   _getTMSBaseLayer(options) {
     return L.tileLayer(options.url, {
       //todo
@@ -282,3 +347,4 @@ class KibanaMap extends EventEmitter {
 
 
 export default KibanaMap;
+
