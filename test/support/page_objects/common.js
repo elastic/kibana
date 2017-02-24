@@ -277,7 +277,7 @@ export default class Common {
       .findByCssSelector(selector)
       .then(() => true)
       .catch(() => false);
-    this.remote.setFindTimeout(defaultFindTimeout);
+    await this.remote.setFindTimeout(defaultFindTimeout);
 
     PageObjects.common.debug(`exists? ${exists}`);
     return exists;
@@ -333,12 +333,29 @@ export default class Common {
 
   async getSharedItemTitleAndDescription() {
     const element = await this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[shared-item]');
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[shared-item]');
 
     return {
       title: await element.getAttribute('data-title'),
       description: await element.getAttribute('data-description')
     };
+  }
+
+  async clickConfirmOnModal() {
+    this.debug('Clicking modal confirm');
+    await this.findTestSubject('confirmModalConfirmButton').click();
+  }
+
+  async clickCancelOnModal() {
+    this.debug('Clicking modal cancel');
+    await this.findTestSubject('confirmModalCancelButton').click();
+  }
+
+  async isConfirmModalOpen() {
+    let isOpen = true;
+    await this.findTestSubject('confirmModalCancelButton', 2000).catch(() => isOpen = false);
+    await this.remote.setFindTimeout(defaultFindTimeout);
+    return isOpen;
   }
 }
