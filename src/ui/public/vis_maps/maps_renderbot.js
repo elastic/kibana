@@ -32,6 +32,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
       this._kibanaMap = new KibanaMap(containerElement);
       this._kibanaMap.addDrawControl();
+      this._kibanaMap.addFitControl();
 
       this._useUIState();
 
