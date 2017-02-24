@@ -11,6 +11,7 @@
   >
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        ng-init="isSeriesOpen = ($index === 0)"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="isSeriesOpen = !isSeriesOpen"
       >
@@ -31,14 +32,14 @@
 
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
-            Type
+            Chart Type
           </label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'seriesType' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="chart.type"
-              ng-options="mode for mode in vis.type.params.chartTypes"
+              ng-options="mode.value as mode.text for mode in vis.type.params.chartTypes"
             ></select>
           </div>
         </div>
