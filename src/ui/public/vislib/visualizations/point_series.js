@@ -105,7 +105,7 @@ export default function PointSeriesFactory(Private) {
       // outside of them so we will use these values rather than ordered.min/max
       const oneUnit = (ordered.units || _.identity)(1);
 
-      const drawInverted = isHorizontal || !isHorizontal && xAxis.axisConfig.get('scale.inverted', false);
+      const drawInverted = isHorizontal || xAxis.axisConfig.get('scale.inverted', false);
       const size = isHorizontal ? width : height;
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
@@ -149,8 +149,8 @@ export default function PointSeriesFactory(Private) {
         const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        const min = isHorizontal ? leftEndzone.w : rightEndzone.w;
-        const max = isHorizontal ? rightEndzone.x : leftEndzone.x;
+        const min = drawInverted ? leftEndzone.w : rightEndzone.w;
+        const max = drawInverted ? rightEndzone.x : leftEndzone.x;
 
         // bounds of the cursor to consider
         let xLeft = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
