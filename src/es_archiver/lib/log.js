@@ -1,32 +1,34 @@
 import { format } from 'util';
+import { PassThrough } from 'stream';
+
 import { magenta, yellow, red, blue, brightBlack } from 'ansicolors';
 
-export function createLog(logLevel, output) {
-  function write(...args) {
+export function createLog(logLevel = 0) {
+  function write(stream, ...args) {
     format(...args).split('\n').forEach((line, i) => {
-      output.write(`${i === 0 ? '' : '    '}${line}\n`);
+      stream.write(`${i === 0 ? '' : '    '}${line}\n`);
     });
   }
 
-  class Log {
-    debug = (...args) => {
+  class Log extends PassThrough {
+    debug(...args) {
       if (logLevel < 3) return;
-      write(' %s ', brightBlack('debg'), format(...args));
+      write(this, ' %s ', brightBlack('debg'), format(...args));
     }
 
-    info = (...args) => {
+    info(...args) {
       if (logLevel < 2) return;
-      write(' %s ', blue('info'), format(...args));
+      write(this, ' %s ', blue('info'), format(...args));
     }
 
-    error = (err) => {
+    error(err) {
       if (logLevel < 1) return;
 
       if (typeof err !== 'string' && !(err instanceof Error)) {
         err = new Error(`"${err}" thrown`);
       }
 
-      write('%s ', red('ERROR'), err.stack || err.message || err);
+      write(this, '%s ', red('ERROR'), err.stack || err.message || err);
     }
   }
 
