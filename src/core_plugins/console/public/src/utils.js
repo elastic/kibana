@@ -56,4 +56,29 @@ utils.expandLiteralStrings = function (data) {
   });
 }
 
+utils.splitOnUnquotedCommaSpace = function (s) {
+    var quoted = false;
+    var arr = [];
+    var buffer = '';
+    var i = 0
+    while (i < s.length) {
+        var token = s.charAt(i++)
+        if (token == '\\' && i < s.length) {
+            token += s.charAt(i++)
+        } else if (token == ',' && i < s.length && s.charAt(i) == ' ') {
+            token += s.charAt(i++);
+        }
+        if (token == '"') {
+            quoted = !quoted
+        } else if (!quoted && token == ', ') {
+            arr.push(buffer);
+            buffer = '';
+            continue
+        }
+        buffer += token;
+    }
+    arr.push(buffer)
+    return arr;
+}
+
 module.exports = utils;

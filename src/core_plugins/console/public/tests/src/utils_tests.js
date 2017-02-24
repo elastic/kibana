@@ -33,4 +33,15 @@ _.each(expandingTests.split(/^=+$/m), function (fixture) {
   test("Literal expand - " + name, function () {
     deepEqual(utils.expandLiteralStrings(collapsed), expanded);
   });
+
+  test("split on unquoted comma followed by space", function () {
+    deepEqual(utils.splitOnUnquotedCommaSpace('a, b'), ['a', 'b']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('a,b, c'), ['a,b', 'c']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('"a, b"'), ['"a, b"']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('"a, b", c'), ['"a, b"', 'c']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('"a, b\\", c"'), ['"a, b\\", c"']);
+    deepEqual(utils.splitOnUnquotedCommaSpace(', a, b'), ['', 'a', 'b']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('a, b, '), ['a', 'b', '']);
+    deepEqual(utils.splitOnUnquotedCommaSpace('\\"a, b", "c, d\\", e", f"'), ['\\"a', 'b", "c', 'd\\"', 'e", f"']);
+  });
 });
