@@ -2,15 +2,15 @@ import { has } from 'lodash';
 
 export function FilterBarLibMapRangeProvider(Promise, courier) {
   return function (filter) {
-    if (!filter.range) return Promise.reject(filter);
+    if (!filter.meta || filter.meta.type !== 'range') return Promise.reject(filter);
 
     return courier
     .indexPatterns
     .get(filter.meta.index)
     .then(function (indexPattern) {
-      const key = Object.keys(filter.range)[0];
+      const key = filter.meta.field;
       const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-      const range = filter.range[key];
+      const range = filter.meta.params;
 
       let left = has(range, 'gte') ? range.gte : range.gt;
       if (left == null) left = -Infinity;
