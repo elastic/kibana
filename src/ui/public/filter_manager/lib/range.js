@@ -3,12 +3,12 @@ const OPERANDS_IN_RANGE = 2;
 
 /**
  *
- * @param field - a kibana field object
- * @param params - any valid param for the ES range query
- * @param indexPattern - a kibana index pattern
- * @param formattedValue - ??? a function that formats the value?
+ * @param { Object } field - a Field object
+ * @param { Object } params - any valid param for the ES range query
+ * @param { Object } indexPattern - an IndexPattern object
+ * @param { Function } formattedValue - a formatting function
  *
- * @return {{meta: {index: (string|string)}}}
+ * @return { Object } a filter object
  */
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   if (_.isUndefined(field)) {
