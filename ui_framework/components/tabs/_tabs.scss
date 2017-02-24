@@ -30,6 +30,11 @@
       }
     }
 
+    &:active {
+      outline: none !important; /* 1 */
+      box-shadow: none; /* 1 */
+    }
+
     &:focus {
       outline: none; /* 1 */
     }

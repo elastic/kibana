@@ -1512,6 +1512,11 @@ body {
     .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
       margin-left: -1px;
       /* 2 */ }
+  .kuiTab:active {
+    outline: none !important;
+    /* 1 */
+    box-shadow: none;
+    /* 1 */ }
   .kuiTab:focus {
     outline: none;
     /* 1 */ }
