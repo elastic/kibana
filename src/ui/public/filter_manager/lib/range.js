@@ -44,6 +44,7 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   if (totalInfinite === OPERANDS_IN_RANGE) {
     filter.match_all = {};
     filter.meta.field = field.name;
+    filter.meta.type = 'matchAll';
   } else if (field.scripted) {
     const operators = {
       gt: '>',
@@ -81,9 +82,13 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     _.set(filter, 'script.script', { inline: script, params: knownParams, lang: field.lang });
     filter.script.script.params.value = value;
     filter.meta.field = field.name;
+    filter.meta.type = 'script';
   } else {
     filter.range = {};
     filter.range[field.name] = params;
+    filter.meta.field = field.name;
+    filter.meta.type = 'range';
+    filter.meta.params = params;
   }
 
   return filter;

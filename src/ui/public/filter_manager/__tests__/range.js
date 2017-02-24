@@ -50,7 +50,10 @@ describe('range filter', function () {
       };
       const expectedFilter = {
         meta: {
-          index: indexPattern.id
+          type: 'range',
+          index: indexPattern.id,
+          field: 'bytes',
+          params: params,
         },
         range: {
           bytes: params
@@ -68,8 +71,9 @@ describe('range filter', function () {
       };
       const expectedFilter = {
         meta: {
+          type: 'matchAll',
           index: indexPattern.id,
-          field: 'bytes'
+          field: 'bytes',
         },
         match_all: {}
       };
@@ -84,8 +88,9 @@ describe('range filter', function () {
       };
       const expectedFilter = {
         meta: {
+          type: 'script',
           index: indexPattern.id,
-          field: 'script number'
+          field: 'script number',
         },
         script: {
           script: {
@@ -108,7 +113,10 @@ describe('range filter', function () {
       const formattedValue = function () {};
       const expectedFilter = {
         meta: {
+          type: 'range',
           index: indexPattern.id,
+          field: 'bytes',
+          params: params,
           formattedValue: formattedValue
         },
         range: {
