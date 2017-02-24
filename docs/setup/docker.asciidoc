@@ -88,6 +88,16 @@ mappings are available:
 `SERVER_PORT`:: `server.port`
 `SERVER_SSL_CERT`:: `server.ssl.cert`
 `SERVER_SSL_KEY`:: `server.ssl.key`
+`XPACK_MONITORING_ELASTICSEARCH_URL`:: `xpack.monitoring.elasticsearch.url`
+`XPACK_MONITORING_ELASTICSEARCH_USERNAME`:: `xpack.monitoring.elasticsearch.username`
+`XPACK_MONITORING_ELASTICSEARCH_PASSWORD`:: `xpack.monitoring.elasticsearch.password`
+`XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
+`XPACK_MONITORING_MAX_BUCKET_SIZE`:: `xpack.monitoring.max_bucket_size`
+`XPACK_MONITORING_MIN_INTERVAL_SECONDS`:: `xpack.monitoring.min_interval_seconds`
+`XPACK_MONITORING_NODE_RESOLVER`:: `xpack.monitoring.node_resolver`
+`XPACK_MONITORING_REPORT_STATS`:: `xpack.monitoring.report_stats`
+`XPACK_MONITORING_KIBANA_COLLECTION_ENABLED`:: `xpack.monitoring.kibana.collection.enabled`
+`XPACK_MONITORING_KIBANA_COLLECTION_INTERVAL`:: `xpack.monitoring.kibana.collection.interval`
 `XPACK_SECURITY_COOKIENAME`:: `xpack.security.cookieName`
 `XPACK_SECURITY_ENCRYPTIONKEY`:: `xpack.security.encryptionKey`
 `XPACK_SECURITY_SECURECOOKIES`:: `xpack.security.secureCookies`
@@ -115,5 +125,3 @@ The following settings have different default values when using the Docker image
 `elasticsearch.url`:: `http://elasticsearch:9200`
 `elasticsearch.username`:: `elastic`
 `elasticsearch.password`:: `changeme`
-
-
