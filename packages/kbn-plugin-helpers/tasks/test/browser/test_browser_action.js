@@ -8,9 +8,9 @@ module.exports = function testBrowserAction(plugin, run, options) {
   ];
 
   if (options.plugins) {
-    kbnServerArgs.push('--kbnServer.testsBundle.pluginId=' + options.plugins);
+    kbnServerArgs.push('--kbnServer.tests_bundle.pluginId=' + options.plugins);
   } else {
-    kbnServerArgs.push('--kbnServer.testsBundle.pluginId=' + plugin.id);
+    kbnServerArgs.push('--kbnServer.tests_bundle.pluginId=' + plugin.id);
   }
 
   var cmd = 'npm';
