@@ -1,7 +1,26 @@
 import _ from 'lodash';
 const OPERANDS_IN_RANGE = 2;
 
+/**
+ *
+ * @param field - a kibana field object
+ * @param params - any valid param for the ES range query
+ * @param indexPattern - a kibana index pattern
+ * @param formattedValue - ??? a function that formats the value?
+ *
+ * @return {{meta: {index: (string|string)}}}
+ */
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
+  if (_.isUndefined(field)) {
+    throw new Error('field is a required argument');
+  }
+  if (_.isUndefined(params)) {
+    throw new Error('params is a required argument');
+  }
+  if (_.isUndefined(indexPattern)) {
+    throw new Error('indexPattern is a required argument');
+  }
+
   const filter = { meta: { index: indexPattern.id } };
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
