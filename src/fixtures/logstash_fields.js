@@ -29,7 +29,7 @@ function stubbedLogstashFields() {
     ['non-sortable',      'string',     false, false, false, false],
     ['custom_user_field', 'conflict',   false, false, true,  true ],
     ['script string',     'string',     false, false, true,  false, { script: '\'i am a string\'' } ],
-    ['script number',     'number',     false, false, true,  false, { script: '1234' } ],
+    ['script number',     'number',     false, false, true,  false, { script: '1234', lang: 'painless' } ],
     ['script date',       'date',       false, false, true,  false, { script: '1234', lang: 'painless' } ],
     ['script murmur3',    'murmur3',    false, false, true,  false, { script: '1234' } ],
   ].map(function (row) {

@@ -77,6 +77,29 @@ describe('range filter', function () {
       expect(_.isEqual(expectedFilter, filter)).to.be(true);
     });
 
+    it('should return a script filter if the provided field is scripted', function () {
+      const params = {
+        gt: 1000,
+        lt: 2000
+      };
+      const expectedFilter = {
+        meta: {
+          index: indexPattern.id,
+          field: 'script number'
+        },
+        script: {
+          script: {
+            inline: 'boolean gt(Supplier s, def v) {return s.get() > v} boolean lt(Supplier s, def v) {return s.get() <'
+                    + ' v}gt(() -> { 1234 }, params.gt) && lt(() -> { 1234 }, params.lt)',
+            params: { gt: 1000, lt: 2000, value: '>1,000 <2,000' },
+            lang: 'painless'
+          }
+        }
+      };
+      const filter = buildRangeFilter(indexPattern.fields.byName['script number'], params, indexPattern);
+      expect(_.isEqual(expectedFilter, filter)).to.be(true);
+    });
+
     // todo scripted field tests
     // todo formattedValue param tests
   });
