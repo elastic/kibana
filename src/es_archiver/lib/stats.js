@@ -47,7 +47,7 @@ export function createStats(name, log) {
 
     archivedIndex(index, metadata) {
       getOrCreate(index).archived = true;
-      info('Archiving %j', index);
+      info('Archived %j', index);
       Object.keys(metadata || {}).forEach(name => {
         debug('%j %s %j', index, name, metadata[name]);
       });
