@@ -1509,14 +1509,15 @@ body {
   /* 3 */ }
   .kuiTab + .kuiTab {
     border-left: none; }
-    .kuiTab + .kuiTab:focus {
+    .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
       margin-left: -1px;
       /* 2 */ }
   .kuiTab:focus {
-    color: #3CAED2;
-    z-index: 1;
     outline: none;
-    /* 1 */
+    /* 1 */ }
+  .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+    z-index: 1;
+    color: #3CAED2;
     border: 1px solid #6EADC1 !important;
     padding-bottom: 11px;
     /* 4 */ }

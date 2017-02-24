@@ -25,15 +25,18 @@
     & + & {
       border-left: none;
 
-      &:focus {
+      &:focus:not(.kuiTab-isSelected):not(:active) {
         margin-left: -1px; /* 2 */
       }
     }
 
     &:focus {
-      color: $linkColor;
-      z-index: 1;
       outline: none; /* 1 */
+    }
+
+    &:focus:not(.kuiTab-isSelected):not(:active) {
+      z-index: 1;
+      color: $linkColor;
       border: 1px solid $selectedBorderColor !important;
       padding-bottom: 11px; /* 4 */
     }
