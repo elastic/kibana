@@ -60,7 +60,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    const vizName1 = 'Visualization AreaChart';
+    const vizName1 = 'Visualization AreaChart Name Test';
 
     bdd.it('should save and load with special characters', function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
