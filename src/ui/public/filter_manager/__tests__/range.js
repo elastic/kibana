@@ -100,7 +100,24 @@ describe('range filter', function () {
       expect(_.isEqual(expectedFilter, filter)).to.be(true);
     });
 
-    // todo scripted field tests
-    // todo formattedValue param tests
+    it('should have a meta.formattedValue property if optional formattedValue argument is supplied', function () {
+      const params = {
+        gt: 1000,
+        lt: 2000
+      };
+      const formattedValue = function () {};
+      const expectedFilter = {
+        meta: {
+          index: indexPattern.id,
+          formattedValue: formattedValue
+        },
+        range: {
+          bytes: params
+        }
+      };
+
+      const filter = buildRangeFilter(indexPattern.fields.byName.bytes, params, indexPattern, formattedValue);
+      expect(_.isEqual(expectedFilter, filter)).to.be(true);
+    });
   });
 });
