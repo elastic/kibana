@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { KuiToolBarPagerSection } from '../../tool_bar';
+import { KuiToolBarSection, KuiToolBarPager } from '../../tool_bar';
 import { KuiSelectedItemsFooterSection } from '../../tool_bar/kui_selected_items_footer_section';
 
 export function LandingPageToolBarFooter({ selectedItemsCount, pagerState, onPreviousPage, onNextPage }) {
@@ -10,10 +10,12 @@ export function LandingPageToolBarFooter({ selectedItemsCount, pagerState, onPre
           ? <KuiSelectedItemsFooterSection selectedItemsCount={selectedItemsCount}/>
           : null
       }
-      <KuiToolBarPagerSection
-        pagerState={pagerState}
-        onNextPage={onNextPage}
-        onPreviousPage={onPreviousPage}/>
+      <KuiToolBarSection>
+        <KuiToolBarPager
+          pagerState={pagerState}
+          onNextPage={onNextPage}
+          onPreviousPage={onPreviousPage}/>
+        </KuiToolBarSection>
     </div>;
 }
 

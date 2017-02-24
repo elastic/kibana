@@ -32,6 +32,13 @@ export function LandingPageTable({
   }
 
   return <div>
+
+    <KuiSectionedToolBar sections={
+      [<KuiToolBarSearchBox filter={filter} onFilter={onFilter}/>,
+        actionButtons,
+        <KuiToolBarPager pagerState={pagerState} onNext={onNextPage} onPrevious={onPreviousPage}/>
+      ]
+    }/>
       <LandingPageToolBar
         filter={filter}
         onFilter={onFilterItems}

@@ -13,7 +13,7 @@ export class ItemSelectionActions {
 
   selectAll() {
     this.deselectAll();
-    this.state.pageOfItems.forEach(id => this.state.selectedIds.push(id));
+    this.state.pageOfItems.forEach(item => this.state.selectedIds.push(item.id));
   }
 
   toggleAll() {

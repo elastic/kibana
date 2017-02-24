@@ -14,7 +14,7 @@ export const TYPE_COLUMN_ID = 'type.title';
 
 export function SortableTypeHeader({ tableActions }) {
   return <SortableTableHeaderColumn
-    onSort={tableActions.sort.bind(TYPE_COLUMN_ID)}
+    onSort={tableActions.sort.bind(tableActions, TYPE_COLUMN_ID)}
     sortOrder={tableActions.getState().getSortOrderFor(TYPE_COLUMN_ID)}>
     Type
   </SortableTableHeaderColumn>;

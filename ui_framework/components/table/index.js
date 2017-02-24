@@ -8,3 +8,5 @@ export { CheckBoxTableHeader } from './check_box_table_header';
 export { CheckBoxTableCell } from './check_box_table_cell';
 export { ItemTable } from './landing_page_table/item_table';
 export { columnPropType } from './landing_page_table/column_prop_type';
+export { LandingPageToolBar } from './landing_page_table/landing_page_tool_bar';
+export { LandingPageToolBarFooter } from './landing_page_table/landing_page_tool_bar_footer';

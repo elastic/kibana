@@ -18,5 +18,6 @@ KuiToolBarText.propTypes = { children: React.PropTypes.node };
 export { KuiToolBarSearchBox } from './kui_tool_bar_search_box';
 export { KuiToolBarPagerButtons } from './kui_tool_bar_pager_buttons';
 export { KuiToolBarPagerText } from './kui_tool_bar_pager_text';
-export { KuiToolBarPagerSection } from './kui_tool_bar_pager_section';
 export { KuiSelectedItemsFooterSection } from './kui_selected_items_footer_section';
+export { KuiSectionedToolBar } from './kui_sectioned_tool_bar';
+export { KuiToolBarPager } from './kui_tool_bar_pager';

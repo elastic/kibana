@@ -1,12 +1,12 @@
 import React from 'react';
 
-export function KuiToolBarPagerText({ startNumber, endNumber, totalCount }) {
-  return <div className="kuiToolBarText">
-    {startNumber}&ndash;{endNumber} of {totalCount}
-  </div>;
+import { KuiToolBarText } from './index';
+
+export function KuiToolBarPagerText({ start, end, count }) {
+  return <KuiToolBarText>{start}&ndash;{end} of {count}</KuiToolBarText>;
 }
 KuiToolBarPagerText.propTypes = {
-  startNumber: React.PropTypes.number.isRequired,
-  endNumber: React.PropTypes.number.isRequired,
-  totalCount: React.PropTypes.number.isRequired
+  start: React.PropTypes.number.isRequired,
+  end: React.PropTypes.number.isRequired,
+  count: React.PropTypes.number.isRequired
 };
