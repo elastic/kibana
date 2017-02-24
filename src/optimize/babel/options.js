@@ -8,13 +8,20 @@ const {
   devIgnore
 } = require('./helpers');
 
+const nodeOptions = {
+  presets: nodePresets,
+  plugins,
+  ignore: devIgnore
+};
+
 exports.webpack = {
   cacheDirectory: webpackCacheDir,
   presets: webpackPresets,
   plugins: plugins
 };
-exports.node = {
-  presets: nodePresets,
-  plugins,
-  ignore: devIgnore
+
+exports.node = nodeOptions;
+
+exports.registerNodeOptions = function () {
+  require('babel-register')(nodeOptions);
 };
