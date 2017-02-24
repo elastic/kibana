@@ -5,9 +5,9 @@ export {
 } from './filenames';
 
 export {
-  createReadArchiveStreams,
-} from './read';
+  createParseArchiveStreams,
+} from './parse';
 
 export {
-  createWriteArchiveStreams,
-} from './write';
+  createFormatArchiveStreams,
+} from './format';

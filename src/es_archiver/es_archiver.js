@@ -1,33 +1,14 @@
-import { resolve, dirname } from 'path';
-import { readdir, rename } from 'fs';
-
-import { fromNode } from 'bluebird';
-import mkdirp from 'mkdirp';
-
 import {
-  createPromiseFromStreams,
-  createListStream,
-} from '../utils';
-
-import {
-  isGzip,
-  createReadArchiveStreams,
-  createWriteArchiveStreams,
-  createIndexDocRecordsStream,
-  createGenerateDocRecordsStream,
-  createCreateIndexStream,
-  createDeleteIndexStream,
-  createFilterRecordsStream,
-  createGenerateIndexRecordsStream,
-  createStats,
-  getArchiveFiles,
-  prioritizeMappings
-} from './lib';
+  saveAction,
+  loadAction,
+  unloadAction,
+  rebuildAllAction,
+} from './actions';
 
 export class EsArchiver {
-  constructor({ client, dir, log }) {
+  constructor({ client, dataDir, log }) {
     this.client = client;
-    this.dir = dir;
+    this.dataDir = dataDir;
     this.log = log;
   }
 
@@ -36,56 +17,24 @@ export class EsArchiver {
    *  it in the dataDir so it can be used later to recreate the index.
    *
    *  @param {Object} options
-   *  @property {String} options.name - the name of this dump, used to determine output
-   *                                  filename. Passing the same name to `#load()`
-   *                                  will recreate the index as it was
-   *  @property {String|Array<String>} options.indices - the indices to dump
+   *  @property {String} options.name - the name of this archive, used to determine filename
+   *  @property {String|Array<String>} options.indices - the indices to archive
    *  @return Promise<Stats>
    */
   async save({ name, indices }) {
-    const { client, dir, log } = this;
-
-    const outputDir = resolve(dir, name);
-    const dataOutputFile = resolve(outputDir, 'data.json.gz');
-    const mappingOutputFile = resolve(outputDir, 'mappings.json');
-    const stats = createStats(name, log);
-
-    log.info('[%s] Creating archive of %j', name, indices);
-
-    await fromNode(cb => mkdirp(dirname(dataOutputFile), cb));
-    const resolvedIndexes = Object.keys(await client.indices.get({
-      index: indices,
-      feature: ['_settings'],
-      filterPath: ['*.settings.index.uuid']
-    }));
-
-    await Promise.all([
-      // export and save the matching indices to mappings.json
-      createPromiseFromStreams([
-        createListStream(resolvedIndexes),
-        createGenerateIndexRecordsStream(client, stats),
-        ...createWriteArchiveStreams(mappingOutputFile),
-      ]),
-
-      // export all documents from matching indexes into data.json.gz
-      createPromiseFromStreams([
-        createListStream(resolvedIndexes),
-        createGenerateDocRecordsStream(client, stats),
-        ...createWriteArchiveStreams(dataOutputFile),
-      ])
-    ]);
-
-    stats.forEachIndex((index, { docs }) => {
-      log.info('[%s] Archived %d docs from %j', name, docs.archived, index);
+    return await saveAction({
+      name,
+      indices,
+      client: this.client,
+      dataDir: this.dataDir,
+      log: this.log,
     });
-
-    return stats.toJSON();
   }
 
   /**
-   *  Load data and mappings that were previously dumped using `#save()`.
+   *  Load an index from an archive
    *
-   *  @param {String} name - the name of the dump to load
+   *  @param {String} name - the name of the archive to load
    *  @param {Object} options
    *  @property {Boolean} options.skipExisting - should existing indices
    *                                           be ignored or overwritten
@@ -96,75 +45,42 @@ export class EsArchiver {
       options = { name: options };
     }
 
-    const { name, skipExisting } = options;
-    const { client, dir, log } = this;
-    const inputDir = resolve(dir, name);
-    const stats = createStats(name, log);
-
-    const files = prioritizeMappings(await getArchiveFiles(inputDir));
-    for (const filename of files) {
-      log.info('[%s] Loading %j', name, filename);
-
-      await createPromiseFromStreams([
-        ...createReadArchiveStreams(resolve(inputDir, filename)),
-        createCreateIndexStream({ client, stats, skipExisting }),
-        createIndexDocRecordsStream(client, stats),
-      ]);
-    }
-
-    stats.forEachIndex((index, { docs }) => {
-      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+    return await loadAction({
+      name: options.name,
+      skipExisting: !!options.skipExisting,
+      client: this.client,
+      dataDir: this.dataDir,
+      log: this.log,
     });
-
-    return stats.toJSON();
   }
 
-  async unload(options) {
-    if (typeof options === 'string') {
-      options = { name: options };
-    }
-
-    const { name } = options;
-    const { client, dir, log } = this;
-    const inputDir = resolve(dir, name);
-    const stats = createStats(name, log);
-
-    const files = prioritizeMappings(await getArchiveFiles(inputDir));
-    for (const filename of files) {
-      log.info('[%s] Unloading indices from %j', name, filename);
-
-      await createPromiseFromStreams([
-        ...createReadArchiveStreams(resolve(inputDir, filename)),
-        createFilterRecordsStream('index'),
-        createDeleteIndexStream({ client, stats })
-      ]);
-    }
-
-    return stats.toJSON();
+  /**
+   *  Remove the indexes in elasticsearch that have data in an archive.
+   *
+   *  @param {String} name
+   *  @return Promise<Stats>
+   */
+  async unload(name) {
+    return await unloadAction({
+      name,
+      client: this.client,
+      dataDir: this.dataDir,
+      log: this.log,
+    });
   }
 
+  /**
+   *  Parse and reformat all of the archives. This is primarily helpful
+   *  for working on the esArchiver.
+   *
+   *  @return Promise<Stats>
+   */
   async rebuildAll() {
-    const { dir, log } = this;
-    const archiveNames = await fromNode(cb => readdir(dir, cb));
-
-    for (const name of archiveNames) {
-      const inputDir = resolve(dir, name);
-      const files = prioritizeMappings(await getArchiveFiles(inputDir));
-      for (const filename of files) {
-        log.info('[%s] Rebuilding %j', name, filename);
-
-        const path = resolve(inputDir, filename);
-        const tempFile = path + (isGzip(path) ? '.rebuilding.gz' : '.rebuilding');
-
-        await createPromiseFromStreams([
-          ...createReadArchiveStreams(path),
-          ...createWriteArchiveStreams(tempFile)
-        ]);
-
-        await fromNode(cb => rename(tempFile, path, cb));
-        log.info('[%s] Rebuilt %j', name, filename);
-      }
-    }
+    return rebuildAllAction({
+      client: this.client,
+      dataDir: this.dataDir,
+      log: this.log
+    });
   }
 
   /**

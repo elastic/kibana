@@ -82,7 +82,7 @@ async function execute(operation, options) {
       const esArchiver = new EsArchiver({
         log,
         client,
-        dir: resolve(cmd.dir)
+        dataDir: resolve(cmd.dir)
       });
       await esArchiver[operation](options);
     } finally {

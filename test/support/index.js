@@ -24,7 +24,7 @@ exports.defaultFindTimeout = config.defaultFindTimeout;
 exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
 exports.esArchiver = new EsArchiver({
   client: exports.esClient.client,
-  dir: resolve(__dirname, '../../src/fixtures/es_archives'),
+  dataDir: resolve(__dirname, '../../src/fixtures/es_archives'),
   log: Log,
 });
 

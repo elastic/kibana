@@ -21,8 +21,8 @@ export {
   isGzip,
   getArchiveFiles,
   prioritizeMappings,
-  createReadArchiveStreams,
-  createWriteArchiveStreams,
+  createParseArchiveStreams,
+  createFormatArchiveStreams,
 } from './archives';
 
 export {
