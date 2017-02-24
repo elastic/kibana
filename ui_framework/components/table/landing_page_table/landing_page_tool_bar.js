@@ -12,20 +12,24 @@ export function LandingPageToolBar({
     onNextPage,
     onPreviousPage,
     actionButtons }) {
-  return <KuiSectionedToolBar sections={
-    [
-      <KuiToolBarSearchBox filter={filter} onFilter={onFilter}/>,
-      actionButtons,
-      <KuiToolBarPager pagerState={pagerState} onNextPage={onNextPage} onPreviousPage={onPreviousPage}/>
-    ]
-  }/>;
+  const toolBarSections = [
+    <KuiToolBarSearchBox filter={filter} onFilter={onFilter}/>,
+    actionButtons
+  ];
+
+  if (pagerState) {
+    toolBarSections.push(
+      <KuiToolBarPager pagerState={pagerState} onNextPage={onNextPage} onPreviousPage={onPreviousPage}/>);
+  }
+
+  return <KuiSectionedToolBar sections={toolBarSections} />;
 }
 
 LandingPageToolBar.propTypes = {
   filter: React.PropTypes.string,
   onFilter: React.PropTypes.func.isRequired,
   actionButtons: React.PropTypes.node.isRequired,
-  pagerState: React.PropTypes.any.isRequired,
-  onNextPage: React.PropTypes.func.isRequired,
-  onPreviousPage: React.PropTypes.func.isRequired
+  pagerState: React.PropTypes.any,
+  onNextPage: React.PropTypes.func,
+  onPreviousPage: React.PropTypes.func
 };

@@ -1,39 +1,41 @@
 export class ItemSelectionActions {
-  /**
-   *
-   * @param state {ItemTableState}
-   */
-  constructor(state) {
-    this.state = state;
+  static deselectAll(selectedIds) {
+    selectedIds.selectedIds.splice(0, selectedIds.selectedIds.length);
   }
 
-  deselectAll() {
-    this.state.selectedIds = [];
+  static selectAll(selectedIds, items) {
+    this.deselectAll(selectedIds);
+    items.forEach(item => this.selectItem(selectedIds, item));
   }
 
-  selectAll() {
-    this.deselectAll();
-    this.state.pageOfItems.forEach(item => this.state.selectedIds.push(item.id));
-  }
-
-  toggleAll() {
-    if (this.state.areAllItemsSelected()) {
-      this.deselectAll();
+  static toggleItem(selectedIds, item) {
+    if (selectedIds.isItemSelected(item)) {
+      this.deselectItem(selectedIds, item);
     } else {
-      this.selectAll();
+      this.selectItem(selectedIds, item);
+    }
+    return selectedIds;
+  }
+
+  static toggleAll(selectedIds, items) {
+    if (selectedIds.areAllItemsSelected(items)) {
+      this.deselectAll(selectedIds);
+    } else {
+      this.selectAll(selectedIds, items);
+    }
+    return selectedIds;
+  }
+
+  static selectItem(selectedIds, item) {
+    if (!selectedIds.isItemSelected(item)) {
+      selectedIds.selectedIds.push(item.id);
     }
   }
 
-  selectItem(item) {
-    if (!this.state.isItemSelected(item)) {
-      this.state.selectedIds.push(item.id);
-    }
-  }
-
-  deselectItem(item) {
-    if (this.state.isItemSelected(item)) {
-      const index = this.state.selectedIds.indexOf(item.id);
-      this.state.selectedIds.splice(index, 1);
+  static deselectItem(selectedIds, item) {
+    if (selectedIds.isItemSelected(item)) {
+      const index = selectedIds.indexOf(item);
+      selectedIds.selectedIds.splice(index, 1);
     }
   }
 }

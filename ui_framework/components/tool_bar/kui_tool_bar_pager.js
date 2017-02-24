@@ -6,8 +6,8 @@ import { KuiToolBarPagerButtons } from './kui_tool_bar_pager_buttons';
 export function KuiToolBarPager({ pagerState, onNextPage, onPreviousPage }) {
   return <div>
       <KuiToolBarPagerText
-        start={pagerState.startItem}
-        end={pagerState.endItem}
+        start={pagerState.startNumber}
+        end={pagerState.endNumber}
         count={pagerState.totalItems} />
       <KuiToolBarPagerButtons
         hasNext={pagerState.hasNextPage}

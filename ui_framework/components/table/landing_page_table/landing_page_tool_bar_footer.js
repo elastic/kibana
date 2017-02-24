@@ -11,18 +11,22 @@ export function LandingPageToolBarFooter({ selectedItemsCount, pagerState, onPre
           : null
       }
       <KuiToolBarSection>
-        <KuiToolBarPager
-          pagerState={pagerState}
-          onNextPage={onNextPage}
-          onPreviousPage={onPreviousPage}/>
+        {
+          pagerState
+          ? <KuiToolBarPager
+              pagerState={pagerState}
+              onNextPage={onNextPage}
+              onPreviousPage={onPreviousPage}/>
+          : null
+        }
         </KuiToolBarSection>
     </div>;
 }
 
 LandingPageToolBarFooter.propTypes = {
-  pagerState: React.PropTypes.any.isRequired,
-  onNextPage: React.PropTypes.func.isRequired,
-  onPreviousPage: React.PropTypes.func.isRequired,
+  pagerState: React.PropTypes.any,
+  onNextPage: React.PropTypes.func,
+  onPreviousPage: React.PropTypes.func,
   selectedItemsCount: React.PropTypes.number.isRequired
 };
 

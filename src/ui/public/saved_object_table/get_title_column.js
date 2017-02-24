@@ -1,28 +1,28 @@
 import React from 'react';
 import { KuiTableCellLink, SortableTableHeaderColumn } from 'ui_framework/components';
-import { ItemTableActions } from 'ui/saved_object_table/item_table_actions';
 
 export const TITLE_COLUMN_ID = 'title';
 
-export function SortableTitleHeader({ tableActions }) {
+export function SortableTitleHeader({ onSort, sortOrder }) {
   return <SortableTableHeaderColumn
-    onSort={() => tableActions.sort(TITLE_COLUMN_ID)}
-    sortOrder={tableActions.getState().getSortOrderFor(TITLE_COLUMN_ID)}>
+    onSort={onSort}
+    sortOrder={sortOrder}>
     Title
   </SortableTableHeaderColumn>;
 }
 SortableTitleHeader.propTypes = {
-  tableActions: React.PropTypes.any.isRequired
+  sortOrder: React.PropTypes.any.isRequired,
+  onSort: React.PropTypes.any
 };
 
-export function getTitleColumn(tableActions, kbnUrl) {
+export function getTitleColumn(getEditUrlForItem, titleSortOrder, onSort) {
   return {
     id: TITLE_COLUMN_ID,
-    getHeaderCell: () => <SortableTitleHeader key={TITLE_COLUMN_ID} tableActions={tableActions}/>,
+    getHeaderCell: () => <SortableTitleHeader key={TITLE_COLUMN_ID} onSort={onSort} sortOrder={titleSortOrder}/>,
     getRowCell: (item) => <KuiTableCellLink
       key={item.id + TITLE_COLUMN_ID}
       title={item.title}
-      href={tableActions.getState().getEditUrl(item, kbnUrl)}
+      href={getEditUrlForItem(item)}
     />
   };
 }

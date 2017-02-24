@@ -1,5 +1,4 @@
 export * from './kui_table';
-export { LandingPageTable } from './landing_page_table/landing_page_table';
 export { KuiTableCellIcon } from './kui_table_cell_icon';
 export { KuiTableCellLiner } from './kui_table_cell_liner';
 export { KuiTableCellLink } from './kui_table_cell_link';
@@ -10,3 +9,4 @@ export { ItemTable } from './landing_page_table/item_table';
 export { columnPropType } from './landing_page_table/column_prop_type';
 export { LandingPageToolBar } from './landing_page_table/landing_page_tool_bar';
 export { LandingPageToolBarFooter } from './landing_page_table/landing_page_tool_bar_footer';
+export { SortOrder } from './sort_order';
