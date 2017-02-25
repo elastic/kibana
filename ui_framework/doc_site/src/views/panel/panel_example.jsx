@@ -14,6 +14,7 @@ import {
 
 const panelHtml = require('./panel.html');
 const panelWithHeaderHtml = require('./panel_with_header.html');
+const panelWithHeaderSectionsHtml = require('./panel_with_header_sections.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -42,6 +43,22 @@ export default props => (
 
       <GuideDemo
         html={panelWithHeaderHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Panel with PanelHeaderSections"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: panelWithHeaderSectionsHtml,
+      }]}
+    >
+      <GuideText>
+        PanelHeaders can have sections.
+      </GuideText>
+
+      <GuideDemo
+        html={panelWithHeaderSectionsHtml}
       />
     </GuideSection>
   </GuidePage>
