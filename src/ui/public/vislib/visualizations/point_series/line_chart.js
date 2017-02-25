@@ -11,6 +11,7 @@ export default function LineChartFactory(Private) {
     radiusRatio: 9,
     showLines: true,
     interpolate: 'linear',
+    lineWidth: 2,
     color: undefined,
     fillColor: undefined
   };
@@ -141,6 +142,7 @@ export default function LineChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
+      const lineWidth = this.seriesConfig.lineWidth;
       const interpolate = this.seriesConfig.interpolate;
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
@@ -179,7 +181,7 @@ export default function LineChartFactory(Private) {
       .attr('stroke', () => {
         return color(data.label);
       })
-      .attr('stroke-width', 2);
+      .attr('stroke-width', lineWidth);
 
       return line;
     }

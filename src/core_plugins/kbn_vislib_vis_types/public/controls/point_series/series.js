@@ -18,6 +18,7 @@ module.directive('vislibSeries', function () {
           drawLinesBetweenPoints: true,
           showCircles: true,
           interpolate: 'linear',
+          lineWidth: 2,
           data: {
             id: id,
             label: label
