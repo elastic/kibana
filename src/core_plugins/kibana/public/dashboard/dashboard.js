@@ -182,6 +182,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
+      // Defined below, only placed here to avoid used before defined warning (and there is a circular reference).
+      let changeViewMode = null;
+
       $scope.save = function () {
         // Make sure to save the latest query, even if 'enter' hasn't been hit.
         dashboardState.updateFilters(queryFilter);
@@ -191,10 +194,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             notify.info(`Saved Dashboard as "${dash.title}"`);
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(
-                `${DashboardConstants.EXISTING_DASHBOARD_URL}?${DashboardConstants.VIEW_MODE_PARAM}=${DashboardViewMode.EDIT}`,
+                `${DashboardConstants.EXISTING_DASHBOARD_URL}`,
                 { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
+              changeViewMode(DashboardViewMode.VIEW);
             }
           }
         }).catch(notify.fatal);
@@ -233,7 +237,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // changeViewMode uses navActions, and navActions uses changeViewMode.
       const navActions = {};
 
-      const changeViewMode = (newMode) => {
+      changeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
         const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
 
