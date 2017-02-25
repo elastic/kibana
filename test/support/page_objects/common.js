@@ -344,11 +344,13 @@ export default class Common {
   async clickConfirmOnModal() {
     this.debug('Clicking modal confirm');
     await this.findTestSubject('confirmModalConfirmButton').click();
+    await PageObjects.common.sleep(1000);
   }
 
   async clickCancelOnModal() {
     this.debug('Clicking modal cancel');
     await this.findTestSubject('confirmModalCancelButton').click();
+    await PageObjects.common.sleep(1000);
   }
 
   async isConfirmModalOpen() {

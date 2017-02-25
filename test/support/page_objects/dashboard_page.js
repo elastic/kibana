@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+
 import {
   scenarioManager,
   esClient,
   elasticDump
 } from '../';
+
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -48,6 +50,31 @@ export default class DashboardPage {
         await PageObjects.common.findTestSubject('searchFilter');
       });
     }
+  }
+
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
+      .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  clickDoneEditing() {
+    PageObjects.common.debug('Clicking done editing');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 
   clickNewDashboard() {
@@ -133,6 +160,12 @@ export default class DashboardPage {
     .then(() => {
       return this.clickAddVisualization();
     });
+  }
+
+  async renameDashboard(dashName) {
+    PageObjects.common.debug(`Naming dashboard ` + dashName);
+    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
+    await this.findTimeout.findById('dashboardTitle').type(dashName);
   }
 
   /**
@@ -382,5 +415,4 @@ export default class DashboardPage {
       }));
     });
   }
-
 }
