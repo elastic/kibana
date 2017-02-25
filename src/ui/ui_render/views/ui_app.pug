@@ -107,7 +107,7 @@ block content
       .kibanaLoader
       .kibanaWelcomeLogoCircle
         .kibanaWelcomeLogo
-    .kibanaWelcomeText
+    .kibanaWelcomeText(data-error-message='#{i18n("UI-WELCOME_ERROR")}')
       | #{i18n('common.ui.welcomeMessage', { defaultMessage: 'Loading Kibana' })}
 
   script(src=bootstrapScriptUrl)
