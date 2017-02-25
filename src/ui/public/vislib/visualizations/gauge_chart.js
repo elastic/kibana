@@ -34,12 +34,13 @@ export default function GaugeChartFactory(Private) {
 
     draw() {
       const self = this;
+      const verticalSplit = this.gaugeConfig.verticalSplit;
 
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const width = $(this).width() / data.series.length;
-          const height = $(this).height() - 25;
+          const width = verticalSplit ? $(this).width() : $(this).width() / data.series.length;
+          const height = (verticalSplit ? $(this).height() / data.series.length : $(this).height()) - 25;
           const transformX = width / 2;
           const transformY = self.gaugeConfig.gaugeType === 'Meter' ? height / 1.5 : height / 2;
 

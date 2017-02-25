@@ -19,14 +19,18 @@ export default function GaugeVisType(Private) {
         addLegend: false,
 
         gauge: {
-          percentageMode: true,
+          verticalSplit: false,
+          autoExtend: false,
+          percentageMode: false,
           gaugeType: 'Meter',
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
           colorSchema: 'Green to Red',
           colorsRange: [
-            { from: 0, to: 100 }
+            { from: 0, to: 50 },
+            { from: 50, to: 75 },
+            { from: 75, to: 100 }
           ],
           invertColors: false,
           labels: {
@@ -73,14 +77,6 @@ export default function GaugeVisType(Private) {
         group: 'buckets',
         name: 'group',
         title: 'Split Group',
-        min: 0,
-        max: 1,
-        aggFilter: '!geohash_grid'
-      },
-      {
-        group: 'buckets',
-        name: 'split',
-        title: 'Split Chart',
         min: 0,
         max: 1,
         aggFilter: '!geohash_grid'

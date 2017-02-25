@@ -200,11 +200,13 @@ export default function GaugeChartFactory(Private) {
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
       const randomNumber = this.randomNumber;
 
+      const extendRange = this.gaugeConfig.extendRange;
+      const maxY = _.max(data.values, 'y').y;
       const min = this.gaugeConfig.colorsRange[0].from;
       const max = _.last(this.gaugeConfig.colorsRange).to;
       const angle = d3.scale.linear()
         .range([minAngle, maxAngle])
-        .domain([min, max]);
+        .domain([min, extendRange && max < maxY ? maxY : max]);
       const radius = d3.scale.linear()
         .range([0, maxRadius])
         .domain([this.gaugeConfig.innerSpace + 1, 0]);
@@ -281,39 +283,41 @@ export default function GaugeChartFactory(Private) {
           return applyMask ? `url(#gauge-mask-front-${randomNumber}-${j})` : '';
         });
 
-      let hiddenLabels = false;
+      const smallContainer = svg.node().getBBox().height < 70;
+      let hiddenLabels = smallContainer;
 
-      svg
-        .append('text')
-        .attr('class', 'chart-label')
-        .text(data.label)
-        .attr('y', -30)
-        .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-        .style('display', function () {
-          const textLength = this.getBBox().width;
-          const textTooLong = textLength > maxRadius;
-          if (textTooLong) {
-            hiddenLabels = true;
-          }
-          return textTooLong ? 'none' : 'initial';
-        });
-
-      svg
-        .append('text')
-        .attr('class', 'chart-label')
-        .text(this.gaugeConfig.style.subText)
-        .attr('y', 20)
-        .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-        .style('display', function () {
-          const textLength = this.getBBox().width;
-          const textTooLong = textLength > maxRadius;
-          if (textTooLong) {
-            hiddenLabels = true;
-          }
-          return textTooLong ? 'none' : 'initial';
-        });
 
       if (this.gaugeConfig.labels.show) {
+        svg
+          .append('text')
+          .attr('class', 'chart-label')
+          .text(data.label)
+          .attr('y', -30)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            const textTooLong = textLength > maxRadius;
+            if (textTooLong) {
+              hiddenLabels = true;
+            }
+            return smallContainer || textTooLong ? 'none' : 'initial';
+          });
+
+        svg
+          .append('text')
+          .attr('class', 'chart-label')
+          .text(this.gaugeConfig.style.subText)
+          .attr('y', 20)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            const textTooLong = textLength > maxRadius;
+            if (textTooLong) {
+              hiddenLabels = true;
+            }
+            return smallContainer || textTooLong ? 'none' : 'initial';
+          });
+
         gauges
           .append('text')
           .attr('class', 'chart-label')
