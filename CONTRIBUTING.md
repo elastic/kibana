@@ -245,10 +245,11 @@ npm run test:dev
 
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
-To run the tests for just your particular plugin, assuming you plugin lives outside of the `plugins directory`, use the following command.
+To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin
+npm run test:server
+npm run test:browser -- --dev # remove the --dev flag to run them once and close
 ```
 
 ### Cross-browser Compatibility
