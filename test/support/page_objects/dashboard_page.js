@@ -38,10 +38,15 @@ export default class DashboardPage {
   }
 
   async gotoDashboardLandingPage() {
-    PageObjects.common.debug('Go to dashboard landing page');
+    PageObjects.common.debug('gotoDashboardLandingPage');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
+      await PageObjects.common.try(async () => {
+        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
+        await goToDashboardLink.click();
+        // Once the searchFilter can be found, we know the page finished loading.
+        const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+      });
     }
   }
 
@@ -130,26 +135,13 @@ export default class DashboardPage {
     });
   }
 
-  async saveDashboard(dashName, storeTimeWithDash) {
-    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    PageObjects.common.debug('entering new title');
-    await this.findTimeout.findById('dashboardTitle').type(dashName);
-
-    if (storeTimeWithDash !== undefined) {
-      await this.storeTimeWithDashboard(storeTimeWithDash);
-    }
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    await PageObjects.common.try(() => {
-      PageObjects.common.debug('clicking final Save button for named dashboard');
-      return this.findTimeout.findByCssSelector('.btn-primary').click();
-    });
+  /**
+   *
+   * @param dashName {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async saveDashboard(dashName, saveOptions = {}) {
+    await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
     await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -163,24 +155,68 @@ export default class DashboardPage {
     });
   }
 
+  /**
+   *
+   * @param dashboardTitle {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    PageObjects.common.debug('entering new title');
+    await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
+
+    if (saveOptions.storeTimeWithDashboard !== undefined) {
+      await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+    }
+
+    if (saveOptions.saveAsNew !== undefined) {
+      await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+    }
+
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('clicking final Save button for named dashboard');
+      return this.findTimeout.findByCssSelector('.btn-primary').click();
+    });
+  }
+
   clickDashboardByLinkText(dashName) {
     return this.findTimeout
     .findByLinkText(dashName)
     .click();
   }
 
+  async searchForDashboardWithName(dashName) {
+    PageObjects.common.debug(`searchForDashboardWithName: ${dashName}`);
+
+    await this.gotoDashboardLandingPage();
+
+    await PageObjects.common.try(async () => {
+      const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+      await searchFilter.click();
+      // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+      await searchFilter.type(dashName.replace('-',' '));
+    });
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async getDashboardCountWithName(dashName) {
+    PageObjects.common.debug(`getDashboardCountWithName: ${dashName}`);
+
+    await this.searchForDashboardWithName(dashName);
+    const links = await this.findTimeout.findAllByLinkText(dashName);
+    return links.length;
+  }
+
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   async loadSavedDashboard(dashName) {
     PageObjects.common.debug(`Load Saved Dashboard ${dashName}`);
-    const self = this;
-    await this.gotoDashboardLandingPage();
-    const searchBox = await PageObjects.common.findTestSubject('searchFilter');
-    await searchBox.click();
-    await searchBox.type(dashName.replace('-',' '));
 
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
+    await this.searchForDashboardWithName(dashName);
     await this.clickDashboardByLinkText(dashName);
     return PageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -280,12 +316,21 @@ export default class DashboardPage {
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
   }
 
-  async storeTimeWithDashboard(on) {
-    PageObjects.common.debug('Storing time with dashboard: ' + on);
+  async setSaveAsNewCheckBox(checked) {
+    PageObjects.common.debug('saveAsNewCheckbox: ' + checked);
+    const saveAsNewCheckbox = await PageObjects.common.findTestSubject('saveAsNewCheckbox');
+    const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
+      PageObjects.common.debug('Flipping save as new checkbox');
+      await saveAsNewCheckbox.click();
+    }
+  }
+
+  async setStoreTimeWithDashboard(checked) {
+    PageObjects.common.debug('Storing time with dashboard: ' + checked);
     const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
-    const checked = await storeTimeCheckbox.getProperty('checked');
-    if (checked === true && on === false ||
-      checked === false && on === true) {
+    const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping store time checkbox');
       await storeTimeCheckbox.click();
     }
