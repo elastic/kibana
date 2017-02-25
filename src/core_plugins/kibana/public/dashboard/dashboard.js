@@ -309,6 +309,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.opts = {
         displayName: dash.getDisplayName(),
+        dashboard: dash,
         save: $scope.save,
         addVis: $scope.addVis,
         addNewVis,

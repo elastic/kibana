@@ -96,6 +96,7 @@ export class DashboardState {
 
   setTitle(title) {
     this.appState.title = title;
+    this.dashboard.title = title;
     this.saveState();
   }
 
