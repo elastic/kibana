@@ -16,6 +16,7 @@ const basicHtml = require('./menu_button_basic.html');
 const dangerHtml = require('./menu_button_danger.html');
 const withIconHtml = require('./menu_button_with_icon.html');
 const groupHtml = require('./menu_button_group.html');
+const elementsHtml = require('./menu_button_elements.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -68,6 +69,22 @@ export default props => (
     >
       <GuideDemo
         html={groupHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Element variations"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: elementsHtml,
+      }]}
+    >
+      <GuideText>
+        You can create a MenuButton using a button element, link, or input[type="submit"].
+      </GuideText>
+
+      <GuideDemo
+        html={elementsHtml}
       />
     </GuideSection>
   </GuidePage>
