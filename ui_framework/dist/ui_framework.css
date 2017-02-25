@@ -1271,6 +1271,12 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -1303,6 +1309,56 @@ body {
 .kuiPanelHeader__title {
   font-size: 18px;
   line-height: 1.5; }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiPanelHeaderSection:first-child {
+    margin-left: 0; }
+  .kuiPanelHeaderSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiPanelHeaderSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: 0;
+    /* 1 */
+    margin-right: auto;
+    /* 1 */ }
 
 .kuiPanelBody {
   padding: 10px; }
