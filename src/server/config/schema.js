@@ -148,7 +148,8 @@ module.exports = () => Joi.object({
   }).default(),
 
   status: Joi.object({
-    allowAnonymous: Joi.boolean().default(false)
+    allowAnonymous: Joi.boolean().default(false),
+    v6ApiFormat: Joi.boolean().default(false)
   }).default(),
   tilemap: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
