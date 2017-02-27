@@ -2,11 +2,24 @@ import KibanaMapLayer from './kibana_map_layer';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
+import $ from 'jquery';
+import { EventEmitter } from 'events';
 
-class GeohashMarkers {
+class GeohashMarkers extends EventEmitter {
   constructor(featureCollection, layerOptions, targetZoom) {
+    super();
     this._geohashGeoJson = featureCollection;
     this._zoom = targetZoom;
+
+    this._valueFormatter = x => x;//todo: get from params
+    this._tooltipFormatter = x => {
+      const div = document.createElement('div');
+      div.innerHTML = x;
+      return div;
+    };//todo: get from params
+
+    this._legendColors = null;
+    this._legendQuantizer = null;
   }
 
   getLeafletLayer() {
@@ -20,21 +33,150 @@ class GeohashMarkers {
   getStyleFunction() {
     const min = _.get(this._geohashGeoJson, 'properties.min', 0);
     const max = _.get(this._geohashGeoJson, 'properties.max', 1);
+
+    const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
     this._legendColors = makeCircleMarkerLegendColors(min, max);
-    return makeStyleFunction(min, max, this._legendColors);
+    this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
+
+    return makeStyleFunction(min, max, this._legendColors, quantizeDomain);
+  }
+
+
+  movePointer(event) {
+  }
+
+  getLabel() {
+    return 'Label';
+    // if (this.popups.length) {
+    //   return this.popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+    // }
+    // return '';
+  }
+
+  appendLegendContents(jqueryDiv) {
+
+    if (!this._legendColors || !this._legendQuantizer) {
+      return '';
+    }
+
+    const titleText = this.getLabel();
+    const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+    jqueryDiv.append($title);
+
+
+    const labels = this._legendColors.map((color) => {
+
+      const labelText = this._legendQuantizer
+        .invertExtent(color)
+        .map(this._valueFormatter)
+        .join(' – ');
+
+      const label = $('<div>');
+
+      const icon = $('<i>').css({
+        background: color,
+        'border-color': makeColorDarker(color)
+      });
+
+      const text = $('<span>').text(labelText);
+
+      label.append(icon);
+      label.append(text);
+
+      jqueryDiv.append(label);
+    });
+
+    return labels.join('');
   }
 }
 
 
 class ScaledCircles extends GeohashMarkers {
+
   constructor() {
     super(...arguments);
+    this._popups = [];
     this._leafletLayer = L.geoJson(null, {
       pointToLayer: this.getMarkerFunction(),
-      style: this.getStyleFunction()
+      style: this.getStyleFunction(),
+      onEachFeature: (feature, layer) => {
+        this._bindPopup(feature, layer);
+      }
     });
     this._leafletLayer.addData(this._geohashGeoJson);
+
   }
+
+  /**
+   * Binds popup and events to each feature on map
+   *
+   * @method bindPopup
+   * @param feature {Object}
+   * @param layer {Object}
+   * return {undefined}
+   */
+  _bindPopup(feature, layer) {
+    const popup = layer.on({
+      mouseover: (e) => {
+        const layer = e.target;
+        // bring layer to front if not older browser
+        if (!L.Browser.ie && !L.Browser.opera) {
+          layer.bringToFront();
+        }
+        this._showTooltip(feature);
+      },
+      mouseout: () => {
+        this._hidePopup();
+      }
+    });
+
+    this._popups.push(popup);
+  }
+
+  /**
+   * Checks if event latlng is within bounds of mapData
+   * features and shows tooltip for that feature
+   *
+   * @method _showTooltip
+   * @param feature {LeafletFeature}
+   * @param latLng? {Leaflet latLng}
+   * @return undefined
+   */
+  _showTooltip(feature, latLng) {
+
+    // const hasTooltip = !!this._attr.addTooltip;
+    const hasTooltip = true;//todo get this from params
+    if (!hasTooltip) {
+      return;
+    }
+    const lat = _.get(feature, 'geometry.coordinates.1');
+    const lng = _.get(feature, 'geometry.coordinates.0');
+    latLng = latLng || L.latLng(lat, lng);
+
+    const content = this._tooltipFormatter(feature);
+    if (!content) {
+      return;
+    }
+
+    this.emit('showTooltip', {
+      content: content,
+      position: latLng
+    });
+  }
+
+  /**
+   * Closes the tooltip on the map
+   *
+   * @method _hidePopup
+   * @return undefined
+   */
+  _hidePopup() {
+    // if (!this.map) return;
+    //
+    // this.map.closePopup();
+    this.emit('hideTooltip');
+  }
+
 
   getMarkerFunction() {
     const scaleFactor = 0.6;
@@ -54,17 +196,17 @@ class ScaledCircles extends GeohashMarkers {
    * @return {Number}
    */
   _radiusScale(value) {
+
+    //magic numbers
     const precisionBiasBase = 5;
     const precisionBiasNumerator = 200;
 
-    const zoom = this._zoom;
-    const maxValue = this._geohashGeoJson.properties.max;
     const precision = _.max(this._geohashGeoJson.features.map((feature) => {
       return String(feature.properties.geohash).length;
     }));
 
-    const pct = Math.abs(value) / Math.abs(maxValue);
-    const zoomRadius = 0.5 * Math.pow(2, zoom);
+    const pct = Math.abs(value) / Math.abs(this._geohashGeoJson.properties.max);
+    const zoomRadius = 0.5 * Math.pow(2, this._zoom);
     const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
     // square root value percentage
@@ -136,8 +278,6 @@ class GeohashGrid extends ScaledCircles {
 }
 
 
-
-
 /**
  * Map overlay: canvas layer with leaflet.heat plugin
  *
@@ -145,28 +285,35 @@ class GeohashGrid extends ScaledCircles {
  * @param geoJson {geoJson Object}
  * @param params {Object}
  */
-class Heatmap {
+class Heatmap extends EventEmitter {
 
-  constructor(featureCollection, heatmapOptions) {
-    // super(...arguments);
+  constructor(featureCollection, heatmapOptions, zoom) {
+
+    super();
+    this._geojsonFeatureCollection = featureCollection;
     const max = _.get(featureCollection, 'properties.max');
     const points = dataToHeatArray(max, heatmapOptions.heatNormalizeData, featureCollection);
     this._leafletLayer = L.heatLayer(points, heatmapOptions);
-    // super(map, geoJson, params);
-    // this._disableTooltips = false;
-    //
-    //
-    // this.addLegend = _.noop;
-    //
-    // this._getLatLng = _.memoize(function (feature) {
-    //   return L.latLng(
-    //     feature.geometry.coordinates[1],
-    //     feature.geometry.coordinates[0]
-    //   );
-    // }, function (feature) {
-    //   // turn coords into a string for the memoize cache
-    //   return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
-    // });
+    this._tooltipFormatter = x => {
+      const div = document.createElement('div');
+      div.innerHTML = x;
+      return div;
+    };//todo: get from params
+
+
+    this._zoom = zoom;
+    this._disableTooltips = false;
+    this._getLatLng = _.memoize(function (feature) {
+      return L.latLng(
+        feature.geometry.coordinates[1],
+        feature.geometry.coordinates[0]
+      );
+    }, function (feature) {
+      // turn coords into a string for the memoize cache
+      return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
+    });
+
+    this._addTooltips();
   }
 
 
@@ -174,128 +321,135 @@ class Heatmap {
     return this._leafletLayer;
   }
 
-  // _createMarkerGroup(options) {
-  //   const max = _.get(this.geoJson, 'properties.allmax');
-  //   const points = this._dataToHeatArray(max);
-  //
-  //   this._markerGroup = L.heatLayer(points, options);
-  //   this._fixTooltips();
-  //   this._addToMap();
-  // }
-  //
-  // _fixTooltips() {
-  //   const self = this;
-  //   const debouncedMouseMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
-  //     'leading': true,
-  //     'trailing': false
-  //   });
-  //
-  //   if (!this._disableTooltips && this._attr.addTooltip) {
-  //     this.map.on('mousemove', debouncedMouseMoveLocation);
-  //     this.map.on('mouseout', function () {
-  //       self.map.closePopup();
-  //     });
-  //     this.map.on('mousedown', function () {
-  //       self._disableTooltips = true;
-  //       self.map.closePopup();
-  //     });
-  //     this.map.on('mouseup', function () {
-  //       self._disableTooltips = false;
-  //     });
-  //   }
-  //
-  //   function mouseMoveLocation(e) {
-  //     const latlng = e.latlng;
-  //
-  //     this.map.closePopup();
-  //
-  //     // unhighlight all svgs
-  //     d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
-  //
-  //     if (!this.geoJson.features.length || this._disableTooltips) {
-  //       return;
-  //     }
-  //
-  //     // find nearest feature to event latlng
-  //     const feature = this._nearestFeature(latlng);
-  //
-  //     // show tooltip if close enough to event latlng
-  //     if (this._tooltipProximity(latlng, feature)) {
-  //       this._showTooltip(feature, latlng);
-  //     }
-  //   }
-  // }
-  //
-  // /**
-  //  * Finds nearest feature in mapData to event latlng
-  //  *
-  //  * @method _nearestFeature
-  //  * @param latLng {Leaflet latLng}
-  //  * @return nearestPoint {Leaflet latLng}
-  //  */
-  // _nearestFeature(latLng) {
-  //   const self = this;
-  //   let nearest;
-  //
-  //   if (latLng.lng < -180 || latLng.lng > 180) {
-  //     return;
-  //   }
-  //
-  //   _.reduce(this.geoJson.features, function (distance, feature) {
-  //     const featureLatLng = self._getLatLng(feature);
-  //     const dist = latLng.distanceTo(featureLatLng);
-  //
-  //     if (dist < distance) {
-  //       nearest = feature;
-  //       return dist;
-  //     }
-  //
-  //     return distance;
-  //   }, Infinity);
-  //
-  //   return nearest;
-  // }
-  //
-  // /**
-  //  * display tooltip if feature is close enough to event latlng
-  //  *
-  //  * @method _tooltipProximity
-  //  * @param latlng {Leaflet latLng  Object}
-  //  * @param feature {geoJson Object}
-  //  * @return {Boolean}
-  //  */
-  // _tooltipProximity(latlng, feature) {
-  //   if (!feature) return;
-  //
-  //   let showTip = false;
-  //   const featureLatLng = this._getLatLng(feature);
-  //
-  //   // zoomScale takes map zoom and returns proximity value for tooltip display
-  //   // domain (input values) is map zoom (min 1 and max 18)
-  //   // range (output values) is distance in meters
-  //   // used to compare proximity of event latlng to feature latlng
-  //   const zoomScale = d3.scale.linear()
-  //     .domain([1, 4, 7, 10, 13, 16, 18])
-  //     .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
-  //
-  //   const proximity = zoomScale(this.map.getZoom());
-  //   const distance = latlng.distanceTo(featureLatLng);
-  //
-  //   // maxLngDif is max difference in longitudes
-  //   // to prevent feature tooltip from appearing 360°
-  //   // away from event latlng
-  //   const maxLngDif = 40;
-  //   const lngDif = Math.abs(latlng.lng - featureLatLng.lng);
-  //
-  //   if (distance < proximity && lngDif < maxLngDif) {
-  //     showTip = true;
-  //   }
-  //
-  //   d3.scale.pow().exponent(0.2)
-  //     .domain([1, 18])
-  //     .range([1500000, 50]);
-  //   return showTip;
-  // }
+  appendLegendContents(jqueryDiv) {
+  }
+
+
+  movePointer(type, event) {
+    if (type === 'mousemove') {
+      this._deboundsMoveMoveLocation(event);
+    } else if (type === 'mouseout') {
+      this.emit('hideTooltip');
+    } else if (type === 'mousedown') {
+      this._disableTooltips = true;
+      this.emit('hideTooltip');
+    } else if (type === 'mouseup') {
+      this._disableTooltips = false;
+    }
+  }
+
+
+  _addTooltips() {
+
+    const mouseMoveLocation = (e) => {
+
+      const latlng = e.latlng;
+      this.emit('hideTooltip');
+
+      // unhighlight all svgs
+      // d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
+
+      if (!this._geojsonFeatureCollection.features.length || this._disableTooltips) {
+        return;
+      }
+
+
+      const feature = this._nearestFeature(latlng);
+      if (this._tooltipProximity(latlng, feature)) {
+        const hasTooltip = true;//todo get this from params
+        if (!hasTooltip) {
+          return;
+        }
+        const content = this._tooltipFormatter(feature);
+        if (!content) {
+          return;
+        }
+        this.emit('showTooltip', {
+          content: content,
+          position: latlng
+        });
+
+      }
+    };
+
+
+    const debouncedMouseMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
+      'leading': true,
+      'trailing': false
+    });
+    this._deboundsMoveMoveLocation = debouncedMouseMoveLocation;
+  }
+
+  /**
+   * Finds nearest feature in mapData to event latlng
+   *
+   * @method _nearestFeature
+   * @param latLng {Leaflet latLng}
+   * @return nearestPoint {Leaflet latLng}
+   */
+  _nearestFeature(latLng) {
+    const self = this;
+    let nearest;
+
+    if (latLng.lng < -180 || latLng.lng > 180) {
+      return;
+    }
+
+    _.reduce(this._geojsonFeatureCollection.features, function (distance, feature) {
+      const featureLatLng = self._getLatLng(feature);
+      const dist = latLng.distanceTo(featureLatLng);
+
+      if (dist < distance) {
+        nearest = feature;
+        return dist;
+      }
+
+      return distance;
+    }, Infinity);
+
+    return nearest;
+  }
+
+  /**
+   * display tooltip if feature is close enough to event latlng
+   *
+   * @method _tooltipProximity
+   * @param latlng {Leaflet latLng  Object}
+   * @param feature {geoJson Object}
+   * @return {Boolean}
+   */
+  _tooltipProximity(latlng, feature) {
+    if (!feature) return;
+
+    let showTip = false;
+    const featureLatLng = this._getLatLng(feature);
+
+    // zoomScale takes map zoom and returns proximity value for tooltip display
+    // domain (input values) is map zoom (min 1 and max 18)
+    // range (output values) is distance in meters
+    // used to compare proximity of event latlng to feature latlng
+    const zoomScale = d3.scale.linear()
+      .domain([1, 4, 7, 10, 13, 16, 18])
+      .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
+
+    const proximity = zoomScale(this._zoom);
+    const distance = latlng.distanceTo(featureLatLng);
+
+    // maxLngDif is max difference in longitudes
+    // to prevent feature tooltip from appearing 360°
+    // away from event latlng
+    const maxLngDif = 40;
+    const lngDif = Math.abs(latlng.lng - featureLatLng.lng);
+
+    if (distance < proximity && lngDif < maxLngDif) {
+      showTip = true;
+    }
+
+    d3.scale.pow().exponent(0.2)
+      .domain([1, 18])
+      .range([1500000, 50]);
+    return showTip;
+  }
 
 }
 
@@ -320,7 +474,6 @@ export default class GeohashLayer extends KibanaMapLayer {
       case 'Shaded Geohash Grid':
         this._geohashMarkers = new GeohashGrid(this._geohashGeoJson, {}, zoom);
         break;
-
       case 'Heatmap':
         this._geohashMarkers = new Heatmap(this._geohashGeoJson, {
           radius: +this._geohashOptions.heatmap.heatRadius,
@@ -328,14 +481,27 @@ export default class GeohashLayer extends KibanaMapLayer {
           maxZoom: +this._geohashOptions.heatmap.heatMaxZoom,
           minOpaxity: +this._geohashOptions.heatmap.heatMinOpacity,
           heatNormalizeData: this._geohashOptions.heatmap.heatNormalizeData
-        });
+        }, zoom);
         break;
       default:
         throw new Error(`${this._geohashOptions.mapType} mapType not recognized`);
 
     }
 
+    this._geohashMarkers.on('showTooltip', (event) => this.emit('showTooltip', event));
+    this._geohashMarkers.on('hideTooltip', (event) => this.emit('hideTooltip', event));
+
+
     this._leafletLayer = this._geohashMarkers.getLeafletLayer();
+    this._legend = null;
+  }
+
+  appendLegendContents(jqueryDiv) {
+    return this._geohashMarkers.appendLegendContents(jqueryDiv);
+  }
+
+  movePointer(...args) {
+    this._geohashMarkers.movePointer(...args);
   }
 
 
@@ -354,9 +520,6 @@ export default class GeohashLayer extends KibanaMapLayer {
     return true;
   }
 }
-
-
-
 
 /**
  * d3 quantize scale returns a hex color, used for marker fill color
@@ -386,8 +549,7 @@ function makeColorDarker(color) {
   return d3.hcl(color).darker(amount).toString();
 }
 
-function makeStyleFunction(min, max, legendColors) {
-  const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
+function makeStyleFunction(min, max, legendColors, quantizeDomain) {
   const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
   return (feature) => {
     const value = _.get(feature, 'properties.value');

@@ -17,6 +17,13 @@ export default class KibanaMapLayer extends EventEmitter {
   removeFromLeafletMap(leafletMap) {
     leafletMap.removeLayer(this._leafletLayer);
   }
+
+  appendLegendContents() {
+  }
+
+
+  movePointer(event) {
+  }
 }
 
 

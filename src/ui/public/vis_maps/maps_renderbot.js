@@ -28,11 +28,12 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         //Even though the basemap will not display, the user will at least still see the overlay data
         notify.warning(tilemapSettings.getError().message);
       }
-      const containerElement = $($el)[0];
 
+      const containerElement = $($el)[0];
       this._kibanaMap = new KibanaMap(containerElement);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
+      this._kibanaMap.addLegendControl();
 
       this._useUIState();
 
@@ -70,6 +71,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       const geohashOptions = this._getGeohashOptions();
       this._geohashLayer = new GeohashLayer(this.mapsData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel());
       this._kibanaMap.addLayer(this._geohashLayer);
+
     }
 
 
@@ -82,7 +84,10 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._geohashGeoJson = this.mapsData.geoJson;
       this._recreateGeohashLayer();
       this._useUIState();
+
+
       this._kibanaMap.resize();
+
     }
 
     destroy() {
