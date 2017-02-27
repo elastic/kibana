@@ -5,7 +5,7 @@ import getBucketsPath from '../get_buckets_path';
 import basicAggs from '../../../public/components/lib/basic_aggs';
 import bucketTransform from './bucket_transform';
 import unitToSeconds from '../unit_to_seconds';
-import calculateIndices from '../calculate_indices';
+import calculateIndices from './calculate_indices';
 import buildRequestBody from './build_request_body';
 import getIntervalAndTimefield from './get_interval_and_timefield';
 

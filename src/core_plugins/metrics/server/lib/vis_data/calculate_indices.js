@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import offsetTime from './vis_data/offset_time';
+import offsetTime from './offset_time';
 
 function getParams(req, indexPattern, timeField, offsetBy) {
 
