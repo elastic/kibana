@@ -83,6 +83,9 @@ uiModules
         type.params.forEach(function (param, i) {
           let aggParam;
           let fields;
+          if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+            return;
+          }
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
             fields = $aggParamEditorsScope.indexedFields;
