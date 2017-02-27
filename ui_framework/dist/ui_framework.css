@@ -1121,6 +1121,12 @@ body {
   .kuiMenuButtonGroup .kuiMenuButton + .kuiMenuButton {
     margin-left: 4px; }
 
+.kuiMenuButtonGroup--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -1265,6 +1271,12 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -1297,6 +1309,56 @@ body {
 .kuiPanelHeader__title {
   font-size: 18px;
   line-height: 1.5; }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiPanelHeaderSection:first-child {
+    margin-left: 0; }
+  .kuiPanelHeaderSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiPanelHeaderSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: 0;
+    /* 1 */
+    margin-right: auto;
+    /* 1 */ }
 
 .kuiPanelBody {
   padding: 10px; }
@@ -1375,6 +1437,17 @@ body {
   border-collapse: collapse;
   background-color: #FFFFFF; }
 
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto;
+  /* 1 */ }
+  .kuiTable--fluid .kuiTableHeaderCell,
+  .kuiTable--fluid .kuiTableRowCell {
+    max-width: none;
+    /* 1 */ }
+
 .kuiTableHeaderCell {
   font-size: 14px;
   font-weight: 400;
@@ -1384,8 +1457,6 @@ body {
   padding: 7px 8px 8px;
   line-height: 1.5;
   color: #a7a7a7; }
-  .kuiTableHeaderCell:last-child {
-    padding-right: 16px; }
 
 /**
  * 1. Prevent rapid clicking from selecting text.
@@ -1420,8 +1491,6 @@ body {
   /* 1 */
   color: #191E23;
   border-top: 1px solid #E4E4E4; }
-  .kuiTableRowCell:last-child {
-    padding-right: 16px; }
 
 /**
    * 1. Vertically align all children.
@@ -1776,3 +1845,25 @@ body {
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
+
+.kuiView {
+  background-color: #FFFFFF;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%; }
+
+.kuiViewContent--constrainedWidth {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto; }
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px; }

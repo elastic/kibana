@@ -78,7 +78,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: titles[6] }
     ];
     return PageObjects.common.tryForTime(10000, function () {
-      return PageObjects.dashboard.getPanelData()
+      return PageObjects.dashboard.getPanelSizeData()
         .then(function (panelTitles) {
           PageObjects.common.log('visualization titles = ' + panelTitles);
           PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
@@ -86,6 +86,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         });
     });
   });
+
 
   bdd.it('filters when a pie chart slice is clicked', async function () {
     let descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
@@ -102,5 +103,25 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     await PageObjects.header.clickDashboard();
     const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
     expect(isDarkThemeOn).to.equal(true);
+  });
+
+  bdd.it('should have shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
+      .then(function (count) {
+        PageObjects.common.log('shared-items-count = ' + count);
+        expect(count).to.eql(visualizations.length);
+      });
+  });
+
+  bdd.it('should have panels with expected shared-item title and description', function checkTitles() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, function () {
+      return PageObjects.dashboard.getPanelSharedItemData()
+        .then(function (data) {
+          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
+          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+        });
+    });
   });
 });

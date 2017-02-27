@@ -44,8 +44,7 @@ export default class HeaderPage {
 
   clickTimepicker() {
     return PageObjects.common.try(() => {
-      return PageObjects.common.findTestSubject('globalTimepickerButton')
-        .click();
+      return PageObjects.common.clickTestSubject('globalTimepickerButton');
     });
   }
 
@@ -185,5 +184,13 @@ export default class HeaderPage {
 
   async getPrettyDuration() {
     return await PageObjects.common.findTestSubject('globalTimepickerRange').getVisibleText();
+  }
+
+  async isSharedTimefilterEnabled() {
+    const element = await this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findByCssSelector(`[shared-timefilter=true]`);
+
+    return new Boolean(element);
   }
 }

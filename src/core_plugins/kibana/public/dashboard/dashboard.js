@@ -74,6 +74,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         quickRanges,
         AppState);
 
+      // Part of the exposed plugin API - do not remove without careful consideration.
+      this.appStatus = {
+        dirty: !dash.id
+      };
+      dashboardState.stateMonitor.onChange(status => {
+        this.appStatus.dirty = status.dirty || !dash.id;
+      });
+
       dashboardState.updateFilters(queryFilter);
       let pendingVisCount = _.size(dashboardState.getPanels());
 
@@ -119,13 +127,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.addVis = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashbard`);
+        notify.info(`Visualization successfully added to your dashboard`);
       };
 
       $scope.addSearch = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashbard`);
+        notify.info(`Search successfully added to your dashboard`);
       };
 
       $scope.showEditHelpText = () => {

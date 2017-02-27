@@ -21,6 +21,10 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
   }
 
+  /**
+   * 1. Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+   *    row in the Context Log.
+   */
   dl.source {
     margin-bottom: 0;
     line-height: 2em;
@@ -31,7 +35,7 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
 
     dt {
-      background: @table-dt-bg;
+      background-color: rgba(108, 135, 142, 0.15); /* 1 */
       color: @table-dt-color;
       padding: @padding-xs-vertical @padding-xs-horizontal;
       margin-right: @padding-xs-horizontal;

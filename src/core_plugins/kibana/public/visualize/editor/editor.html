@@ -71,7 +71,11 @@
 
   <div class="vis-editor-content">
 
-    <vis-editor-vis-options ng-if="vis.type.fullEditor" vis="vis" saved-vis="savedVis" ui-state="uiState"
+    <vis-editor-vis-options ng-if="vis.type.fullEditor"
+                            vis="vis"
+                            saved-vis="savedVis"
+                            editor="vis.type.params.editor"
+                            ui-state="uiState"
                             class="vis-editor-full-options"></vis-editor-vis-options>
 
     <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
@@ -81,6 +85,9 @@
     <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
       <visualize
         vis="vis"
+        shared-item
+        data-title="{{savedVis.lastSavedTitle}}"
+        data-description="{{savedVis.description}}"
         render-counter
         ui-state="uiState"
         show-spy-panel="chrome.getVisible()"
