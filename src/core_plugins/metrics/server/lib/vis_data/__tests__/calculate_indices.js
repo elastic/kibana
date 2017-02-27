@@ -50,7 +50,7 @@ describe('calculateIndices', () => {
 
     it('returns an empty array if none found', () => {
       const resp = { indices: { } };
-      expect(handleResponse(resp)).to.be.empty;
+      expect(handleResponse(resp)).to.be.empty();
     });
   });
 });

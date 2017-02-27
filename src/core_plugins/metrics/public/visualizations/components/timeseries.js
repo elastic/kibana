@@ -1,7 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
-import numeral from 'numeral';
-import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
