@@ -132,6 +132,10 @@ export default function AxisConfigFactory() {
         this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
       }
 
+      if (this.get('type') === 'category' && !this.isHorizontal()) {
+        this._values.scale.inverted = _.get(axisConfigArgs, 'scale.inverted', true);
+      }
+
       let offset;
       let stacked = true;
       switch (this.get('scale.mode')) {
