@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getParams, handleResponse } from './calculate_indices';
+import { getParams, handleResponse } from '../calculate_indices';
 
 describe('calculateIndices', () => {
 
