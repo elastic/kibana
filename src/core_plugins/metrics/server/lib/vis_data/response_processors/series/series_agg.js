@@ -1,4 +1,4 @@
-import SeriesAgg from '../../../series_agg';
+import SeriesAgg from '../../series_agg';
 import _ from 'lodash';
 import basicAggs from '../../../../../public/components/lib/basic_aggs';
 import getDefaultDecoration from '../../get_default_decoration';
