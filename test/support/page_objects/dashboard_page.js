@@ -51,15 +51,15 @@ export default class DashboardPage {
   }
 
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('newDashboardLink').click();
+    return PageObjects.common.clickTestSubject('newDashboardLink');
   }
 
   clickAddVisualization() {
-    return PageObjects.common.findTestSubject('dashboardAddPanelButton').click();
+    return PageObjects.common.clickTestSubject('dashboardAddPanelButton');
   }
 
   clickOptions() {
-    return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+    return PageObjects.common.clickTestSubject('dashboardOptionsButton');
   }
 
   isOptionsOpen() {
@@ -71,7 +71,7 @@ export default class DashboardPage {
     PageObjects.common.debug('openOptions');
     const isOpen = await this.isOptionsOpen();
     if (!isOpen) {
-      return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+      return PageObjects.common.clickTestSubject('dashboardOptionsButton');
     }
   }
 
@@ -86,7 +86,7 @@ export default class DashboardPage {
     await this.openOptions();
     const isDarkThemeOn = await this.isDarkThemeOn();
     if (isDarkThemeOn !== on) {
-      return PageObjects.common.findTestSubject('dashboardDarkThemeCheckbox').click();
+      return PageObjects.common.clickTestSubject('dashboardDarkThemeCheckbox');
     }
   }
 
@@ -161,7 +161,7 @@ export default class DashboardPage {
    * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
    */
   async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
-    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
+    await PageObjects.common.clickTestSubject('dashboardSaveButton');
 
     await PageObjects.header.waitUntilLoadingHasFinished();
 

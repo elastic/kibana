@@ -299,6 +299,12 @@ export default class Common {
     return exists;
   }
 
+  async clickTestSubject(selector) {
+    return await Try.try(async () => {
+      await this.findTestSubject(selector).click();
+    });
+  }
+
   findTestSubject(selector, timeout = defaultFindTimeout) {
     this.debug('in findTestSubject: ' + testSubjSelector(selector));
     let originalFindTimeout = null;

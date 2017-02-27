@@ -37,14 +37,13 @@ export default class SettingsPage {
   }
 
   async setAdvancedSettings(propertyName, propertyValue) {
-    const self = this;
-    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-editButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
     await this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + propertyValue + '"]').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-saveButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -293,8 +292,7 @@ export default class SettingsPage {
     });
     await PageObjects.common.try(async () => {
       PageObjects.common.debug('acceptConfirmation');
-      await PageObjects.common.findTestSubject('confirmModalConfirmButton')
-        .click();
+      await PageObjects.common.clickTestSubject('confirmModalConfirmButton');
     });
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();
@@ -307,20 +305,17 @@ export default class SettingsPage {
 
   async clickFieldsTab() {
     PageObjects.common.debug('click Fields tab');
-    await PageObjects.common.findTestSubject('tab-indexFields')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-indexFields');
   }
 
   async clickScriptedFieldsTab() {
     PageObjects.common.debug('click Scripted Fields tab');
-    await PageObjects.common.findTestSubject('tab-scriptedFields')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-scriptedFields');
   }
 
   async clickSourceFiltersTab() {
     PageObjects.common.debug('click Source Filters tab');
-    await PageObjects.common.findTestSubject('tab-sourceFilters')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-sourceFilters');
   }
 
   async addScriptedField(name, language, type, format, popularity, script) {
