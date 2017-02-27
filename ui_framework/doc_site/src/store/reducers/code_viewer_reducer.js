@@ -1,3 +1,5 @@
+import { LOCATION_CHANGE } from 'react-router-redux';
+
 import ActionTypes from '../../actions/action_types';
 
 const defaultState = {
@@ -28,6 +30,7 @@ export default function codeViewerReducer(state = defaultState, action) {
       });
     }
 
+    case LOCATION_CHANGE: // Close Code Viewer when we navigate somewhere.
     case ActionTypes.CLOSE_CODE_VIEWER: {
       return Object.assign({}, state, {
         isOpen: false,
