@@ -178,17 +178,9 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
             var warnings = xhr.getResponseHeader("warning");
             if (warnings) {
-              // pattern for valid warning header
-              var re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")/
-              // split on any comma that is followed by an even number of quotes
-              warnings = _.map(utils.splitOnUnquotedCommaSpace(warnings), function (warning) {
-                var match = re.exec(warning)
-                // extract the actual warning if there was a match
-                return "#! Deprecation: " + (match !== null ? match[1] : warning)
-              });
-              value = warnings.join("\n") + "\n" + value;
+              var deprecationMessages = utils.extractDeprecationMessages(warnings);
+              value = deprecationMessages.join("\n") + "\n" + value;
             }
-
 
             if (isMultiRequest) {
               value = "# " + req.method + " " + req.url + "\n" + value;
