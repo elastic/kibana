@@ -125,14 +125,13 @@ describe('ui/modals/confirm_modal', function () {
       showClose: true
     };
 
-    function resetSpyCounts() {
+    beforeEach(() => {
       confirmCallback.reset();
       closeCallback.reset();
       cancelCallback.reset();
-    }
+    });
 
     it('onClose', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalCloseButton').click();
@@ -143,7 +142,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onCancel', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalCancelButton').click();
@@ -154,7 +152,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onConfirm', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalConfirmButton').click();
@@ -166,7 +163,6 @@ describe('ui/modals/confirm_modal', function () {
 
 
     it('onClose defaults to onCancel if not specified', function () {
-      resetSpyCounts();
       const confirmModalOptions = {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
@@ -184,7 +180,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onKeyDown detects ESC and calls onCancel', function () {
-      resetSpyCounts();
       const confirmModalOptions = {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
@@ -204,7 +199,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onKeyDown ignores keys other than ESC', function () {
-      resetSpyCounts();
       const confirmModalOptions = {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
