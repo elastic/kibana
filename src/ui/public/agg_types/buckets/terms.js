@@ -16,12 +16,16 @@ export default function TermsAggDefinition(Private) {
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
-  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev', '!derivative'];
+  const aggFilter = [
+    '!top_hits', '!percentiles', '!median', '!std_dev',
+    '!derivative', '!cumulative_sum', '!moving_avg', '!serial_diff'
+  ];
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
       title: 'Order Agg',
+      hideCustomLabel: true,
       aggFilter: aggFilter
     }
   ])).all[0];

@@ -16,6 +16,7 @@ const ParentPipelineAggHelperProvider = function (Private) {
       group: 'none',
       name: 'metricAgg',
       title: 'Metric Agg',
+      hideCustomLabel: true,
       aggFilter: metricAggFilter
     }
   ])).all[0];
