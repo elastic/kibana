@@ -41,9 +41,12 @@ export function DashboardListingController($injector, $scope) {
     this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
   };
 
-  const fetchObjects = () => {
+  const fetchItems = () => {
+    this.isFetchingItems = true;
+
     dashboardService.find(this.filter)
       .then(result => {
+        this.isFetchingItems = false;
         this.items = result.hits;
         calculateItemsOnPage();
       });
@@ -57,6 +60,7 @@ export function DashboardListingController($injector, $scope) {
     selectedItems = this.pageOfItems.slice(0);
   };
 
+  this.isFetchingItems = false;
   this.items = [];
   this.pageOfItems = [];
   this.filter = '';
@@ -65,7 +69,7 @@ export function DashboardListingController($injector, $scope) {
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();
-    fetchObjects();
+    fetchItems();
   });
 
   /**
@@ -115,7 +119,7 @@ export function DashboardListingController($injector, $scope) {
       const selectedIds = selectedItems.map(item => item.id);
 
       dashboardService.delete(selectedIds)
-        .then(fetchObjects)
+        .then(fetchItems)
         .then(() => {
           deselectAll();
         })

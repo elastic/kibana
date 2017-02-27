@@ -185,7 +185,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
 
     courierFetch.these([req]);
 
-    return req.defer.promise;
+    return req.getCompletePromise();
   };
 
   /**

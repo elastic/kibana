@@ -43,7 +43,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(function waitForVisualization() {
       return PageObjects.visualize.waitForVisualization();
@@ -66,7 +66,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function () {
-        return PageObjects.header.isGlobalLoadingIndicatorHidden();
+        return PageObjects.header.waitUntilLoadingHasFinished();
       })
       .then(function waitForVisualization() {
         return PageObjects.visualize.waitForVisualization();
@@ -74,10 +74,10 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct chart, take screenshot', function () {
-      const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1200 - 1600',
-        '1200 - 1600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
-        '1200 - 1600', '1200 - 1600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
-        '400 - 800', '1200 - 1600', '1200 - 1600', '400 - 800', '0 - 400', '0 - 400' ];
+      const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
+        '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
+        '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
+        '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function

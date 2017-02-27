@@ -25,6 +25,8 @@
  */
 * {
   box-sizing: border-box; }
+  *:before, *:after {
+    box-sizing: border-box; }
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
@@ -105,6 +107,7 @@ body {
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
  * 2. Disable for Angular.
+ * 3. Safari won't respect :enabled:active on links.
  */
 .kuiButton {
   display: inline-block;
@@ -124,7 +127,8 @@ body {
     cursor: default;
     pointer-events: none;
     /* 2 */ }
-  .kuiButton:active:enabled {
+  .kuiButton:active {
+    /* 3 */
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
   .kuiButton:focus {
@@ -143,6 +147,7 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--basic {
   color: #5a5a5a;
@@ -150,7 +155,8 @@ body {
   .kuiButton--basic:focus {
     color: #5a5a5a !important;
     /* 1 */ }
-  .kuiButton--basic:hover:enabled, .kuiButton--basic:active:enabled {
+  .kuiButton--basic:hover, .kuiButton--basic:active {
+    /* 2 */
     color: #ffffff !important;
     /* 1 */
     background-color: #9B9B9B; }
@@ -159,11 +165,13 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1; }
-  .kuiButton--primary:hover:enabled, .kuiButton--primary:active:enabled {
+  .kuiButton--primary:hover, .kuiButton--primary:active {
+    /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #006E8A; }
@@ -175,11 +183,13 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051; }
-  .kuiButton--danger:hover:enabled, .kuiButton--danger:active:enabled {
+  .kuiButton--danger:hover, .kuiButton--danger:active {
+    /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #A52E1F; }
@@ -198,12 +208,14 @@ body {
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
+ * 3. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--hollow {
   color: #3CAED2 !important;
   /* 2 */
   background-color: transparent; }
-  .kuiButton--hollow:hover:enabled, .kuiButton--hollow:active:enabled {
+  .kuiButton--hollow:hover, .kuiButton--hollow:active {
+    /* 3 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
@@ -302,8 +314,7 @@ body {
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
-    top: -0.05em;
-    left: 0.15em;
+    left: 0.25em;
     font-family: FontAwesome;
     content: "\F00C";
     font-size: 1em;
@@ -1110,6 +1121,12 @@ body {
   .kuiMenuButtonGroup .kuiMenuButton + .kuiMenuButton {
     margin-left: 4px; }
 
+.kuiMenuButtonGroup--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
 .kuiMicroButton {
   display: inline-block;
   /* 1 */
@@ -1254,6 +1271,12 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
@@ -1286,6 +1309,56 @@ body {
 .kuiPanelHeader__title {
   font-size: 18px;
   line-height: 1.5; }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiPanelHeaderSection:first-child {
+    margin-left: 0; }
+  .kuiPanelHeaderSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiPanelHeaderSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: 0;
+    /* 1 */
+    margin-right: auto;
+    /* 1 */ }
 
 .kuiPanelBody {
   padding: 10px; }
@@ -1351,21 +1424,39 @@ body {
   border-top: none;
   /* 2 */ }
 
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
 .kuiTable {
   width: 100%;
   border: 2px solid #E4E4E4;
   border-collapse: collapse;
   background-color: #FFFFFF; }
 
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto;
+  /* 1 */ }
+  .kuiTable--fluid .kuiTableHeaderCell,
+  .kuiTable--fluid .kuiTableRowCell {
+    max-width: none;
+    /* 1 */ }
+
 .kuiTableHeaderCell {
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.5;
-  padding: 7px 8px 8px;
   text-align: left;
+  max-width: 20px;
+  /* 1 */
+  padding: 7px 8px 8px;
+  line-height: 1.5;
   color: #a7a7a7; }
-  .kuiTableHeaderCell:last-child {
-    padding-right: 16px; }
 
 /**
  * 1. Prevent rapid clicking from selecting text.
@@ -1395,21 +1486,28 @@ body {
 .kuiTableRowCell {
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.5;
-  padding: 7px 8px 8px;
   text-align: left;
+  max-width: 20px;
+  /* 1 */
   color: #191E23;
   border-top: 1px solid #E4E4E4; }
-  .kuiTableRowCell:last-child {
-    padding-right: 16px; }
 
 /**
    * 1. Vertically align all children.
+   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+   *    the padding was on the cell, the ellipsis would be cropped.
    */
 .kuiTableRowCell__liner {
   white-space: nowrap;
+  /* 2 */
   overflow: hidden;
-  text-overflow: ellipsis; }
+  /* 2 */
+  text-overflow: ellipsis;
+  /* 2 */
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */ }
   .kuiTableRowCell__liner > * {
     vertical-align: middle;
     /* 1 */ }
@@ -1422,13 +1520,19 @@ body {
 /**
  * 1. Rendered width of cell with checkbox inside of it.
  * 2. Align checkbox with text in other cells.
+ * 3. Show the checkbox in Edge; otherwise it gets cropped.
  */
 .kuiTableHeaderCell--checkBox,
 .kuiTableRowCell--checkBox {
   width: 28px;
   /* 1 */
   padding-right: 0;
-  line-height: 1; }
+  line-height: 1;
+  /* 2 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    overflow: visible;
+    /* 3 */ }
 
 .kuiTabs {
   display: -webkit-box;
@@ -1439,6 +1543,10 @@ body {
 
 /**
    * 1. Override button styles (some of which are from Bootstrap).
+   * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
+   * 3. Move the tab down so that its bottom border covers the container's bottom border.
+   * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
+   *    of padding to make sure the text doesn't shift down.
    */
 .kuiTab {
   -webkit-appearance: none;
@@ -1452,28 +1560,37 @@ body {
   background-color: #ffffff;
   /* 1 */
   border: 1px solid #E4E4E4;
-  border-bottom: none;
+  border-bottom-width: 2px;
   border-radius: 0;
-  /* 1 */ }
+  /* 1 */
+  margin-bottom: -2px;
+  /* 3 */ }
   .kuiTab + .kuiTab {
     border-left: none; }
-  .kuiTab:focus {
-    color: #3CAED2;
-    z-index: 1;
-    outline: 1px solid #6EADC1 !important;
-    /* 1 */ }
-  .kuiTab:hover:not(.kuiTab-isSelected) {
-    color: #006E8A; }
+    .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      margin-left: -1px;
+      /* 2 */ }
   .kuiTab:active {
-    outline: none;
-    border-color: #ffffff;
-    box-shadow: none;
+    outline: none !important;
     /* 1 */
-    color: #3CAED2 !important; }
+    box-shadow: none;
+    /* 1 */ }
+  .kuiTab:focus {
+    outline: none;
+    /* 1 */ }
+  .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+    z-index: 1;
+    color: #3CAED2;
+    border: 1px solid #6EADC1 !important;
+    padding-bottom: 11px;
+    /* 4 */ }
+  .kuiTab:hover:not(.kuiTab-isSelected) {
+    color: #006E8A;
+    background-color: #F2F2F2; }
   .kuiTab.kuiTab-isSelected {
+    cursor: default;
     color: #191E23;
-    background-color: #F2F2F2;
-    cursor: default; }
+    border-bottom-color: #FFFFFF; }
 
 .kuiToolBar {
   display: -webkit-box;
@@ -1663,13 +1780,14 @@ body {
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  position: relative; }
+  position: relative;
+  font-size: 14px; }
 
 .kuiToolBarSearchBox__icon {
   position: absolute;
-  top: 6px;
-  left: 8px;
-  font-size: 14px;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
   color: #ACACAC; }
 
 /**
@@ -1678,15 +1796,18 @@ body {
 .kuiToolBarSearchBox__input {
   width: 100%;
   min-width: 200px;
-  padding: 5px 12px 6px 28px;
+  padding: 4px 12px 5px 28px;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  /* 1 */
   background-color: #FFFFFF;
   color: #191E23;
-  border: 1px solid #FFFFFF;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 1em;
   border: 1px solid #ffffff;
   line-height: normal;
-  /* 1 */ }
+  /* 1 */
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
     border-color: #6EADC1; }
@@ -1737,3 +1858,25 @@ body {
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
+
+.kuiView {
+  background-color: #FFFFFF;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%; }
+
+.kuiViewContent--constrainedWidth {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto; }
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px; }

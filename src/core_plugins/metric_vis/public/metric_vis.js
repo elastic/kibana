@@ -39,6 +39,7 @@ function MetricVisProvider(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
+        aggFilter: ['!derivative'],
         defaults: [
           { type: 'count', schema: 'metric' }
         ]

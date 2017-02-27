@@ -14,6 +14,9 @@ module.exports = function formatNumber(num, which) {
     case 'ms':
       postfix = ' ms';
       break;
+    case 'integer':
+      format = '0';
+      break;
   }
   return numeral(num).format(format) + postfix;
 };

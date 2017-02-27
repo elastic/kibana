@@ -53,14 +53,14 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function clickGo() {
       return PageObjects.visualize.clickGo();
     })
-    .then(function isGlobalLoadingIndicatorHidden() {
+    .then(function waitUntilLoadingHasFinished() {
       PageObjects.common.debug('Waiting...');
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    const vizName1 = 'Visualization AreaChart';
+    const vizName1 = 'Visualization AreaChart Name Test';
 
     bdd.it('should save and load with special characters', function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';

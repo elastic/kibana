@@ -1,4 +1,9 @@
+export {
+  openCodeViewer,
+  closeCodeViewer,
+} from './code_viewer_actions';
 
 export {
-  default as CodeViewerActions,
-} from './code_viewer/code_viewer_actions';
+  registerSection,
+  unregisterSection,
+} from './example_nav_actions';

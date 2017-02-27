@@ -229,6 +229,11 @@ $verticalRhythm: 10px;
 
 * {
   box-sizing: border-box;
+
+  &:before,
+  &:after {
+    box-sizing: border-box;
+  }
 }
 
 body {
@@ -259,3 +264,4 @@ body {
 @import "tool_bar/index";
 @import "typography/index";
 @import "vertical_rhythm/index";
+@import "view/index";

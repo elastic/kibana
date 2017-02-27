@@ -10,8 +10,8 @@
   </header>
 
   <div class="row metrics_wrapper">
-    <div ng-repeat="(name, data) in ui.metrics">
-      <status-page-metric name="{{name}}" data="data"></status-page-metric>
+    <div ng-repeat="metric in ui.metrics">
+      <status-page-metric metric="metric"></status-page-metric>
     </div>
   </div>
 

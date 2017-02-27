@@ -1,4 +1,3 @@
-
 import Slugify from '../string/slugify';
 
 import ActionItemExample
@@ -13,11 +12,17 @@ import ButtonExample
 import EventExample
   from '../../views/event/event_example.jsx';
 
+import EventsSandbox
+  from '../../views/event/events_sandbox.jsx';
+
 import FormExample
   from '../../views/form/form_example.jsx';
 
 import HeaderBarExample
   from '../../views/header_bar/header_bar_example.jsx';
+
+import HeaderBarSandbox
+  from '../../views/header_bar/header_bar_sandbox.jsx';
 
 import IconExample
   from '../../views/icon/icon_example.jsx';
@@ -63,6 +68,9 @@ import TypographyExample
 
 import VerticalRhythmExample
   from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
+
+import ViewSandbox
+  from '../../views/view/view_sandbox.jsx';
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -130,10 +138,21 @@ const components = [{
   component: VerticalRhythmExample,
 }];
 
+const sandboxes = [{
+  name: 'Events',
+  component: EventsSandbox,
+}, {
+  name: 'HeaderBar with Table',
+  component: HeaderBarSandbox,
+}, {
+  name: 'View',
+  component: ViewSandbox,
+}];
+
 export default {
   components: Slugify.each(components, 'name', 'path'),
+  sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    const list = this.components;
-    return list.slice(0);
+    return this.components.concat(this.sandboxes);
   },
 };

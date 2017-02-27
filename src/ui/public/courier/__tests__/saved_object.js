@@ -69,6 +69,9 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
+    // Stub out search for duplicate title:
+    sinon.stub(esAdminStub, 'search').returns(BluebirdPromise.resolve({ hits: { total: 0 } }));
+
     sinon.stub(esDataStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
     sinon.stub(esDataStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
     sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
@@ -85,6 +88,7 @@ describe('Saved Object', function () {
    */
   function createInitializedSavedObject(config = {}) {
     const savedObject = new SavedObject(config);
+    savedObject.title = 'my saved object';
     return savedObject.init();
   }
 
@@ -278,6 +282,7 @@ describe('Saved Object', function () {
       });
 
       it('on failure', function () {
+        stubESResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
           sinon.stub(DocSource.prototype, 'doIndex', () => {
             expect(savedObject.isSaving).to.be(true);

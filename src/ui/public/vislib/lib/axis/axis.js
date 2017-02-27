@@ -43,124 +43,21 @@ export default function AxisFactory(Private) {
 
       const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
       if (stackedMode) {
-        this.stack.out((d, y0, y) => {
-          return this._stackNegAndPosVals(d, y0, y);
+        const self = this;
+        this.stack = this._stackNegAndPosVals;
+      }
+    }
+
+    _stackNegAndPosVals(data) {
+      const cache = {};
+      data.forEach(series => {
+        series.forEach(value => {
+          if (!cache[value.x]) cache[value.x] = [0, 0];
+          value.y0 = cache[value.x][value.y < 0 ? 0 : 1];
+          cache[value.x][value.y < 0 ? 0 : 1] += value.y;
         });
-      }
-    }
-
-    /**
-     * Returns true for positive numbers
-     */
-    _isPositive(num) {
-      return num >= 0;
-    }
-
-    /**
-     * Returns true for negative numbers
-     */
-    _isNegative(num) {
-      return num < 0;
-    }
-
-    /**
-     * Adds two input values
-     */
-    _addVals(a, b) {
-      return a + b;
-    }
-
-    /**
-     * Returns the results of the addition of numbers in a filtered array.
-     */
-    _sumYs(arr, callback) {
-      const filteredArray = arr.filter(callback);
-
-      return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
-    }
-
-    /**
-     * Calculates the d.y0 value for stacked data in D3.
-     */
-    _calcYZero(y, arr) {
-      if (y === 0 && this._lastY0) return this._sumYs(arr, this._lastY0 > 0 ? this._isPositive : this._isNegative);
-      if (y >= 0) return this._sumYs(arr, this._isPositive);
-      return this._sumYs(arr, this._isNegative);
-    }
-
-    _getCounts(i, j) {
-      const data = this.visConfig.data.chartData();
-      const dataLengths = {};
-
-      dataLengths.charts = data.length;
-      dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
-      dataLengths.values = dataLengths.stacks ? data[i].series[j].values.length : 0;
-
-      return dataLengths;
-    }
-
-    _createCache() {
-      const cache = {
-        index: {
-          chart: 0,
-          stack: 0,
-          value: 0
-        },
-        yValsArr: []
-      };
-
-      cache.count = this._getCounts(cache.index.chart, cache.index.stack);
-
-      return cache;
-    }
-    /**
-     * Stacking function passed to the D3 Stack Layout `.out` API.
-     * See: https://github.com/mbostock/d3/wiki/Stack-Layout
-     * It is responsible for calculating the correct d.y0 value for
-     * mixed datasets containing both positive and negative values.
-     */
-    _stackNegAndPosVals(d, y0, y) {
-      const data = this.visConfig.data.chartData();
-
-      // Storing counters and data characteristics needed to stack values properly
-      if (!this._cache) {
-        this._cache = this._createCache();
-      }
-
-      d.y0 = this._calcYZero(y, this._cache.yValsArr);
-      if (d.y0 > 0) this._lastY0 = 1;
-      if (d.y0 < 0) this._lastY0 = -1;
-      ++this._cache.index.stack;
-
-
-      // last stack, or last value, reset the stack count and y value array
-      const lastStack = (this._cache.index.stack >= this._cache.count.stacks);
-      if (lastStack) {
-        this._cache.index.stack = 0;
-        ++this._cache.index.value;
-        this._cache.yValsArr = [];
-        // still building the stack collection, push v value to array
-      } else if (y !== 0) {
-        this._cache.yValsArr.push(y);
-      }
-
-      // last value, prepare for the next chart, if one exists
-      const lastValue = (this._cache.index.value >= this._cache.count.values);
-      if (lastValue) {
-        this._cache.index.value = 0;
-        ++this._cache.index.chart;
-
-        // no more charts, reset the queue and finish
-        if (this._cache.index.chart >= this._cache.count.charts) {
-          this._cache = this._createCache();
-          return;
-        }
-
-        // get stack and value count for next chart
-        const chartSeries = data[this._cache.index.chart].series;
-        this._cache.count.stacks = chartSeries.length;
-        this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
-      }
+      });
+      return data;
     }
 
     render() {
@@ -173,6 +70,7 @@ export default function AxisFactory(Private) {
       const elSelector = this.axisConfig.get('elSelector');
       const rootEl = this.axisConfig.get('rootEl');
       $(rootEl).find(elSelector).find('svg').remove();
+      this.axisTitle.destroy();
     }
 
     getAxis(length) {
@@ -271,13 +169,14 @@ export default function AxisFactory(Private) {
     }
 
     draw() {
+      let svg;
       const self = this;
       const config = this.axisConfig;
       const style = config.get('style');
 
       return function (selection) {
         const n = selection[0].length;
-        if (config.get('show') && self.axisTitle) {
+        if (config.get('show') && self.axisTitle && ['left', 'top'].includes(config.get('position'))) {
           self.axisTitle.render(selection);
         }
         selection.each(function () {
@@ -292,7 +191,7 @@ export default function AxisFactory(Private) {
           const axis = self.getAxis(length);
 
           if (config.get('show')) {
-            const svg = div.append('svg')
+            svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
 
@@ -313,9 +212,14 @@ export default function AxisFactory(Private) {
               .style('stroke-opacity', style.opacity);
             }
             if (self.axisLabels) self.axisLabels.render(svg);
-            svg.call(self.adjustSize());
           }
         });
+
+        if (self.axisTitle && ['right', 'bottom'].includes(config.get('position'))) {
+          self.axisTitle.render(selection);
+        }
+
+        if (svg) svg.call(self.adjustSize());
       };
     }
   }

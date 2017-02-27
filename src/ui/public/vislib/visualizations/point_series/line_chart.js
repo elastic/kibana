@@ -69,7 +69,9 @@ export default function LineChartFactory(Private) {
       }
 
       function cy(d) {
-        return yScale(d.y);
+        const y0 = d.y0 || 0;
+        const y = d.y || 0;
+        return yScale(y0 + y);
       }
 
       function cColor(d) {
@@ -156,7 +158,9 @@ export default function LineChartFactory(Private) {
       }
 
       function cy(d) {
-        return yScale(d.y);
+        const y = d.y || 0;
+        const y0 = d.y0 || 0;
+        return yScale(y0 + y);
       }
 
       line.append('path')
@@ -169,7 +173,9 @@ export default function LineChartFactory(Private) {
           .interpolate(interpolate)
           .x(isHorizontal ? cx : cy)
           .y(isHorizontal ? cy : cx);
-        return d3Line(data.values);
+        return d3Line(data.values.filter(function (d) {
+          return !_.isNull(d.y);
+        }));
       })
       .attr('fill', 'none')
       .attr('stroke', () => {

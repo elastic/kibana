@@ -1,17 +1,10 @@
-.guideCode {
-  padding: 2px 4px;
-  font-family: 'Ubuntu Mono', monospace;
-  background-color: #e8e8e8;
-  color: #565656;
-}
-
 .guideCodeViewer {
   position: fixed;
   top: $guideNavHeight;
   right: 0;
   bottom: 0;
   width: $guideCodeViewerWidth;
-  padding: 40px 20px 40px 0;
+  padding: 40px 20px;
   background-color: white;
   transform: translateX($guideCodeViewerWidth);
   transition: transform $guideCodeViewerTransition;
