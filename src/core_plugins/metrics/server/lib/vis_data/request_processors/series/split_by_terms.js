@@ -4,7 +4,7 @@ import basicAggs from '../../../../../public/components/lib/basic_aggs';
 import getBucketSize from '../../get_bucket_size';
 import getTimerange from '../../get_timerange';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
-import getBucketsPath from '../../../get_buckets_path';
+import getBucketsPath from '../../get_buckets_path';
 import bucketTransform from '../../bucket_transform';
 
 export default function splitByTerm(req, panel, series) {

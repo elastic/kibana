@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import parseSettings from '../parse_settings';
-import getBucketsPath from '../get_buckets_path';
+import getBucketsPath from './get_buckets_path';
 function checkMetric(metric, fields) {
   fields.forEach(field => {
     if (!metric[field]) {

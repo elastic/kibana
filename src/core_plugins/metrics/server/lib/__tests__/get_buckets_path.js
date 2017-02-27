@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import getBucketsPath from '../get_buckets_path';
+import getBucketsPath from './get_buckets_path';
 
 describe('getBucketsPath', () => {
 
