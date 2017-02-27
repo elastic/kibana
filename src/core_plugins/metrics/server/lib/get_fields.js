@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-function getParams(req) {
+export function getParams(req) {
   const index = req.query.index || '*';
   return {
     index,
@@ -11,7 +11,7 @@ function getParams(req) {
   };
 }
 
-function handleResponse(resp) {
+export function handleResponse(resp) {
   return _.reduce(resp, (acc, index, key) => {
     _.each(index.mappings, (type) => {
       _.each(type, (field, fullName) => {
@@ -36,7 +36,5 @@ function getFields(req) {
   return callWithRequest(req, 'indices.getFieldMapping', params).then(handleResponse);
 }
 
-getFields.handleResponse = handleResponse;
-getFields.getParams = getParams;
 export default getFields;
 
