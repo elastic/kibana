@@ -127,13 +127,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.addVis = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashbard`);
+        notify.info(`Visualization successfully added to your dashboard`);
       };
 
       $scope.addSearch = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashbard`);
+        notify.info(`Search successfully added to your dashboard`);
       };
 
       $scope.showEditHelpText = () => {
