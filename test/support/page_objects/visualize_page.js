@@ -306,8 +306,7 @@ export default class VisualizePage {
   }
 
   saveVisualization(vizName) {
-    return PageObjects.common.findTestSubject('visualizeSaveButton')
-    .click()
+    return PageObjects.common.clickTestSubject('visualizeSaveButton')
     .then(() => {
       return PageObjects.common.sleep(1000);
     })
@@ -321,8 +320,7 @@ export default class VisualizePage {
     //   // click save button
     .then(() => {
       PageObjects.common.debug('click submit button');
-      return PageObjects.common.findTestSubject('saveVisualizationButton')
-      .click();
+      return PageObjects.common.clickTestSubject('saveVisualizationButton');
     })
     .then(function () {
       return PageObjects.header.waitUntilLoadingHasFinished();
