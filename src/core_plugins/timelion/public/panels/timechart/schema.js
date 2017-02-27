@@ -250,9 +250,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           try {
             $scope.plot = $.plot(canvasElem, _.compact(series), options);
           } catch (e) {
-            drawErrorTimeout = setTimeout(function () {
-              drawPlot(plotConfig);
-            }, 500);
+            drawErrorTimeout = setTimeout(drawPlot, 500);
           }
 
           if ($scope.plot) {
