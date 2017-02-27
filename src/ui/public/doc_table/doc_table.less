@@ -1,13 +1,19 @@
 @import (reference) "~ui/styles/variables";
 
+/**
+ * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
+ */
 doc-table {
   overflow: auto;
   flex: 1 1 100%;
-  flex-direction: column;
+  flex-direction: column; /* 1 */
 
+  /**
+   * 1. Allow user to scroll table when its constrained by a fixed container height.
+   */
   .doc-table-container {
-    flex: 1 1 0;
-    overflow: auto;
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
   }
 
   .discover-table-datafield {
