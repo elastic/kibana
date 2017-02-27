@@ -225,6 +225,7 @@ export default function MarkerFactory() {
       }
       const lat = _.get(feature, 'geometry.coordinates.1');
       const lng = _.get(feature, 'geometry.coordinates.0');
+
       latLng = latLng || L.latLng(lat, lng);
 
       const content = this._tooltipFormatter(feature);
@@ -233,8 +234,51 @@ export default function MarkerFactory() {
       this._createTooltip(content, latLng);
     }
 
+    _getOffset(content, latLng) {
+      // Default maxWidth leaflet applies to popup is 300
+      const popupWidth = 300;
+
+      // We need to create the popup first to determine how tall it will be.  Give
+      // it an out of map bounds offset as we don't want to see this one.  It will
+      // get replaced on the next popup creation where we apply the correct offset
+      const popup = L.popup({ autoPan: false, offset: new L.Point(this.map.getSize().x * 2, this.map.getSize().y * 2) })
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(this.map);
+      const popupHeight = popup._contentNode.clientHeight;
+
+      const east = this.map.getBounds().getEast();
+      const west = this.map.getBounds().getWest();
+      const north = this.map.getBounds().getNorth();
+      const south = this.map.getBounds().getSouth();
+      const width = Math.abs(east - west);
+      const height = Math.abs(north - south);
+      const xscale = this.map.getSize().x / width;
+      const yscale = this.map.getSize().y / height;
+
+      const popupDistanceToLeftEdge = Math.abs(latLng.lng - west) * xscale;
+      const popupDistanceToRightEdge = Math.abs(latLng.lng - east) * xscale;
+      let widthOffset = 0;
+      if (popupDistanceToLeftEdge < popupWidth / 2) {
+        widthOffset = popupWidth / 2;
+      }
+      else if (popupDistanceToRightEdge < popupWidth / 2) {
+        widthOffset = -popupWidth / 2;
+      }
+
+      // Default height offset leaflet applies to popup is 6
+      let heightOffset = 6;
+      const popupDistanceToTopEdge = Math.abs(latLng.lat - north) * yscale;
+      if (popupDistanceToTopEdge < popupHeight + heightOffset) {
+        // 16 is the margin-bottom style that was added to the leaflet-popup in _tilemap.less
+        heightOffset += popupHeight + 16;
+      }
+
+      return new L.Point(widthOffset, heightOffset);
+    }
+
     _createTooltip(content, latLng) {
-      L.popup({ autoPan: false })
+      L.popup({ autoPan: false, offset: this._getOffset(content, latLng) })
       .setLatLng(latLng)
       .setContent(content)
       .openOn(this.map);

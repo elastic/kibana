@@ -25,11 +25,12 @@ export default function TileMapTooltipFormatter($compile, $rootScope, Private) {
         value: metricAgg.fieldFormatter()(value)
       },
       {
-        label: 'Center',
-        value: geoFormat.convert({
-          lat: feature.geometry.coordinates[1],
-          lon: feature.geometry.coordinates[0]
-        })
+        label: 'Latitude',
+        value: feature.geometry.coordinates[1],
+      },
+      {
+        label: 'Longitude',
+        value: feature.geometry.coordinates[0],
       }
     ];
 
