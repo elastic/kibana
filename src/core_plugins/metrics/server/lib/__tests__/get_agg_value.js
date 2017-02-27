@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import getAggValue from '../get_agg_value';
+import getAggValue from './get_agg_value';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;

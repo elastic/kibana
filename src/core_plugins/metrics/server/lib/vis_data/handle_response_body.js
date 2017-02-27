@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import getAggValue from '../get_agg_value';
+import getAggValue from './get_agg_value';
 import buildProcessorFunction from './build_processor_function';
 import basicAggs from '../../../public/components/lib/basic_aggs';
 import calculateLabel from '../../../public/components/lib/calculate_label';
