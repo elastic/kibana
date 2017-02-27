@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
-import moment from 'moment';
 import _ from 'lodash';
 import { Timeseries } from 'plugins/metrics/visualizations';
 import color from 'color';

@@ -1,6 +1,6 @@
 {
   "author": "Chris Cowan<chris@elastic.co>",
-  "name": "metrics",
+  "name": "Time Series Visual Builder",
   "version": "kibana"
 }
 

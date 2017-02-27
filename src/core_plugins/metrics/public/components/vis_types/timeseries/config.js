@@ -7,7 +7,6 @@ import createTextHandler from '../../lib/create_text_handler';
 import IndexPattern from '../../index_pattern';
 
 function TimeseriesConfig(props) {
-  const { fields } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
