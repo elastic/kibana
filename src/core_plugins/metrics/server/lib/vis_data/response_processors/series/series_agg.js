@@ -5,7 +5,7 @@ import getDefaultDecoration from '../../get_default_decoration';
 import getSplits from '../../get_splits';
 import getLastMetric from '../../get_last_metric';
 import mapBucket from '../../map_bucket';
-import unitToSeconds from '../../../unit_to_seconds';
+import unitToSeconds from '../../unit_to_seconds';
 import calculateLabel from '../../../../../public/components/lib/calculate_label';
 export default function seriesAgg(resp, panel, series) {
   return next => results => {
