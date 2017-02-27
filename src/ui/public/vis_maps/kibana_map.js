@@ -30,6 +30,35 @@ const FitControl = L.Control.extend({
   }
 });
 
+
+const LegendControl = L.Control.extend({
+
+  options: {},
+
+  _updateContents() {
+    this._legendContainer.empty();
+    const $div = $('<div>').addClass('tilemap-legend');
+    this._legendContainer.append($div);
+    const layers = this._kibanaMap.getLayers();
+    layers.forEach((layer) =>layer.appendLegendContents($div));
+  },
+
+  initialize: function (container, kibanaMap) {
+    this._legendContainer = container;
+    this._kibanaMap = kibanaMap;
+
+  },
+  onAdd: function () {
+    this._layerUpdateHandle = this._kibanaMap.on('layers:update', () => this._updateContents());
+    this._updateContents();
+    return this._legendContainer.get(0);
+  },
+  onRemove: function () {
+    this._layerUpdateHandle.remove();
+  }
+
+});
+
 /**
  * Collects map functionality required for Kibana.
  * Serves as simple abstraction for leaflet as well.
@@ -48,8 +77,10 @@ class KibanaMap extends EventEmitter {
 
     this._leafletDrawControl = null;
     this._leafletFitControl = null;
+    this._leafletLegendControl = null;
 
     this._layers = [];
+    this._listeners = [];
     this._leafletMap = L.map(containerNode, {//todo: read this from meta
       minZoom: 0,
       maxZoom: 10
@@ -66,11 +97,12 @@ class KibanaMap extends EventEmitter {
         this.emit('zoomchange');
       }
     });
-
-    this._leafletMap.on('zoomend', e => {
-      this.emit('zoomend');
-    });
+    this._leafletMap.on('zoomend', e =>this.emit('zoomend'));
     this._leafletMap.on('moveend', e => this.emit('moveend'));
+    this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
+    this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
+    this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
+    this._leafletMap.on('mouseup', e => this._layers.forEach(layer => layer.movePointer('mouseup', e)));
 
     this._leafletMap.on('draw:created', event => {
       const drawType = event.layerType;
@@ -126,9 +158,25 @@ class KibanaMap extends EventEmitter {
 
   }
 
+  getLayers() {
+    return this._layers.slice();
+  }
+
   addLayer(layer) {
+
+    const onTooltip = layer.on('showTooltip', (event) => {
+      const popup = L.popup({ autoPan: false });
+      popup.setLatLng(event.position);
+      popup.setContent(event.content);
+      popup.openOn(this._leafletMap);
+    });
+    const hideTooltip = layer.on('hideTooltip', () => this._leafletMap.closePopup());
+    this._listeners.push(onTooltip);
+    this._listeners.push(hideTooltip);
+
     this._layers.push(layer);
     layer.addToLeafletMap(this._leafletMap);
+    this.emit('layers:update');
   }
 
   removeLayer(layer) {
@@ -146,12 +194,16 @@ class KibanaMap extends EventEmitter {
     if (this._leafletDrawControl) {
       this._leafletMap.removeControl(this._leafletDrawControl);
     }
+    if (this._leafletLegendControl) {
+      this._leafletMap.removeControl(this._leafletLegendControl);
+    }
     this.setBaseLayer(null);
     for (const layer of this._layers) {
       layer.removeFromLeafletMap(this._leafletMap);
     }
     this._leafletMap.remove();
     this._containerNode.innerHTML = '';
+    this._listeners.forEach(listener => listener.remove());
   }
 
   getCenter() {
@@ -254,6 +306,18 @@ class KibanaMap extends EventEmitter {
     const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
     this._leafletFitControl = new FitControl(fitContainer, this);
     this._leafletMap.addControl(this._leafletFitControl);
+  }
+
+
+  addLegendControl() {
+
+    if (this._leafletLegendControl || !this._leafletMap) {
+      return;
+    }
+
+    const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
+    this._leafletLegendControl = new LegendControl($wrapper, this);
+    this._leafletMap.addControl(this._leafletLegendControl);
   }
 
   resize() {
