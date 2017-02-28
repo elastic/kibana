@@ -1,0 +1,26 @@
+/**
+ * 1. Allow container to deteermine font-size and line-height.
+ */
+.kuiToggleButton {
+  appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  color: $linkColor;
+
+  &:hover {
+    color: $linkHoverColor;
+    text-decoration: underline;
+  }
+}
+
+  /**
+   * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes
+   *    between "expand" and "collapse". Use ems to be relative to inherited font-size.
+   */
+  .kuiToggleButton__icon {
+    width: 0.8em; /* 1 */
+  }

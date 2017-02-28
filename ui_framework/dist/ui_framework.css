@@ -1493,6 +1493,14 @@ body {
   border-top: 1px solid #E4E4E4; }
 
 /**
+ * 1. We don't want to create too strong a disconnect between the original row and the row
+ *    that contains its expanded details.
+ */
+.kuiTableRowCell--expanded {
+  border-top-color: #f0f0f0;
+  /* 1 */ }
+
+/**
    * 1. Vertically align all children.
    * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
    *    the padding was on the cell, the ellipsis would be cropped.
@@ -1578,6 +1586,34 @@ body {
     color: #191E23;
     background-color: #F2F2F2;
     cursor: default; }
+
+/**
+ * 1. Allow container to deteermine font-size and line-height.
+ */
+.kuiToggleButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  /* 1 */
+  line-height: inherit;
+  /* 1 */
+  color: #3CAED2; }
+  .kuiToggleButton:hover {
+    color: #006E8A;
+    text-decoration: underline; }
+
+/**
+   * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes
+   *    between "expand" and "collapse". Use ems to be relative to inherited font-size.
+   */
+.kuiToggleButton__icon {
+  width: 0.8em;
+  /* 1 */ }
 
 .kuiToolBar {
   display: -webkit-box;
