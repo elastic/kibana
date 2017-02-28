@@ -7,10 +7,12 @@ import KibanaMap from './kibana_map';
 import GeohashLayer from './geohash_layer';
 import './lib/tilemap_settings';
 import './styles/_tilemap.less';
+import VislibLibResizeCheckerProvider from '../vislib/lib/resize_checker';
 
 
 module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier, courier, getAppState) {
 
+  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(MapsVisTypeBuildChartDataProvider);
   const notify = new Notifier({ location: 'Tilemap' });
@@ -28,6 +30,13 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._dataDirty = true;
       this._paramsDirty = true;
 
+
+      this._resizeChecker = new ResizeChecker($el);
+      this._resizeChecker.on('resize', () => {
+        if (this._kibanaMap) {
+          this._kibanaMap.resize();
+        }
+      });
     }
 
     async _makeKibanaMap($el) {

@@ -225,7 +225,7 @@ class KibanaMap extends EventEmitter {
     }
     this._leafletMap.remove();
     this._containerNode.innerHTML = '';
-    this._listeners.forEach(listener => listener.layer.removeEventListener(listener.name, listener.handle));
+    this._listeners.forEach(listener => listener.layer.removeListener(listener.name, listener.handle));
   }
 
   getCenter() {
