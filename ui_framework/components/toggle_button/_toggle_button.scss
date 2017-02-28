@@ -1,5 +1,6 @@
 /**
  * 1. Allow container to deteermine font-size and line-height.
+ * 2. Override inherited Bootstrap styles.
  */
 .kuiToggleButton {
   appearance: none;
@@ -11,8 +12,12 @@
   line-height: inherit; /* 1 */
   color: $linkColor;
 
+  &:active {
+    color: $linkColor !important; /* 2 */
+  }
+
   &:hover {
-    color: $linkHoverColor;
+    color: $linkHoverColor !important; /* 2 */
     text-decoration: underline;
   }
 }

@@ -1589,6 +1589,7 @@ body {
 
 /**
  * 1. Allow container to deteermine font-size and line-height.
+ * 2. Override inherited Bootstrap styles.
  */
 .kuiToggleButton {
   -webkit-appearance: none;
@@ -1603,8 +1604,12 @@ body {
   line-height: inherit;
   /* 1 */
   color: #3CAED2; }
+  .kuiToggleButton:active {
+    color: #3CAED2 !important;
+    /* 2 */ }
   .kuiToggleButton:hover {
-    color: #006E8A;
+    color: #006E8A !important;
+    /* 2 */
     text-decoration: underline; }
 
 /**
