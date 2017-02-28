@@ -6,18 +6,12 @@ import $ from 'jquery';
 import { EventEmitter } from 'events';
 
 class GeohashMarkers extends EventEmitter {
-  constructor(featureCollection, layerOptions, targetZoom) {
+  constructor(featureCollection, options, targetZoom) {
     super();
     this._geohashGeoJson = featureCollection;
     this._zoom = targetZoom;
-
-    this._valueFormatter = x => x;//todo: get from params
-    this._tooltipFormatter = x => {
-      const div = document.createElement('div');
-      div.innerHTML = x;
-      return div;
-    };//todo: get from params
-
+    this._valueFormatter = options.valueFormatter;
+    this._tooltipFormatter = options.tooltipFormatter;
     this._legendColors = null;
     this._legendQuantizer = null;
   }
@@ -62,7 +56,6 @@ class GeohashMarkers extends EventEmitter {
     const titleText = this.getLabel();
     const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
     jqueryDiv.append($title);
-
 
     const labels = this._legendColors.map((color) => {
 
@@ -287,18 +280,14 @@ class GeohashGrid extends ScaledCircles {
  */
 class Heatmap extends EventEmitter {
 
-  constructor(featureCollection, heatmapOptions, zoom) {
+  constructor(featureCollection, options, zoom) {
 
     super();
     this._geojsonFeatureCollection = featureCollection;
     const max = _.get(featureCollection, 'properties.max');
-    const points = dataToHeatArray(max, heatmapOptions.heatNormalizeData, featureCollection);
-    this._leafletLayer = L.heatLayer(points, heatmapOptions);
-    this._tooltipFormatter = x => {
-      const div = document.createElement('div');
-      div.innerHTML = x;
-      return div;
-    };//todo: get from params
+    const points = dataToHeatArray(max, options.heatNormalizeData, featureCollection);
+    this._leafletLayer = L.heatLayer(points, options);
+    this._tooltipFormatter = options.tooltipFormatter;
 
 
     this._zoom = zoom;
@@ -316,6 +305,9 @@ class Heatmap extends EventEmitter {
     this._addTooltips();
   }
 
+  getBounds() {
+    return this._leafletLayer.getBounds();
+  }
 
   getLeafletLayer() {
     return this._leafletLayer;
@@ -464,15 +456,21 @@ export default class GeohashLayer extends KibanaMapLayer {
     this._zoom = zoom;
 
     this._geohashMarkers = null;
+
+    const markerOptions = {
+      valueFormatter: this._geohashOptions.valueFormatter,
+      tooltipFormatter: this._geohashOptions.tooltipFormatter
+    };
+
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
-        this._geohashMarkers = new ScaledCircles(this._geohashGeoJson, {}, zoom);
+        this._geohashMarkers = new ScaledCircles(this._geohashGeoJson, markerOptions, zoom);
         break;
       case 'Shaded Circle Markers':
-        this._geohashMarkers = new ShadedCircles(this._geohashGeoJson, {}, zoom);
+        this._geohashMarkers = new ShadedCircles(this._geohashGeoJson, markerOptions, zoom);
         break;
       case 'Shaded Geohash Grid':
-        this._geohashMarkers = new GeohashGrid(this._geohashGeoJson, {}, zoom);
+        this._geohashMarkers = new GeohashGrid(this._geohashGeoJson, markerOptions, zoom);
         break;
       case 'Heatmap':
         this._geohashMarkers = new Heatmap(this._geohashGeoJson, {
@@ -480,7 +478,8 @@ export default class GeohashLayer extends KibanaMapLayer {
           blur: +this._geohashOptions.heatmap.heatBlur,
           maxZoom: +this._geohashOptions.heatmap.heatMaxZoom,
           minOpaxity: +this._geohashOptions.heatmap.heatMinOpacity,
-          heatNormalizeData: this._geohashOptions.heatmap.heatNormalizeData
+          heatNormalizeData: this._geohashOptions.heatmap.heatNormalizeData,
+          tooltipFormatter: this._geohashOptions.tooltipFormatter
         }, zoom);
         break;
       default:
