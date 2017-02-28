@@ -1,33 +1,59 @@
-<div class="index-pattern-name">
-  <h1 class="title" css-truncate>
-    <i aria-hidden="true" ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
-    {{indexPattern.id}}
-  </h1>
-  <div class="controls">
+<div class="kuiBar kuiVerticalRhythm">
+  <div class="kuiBarSection">
+    <!-- Index pattern name -->
+    <h1
+      class="kuiTitle kuiVerticalRhythm"
+      css-truncate
+      data-test-subj="indexPatternTitle"
+    >
+      <span
+        aria-hidden="true"
+        ng-if="defaultIndex === indexPattern.id"
+        class="kuiIcon fa-star"
+      ></span>
+      {{indexPattern.id}}
+    </h1>
+  </div>
+
+  <div class="kuiBarSection">
     <button
       ng-if="setDefault"
       ng-click="setDefault()"
       tooltip="Set as default index"
-      class="btn btn-success">
+      class="kuiButton kuiButton--basic"
+      data-test-subj="setDefaultIndexPatternButton"
+    >
       <span class="sr-only">Set as default index</span>
-      <i aria-hidden="true" class="fa fa-star"></i>
+      <ispan
+        aria-hidden="true"
+        class="kuiIcon fa-star"
+      ></span>
     </button>
     <button
       ng-if="refreshFields"
       ng-click="refreshFields()"
       tooltip="Refresh field list"
-      class="btn btn-warning">
+      class="kuiButton kuiButton--basic"
+    >
       <span class="sr-only">Reload field list</span>
-      <i aria-hidden="true" class="fa fa-refresh"></i>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-refresh"
+      ></span>
     </button>
     <button
       ng-if="delete"
       ng-click="delete()"
       aria-label="Remove index pattern"
       tooltip="Remove index pattern"
-      class="btn btn-danger">
+      class="kuiButton kuiButton--danger"
+      data-test-subj="deleteIndexPatternButton"
+    >
       <span class="sr-only">Remove index pattern</span>
-      <i aria-hidden="true" class="fa fa-trash"></i>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-trash"
+      ></span>
     </button>
   </div>
 </div>
