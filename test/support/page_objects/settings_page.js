@@ -98,19 +98,16 @@ export default class SettingsPage {
   }
 
   async clickDefaultIndexButton() {
-    await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-success.ng-scope').click();
+    await PageObjects.common.findTestSubject('setDefaultIndexPatternButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async clickDeletePattern() {
-    await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-danger.ng-scope').click();
+    await PageObjects.common.findTestSubject('deleteIndexPatternButton').click();
   }
 
   getIndexPageHeading() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
+    return PageObjects.common.findTestSubject('indexPatternTitle');
   }
 
   getConfigureHeader() {
@@ -156,17 +153,17 @@ export default class SettingsPage {
   getFieldsTabCount() {
     const selector = 'a[data-test-subj="tab-indexedFields"] small';
     return PageObjects.common.try(() => {
-      return this.remote.setFindTimeout(defaultFindTimeout / 10)
-      .findByCssSelector('a[data-test-subj="tab-indexedFields"] small').getVisibleText()
-      .then((theText) => {
-      // the value has () around it, remove them
-        return theText.replace(/\((.*)\)/, '$1');
-      });
+      return PageObjects.common.findTestSubject('tab-count-indexedFields')
+        .getVisibleText()
+        .then((theText) => {
+        // the value has () around it, remove them
+          return theText.replace(/\((.*)\)/, '$1');
+        });
     });
   }
 
   async getScriptedFieldsTabCount() {
-    const selector = 'a[data-test-subj="tab-scriptedFields"] small';
+    const selector = '[data-test-subj="tab-count-scriptedFields"]';
     return await PageObjects.common.try(async () => {
       const theText = await this.remote.setFindTimeout(defaultFindTimeout / 10)
       .findByCssSelector(selector).getVisibleText();
@@ -257,7 +254,7 @@ export default class SettingsPage {
 
   async setPageSize(size) {
     await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
+    .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
     .click();
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
