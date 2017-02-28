@@ -32,23 +32,30 @@ kbn-management-app {
 }
 
 kbn-management-landing {
-  .management-panel-product {
+  .management-panel {
     margin-bottom: 10px;
 
-    .panel-body {
-      padding-bottom: 30px;
-      position: relative;
-      border-left: 1px solid #E4E4E3;
-      border-right: 1px solid #E4E4E3;
-      border-bottom: 1px solid #E4E4E3;
-    }
   }
 
-  .management-link {
+  .management-panel__heading-icon {
+    font-size: 0.9em;
+    padding: 5px;
+  }
+
+  .management-panel__heading-icon--secondary {
+    font-size: 0.9em;
+    padding: 5px;
+  }
+
+  .management-panel__body {
+    padding-bottom: 30px;
+  }
+
+  .management-panel__link {
     font-size: 17px;
     line-height: 32px;
 
-    &.is-management-link-disabled {
+    &.management-panel__link--disabled {
       opacity: 0.5;
       cursor: default;
 
@@ -56,11 +63,6 @@ kbn-management-landing {
         color: @kibanaBlue2;
       }
     }
-  }
-
-  .panel-heading-icon {
-    font-size: 0.9em;
-    padding: 5px;
   }
 
   .management-section-info {
@@ -72,13 +74,35 @@ kbn-management-landing {
   }
 
   .management-section-info-expanded {
-    .panel-heading-icon {
-      color: @black;
-    }
-
     .management-section-info {
       display: block;
     }
+  }
+
+  .management-panel__heading-icon {
+    width: 32px;
+    height: 32px;
+    background-position: 3px 3px;
+    background-repeat: no-repeat;
+    background-size: 26px 26px;
+    background-color: white;
+    border-radius: 18px;
+  }
+
+  .management-panel__heading-icon--elasticsearch {
+    background-image: url("~ui/icons/elasticsearch-color.svg");
+  }
+
+  .management-panel__heading-icon--kibana {
+    background-image: url("~ui/icons/kibana-color.svg");
+  }
+
+  .management-panel__heading-icon--beats {
+    background-image: url("~ui/icons/beats-color.svg");
+  }
+
+  .management-panel__heading-icon--logstash {
+    background-image: url("~ui/icons/logstash-color.svg");
   }
 }
 
