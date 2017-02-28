@@ -9,60 +9,71 @@ import colorramps from 'ui/vislib/components/color/colormaps';
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
 
-  const containerNode = $element[0];
-  const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
-  const kibanaMap = new KibanaMap(containerNode, minMaxZoom);
-  const url = tilemapSettings.getUrl();
-  const options = tilemapSettings.getTMSOptions();
-  kibanaMap.setBaseLayer({
-    baseLayerType: 'tms',
-    options: { url, ...options }
-  });
-
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
-
+  const containerNode = $element[0];
+  let kibanaMap = null;
   let choroplethLayer = null;
 
+  async function makeKibanaMap() {
+
+    if (!tilemapSettings.isInitialized()) {
+      await tilemapSettings.loadSettings();
+    }
+
+    const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
+    kibanaMap = new KibanaMap(containerNode, minMaxZoom);
+    const url = tilemapSettings.getUrl();
+    const options = tilemapSettings.getTMSOptions();
+    kibanaMap.setBaseLayer({
+      baseLayerType: 'tms',
+      options: { url, ...options }
+    });
+  }
+
+  const kibanaMapReady = makeKibanaMap();
   $scope.$watch('esResponse', async function (response) {
-    const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
-    let results;
-    if (!response || !response.aggregations) {
-      results = [];
-    } else {
-      const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
-      const buckets = response.aggregations[termAggId].buckets;
-      results = buckets.map((bucket) => {
-        return {
-          term: bucket.key,
-          value: getValue(metricsAgg, bucket)
-        };
-      });
-    }
-
-    const options = $scope.vis.params;
-    if (!options.selectedJoinField) {
-      options.selectedJoinField = options.selectedLayer.fields[0];
-    }
-
-    updateChoroplethLayer(options.selectedLayer.url);
-    choroplethLayer.setChoroplethMetrics(results);
-    kibanaMap.resize();
-
+    kibanaMapReady.then(() => {
+      const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
+      let results;
+      if (!response || !response.aggregations) {
+        results = [];
+      } else {
+        const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
+        const buckets = response.aggregations[termAggId].buckets;
+        results = buckets.map((bucket) => {
+          return {
+            term: bucket.key,
+            value: getValue(metricsAgg, bucket)
+          };
+        });
+      }
+      const options = $scope.vis.params;
+      if (!options.selectedJoinField) {
+        options.selectedJoinField = options.selectedLayer.fields[0];
+      }
+      updateChoroplethLayer(options.selectedLayer.url);
+      choroplethLayer.setChoroplethMetrics(results);
+      kibanaMap.resize();
+    });
   });
 
   $scope.$watch('vis.params', (options) => {
-    if (!options.selectedJoinField) {
-      options.selectedJoinField = options.selectedLayer.fields[0];
-    }
+    kibanaMapReady.then(() => {
+      if (!options.selectedJoinField) {
+        options.selectedJoinField = options.selectedLayer.fields[0];
+      }
 
-    updateChoroplethLayer(options.selectedLayer.url);
-    choroplethLayer.setChoroplethJoinField(options.selectedJoinField);
-    choroplethLayer.setChoroplethColorRamp(colorramps[options.colorSchema]);
-    kibanaMap.resize();
+      updateChoroplethLayer(options.selectedLayer.url);
+      choroplethLayer.setChoroplethJoinField(options.selectedJoinField);
+      choroplethLayer.setChoroplethColorRamp(colorramps[options.colorSchema]);
+      kibanaMap.resize();
+    });
   });
 
   $scope.$watch(getContainerSize, _.debounce(() => {
-    kibanaMap.resize();
+    kibanaMapReady.then(()=> {
+      kibanaMap.resize();
+    });
   }, 500, { trailing: true }), true);
 
   function getContainerSize() {
@@ -87,10 +98,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     });
     kibanaMap.addLayer(choroplethLayer);
   }
-
-
-
-
 });
 
 
