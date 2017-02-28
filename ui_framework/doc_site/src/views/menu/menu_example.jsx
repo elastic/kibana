@@ -1,15 +1,44 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideCode,
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideSectionTypes,
+} from '../../components';
 
-export default createExample([{
-  title: 'Menu',
-  html: require('./menu.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Menu, contained',
-  html: require('./menu_contained.html'),
-  hasDarkTheme: false,
-}]);
+const menuHtml = require('./menu.html');
+const menuContainedHtml = require('./menu_contained.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Menu"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: menuHtml,
+      }]}
+    >
+      <GuideDemo
+        html={menuHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Menu, contained"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: menuContainedHtml,
+      }]}
+    >
+      <GuideDemo
+        html={menuContainedHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

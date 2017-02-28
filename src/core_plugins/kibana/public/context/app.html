@@ -1,0 +1,142 @@
+<div class="kuiLocalNav">
+  <div class="kuiLocalNavRow">
+    <div class="kuiLocalNavRow__section">
+      <div class="kuiLocalTitle">
+        Surrounding Documents in {{ contextApp.state.queryParameters.indexPattern.id }}
+      </div>
+    </div>
+  </div>
+  <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
+    <div class="kuiLocalTabs">
+      <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind="contextApp.state.queryParameters.anchorUid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Error feedback -->
+<div
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.FAILED"
+>
+  <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span class="kuiInfoPanelHeader__title">
+        Problem with query
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        Failed to load the anchor document. Please reload or visit
+        <a ng-href="{{ contextApp.state.navigation.discover.url }}">Discover</a>
+        to select a valid anchor document.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.FAILED"
+  role="main"
+>
+  <!-- Controls -->
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <context-loading-button
+        data-test-subj="predecessorLoadMoreButton"
+        is-disabled="![
+          contextApp.constants.LOADING_STATUS.LOADED,
+          contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.predecessors)"
+        icon="'fa-chevron-up'"
+        ng-click="contextApp.actions.fetchMorePredecessorRows()"
+      >
+        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
+      </context-loading-button>
+      <context-size-picker
+        count="contextApp.state.queryParameters.predecessorCount"
+        data-test-subj="predecessorCountPicker"
+        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
+        on-change-count="contextApp.actions.fetchGivenPredecessorRows"
+      ></context-size-picker>
+      <span>newer documents</span>
+      <span
+        class="kuiStatusText kuiStatusText--warning"
+        ng-if="(contextApp.state.loadingStatus.predecessors === contextApp.constants.LOADING_STATUS.LOADED)
+          && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
+      >
+        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} documents newer than the anchor could be found."></span>
+      </span>
+    </div>
+
+    <div class="kuiBarSection">
+    </div>
+  </div>
+
+  <!-- Loading feedback -->
+  <div
+    ng-if="[
+      contextApp.constants.LOADING_STATUS.UNINITIALIZED,
+      contextApp.constants.LOADING_STATUS.LOADING,
+    ].includes(contextApp.state.loadingStatus.anchor)"
+    class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
+  >
+    <div class="kuiLoadingItems">
+      Loading&hellip;
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div
+    ng-if="contextApp.state.loadingStatus.anchor === contextApp.constants.LOADING_STATUS.LOADED"
+    class="kuiPanel kuiVerticalRhythm"
+  >
+    <div class="discover-table" fixed-scroll>
+      <doc-table
+        hits="contextApp.state.rows.all"
+        index-pattern="contextApp.state.queryParameters.indexPattern"
+        sorting="contextApp.state.queryParameters.sort"
+        columns="contextApp.state.queryParameters.columns"
+        infinite-scroll="true"
+      ></doc-table>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <context-loading-button
+        data-test-subj="successorLoadMoreButton"
+        is-disabled="![
+          contextApp.constants.LOADING_STATUS.LOADED,
+          contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.successors)"
+        icon="'fa-chevron-down'"
+        ng-click="contextApp.actions.fetchMoreSuccessorRows()"
+      >
+        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
+      </context-loading-button>
+      <context-size-picker
+        count="contextApp.state.queryParameters.successorCount"
+        data-test-subj="successorCountPicker"
+        is-disabled="contextApp.state.loadingStatus.anchor !== contextApp.constants.LOADING_STATUS.LOADED"
+        on-change-count="contextApp.actions.fetchGivenSuccessorRows"
+      ></context-size-picker>
+      <div>older documents</div>
+      <span
+        class="kuiStatusText kuiStatusText--warning"
+        ng-if="(contextApp.state.loadingStatus.successors === contextApp.constants.LOADING_STATUS.LOADED)
+          && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
+      >
+        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
+        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} documents older than the anchor could be found."></span>
+      </span>
+    </div>
+
+    <div class="kuiBarSection">
+    </div>
+  </div>
+</div>

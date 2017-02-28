@@ -84,7 +84,7 @@ authority for your Elasticsearch instance.
 to `false`.
 `elasticsearch.tribe.pingTimeout:`:: *Default: the value of the `elasticsearch.tribe.requestTimeout` setting* Time in milliseconds to
 wait for Elasticsearch to respond to pings.
-`elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait for responses from the back end or
+`elasticsearch.tribe.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait for responses from the back end or
 Elasticsearch. This value must be a positive integer.
 `elasticsearch.tribe.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List of Kibana client-side headers to send to Elasticsearch.
 To send *no* client-side headers, set this value to [] (an empty list).

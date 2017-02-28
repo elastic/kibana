@@ -9,14 +9,14 @@
 
 .guideContent {
   flex: 1 1 auto;
-  padding-top: 100px;
+  padding-top: $guideNavHeight;
   transition: padding-right $guideCodeViewerTransition;
 
   &.is-code-viewer-open {
-    padding-right: $guideCodeViewerWidth;
+    padding-right: $guideCodeViewerWidth - 20px;
 
     @include whenNarrowerThan($normalBreakpoint) {
-      padding-right: $guideCodeViewerSmallWidth;
+      padding-right: $guideCodeViewerSmallWidth - 20px;
     }
   }
 }

@@ -34,7 +34,7 @@ export default function VislibVisTypeFactory(Private) {
     if (params.mode) {
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(params.mode);
       params.seriesParams[0].mode = stacked ? 'stacked' : 'normal';
-      const axisMode = ['stacked', 'overlap'].includes(params.mode) ? 'norlal' : params.mode;
+      const axisMode = ['stacked', 'overlap'].includes(params.mode) ? 'normal' : params.mode;
       params.valueAxes[0].scale.mode = axisMode;
       delete params.mode;
     }

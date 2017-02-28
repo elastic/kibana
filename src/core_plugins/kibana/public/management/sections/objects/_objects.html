@@ -139,12 +139,14 @@
             class="kuiTableRow"
           >
             <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-              <input
-                type="checkbox"
-                class="kuiCheckBox"
-                ng-click="toggleItem(item)"
-                ng-checked="selectedItems.indexOf(item) >= 0"
-              >
+              <div class="kuiTableRowCell__liner">
+                <input
+                  type="checkbox"
+                  class="kuiCheckBox"
+                  ng-click="toggleItem(item)"
+                  ng-checked="selectedItems.indexOf(item) >= 0"
+                >
+              </div>
             </td>
             <td class="kuiTableRowCell">
               <div class="kuiTableRowCell__liner">
