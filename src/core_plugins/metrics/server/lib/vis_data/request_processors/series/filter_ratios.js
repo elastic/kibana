@@ -16,7 +16,7 @@ export default function ratios(req, panel, series) {
         let numeratorPath = `${metric.id}-numerator>_count`;
         let denominatorPath =  `${metric.id}-denominator>_count`;
 
-        if (metric.metric_agg !== 'count') {
+        if (metric.metric_agg !== 'count' && bucketTransform[metric.metric_agg]) {
           const aggBody = {
             metric: bucketTransform[metric.metric_agg]({
               type: metric.metric_agg,
