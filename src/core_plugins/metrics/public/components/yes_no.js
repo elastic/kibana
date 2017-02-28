@@ -1,21 +1,22 @@
 import React, { Component, PropTypes } from 'react';
+import _ from 'lodash';
 
 function YesNo(props) {
   const { name, value } = props;
   const handleChange = value => {
     const { name } = props;
     return (e) => {
-      const parts = {};
-      parts[name] = value;
+      const parts = { [name]: value };
       props.onChange(parts);
     };
   };
+  const inputName = name + _.uniqueId();
   return (
     <div className="thor__yes_no">
       <label>
         <input
           type="radio"
-          name={name}
+          name={inputName}
           checked={Boolean(value)}
           value="yes"
           onChange={handleChange(1)}/>
@@ -23,7 +24,7 @@ function YesNo(props) {
       <label>
         <input
           type="radio"
-          name={name}
+          name={inputName}
           checked={!Boolean(value)}
           value="no"
           onChange={handleChange(0)}/>
