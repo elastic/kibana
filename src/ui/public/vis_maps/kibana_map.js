@@ -171,7 +171,7 @@ class KibanaMap extends EventEmitter {
 
   addLayer(layer) {
 
-    const onTooltip = layer.on('showTooltip', (event) => {
+    const onshowTooltip = (event) => {
 
       if (!this._showTooltip) {
         return;
@@ -181,10 +181,13 @@ class KibanaMap extends EventEmitter {
       popup.setLatLng(event.position);
       popup.setContent(event.content);
       popup.openOn(this._leafletMap);
-    });
-    const hideTooltip = layer.on('hideTooltip', () => this._leafletMap.closePopup());
-    this._listeners.push(onTooltip);
-    this._listeners.push(hideTooltip);
+    };
+
+    layer.on('showTooltip', onshowTooltip);
+    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: layer });
+    const onHideTooltip = () => this._leafletMap.closePopup();
+    layer.on('hideTooltip', onHideTooltip);
+    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: layer });
 
     this._layers.push(layer);
     layer.addToLeafletMap(this._leafletMap);
@@ -215,7 +218,7 @@ class KibanaMap extends EventEmitter {
     }
     this._leafletMap.remove();
     this._containerNode.innerHTML = '';
-    this._listeners.forEach(listener => listener.remove());
+    this._listeners.forEach(listener => listener.remove.removeEventListener(listener.name, listener.handle));
   }
 
   getCenter() {
