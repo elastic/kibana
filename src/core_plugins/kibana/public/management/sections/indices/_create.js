@@ -14,7 +14,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
+.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
@@ -88,7 +88,7 @@ uiModules.get('apps/management')
     })
     .catch(function (err) {
       if (err instanceof IndexPatternMissingIndices) {
-        notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+        notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
       }
       else notify.fatal(err);
     });
@@ -192,12 +192,12 @@ uiModules.get('apps/management')
         return;
       }
 
-      patternErrors.push('Pattern does not match any existing indices');
+      patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
       const radius = Math.round(index.sampleCount / 2);
       const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
 
       if (_.uniq(samples).length !== samples.length) {
-        patternErrors.push('Invalid pattern, interval does not create unique index names');
+        patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
       } else {
         index.samples = samples;
       }

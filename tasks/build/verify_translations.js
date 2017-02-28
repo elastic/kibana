@@ -7,6 +7,9 @@ import * as i18nVerify from '../utils/i18n_verify_keys';
 
 export default function (grunt) {
   grunt.registerTask('_build:verifyTranslations', function () {
+
+    grunt.task.requires('_build:extractAngularTranslations');
+
     const done = this.async();
 
     const serverConfig = {
@@ -46,13 +49,12 @@ export default function (grunt) {
 
 function verifyTranslations(uiI18nObj)
 {
+  const angularTranslations = require(fromRoot('build/tmp/en.json'));
+  const translationKeys = Object.keys(angularTranslations);
   const translationPatterns = [
-    { regEx: 'translate=\"([^\"]+)\"',
-      parsePaths: [fromRoot('/src/core_plugins/kibana/*.html')] },
     { regEx: 'i18n\\(\'(.*)\'\\)',
       parsePaths: [fromRoot('/src/ui/views/*.jade')] }
   ];
-  const translationKeys = [];
 
   const keyPromises = _.map(translationPatterns, (pattern) => {
     return i18nVerify.getTranslationKeys(pattern.regEx, pattern.parsePaths)

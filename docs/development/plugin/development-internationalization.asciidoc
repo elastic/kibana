@@ -115,15 +115,15 @@ After
 `_create.html`
 
 --------------------------------------------------------
-    <h1 translate>KIBANA-H1_CONFIGURE_INDEX_PATTERN</h1>
-    <p translate>KIBANA-MUST_CONFIGURE_INDEX_PATTERN</p>
+    <h1 translate="KIBANA-CONFIGURE_INDEX_PATTERN"</h1>
+    <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"</p>
 --------------------------------------------------------
 
 `en.json`
 
 --------------------------------------------------------------------------------
     {
-       "KIBANA-H1_CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
+       "KIBANA-CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
        "KIBANA-MUST_CONFIGURE_INDEX_PATTERN": "In order to use Kibana you must…"
     }
 --------------------------------------------------------------------------------
