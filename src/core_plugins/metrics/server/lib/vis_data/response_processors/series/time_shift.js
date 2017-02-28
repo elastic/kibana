@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import unitToSeconds from '../../unit_to_seconds';
 import moment from 'moment';
 export default function timeShift(resp, panel, series) {
   return next => results => {

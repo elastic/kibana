@@ -1,9 +1,7 @@
-import _ from 'lodash';
-import basicAggs from '../../../../../public/components/lib/basic_aggs';
-import getDefaultDecoration from '../../get_default_decoration';
-import getSplits from '../../get_splits';
-import getLastMetric from '../../get_last_metric';
-import mapBucket from '../../map_bucket';
+import getDefaultDecoration from '../../helpers/get_default_decoration';
+import getSplits from '../../helpers/get_splits';
+import getLastMetric from '../../helpers/get_last_metric';
+import mapBucket from '../../helpers/map_bucket';
 export default function stdMetric(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);

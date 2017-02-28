@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import getSplits from '../get_splits';
+import getSplits from '../../helpers/get_splits';
 
 describe('getSplits(resp, series)', () => {
 

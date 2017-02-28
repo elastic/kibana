@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-import getTimerange from '../get_timerange';
+import getTimerange from '../../helpers/get_timerange';
 import moment from 'moment';
 
 describe('getTimerange(req)', () => {

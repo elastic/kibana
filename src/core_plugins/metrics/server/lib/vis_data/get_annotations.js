@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import moment from 'moment';
 import calculateIndices from './calculate_indices';
 import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';

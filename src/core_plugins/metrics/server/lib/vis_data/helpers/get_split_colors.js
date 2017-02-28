@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import Color from 'color';
 export default function getSplitColors(inputColor, size = 10, style = 'gradient') {
   const color = new Color(inputColor);

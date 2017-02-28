@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import getSiblingAggValue from '../get_sibling_agg_value';
+import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 
 describe('getSiblingAggValue', () => {
   const row = {

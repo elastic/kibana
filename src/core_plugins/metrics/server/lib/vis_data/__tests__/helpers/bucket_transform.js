@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import bucketTransform from '../bucket_transform';
+import bucketTransform from '../../helpers/bucket_transform';
 
 describe('bucketTransform', () => {
 
