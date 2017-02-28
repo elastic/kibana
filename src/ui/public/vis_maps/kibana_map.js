@@ -3,8 +3,6 @@ import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import zoomToPrecision from 'ui/utils/zoom_to_precision';
-// import Notifier from 'ui/notify/notifier';
-
 
 const FitControl = L.Control.extend({
   options: {
@@ -35,7 +33,7 @@ const LegendControl = L.Control.extend({
 
   options: {
     position: 'topright'
-  },//todo: add position
+  },
 
   _updateContents() {
     this._legendContainer.empty();
@@ -171,6 +169,9 @@ class KibanaMap extends EventEmitter {
 
   addLayer(layer) {
 
+
+    this.emit('layers:invalidate');
+
     const onshowTooltip = (event) => {
 
       if (!this._showTooltip) {
@@ -185,6 +186,7 @@ class KibanaMap extends EventEmitter {
 
     layer.on('showTooltip', onshowTooltip);
     this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: layer });
+
     const onHideTooltip = () => this._leafletMap.closePopup();
     layer.on('hideTooltip', onHideTooltip);
     this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: layer });
@@ -192,6 +194,11 @@ class KibanaMap extends EventEmitter {
     this._layers.push(layer);
     layer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
+  }
+
+
+  isReady() {
+    return this._layers.every(layer => layer.isReady());
   }
 
   removeLayer(layer) {
@@ -244,7 +251,6 @@ class KibanaMap extends EventEmitter {
   }
 
   getAutoPrecision() {
-    //todo: not correct, should take into account settigns...
     return zoomToPrecision(this._leafletMap.getZoom(), 12);
   }
 
@@ -381,6 +387,8 @@ class KibanaMap extends EventEmitter {
     }
 
     baseLayer.on('tileload', () => this._updateDesaturation());
+    baseLayer.on('load', () => { this.emit('baseLayer:loaded');});
+    baseLayer.on('loading', () => {this.emit('baseLayer:loading');});
 
     this._leafletBaseLayer = baseLayer;
     this._leafletBaseLayer.addTo(this._leafletMap);

@@ -25,7 +25,6 @@ class ScaledCircles extends EventEmitter {
       }
     });
     this._leafletLayer.addData(this._geohashGeoJson);
-
   }
 
   getLeafletLayer() {
@@ -333,13 +332,8 @@ class Heatmap extends EventEmitter {
         return;
       }
 
-
       const feature = this._nearestFeature(latlng);
       if (this._tooltipProximity(latlng, feature)) {
-        const hasTooltip = true;//todo get this from params
-        if (!hasTooltip) {
-          return;
-        }
         const content = this._tooltipFormatter(feature);
         if (!content) {
           return;
@@ -348,7 +342,6 @@ class Heatmap extends EventEmitter {
           content: content,
           position: latlng
         });
-
       }
     };
 
