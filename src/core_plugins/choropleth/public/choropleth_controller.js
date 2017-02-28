@@ -10,7 +10,8 @@ const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
 
   const containerNode = $element[0];
-  const kibanaMap = new KibanaMap(containerNode);
+  const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
+  const kibanaMap = new KibanaMap(containerNode, minMaxZoom);
   const url = tilemapSettings.getUrl();
   const options = tilemapSettings.getTMSOptions();
   kibanaMap.setBaseLayer({
