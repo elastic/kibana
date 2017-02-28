@@ -120,7 +120,7 @@ uiModules
 
       }
 
-      loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
+      $scope.loadedPanel = loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
         .then(initializePanel)
         .catch(function (e) {
           $scope.error = e.message;
