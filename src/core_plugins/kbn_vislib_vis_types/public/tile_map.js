@@ -45,7 +45,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         value: 'topright',
         text: 'top right',
       }],
-      // mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       mapTypes: ['Scaled Circle Markers',
         'Shaded Circle Markers',
         'Shaded Geohash Grid',
@@ -54,37 +53,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       canDesaturate: !!supports.cssFilters,
       editor: tileMapTemplate
     },
-    // listeners: {
-    //   rectangle: function (event) {
-    //     const agg = _.get(event, 'chart.geohashGridAgg');
-    //     if (!agg) return;
-    //
-    //     const pushFilter = Private(FilterBarPushFilterProvider)(getAppState());
-    //     const indexPatternName = agg.vis.indexPattern.id;
-    //     const field = agg.fieldName();
-    //     const filter = { geo_bounding_box: {} };
-    //     filter.geo_bounding_box[field] = event.bounds;
-    //
-    //     pushFilter(filter, false, indexPatternName);
-    //   },
-    //   mapMoveEnd: function (event) {
-    //     const vis = _.get(event, 'chart.geohashGridAgg.vis');
-    //     if (vis && vis.hasUiState()) {
-    //       vis.getUiState().set('mapCenter', event.center);
-    //     }
-    //   },
-    //   mapZoomEnd: function (event) {
-    //     const vis = _.get(event, 'chart.geohashGridAgg.vis');
-    //     if (vis && vis.hasUiState()) {
-    //       vis.getUiState().set('mapZoom', event.zoom);
-    //     }
-    //
-    //     const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
-    //     if (autoPrecision) {
-    //       courier.fetch();
-    //     }
-    //   }
-    // },
     responseConverter: geoJsonConverter,
     implementsRenderComplete: true,
     schemas: new Schemas([
