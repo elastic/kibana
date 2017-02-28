@@ -10,16 +10,6 @@ marked.setOptions({
   sanitize: true // Sanitize HTML tags
 });
 
-/**
- * Reloads the setting for each route,
- * This is to ensure, that if the license changed during the lifecycle of the application,
- * we get an update.
- * tilemapSettings itself will take care that the manifest-service is not queried when not necessary.
- */
-uiRoutes.afterSetupWork(function (tilemapSettings) {
-  return tilemapSettings.loadSettings();
-});
-
 uiModules.get('kibana')
   .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize, kbnVersion) {
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
@@ -189,6 +179,10 @@ uiModules.get('kibana')
           maxZoom: this._tmsOptions.maxZoom
         };
 
+      }
+
+      isInitialized() {
+        return this._settingsInitialized;
       }
 
 

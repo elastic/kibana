@@ -19,8 +19,17 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
     constructor(vis, $el, uiState) {
       super(vis, $el, uiState);
-
       this._buildChartData = buildChartData.bind(this);
+      this._geohashLayer = null;
+      this._kibanaMap = null;
+      this._kibanaMapReady = this._makeKibanaMap($el);
+    }
+
+    async _makeKibanaMap($el) {
+
+      if (!tilemapSettings.isInitialized()) {
+        await tilemapSettings.loadSettings();
+      }
 
       if (tilemapSettings.getError()) {
         //Still allow the visualization to be build, but show a toast that there was a problem retrieving map settings
@@ -29,19 +38,13 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       }
 
       const containerElement = $($el)[0];
-
-
       const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
       this._kibanaMap = new KibanaMap(containerElement, minMaxZoom);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
 
-      this._useUIState();
-
-
       const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
-
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', e => {
@@ -67,9 +70,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
-
-      this._geohashLayer = null;
-
     }
 
     _recreateGeohashLayer() {
@@ -82,7 +82,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       const geohashOptions = this._getGeohashOptions();
       this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel());
       this._kibanaMap.addLayer(this._geohashLayer);
-
     }
 
 
@@ -91,63 +90,60 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      * @param esResponse
      */
     render(esResponse) {
-
-      // console.log('render', esResponse);
-
-      this._chartData = this._buildChartData(esResponse);
-      this._geohashGeoJson = this._chartData.geoJson;
-      this._recreateGeohashLayer();
-      this._useUIState();
-
-
-      this._kibanaMap.resize();
-
+      this._kibanaMapReady.then(() => {
+        this._chartData = this._buildChartData(esResponse);
+        this._geohashGeoJson = this._chartData.geoJson;
+        this._recreateGeohashLayer();
+        this._useUIState();
+        this._kibanaMap.resize();
+      });
     }
 
     destroy() {
-      this._kibanaMap.destroy();
+      if (this._kibanaMap) {
+        this._kibanaMap.destroy();
+      }
     }
 
     /**
      * called on options change (vis.params change)
      */
     updateParams() {
-      const mapParams = this._getMapsParams();
 
-      // console.log('updateParams', mapParams);
+      this._kibanaMapReady.then(_ => {
+        const mapParams = this._getMapsParams();
+        //todo: when WMS changes, recreate the kibana-map
+        if (mapParams.wms.enabled) {
+          const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
+          this._kibanaMap.setBaseLayer({
+            baseLayerType: 'wms',
+            options: {
+              minZoom: minZoom,
+              maxZoom: maxZoom,
+              url: mapParams.wms.url,
+              ...mapParams.wms.options
+            }
+          });
+        } else {
+          const url = tilemapSettings.getUrl();
+          const options = tilemapSettings.getTMSOptions();
+          this._kibanaMap.setBaseLayer({
+            baseLayerType: 'tms',
+            options: { url, ...options }
+          });
+        }
+        const geohashOptions = this._getGeohashOptions();
+        if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
+          this._recreateGeohashLayer();
+        }
 
+        this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
+        this._kibanaMap.setShowTooltip(mapParams.addTooltip);
+        this._kibanaMap.setLegendPosition(mapParams.legendPosition);
 
-      //todo: when WMS changes, recreate the kibana-map
-      if (mapParams.wms.enabled) {
-        const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
-        this._kibanaMap.setBaseLayer({
-          baseLayerType: 'wms',
-          options: {
-            minZoom: minZoom,
-            maxZoom: maxZoom,
-            url: mapParams.wms.url,
-            ...mapParams.wms.options
-          }
-        });
-      } else {
-        const url = tilemapSettings.getUrl();
-        const options = tilemapSettings.getTMSOptions();
-        this._kibanaMap.setBaseLayer({
-          baseLayerType: 'tms',
-          options: { url, ...options }
-        });
-      }
-      const geohashOptions = this._getGeohashOptions();
-      if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        this._recreateGeohashLayer();
-      }
-
-      this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
-      this._kibanaMap.setShowTooltip(mapParams.addTooltip);
-      this._kibanaMap.setLegendPosition(mapParams.legendPosition);
-
-      this._useUIState();
-      this._kibanaMap.resize();
+        this._useUIState();
+        this._kibanaMap.resize();
+      });
     }
 
 
@@ -185,10 +181,13 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     }
 
     _getMapsParams() {
-      return _.assign({}, this.vis.type.params.defaults, {
-        type: this.vis.type.name,
-        hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
-      },
+      return _.assign(
+        {},
+        this.vis.type.params.defaults,
+        {
+          type: this.vis.type.name,
+          hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
+        },
         this.vis.params
       );
     }
