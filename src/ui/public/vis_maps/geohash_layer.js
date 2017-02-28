@@ -5,7 +5,8 @@ import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
 
-class GeohashMarkers extends EventEmitter {
+class ScaledCircles extends EventEmitter {
+
   constructor(featureCollection, options, targetZoom) {
     super();
     this._geohashGeoJson = featureCollection;
@@ -14,15 +15,23 @@ class GeohashMarkers extends EventEmitter {
     this._tooltipFormatter = options.tooltipFormatter;
     this._legendColors = null;
     this._legendQuantizer = null;
+
+    this._popups = [];
+    this._leafletLayer = L.geoJson(null, {
+      pointToLayer: this.getMarkerFunction(),
+      style: this.getStyleFunction(),
+      onEachFeature: (feature, layer) => {
+        this._bindPopup(feature, layer);
+      }
+    });
+    this._leafletLayer.addData(this._geohashGeoJson);
+
   }
 
   getLeafletLayer() {
     return this._leafletLayer;
   }
 
-  getMarkerFunction() {
-    throw new Error('should implement getMarkerFunction');
-  }
 
   getStyleFunction() {
     const min = _.get(this._geohashGeoJson, 'properties.min', 0);
@@ -40,12 +49,13 @@ class GeohashMarkers extends EventEmitter {
   }
 
   getLabel() {
-    return 'Label';
-    // if (this.popups.length) {
-    //   return this.popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
-    // }
-    // return '';
+    // return 'Label';
+    if (this._popups.length) {
+      return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+    }
+    return '';
   }
+
 
   appendLegendContents(jqueryDiv) {
 
@@ -81,24 +91,7 @@ class GeohashMarkers extends EventEmitter {
 
     return labels.join('');
   }
-}
 
-
-class ScaledCircles extends GeohashMarkers {
-
-  constructor() {
-    super(...arguments);
-    this._popups = [];
-    this._leafletLayer = L.geoJson(null, {
-      pointToLayer: this.getMarkerFunction(),
-      style: this.getStyleFunction(),
-      onEachFeature: (feature, layer) => {
-        this._bindPopup(feature, layer);
-      }
-    });
-    this._leafletLayer.addData(this._geohashGeoJson);
-
-  }
 
   /**
    * Binds popup and events to each feature on map
@@ -137,11 +130,6 @@ class ScaledCircles extends GeohashMarkers {
    */
   _showTooltip(feature, latLng) {
 
-    // const hasTooltip = !!this._attr.addTooltip;
-    const hasTooltip = true;//todo get this from params
-    if (!hasTooltip) {
-      return;
-    }
     const lat = _.get(feature, 'geometry.coordinates.1');
     const lng = _.get(feature, 'geometry.coordinates.0');
     latLng = latLng || L.latLng(lat, lng);
