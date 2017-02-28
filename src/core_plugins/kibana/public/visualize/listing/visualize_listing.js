@@ -16,7 +16,6 @@ export function VisualizeListingController($injector, $scope) {
   const confirmModal = $injector.get('confirmModal');
   const kbnUrl = $injector.get('kbnUrl');
   const Notifier = $injector.get('Notifier');
-  const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
 

@@ -3,35 +3,47 @@ function clamp(val, min, max) {
 }
 
 export class Pager {
-  constructor(totalItems, pageSize, startingPage) {
-    this.currentPage = startingPage;
-    this.totalItems = totalItems;
-    this.pageSize = pageSize;
+  constructor(itemsPerPage) {
+    this.itemsPerPage = itemsPerPage;
   }
 
-  get pageCount() {
-    return Math.ceil(this.totalItems / this.pageSize);
+  canPagePrevious(currentPage) {
+    return currentPage > 0;
   }
 
-  get hasNextPage() {
-    return this.currentPage < this.totalPages;
+  canPageNext(itemsCount, currentPage) {
+    const pagesCount = this.getPagesCount(itemsCount);
+    return currentPage < pagesCount - 1;
   }
 
-  get hasPreviousPage() {
-    return this.currentPage > 1;
+  getItemsOnPage(items, currentPage) {
+    const startIndex = currentPage * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return items.filter((item, index) => (
+      index >= startIndex
+      && index < endIndex
+    ));
   }
 
-  get startNumber() {
-    const startNumber = ((this.currentPage - 1) * this.pageSize) + 1;
-    return clamp(startNumber, 0, this.totalItems);
+  getPagesCount(itemsCount) {
+    return Math.ceil(itemsCount / this.itemsPerPage);
   }
 
-  get endNumber() {
-    const endNumber = (this.startNumber - 1) + this.pageSize;
-    return clamp(endNumber, 0, this.totalItems);
+  getLastPageIndex(itemsCount) {
+    const pagesCount = this.getPagesCount(itemsCount);
+    return pagesCount > 0 ? pagesCount - 1 : 0;
   }
 
-  get totalPages() {
-    return Math.ceil(this.totalItems / this.pageSize);
+  getStartNumber(itemsCount, currentPageIndex) {
+    if (itemsCount === 0) return 0;
+    const startNumber = (currentPageIndex * this.itemsPerPage) + 1;
+    return clamp(startNumber, 0, itemsCount);
+  }
+
+  getEndNumber(itemsCount, currentPage) {
+    if (itemsCount === 0) return 0;
+    const startNumber = this.getStartNumber(itemsCount, currentPage);
+    const endNumber = (startNumber - 1) + this.itemsPerPage;
+    return clamp(endNumber, 0, itemsCount);
   }
 }

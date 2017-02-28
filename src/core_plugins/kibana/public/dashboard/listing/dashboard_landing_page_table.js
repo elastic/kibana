@@ -4,7 +4,6 @@ import { DashboardConstants } from '../dashboard_constants';
 import { DashboardItemPrompt } from './dashboard_item_prompt';
 import { SelectedIds } from 'ui/saved_object_table/selected_ids';
 import { Pager } from 'ui/pager/pager';
-import { PagerActions } from 'ui/pager/pager_actions';
 import { sortItems, getFlippedSortOrder } from 'ui/saved_object_table/sort_items';
 import { TITLE_COLUMN_ID } from 'ui/saved_object_table/get_title_column';
 import { getCheckBoxColumn } from 'ui/saved_object_table/get_checkbox_column';
@@ -29,26 +28,31 @@ export class DashboardLandingPageTable extends React.Component {
       items: [],
       sortedColumn: undefined,
       sortOrder: SortOrder.ASC,
-      selectedIds: new SelectedIds()
+      selectedIds: [],
+      currentPageIndex: 0,
     };
+
+    this.pager = new Pager(2);
   }
 
   componentDidMount() {
     this.onFilter();
   }
 
-  onFilter(newFilter) {
-    const PAGE_SIZE = 20;
+  onFilter = (newFilter) => {
     this.props.fetch(newFilter).then((results) => {
       const items = results.hits;
+      const lastPageIndex = this.pager.getLastPageIndex(this.getPageOfItems().length);
+
       this.setState({
         items,
         isFetchingItems: false,
-        pager: new Pager(items.length, PAGE_SIZE, 1),
-        selectedIds: new SelectedIds()
+        currentPageIndex: Math.min(this.state.currentPageIndex, lastPageIndex),
+        selectedIds: [],
+        filter: newFilter
       });
     });
-  }
+  };
 
   onSort(property) {
     let { sortedColumn, sortOrder } = this.state;
@@ -71,31 +75,38 @@ export class DashboardLandingPageTable extends React.Component {
     });
   }
 
-  turnToNextPage() {
-    const { pager, selectedIds } = this.state;
-    ItemSelectionActions.deselectAll(selectedIds);
-    PagerActions.nextPage(pager);
-    this.setState({ pager, selectedIds });
-  }
+  turnToNextPage = () => {
+    this.setState({
+      currentPageIndex: this.state.currentPageIndex + 1,
+      selectedIds: [],
+    });
+  };
 
-  turnToPreviousPage() {
-    const { pager, selectedIds } = this.state;
-    ItemSelectionActions.deselectAll(selectedIds);
-    PagerActions.previousPage(pager);
-    this.setState({ pager, selectedIds });
-  }
+  turnToPreviousPage = () => {
+    this.setState({
+      currentPageIndex: this.state.currentPageIndex - 1,
+      selectedIds: [],
+    });
+  };
+
+  getStartNumber = () => this.pager.getStartNumber(this.state.items.length, this.state.currentPageIndex);
+  getEndNumber = () => this.pager.getEndNumber(this.state.items.length, this.state.currentPageIndex);
+  getPageOfItems = () => this.pager.getItemsOnPage(this.state.items, this.state.currentPageIndex);
+  hasPreviousPage = () => this.pager.canPagePrevious(this.state.currentPageIndex);
+  hasNextPage = () => this.pager.canPageNext(this.state.items.length, this.state.currentPageIndex);
+  getPagesCount = () => this.pager.getPagesCount(this.getPageOfItems().length);
 
   onSortByTitle = () => {
     this.onSort(TITLE_COLUMN_ID);
   };
 
   onToggleItem = (item) => {
-    const selectedIds = ItemSelectionActions.toggleItem(this.state.selectedIds, item);
+    const selectedIds = ItemSelectionActions.toggleItem(this.state.selectedIds, item.id);
     this.setState({ selectedIds });
   };
 
   onToggleAll = () => {
-    const pageOfItems = PagerActions.calculateItemsOnPage(this.state.pager, this.state.items);
+    const pageOfItems = this.getPageOfItems();
     const selectedIds = ItemSelectionActions.toggleAll(this.state.selectedIds, pageOfItems);
     this.setState({ selectedIds });
   };
@@ -113,9 +124,10 @@ export class DashboardLandingPageTable extends React.Component {
   }
 
   getAreAllItemsSelected() {
-    const { selectedIds, items, pager } = this.state;
-    const pageOfItems = PagerActions.calculateItemsOnPage(pager, items);
-    return selectedIds.areAllItemsSelected(pageOfItems);
+    const { selectedIds } = this.state;
+    const pageOfItems = this.getPageOfItems();
+    const pageOfItemIds = pageOfItems.map(item => item.id);
+    return ItemSelectionActions.areAllItemsSelected(selectedIds, pageOfItemIds);
   }
 
   getDashboardColumns() {
@@ -129,7 +141,7 @@ export class DashboardLandingPageTable extends React.Component {
   onDelete = () => {
     const { deleteItems } = this.props;
     const { selectedIds, filter } = this.state;
-    deleteItems(selectedIds.selectedIds).then((didDelete) => {
+    deleteItems(selectedIds).then((didDelete) => {
       if (didDelete) {
         this.onFilter(filter);
       }
@@ -137,15 +149,15 @@ export class DashboardLandingPageTable extends React.Component {
   };
 
   getActionButtons() {
-    return this.state.selectedIds.getSelectedItemsCount() > 0
+    return this.state.selectedIds.length > 0
       ? <DeleteButton onClick={this.onDelete} />
       : <CreateButtonLink href={'#' + DashboardConstants.CREATE_NEW_DASHBOARD_URL} />;
   }
 
   getTableContents() {
-    const { isFetchingItems, pager, items } = this.state;
+    const { isFetchingItems } = this.state;
     if (isFetchingItems) return null;
-    const pageOfItems = PagerActions.calculateItemsOnPage(pager, items);
+    const pageOfItems = this.getPageOfItems();
     const columns = this.getDashboardColumns();
 
     return pageOfItems.length > 0
@@ -154,13 +166,17 @@ export class DashboardLandingPageTable extends React.Component {
   }
 
   render() {
-    const { filter, pager, selectedIds } = this.state;
+    const { filter, selectedIds } = this.state;
 
     return <div>
       <LandingPageToolBar
         filter={filter}
         onFilter={this.onFilter}
-        pagerState={pager}
+        startNumber={this.getStartNumber()}
+        endNumber={this.getEndNumber()}
+        totalItems={this.state.items.length}
+        hasPreviousPage={this.hasPreviousPage}
+        hasNextPage={this.hasNextPage}
         onNextPage={this.turnToNextPage}
         onPreviousPage={this.turnToPreviousPage}
         actionButtons={this.getActionButtons()}/>
@@ -168,10 +184,14 @@ export class DashboardLandingPageTable extends React.Component {
         this.getTableContents()
       }
       <LandingPageToolBarFooter
-        pagerState={pager}
+        startNumber={this.getStartNumber()}
+        endNumber={this.getEndNumber()}
+        totalItems={this.state.items.length}
+        hasPreviousPage={this.hasPreviousPage}
+        hasNextPage={this.hasNextPage}
         onNextPage={this.turnToNextPage}
         onPreviousPage={this.turnToPreviousPage}
-        selectedItemsCount={selectedIds.getSelectedItemsCount()}
+        selectedItemsCount={selectedIds.length}
       />
     </div>;
   }

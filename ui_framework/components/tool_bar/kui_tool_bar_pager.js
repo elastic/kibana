@@ -3,23 +3,32 @@ import React from 'react';
 import { KuiToolBarPagerText } from './kui_tool_bar_pager_text';
 import { KuiToolBarPagerButtons } from './kui_tool_bar_pager_buttons';
 
-export function KuiToolBarPager({ pagerState, onNextPage, onPreviousPage }) {
+export function KuiToolBarPager({ startNumber, endNumber, totalItems, hasPreviousPage, hasNextPage, onNextPage, onPreviousPage }) {
   return <div>
       <KuiToolBarPagerText
-        start={pagerState.startNumber}
-        end={pagerState.endNumber}
-        count={pagerState.totalItems} />
-      <KuiToolBarPagerButtons
-        hasNext={pagerState.hasNextPage}
-        hasPrevious={pagerState.hasPreviousPage}
-        onNext={onNextPage}
-        onPrevious={onPreviousPage}
-      />
+        start={startNumber}
+        end={endNumber}
+        count={totalItems} />
+
+    {
+      startNumber === 1 && endNumber === totalItems
+        ? null
+        : <KuiToolBarPagerButtons
+            hasNext={hasNextPage()}
+            hasPrevious={hasPreviousPage()}
+            onNext={onNextPage}
+            onPrevious={onPreviousPage}
+          />
+    }
     </div>;
 }
 
 KuiToolBarPager.propTypes = {
-  pagerState: React.PropTypes.any.isRequired,
+  startNumber: React.PropTypes.number,
+  endNumber: React.PropTypes.number,
+  totalItems: React.PropTypes.number,
+  hasPreviousPage: React.PropTypes.func.isRequired,
+  hasNextPage: React.PropTypes.func.isRequired,
   onNextPage: React.PropTypes.func.isRequired,
   onPreviousPage: React.PropTypes.func.isRequired
 };

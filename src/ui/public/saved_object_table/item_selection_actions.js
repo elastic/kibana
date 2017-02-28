@@ -8,22 +8,23 @@ export class ItemSelectionActions {
     items.forEach(item => this.selectItem(selectedIds, item));
   }
 
-  static toggleItem(selectedIds, item) {
-    if (selectedIds.isItemSelected(item)) {
-      this.deselectItem(selectedIds, item);
-    } else {
-      this.selectItem(selectedIds, item);
+  static toggleItem(selectedIds, itemId) {
+    const itemIndex = selectedIds.indexOf(itemId);
+    if (itemIndex === -1) {
+      return selectedIds.concat(itemId);
     }
-    return selectedIds;
+
+    const copy = selectedIds.slice(0);
+    copy.splice(itemIndex, 1);
+    return copy;
   }
 
-  static toggleAll(selectedIds, items) {
-    if (selectedIds.areAllItemsSelected(items)) {
-      this.deselectAll(selectedIds);
-    } else {
-      this.selectAll(selectedIds, items);
+  static toggleAll(selectedIds, itemIds) {
+    if (this.areAllItemsSelected(selectedIds, itemIds)) {
+      return [];
     }
-    return selectedIds;
+
+    return itemIds.slice(0);
   }
 
   static selectItem(selectedIds, item) {
@@ -37,5 +38,9 @@ export class ItemSelectionActions {
       const index = selectedIds.indexOf(item);
       selectedIds.selectedIds.splice(index, 1);
     }
+  }
+
+  static areAllItemsSelected(selectedIds, itemIds) {
+    return itemIds.every(id => selectedIds.indexOf(id) !== -1);
   }
 }

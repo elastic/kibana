@@ -13,11 +13,10 @@ export function getCheckBoxColumn(allItemsAreSelected, selectedIds, onToggleItem
         isChecked={allItemsAreSelected} />;
     },
     getRowCell: (item) => {
-      function toggle() { onToggleItem(item); }
       return <CheckBoxTableCell
         key={item.id + CHECKBOX_COLUMN_ID}
-        onClick={toggle}
-        isChecked={selectedIds.isItemSelected(item)}/>;
+        onClick={onToggleItem.bind(null, item)}
+        isChecked={selectedIds.filter(id => id === item.id).length > 0}/>;
     },
     isSortable: false
   };
