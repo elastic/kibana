@@ -23,6 +23,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._geohashLayer = null;
       this._kibanaMap = null;
       this._kibanaMapReady = this._makeKibanaMap($el);
+
+      this._baseLayerDirty = true;
+      this._dataDirty = true;
+      this._paramsDirty = true;
+
     }
 
     async _makeKibanaMap($el) {
@@ -47,28 +52,38 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
-      this._kibanaMap.on('zoomchange', e => {
+      this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
       });
-      this._kibanaMap.on('moveend', ignore => {
+      this._kibanaMap.on('moveend', () => {
         this._persistUIStateFromMap();
       });
-      this._kibanaMap.on('zoomend', ignore => {
+      this._kibanaMap.on('zoomend', () => {
 
         const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
         if (!isAutoPrecision) {
           return;
         }
 
+        this._dataDirty = true;
         if (precisionChange) {
           courier.fetch();
         } else {
           this._recreateGeohashLayer();
+          this._dataDirty = false;
+          this._doRenderComplete();
         }
       });
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
+      });
+      this._kibanaMap.on('baseLayer:loaded', () => {
+        this._baseLayerDirty = false;
+        this._doRenderComplete();
+      });
+      this._kibanaMap.on('baseLayer:loading', () => {
+        this._baseLayerDirty = true;
       });
     }
 
@@ -90,12 +105,15 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      * @param esResponse
      */
     render(esResponse) {
+      this._dataDirty = true;
       this._kibanaMapReady.then(() => {
         this._chartData = this._buildChartData(esResponse);
         this._geohashGeoJson = this._chartData.geoJson;
         this._recreateGeohashLayer();
         this._useUIState();
         this._kibanaMap.resize();
+        this._dataDirty = false;
+        this._doRenderComplete();
       });
     }
 
@@ -110,6 +128,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      */
     updateParams() {
 
+      this._paramsDirty = true;
       this._kibanaMapReady.then(_ => {
         const mapParams = this._getMapsParams();
         //todo: when WMS changes, recreate the kibana-map
@@ -125,12 +144,14 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
             }
           });
         } else {
-          const url = tilemapSettings.getUrl();
-          const options = tilemapSettings.getTMSOptions();
-          this._kibanaMap.setBaseLayer({
-            baseLayerType: 'tms',
-            options: { url, ...options }
-          });
+          if (!tilemapSettings.hasError()) {
+            const url = tilemapSettings.getUrl();
+            const options = tilemapSettings.getTMSOptions();
+            this._kibanaMap.setBaseLayer({
+              baseLayerType: 'tms',
+              options: { url, ...options }
+            });
+          }
         }
         const geohashOptions = this._getGeohashOptions();
         if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
@@ -143,6 +164,8 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
         this._useUIState();
         this._kibanaMap.resize();
+        this._paramsDirty = false;
+        this._doRenderComplete();
       });
     }
 
@@ -192,7 +215,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       );
     }
 
-
     _getGeohashOptions() {
       const newParams = this._getMapsParams();
       return {
@@ -209,8 +231,15 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       };
     }
 
-  }
+    _doRenderComplete() {
 
+      if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
+        return;
+      }
+      $(this.el).trigger('renderComplete');
+    }
+
+  }
 
   function addSpatialFilter(agg, filterName, filterData) {
     if (!agg) {
