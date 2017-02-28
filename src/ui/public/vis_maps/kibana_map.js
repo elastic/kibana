@@ -33,7 +33,9 @@ const FitControl = L.Control.extend({
 
 const LegendControl = L.Control.extend({
 
-  options: {},
+  options: {
+    position: 'topright'
+  },//todo: add position
 
   _updateContents() {
     this._legendContainer.empty();
@@ -43,18 +45,20 @@ const LegendControl = L.Control.extend({
     layers.forEach((layer) =>layer.appendLegendContents($div));
   },
 
-  initialize: function (container, kibanaMap) {
+  initialize: function (container, kibanaMap, position) {
     this._legendContainer = container;
     this._kibanaMap = kibanaMap;
+    this.options.position = position;
 
   },
   onAdd: function () {
-    this._layerUpdateHandle = this._kibanaMap.on('layers:update', () => this._updateContents());
+    this._layerUpdateHandle = () => this._updateContents();
+    this._kibanaMap.on('layers:update', this._layerUpdateHandle);
     this._updateContents();
     return this._legendContainer.get(0);
   },
   onRemove: function () {
-    this._layerUpdateHandle.remove();
+    this._kibanaMap.removeListener('layers:update', this._layerUpdateHandle);
   }
 
 });
@@ -65,7 +69,7 @@ const LegendControl = L.Control.extend({
  */
 class KibanaMap extends EventEmitter {
 
-  constructor(containerNode) {
+  constructor(containerNode, options) {
 
     super();
 
@@ -78,17 +82,17 @@ class KibanaMap extends EventEmitter {
     this._leafletDrawControl = null;
     this._leafletFitControl = null;
     this._leafletLegendControl = null;
+    this._legendPosition = 'topright';
 
     this._layers = [];
     this._listeners = [];
-    this._leafletMap = L.map(containerNode, {//todo: read this from meta
-      minZoom: 0,
-      maxZoom: 10
+    this._showTooltip = false;
+
+    this._leafletMap = L.map(containerNode, {
+      minZoom: options.minZoom,
+      maxZoom: options.maxZoom
     });
-
-
-    // this._leafletMap.setView([0, 0], 0);//todo: pass in from UI-state (if any)
-    this._leafletMap.fitWorld();//todo: pass in from UI-state (if any)
+    this._leafletMap.fitWorld();
 
     let previousZoom = this._leafletMap.getZoom();
     this._leafletMap.on('zoomend', () => {
@@ -103,7 +107,6 @@ class KibanaMap extends EventEmitter {
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
     this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
     this._leafletMap.on('mouseup', e => this._layers.forEach(layer => layer.movePointer('mouseup', e)));
-
     this._leafletMap.on('draw:created', event => {
       const drawType = event.layerType;
       if (drawType === 'rectangle') {
@@ -158,6 +161,10 @@ class KibanaMap extends EventEmitter {
 
   }
 
+  setShowTooltip(showTooltip) {
+    this._showTooltip = showTooltip;
+  }
+
   getLayers() {
     return this._layers.slice();
   }
@@ -165,6 +172,11 @@ class KibanaMap extends EventEmitter {
   addLayer(layer) {
 
     const onTooltip = layer.on('showTooltip', (event) => {
+
+      if (!this._showTooltip) {
+        return;
+      }
+
       const popup = L.popup({ autoPan: false });
       popup.setLatLng(event.position);
       popup.setContent(event.content);
@@ -274,8 +286,12 @@ class KibanaMap extends EventEmitter {
 
 
   setDesaturateBaseLayer(isDesaturated) {
+    if (isDesaturated === this._baseLayerIsDesaturated) {
+      return;
+    }
     this._baseLayerIsDesaturated = isDesaturated;
-
+    this._updateDesaturation();
+    this._leafletBaseLayer.redraw();
   }
 
   addDrawControl() {
@@ -308,15 +324,24 @@ class KibanaMap extends EventEmitter {
     this._leafletMap.addControl(this._leafletFitControl);
   }
 
-
   addLegendControl() {
-
     if (this._leafletLegendControl || !this._leafletMap) {
       return;
     }
+    this._updateLegend();
+  }
 
+  setLegendPosition(position) {
+    this._legendPosition = position;
+    if (this._leafletLegendControl) {
+      this._leafletMap.removeControl(this._leafletLegendControl);
+      this._updateLegend();
+    }
+  }
+
+  _updateLegend() {
     const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
-    this._leafletLegendControl = new LegendControl($wrapper, this);
+    this._leafletLegendControl = new LegendControl($wrapper, this, this._legendPosition);
     this._leafletMap.addControl(this._leafletLegendControl);
   }
 
@@ -328,8 +353,6 @@ class KibanaMap extends EventEmitter {
   setBaseLayer(settings) {
 
     if (_.isEqual(settings, this._baseLayerSettings)) {
-      this._updateDesaturation();
-      this._leafletBaseLayer.redraw();
       return;
     }
 
@@ -371,8 +394,8 @@ class KibanaMap extends EventEmitter {
 
     let bounds = null;
     this._layers.forEach(layer => {
-      const l = layer.getLeafletLayer();
-      const b = l.getBounds();
+      const leafletLayer = layer.getLeafletLayer();
+      const b = leafletLayer.getBounds();
       if (bounds) {
         bounds.extend(b);
       } else {
@@ -387,12 +410,24 @@ class KibanaMap extends EventEmitter {
 
   _getTMSBaseLayer(options) {
     return L.tileLayer(options.url, {
-      //todo
+      minZoom: options.minZoom,
+      maxZoom: options.maxZoom,
+      subdomains: options.subdomains,
+      attribution: options.attribution
     });
   }
 
   _getWMSBaseLayer(options) {
-    return L.tileLayer.wms(options.url, options);
+    return L.tileLayer.wms(options.url, {
+      attribution: options.attribution,
+      format: options.format,
+      layers: options.layers,
+      minZoom: options.minZoom,
+      maxZoom: options.maxZoom,
+      styles: options.styles,
+      transparent: options.transparent,
+      version: options.version
+    });
   }
 
   _updateDesaturation() {
