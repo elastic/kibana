@@ -14,4 +14,4 @@ Management::
 * Attempting to import a missing type now results in a warning {pull}10521[#10521]
 Visualize::
 * Fixed regression where include and exclude patterns triggered an error {issue}10153[#10153]
-* Fixed regression where both stacked and grouped bar charts did not properly scale down their y-axis {issue}10295[#10295]
+* Fixed regression where grouped bar charts did not properly scale down their y-axis {issue}10295[#10295]
