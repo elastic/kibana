@@ -98,12 +98,14 @@
                       ng-blur="toggleInterval()"
                       >
                     </select>
-                    <kbn-info
-                      ng-show="bucketInterval.scaled"
-                      placement="right"
-                      class="text-warning"
-                      info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
-                    </kbn-info>
+                    <span ng-show="bucketInterval.scaled">
+                      <kbn-info
+                        placement="right"
+                        class="kuiIcon--info"
+                        info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
+                      </kbn-info>
+                      Scaled to {{ bucketInterval.description }}
+                    </span>
                   </span>
                 </center>
 
