@@ -184,9 +184,7 @@ describe('ui/modals/confirm_modal', function () {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
         onCancel: cancelCallback,
-        onClose: closeCallback,
-        title: 'hi',
-        showClose: false
+        title: 'hi'
       };
 
       confirmModal('hi', confirmModalOptions);
@@ -203,18 +201,13 @@ describe('ui/modals/confirm_modal', function () {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
         onCancel: cancelCallback,
-        onClose: closeCallback,
-        title: 'hi',
-        showClose: false
+        title: 'hi'
       };
 
       confirmModal('hi', confirmModalOptions);
 
       const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      e.keyCode = 27;
-      while(e.keyCode === 27) {
-        e.keyCode = Math.floor((Math.random() * 100) + 1);
-      }
+      e.keyCode = 50;
       angular.element(document.body).trigger(e);
 
       expect(cancelCallback.called).to.be(false);

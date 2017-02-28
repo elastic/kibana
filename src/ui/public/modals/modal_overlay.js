@@ -9,13 +9,11 @@ export class ModalOverlay {
     this.overlayElement = angular.element(modalOverlayTemplate);
     this.overlayElement.append(modalElement);
 
-    const onKeyDown = (event) => {
+    angular.element(document.body).on('keydown', (event) => {
       if(event.keyCode === 27) {
         scope.onCancel();
       }
-    };
-
-    angular.element(document.body).bind('keydown', onKeyDown);
+    });
     angular.element(document.body).append(this.overlayElement);
   }
 
