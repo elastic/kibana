@@ -44,13 +44,15 @@ export default function HeatmapChartFactory(Private) {
       const percentageMode = cfg.get('percentageMode');
       const colorsNumber = cfg.get('colorsNumber');
       const colorsRange = cfg.get('colorsRange');
+      const zAxisConfig = this.getValueAxis().axisConfig;
+      const zAxisFormatter = zAxisConfig.get('labels.axisFormatter');
       const zScale = this.getValueAxis().getScale();
       const [min, max] = zScale.domain();
       const labels = [];
       if (cfg.get('setColorRange')) {
         colorsRange.forEach(range => {
-          const from = range.from;
-          const to = range.to;
+          const from = isFinite(range.from) ? zAxisFormatter(range.from) : range.from;
+          const to = isFinite(range.to) ? zAxisFormatter(range.to) : range.to;
           labels.push(`${from} - ${to}`);
         });
       } else {
@@ -69,6 +71,8 @@ export default function HeatmapChartFactory(Private) {
               val = Math.ceil(val);
               nextVal = Math.ceil(nextVal);
             }
+            if (isFinite(val)) val = zAxisFormatter(val);
+            if (isFinite(nextVal)) nextVal = zAxisFormatter(nextVal);
             label = `${val} - ${nextVal}`;
           }
 

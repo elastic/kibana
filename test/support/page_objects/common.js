@@ -277,7 +277,7 @@ export default class Common {
       .findByCssSelector(selector)
       .then(() => true)
       .catch(() => false);
-    this.remote.setFindTimeout(defaultFindTimeout);
+    await this.remote.setFindTimeout(defaultFindTimeout);
 
     PageObjects.common.debug(`exists? ${exists}`);
     return exists;
@@ -299,11 +299,26 @@ export default class Common {
     return exists;
   }
 
-  findTestSubject(selector) {
+  async clickTestSubject(selector) {
+    return await Try.try(async () => {
+      await this.findTestSubject(selector).click();
+    });
+  }
+
+  findTestSubject(selector, timeout = defaultFindTimeout) {
     this.debug('in findTestSubject: ' + testSubjSelector(selector));
+    let originalFindTimeout = null;
     return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector(testSubjSelector(selector));
+      .getFindTimeout()
+      .then((findTimeout) => originalFindTimeout = findTimeout)
+      .setFindTimeout(timeout)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(
+        (result) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => result),
+        (error) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => { throw error; }),
+      );
   }
 
   async findAllTestSubjects(selector) {
@@ -320,5 +335,33 @@ export default class Common {
     if (!elements) elements = [];
     this.debug(`Found ${elements.length} for selector ${selector}`);
     return elements;
+  }
+
+  async getSharedItemTitleAndDescription() {
+    const element = await this.remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[shared-item]');
+
+    return {
+      title: await element.getAttribute('data-title'),
+      description: await element.getAttribute('data-description')
+    };
+  }
+
+  async clickConfirmOnModal() {
+    this.debug('Clicking modal confirm');
+    await this.findTestSubject('confirmModalConfirmButton').click();
+  }
+
+  async clickCancelOnModal() {
+    this.debug('Clicking modal cancel');
+    await this.findTestSubject('confirmModalCancelButton').click();
+  }
+
+  async isConfirmModalOpen() {
+    let isOpen = true;
+    await this.findTestSubject('confirmModalCancelButton', 2000).catch(() => isOpen = false);
+    await this.remote.setFindTimeout(defaultFindTimeout);
+    return isOpen;
   }
 }

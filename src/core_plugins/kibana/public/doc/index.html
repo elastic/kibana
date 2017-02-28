@@ -1,47 +1,74 @@
 <div ng-controller="doc" class="app-container">
-
-  <div class="container-fluid">
-    <div class="row">
-
-      <!-- no results -->
-      <div class="col-md-12" ng-if="status === 'notFound'">
-          <div class="col-md-12">
-            <h1>Failed to locate document. <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
-
-            <p>
-              Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better
-            </p>
-
-          </div>
-      </div>
-
-            <!-- no results -->
-      <div class="col-md-12" ng-if="status === 'error'">
-          <div class="col-md-12">
-            <h1>This is bad. <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
-
-            <p>
-              Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here.
-            </p>
-
-          </div>
-      </div>
-
-      <!-- loading -->
-      <div class="col-md-12" ng-if="status === undefined">
-        <div class="discover-overlay">
-          <h2>Searching</h2>
-          <div class="spinner large"></div>
-          <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+  <div class="kuiLocalNav">
+    <div class="kuiLocalNavRow">
+      <div class="kuiLocalNavRow__section">
+        <div class="kuiLocalTitle">
+          Single Document
         </div>
       </div>
-
-      <!-- result -->
-      <div class="col-md-12" ng-if="status === 'found'">
-        <h2><b>Doc:</b> {{hit._index}}/{{hit._type}}/{{hit._id | uriescape}}</h2>
-
-        <doc-viewer hit="hit" index-pattern="indexPattern"></doc-viewer>
+    </div>
+    <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
+      <div class="kuiLocalTabs">
+        <div
+          class="kuiLocalTab kuiLocalTab-isSelected"
+          ng-bind-template="{{ hit._type }}#{{ hit._id | uriescape }}"
+          ng-if="!!hit"
+        ></div>
+        <div
+          class="kuiLocalTab kuiLocalTab-isSelected"
+          ng-if="!hit"
+        >Unknown Id</div>
       </div>
+    </div>
+  </div>
+
+  <div class="kuiViewContent">
+    <!-- no results -->
+    <div class="kuiViewContentItem" ng-if="status === 'notFound'">
+      <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Failed to locate document
+          </span>
+        </div>
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- error -->
+    <div class="kuiViewContentItem" ng-if="status === 'error'">
+      <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Failed to execute query
+          </span>
+        </div>
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- loading -->
+    <div class="kuiViewContentItem" ng-if="status === undefined">
+      <div class="kuiPanel kuiPanel--centered">
+        <div class="kuiLoadingItems">
+          Loading&hellip;
+        </div>
+      </div>
+    </div>
+
+    <!-- result -->
+    <div class="kuiViewContentItem" ng-if="status === 'found'">
+      <doc-viewer hit="hit" index-pattern="indexPattern"></doc-viewer>
     </div>
   </div>
 </div>

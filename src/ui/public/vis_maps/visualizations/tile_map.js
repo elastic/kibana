@@ -98,12 +98,13 @@ export default function TileMapFactory(Private) {
 
       const params = _.assign({}, _.get(this._chartData, 'geoAgg.vis.params'), uiStateParams);
 
+      const tooltipFormatter = this.handler.visConfig.get('addTooltip') ? this.tooltipFormatter : null;
       const map = new TileMapMap(container, this._chartData, {
         center: params.mapCenter,
         zoom: params.mapZoom,
         events: this.events,
         markerType: this.handler.visConfig.get('mapType'),
-        tooltipFormatter: this.tooltipFormatter,
+        tooltipFormatter: tooltipFormatter,
         valueFormatter: this.valueFormatter,
         attr: this.handler.visConfig._values
       });

@@ -16,12 +16,16 @@ export default function TermsAggDefinition(Private) {
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
-  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev', '!derivative'];
+  const aggFilter = [
+    '!top_hits', '!percentiles', '!median', '!std_dev',
+    '!derivative', '!cumulative_sum', '!moving_avg', '!serial_diff'
+  ];
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
       title: 'Order Agg',
+      hideCustomLabel: true,
       aggFilter: aggFilter
     }
   ])).all[0];
@@ -32,6 +36,21 @@ export default function TermsAggDefinition(Private) {
       return !field || field.type !== type;
     };
   }
+
+  const migrateIncludeExcludeFormat = {
+    serialize: function (value) {
+      if (!value || _.isString(value)) return value;
+      else return value.pattern;
+    },
+    write: function (aggConfig, output) {
+      const value = aggConfig.params[this.name];
+      if (_.isObject(value)) {
+        output.params[this.name] = value.pattern;
+      } else if (value) {
+        output.params[this.name] = value;
+      }
+    }
+  };
 
   return new BucketAggType({
     name: 'terms',
@@ -48,15 +67,17 @@ export default function TermsAggDefinition(Private) {
       },
       {
         name: 'exclude',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'include',
-        type: 'regex',
+        type: 'string',
         advanced: true,
-        disabled: isNotType('string')
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
       },
       {
         name: 'size',

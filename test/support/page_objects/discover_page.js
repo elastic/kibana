@@ -42,33 +42,30 @@ export default class DiscoverPage {
     })
     .then(() => {
       PageObjects.common.debug('--find save button');
-      return PageObjects.common.findTestSubject('discover-save-search-btn').click();
+      return PageObjects.common.clickTestSubject('discover-save-search-btn');
     });
   }
 
   loadSavedSearch(searchName) {
     return this.clickLoadSavedSearchButton()
     .then(() => {
-      this.findTimeout.findByLinkText(searchName).click();
+      this.findTimeout.findByPartialLinkText(searchName).click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
   clickNewSearchButton() {
-    return PageObjects.common.findTestSubject('discoverNewButton')
-    .click();
+    return PageObjects.common.clickTestSubject('discoverNewButton');
   }
 
   clickSaveSearchButton() {
-    return PageObjects.common.findTestSubject('discoverSaveButton')
-    .click();
+    return PageObjects.common.clickTestSubject('discoverSaveButton');
   }
 
   clickLoadSavedSearchButton() {
-    return PageObjects.common.findTestSubject('discoverOpenButton')
-    .click();
+    return PageObjects.common.clickTestSubject('discoverOpenButton');
   }
 
   getCurrentQueryName() {
@@ -81,7 +78,7 @@ export default class DiscoverPage {
     let yAxisLabel = 0;
     let yAxisHeight;
 
-    return PageObjects.header.isGlobalLoadingIndicatorHidden()
+    return PageObjects.header.waitUntilLoadingHasFinished()
     .then(() => {
       return this.findTimeout
         .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
@@ -167,12 +164,12 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
   getHitCount() {
-    return PageObjects.header.isGlobalLoadingIndicatorHidden()
+    return PageObjects.header.waitUntilLoadingHasFinished()
     .then(() => {
       return PageObjects.common.findTestSubject('discoverQueryHits')
       .getVisibleText();
@@ -190,7 +187,7 @@ export default class DiscoverPage {
       .click();
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -225,18 +222,15 @@ export default class DiscoverPage {
   }
 
   clickShare() {
-    return PageObjects.common.findTestSubject('discoverShareButton')
-    .click();
+    return PageObjects.common.clickTestSubject('discoverShareButton');
   }
 
   clickShortenUrl() {
-    return PageObjects.common.findTestSubject('sharedSnapshotShortUrlButton')
-    .click();
+    return PageObjects.common.clickTestSubject('sharedSnapshotShortUrlButton');
   }
 
   clickCopyToClipboard() {
-    return PageObjects.common.findTestSubject('sharedSnapshotCopyButton')
-    .click();
+    return PageObjects.common.clickTestSubject('sharedSnapshotCopyButton');
   }
 
   getShareCaption() {
@@ -291,12 +285,14 @@ export default class DiscoverPage {
   }
 
   async clickFieldListItemAdd(field) {
-    await PageObjects.common.findTestSubject('fieldToggle-' + field).click();
+    const listEntry = await PageObjects.common.findTestSubject(`field-${field}`);
+    await this.remote.moveMouseTo(listEntry);
+    await PageObjects.common.clickTestSubject(`fieldToggle-${field}`);
   }
 
   async clickFieldListItemVisualize(field) {
     return await PageObjects.common.try(async () => {
-      await PageObjects.common.findTestSubject('fieldVisualize-' + field).click();
+      await PageObjects.common.clickTestSubject('fieldVisualize-' + field);
     });
   }
 
@@ -317,8 +313,8 @@ export default class DiscoverPage {
   }
 
   async removeAllFilters() {
-    await PageObjects.common.findTestSubject('showFilterActions').click();
-    await PageObjects.common.findTestSubject('removeAllFilters').click();
+    await PageObjects.common.clickTestSubject('showFilterActions');
+    await PageObjects.common.clickTestSubject('removeAllFilters');
   }
 
 

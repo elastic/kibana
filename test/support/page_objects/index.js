@@ -1,43 +1,56 @@
 
 import Common from './common';
 import ConsolePage from './console_page';
+import ContextPage from './context_page';
 import DashboardPage from './dashboard_page';
 import DiscoverPage from './discover_page';
 import HeaderPage from './header_page';
 import SettingsPage from './settings_page';
 import ShieldPage from './shield_page';
 import VisualizePage from './visualize_page';
+import VisualizePointSeriesOptions from './visualize_point_series_options';
 import MonitoringPage from './monitoring_page';
+import DocTable from './doc_table';
 
 const common = new Common();
 const consolePage = new ConsolePage();
+const contextPage = new ContextPage();
 const dashboardPage = new DashboardPage();
 const discoverPage = new DiscoverPage();
 const headerPage = new HeaderPage();
 const settingsPage = new SettingsPage();
 const shieldPage = new ShieldPage();
 const visualizePage = new VisualizePage();
+const visualizePointSeriesOptions = new VisualizePointSeriesOptions();
 const monitoringPage = new MonitoringPage();
+
+const docTable = new DocTable();
 
 class PageObjects {
 
   constructor() {
     this.isInitialized = false;
     this.remote = undefined;
+    this.pageObjects = [
+      common,
+      consolePage,
+      contextPage,
+      dashboardPage,
+      discoverPage,
+      headerPage,
+      settingsPage,
+      shieldPage,
+      visualizePage,
+      visualizePointSeriesOptions,
+      monitoringPage,
+      docTable,
+    ];
   }
 
   init(remote) {
     this.isInitialized = true;
     this.remote = remote;
-    common.init(remote);
-    consolePage.init(remote);
-    dashboardPage.init(remote);
-    discoverPage.init(remote);
-    headerPage.init(remote);
-    settingsPage.init(remote);
-    shieldPage.init(remote);
-    visualizePage.init(remote);
-    monitoringPage.init(remote);
+    this.pageObjects.map((pageObject) => pageObject.init(remote));
   }
 
   assertInitialized() {
@@ -53,6 +66,10 @@ class PageObjects {
 
   get console() {
     return this.assertInitialized() && consolePage;
+  }
+
+  get context() {
+    return this.assertInitialized() && contextPage;
   }
 
   get dashboard() {
@@ -79,8 +96,16 @@ class PageObjects {
     return this.assertInitialized() && visualizePage;
   }
 
+  get visualizeOptions() {
+    return this.assertInitialized() && visualizePointSeriesOptions;
+  }
+
   get monitoring() {
     return this.assertInitialized() && monitoringPage;
+  }
+
+  get docTable() {
+    return this.assertInitialized() && docTable;
   }
 
 }

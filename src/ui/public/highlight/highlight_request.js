@@ -23,11 +23,9 @@ function getHighlightQuery(query) {
 }
 
 export default function getHighlightRequestProvider(config) {
-  if (!config.get('doc_table:highlight')) {
-    return _.noop;
-  }
-
   return function getHighlightRequest(query) {
+    if (!config.get('doc_table:highlight')) return;
+
     const fieldsParams = config.get('doc_table:highlight:all_fields')
       ? { highlight_query: getHighlightQuery(query) }
       : {};

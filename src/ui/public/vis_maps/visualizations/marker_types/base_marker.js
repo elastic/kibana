@@ -17,7 +17,7 @@ export default function MarkerFactory() {
       this.geoJson = geoJson;
       this.popups = [];
 
-      this._tooltipFormatter = params.tooltipFormatter || _.identity;
+      this._tooltipFormatter = params.tooltipFormatter || null;
       this._valueFormatter = params.valueFormatter || _.identity;
       this._attr = params.attr || {};
 
@@ -218,7 +218,11 @@ export default function MarkerFactory() {
      * @return undefined
      */
     _showTooltip(feature, latLng) {
-      if (!this.map) return;
+      const hasMap = !!this.map;
+      const hasTooltip = !!this._attr.addTooltip;
+      if (!hasMap || !hasTooltip) {
+        return;
+      }
       const lat = _.get(feature, 'geometry.coordinates.1');
       const lng = _.get(feature, 'geometry.coordinates.0');
       latLng = latLng || L.latLng(lat, lng);

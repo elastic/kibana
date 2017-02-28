@@ -38,6 +38,7 @@
           ng-if="listingController.getSelectedItemsCount() > 0"
           ng-click="listingController.deleteSelectedItems()"
           tooltip="Delete selected visualizations"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
         </button>
@@ -49,6 +50,7 @@
           aria-label="Create new visualization"
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>
@@ -83,7 +85,7 @@
     <!-- PromptForItems -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
-      ng-if="!listingController.items.length && !listingController.filter"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
     >
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
@@ -115,7 +117,10 @@
             >
           </th>
 
-          <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('title')">
+          <th
+            class="kuiTableHeaderCell"
+            ng-click="listingController.sortOn('title')"
+          >
             Name
             <span
               class="kuiIcon"
@@ -124,7 +129,10 @@
             ></span>
           </th>
 
-          <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('type')">
+          <th
+            class="kuiTableHeaderCell"
+            ng-click="listingController.sortOn('type')"
+          >
             Type
             <span
               class="kuiIcon"
@@ -141,12 +149,14 @@
           class="kuiTableRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-            <input
-              type="checkbox"
-              class="kuiCheckBox"
-              ng-click="listingController.toggleItem(item)"
-              ng-checked="listingController.isItemChecked(item)"
-            >
+            <div class="kuiTableRowCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-click="listingController.toggleItem(item)"
+                ng-checked="listingController.isItemChecked(item)"
+              >
+            </div>
           </td>
 
           <td class="kuiTableRowCell">

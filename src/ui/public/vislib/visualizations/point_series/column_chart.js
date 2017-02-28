@@ -34,7 +34,7 @@ export default function ColumnChartFactory(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
-      .attr('class', 'series')
+      .attr('class', 'series histogram')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')
@@ -50,9 +50,8 @@ export default function ColumnChartFactory(Private) {
       .enter()
       .append('rect')
       .attr('data-label', data.label)
-      .attr('fill', () => {
-        return color(data.label);
-      });
+      .attr('fill', () => color(data.label))
+      .attr('stroke', () => color(data.label));
 
       self.updateBars(bars);
 
@@ -102,7 +101,7 @@ export default function ColumnChartFactory(Private) {
       if (isTimeScale) {
         const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
-        if (!isHorizontal) groupWidth *= -1;
+        groupWidth = Math.abs(groupWidth);
         const groupSpacing = groupWidth * groupSpacingPercentage;
 
         barWidth = (groupWidth - groupSpacing) / groupCount;
@@ -117,7 +116,6 @@ export default function ColumnChartFactory(Private) {
         if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
           return yScale(d.y0);
         }
-        /*if (!isHorizontal && d.y < 0) return yScale(d.y);*/
         return yScale(d.y0 + d.y);
       }
 
@@ -168,7 +166,7 @@ export default function ColumnChartFactory(Private) {
       if (isTimeScale) {
         const { min, interval } = this.handler.data.get('ordered');
         let groupWidth = xScale(min + interval) - xScale(min);
-        if (!isHorizontal) groupWidth *= -1;
+        groupWidth = Math.abs(groupWidth);
         const groupSpacing = groupWidth * groupSpacingPercentage;
 
         barWidth = (groupWidth - groupSpacing) / groupCount;

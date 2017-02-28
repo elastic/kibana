@@ -17,7 +17,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
     bdd.it('is saved', async function () {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
-      await PageObjects.dashboard.saveDashboard(dashboardName, false);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
     });
 
     bdd.it('Does not set the time picker on open', async function () {
@@ -35,7 +35,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
   bdd.describe('dashboard with stored timed', async function () {
     bdd.it('is saved with quick time', async function () {
       await PageObjects.header.setQuickTime('Today');
-      await PageObjects.dashboard.saveDashboard(dashboardName, true);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
     });
 
     bdd.it('sets quick time on open', async function () {
@@ -49,7 +49,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
 
     bdd.it('is saved with absolute time', async function () {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.saveDashboard(dashboardName, true);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
     });
 
     bdd.it('sets absolute time on open', async function () {

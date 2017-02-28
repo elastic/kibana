@@ -33,7 +33,7 @@ bdd.describe('shared links', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
+      return elasticDump.elasticLoad('discover','.kibana');
     })
     // and load a set of makelogs data
     .then(function loadIfEmptyMakelogs() {
