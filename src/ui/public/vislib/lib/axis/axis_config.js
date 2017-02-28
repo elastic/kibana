@@ -87,7 +87,7 @@ export default function AxisConfigFactory() {
       this._values.rootEl = chartConfig.get('el');
 
       this.data = chartConfig.data;
-      if (this._values.type === 'category') {
+      if (isCategoryAxis) {
         if (!this._values.values) {
           this.values = this.data.xValues(chartConfig.get('orderBucketsBySum', false));
           this.ordered = this.data.get('ordered');
@@ -122,6 +122,11 @@ export default function AxisConfigFactory() {
         if (this.isLogScale()) {
           this._values.labels.filter = true;
         }
+      }
+
+      if (axisConfigArgs.title == null || axisConfigArgs.title.text == null) {
+        const label = isCategoryAxis ? 'xAxisLabel' : 'yAxisLabel';
+        this.set('title.text', this.data.get(label));
       }
 
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
