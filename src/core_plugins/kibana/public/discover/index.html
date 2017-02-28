@@ -90,14 +90,7 @@
 
                   &mdash;
 
-                  <span class="results-interval" ng-hide="showInterval">
-                    <a
-                      ng-click="toggleInterval()">
-                      {{ intervalName }}
-                    </a>
-                  </span>
-
-                  <span ng-show="showInterval" class="results-interval form-inline">
+                  <span class="results-interval form-inline">
                     <select
                       class="form-control"
                       ng-model="state.interval"
@@ -105,6 +98,12 @@
                       ng-blur="toggleInterval()"
                       >
                     </select>
+                    <kbn-info
+                      ng-show="bucketInterval.scaled"
+                      placement="right"
+                      class="text-warning"
+                      info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
+                    </kbn-info>
                   </span>
                 </center>
 
