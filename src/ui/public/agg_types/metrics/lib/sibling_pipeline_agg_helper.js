@@ -37,7 +37,7 @@ const SiblingPipelineAggHelperProvider = function (Private) {
   ])).all[0];
 
   return {
-    subtype: 'Pipeline Aggregations',
+    subtype: 'Sibling Pipeline Aggregations',
     params: function () {
       return [
         {
