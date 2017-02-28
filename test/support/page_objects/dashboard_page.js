@@ -72,8 +72,13 @@ export default class DashboardPage {
       .click();
   }
 
-  clickDoneEditing() {
-    PageObjects.common.debug('Clicking done editing');
+  getIsInViewMode() {
+    PageObjects.common.debug('getIsInViewMode');
+    return PageObjects.common.doesTestSubjectExist('dashboardEditMode');
+  }
+
+  clickCancelOutOfEditMode() {
+    PageObjects.common.debug('Clicking cancel');
     return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 

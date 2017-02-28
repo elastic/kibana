@@ -15,11 +15,10 @@ export class DashboardStrings {
   static getUnsavedChangesWarningMessage(dashboardState) {
     const changedFilters = dashboardState.getChangedFiltersForDisplay();
     const changedFilterList = this.createStringList(changedFilters);
-    const saveOrLoseMessage = 'You can save them or exit without saving and lose your changes.';
 
     return changedFilterList ?
-      `You have unsaved changes, including changes to your ${changedFilterList}. ${saveOrLoseMessage}` :
-      `You have unsaved changes. ${saveOrLoseMessage}`;
+      `Are you sure you want to cancel and lose changes, including changes made to your ${changedFilterList}?` :
+      `Are you sure you want to cancel and lose changes?`;
   }
 
   static getDashboardTitle(dashboardState) {

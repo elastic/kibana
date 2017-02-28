@@ -20,6 +20,7 @@ import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_cli
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardState } from './dashboard_state';
 import { TopNavIds } from './top_nav/top_nav_ids';
+import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -247,25 +248,23 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           dashboardState.switchViewMode(newMode);
         }
 
-        function onCancel() {
-          dashboardState.reloadLastSavedFilters();
-          const refreshUrl = dashboardState.getReloadDashboardUrl();
-          dashboardState.resetState();
-          kbnUrl.change(refreshUrl.url, refreshUrl.options, new AppState());
-          doModeSwitch();
-        }
-
         if (leavingEditMode && dashboardState.getIsDirty()) {
+          function revertChangesAndExit() {
+            dashboardState.reloadLastSavedFilters();
+            const refreshUrl = dashboardState.getReloadDashboardUrl();
+            dashboardState.resetState();
+            kbnUrl.change(refreshUrl.url, refreshUrl.options, new AppState());
+            doModeSwitch();
+          }
+
           confirmModal(
             DashboardStrings.getUnsavedChangesWarningMessage(dashboardState),
             {
-              onConfirm: () => $scope.save().then(doModeSwitch),
-              onCancel,
-              onClose: _.noop,
-              confirmButtonText: 'Save dashboard',
-              cancelButtonText: 'Lose changes',
-              title: `Save dashboard ${dashboardState.getTitle()}`,
-              showClose: true
+              onConfirm: revertChangesAndExit,
+              onCancel: _.noop,
+              confirmButtonText: 'Yes, lose changes',
+              cancelButtonText: 'No, keep working',
+              defaultFocusedButton: ConfirmationButtonTypes.CANCEL
             }
           );
         } else {
@@ -274,14 +273,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       };
 
-      navActions[TopNavIds.SAVE] = () => {
-        $scope.save().then(() => changeViewMode(DashboardViewMode.VIEW));
-      };
-      navActions[TopNavIds.CLONE] = () => {
-        dashboardState.setTitle(dashboardState.getTitle() + ' (Copy)');
-        dash.copyOnSave = true;
-        $scope.save();
-      };
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => changeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => changeViewMode(DashboardViewMode.EDIT);
 
