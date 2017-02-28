@@ -48,6 +48,15 @@ const byType = {
   _all: lookup,
   pipeline: pipeline,
   basic: _.omit(lookup, pipeline),
+  metrics: _.pick(lookup, [
+    'count',
+    'avg',
+    'min',
+    'max',
+    'sum',
+    'cardinality',
+    'value_count'
+  ])
 };
 
 export function isBasicAgg(item) {
