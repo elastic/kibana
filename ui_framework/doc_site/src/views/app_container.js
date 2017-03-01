@@ -5,6 +5,7 @@ import {
   getIsCodeViewerOpen,
   getSections,
   getSource,
+  getTitle,
 } from '../store';
 import { AppView } from './app_view.jsx';
 import {
@@ -19,6 +20,7 @@ function mapStateToProps(state, ownProps) {
     routes: ownProps.routes,
     isCodeViewerOpen: getIsCodeViewerOpen(state),
     source: getSource(state),
+    title: getTitle(state),
     sections: getSections(state),
   };
 }
