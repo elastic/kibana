@@ -1,9 +1,8 @@
-import KibanaMapLayer from './kibana_map_layer';
 import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
+import KibanaMapLayer from 'ui/vis_maps/kibana_map_layer';
 import colorramps from 'ui/vislib/components/color/colormaps';
-
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
@@ -13,19 +12,40 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = colorramps['Yellow to Red'];
+    this._tooltipFormatter = x => '';
 
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
+
         layer.on('click', () => {
           this.emit('select', feature.properties[this._joinField]);
+        });
+        let location = null;
+        const popup = layer.on({
+          mouseover: (event) => {
+
+            const tooltipContents = this._tooltipFormatter(feature);
+            if (!location) {
+              const leafletGeojon = L.geoJson(feature);
+              location = leafletGeojon.getBounds().getCenter();
+            }
+
+            this.emit('showTooltip', {
+              content: tooltipContents,
+              position: location
+            });
+          },
+          mouseout: () => {
+            this.emit('hideTooltip');
+          }
         });
       },
       style: emptyStyle
     });
 
     this._loaded = false;
-    $.ajax({
+    $.ajax({//todo: replace with es6 fetch
       dataType: 'json',
       url: geojsonUrl,
       success: (data) => {
@@ -48,7 +68,19 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  setChoroplethJoinField(joinfield) {
+  setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName) {
+    this._tooltipFormatter = (geojsonFeature) => {
+      if (!this._metrics) {
+        return '';
+      }
+      const match = this._metrics.find((bucket) => {
+        return bucket.term === geojsonFeature.properties[this._joinField];
+      });
+      return tooltipFormatter(metricsAgg, match, fieldName);
+    };
+  }
+
+  setJoinField(joinfield) {
     if (joinfield === this._joinField) {
       return;
     }
@@ -57,12 +89,12 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  setChoroplethMetrics(metrics) {
+  setMetrics(metrics) {
     this._metrics = metrics;
     this._setChoroplethStyle();
   }
 
-  setChoroplethColorRamp(colorRamp) {
+  setColorRamp(colorRamp) {
     if (_.isEqual(colorRamp, this._colorRamp)) {
       return;
     }
@@ -76,7 +108,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
 
 }
-
 
 function makeChoroplethStyleFunction(data, colorramp, joinField) {
 
@@ -111,7 +142,6 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
       fillOpacity: 0.7
     };
   };
-
 }
 
 function getChoroplethColor(value, min, max, colorRamp) {
