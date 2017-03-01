@@ -1,8 +1,7 @@
-import _ from 'lodash';
-import getDefaultDecoration from '../../get_default_decoration';
-import getSplits from '../../get_splits';
-import getLastMetric from '../../get_last_metric';
-import getSiblingAggValue from '../../get_sibling_agg_value';
+import getDefaultDecoration from '../../helpers/get_default_decoration';
+import getSplits from '../../helpers/get_splits';
+import getLastMetric from '../../helpers/get_last_metric';
+import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 export default function stdSibling(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);

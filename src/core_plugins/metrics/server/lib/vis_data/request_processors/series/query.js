@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
-import getBucketSize from '../../get_bucket_size';
-import unitToSeconds from '../../unit_to_seconds';
+import getBucketSize from '../../helpers/get_bucket_size';
+import unitToSeconds from '../../helpers/unit_to_seconds';
 import offsetTime from '../../offset_time';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 export default function query(req, panel, series) {

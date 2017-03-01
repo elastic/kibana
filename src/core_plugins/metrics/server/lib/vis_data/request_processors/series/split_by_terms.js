@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 import basicAggs from '../../../../../public/components/lib/basic_aggs';
-import getBucketSize from '../../get_bucket_size';
-import getTimerange from '../../get_timerange';
+import getBucketSize from '../../helpers/get_bucket_size';
+import getTimerange from '../../helpers/get_timerange';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
-import getBucketsPath from '../../get_buckets_path';
-import bucketTransform from '../../bucket_transform';
+import getBucketsPath from '../../helpers/get_buckets_path';
+import bucketTransform from '../../helpers/bucket_transform';
 
 export default function splitByTerm(req, panel, series) {
   return next => doc => {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import seriesAgg from '../series_agg';
+import seriesAgg from '../_series_agg';
 
 describe('seriesAgg', () => {
   const series = [

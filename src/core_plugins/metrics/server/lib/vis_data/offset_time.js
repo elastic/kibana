@@ -1,5 +1,4 @@
-import getTimerange from './get_timerange';
-import unitToSeconds from './unit_to_seconds';
+import getTimerange from './helpers/get_timerange';
 export default function offsetTime(req, by) {
   const { from, to } = getTimerange(req);
   if (!/^([\d]+)([shmdwMy]|ms)$/.test(by)) return { from, to };

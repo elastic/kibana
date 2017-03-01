@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import offsetTime from './offset_time';
 
 function getParams(req, indexPattern, timeField, offsetBy) {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import getBucketSize from '../get_bucket_size';
+import getBucketSize from '../../helpers/get_bucket_size';
 
 describe('getBucketSize', () => {
   const req = {
