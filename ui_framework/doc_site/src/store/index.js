@@ -9,3 +9,7 @@ export function getSections(state) {
 export function getSource(state) {
   return state.codeViewer.source;
 }
+
+export function getTitle(state) {
+  return state.codeViewer.title;
+}

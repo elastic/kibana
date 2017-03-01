@@ -345,8 +345,8 @@ describe('timepicker directive', function () {
       inputs = {
         fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
         toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-        fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
-        toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
+        fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="pickFromDate"] '),
+        toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="pickToDate"] '),
       };
 
     });
@@ -421,6 +421,33 @@ describe('timepicker directive', function () {
       done();
     });
 
-  });
+    it('should set from/to to start/end of day if set from datepicker', function (done) {
+      $scope.pickFromDate(new Date('2012-02-01 12:00'));
+      $scope.pickToDate(new Date('2012-02-11 12:00'));
+      $scope.applyAbsolute();
 
+      expect($parentScope.updateFilter.firstCall.args[0].valueOf()).to.be(moment('2012-02-01 00:00:00.000').valueOf());
+      expect($parentScope.updateFilter.firstCall.args[1].valueOf()).to.be(moment('2012-02-11 23:59:59.999').valueOf());
+
+      done();
+    });
+
+    it('should allow setting hour/minute/second after setting from datepicker', function (done) {
+      $scope.pickFromDate(new Date('2012-02-01 12:00'));
+      $scope.pickToDate(new Date('2012-02-11 12:00'));
+      $scope.applyAbsolute();
+
+      expect($parentScope.updateFilter.firstCall.args[0].valueOf()).to.be(moment('2012-02-01 00:00:00.000').valueOf());
+      expect($parentScope.updateFilter.firstCall.args[1].valueOf()).to.be(moment('2012-02-11 23:59:59.999').valueOf());
+
+      $scope.absolute.from = moment('2012-02-01 01:23:45');
+      $scope.absolute.to = moment('2012-02-11 12:34:56');
+      $scope.applyAbsolute();
+
+      expect($parentScope.updateFilter.secondCall.args[0].valueOf()).to.be(moment('2012-02-01 01:23:45').valueOf());
+      expect($parentScope.updateFilter.secondCall.args[1].valueOf()).to.be(moment('2012-02-11 12:34:56').valueOf());
+
+      done();
+    });
+  });
 });
