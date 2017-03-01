@@ -33,6 +33,10 @@ export default props => (
         code: tableJs,
       }]}
     >
+      <GuideText>
+        Here&rsquo;s the basic Table. You can expand and collapse rows.
+      </GuideText>
+
       <GuideDemo
         html={tableHtml}
         js={tableJs}
