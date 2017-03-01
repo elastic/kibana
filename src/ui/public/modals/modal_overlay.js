@@ -8,6 +8,7 @@ export class ModalOverlay {
   constructor(modalElement) {
     this.overlayElement = angular.element(modalOverlayTemplate);
     this.overlayElement.append(modalElement);
+
     angular.element(document.body).append(this.overlayElement);
   }
 
