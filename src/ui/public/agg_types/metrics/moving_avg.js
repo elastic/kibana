@@ -9,6 +9,7 @@ export default function AggTypeMetricMovingAvgProvider(Private) {
   return new MetricAggType({
     name: 'moving_avg',
     title: 'Moving Avg',
+    subtype: parentPipelineAggHelper.subtype,
     makeLabel: agg => makeNestedLabel(agg, 'moving avg'),
     params: [
       ...parentPipelineAggHelper.params()

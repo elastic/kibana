@@ -216,6 +216,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     configDsl[this.type.dslName || this.type.name] = output.params;
 
     // if the config requires subAggs, write them to the dsl as well
+    if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
