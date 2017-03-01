@@ -6,10 +6,13 @@ import KbnServer from '../../src/server/kbn_server';
 import * as i18nVerify from '../utils/i18n_verify_keys';
 
 export default function (grunt) {
-  grunt.registerTask('_build:verifyTranslations', function () {
 
-    grunt.task.requires('_build:extractAngularTranslations');
+  grunt.registerTask('_build:verifyTranslations', [
+    'i18nextract',
+    '_build:check'
+  ]);
 
+  grunt.registerTask('_build:check', function () {
     const done = this.async();
 
     const serverConfig = {
@@ -45,6 +48,7 @@ export default function (grunt) {
       .then(() => done(err));
     });
   });
+
 }
 
 function verifyTranslations(uiI18nObj)
