@@ -168,14 +168,14 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
         let legendScope = $scope.$new();
         function drawPlot(plotConfig) {
-
-          if (!plotConfig || !plotConfig.length) {
-            $elem.empty();
-            return;
-          }
-
           if (!$('.chart-canvas', $elem).length) $elem.html(template);
           const canvasElem = $('.chart-canvas', $elem);
+
+          // we can't use `$.plot` to draw the chart when the height or width is 0
+          // so, we'll need another event to trigger drawPlot to actually draw it
+          if (canvasElem.height() === 0 || canvasElem.width() === 0) {
+            return;
+          }
 
           const title = _(plotConfig).map('_title').compact().last();
           $('.chart-top-title', $elem).text(title == null ? '' : title);
@@ -242,11 +242,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             });
           }
 
-          try {
-            $scope.plot = $.plot(canvasElem, _.compact(series), options);
-          } catch (e) {
-            setTimeout(drawPlot, 500);
-          }
+          $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
           if ($scope.plot) {
             $scope.$emit('renderComplete');
