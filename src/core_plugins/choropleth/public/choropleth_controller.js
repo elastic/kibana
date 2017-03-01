@@ -31,6 +31,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       baseLayerType: 'tms',
       options: { url, ...options }
     });
+    kibanaMap.addLegendControl();
   }
 
   const kibanaMapReady = makeKibanaMap();
@@ -56,7 +57,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
         options.selectedJoinField = options.selectedLayer.fields[0];
       }
       updateChoroplethLayer(options.selectedLayer.url);
-      choroplethLayer.setMetrics(results);
+      choroplethLayer.setMetrics(results, metricsAgg);
 
 
       if ($scope.vis.aggs.bySchemaName.segment[0]) {

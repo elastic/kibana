@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
+import d3 from 'd3';
 import KibanaMapLayer from 'ui/vis_maps/kibana_map_layer';
 import colorramps from 'ui/vislib/components/color/colormaps';
 
@@ -17,7 +18,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
-
         layer.on('click', () => {
           this.emit('select', feature.properties[this._joinField]);
         });
@@ -51,7 +51,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       success: (data) => {
         this._leafletLayer.addData(data);
         this._loaded = true;
-        this._setChoroplethStyle();
+        this._setStyle();
       }
     }).error(function (e) {
       // notifier.fatal(e);
@@ -59,12 +59,23 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     });
   }
 
-  _setChoroplethStyle() {
+  _setStyle() {
     if (!this._loaded || !this._metrics || !this._joinField) {
       return;
     }
+
+
     const styleFunction = makeChoroplethStyleFunction(this._metrics, this._colorRamp, this._joinField);
     this._leafletLayer.setStyle(styleFunction);
+
+
+    if (this._metrics && this._metrics.length > 0) {
+      const {min, max} = getMinMax(this._metrics);
+      this._legendColors = getLegendColors(this._colorRamp);
+      const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
+      this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
+    }
+    this.emit('styleChanged');
   }
 
 
@@ -85,13 +96,15 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       return;
     }
     this._joinField = joinfield;
-    this._setChoroplethStyle();
+    this._setStyle();
   }
 
 
-  setMetrics(metrics) {
+  setMetrics(metrics, metricsAgg) {
     this._metrics = metrics;
-    this._setChoroplethStyle();
+    this._metricsAgg = metricsAgg;
+    this._valueFormatter = this._metricsAgg.fieldFormatter();
+    this._setStyle();
   }
 
   setColorRamp(colorRamp) {
@@ -99,15 +112,66 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       return;
     }
     this._colorRamp = colorRamp;
-    this._setChoroplethStyle();
+    this._setStyle();
   }
 
   equalsGeoJsonUrl(geojsonUrl) {
     return this._geojsonUrl === geojsonUrl;
   }
 
+  appendLegendContents(jqueryDiv) {
+
+
+    if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
+      return '';
+    }
+
+    const titleText = this._metricsAgg.makeLabel();
+    // const titleText = 'foobar';
+    const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+    jqueryDiv.append($title);
+
+    this._legendColors.forEach((color) => {
+
+      const labelText = this._legendQuantizer
+        .invertExtent(color)
+        .map(this._valueFormatter)
+        .join(' – ');
+
+      const label = $('<div>');
+      const icon = $('<i>').css({
+        background: color,
+        'border-color': makeColorDarker(color)
+      });
+
+      const text = $('<span>').text(labelText);
+      label.append(icon);
+      label.append(text);
+
+      jqueryDiv.append(label);
+    });
+
+  }
 
 }
+
+
+function makeColorDarker(color) {
+  const amount = 1.3;//magic number, carry over from earlier
+  return d3.hcl(color).darker(amount).toString();
+}
+
+
+function getMinMax(data) {
+  let min = data[0].value;
+  let max = data[0].value;
+  for (let i = 1; i < data.length; i += 1) {
+    min = Math.min(data[i].value, min);
+    max = Math.max(data[i].value, max);
+  }
+  return {min, max};
+}
+
 
 function makeChoroplethStyleFunction(data, colorramp, joinField) {
 
@@ -117,12 +181,7 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
     };
   }
 
-  let min = data[0].value;
-  let max = data[0].value;
-  for (let i = 1; i < data.length; i += 1) {
-    min = Math.min(data[i].value, min);
-    max = Math.max(data[i].value, max);
-  }
+  const {min, max} = getMinMax(data);
 
   return function (geojsonFeature) {
 
@@ -142,7 +201,35 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
       fillOpacity: 0.7
     };
   };
+  // const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
+  // const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(colorramp);
+
+  // return {
+  //   styleFunction: styleFunction,
+  //   legendQuantizer: legendQuantizer
+  // };
 }
+
+
+function getLegendColors(colorRamp) {
+
+  const colors = [];
+  colors[0] = getColor(colorRamp, 0);
+  colors[1] = getColor(colorRamp, Math.floor(colorRamp.length * 1 / 4));
+  colors[2] = getColor(colorRamp, Math.floor(colorRamp.length * 2 / 4));
+  colors[3] = getColor(colorRamp, Math.floor(colorRamp.length * 3 / 4));
+  colors[4] = getColor(colorRamp, colorRamp.length - 1);
+  return colors;
+}
+
+function getColor(colorRamp, i) {
+  const color = colorRamp[i][1];
+  const red = Math.floor(color[0] * 255);
+  const green = Math.floor(color[1] * 255);
+  const blue = Math.floor(color[2] * 255);
+  return `rgb(${red},${green},${blue})`;
+}
+
 
 function getChoroplethColor(value, min, max, colorRamp) {
   if (min === max) {
@@ -152,13 +239,8 @@ function getChoroplethColor(value, min, max, colorRamp) {
   const index = Math.round(colorRamp.length * fraction) - 1;
   const i = Math.max(Math.min(colorRamp.length - 1, index), 0);
 
-  const color = colorRamp[i][1];
-  const red = Math.floor(color[0] * 255);
-  const green = Math.floor(color[1] * 255);
-  const blue = Math.floor(color[2] * 255);
-  return `rgb(${red},${green},${blue})`;
+  return getColor(colorRamp, i);
 }
-
 
 const emptyStyleObject = {
   weight: 1,

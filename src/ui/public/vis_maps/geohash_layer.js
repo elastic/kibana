@@ -58,36 +58,32 @@ class ScaledCircles extends EventEmitter {
   appendLegendContents(jqueryDiv) {
 
     if (!this._legendColors || !this._legendQuantizer) {
-      return '';
+      return;
     }
 
     const titleText = this.getLabel();
     const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
     jqueryDiv.append($title);
 
-    const labels = this._legendColors.map((color) => {
-
+    this._legendColors.forEach((color) => {
       const labelText = this._legendQuantizer
         .invertExtent(color)
         .map(this._valueFormatter)
         .join(' – ');
 
       const label = $('<div>');
-
       const icon = $('<i>').css({
         background: color,
         'border-color': makeColorDarker(color)
       });
 
       const text = $('<span>').text(labelText);
-
       label.append(icon);
       label.append(text);
 
       jqueryDiv.append(label);
     });
 
-    return labels.join('');
   }
 
 

@@ -35,13 +35,14 @@ const LegendControl = L.Control.extend({
     position: 'topright'
   },
 
-  _updateContents() {
+  updateContents() {
     this._legendContainer.empty();
     const $div = $('<div>').addClass('tilemap-legend');
     this._legendContainer.append($div);
     const layers = this._kibanaMap.getLayers();
     layers.forEach((layer) =>layer.appendLegendContents($div));
   },
+
 
   initialize: function (container, kibanaMap, position) {
     this._legendContainer = container;
@@ -50,9 +51,9 @@ const LegendControl = L.Control.extend({
 
   },
   onAdd: function () {
-    this._layerUpdateHandle = () => this._updateContents();
+    this._layerUpdateHandle = () => this.updateContents();
     this._kibanaMap.on('layers:update', this._layerUpdateHandle);
-    this._updateContents();
+    this.updateContents();
     return this._legendContainer.get(0);
   },
   onRemove: function () {
@@ -190,6 +191,15 @@ class KibanaMap extends EventEmitter {
     const onHideTooltip = () => this._leafletMap.closePopup();
     layer.on('hideTooltip', onHideTooltip);
     this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: layer });
+
+
+    const onStyleChanged = () => {
+      if (this._leafletLegendControl) {
+        this._leafletLegendControl.updateContents();
+      }
+    };
+    layer.on('styleChanged', onStyleChanged);
+    this._listeners.push({name: 'styleChanged', handle: onStyleChanged, layer: layer});
 
     this._layers.push(layer);
     layer.addToLeafletMap(this._leafletMap);
