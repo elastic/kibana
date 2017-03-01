@@ -36,7 +36,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   const kibanaMapReady = makeKibanaMap();
   $scope.$watch('esResponse', async function (response) {
-
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
       const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
@@ -68,6 +67,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
 
       kibanaMap.resize();
+      $element.trigger('renderComplete');
     });
   });
 
@@ -83,15 +83,16 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
       kibanaMap.setShowTooltip(true);
       kibanaMap.resize();
+      $element.trigger('renderComplete');
     });
   });
 
 
   //todo: switch with ResizeChecker
   $scope.$watch(getContainerSize, _.debounce(() => {
-    kibanaMapReady.then(()=> {
+    if (kibanaMap) {
       kibanaMap.resize();
-    });
+    }
   }, 500, { trailing: true }), true);
 
   function getContainerSize() {

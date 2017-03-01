@@ -4,7 +4,7 @@ const vectorMaps = {
     fields: ['iso']
   },
   'States': {
-    url: '../plugins/choropleth/data/us_states.geojson',
+    url: '../plugins/choropleth/data/state.geojson',
     fields: ['NAME']
   }
 };
