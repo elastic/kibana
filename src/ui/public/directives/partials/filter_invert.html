@@ -1,0 +1,35 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  class="{{opts.className}}"
+  width="{{opts.svgWidth}}"
+  height="{{opts.svgHeight}}"
+>
+  <defs>
+    <filter id="filter">
+      <feComposite
+        in="SourceGraphic"
+        in2="SourceGraphic"
+        operator="arithmetic"
+        k1="0"
+        k2="1"
+        k3="0"
+        k4="0"
+      />
+      <feColorMatrix
+        color-interpolation-filters="sRGB"
+        in="SourceGraphic"
+        type="matrix"
+        values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"
+      />
+    </filter>
+  </defs>
+  <image
+    filter="url('#filter')"
+    x="0"
+    y="0"
+    width="{{opts.svgWidth}}"
+    height="{{opts.svgHeight}}"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xlink:href="{{opts.svgSource}}"
+  />
+</svg>
