@@ -103,10 +103,12 @@ Before
 
 `_create.html`
 
--------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
     <h1>Configure an index pattern</h1>
     In order to use Kibana you must configure at least one index pattern…
--------------------------------------------------------------------------
+
+    <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info> 
+-----------------------------------------------------------------------------------------------------
 
 [[after]]
 After
@@ -114,19 +116,50 @@ After
 
 `_create.html`
 
---------------------------------------------------------
+-------------------------------------------------------------------------------------------
     <h1 translate="KIBANA-CONFIGURE_INDEX_PATTERN"</h1>
     <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"</p>
---------------------------------------------------------
+
+    <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
+-------------------------------------------------------------------------------------------
+
+* In the view (JS) file, such as
+`src/core_plugins/kibana/public/management/sections/indices/_create.js`
+As above, replace English text with translation keys, and copy the English text
+into the `en.json` file appropriately. Note that some strings may not be user facing
+and do not need to be replaced then. Also note the prefix `KIBANA-` matching the plugin
+being translated.
+
+[[before]]
+Before
+++++++
+
+`_create.js`
+
+--------------------------------------------------------------------------------------------------------------
+    notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+--------------------------------------------------------------------------------------------------------------
+
+[[after]]
+After
++++++
+
+`_create.js`
+
+-------------------------------------------------------------------------------------------
+    notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+-------------------------------------------------------------------------------------------
 
 `en.json`
 
---------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
     {
        "KIBANA-CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
-       "KIBANA-MUST_CONFIGURE_INDEX_PATTERN": "In order to use Kibana you must…"
+       "KIBANA-MUST_CONFIGURE_INDEX_PATTERN": "In order to use Kibana you must…",
+       "KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME" : "This field will be used to filter events with the global time filter",
+       "KIBANA-NO_INDICES_MATCHING_PATTERN": "Could not locate any indices matching that pattern. Please add the index to Elasticsearch",
     }
---------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
 
 * Refresh the Kibana page and verify the UI looks the same.
 * Refer to Kibana core plugin (`src/core_plugins/kibana/`) for examples.
