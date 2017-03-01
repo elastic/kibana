@@ -16,7 +16,7 @@ export class GuideSection extends Component {
   }
 
   onClickSource() {
-    this.props.openCodeViewer(this.props.source);
+    this.props.openCodeViewer(this.props.source, this.props.title);
   }
 
   componentWillMount() {
