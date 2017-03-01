@@ -9,6 +9,7 @@ export default function AggTypeMetricComulativeSumProvider(Private) {
   return new MetricAggType({
     name: 'cumulative_sum',
     title: 'Cumulative Sum',
+    subtype: parentPipelineAggHelper.subtype,
     makeLabel: agg => makeNestedLabel(agg, 'cumulative sum'),
     params: [
       ...parentPipelineAggHelper.params()
