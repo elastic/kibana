@@ -60,6 +60,9 @@ import TableExample
 import TabsExample
   from '../../views/tabs/tabs_example.jsx';
 
+import ToggleButtonExample
+  from '../../views/toggle_button/toggle_button_example.jsx';
+
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
 
@@ -127,6 +130,9 @@ const components = [{
 }, {
   name: 'Tabs',
   component: TabsExample,
+}, {
+  name: 'ToggleButton',
+  component: ToggleButtonExample,
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
