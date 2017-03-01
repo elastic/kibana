@@ -132,6 +132,10 @@ export default function AxisConfigFactory() {
         this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
       }
 
+      if (this.get('type') === 'category' && !this.isHorizontal()) {
+        this._values.scale.inverted = _.get(axisConfigArgs, 'scale.inverted', true);
+      }
+
       let offset;
       let stacked = true;
       switch (this.get('scale.mode')) {
@@ -155,12 +159,12 @@ export default function AxisConfigFactory() {
     }
 
     get(property, defaults) {
-      if (typeof defaults !== 'undefined' || _.has(this._values, property)) {
-        return _.get(this._values, property, defaults);
-      } else {
+      if (typeof defaults === 'undefined' && !_.has(this._values, property)) {
         throw new Error(`Accessing invalid config property: ${property}`);
-        return defaults;
       }
+      const val = _.get(this._values, property, defaults);
+      if (val == null && defaults != null) return defaults;
+      return val;
     }
 
     set(property, value) {

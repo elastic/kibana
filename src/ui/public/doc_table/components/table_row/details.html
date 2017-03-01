@@ -1,6 +1,20 @@
 <td colspan="{{ columns.length + 2 }}">
-  <a class="pull-right" ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}">
-    <small>Link to /{{row._index}}/{{row._type}}/{{row._id | uriescape}}</small></i>
-  </a>
+  <div class="documentTableRow__actions">
+    <a
+      class="kuiLink documentTableRow__action"
+      data-test-subj="docTableRowAction"
+      ng-href="{{ getContextAppHref() }}"
+      ng-if="indexPattern.hasTimeField()"
+    >
+      View surrounding documents
+    </a>
+    <a
+      class="kuiLink documentTableRow__action"
+      data-test-subj="docTableRowAction"
+      ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
+    >
+      View single document
+    </a>
+  </div>
   <doc-viewer hit="row" filter="filter" columns="columns" index-pattern="indexPattern"></doc-viewer>
 </td>

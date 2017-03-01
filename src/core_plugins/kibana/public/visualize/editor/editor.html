@@ -71,7 +71,11 @@
 
   <div class="vis-editor-content">
 
-    <vis-editor-vis-options ng-if="vis.type.fullEditor" vis="vis" saved-vis="savedVis" ui-state="uiState"
+    <vis-editor-vis-options ng-if="vis.type.fullEditor"
+                            vis="vis"
+                            saved-vis="savedVis"
+                            editor="vis.type.params.editor"
+                            ui-state="uiState"
                             class="vis-editor-full-options"></vis-editor-vis-options>
 
     <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >

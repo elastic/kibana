@@ -1,20 +1,3 @@
-@import (reference) "~ui/styles/variables";
-
-@truncate1: fade(@truncate-color, 0%);
-@truncate2: fade(@truncate-color, 1%);
-@truncate3: fade(@truncate-color, 99%);
-@truncate4: fade(@truncate-color, 100%);
-
 .truncate-by-height {
-  position: relative;
   overflow: hidden;
-
-  &:before {
-    content: " ";
-    width: 100%;
-    height: 15px; // copied into index.html!
-    position: absolute;
-    left: 0;
-    background: linear-gradient(to bottom, @truncate1 0%, @truncate2 1%, @truncate3 99%, @truncate4 100%);
-  }
 }

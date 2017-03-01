@@ -20,4 +20,9 @@ sections.register('kibana', {
   order: 20,
 });
 
+sections.register('logstash', {
+  display: 'Logstash',
+  order: 30,
+});
+
 export default sections;
