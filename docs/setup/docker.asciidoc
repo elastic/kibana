@@ -98,6 +98,7 @@ mappings are available:
 `XPACK_MONITORING_REPORT_STATS`:: `xpack.monitoring.report_stats`
 `XPACK_MONITORING_KIBANA_COLLECTION_ENABLED`:: `xpack.monitoring.kibana.collection.enabled`
 `XPACK_MONITORING_KIBANA_COLLECTION_INTERVAL`:: `xpack.monitoring.kibana.collection.interval`
+`XPACK_SECURITY_ENABLED`:: `xpack.security.enabled`
 `XPACK_SECURITY_COOKIENAME`:: `xpack.security.cookieName`
 `XPACK_SECURITY_ENCRYPTIONKEY`:: `xpack.security.encryptionKey`
 `XPACK_SECURITY_SECURECOOKIES`:: `xpack.security.secureCookies`
