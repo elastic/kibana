@@ -11,6 +11,10 @@ import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/std_deviat
 import AggTypesMetricsCardinalityProvider from 'ui/agg_types/metrics/cardinality';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 import AggTypesMetricsPercentileRanksProvider from 'ui/agg_types/metrics/percentile_ranks';
+import AggTypesMetricsDerivativeProvider from 'ui/agg_types/metrics/derivative';
+import AggTypesMetricsCumulativeSumProvider from 'ui/agg_types/metrics/cumulative_sum';
+import AggTypesMetricsMovingAvgProvider from 'ui/agg_types/metrics/moving_avg';
+import AggTypesMetricsSerialDiffProvider from 'ui/agg_types/metrics/serial_diff';
 import AggTypesBucketsDateHistogramProvider from 'ui/agg_types/buckets/date_histogram';
 import AggTypesBucketsHistogramProvider from 'ui/agg_types/buckets/histogram';
 import AggTypesBucketsRangeProvider from 'ui/agg_types/buckets/range';
@@ -20,6 +24,10 @@ import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
 import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
 import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
 import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
+import AggTypesMetricsBucketSumProvider from 'ui/agg_types/metrics/bucket_sum';
+import AggTypesMetricsBucketAvgProvider from 'ui/agg_types/metrics/bucket_avg';
+import AggTypesMetricsBucketMinProvider from 'ui/agg_types/metrics/bucket_min';
+import AggTypesMetricsBucketMaxProvider from 'ui/agg_types/metrics/bucket_max';
 export default function AggTypeService(Private) {
 
   const aggs = {
@@ -34,7 +42,15 @@ export default function AggTypeService(Private) {
       Private(AggTypesMetricsCardinalityProvider),
       Private(AggTypesMetricsPercentilesProvider),
       Private(AggTypesMetricsPercentileRanksProvider),
-      Private(AggTypesMetricsTopHitProvider)
+      Private(AggTypesMetricsTopHitProvider),
+      Private(AggTypesMetricsDerivativeProvider),
+      Private(AggTypesMetricsCumulativeSumProvider),
+      Private(AggTypesMetricsMovingAvgProvider),
+      Private(AggTypesMetricsSerialDiffProvider),
+      Private(AggTypesMetricsBucketAvgProvider),
+      Private(AggTypesMetricsBucketSumProvider),
+      Private(AggTypesMetricsBucketMinProvider),
+      Private(AggTypesMetricsBucketMaxProvider),
     ],
     buckets: [
       Private(AggTypesBucketsDateHistogramProvider),

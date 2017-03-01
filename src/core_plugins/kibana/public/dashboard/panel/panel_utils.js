@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+import _ from 'lodash';
 
 export class PanelUtils {
   /**
@@ -24,9 +25,10 @@ export class PanelUtils {
   /**
    * Ensures that the panel object has the latest size/pos info.
    * @param {PanelState} panel
+   * @param {Element} panelElement - jQuery element representing the element in the UI
    */
-  static refreshSizeAndPosition(panel) {
-    const data = panel.$el.coords().grid;
+  static refreshSizeAndPosition(panel, panelElement) {
+    const data = panelElement.coords().grid;
     panel.size_x = data.size_x;
     panel.size_y = data.size_y;
     panel.col = data.col;
@@ -34,12 +36,31 @@ export class PanelUtils {
   }
 
   /**
-   * $el is a circular structure because it contains a reference to it's parent panel,
-   * so it needs to be removed before it can be serialized (we also don't
-   * want it to show up in the url).
-   * @param {PanelState} panel
+   * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
+   * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
+   * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
+   * @param panels {Array<Object>}
    */
-  static makeSerializeable(panel) {
-    delete panel.$el;
+  static findPanelByPanelIndex(panelIndex, panels) {
+    return _.find(panels, (panel) => panel.panelIndex === panelIndex);
+  }
+
+  static initPanelIndexes(panels) {
+    // find the largest panelIndex in all the panels
+    let maxIndex = this.getMaxPanelIndex(panels);
+
+    // ensure that all panels have a panelIndex
+    panels.forEach(function (panel) {
+      if (!panel.panelIndex) {
+        panel.panelIndex = maxIndex++;
+      }
+    });
+  }
+
+  static getMaxPanelIndex(panels) {
+    let maxId = panels.reduce(function (id, panel) {
+      return Math.max(id, panel.panelIndex || id);
+    }, 0);
+    return ++maxId;
   }
 }

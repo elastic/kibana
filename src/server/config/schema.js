@@ -52,7 +52,6 @@ module.exports = () => Joi.object({
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()),
-      clientAuthentication: Joi.string().valid('none', 'required').default('none'),
       supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
@@ -123,20 +122,28 @@ module.exports = () => Joi.object({
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi
-      .alternatives()
-      .try(
-        Joi.boolean(),
-        Joi.string().regex(/^\/.+\/$/)
-      )
-      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
-    sourceMaps: Joi
-      .alternatives()
-      .try(
-        Joi.string().required(),
-        Joi.boolean()
-      )
-      .default(Joi.ref('$dev')),
+    unsafeCache: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.boolean(),
+          Joi.string().regex(/^\/.+\/$/)
+        )
+        .default(true),
+    }),
+    sourceMaps: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.string().required(),
+          Joi.boolean()
+        )
+        .default('#cheap-source-map'),
+    }),
     profile: Joi.boolean().default(false)
   }).default(),
 
@@ -144,7 +151,11 @@ module.exports = () => Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
   tilemap: Joi.object({
-    manifestServiceUrl: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
+      otherwise: Joi.string().default('https://tiles.elastic.co/v2/manifest')
+    }),
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),

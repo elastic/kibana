@@ -33,11 +33,6 @@ export default function PointSeriesFactory(Private) {
       this.chartEl = chartEl;
       this.chartConfig = this.findChartConfig();
       this.handler.pointSeries = this;
-
-      const seriesLimit = 25;
-      if (this.chartConfig.series.length > seriesLimit) {
-        throw new errors.VislibError('There are too many series defined.');
-      }
     }
 
     findChartConfig() {
@@ -58,6 +53,14 @@ export default function PointSeriesFactory(Private) {
       .attr('height', height)
       .attr('fill', 'transparent')
       .attr('class', 'background');
+    }
+
+    addGrid(svg) {
+      const { width, height } = svg.node().getBBox();
+      return svg
+        .append('g')
+        .attr('class', 'grid')
+        .call(this.handler.grid.draw(width, height));
     }
 
     addClipPath(svg) {
@@ -102,19 +105,21 @@ export default function PointSeriesFactory(Private) {
       // outside of them so we will use these values rather than ordered.min/max
       const oneUnit = (ordered.units || _.identity)(1);
 
+      const drawInverted = isHorizontal || xAxis.axisConfig.get('scale.inverted', false);
+      const size = isHorizontal ? width : height;
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
       const leftEndzone = {
-        x: isHorizontal ? 0 : Math.max(xScale(ordered.min), 0),
-        w: isHorizontal ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
+        x: drawInverted ? 0 : Math.max(xScale(ordered.min), 0),
+        w: drawInverted ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
       };
 
       const expandLastBucket = xAxis.axisConfig.get('scale.expandLastBucket');
       const rightLastVal = expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
       const rightStart = rightLastVal + oneUnit;
       const rightEndzone = {
-        x: isHorizontal ? xScale(rightStart) : 0,
-        w: isHorizontal ? Math.max(width - xScale(rightStart), 0) : xScale(rightStart)
+        x: drawInverted ? xScale(rightStart) : 0,
+        w: drawInverted ? Math.max(size - xScale(rightStart), 0) : xScale(rightStart)
       };
 
       this.endzones = svg.selectAll('.layer')
@@ -144,8 +149,8 @@ export default function PointSeriesFactory(Private) {
         const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        const min = isHorizontal ? leftEndzone.w : rightEndzone.w;
-        const max = isHorizontal ? rightEndzone.x : leftEndzone.x;
+        const min = drawInverted ? leftEndzone.w : rightEndzone.w;
+        const max = drawInverted ? rightEndzone.x : leftEndzone.x;
 
         // bounds of the cursor to consider
         let xLeft = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
@@ -224,6 +229,7 @@ export default function PointSeriesFactory(Private) {
           .attr('height', height);
 
           self.addBackground(svg, width, height);
+          self.addGrid(svg);
           self.addClipPath(svg);
           self.addEvents(svg);
           self.createEndZones(svg);
@@ -232,7 +238,7 @@ export default function PointSeriesFactory(Private) {
           self.series = [];
           _.each(self.chartConfig.series, (seriArgs, i) => {
             if (!seriArgs.show) return;
-            const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')];
+            const SeriClass = seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
             const series = new SeriClass(self.handler, svg, data.series[i], seriArgs);
             series.events = self.events;
             svg.call(series.draw());

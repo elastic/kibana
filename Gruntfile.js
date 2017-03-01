@@ -1,5 +1,5 @@
 const camelCase = require('lodash').camelCase;
-require('babel/register')(require('./src/optimize/babel_options').node);
+require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config

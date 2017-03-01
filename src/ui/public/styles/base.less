@@ -253,7 +253,6 @@ kbn-table, .kbn-table {
       visibility: visible;
     }
   }
-
 }
 
 //== Generic Table
@@ -491,6 +490,16 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
+  position: relative;
+
+  .table-cell-filter {
+    position: absolute;
+    background-color: @table-cell-hover-bg;
+    white-space: nowrap;
+    right: 0;
+    top: 5px;
+    display: none;
+  }
 }
 
   .cell-hover-show {
@@ -499,8 +508,9 @@ style-compile {
   }
 
 .cell-hover:hover {
-  background-color: @table-cell-hover-hover-bg;
-  cursor: cell;
+  .table-cell-filter {
+    display: inline;
+  }
 
   .cell-hover-show {
     visibility: visible;
@@ -601,28 +611,6 @@ fieldset {
 .page-row-text {
   color: @kibanaGray2;
   font-size: 14px;
-}
-
-.kuiView {
-  background-color: #FFFFFF;
-  flex: 1 1 auto;
-}
-
-.kuiViewContent {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-
-.kuiViewContent--constrainedWidth {
-  width: 100%;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.kuiViewContentItem {
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .kuiNotice {
@@ -892,6 +880,7 @@ fieldset {
 .kuiSideBarSelect {
   // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
   height: 24px;
+  width: 100%;
   font-size: 12px;
   padding: 0 15px;
 }
@@ -912,12 +901,21 @@ fieldset {
   margin-bottom: 6px;
 }
 
+.kuiSideBarSection__main {
+  margin-bottom: 25px;
+}
+
 .kuiSideBarSectionTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
   border-bottom: 1px solid #D4D4D4;
+}
+
+.kuiSideBarSection__main .kuiSideBarSectionTitle {
+  background-color: #E4E4E4;
+  padding: 2px 10px;
 }
 
 .kuiSideBarSectionTitle__text {

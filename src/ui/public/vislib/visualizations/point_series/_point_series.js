@@ -29,8 +29,8 @@ export default function PointSeriesProvider(Private) {
 
     getGroupedCount() {
       const stacks = [];
-      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
-        const valueAxis = series.valueAxis;
+      return this.baseChart.chartConfig.series.reduce((sum, series) => {
+        const valueAxis = series.valueAxis || this.baseChart.handler.valueAxes[0].id;
         const isStacked = series.mode === 'stacked';
         const isHistogram = series.type === 'histogram';
         if (!isHistogram) return sum;
@@ -53,7 +53,7 @@ export default function PointSeriesProvider(Private) {
       let i = 0;
       const stacks = [];
       for (const seri of this.baseChart.chartConfig.series) {
-        const valueAxis = seri.valueAxis;
+        const valueAxis = seri.valueAxis || this.baseChart.handler.valueAxes[0].id;
         const isStacked = seri.mode === 'stacked';
         if (!isStacked) {
           if (seri.data === data) return i;

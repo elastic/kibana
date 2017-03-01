@@ -1,4 +1,3 @@
-
 import React, {
   Component,
   PropTypes,
@@ -18,8 +17,7 @@ import {
 // Inject version into header.
 const pkg = require('json!../../../../package.json');
 
-export default class AppView extends Component {
-
+export class AppView extends Component {
   constructor(props) {
     super(props);
 
@@ -30,15 +28,6 @@ export default class AppView extends Component {
     this.onClickNavItem = this.onClickNavItem.bind(this);
     this.onToggleNav = this.onToggleNav.bind(this);
     this.onCloseCodeViewer = this.onCloseCodeViewer.bind(this);
-  }
-
-  getChildContext() {
-    return {
-      openCodeViewer: this.props.openCodeViewer,
-      updateCodeViewer: this.props.updateCodeViewer,
-      registerCode: this.props.registerCode,
-      unregisterCode: this.props.unregisterCode,
-    };
   }
 
   onClickNavItem() {
@@ -69,7 +58,8 @@ export default class AppView extends Component {
           onToggleNav={this.onToggleNav}
           onClickNavItem={this.onClickNavItem}
           version={pkg.version}
-          items={Routes.components}
+          components={Routes.components}
+          sandboxes={Routes.sandboxes}
         />
 
         <div className={contentClasses}>
@@ -79,35 +69,26 @@ export default class AppView extends Component {
         <GuideCodeViewer
           isOpen={this.props.isCodeViewerOpen}
           onClose={this.onCloseCodeViewer}
-          title={this.props.code.title}
-          html={this.props.code.html}
-          js={this.props.code.js}
+          title={'No title'}
+          source={this.props.source}
         />
       </div>
     );
   }
-
 }
-
-AppView.childContextTypes = {
-  openCodeViewer: PropTypes.func,
-  updateCodeViewer: PropTypes.func,
-  registerCode: PropTypes.func,
-  unregisterCode: PropTypes.func,
-};
 
 AppView.propTypes = {
   children: PropTypes.any,
   routes: PropTypes.array.isRequired,
   openCodeViewer: PropTypes.func,
-  updateCodeViewer: PropTypes.func,
   closeCodeViewer: PropTypes.func,
-  registerCode: PropTypes.func,
-  unregisterCode: PropTypes.func,
   isCodeViewerOpen: PropTypes.bool,
-  code: PropTypes.object,
+  registerSection: PropTypes.func,
+  unregisterSection: PropTypes.func,
+  sections: PropTypes.array,
+  source: PropTypes.array,
 };
 
 AppView.defaultProps = {
-  code: {},
+  source: [],
 };

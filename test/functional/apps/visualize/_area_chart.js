@@ -14,7 +14,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickAreaChart');
       return PageObjects.visualize.clickAreaChart();
@@ -53,14 +53,14 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function clickGo() {
       return PageObjects.visualize.clickGo();
     })
-    .then(function isGlobalLoadingIndicatorHidden() {
+    .then(function waitUntilLoadingHasFinished() {
       PageObjects.common.debug('Waiting...');
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    const vizName1 = 'Visualization AreaChart';
+    const vizName1 = 'Visualization AreaChart Name Test';
 
     bdd.it('should save and load with special characters', function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';

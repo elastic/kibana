@@ -1,0 +1,48 @@
+<div>
+  <div class="kuiSideBarCollapsibleTitle">
+    <div
+      class="kuiSideBarCollapsibleTitle__label"
+      ng-click="isGridOpen = !isGridOpen"
+    >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': isGridOpen, 'fa-caret-right': !isGridOpen }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+      <span class="kuiSideBarCollapsibleTitle__text">
+        Grid
+      </span>
+    </div>
+  </div>
+
+  <div ng-show="isGridOpen" class="kuiSideBarCollapsibleSection">
+    <!-- General -->
+    <div class="kuiSideBarSection">
+      <div class="kuiSideBarFormRow">
+        <label class="kuiSideBarFormRow__label" for="showCategoryLines">
+          X-Axis Lines
+        </label>
+        <div class="kuiSideBarFormRow__control">
+          <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="vis.params.grid.categoryLines">
+        </div>
+      </div>
+
+      <div class="kuiSideBarFormRow">
+        <label class="kuiSideBarFormRow__label" for="gridAxis">
+          Y-Axis Lines
+        </label>
+        <div class="kuiSideBarFormRow__control">
+          <select
+            id="gridAxis"
+            class="kuiSelect kuiSideBarSelect"
+            ng-model="vis.params.grid.valueAxis"
+            ng-options="axis.id as axis.name for axis in vis.params.valueAxes"
+          >
+            <option value="">Don't show</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+  </div>

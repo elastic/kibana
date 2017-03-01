@@ -3,16 +3,14 @@
   <kbn-top-nav name="visualize" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
-      <!-- Title. -->
-      <div
+      <!-- Breadcrumbs. -->
+      <bread-crumbs
         data-transclude-slot="topLeftCorner"
-        class="kuiLocalTitle"
-      >
-        <span
-          ng-show="savedVis.id"
-          ng-bind="savedVis.lastSavedTitle"
-        ></span>
-      </div>
+        page-title="getVisualizationTitle()"
+        use-links="true"
+        omit-current-page="true"
+        omit-pages="['edit']"
+      ></bread-crumbs>
 
       <!-- Search. -->
       <div
@@ -29,11 +27,11 @@
             ng-dblclick="unlink()"
             tooltip="Double click to unlink from Saved Search"
           >
-            <i aria-hidden="true" class="fa fa-chain-broken"></i>
+            <span aria-hidden="true" class="fa fa-chain-broken"></span>
           </a>
         </div>
 
-        <!-- Allow searching if there is no linked Saved Searc. -->
+        <!-- Allow searching if there is no linked Saved Search. -->
         <form
           ng-if="vis.type.requiresSearch && !$state.linked"
           name="queryInput"
@@ -73,13 +71,23 @@
 
   <div class="vis-editor-content">
 
-    <div class="collapsible-sidebar" ng-if="chrome.getVisible()">
-        <vis-editor-sidebar class="vis-editor-sidebar"></vis-editor-sidebar>
+    <vis-editor-vis-options ng-if="vis.type.fullEditor"
+                            vis="vis"
+                            saved-vis="savedVis"
+                            editor="vis.type.params.editor"
+                            ui-state="uiState"
+                            class="vis-editor-full-options"></vis-editor-vis-options>
+
+    <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
+      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
     </div>
 
-    <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
+    <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
       <visualize
         vis="vis"
+        shared-item
+        data-title="{{savedVis.lastSavedTitle}}"
+        data-description="{{savedVis.description}}"
         render-counter
         ui-state="uiState"
         show-spy-panel="chrome.getVisible()"
@@ -87,5 +95,6 @@
         search-source="savedVis.searchSource">
       </visualize>
     </div>
+
   </div>
 </visualize-app>

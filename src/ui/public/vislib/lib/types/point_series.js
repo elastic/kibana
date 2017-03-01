@@ -1,27 +1,50 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
 
 export default function ColumnHandler(Private) {
 
-  const createSeries = (cfg, series) => {
-    const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
-    let interpolate = cfg.interpolate;
+  const createSerieFromParams = (cfg, seri) => {
+    const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
+      return seri.label.endsWith(seriConfig.data.label);
+    }) : null;
+
+
+    let interpolate = matchingSeriParams ? matchingSeriParams.interpolate : cfg.interpolate;
     // for backward compatibility when loading URLs or configs we need to check smoothLines
     if (cfg.smoothLines) interpolate = 'cardinal';
 
+    if (!matchingSeriParams) {
+      const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
+      return {
+        show: true,
+        type: cfg.type || 'line',
+        mode: stacked ? 'stacked' : 'normal',
+        interpolate: interpolate,
+        drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
+        showCircles: cfg.showCircles,
+        radiusRatio: cfg.radiusRatio,
+        data: seri
+      };
+    }
+
+    return {
+      show: matchingSeriParams.show,
+      type: matchingSeriParams.type,
+      mode: matchingSeriParams.mode,
+      interpolate: interpolate,
+      valueAxis: matchingSeriParams.valueAxis,
+      drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
+      showCircles: matchingSeriParams.showCircles,
+      radiusRatio: matchingSeriParams.radiusRatio,
+      data: seri
+    };
+  };
+
+  const createSeries = (cfg, series) => {
     return {
       type: 'point_series',
+      addTimeMarker: cfg.addTimeMarker,
       series: _.map(series, (seri) => {
-        return {
-          show: true,
-          type: cfg.type || 'line',
-          mode: stacked ? 'stacked' : 'normal',
-          interpolate: interpolate,
-          drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
-          showCircles: cfg.showCircles,
-          radiusRatio: cfg.radiusRatio,
-          data: seri
-        };
+        return createSerieFromParams(cfg, seri);
       })
     };
   };
@@ -82,6 +105,12 @@ export default function ColumnHandler(Private) {
             }
           }
         ];
+      } else {
+        config.valueAxes.forEach(axis => {
+          if (axis.labels) {
+            axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
+          }
+        });
       }
 
       if (!config.categoryAxes) {
@@ -148,6 +177,12 @@ export default function ColumnHandler(Private) {
 
     heatmap: (cfg, data) => {
       const defaults = create()(cfg, data);
+      const seriesLimit = 25;
+      const hasCharts = defaults.charts.length;
+      const tooManySeries = defaults.charts[0].series.length > seriesLimit;
+      if (hasCharts && tooManySeries) {
+        defaults.error = 'There are too many series defined.';
+      }
       defaults.valueAxes[0].show = false;
       defaults.categoryAxes[0].style = {
         rangePadding: 0,
@@ -162,7 +197,8 @@ export default function ColumnHandler(Private) {
           inverted: true
         },
         labels: {
-          axisFormatter: val => val
+          filter: false,
+          axisFormatter: data.data.yAxisFormatter
         },
         style: {
           rangePadding: 0,

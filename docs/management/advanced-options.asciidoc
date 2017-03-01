@@ -35,6 +35,8 @@ document.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
+`doc_table:highlight:all_fields`:: Improves highlighting by using a separate `highlight_query` that uses `all_fields` mode on
+`query_string` queries. Set to `false` if you are using a `default_field` in your index.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
 the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
 increase request processing time.
@@ -76,7 +78,6 @@ Markdown.
 `notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
 `notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
 `notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
-
 `timelion:showTutorial`:: Set this property to `true` to show the Timelion tutorial to users when they first open Timelion.
 `timelion:es.timefield`:: Default field containing a timestamp when using the `.es()` query.
 `timelion:es.default_index`:: Default index when using the `.es()` query.
@@ -87,3 +88,5 @@ Markdown.
 `timelion:graphite.url`:: [experimental] Used with graphite queries, this it the URL of your host
 `timelion:quandl.key`:: [experimental] Used with quandl queries, this is your API key from www.quandl.com
 `state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of information there and the URL gets very long. Enabling this will store parts of the state in your browser session instead, to keep the URL shorter.
+`context:defaultSize`:: Specifies the initial number of surrounding entries to display in the context view. The default value is 5.
+`context:step`:: Specifies the number to increment or decrement the context size by when using the buttons in the context view. The default value is 5.

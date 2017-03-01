@@ -29,7 +29,7 @@ export default function (vis, resp) {
       aggConfig: agg,
       aggType: agg.type,
       field: agg.params.field,
-      label: agg.type.makeLabel(agg)
+      label: agg.makeLabel()
     };
   })
   .value();

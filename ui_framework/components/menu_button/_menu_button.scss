@@ -44,6 +44,7 @@
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--basic {
   color: #5a5a5a;
@@ -54,8 +55,9 @@
     color: #5a5a5a !important; /* 1 */
   }
 
-  &:hover:enabled,
-  &:active:enabled {
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: #5a5a5a !important; /* 1 */
     background-color: #F2F2F2;
   }
 
@@ -66,13 +68,14 @@
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--danger {
   color: #D76051;
   background-color: #ffffff;
 
-  &:hover:enabled,
-  &:active:enabled {
+  &:hover, /* 2 */
+  &:active { /* 2 */
     color: #FFFFFF !important; /* 1 */
     background-color: #D76051;
   }

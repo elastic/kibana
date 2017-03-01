@@ -93,6 +93,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'filter',
     'sort',
     'highlight',
+    'highlightAll',
     'aggs',
     'from',
     'size',
@@ -174,10 +175,9 @@ export default function SearchSourceFactory(Promise, Private, config) {
 
       // return promises created by the completion handler so that
       // errors will bubble properly
-      return req.defer.promise.then(addRequest);
+      return req.getCompletePromise().then(addRequest);
     });
   };
-
 
   /******
    * PRIVATE APIS
@@ -249,6 +249,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
       case 'index':
       case 'type':
       case 'id':
+      case 'highlightAll':
         if (key && state[key] == null) {
           state[key] = val;
         }
@@ -266,7 +267,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     }
 
     /**
-     * Add the key and val to the body of the resuest
+     * Add the key and val to the body of the request
      */
     function addToBody() {
       state.body = state.body || {};

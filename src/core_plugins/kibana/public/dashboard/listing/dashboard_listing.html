@@ -32,17 +32,14 @@
       </div>
 
       <div class="kuiToolBarSection">
-        <!-- We need an empty section for the buttons to be positioned consistently. -->
-      </div>
-
-      <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
         <button
           class="kuiButton kuiButton--danger"
           ng-click="listingController.deleteSelectedItems()"
           aria-label="Delete selected objects"
-          ng-hide="listingController.getSelectedItemsCount() === 0"
+          ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected dashboards"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
         </button>
@@ -53,15 +50,31 @@
           href="#/dashboard/create"
           aria-label="Create new dashboard"
           data-test-subj="newDashboardLink"
-          ng-hide="listingController.getSelectedItemsCount() > 0"
+          ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new dashboard"
+          tooltip-append-to-body="true"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>
       </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
     </div>
 
-    <!-- NoResults -->
+    <!-- NoItems -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
       ng-if="!listingController.items.length && listingController.filter"
@@ -74,11 +87,11 @@
     <!-- PromptForItems -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
-      ng-if="!listingController.items.length && !listingController.filter"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
     >
       <div class="kuiPromptForItems">
         <div class="kuiPromptForItems__message">
-          Looks like you don&rsquo;t have any dashboards. Let&rsquo;s add some!
+          Looks like you don&rsquo;t have any dashboards. Let&rsquo;s create some!
         </div>
 
         <div class="kuiPromptForItems__actions">
@@ -87,7 +100,7 @@
             href="#/dashboard/create"
           >
             <span class="kuiButton__icon kuiIcon fa-plus"></span>
-            Add a dashboard
+            Create a dashboard
           </a>
         </div>
       </div>
@@ -106,7 +119,7 @@
           >
         </th>
 
-        <th class="kuiTableHeaderCell" ng-click="listingController.sortHits()">
+        <th class="kuiTableHeaderCell" ng-click="listingController.toggleSort()">
           Name
           <span
             class="fa"
@@ -118,21 +131,23 @@
 
       <tbody>
       <tr
-        ng-repeat="item in listingController.items track by item.id | orderBy:'title'"
+        ng-repeat="item in listingController.pageOfItems track by item.id"
         class="kuiTableRow"
       >
         <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-          <input
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="listingController.toggleItem(item)"
-            ng-checked="listingController.isItemChecked(item)"
-          >
+          <div class="kuiTableRowCell__liner">
+            <input
+              type="checkbox"
+              class="kuiCheckBox"
+              ng-click="listingController.toggleItem(item)"
+              ng-checked="listingController.isItemChecked(item)"
+            >
+          </div>
         </td>
 
         <td class="kuiTableRowCell">
           <div class="kuiTableRowCell__liner">
-            <a class="kuiLink" ng-click="listingController.open(item)">
+            <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
               {{ item.title }}
             </a>
           </div>
@@ -149,8 +164,20 @@
           {{ listingController.getSelectedItemsCount() }} selected
         </div>
       </div>
-      <div class="kuiToolBarFooterSection">
-        <!-- We need an empty section for the buttons to be positioned consistently. -->
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
       </div>
     </div>
   </div>

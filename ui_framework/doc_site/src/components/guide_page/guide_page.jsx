@@ -1,4 +1,3 @@
-
 import React, {
   Component,
   PropTypes,
@@ -13,34 +12,30 @@ import {
   GuidePageSideNavItem,
 } from '../';
 
-export default class GuidePage extends Component {
-
+export class GuidePage extends Component {
   constructor(props) {
     super(props);
 
     this.onClickLink = this.onClickLink.bind(this);
   }
 
-  onClickLink(slug) {
+  onClickLink(id) {
     // Scroll to element.
     $('html, body').animate({
-      scrollTop: $(`#${slug}`).offset().top - 100
+      scrollTop: $(`#${id}`).offset().top - 100
     }, 250);
-
-    // Load in code viewer.
-    this.context.updateCodeViewer(slug);
   }
 
   renderSideNavMenu() {
-    //  Traverse children and build side nav from it.
-    return this.props.children.map((section, index) => {
+    // Traverse sections and build side nav from it.
+    return this.props.sections.map((section, index) => {
       return (
         <GuidePageSideNavItem
           key={index}
-          slug={Slugify.one(section.props.title)}
+          id={section.id}
           onClick={this.onClickLink}
         >
-          {section.props.title}
+          {section.name}
         </GuidePageSideNavItem>
       );
     });
@@ -59,14 +54,10 @@ export default class GuidePage extends Component {
       </div>
     );
   }
-
 }
-
-GuidePage.contextTypes = {
-  updateCodeViewer: PropTypes.func,
-};
 
 GuidePage.propTypes = {
   children: PropTypes.any,
   title: PropTypes.string,
+  sections: PropTypes.array,
 };

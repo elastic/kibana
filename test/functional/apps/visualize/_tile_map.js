@@ -15,7 +15,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
 
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickTileMap');
       return PageObjects.visualize.clickTileMap();
@@ -45,7 +45,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 

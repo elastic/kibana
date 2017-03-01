@@ -1,26 +1,91 @@
-import React from 'react';
+import React, {
+  Component,
+  PropTypes,
+} from 'react';
 
 import {
-  createExample,
-} from '../../services';
+  GuideDemo,
+  GuideLink,
+  GuidePage,
+  GuideSection,
+  GuideSectionTypes,
+  GuideText,
+} from '../../components';
 
-export default createExample([{
-  title: 'Basic MenuButton',
-  html: require('./menu_button_basic.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'Danger MenuButton',
-  html: require('./menu_button_danger.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'MenuButton with Icon',
-  description: (
-    <p>You can use a MenuButton with an Icon, with or without text.</p>
-  ),
-  html: require('./menu_button_with_icon.html'),
-  hasDarkTheme: false,
-}, {
-  title: 'MenuButtonGroup',
-  html: require('./menu_button_group.html'),
-  hasDarkTheme: false,
-}]);
+const basicHtml = require('./menu_button_basic.html');
+const dangerHtml = require('./menu_button_danger.html');
+const withIconHtml = require('./menu_button_with_icon.html');
+const groupHtml = require('./menu_button_group.html');
+const elementsHtml = require('./menu_button_elements.html');
+
+export default props => (
+  <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Basic MenuButton"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: basicHtml,
+      }]}
+    >
+      <GuideDemo
+        html={basicHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Danger MenuButton"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: dangerHtml,
+      }]}
+    >
+      <GuideDemo
+        html={dangerHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="MenuButton with Icon"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: withIconHtml,
+      }]}
+    >
+      <GuideText>
+        You can use a MenuButton with an Icon, with or without text.
+      </GuideText>
+
+      <GuideDemo
+        html={withIconHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="MenuButtonGroup"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: groupHtml,
+      }]}
+    >
+      <GuideDemo
+        html={groupHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Element variations"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: elementsHtml,
+      }]}
+    >
+      <GuideText>
+        You can create a MenuButton using a button element, link, or input[type="submit"].
+      </GuideText>
+
+      <GuideDemo
+        html={elementsHtml}
+      />
+    </GuideSection>
+  </GuidePage>
+);

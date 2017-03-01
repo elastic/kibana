@@ -14,6 +14,11 @@ uiRoutes
   template: objectIndexHTML
 });
 
+uiRoutes
+.when('/management/kibana/objects/:service', {
+  redirectTo: '/management/kibana/objects'
+});
+
 uiModules.get('apps/management')
 .directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
   return {
@@ -37,7 +42,6 @@ uiModules.get('apps/management')
       const getData = function (filter) {
         const services = registry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-
           return service.find(filter).then(function (data) {
             return {
               service: service,
@@ -165,8 +169,20 @@ uiModules.get('apps/management')
           notify.error('The file could not be processed.');
         }
 
-        return Promise.map(docs, function (doc) {
-          const service = find($scope.services, { type: doc._type }).service;
+        return Promise.map(docs, (doc) => {
+          const { service } = find($scope.services, { type: doc._type }) || {};
+
+          if (!service) {
+            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+            const reason = `Invalid type: "${doc._type}"`;
+
+            notify.warning(`${msg}, ${reason}`, {
+              lifetime: 0,
+            });
+
+            return;
+          }
+
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
@@ -175,7 +191,8 @@ uiModules.get('apps/management')
           });
         })
         .then(refreshIndex)
-        .then(refreshData, notify.error);
+        .then(refreshData)
+        .catch(notify.error);
       };
 
       function refreshIndex() {

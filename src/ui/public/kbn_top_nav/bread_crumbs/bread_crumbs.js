@@ -8,13 +8,20 @@ const module = uiModules.get('kibana');
 module.directive('breadCrumbs', function ($location) {
   return {
     restrict: 'E',
+    replace: true,
     scope: {
       omitCurrentPage: '=',
       /**
-       * Optional title to append at the end of the breadcrumbs
+       * Pages to omit from the breadcrumbs. Should be lower-case.
+       * @type {Array}
+       */
+      omitPages: '=',
+      /**
+       * Optional title to append at the end of the breadcrumbs. Note that this can't just be
+       * 'title', because that will be interpreted by browsers as an actual 'title' HTML attribute.
        * @type {String}
        */
-      title: '=',
+      pageTitle: '=',
       /**
        * If true, makes each breadcrumb a clickable link.
        * @type {String}
@@ -23,16 +30,19 @@ module.directive('breadCrumbs', function ($location) {
     },
     template: breadCrumbsTemplate,
     controller: function ($scope) {
-      // Capitalize the first letter of each bread crumb.
-      $scope.breadcrumbs = chrome.getBreadcrumbs().map(breadcrumb => _.startCase(breadcrumb));
-
-      if ($scope.omitCurrentPage === true) {
-        $scope.breadcrumbs.pop();
-      }
+      const breadcrumbs = chrome.getBreadcrumbs();
 
       if ($scope.useLinks) {
         const url = '#' + $location.path();
-        $scope.breadCrumbUrls = getBreadCrumbUrls($scope.breadcrumbs, url);
+        $scope.breadcrumbs = getBreadCrumbUrls(breadcrumbs, url);
+      } else {
+        $scope.breadcrumbs = breadcrumbs.map(path => ({
+          path: path,
+          title: _.startCase(path)
+        }));
+      }
+      if ($scope.omitCurrentPage === true) {
+        $scope.breadcrumbs.pop();
       }
     }
   };

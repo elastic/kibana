@@ -1,8 +1,8 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
-import areaTemplate from 'plugins/kbn_vislib_vis_types/editors/area.html';
+import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
-export default function HistogramVisType(Private) {
+export default function PointSeriesVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -11,35 +11,96 @@ export default function HistogramVisType(Private) {
     title: 'Area chart',
     icon: 'fa-area-chart',
     description: 'Great for stacked timelines in which the total of all series is more important ' +
-      'than comparing any two or more series. Less useful for assessing the relative change of ' +
-      'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
-      'effect on the series above it.',
+    'than comparing any two or more series. Less useful for assessing the relative change of ' +
+    'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
+    'effect on the series above it.',
     params: {
       defaults: {
+        grid: {
+          categoryLines: false,
+          style: {
+            color: '#eee'
+          }
+        },
+        categoryAxes: [
+          {
+            id: 'CategoryAxis-1',
+            type: 'category',
+            position: 'bottom',
+            show: true,
+            style: {
+            },
+            scale: {
+              type: 'linear'
+            },
+            labels: {
+              show: true,
+              truncate: 100
+            },
+            title: {}
+          }
+        ],
+        valueAxes: [
+          {
+            id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
+            type: 'value',
+            position: 'left',
+            show: true,
+            style: {
+            },
+            scale: {
+              type: 'linear',
+              mode: 'normal'
+            },
+            labels: {
+              show: true,
+              rotate: 0,
+              filter: false,
+              truncate: 100
+            },
+            title: {}
+          }
+        ],
+        seriesParams: [{
+          show: 'true',
+          type: 'area',
+          mode: 'stacked',
+          data: {
+            label: 'Count'
+          },
+          drawLinesBetweenPoints: true,
+          showCircles: true,
+          interpolate: 'linear',
+          valueAxis: 'ValueAxis-1'
+        }],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        scale: 'linear',
+        showCircles: true,
         interpolate: 'linear',
-        mode: 'stacked',
+        scale: 'linear',
+        drawLinesBetweenPoints: true,
+        radiusRatio: 9,
         times: [],
         addTimeMarker: false,
         defaultYExtents: false,
         setYExtents: false
       },
-      legendPositions: [{
-        value: 'left',
-        text: 'left',
+      positions: ['top', 'left', 'right', 'bottom'],
+      chartTypes: [{
+        value: 'line',
+        text: 'line'
       }, {
-        value: 'right',
-        text: 'right',
+        value: 'area',
+        text: 'area'
       }, {
-        value: 'top',
-        text: 'top',
-      }, {
-        value: 'bottom',
-        text: 'bottom',
+        value: 'histogram',
+        text: 'bar'
       }],
+      axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
+      scaleTypes: ['linear', 'log', 'square root'],
+      chartModes: ['normal', 'stacked'],
       interpolationModes: [{
         value: 'linear',
         text: 'straight',
@@ -50,21 +111,34 @@ export default function HistogramVisType(Private) {
         value: 'step-after',
         text: 'stepped',
       }],
-      scales: ['linear', 'log', 'square root'],
-      modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-      editor: areaTemplate
+      editor: pointSeriesTemplate,
+      optionTabs: [
+        {
+          name: 'advanced',
+          title: 'Metrics & Axes',
+          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
+          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
+        },
+        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
+      ],
     },
-    implementsRenderComplete: true,
     schemas: new Schemas([
       {
         group: 'metrics',
         name: 'metric',
         title: 'Y-Axis',
         min: 1,
-        aggFilter: '!std_dev',
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
+      },
+      {
+        group: 'metrics',
+        name: 'radius',
+        title: 'Dot Size',
+        min: 0,
+        max: 1,
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
       },
       {
         group: 'buckets',
@@ -77,7 +151,7 @@ export default function HistogramVisType(Private) {
       {
         group: 'buckets',
         name: 'group',
-        title: 'Split Area',
+        title: 'Split Series',
         min: 0,
         max: 1,
         aggFilter: '!geohash_grid'

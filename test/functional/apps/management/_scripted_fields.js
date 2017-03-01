@@ -56,13 +56,13 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
     await PageObjects.common.try(async function() {
       await PageObjects.discover.clickFieldListItemAdd(scriptedExpressionFieldName);
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
@@ -75,7 +75,7 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
     await PageObjects.common.debug('filter by the first value (14) in the expanded scripted field list');
     await PageObjects.discover.clickFieldListPlusFilter(scriptedExpressionFieldName, '14');
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       expect(await PageObjects.discover.getHitCount()).to.be('31');
@@ -90,7 +90,7 @@ bdd.describe('creating and using Lucence expression scripted fields', function d
     await PageObjects.discover.removeAllFilters();
     await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedExpressionFieldName);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.visualize.collapseChart();
     await PageObjects.settings.setPageSize('All');
@@ -127,13 +127,13 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
     await PageObjects.common.try(async function() {
       await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
@@ -145,7 +145,7 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
     await PageObjects.common.debug('filter by the first value (14) in the expanded scripted field list');
     await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       expect(await PageObjects.discover.getHitCount()).to.be('31');
@@ -160,7 +160,7 @@ bdd.describe('creating and using Painless numeric scripted fields', function des
     await PageObjects.discover.removeAllFilters();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.visualize.collapseChart();
     await PageObjects.settings.setPageSize('All');
@@ -198,13 +198,13 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.try(async function() {
       await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
@@ -217,7 +217,7 @@ bdd.describe('creating and using Painless string scripted fields', function desc
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.debug('filter by "bad" in the expanded scripted field list');
     await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       expect(await PageObjects.discover.getHitCount()).to.be('27');
@@ -228,7 +228,7 @@ bdd.describe('creating and using Painless string scripted fields', function desc
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.visualize.collapseChart();
     await PageObjects.settings.setPageSize('All');
@@ -266,13 +266,13 @@ bdd.describe('creating and using Painless boolean scripted fields', function des
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.try(async function() {
       await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
@@ -285,7 +285,7 @@ bdd.describe('creating and using Painless boolean scripted fields', function des
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.debug('filter by "true" in the expanded scripted field list');
     await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       expect(await PageObjects.discover.getHitCount()).to.be('359');
@@ -296,7 +296,7 @@ bdd.describe('creating and using Painless boolean scripted fields', function des
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.visualize.collapseChart();
     await PageObjects.settings.setPageSize('All');
@@ -323,7 +323,7 @@ bdd.describe('creating and using Painless date scripted fields', function descri
     await PageObjects.settings
       .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
       { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
-      'doc[\'utc_time\'].value + (1000) * 60 * 60');
+      'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
     await PageObjects.common.try(async function() {
       expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
     });
@@ -335,13 +335,13 @@ bdd.describe('creating and using Painless date scripted fields', function descri
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.try(async function() {
       await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
@@ -353,7 +353,7 @@ bdd.describe('creating and using Painless date scripted fields', function descri
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.common.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
     await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.common.try(async function() {
       expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -364,7 +364,7 @@ bdd.describe('creating and using Painless date scripted fields', function descri
   bdd.it('should visualize scripted field in vertical bar chart', async function () {
     await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
     await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visualize.waitForVisualization();
     await PageObjects.visualize.collapseChart();
     await PageObjects.settings.setPageSize('All');

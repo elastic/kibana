@@ -5,9 +5,11 @@ import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
+import directivesProvider from '../directives';
+
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-module.exports = function (chrome, internals) {
+export default function (chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
 
@@ -57,7 +59,6 @@ module.exports = function (chrome, internals) {
         }
 
         return path.substr(1, length)
-          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
           .split('/');
       };
 
@@ -95,9 +96,9 @@ module.exports = function (chrome, internals) {
       $rootScope.$on('$routeChangeStart', check);
     });
 
-    require('../directives')(chrome, internals);
+    directivesProvider(chrome, internals);
 
     modules.link(kibana);
   };
 
-};
+}

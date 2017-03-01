@@ -19,7 +19,7 @@ bdd.describe('discover app', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
+      return elasticDump.elasticLoad('discover','.kibana');
     })
     // and load a set of makelogs data
     .then(function loadIfEmptyMakelogs() {
@@ -37,7 +37,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
   bdd.describe('field data', function () {
-    const queryName1 = 'Query # 1';
+    const queryName1 = 'New Saved Search';
     const fromTimeString = 'September 19th 2015, 06:31:44.000';
     const toTimeString = 'September 23rd 2015, 18:31:44.000';
 

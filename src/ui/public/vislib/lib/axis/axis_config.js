@@ -42,7 +42,7 @@ export default function AxisConfigFactory() {
     },
     title: {
       text: '',
-      elSelector: '.axis-wrapper-{pos} .axis-title'
+      elSelector: '.axis-wrapper-{pos} .axis-div',
     }
   };
 
@@ -77,14 +77,17 @@ export default function AxisConfigFactory() {
       const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
+      const isCategoryAxis = axisConfigArgsClone.type === 'category';
+      const isHorizontal = axisConfigArgsClone.position && ['top', 'bottom'].includes(axisConfigArgsClone.position);
+
+      _.merge(typeDefaults, isHorizontal || isCategoryAxis ? horizontalDefaults : verticalDefaults);
       this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
-      _.merge(this._values, this.isHorizontal() ? horizontalDefaults : verticalDefaults);
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
       this._values.rootEl = chartConfig.get('el');
 
       this.data = chartConfig.data;
-      if (this._values.type === 'category') {
+      if (isCategoryAxis) {
         if (!this._values.values) {
           this.values = this.data.xValues(chartConfig.get('orderBucketsBySum', false));
           this.ordered = this.data.get('ordered');
@@ -121,12 +124,21 @@ export default function AxisConfigFactory() {
         }
       }
 
+      if (axisConfigArgs.title == null || axisConfigArgs.title.text == null) {
+        const label = isCategoryAxis ? 'xAxisLabel' : 'yAxisLabel';
+        this.set('title.text', this.data.get(label));
+      }
+
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       // unless explicitly overriden by user
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
         this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
+      }
+
+      if (this.get('type') === 'category' && !this.isHorizontal()) {
+        this._values.scale.inverted = _.get(axisConfigArgs, 'scale.inverted', true);
       }
 
       let offset;
@@ -138,6 +150,7 @@ export default function AxisConfigFactory() {
           break;
         case SCALE_MODES.GROUPED:
           offset = 'group';
+          stacked = false;
           break;
         case SCALE_MODES.PERCENTAGE:
           offset = 'expand';
@@ -151,12 +164,12 @@ export default function AxisConfigFactory() {
     }
 
     get(property, defaults) {
-      if (typeof defaults !== 'undefined' || _.has(this._values, property)) {
-        return _.get(this._values, property, defaults);
-      } else {
+      if (typeof defaults === 'undefined' && !_.has(this._values, property)) {
         throw new Error(`Accessing invalid config property: ${property}`);
-        return defaults;
       }
+      const val = _.get(this._values, property, defaults);
+      if (val == null && defaults != null) return defaults;
+      return val;
     }
 
     set(property, value) {
