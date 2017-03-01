@@ -199,7 +199,7 @@ class KibanaMap extends EventEmitter {
       }
     };
     layer.on('styleChanged', onStyleChanged);
-    this._listeners.push({name: 'styleChanged', handle: onStyleChanged, layer: layer});
+    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: layer });
 
     this._layers.push(layer);
     layer.addToLeafletMap(this._leafletMap);
