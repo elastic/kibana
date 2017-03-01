@@ -17,7 +17,8 @@ function getStateDefaults(dashboard) {
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
     uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
     query: FilterUtils.getQueryFilterForDashboard(dashboard),
-    filters: FilterUtils.getFilterBarsForDashboard(dashboard)
+    filters: FilterUtils.getFilterBarsForDashboard(dashboard),
+    viewMode: dashboard.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
   };
 }
 
@@ -47,11 +48,10 @@ function areTimesEqual(timeA, timeB) {
 }
 
 export class DashboardState {
-  constructor(dashboard, timefilter, timeFilterPreviouslyStored, defaultViewMode, quickTimeRanges, AppState) {
+  constructor(dashboard, timefilter, timeFilterPreviouslyStored, quickTimeRanges, AppState) {
     this.dashboard = dashboard;
 
     this.stateDefaults = getStateDefaults(this.dashboard);
-    this.stateDefaults.viewMode = defaultViewMode;
 
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
@@ -150,6 +150,10 @@ export class DashboardState {
     return this.lastSavedDashboardFilters.query;
   }
 
+  /**
+   * @returns {boolean} True if the query changed since the last time the dashboard was saved, or if it's a
+   * new dashboard, if the query differs from the default.
+   */
   getQueryChanged() {
     return !_.isEqual(this.appState.query, this.getLastSavedQuery());
   }
@@ -166,18 +170,40 @@ export class DashboardState {
     );
   }
 
+  /**
+   *
+   * @returns {DashboardViewMode}
+   */
   getViewMode() {
     return this.appState.viewMode;
   }
 
+  /**
+   * @returns {boolean}
+   */
+  getIsViewMode() {
+    return this.getViewMode() === DashboardViewMode.VIEW;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  getIsEditMode() {
+    return this.getViewMode() === DashboardViewMode.EDIT;
+  }
+
+
+  /**
+   *
+   * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
+   */
   getIsDirty() {
     const existingTitleChanged =
       this.dashboard.lastSavedTitle &&
       this.dashboard.lastSavedTitle !== this.dashboard.title;
 
-    // Not all filter changes are tracked by the state monitor.
     return this.isDirty ||
-      this.getFiltersChangedFromLastSave() ||
+      this.getFiltersChanged() ||  // Not all filter changes are tracked by the state monitor.
       existingTitleChanged;
   }
 
@@ -208,16 +234,11 @@ export class DashboardState {
   }
 
   /**
-   * Updates the time filter to match the values stored in the dashboard.
-   * @param {Array<Object>} quickTimeRanges - An array of often used default relative time ranges.
-   * Used to determine whether a relative query should be classified as a "quick" time mode or
-   * simply a "relative" time mode.
+   * @return {boolean} True if filters (query, filter bar filters, and time picker if time is stored
+   * with the dashboard) have changed since the last saved state (or if the dashboard hasn't been saved,
+   * the default state).
    */
-  getFiltersChangedFromLastSave() {
-    // If the dashboard hasn't been saved before, then there is no last saved state
-    // for the current state to differ from.
-    if (!this.dashboard.id) return false;
-
+  getFiltersChanged() {
     return (
       this.getQueryChanged() ||
       this.getFilterBarChanged() ||

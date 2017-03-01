@@ -17,7 +17,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardState } from './dashboard_state';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -72,18 +71,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         docTitle.change(dash.title);
       }
 
-      // Brand new dashboards are defaulted to edit mode, existing ones default to view mode, except when trumped
-      // by a url param.
-      const defaultViewMode =
-        $route.current.params[DashboardConstants.VIEW_MODE_PARAM] ||
-        (dash.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT);
-      kbnUrl.removeParam(DashboardConstants.VIEW_MODE_PARAM);
-
       const dashboardState = new DashboardState(
         dash,
         timefilter,
         !getAppState.previouslyStored(),
-        defaultViewMode,
         quickRanges,
         AppState);
 
@@ -115,14 +106,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.panels = dashboardState.getPanels();
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
-      $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
-      $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.expandedPanel = null;
 
+      $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
+      $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.getDashTitle = () => DashboardStrings.getDashboardTitle(dashboardState);
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
+      $scope.showEditHelpText = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
+      $scope.showViewHelpText = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
@@ -152,14 +145,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         notify.info(`Search successfully added to your dashboard`);
       };
 
-      $scope.showEditHelpText = () => {
-        return !dashboardState.getPanels().length && dashboardState.getViewMode() === DashboardViewMode.EDIT;
-      };
-
-      $scope.showViewHelpText = () => {
-        return !dashboardState.getPanels().length && dashboardState.getViewMode() === DashboardViewMode.VIEW;
-      };
-
       /**
        * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
        * be generated from the parent (why, I don't know yet).
@@ -183,12 +168,53 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
-      // Defined below, only placed here to avoid used before defined warning (and there is a circular reference).
-      let changeViewMode = null;
+      // Defined up here, but filled in below, to avoid 'Defined before use' warning due to circular reference:
+      // changeViewMode calls updateTopNav, and navActions uses changeViewMode.
+      const navActions = {};
+
+      function updateTopNav(newMode) {
+        $scope.topNavMenu = getTopNavConfig(newMode, navActions);
+      }
+
+      function updateViewMode(newMode) {
+        updateTopNav(newMode);
+        dashboardState.switchViewMode(newMode);
+      }
+
+      const onChangeViewMode = (newMode) => {
+        const isPageRefresh = newMode === dashboardState.getViewMode();
+        const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+        const willLoseChanges = leavingEditMode && dashboardState.getIsDirty();
+
+        if (!willLoseChanges) {
+          updateViewMode(newMode);
+          return;
+        }
+
+        function revertChangesAndExitEditMode() {
+          dashboardState.reloadLastSavedFilters();
+          dashboardState.resetState();
+          const refreshUrl = dashboardState.getReloadDashboardUrl();
+          kbnUrl.change(refreshUrl.url, refreshUrl.options, new AppState());
+          updateViewMode(DashboardViewMode.VIEW);
+        }
+
+        confirmModal(
+          DashboardStrings.getUnsavedChangesWarningMessage(dashboardState),
+          {
+            onConfirm: revertChangesAndExitEditMode,
+            onCancel: _.noop,
+            confirmButtonText: 'Yes, lose changes',
+            cancelButtonText: 'No, keep working',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+          }
+        );
+      };
+
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
 
       $scope.save = function () {
-        // Make sure to save the latest query, even if 'enter' hasn't been hit.
-        dashboardState.updateFilters(queryFilter);
         return dashboardState.saveDashboard(angular.toJson).then(function (id) {
           $scope.kbnTopNav.close('save');
           if (id) {
@@ -199,7 +225,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
                 { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
-              changeViewMode(DashboardViewMode.VIEW);
+              updateViewMode(DashboardViewMode.VIEW);
             }
           }
         }).catch(notify.fatal);
@@ -233,50 +259,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
       }
-
-      // Defined up here, but filled in below, to avoid 'Defined before use' warning due to circular reference:
-      // changeViewMode uses navActions, and navActions uses changeViewMode.
-      const navActions = {};
-
-      changeViewMode = (newMode) => {
-        const isPageRefresh = newMode === dashboardState.getViewMode();
-        const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
-
-        function doModeSwitch() {
-          $scope.dashboardViewMode = newMode;
-          $scope.topNavMenu = getTopNavConfig(newMode, navActions);
-          dashboardState.switchViewMode(newMode);
-        }
-
-        if (leavingEditMode && dashboardState.getIsDirty()) {
-          function revertChangesAndExit() {
-            dashboardState.reloadLastSavedFilters();
-            const refreshUrl = dashboardState.getReloadDashboardUrl();
-            dashboardState.resetState();
-            kbnUrl.change(refreshUrl.url, refreshUrl.options, new AppState());
-            doModeSwitch();
-          }
-
-          confirmModal(
-            DashboardStrings.getUnsavedChangesWarningMessage(dashboardState),
-            {
-              onConfirm: revertChangesAndExit,
-              onCancel: _.noop,
-              confirmButtonText: 'Yes, lose changes',
-              cancelButtonText: 'No, keep working',
-              defaultFocusedButton: ConfirmationButtonTypes.CANCEL
-            }
-          );
-        } else {
-          // No special handling, just make the switch.
-          doModeSwitch();
-        }
-      };
-
-      navActions[TopNavIds.EXIT_EDIT_MODE] = () => changeViewMode(DashboardViewMode.VIEW);
-      navActions[TopNavIds.ENTER_EDIT_MODE] = () => changeViewMode(DashboardViewMode.EDIT);
-
-      changeViewMode(dashboardState.getViewMode());
+      updateViewMode(dashboardState.getViewMode());
 
       $scope.$on('ready:vis', function () {
         if (pendingVisCount > 0) pendingVisCount--;

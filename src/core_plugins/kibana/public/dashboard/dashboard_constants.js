@@ -5,5 +5,4 @@ export const DashboardConstants = {
   LANDING_PAGE_PATH: '/dashboard',
   CREATE_NEW_DASHBOARD_URL: '/dashboard/create',
   EXISTING_DASHBOARD_URL: '/dashboard/{{id}}',
-  VIEW_MODE_PARAM: 'viewMode'
 };

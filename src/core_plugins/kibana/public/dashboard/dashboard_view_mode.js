@@ -5,7 +5,7 @@
 
 /**
  * Dashboard view modes.
- * @type {{EDIT: DashboardMode, VIEW: DashboardMode}}
+ * @type {{EDIT: DashboardViewMode, VIEW: DashboardViewMode}}
  */
 export const DashboardViewMode = {
   EDIT: 'edit',
