@@ -123,7 +123,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
 
     if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
-      return '';
+      return;
     }
 
     const titleText = this._metricsAgg.makeLabel();
@@ -223,6 +223,11 @@ function getLegendColors(colorRamp) {
 }
 
 function getColor(colorRamp, i) {
+
+  if (!colorRamp[i]) {
+    return getColor();
+  }
+
   const color = colorRamp[i][1];
   const red = Math.floor(color[0] * 255);
   const green = Math.floor(color[1] * 255);
@@ -233,7 +238,7 @@ function getColor(colorRamp, i) {
 
 function getChoroplethColor(value, min, max, colorRamp) {
   if (min === max) {
-    return colorRamp[colorRamp.length - 1];
+    return getColor(colorRamp, colorRamp.length - 1);
   }
   const fraction = (value - min) / (max - min);
   const index = Math.round(colorRamp.length * fraction) - 1;
