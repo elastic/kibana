@@ -26,6 +26,7 @@
   </div>
 
   <visualize
+    ng-if="!error"
     ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
@@ -39,6 +40,7 @@
   </visualize>
 
   <doc-table
+    ng-if="!error"
     ng-switch-when="search"
     search-source="savedObj.searchSource"
     sorting="panel.sort"
