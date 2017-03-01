@@ -48,7 +48,6 @@ class ScaledCircles extends EventEmitter {
   }
 
   getLabel() {
-    // return 'Label';
     if (this._popups.length) {
       return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
     }
@@ -111,7 +110,7 @@ class ScaledCircles extends EventEmitter {
         this._showTooltip(feature);
       },
       mouseout: () => {
-        this._hidePopup();
+        this.emit('hideTooltip');
       }
     });
 
@@ -143,20 +142,6 @@ class ScaledCircles extends EventEmitter {
       position: latLng
     });
   }
-
-  /**
-   * Closes the tooltip on the map
-   *
-   * @method _hidePopup
-   * @return undefined
-   */
-  _hidePopup() {
-    // if (!this.map) return;
-    //
-    // this.map.closePopup();
-    this.emit('hideTooltip');
-  }
-
 
   getMarkerFunction() {
     const scaleFactor = 0.6;
