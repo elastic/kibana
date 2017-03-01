@@ -421,7 +421,7 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should set from/to to start/end of day if set from timepicker', function (done) {
+    it('should set from/to to start/end of day if set from datepicker', function (done) {
       $scope.pickFromDate(new Date('2012-02-01 12:00'));
       $scope.pickToDate(new Date('2012-02-11 12:00'));
       $scope.applyAbsolute();
@@ -432,7 +432,7 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should allow setting hour/minute/second after setting from timepicker', function (done) {
+    it('should allow setting hour/minute/second after setting from datepicker', function (done) {
       $scope.pickFromDate(new Date('2012-02-01 12:00'));
       $scope.pickToDate(new Date('2012-02-11 12:00'));
       $scope.applyAbsolute();
