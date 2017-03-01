@@ -10,6 +10,7 @@ import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
+import mappings from './mappings.json';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -17,7 +18,7 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-
+    require: ['elasticsearch'],
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -148,6 +149,8 @@ module.exports = function (kibana) {
 
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
+
+      server.plugins.elasticsearch.registerMappings(mappings);
     }
   });
 };

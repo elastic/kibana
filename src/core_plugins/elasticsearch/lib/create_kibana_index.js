@@ -1,4 +1,4 @@
-import { mappings } from './kibana_index_mappings';
+import { getMappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
@@ -11,7 +11,7 @@ module.exports = function (server) {
         number_of_shards: 1,
         'index.mapper.dynamic': false,
       },
-      mappings
+      mappings: getMappings()
     }
   })
   .catch(() => {

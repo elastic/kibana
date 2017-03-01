@@ -3,6 +3,7 @@ import { unset } from '../../utils';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
+import { assignMappings } from './lib/kibana_index_mappings';
 import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
@@ -15,8 +16,6 @@ const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
 module.exports = function ({ Plugin }) {
   return new Plugin({
-    require: ['kibana'],
-
     config(Joi) {
       const { array, boolean, number, object, string, ref } = Joi;
 
@@ -115,6 +114,7 @@ module.exports = function ({ Plugin }) {
 
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
+      server.expose('registerMappings', assignMappings);
 
       createDataCluster(server);
       createAdminCluster(server);

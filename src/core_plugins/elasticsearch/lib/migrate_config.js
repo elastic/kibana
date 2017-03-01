@@ -1,5 +1,5 @@
 import upgrade from './upgrade_config';
-import { mappings } from './kibana_index_mappings';
+import { getMappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
   const config = server.config();
@@ -14,7 +14,7 @@ module.exports = function (server) {
         {
           buildNum: {
             order: 'desc',
-            unmapped_type: mappings.config.properties.buildNum.type
+            unmapped_type: getMappings().config.properties.buildNum.type
           }
         }
       ]
