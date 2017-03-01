@@ -1,0 +1,14 @@
+<div ng-controller="aggParam.controller">
+  <div class="form-group" ng-if="agg.params[aggType]">
+    <label>{{aggTitle}}</label>
+    <div class="vis-editor-agg-order-agg">
+      <ng-form name="{{aggType}}Form">
+        <vis-editor-agg-params
+          agg="agg.params[aggType]"
+          group-name="'{{aggGroup}}'">
+        </vis-editor-agg-params>
+      </ng-form>
+    </div>
+  </div>
+
+</div>
