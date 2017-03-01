@@ -1,6 +1,6 @@
 export const mappings = {
   '_default_': {
-    'dynamic': 'false'
+    'dynamic': 'strict'
   },
   dashboard: {
     properties: {
