@@ -1086,6 +1086,7 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--basic {
   color: #5a5a5a;
@@ -1093,18 +1094,23 @@ body {
   .kuiMenuButton--basic:focus {
     color: #5a5a5a !important;
     /* 1 */ }
-  .kuiMenuButton--basic:hover:enabled, .kuiMenuButton--basic:active:enabled {
+  .kuiMenuButton--basic:hover, .kuiMenuButton--basic:active {
+    /* 2 */
+    color: #5a5a5a !important;
+    /* 1 */
     background-color: #F2F2F2; }
   .kuiMenuButton--basic:disabled {
     color: #9B9B9B; }
 
 /**
  * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--danger {
   color: #D76051;
   background-color: #ffffff; }
-  .kuiMenuButton--danger:hover:enabled, .kuiMenuButton--danger:active:enabled {
+  .kuiMenuButton--danger:hover, .kuiMenuButton--danger:active {
+    /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #D76051; }
