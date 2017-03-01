@@ -70,7 +70,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
 
     if (this._metrics && this._metrics.length > 0) {
-      const {min, max} = getMinMax(this._metrics);
+      const { min, max } = getMinMax(this._metrics);
       this._legendColors = getLegendColors(this._colorRamp);
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
@@ -169,7 +169,7 @@ function getMinMax(data) {
     min = Math.min(data[i].value, min);
     max = Math.max(data[i].value, max);
   }
-  return {min, max};
+  return { min, max };
 }
 
 
@@ -181,7 +181,7 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
     };
   }
 
-  const {min, max} = getMinMax(data);
+  const { min, max } = getMinMax(data);
 
   return function (geojsonFeature) {
 
