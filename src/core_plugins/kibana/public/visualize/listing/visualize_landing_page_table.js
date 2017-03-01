@@ -10,6 +10,7 @@ import { getCheckBoxColumn } from 'ui/saved_object_table/get_checkbox_column';
 import { getTitleColumn } from 'ui/saved_object_table/get_title_column';
 import { TYPE_COLUMN_ID, getTypeColumn } from './get_type_column';
 import { Pager } from 'ui/pager/pager';
+import { ListingTableActions } from 'ui/saved_object_table/listing_table_actions';
 
 import {
   ItemTable,
@@ -24,15 +25,7 @@ export class VisualizeLandingPageTable extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      isFetchingItems: true,
-      items: [],
-      sortedColumn: undefined,
-      sortOrder: SortOrder.ASC,
-      selectedIds: [],
-      currentPageIndex: 0,
-    };
-
+    this.state = ListingTableActions.getInitialState();
     this.pager = new Pager(2);
   }
 
@@ -41,103 +34,50 @@ export class VisualizeLandingPageTable extends React.Component {
   }
 
   onFilter = (newFilter) => {
+    this.setState(ListingTableActions.startFetching());
     this.props.fetch(newFilter).then((results) => {
       const items = results.hits;
       const lastPageIndex = this.pager.getLastPageIndex(items.length);
-
-      this.setState({
-        items,
-        isFetchingItems: false,
-        currentPageIndex: Math.min(this.state.currentPageIndex, lastPageIndex),
-        selectedIds: [],
-      });
+      this.setState(ListingTableActions.setFilteredItems(this.state, items, lastPageIndex));
+    }).finally(() => {
+      this.setState(ListingTableActions.endFetching());
     });
   };
 
-  onSort = (property) => {
-    let { sortedColumn, sortOrder } = this.state;
-    const { selectedIds, items } = this.state;
 
-    if (sortedColumn === property) {
-      sortOrder = getFlippedSortOrder(sortOrder);
-    } else {
-      sortedColumn = property;
-      sortOrder = SortOrder.ASC;
-    }
+  getPageOfItems = () => this.pager.getItemsOnPage(this.state.items, this.state.currentPageIndex);
 
-    const sortedItems = sortItems(items, sortedColumn, sortOrder);
-    this.setState({
-      sortedColumn,
-      sortOrder,
-      selectedIds: [],
-      items: sortedItems
-    });
-  };
+  onToggleAll = () => this.setState(ListingTableActions.onToggleAll(this.state, this.getPageOfItems()));
 
-  turnToNextPage = () => {
-    this.setState({
-      currentPageIndex: this.state.currentPageIndex + 1,
-      selectedIds: [],
-    });
-  };
+  onToggleItem = (item) => this.setState(ListingTableActions.onToggleItem(this.state, item));
 
-  turnToPreviousPage = () => {
-    this.setState({
-      currentPageIndex: this.state.currentPageIndex - 1,
-      selectedIds: [],
-    });
-  };
+  turnToNextPage = () => this.setState(ListingTableActions.turnToNextPage(this.state));
 
-  onSortByTitle = () => {
-    this.onSort(TITLE_COLUMN_ID);
-  };
+  turnToPreviousPage = () => this.setState(ListingTableActions.turnToPreviousPage(this.state));
 
-  onSortByType = () => {
-    this.onSort(TYPE_COLUMN_ID);
-  };
+  onSortByTitle = () => this.setState(ListingTableActions.onSort(this.state, TITLE_COLUMN_ID));
 
-  onToggleItem = (item) => {
-    this.setState({
-      selectedIds: ItemSelectionActions.toggleItem(this.state.selectedIds, item.id),
-    });
-  };
-
-  onToggleAll = () => {
-    const pageOfItems = this.getPageOfItems();
-    const pageOfItemIds = pageOfItems.map(item => item.id);
-    this.setState({
-      selectedIds: ItemSelectionActions.toggleAll(this.state.selectedIds, pageOfItemIds),
-    });
-  };
+  onSortByType = () => this.setState(ListingTableActions.onSort(this.state, TYPE_COLUMN_ID));
 
   getStartNumber = () => this.pager.getStartNumber(this.state.items.length, this.state.currentPageIndex);
+
   getEndNumber = () => this.pager.getEndNumber(this.state.items.length, this.state.currentPageIndex);
-  getPageOfItems = () => this.pager.getItemsOnPage(this.state.items, this.state.currentPageIndex);
+
   hasPreviousPage = () => this.pager.canPagePrevious(this.state.currentPageIndex);
+
   hasNextPage = () => this.pager.canPageNext(this.state.items.length, this.state.currentPageIndex);
 
   getEditUrlForItem = (item) => {
     return this.props.kbnUrl.eval(`#${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: item.id });
   };
 
-  getColumnSortOrder(column) {
-    return this.state.sortedColumn === column ? this.state.sortOrder : SortOrder.NONE;
-  }
+  getColumnSortOrder = (column) => ListingTableActions.getSortOrderForColumn(this.state, column);
 
-  getTitleSortOrder() {
-    return this.getColumnSortOrder(TITLE_COLUMN_ID);
-  }
+  getTitleSortOrder = () => this.getColumnSortOrder(TITLE_COLUMN_ID);
 
-  getTypeSortOrder() {
-    return this.getColumnSortOrder(TYPE_COLUMN_ID);
-  }
+  getTypeSortOrder = () => this.getColumnSortOrder(TYPE_COLUMN_ID);
 
-  getAreAllItemsSelected() {
-    const { selectedIds } = this.state;
-    const pageOfItems = this.getPageOfItems();
-    const pageOfItemIds = pageOfItems.map(item => item.id);
-    return ItemSelectionActions.areAllItemsSelected(selectedIds, pageOfItemIds);
-  }
+  getAreAllItemsSelected = () => ListingTableActions.areAllItemsSelected(this.state, this.getPageOfItems());
 
   getVisualizeColumns() {
     const { selectedIds } = this.state;

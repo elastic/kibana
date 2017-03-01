@@ -20,7 +20,7 @@ export class ItemSelectionActions {
   }
 
   static toggleAll(selectedIds, itemIds) {
-    if (this.areAllItemsSelected(selectedIds, itemIds)) {
+    if (this.areAllItemIdsSelected(selectedIds, itemIds)) {
       return [];
     }
 
@@ -40,7 +40,7 @@ export class ItemSelectionActions {
     }
   }
 
-  static areAllItemsSelected(selectedIds, itemIds) {
+  static areAllItemIdsSelected(selectedIds, itemIds) {
     return itemIds.every(id => selectedIds.indexOf(id) !== -1);
   }
 }

@@ -1,6 +1,11 @@
 import _ from 'lodash';
 import { SortOrder } from 'ui_framework/components/table/sort_order';
 
+/**
+ *
+ * @param sortOrder {SortOrder}
+ * @returns {SortOrder}
+ */
 export function getFlippedSortOrder(sortOrder) {
   return sortOrder === SortOrder.ASC
     ? SortOrder.DESC
