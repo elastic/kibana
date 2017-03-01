@@ -18,8 +18,10 @@ export default function TermsAggDefinition(Private) {
 
   const aggFilter = [
     '!top_hits', '!percentiles', '!median', '!std_dev',
-    '!derivative', '!cumulative_sum', '!moving_avg', '!serial_diff'
+    '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+    '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
   ];
+
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
