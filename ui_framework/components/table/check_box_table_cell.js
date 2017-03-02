@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { KuiCheckBox } from '../form';
-import { KuiTd } from './kui_table';
-import { KuiTableCellLiner } from './kui_table_cell_liner';
+import { KuiTd } from './table';
+import { KuiTableCellLiner } from './table_cell_liner';
 
 export function CheckBoxTableCell({ onClick, isChecked }) {
   return <KuiTableCellLiner className="kuiTableRowCell--checkBox">

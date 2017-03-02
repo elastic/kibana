@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { KuiTd } from './kui_table';
+import { KuiTd } from './index';
 
 export function KuiTableCellLiner({ children, className }) {
   return <KuiTd className={className}><div className="kuiTableRowCell__liner">{children}</div></KuiTd>;

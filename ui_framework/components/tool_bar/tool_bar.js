@@ -1,17 +1,17 @@
 import React from 'react';
 import _ from 'lodash';
 
-import { KuiToolBarSection, KuiToolBar } from './index';
+import { KuiToolBarSection } from './index';
 
-export function KuiSectionedToolBar({ sections }) {
+export function KuiToolBar({ sections }) {
   let id = 0;
   const sectionElements = _.map(sections, (section) => {
     id++;
     return <KuiToolBarSection key={id}>{section}</KuiToolBarSection>;
   });
-  return <KuiToolBar>{sectionElements}</KuiToolBar>;
+  return <div className="kuiToolBar">{sectionElements}</div>;
 }
 
-KuiSectionedToolBar.propTypes = {
+KuiToolBar.propTypes = {
   sections: React.PropTypes.node
 };

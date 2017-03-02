@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { KuiCheckBox } from '../form';
-import { KuiTh } from './kui_table';
+import { KuiTh } from './table';
 
 export function CheckBoxTableHeader({ onClick, isChecked }) {
   return <KuiTh className="kuiTableHeaderCell--checkBox">

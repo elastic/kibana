@@ -16,7 +16,12 @@ import {
   CreateButtonLink,
   SortOrder,
   LandingPageToolBar,
-  LandingPageToolBarFooter
+  LandingPageToolBarFooter,
+  KuiToolBarSearchBox,
+  KuiToolBarPager,
+  KuiToolBar,
+  KuiToolBarFooter,
+  KuiToolBarText
 } from 'ui_framework/components';
 
 export class DashboardLandingPageTable extends React.Component {
@@ -107,34 +112,45 @@ export class DashboardLandingPageTable extends React.Component {
       : <DashboardItemPrompt />;
   }
 
-  render() {
-    const { filter, selectedIds } = this.state;
+  getPagerComponent() {
+    return <KuiToolBarPager
+      startNumber={this.getStartNumber()}
+      endNumber={this.getEndNumber()}
+      totalItems={this.state.items.length}
+      hasPreviousPage={this.hasPreviousPage}
+      hasNextPage={this.hasNextPage}
+      onNextPage={this.turnToNextPage}
+      onPreviousPage={this.turnToPreviousPage}/>;
+  }
 
+  getToolBarSections() {
+    const toolBarSections = [
+      <KuiToolBarSearchBox filter={this.state.filter} onFilter={this.onFilter}/>,
+      this.getActionButtons()
+    ];
+    if (this.state.items.length > 0) {
+      toolBarSections.push(this.getPagerComponent());
+    }
+    return toolBarSections;
+  }
+
+  getToolBarFooterSections() {
+    const footerSections = [
+      <KuiToolBarText>{this.state.selectedIds.length} selected</KuiToolBarText>,
+    ];
+    if (this.state.items.length > 0) {
+      footerSections.push(this.getPagerComponent());
+    }
+    return footerSections;
+  }
+
+  render() {
     return <div>
-      <LandingPageToolBar
-        filter={filter}
-        onFilter={this.onFilter}
-        startNumber={this.getStartNumber()}
-        endNumber={this.getEndNumber()}
-        totalItems={this.state.items.length}
-        hasPreviousPage={this.hasPreviousPage}
-        hasNextPage={this.hasNextPage}
-        onNextPage={this.turnToNextPage}
-        onPreviousPage={this.turnToPreviousPage}
-        actionButtons={this.getActionButtons()}/>
+      <KuiToolBar sections={this.getToolBarSections()} />
       {
         this.getTableContents()
       }
-      <LandingPageToolBarFooter
-        startNumber={this.getStartNumber()}
-        endNumber={this.getEndNumber()}
-        totalItems={this.state.items.length}
-        hasPreviousPage={this.hasPreviousPage}
-        hasNextPage={this.hasNextPage}
-        onNextPage={this.turnToNextPage}
-        onPreviousPage={this.turnToPreviousPage}
-        selectedItemsCount={selectedIds.length}
-      />
+      <KuiToolBarFooter sections={this.getToolBarFooterSections()} />
     </div>;
   }
 }

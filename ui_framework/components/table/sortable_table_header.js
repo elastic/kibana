@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { KuiTh } from './kui_table';
+import { KuiTh } from './table';
 import { SortAscIcon, SortDescIcon } from '../icon';
 import { SortOrder } from './sort_order';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 
 import { ItemTableRow } from './item_table_row';
-import { KuiTable, KuiTBody, KuiTr, KuiTHead } from '../kui_table';
+import { KuiTable, KuiTBody, KuiTr, KuiTHead } from '../index';
 import { columnPropType } from './column_prop_type';
 
 export function ItemTable({ items, columns }) {

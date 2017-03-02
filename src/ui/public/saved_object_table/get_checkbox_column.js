@@ -5,7 +5,7 @@ export const CHECKBOX_COLUMN_ID = 'checkBoxColumn';
 
 export function getCheckBoxColumn(allItemsAreSelected, selectedIds, onToggleItem, onToggleAll) {
   return {
-    id: 'checkBoxColumn',
+    id: CHECKBOX_COLUMN_ID,
     getHeaderCell: () => {
       return <CheckBoxTableHeader
         key={CHECKBOX_COLUMN_ID}

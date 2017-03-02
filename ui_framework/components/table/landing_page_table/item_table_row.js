@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 
-import { KuiTr } from '../kui_table';
+import { KuiTr } from '../index';
 import { columnPropType } from './column_prop_type';
 
 export function ItemTableRow({ item, columns }) {
