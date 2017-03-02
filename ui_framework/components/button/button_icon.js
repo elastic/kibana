@@ -6,27 +6,9 @@ import classNames from 'classnames';
 import keyMirror from 'keymirror';
 
 const KuiButtonIcon = props => {
-  const typeToIconClassMap = {
-    [KuiButtonIcon.TYPE.CREATE]: 'fa-plus',
-    [KuiButtonIcon.TYPE.DELETE]: 'fa-trash',
-    [KuiButtonIcon.TYPE.PREVIOUS]: 'fa-chevron-left',
-    [KuiButtonIcon.TYPE.NEXT]: 'fa-chevron-right',
-  };
-
-  let iconType;
-
-  if (props.type) {
-    iconType = typeToIconClassMap[props.type];
-
-    if (iconType === undefined) {
-      throw new Error(`KuiButtonIcon type not defined: ${props.type}`);
-    }
-  }
-
   const iconClasses = classNames(
     'kuiButton__icon kuiIcon',
-    iconType,
-    props.classes,
+    props.className,
   );
 
   return (
@@ -34,16 +16,19 @@ const KuiButtonIcon = props => {
   );
 };
 
-KuiButtonIcon.TYPE = keyMirror({
-  CREATE: null,
-  DELETE: null,
-  PREVIOUS: null,
-  NEXT: null,
-});
-
 KuiButtonIcon.propTypes = {
-  type: PropTypes.string,
-  classes: PropTypes.string,
+  className: PropTypes.string,
 };
 
-export { KuiButtonIcon };
+const KuiCreateButtonIcon = () => <KuiButtonIcon className="fa-plus" />;
+const KuiDeleteButtonIcon = () => <KuiButtonIcon className="fa-trash" />;
+const KuiPreviousButtonIcon = () => <KuiButtonIcon className="fa-chevron-left" />;
+const KuiNextButtonIcon = () => <KuiButtonIcon className="fa-chevron-right" />;
+
+export {
+  KuiButtonIcon,
+  KuiCreateButtonIcon,
+  KuiDeleteButtonIcon,
+  KuiPreviousButtonIcon,
+  KuiNextButtonIcon,
+};

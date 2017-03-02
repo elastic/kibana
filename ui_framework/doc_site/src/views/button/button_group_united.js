@@ -3,7 +3,8 @@ import React from 'react';
 import {
   KuiBasicButton,
   KuiButtonGroup,
-  KuiButtonIcon,
+  KuiNextButtonIcon,
+  KuiPreviousButtonIcon,
 } from '../../../../components';
 
 export default () => (
@@ -23,8 +24,8 @@ export default () => (
     <br />
 
     <KuiButtonGroup isUnited>
-      <KuiBasicButton icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />}/>
-      <KuiBasicButton iconRight={<KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />}/>
+      <KuiBasicButton icon={<KuiPreviousButtonIcon />}/>
+      <KuiBasicButton iconRight={<KuiNextButtonIcon />}/>
     </KuiButtonGroup>
   </div>
 );

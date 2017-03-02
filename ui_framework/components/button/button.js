@@ -1,4 +1,5 @@
 import React, {
+  Component,
   PropTypes,
 } from 'react';
 
@@ -28,7 +29,7 @@ const KuiButton = props => {
     props.onClick(props.data);
   }
 
-  const classes = classNames('kuiButton', props.classes, {
+  const className = classNames('kuiButton', props.className, {
     'kuiButton--iconText': props.icon || props.iconRight,
   });
 
@@ -42,19 +43,34 @@ const KuiButton = props => {
     );
   }
 
-  const elementType = props.isSubmit ? 'input' : props.href ? 'a' : 'button';
+  const elementType =
+    props.isSubmit
+    ? 'input'
+    : props.href
+    ? 'a'
+    : 'button';
+
+  const children =
+    props.isSubmit
+    ? null
+    : (
+      <span>
+        {props.icon}
+        {wrappedChildren}
+        {props.iconRight}
+      </span>
+    );
 
   return React.createElement(elementType, {
     'data-test-subj': props.testSubject,
-    className: classes,
+    className,
     href: props.href,
     target: props.target,
     type: props.isSubmit ? 'submit' : null,
     disabled: props.isDisabled,
     onClick,
     value: props.isSubmit ? props.children : null,
-    children: props.isSubmit ? null : [props.icon, wrappedChildren, props.iconRight],
-  });
+  }, children);
 };
 
 KuiButton.propTypes = {
@@ -63,18 +79,49 @@ KuiButton.propTypes = {
   icon: PropTypes.node,
   iconRight: PropTypes.node,
   children: PropTypes.node,
-  type: PropTypes.string,
   isSubmit: PropTypes.bool,
   href: PropTypes.string,
   target: PropTypes.string,
   onClick: PropTypes.func,
   isDisabled: PropTypes.bool,
   hasIcon: PropTypes.bool,
-  classes: PropTypes.oneOfType([
+  className: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
     PropTypes.object,
   ]),
 };
 
-export { KuiButton };
+function createButtonVariation(hardCodedProps) {
+  const ButtonVariation = props => {
+    return React.createElement(KuiButton, Object.assign({}, props, hardCodedProps));
+  };
+
+  ButtonVariation.propTypes = Object.assign({}, KuiButton.propTypes);
+
+  return ButtonVariation;
+}
+
+const KuiBasicButton = createButtonVariation({
+  className: 'kuiButton--basic',
+});
+
+const KuiHollowButton = createButtonVariation({
+  className: 'kuiButton--hollow',
+});
+
+const KuiDangerButton = createButtonVariation({
+  className: 'kuiButton--danger',
+});
+
+const KuiPrimaryButton = createButtonVariation({
+  className: 'kuiButton--primary',
+});
+
+export {
+  KuiButton,
+  KuiBasicButton,
+  KuiHollowButton,
+  KuiDangerButton,
+  KuiPrimaryButton,
+};
