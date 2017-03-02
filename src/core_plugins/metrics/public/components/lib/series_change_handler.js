@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import newMetricAggFn from './new_metric_agg_fn';
-import { isBasicAgg } from './agg_lookup';
+import { isBasicAgg } from '../../../common/agg_lookup';
 import {
   handleAdd,
   handleChange

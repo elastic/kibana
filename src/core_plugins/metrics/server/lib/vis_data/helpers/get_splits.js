@@ -1,5 +1,5 @@
 import Color from 'color';
-import calculateLabel from '../../../../public/components/lib/calculate_label';
+import calculateLabel from '../../../../common/calculate_label';
 import _ from 'lodash';
 import getLastMetric from './get_last_metric';
 import getSplitColors from './get_split_colors';

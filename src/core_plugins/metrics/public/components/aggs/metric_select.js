@@ -2,8 +2,8 @@ import React, { PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 import calculateSiblings from '../lib/calculate_siblings';
-import calculateLabel from '../lib/calculate_label';
-import basicAggs from '../lib/basic_aggs';
+import calculateLabel from '../../../common/calculate_label';
+import basicAggs from '../../../common/basic_aggs';
 
 function createTypeFilter(restrict, exclude) {
   return (metric) => {

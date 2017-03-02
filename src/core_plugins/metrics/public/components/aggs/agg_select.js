@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import Select from 'react-select';
-import { createOptions } from '../lib/agg_lookup';
+import { createOptions } from '../../../common/agg_lookup';
 
 function AggSelect(props) {
   const { siblings, panelType } = props;
