@@ -23,10 +23,14 @@ SortableTypeHeader.propTypes = {
   sortOrder: React.PropTypes.any
 };
 
-export function getTypeColumn(onSort, sortOrder) {
+export function getTypeColumn() {
   return {
-    id: 'type',
-    getHeaderCell: () => <SortableTypeHeader key={TYPE_COLUMN_ID} onSort={onSort} sortOrder={sortOrder}/>,
+    isSortable: true,
+    id: TYPE_COLUMN_ID,
+    getHeaderCell: (onSort, sortOrder) => <SortableTypeHeader
+      key={TYPE_COLUMN_ID}
+      onSort={() => onSort(TYPE_COLUMN_ID)}
+      sortOrder={sortOrder}/>,
     getRowCell: (item) => <KuiTableCellIcon key={item.id + TYPE_COLUMN_ID} title={item.type.title} icon={item.type.icon}/>
   };
 }
