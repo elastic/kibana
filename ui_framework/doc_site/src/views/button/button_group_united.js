@@ -25,7 +25,7 @@ export default () => (
 
     <KuiButtonGroup isUnited>
       <KuiBasicButton icon={<KuiPreviousButtonIcon />}/>
-      <KuiBasicButton iconRight={<KuiNextButtonIcon />}/>
+      <KuiBasicButton icon={<KuiNextButtonIcon />}/>
     </KuiButtonGroup>
   </div>
 );

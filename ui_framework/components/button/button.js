@@ -1,15 +1,16 @@
 import React, {
-  Component,
   PropTypes,
 } from 'react';
 
 import classNames from 'classnames';
 import keyMirror from 'keymirror';
 
+import { KuiLoadingButtonIcon } from './button_icon';
+
 const KuiButton = props => {
   if (props.isSubmit) {
     // input is a void element tag and can't have children.
-    if (typeof props.children !== 'string' || props.icon || props.rightIcon) {
+    if (typeof props.children !== 'string' || props.icon) {
       throw new Error(
         `KuiButton with isSubmit prop set to true can only accept string children, and can't
         display icons. This is because input is a void element and can't contain children.`
@@ -29,8 +30,13 @@ const KuiButton = props => {
     props.onClick(props.data);
   }
 
+  const icon =
+    props.isLoading
+    ? <KuiLoadingButtonIcon />
+    : props.icon;
+
   const className = classNames('kuiButton', props.className, {
-    'kuiButton--iconText': props.icon || props.iconRight,
+    'kuiButton--iconText': icon,
   });
 
   let wrappedChildren;
@@ -53,11 +59,16 @@ const KuiButton = props => {
   const children =
     props.isSubmit
     ? null
-    : (
+    : props.isIconOnRight
+    ? (
       <span>
-        {props.icon}
         {wrappedChildren}
-        {props.iconRight}
+        {icon}
+      </span>
+    ) : (
+      <span>
+        {icon}
+        {wrappedChildren}
       </span>
     );
 
@@ -77,14 +88,14 @@ KuiButton.propTypes = {
   testSubject: PropTypes.string,
   data: PropTypes.any,
   icon: PropTypes.node,
-  iconRight: PropTypes.node,
+  isIconOnRight: PropTypes.bool,
   children: PropTypes.node,
   isSubmit: PropTypes.bool,
   href: PropTypes.string,
   target: PropTypes.string,
   onClick: PropTypes.func,
   isDisabled: PropTypes.bool,
-  hasIcon: PropTypes.bool,
+  isLoading: PropTypes.bool,
   className: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,

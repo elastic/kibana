@@ -24,6 +24,9 @@ const primarySource = require('!!raw!./button_primary');
 import Danger from './button_danger';
 const dangerSource = require('!!raw!./button_danger');
 
+import Loading from './button_loading';
+const loadingSource = require('!!raw!./button_loading');
+
 import WithIcon from './button_with_icon';
 const withIconSource = require('!!raw!./button_with_icon');
 
@@ -103,6 +106,18 @@ export default props => (
 
       <GuideDemo>
         <Danger />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Loading Button"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: loadingSource,
+      }]}
+    >
+      <GuideDemo>
+        <Loading />
       </GuideDemo>
     </GuideSection>
 

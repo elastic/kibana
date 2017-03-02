@@ -8,6 +8,7 @@ import {
   KuiDeleteButtonIcon,
   KuiNextButtonIcon,
   KuiPreviousButtonIcon,
+  KuiLoadingButtonIcon,
   KuiPrimaryButton,
 } from '../../../../components';
 
@@ -31,8 +32,14 @@ export default () => (
 
     <br />
 
-    <KuiBasicButton iconRight={<KuiNextButtonIcon />}>
+    <KuiBasicButton icon={<KuiNextButtonIcon />} isIconOnRight>
       Next
+    </KuiBasicButton>
+
+    <br />
+
+    <KuiBasicButton icon={<KuiLoadingButtonIcon />}>
+      Loading
     </KuiBasicButton>
 
     <br />
