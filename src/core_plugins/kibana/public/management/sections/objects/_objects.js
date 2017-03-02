@@ -203,6 +203,7 @@ uiModules.get('apps/management')
                     })
                     .catch((err) => {
                       // swallow errors here so that the remaining promise chain executes
+                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                       notify.error(err);
                     });
                 })
