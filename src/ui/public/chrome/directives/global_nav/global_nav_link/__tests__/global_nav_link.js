@@ -24,10 +24,10 @@ describe('globalNavLink directive', () => {
         is-disabled="isDisabled"
         tooltip-content="tooltipContent"
         on-click="onClick()"
-        href="href"
+        url="href"
         kbn-route="kbnRoute"
         icon="icon"
-        title="title"
+        label="title"
       />
     `;
 
