@@ -36,7 +36,9 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       columns: '=',
       filter: '=',
       indexPattern: '=',
-      row: '=kbnTableRow'
+      row: '=kbnTableRow',
+      onAddColumn: '=?',
+      onRemoveColumn: '=?',
     },
     link: function ($scope, $el) {
       $el.after('<tr>');

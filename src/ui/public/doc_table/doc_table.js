@@ -23,7 +23,10 @@ uiModules.get('kibana')
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      onAddColumn: '=?',
       onChangeSortOrder: '=?',
+      onMoveColumn: '=?',
+      onRemoveColumn: '=?',
     },
     link: function ($scope) {
       const notify = new Notifier();

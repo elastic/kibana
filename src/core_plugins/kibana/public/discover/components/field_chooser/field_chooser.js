@@ -26,7 +26,9 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       state: '=',
       indexPattern: '=',
       indexPatternList: '=',
-      updateFilterInQuery: '=filter'
+      onAddField: '=',
+      onAddFilter: '=',
+      onRemoveField: '=',
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
@@ -98,11 +100,6 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         filter.active = filter.getActive();
       });
 
-      $scope.toggle = function (fieldName) {
-        $scope.increaseFieldCounter(fieldName);
-        _.toggleInOut($scope.columns, fieldName);
-      };
-
       $scope.$watchMulti([
         '[]fieldCounts',
         '[]columns',
@@ -156,7 +153,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
-      $scope.vizLocation = function (field) {
+      function getVizualizeUrl(field) {
         if (!$scope.state) {return '';}
 
         let agg = {};
@@ -210,16 +207,21 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
             }
           })
         }));
-      };
+      }
 
-      $scope.details = function (field, recompute) {
+      $scope.computeDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
-          field.details = fieldCalculator.getFieldValueCounts({
-            hits: $scope.hits,
-            field: field,
-            count: 5,
-            grouped: false
-          });
+          field.details = Object.assign(
+            {
+              visualizeUrl: field.visualizable ? getVizualizeUrl(field) : null,
+            },
+            fieldCalculator.getFieldValueCounts({
+              hits: $scope.hits,
+              field: field,
+              count: 5,
+              grouped: false
+            }),
+          );
           _.each(field.details.buckets, function (bucket) {
             bucket.display = field.format.convert(bucket.value);
           });

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
@@ -117,6 +118,20 @@ uiModules
           $scope.setSortOrder = function setSortOrder(columnName, direction) {
             $scope.panel.sort = [columnName, direction];
             $scope.saveState();
+          };
+
+          $scope.addColumn = function addColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.addColumn($scope.panel.columns, columnName);
+          };
+
+          $scope.removeColumn = function removeColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.removeColumn($scope.panel.columns, columnName);
+          };
+
+          $scope.moveColumn = function moveColumn(columnName, newIndex) {
+            columnActions.moveColumn($scope.panel.columns, columnName, newIndex);
           };
         }
 
