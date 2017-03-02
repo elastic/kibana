@@ -98,3 +98,7 @@
 # Set the interval in milliseconds to sample system and process performance
 # metrics. Minimum is 100ms. Defaults to 5000.
 #ops.interval: 5000
+
+# The default locale. This locale can be used in certain circumstances to substitute any missing
+# translations.
+#i18n.defaultLocale: "en"

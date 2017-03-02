@@ -41,6 +41,16 @@ class UiExports {
     this.consumers.push(consumer);
   }
 
+  addConsumerForType(typeToConsume, consumer) {
+    this.consumers.push({
+      exportConsumer(uiExportType) {
+        if (uiExportType === typeToConsume) {
+          return consumer;
+        }
+      }
+    });
+  }
+
   exportConsumer(type) {
     for (const consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;

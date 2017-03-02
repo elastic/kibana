@@ -82,6 +82,7 @@
     "@spalger/test-subj-selector": "0.2.1",
     "@spalger/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
+    "accept-language-parser": "1.2.0",
     "angular": "1.4.7",
     "angular-bootstrap-colorpicker": "3.0.19",
     "angular-elastic": "2.5.0",
