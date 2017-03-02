@@ -187,25 +187,5 @@ describe('globalNavLink directive', () => {
         });
       });
     });
-
-    describe('title attribute', () => {
-      it('is displayed', () => {
-        const attrs = {
-          title: 'demo title',
-        };
-        const element = create(attrs);
-        const title = element.find('.global-nav-link__title');
-        expect(title.text().trim()).to.be(attrs.title);
-      });
-
-      it('is set as a title attribute on the anchor tag', () => {
-        const attrs = {
-          title: 'demo title',
-        };
-        const element = create(attrs);
-        const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('title')).to.be(attrs.title);
-      });
-    });
   });
 });
