@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import basicAggs from '../../../../../public/components/lib/basic_aggs';
+import basicAggs from '../../../../../common/basic_aggs';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';

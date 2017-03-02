@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
-import AggLookup from '../lib/agg_lookup';
+import AggLookup from '../../../common/agg_lookup';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 
 function FieldSelect(props) {

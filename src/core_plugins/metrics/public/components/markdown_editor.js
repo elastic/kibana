@@ -2,7 +2,7 @@
 import React, { Component, PropTypes } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import moment from 'moment';
-import calculateLabel from './lib/calculate_label';
+import calculateLabel from '../../common/calculate_label';
 import convertSeriesToVars from './lib/convert_series_to_vars';
 import AceEditor from 'react-ace';
 import _ from 'lodash';
