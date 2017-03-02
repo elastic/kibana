@@ -11,7 +11,7 @@
     href="{{ getHref() }}"
     ng-click="onClick({ $event: $event })"
     data-test-subj="appLink"
-    title="{{ title }}"
+    title="{{ tooltipContent ? '' : title }}"
   >
     <div class="global-nav-link__icon">
       <img
