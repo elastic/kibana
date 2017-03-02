@@ -100,24 +100,36 @@ module.directive('kbnTopNav', function (Private) {
       });
       const extensions = getNavbarExtensions($attrs.name);
 
-      function initTopNavForConfigChanges(newConfig, oldConfig) {
+      function initTopNav(newConfig, oldConfig) {
         if (_.isEqual(oldConfig, newConfig)) return;
 
         if (newConfig instanceof KbnTopNavController) {
           newConfig.addItems(extensions);
-          $scope.kbnTopNav = newConfig;
+          $scope.kbnTopNav = new KbnTopNavController(newConfig);
         } else {
           newConfig = newConfig.concat(extensions);
           $scope.kbnTopNav = new KbnTopNavController(newConfig);
-          $scope.kbnTopNav._link($scope, $element);
         }
+        $scope.kbnTopNav._link($scope, $element);
       }
 
-      const getTopNavConfig = () => _.get($scope, $attrs.config, []);
+      const getTopNavConfig = () => {
+        return _.get($scope, $attrs.config, []);
+      };
 
-      $scope.$watch(getTopNavConfig, initTopNavForConfigChanges, true);
+      const topNavConfig = getTopNavConfig();
 
-      initTopNavForConfigChanges(getTopNavConfig(), null);
+      // Because we store $scope and $element on the kbnTopNavController, if this was passed an instance
+      // instead of a configuration, it will enter an infinite digest loop. Only watch for updates if a config
+      // was passed instead. This is ugly, but without diving into a larger refactor, the smallest temporary solution
+      // to get dynamic nav updates working for dashboard. Console is currently the only place that passes a
+      // KbnTopNavController (and a slew of tests).
+      if (!(topNavConfig instanceof KbnTopNavController)) {
+        $scope.$watch(getTopNavConfig, initTopNav, true);
+      }
+
+      initTopNav(topNavConfig, null);
+
       return $scope.kbnTopNav;
     },
 

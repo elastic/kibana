@@ -12,8 +12,7 @@ export class DashboardStrings {
     return `${listClone.join(', ')}${lastEntry}`;
   }
 
-  static getUnsavedChangesWarningMessage(dashboardState) {
-    const changedFilters = dashboardState.getChangedFiltersForDisplay();
+  static getUnsavedChangesWarningMessage(changedFilters) {
     const changedFilterList = this.createStringList(changedFilters);
 
     return changedFilterList ?
@@ -21,13 +20,13 @@ export class DashboardStrings {
       `Are you sure you want to cancel and lose changes?`;
   }
 
-  static getDashboardTitle(dashboardState) {
-    const isEditMode = dashboardState.getViewMode() === DashboardViewMode.EDIT;
-    const unsavedSuffix = isEditMode && dashboardState.getIsDirty()
+  static getDashboardTitle(title, viewMode, isDirty) {
+    const isEditMode = viewMode === DashboardViewMode.EDIT;
+    const unsavedSuffix = isEditMode && isDirty
       ? ' (unsaved)'
       : '';
 
-    const displayTitle = `${dashboardState.getTitle()}${unsavedSuffix}`;
+    const displayTitle = `${title}${unsavedSuffix}`;
     return isEditMode ? 'Editing ' + displayTitle : displayTitle;
   }
 }

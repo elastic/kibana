@@ -71,12 +71,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(
-        dash,
-        timefilter,
-        !getAppState.previouslyStored(),
-        quickRanges,
-        AppState);
+      const dashboardState = new DashboardState(dash, AppState);
+
+      if (dashboardState.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+        dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+      }
 
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
@@ -107,11 +106,15 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
+      $scope.dashboardViewMode = dashboardState.getViewMode();
 
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      $scope.getDashTitle = () => DashboardStrings.getDashboardTitle(dashboardState);
+      $scope.getDashTitle = () => DashboardStrings.getDashboardTitle(
+        dashboardState.getTitle(),
+        dashboardState.getViewMode(),
+        dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
       $scope.showEditHelpText = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
@@ -169,22 +172,18 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
       // Defined up here, but filled in below, to avoid 'Defined before use' warning due to circular reference:
-      // changeViewMode calls updateTopNav, and navActions uses changeViewMode.
+      // changeViewMode calls updateViewMode, and navActions uses changeViewMode.
       const navActions = {};
 
-      function updateTopNav(newMode) {
-        $scope.topNavMenu = getTopNavConfig(newMode, navActions);
-      }
-
       function updateViewMode(newMode) {
-        updateTopNav(newMode);
+        $scope.topNavMenu = getTopNavConfig(newMode, navActions);
         dashboardState.switchViewMode(newMode);
       }
 
       const onChangeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
         const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
-        const willLoseChanges = leavingEditMode && dashboardState.getIsDirty();
+        const willLoseChanges = leavingEditMode && dashboardState.getIsDirty(timefilter);
 
         if (!willLoseChanges) {
           updateViewMode(newMode);
@@ -192,15 +191,21 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
 
         function revertChangesAndExitEditMode() {
-          dashboardState.reloadLastSavedFilters();
           dashboardState.resetState();
           const refreshUrl = dashboardState.getReloadDashboardUrl();
-          kbnUrl.change(refreshUrl.url, refreshUrl.options, new AppState());
+          kbnUrl.change(refreshUrl.url, refreshUrl.options);
+          // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
+          // We need to do a hard reset of the timefilter, it won't happen automatically because of the
+          // getAppState.previouslyStored() check on reload.  Even though we reset appState, it gets saved
+          // from the above call to update the view mode.
+          if (dashboardState.getIsTimeSavedWithDashboard()) {
+            dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+          }
         }
 
         confirmModal(
-          DashboardStrings.getUnsavedChangesWarningMessage(dashboardState),
+          DashboardStrings.getUnsavedChangesWarningMessage(dashboardState.getChangedFiltersForDisplay(timefilter)),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
@@ -215,7 +220,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
 
       $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson).then(function (id) {
+        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
           $scope.kbnTopNav.close('save');
           if (id) {
             notify.info(`Saved Dashboard as "${dash.title}"`);

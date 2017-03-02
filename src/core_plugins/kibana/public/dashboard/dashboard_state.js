@@ -9,6 +9,7 @@ import moment from 'moment';
 import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+
 function getStateDefaults(dashboard) {
   return {
     title: dashboard.title,
@@ -48,7 +49,7 @@ function areTimesEqual(timeA, timeB) {
 }
 
 export class DashboardState {
-  constructor(dashboard, timefilter, timeFilterPreviouslyStored, quickTimeRanges, AppState) {
+  constructor(dashboard, AppState) {
     this.dashboard = dashboard;
 
     this.stateDefaults = getStateDefaults(this.dashboard);
@@ -56,7 +57,6 @@ export class DashboardState {
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
     this.isDirty = false;
-    this.timefilter = timefilter;
 
     this.lastSavedDashboardFilters = this.getFilterState();
 
@@ -68,12 +68,7 @@ export class DashboardState {
       this.stateDefaults.filters = this.appState.filters;
     }
 
-    if (this.getShouldSyncTimefilterWithDashboard() && timeFilterPreviouslyStored) {
-      this.syncTimefilterWithDashboard(quickTimeRanges);
-    }
-
     PanelUtils.initPanelIndexes(this.getPanels());
-
     this.createStateMonitor();
   }
 
@@ -127,11 +122,10 @@ export class DashboardState {
   }
 
   /**
-   * Returns true if the timefilter should match the time stored with the dashboard.
    * @returns {boolean}
    */
-  getShouldSyncTimefilterWithDashboard() {
-    return this.dashboard.timeRestore && this.dashboard.timeTo && this.dashboard.timeFrom;
+  getIsTimeSavedWithDashboard() {
+    return this.dashboard.timeRestore;
   }
 
   getDashboardFilterBars() {
@@ -163,10 +157,10 @@ export class DashboardState {
       cleanFiltersForComparison(this.getLastSavedFilterBars()));
   }
 
-  getTimeChanged() {
+  getTimeChanged(timeFilter) {
     return (
-      !areTimesEqual(this.lastSavedDashboardFilters.timeFrom, this.timefilter.time.from) ||
-      !areTimesEqual(this.lastSavedDashboardFilters.timeTo, this.timefilter.time.to)
+      !areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.time.from) ||
+      !areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.time.to)
     );
   }
 
@@ -197,13 +191,13 @@ export class DashboardState {
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
-  getIsDirty() {
+  getIsDirty(timeFilter) {
     const existingTitleChanged =
       this.dashboard.lastSavedTitle &&
       this.dashboard.lastSavedTitle !== this.dashboard.title;
 
     return this.isDirty ||
-      this.getFiltersChanged() ||  // Not all filter changes are tracked by the state monitor.
+      this.getFiltersChanged(timeFilter) ||  // Not all filter changes are tracked by the state monitor.
       existingTitleChanged;
   }
 
@@ -238,15 +232,15 @@ export class DashboardState {
    * with the dashboard) have changed since the last saved state (or if the dashboard hasn't been saved,
    * the default state).
    */
-  getFiltersChanged() {
+  getFiltersChanged(timeFilter) {
     return (
       this.getQueryChanged() ||
       this.getFilterBarChanged() ||
-      (this.dashboard.timeRestore && this.getTimeChanged())
+      (this.dashboard.timeRestore && this.getTimeChanged(timeFilter))
     );
   }
 
-  getChangedFiltersForDisplay() {
+  getChangedFiltersForDisplay(timeFilter) {
     const changedFilters = [];
     if (this.getFilterBarChanged()) {
       changedFilters.push('filter');
@@ -254,27 +248,27 @@ export class DashboardState {
     if (this.getQueryChanged()) {
       changedFilters.push('query');
     }
-    if (this.dashboard.timeRestore && this.getTimeChanged()) {
+    if (this.dashboard.timeRestore && this.getTimeChanged(timeFilter)) {
       changedFilters.push('time range');
     }
     return changedFilters;
   }
 
-  syncTimefilterWithDashboard(quickTimeRanges) {
-    this.timefilter.time.to = this.dashboard.timeTo;
-    this.timefilter.time.from = this.dashboard.timeFrom;
+  syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
+    timeFilter.time.to = this.dashboard.timeTo;
+    timeFilter.time.from = this.dashboard.timeFrom;
     const isMoment = moment(this.dashboard.timeTo).isValid();
     if (isMoment) {
-      this.timefilter.time.mode = 'absolute';
+      timeFilter.time.mode = 'absolute';
     } else {
       const quickTime = _.find(
         quickTimeRanges,
         (timeRange) => timeRange.from === this.dashboard.timeFrom && timeRange.to === this.dashboard.timeTo);
 
-      this.timefilter.time.mode = quickTime ? 'quick' : 'relative';
+      timeFilter.time.mode = quickTime ? 'quick' : 'relative';
     }
     if (this.dashboard.refreshInterval) {
-      this.timefilter.refreshInterval = this.dashboard.refreshInterval;
+      timeFilter.refreshInterval = this.dashboard.refreshInterval;
     }
   }
 
@@ -295,16 +289,16 @@ export class DashboardState {
    * @returns {Promise<string>} A promise that if resolved, will contain the id of the newly saved
    * dashboard.
    */
-  saveDashboard(toJson) {
+  saveDashboard(toJson, timeFilter) {
     this.saveState();
 
-    const timeRestoreObj = _.pick(this.timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
+    const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
     this.dashboard.title = this.appState.title;
     this.dashboard.timeRestore = this.appState.timeRestore;
     this.dashboard.panelsJSON = toJson(this.appState.panels);
     this.dashboard.uiStateJSON = toJson(this.uiState.getChanges());
-    this.dashboard.timeFrom = this.dashboard.timeRestore ? convertTimeToString(this.timefilter.time.from) : undefined;
-    this.dashboard.timeTo = this.dashboard.timeRestore ? convertTimeToString(this.timefilter.time.to) : undefined;
+    this.dashboard.timeFrom = this.dashboard.timeRestore ? convertTimeToString(timeFilter.time.from) : undefined;
+    this.dashboard.timeTo = this.dashboard.timeRestore ? convertTimeToString(timeFilter.time.to) : undefined;
     this.dashboard.refreshInterval = this.dashboard.timeRestore ? timeRestoreObj : undefined;
     this.dashboard.optionsJSON = toJson(this.appState.options);
 

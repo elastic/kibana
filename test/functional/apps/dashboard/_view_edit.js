@@ -22,13 +22,34 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
     await PageObjects.dashboard.saveDashboard(dashboardName);
   });
 
-  bdd.it('open dashboard in view mode and click edit', async function () {
+  bdd.it('existing dashboard opens in view mode', async function () {
     await PageObjects.dashboard.gotoDashboardLandingPage();
     await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
-    await PageObjects.dashboard.clickEdit();
+    const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+
+    expect(inViewMode).to.equal(true);
+  });
+
+  bdd.it('view mode hides panel edit controls', async function () {
+    await PageObjects.dashboard.gotoDashboardLandingPage();
+    await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+
+    const editLinkExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelEditLink');
+    const moveExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelMoveIcon');
+    const removeExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelRemoveIcon');
+
+    expect(editLinkExists).to.equal(false);
+    expect(moveExists).to.equal(false);
+    expect(removeExists).to.equal(false);
+  });
+
+  bdd.it('view mode shows expand on a panel', async function () {
+    const expandExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelExpandIcon');
+    expect(expandExists).to.equal(true);
   });
 
   bdd.it('save auto exits out of edit mode', async function () {
+    await PageObjects.dashboard.clickEdit();
     await PageObjects.dashboard.saveDashboard(dashboardName);
     const isViewMode = await PageObjects.dashboard.getIsInViewMode();
 
