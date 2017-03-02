@@ -2,7 +2,7 @@ import _ from 'lodash';
 import getLastValue from '../../visualizations/lib/get_last_value';
 import tickFormatter from './tick_formatter';
 import moment from 'moment';
-import calculateLabel from './calculate_label';
+import calculateLabel from '../../../common/calculate_label';
 export default (series, model) => {
   const variables = {};
   model.series.forEach(seriesModel => {
