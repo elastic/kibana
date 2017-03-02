@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import VisEditorVisualization from './vis_editor_visualization';
+import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 
@@ -18,6 +19,15 @@ class VisEditor extends Component {
         this.props.onChange(nextModel);
       }
     };
+
+    if (this.props.embedded) {
+      return (
+        <Visualization
+          fields={this.props.fields}
+          model={this.props.model}
+          visData={this.props.visData} />
+      );
+    }
 
 
     const { model } = this.state;

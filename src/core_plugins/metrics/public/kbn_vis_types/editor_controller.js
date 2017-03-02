@@ -8,18 +8,28 @@ import _ from 'lodash';
 import angular from 'angular';
 const app = modules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
+  $location,
+  $element,
   $scope,
   Private,
   timefilter,
   metricsExecutor
 ) => {
 
+  $scope.embedded = $location.search().embed === 'true';
   const queryFilter = Private(require('ui/filter_bar/query_filter'));
-  const fetch = Private(require('../lib/fetch'));
+  const createFetch = Private(require('../lib/fetch'));
+  const fetch = () => {
+    const fn = createFetch($scope);
+    return fn().then((resp) => {
+      $element.trigger('renderComplete');
+      return resp;
+    });
+  };
   const fetchFields = Private(require('../lib/fetch_fields'));
 
   const debouncedFetch = _.debounce(() => {
-    fetch($scope)();
+    fetch();
   }, 1000, {
     leading: false,
     trailing: true
@@ -82,13 +92,13 @@ app.controller('MetricsEditorController', (
   $scope.visData = {};
   $scope.fields = {};
   // All those need to be consolidated
-  $scope.$listen(queryFilter, 'fetch', fetch($scope));
-  $scope.$on('fetch', fetch($scope));
+  $scope.$listen(queryFilter, 'fetch', fetch);
+  $scope.$on('fetch', fetch);
 
   fetchFields($scope)($scope.model.index_pattern);
 
   // Register fetch
-  metricsExecutor.register({ execute: fetch($scope) });
+  metricsExecutor.register({ execute: fetch });
 
   // Start the executor
   metricsExecutor.start();

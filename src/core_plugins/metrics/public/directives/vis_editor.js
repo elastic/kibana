@@ -11,7 +11,7 @@ app.directive('metricsVisEditor', (timefilter) => {
   return {
     restrict: 'E',
     link: ($scope, $el, $attrs) => {
-      const addToState = ['fields', 'visData'];
+      const addToState = ['embedded', 'fields', 'visData'];
       const Component = addScope(VisEditor, $scope, addToState);
       const handleBrush = createBrushHandler($scope, timefilter);
       const handleChange = part => {

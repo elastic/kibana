@@ -17,12 +17,8 @@ app.controller('MetricsVisController', (
   // render the visualizations. This is handled by the editor itself.
   const embedded = $location.search().embed === 'true';
   if (!embedded && $scope.vis._editableVis) {
-    $scope.displayVis = false;
     return;
-  } else {
-    $scope.displayVis = true;
   }
-
   // We need to watch the app state for changes to the dark theme attribute.
   $scope.state = getAppState();
   $scope.$watch('state.options.darkTheme', newValue => {
@@ -30,21 +26,23 @@ app.controller('MetricsVisController', (
   });
 
   const queryFilter = Private(require('ui/filter_bar/query_filter'));
-  const fetch = Private(require('../lib/fetch'));
+  const createFetch = Private(require('../lib/fetch'));
+  const fetch = () => {
+    const fn = createFetch($scope);
+    return fn().then((resp) => {
+      $element.trigger('renderComplete');
+      return resp;
+    });
+  };
+
 
   $scope.model = $scope.vis.params;
-  $scope.$watch('vis.params', fetch($scope));
+  $scope.$watch('vis.params', fetch);
 
   // All those need to be consolidated
-  $scope.$listen(timefilter, 'fetch', fetch($scope));
-  $scope.$listen(queryFilter, 'fetch', fetch($scope));
+  $scope.$listen(timefilter, 'fetch', fetch);
+  $scope.$listen(queryFilter, 'fetch', fetch);
 
-  $scope.$on('courier:searchRefresh', fetch($scope));
-  $scope.$on('fetch', fetch($scope));
-
-  $scope.$on('renderComplete', event => {
-    event.stopPropagation();
-    $element.trigger('renderComplete');
-  });
-
+  $scope.$on('courier:searchRefresh', fetch);
+  $scope.$on('fetch', fetch);
 });
