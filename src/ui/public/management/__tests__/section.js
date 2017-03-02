@@ -102,7 +102,7 @@ describe('ManagementSection', () => {
     });
 
     it('returns undefined if a sub-section along a /-separated path does not exist', () => {
-      expect(section.getSection('about/time/it/is')).to.be(undefined);
+      expect(section.getSection('about/damn/time')).to.be(undefined);
     });
   });
 
