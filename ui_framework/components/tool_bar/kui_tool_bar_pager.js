@@ -14,8 +14,8 @@ export function KuiToolBarPager({ startNumber, endNumber, totalItems, hasPreviou
       startNumber === 1 && endNumber === totalItems
         ? null
         : <KuiToolBarPagerButtons
-            hasNext={hasNextPage()}
-            hasPrevious={hasPreviousPage()}
+            hasNext={hasNextPage}
+            hasPrevious={hasPreviousPage}
             onNext={onNextPage}
             onPrevious={onPreviousPage}
           />
@@ -27,8 +27,8 @@ KuiToolBarPager.propTypes = {
   startNumber: React.PropTypes.number,
   endNumber: React.PropTypes.number,
   totalItems: React.PropTypes.number,
-  hasPreviousPage: React.PropTypes.func.isRequired,
-  hasNextPage: React.PropTypes.func.isRequired,
+  hasPreviousPage: React.PropTypes.bool.isRequired,
+  hasNextPage: React.PropTypes.bool.isRequired,
   onNextPage: React.PropTypes.func.isRequired,
   onPreviousPage: React.PropTypes.func.isRequired
 };

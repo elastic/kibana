@@ -9,7 +9,7 @@ import { TITLE_COLUMN_ID } from 'ui/saved_object_table/get_title_column';
 import { getCheckBoxColumn } from 'ui/saved_object_table/get_checkbox_column';
 import { getTitleColumn } from 'ui/saved_object_table/get_title_column';
 import { TYPE_COLUMN_ID, getTypeColumn } from './get_type_column';
-import { Pager } from 'ui/pager/pager';
+import { Pager, ToolBarPager } from 'ui/pager';
 import { ListingTableActions } from 'ui/saved_object_table/listing_table_actions';
 
 import {
@@ -17,8 +17,6 @@ import {
   DeleteButton,
   CreateButtonLink,
   SortOrder,
-  LandingPageToolBar,
-  LandingPageToolBarFooter,
   KuiToolBarSearchBox,
   KuiToolBarPager,
   KuiToolBar,
@@ -26,12 +24,15 @@ import {
   KuiToolBarText
 } from 'ui_framework/components';
 
+
+const ITEMS_PER_PAGE = 2;
+
 export class VisualizeLandingPageTable extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = ListingTableActions.getInitialState();
-    this.pager = new Pager(2);
+    this.pager = new Pager(ITEMS_PER_PAGE);
   }
 
   componentDidMount() {
@@ -63,14 +64,6 @@ export class VisualizeLandingPageTable extends React.Component {
   onSortByTitle = () => this.setState(ListingTableActions.onSort(this.state, TITLE_COLUMN_ID));
 
   onSortByType = () => this.setState(ListingTableActions.onSort(this.state, TYPE_COLUMN_ID));
-
-  getStartNumber = () => this.pager.getStartNumber(this.state.items.length, this.state.currentPageIndex);
-
-  getEndNumber = () => this.pager.getEndNumber(this.state.items.length, this.state.currentPageIndex);
-
-  hasPreviousPage = () => this.pager.canPagePrevious(this.state.currentPageIndex);
-
-  hasNextPage = () => this.pager.canPageNext(this.state.items.length, this.state.currentPageIndex);
 
   getEditUrlForItem = (item) => {
     return this.props.kbnUrl.eval(`#${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: item.id });
@@ -121,12 +114,10 @@ export class VisualizeLandingPageTable extends React.Component {
   }
 
   getPagerComponent() {
-    return <KuiToolBarPager
-      startNumber={this.getStartNumber()}
-      endNumber={this.getEndNumber()}
+    return <ToolBarPager
+      currentPageIndex={this.state.currentPageIndex}
       totalItems={this.state.items.length}
-      hasPreviousPage={this.hasPreviousPage}
-      hasNextPage={this.hasNextPage}
+      itemsPerPage={ITEMS_PER_PAGE}
       onNextPage={this.turnToNextPage}
       onPreviousPage={this.turnToPreviousPage}/>;
   }
