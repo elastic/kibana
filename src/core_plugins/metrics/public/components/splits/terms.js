@@ -27,7 +27,7 @@ class SplitByTerms extends Component {
         <div className="vis_editor__label">By</div>
         <div className="vis_editor__item">
           <FieldSelect
-            IndexPattern={indexPattern}
+            indexPattern={indexPattern}
             onChange={handleSelectChange('terms_field')}
             value={model.terms_field}
             fields={this.props.fields} />
