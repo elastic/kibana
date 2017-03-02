@@ -15,7 +15,7 @@ export default function MetricsVisProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'metrics',
-    title: 'Time Series: Visual Builder',
+    title: 'Time Series Visual Builder',
     icon: 'fa-area-chart',
     description: `Create a time series based visualization for metrics. Perfect
         for creating visualizations for time series based metrics using the
