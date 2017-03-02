@@ -197,12 +197,19 @@ uiModules.get('apps/management')
               return service.get()
                 .then(function (obj) {
                   obj.id = doc._id;
-                  return obj.applyESResp(doc).then(() => obj.save({ confirmOverwrite : !overwriteAll }));
-                });
-            })
-              .then(refreshIndex)
-              .then(refreshData)
-              .catch(notify.error);
+                  return obj.applyESResp(doc)
+                    .then(() => {
+                      return obj.save({ confirmOverwrite : !overwriteAll });
+                    })
+                    .catch((err) => {
+                      // swallow errors here so that the remaining promise chain executes
+                      notify.error(err);
+                    });
+                })
+                .then(refreshIndex)
+                .then(refreshData)
+                .catch(notify.error);
+            });
           });
       };
 
