@@ -1,4 +1,6 @@
 <div class="form-group">
+  <field-editor-numeral></field-editor-numeral>
+
   <div ng-repeat="color in editor.formatParams.colors">
     <div class="editor-color">
       <button ng-if="editor.formatParams.colors.length > 1" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger editor-color-remove">
@@ -48,5 +50,4 @@
       <span class="sr-only">Add Color</span>
       <i aria-hidden="true" class="fa fa-plus"></i> Add Color
   </button>
-
 </div>

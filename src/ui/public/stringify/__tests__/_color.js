@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+
 describe('Color Format', function () {
   let fieldFormats;
   let ColorFormat;
@@ -63,4 +64,42 @@ describe('Color Format', function () {
       expect(converter('a', 'html')).to.eql('a');
     });
   });
+
+
+  it('should take into account numerical format', function () {
+    let colorer = new ColorFormat({
+      colors: [{
+        range: '100:150',
+        text: 'blue',
+        background: 'yellow'
+      }]
+      //,
+      // pattern: '0,0.[000]'
+    });
+    expect(colorer.convert(99.5555, 'html')).to.eql('99.556');
+    expect(colorer.convert(100.5555, 'html')).to.eql('<span style="color: blue;background-color: yellow;">100.556</span>');
+    expect(colorer.convert(149.5555, 'html')).to.eql('<span style="color: blue;background-color: yellow;">149.556</span>');
+    expect(colorer.convert(151.5555, 'html')).to.eql('151.556');
+
+  });
+
+  it('should take into account custom numerical format', function () {
+    let colorer = new ColorFormat({
+      colors: [{
+        range: '100:150',
+        text: 'blue',
+        background: 'yellow'
+      }],
+      pattern: '0,0.[00]'
+    });
+    expect(colorer.convert(99.5555, 'html')).to.eql('99.56');
+    expect(colorer.convert(100.5555, 'html')).to.eql('<span style="color: blue;background-color: yellow;">100.56</span>');
+    expect(colorer.convert(149.5555, 'html')).to.eql('<span style="color: blue;background-color: yellow;">149.56</span>');
+    expect(colorer.convert(151.5555, 'html')).to.eql('151.56');
+
+  });
+
+
+
+
 });

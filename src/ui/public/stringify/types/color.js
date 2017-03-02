@@ -1,11 +1,13 @@
 import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import colorTemplate from 'ui/stringify/editors/color.html';
-export default function ColorFormatProvider(Private) {
+import StringifyTypesNumeralProvider from 'ui/stringify/types/_numeral';
+import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
 
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
+export default function ColorFormatProvider(Private) {
+  const Numeral = Private(StringifyTypesNumeralProvider);
+  const BoundToConfigObj = Private(BoundToConfigObjProvider);
+  
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
     regex: '<insert regex>',
@@ -13,7 +15,7 @@ export default function ColorFormatProvider(Private) {
     background: '#ffffff'
   };
 
-  _.class(_Color).inherits(FieldFormat);
+  _.class(_Color).inherits(Numeral);
   function _Color(params) {
     _Color.Super.call(this, params);
   }
@@ -42,11 +44,10 @@ export default function ColorFormatProvider(Private) {
     }
   };
 
-
-  _Color.paramDefaults = {
-    fieldType: null, // populated by editor, see controller below
-    colors: [_.cloneDeep(DEFAULT_COLOR)]
-  };
+  _Color.paramDefaults = new BoundToConfigObj({
+    colors: [_.cloneDeep(DEFAULT_COLOR)],
+    pattern: '=format:color:defaultPattern'
+  });
 
   _Color.prototype.findColorRuleForVal = function (val) {
     switch (this.param('fieldType')) {
@@ -69,13 +70,20 @@ export default function ColorFormatProvider(Private) {
 
   _Color.prototype._convert = {
     html(val) {
-      const color = this.findColorRuleForVal(val);
-      if (!color) return _.asPrettyString(val);
+      const color = _.findLast(this.param('colors'), ({ range }) => {
+        if (!range) return;
+        const [start, end] = range.split(':');
+        return val >= Number(start) && val <= Number(end);
+      });
 
-      let style = '';
-      if (color.text) style += `color: ${color.text};`;
-      if (color.background) style += `background-color: ${color.background};`;
-      return convertTemplate({ val, style });
+      const formattedValue = Numeral.prototype._convert.call(this, val);
+      if (!color) {
+        return formattedValue;
+      }
+
+      const styleColor = color.text ? `color: ${color.text};` : '';
+      const styleBackgroundColor = color.background ? `background-color: ${color.background};` : '';
+      return `<span style="${styleColor}${styleBackgroundColor}">${formattedValue}</span>`;
     }
   };
 

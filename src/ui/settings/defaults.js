@@ -191,6 +191,11 @@ export default function defaultSettingsProvider() {
       value: '0,0.[000]',
       description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "number" format'
     },
+    'format:color:defaultPattern': {
+      type: 'string',
+      value: '0,0.[000]',
+      description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "color" format'
+    },
     'format:bytes:defaultPattern': {
       type: 'string',
       value: '0,0.[000]b',
