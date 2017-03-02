@@ -32,12 +32,14 @@
 
 .kuiButton--iconText {
   .kuiButton__icon {
-    &:first-child {
-      margin-right: 4px;
+    $iconSpacing: 8px;
+
+    &:first-child:not(:only-child) {
+      margin-right: $iconSpacing;
     }
 
-    &:last-child {
-      margin-left: 4px;
+    &:last-child:not(:only-child) {
+      margin-left: $iconSpacing;
     }
   }
 }

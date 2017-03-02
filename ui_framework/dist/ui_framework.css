@@ -152,11 +152,11 @@ body {
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
     /* 3 */ }
 
-.kuiButton--iconText .kuiButton__icon:first-child {
-  margin-right: 4px; }
+.kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 8px; }
 
-.kuiButton--iconText .kuiButton__icon:last-child {
-  margin-left: 4px; }
+.kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 8px; }
 
 /**
  * 1. Override Bootstrap.
