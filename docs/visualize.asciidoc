@@ -34,7 +34,7 @@ instructions.
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
-Timeseries:: Compute and combine data from multiple time series
+Timelion:: Compute and combine data from multiple time series
 data sets.
 
 . Specify a search query to retrieve the data for your visualization:
