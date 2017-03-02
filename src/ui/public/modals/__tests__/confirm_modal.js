@@ -125,14 +125,13 @@ describe('ui/modals/confirm_modal', function () {
       showClose: true
     };
 
-    function resetSpyCounts() {
+    beforeEach(() => {
       confirmCallback.reset();
       closeCallback.reset();
       cancelCallback.reset();
-    }
+    });
 
     it('onClose', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalCloseButton').click();
@@ -143,7 +142,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onCancel', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalCancelButton').click();
@@ -154,7 +152,6 @@ describe('ui/modals/confirm_modal', function () {
     });
 
     it('onConfirm', function () {
-      resetSpyCounts();
       confirmModal('hi', confirmModalOptions);
       $rootScope.$digest();
       findByDataTestSubj('confirmModalConfirmButton').click();
@@ -166,7 +163,6 @@ describe('ui/modals/confirm_modal', function () {
 
 
     it('onClose defaults to onCancel if not specified', function () {
-      resetSpyCounts();
       const confirmModalOptions = {
         confirmButtonText: 'bye',
         onConfirm: confirmCallback,
@@ -181,6 +177,40 @@ describe('ui/modals/confirm_modal', function () {
 
       expect(confirmCallback.called).to.be(false);
       expect(cancelCallback.called).to.be(true);
+    });
+
+    it('onKeyDown detects ESC and calls onCancel', function () {
+      const confirmModalOptions = {
+        confirmButtonText: 'bye',
+        onConfirm: confirmCallback,
+        onCancel: cancelCallback,
+        title: 'hi'
+      };
+
+      confirmModal('hi', confirmModalOptions);
+
+      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
+      e.keyCode = 27;
+      angular.element(document.body).trigger(e);
+
+      expect(cancelCallback.called).to.be(true);
+    });
+
+    it('onKeyDown ignores keys other than ESC', function () {
+      const confirmModalOptions = {
+        confirmButtonText: 'bye',
+        onConfirm: confirmCallback,
+        onCancel: cancelCallback,
+        title: 'hi'
+      };
+
+      confirmModal('hi', confirmModalOptions);
+
+      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
+      e.keyCode = 50;
+      angular.element(document.body).trigger(e);
+
+      expect(cancelCallback.called).to.be(false);
     });
   });
 });

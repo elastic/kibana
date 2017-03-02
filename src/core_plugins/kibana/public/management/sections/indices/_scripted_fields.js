@@ -37,7 +37,7 @@ uiModules.get('apps/management')
         _.invoke(rowScopes, '$destroy');
         rowScopes.length = 0;
 
-        const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
+        const fields = filter($scope.indexPattern.getScriptedFields(), { name: $scope.fieldFilter });
         _.find($scope.editSections, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
