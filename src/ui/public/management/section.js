@@ -83,7 +83,18 @@ export default class ManagementSection {
    */
 
   getSection(id) {
-    return this.items.byId[id];
+    if (!id) {
+      return;
+    }
+
+    const sectionPath = id.split('/');
+    return sectionPath.reduce((currentSection, nextSection) => {
+      if (!currentSection) {
+        return;
+      }
+
+      return currentSection.items.byId[nextSection];
+    }, this);
   }
 
   hide() {
