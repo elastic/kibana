@@ -94,6 +94,16 @@ describe('ManagementSection', () => {
     it('returns undefined if un-registered', () => {
       expect(section.getSection('unknown')).to.be(undefined);
     });
+
+    it('returns sub-sections specified via a /-separated path', () => {
+      section.getSection('about').register('time');
+      expect(section.getSection('about/time')).to.be.a(ManagementSection);
+      expect(section.getSection('about/time')).to.be(section.getSection('about').getSection('time'));
+    });
+
+    it('returns undefined if a sub-section along a /-separated path does not exist', () => {
+      expect(section.getSection('about/damn/time')).to.be(undefined);
+    });
   });
 
   describe('items', () => {
