@@ -34,3 +34,4 @@ selenium
 *.swo
 *.out
 ui_framework/doc_site/build/*.js*
+yarn.lock
