@@ -74,15 +74,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         aggFilter: 'geohash_grid',
         min: 1,
         max: 1
-      },
-      {
-        group: 'buckets',
-        name: 'split',
-        title: 'Split Chart',
-        deprecate: true,
-        deprecateMessage: 'The Split Chart feature for Tile Maps has been deprecated.',
-        min: 0,
-        max: 1
       }
     ])
   });
