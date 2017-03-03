@@ -33,3 +33,4 @@ selenium
 *.swp
 *.swo
 *.out
+yarn.lock
