@@ -4,7 +4,7 @@ import React, { Component, PropTypes } from 'react';
 import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
-import ResizeAware from 'simianhacker-react-resize-aware';
+import Resize from './resize';
 import GaugeVis from './gauge_vis';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
@@ -63,16 +63,7 @@ class Gauge extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.addEventListener('resize', this.handleResize);
     this.handleResize();
-  }
-
-  componentWillUnmount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.removeEventListener('resize', this.handleResize);
   }
 
   // When the component updates it might need to be resized so we need to
@@ -168,10 +159,13 @@ class Gauge extends Component {
     if (this.props.reversed) className = `reversed ${className}`;
     return (
       <div className={className}>
-        <ResizeAware className={`${className}__resize`} ref={(el) => this.resize = el}>
+        <Resize
+          onResize={this.handleResize}
+          className={`${className}__resize`}
+          ref={(el) => this.resize = el}>
           { metrics }
           <GaugeVis {...gaugeProps}/>
-        </ResizeAware>
+        </Resize>
       </div>
     );
   }
