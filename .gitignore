@@ -27,3 +27,4 @@ selenium
 .babelcache.json
 *.swp
 *.swo
+yarn.lock
