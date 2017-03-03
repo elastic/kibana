@@ -1,0 +1,50 @@
+  <div class="row" ng-repeat="helper in filterHelper.helpers" style="padding: 0.5em 0">
+    <div class="col-md-2">
+      <ui-select ng-model="helper.field">
+        <ui-select-match>
+          {{$select.selected.name}}
+        </ui-select-match>
+        <ui-select-choices repeat="field.name as field in indexPattern.fields | filter:$select.search">
+          <div ng-bind-html="field.name"></div>
+        </ui-select-choices>
+      </ui-select>
+    </div>
+    <div class="col-md-1">
+      <select
+        class="form-control"
+        ng-model="helper.type"
+        ng-options="type.label for type in filterHelper.types"
+      ></select>
+    </div>
+    <div class="col-md-4" ng-if="helper.type.label === 'matches'">
+      <input ng-model="helper.params.query" type="text" class="form-control" />
+    </div>
+    <div class="col-md-4" ng-if="helper.type.label === 'between'">
+      <form class="form-inline">
+        <input ng-model="helper.params.gte" type="number" class="form-control" /> and
+        <input ng-model="helper.params.lt" type="number" class="form-control" />
+      </form>
+    </div>
+    <div class="col-md-4" ng-if="helper.type.label === 'exists'"></div>
+    <div class="col-md-5 text-right">
+      <button class="kuiButton kuiButton--danger kuiButton--iconText" ng-click="filterHelper.removeHelper(helper)">
+        <span class="kuiButton__icon kuiIcon fa-trash"></span>
+      </button>
+    </div>
+  </div>
+  <div class="row" style="padding: 0.5em 0">
+    <div class="col-md-2">
+      <button class="kuiButton kuiButton--default kuiButton--iconText" ng-click="filterHelper.addHelper()">
+        <span class="kuiButton__icon kuiIcon fa-plus"></span>
+        Add a filter
+      </button>
+    </div>
+  </div>
+  <div class="row" style="padding: 0.5em 0">
+    <div class="col-md-12 text-right">
+      <button class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="filterHelper.applyHelpers()">
+        <span class="kuiButton__icon kuiIcon fa-search"></span>
+        Search
+      </button>
+    </div>
+  </div>

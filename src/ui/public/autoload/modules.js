@@ -12,6 +12,7 @@ import 'ui/es';
 import 'ui/events';
 import 'ui/fancy_forms';
 import 'ui/filter_bar';
+import 'ui/filter_bar/filter_helper';
 import 'ui/filter_manager';
 import 'ui/index_patterns';
 import 'ui/listen';
