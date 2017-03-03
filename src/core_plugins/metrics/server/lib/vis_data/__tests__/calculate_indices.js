@@ -22,8 +22,8 @@ describe('calculateIndices', () => {
           fields: ['@timestamp'],
           index_constraints: {
             '@timestamp': {
-              max_value: { gte: '2017-01-01T00:00:00.000Z' },
-              min_value: { lte: '2017-01-03T23:59:59.000Z' }
+              max_value: { gte: 1483228800000, format: 'epoch_millis' },
+              min_value: { lte: 1483487999000, format: 'epoch_millis' }
             }
           }
         }
