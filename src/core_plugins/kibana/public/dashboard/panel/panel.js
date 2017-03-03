@@ -117,6 +117,10 @@ uiModules
           $scope.$watchCollection('panel.sort', function () {
             $scope.saveState();
           });
+
+          $scope.setSortOrder = function setSortOrder(columnName, direction) {
+            $scope.panel.sort = [columnName, direction];
+          };
         }
 
         $scope.filter = function (field, value, operator) {

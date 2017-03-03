@@ -132,8 +132,9 @@
                 shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
-                render-counter>
-              </doc-table>
+                render-counter
+                on-change-sort-order="setSortOrder"
+              ></doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 <center>
