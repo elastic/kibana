@@ -251,7 +251,16 @@ export class DashboardState {
     return changedFilters;
   }
 
+  /**
+   * Updates timeFilter to match the time saved with the dashboard.
+   * @param timeFilter
+   * @param quickTimeRanges
+   */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
+    if (!this.getIsTimeSavedWithDashboard()) {
+      throw 'The time is not saved with this dashboard so should not be synced.';
+    }
+
     timeFilter.time.to = this.dashboard.timeTo;
     timeFilter.time.from = this.dashboard.timeFrom;
     const isMoment = moment(this.dashboard.timeTo).isValid();
@@ -298,12 +307,12 @@ export class DashboardState {
 
     return this.dashboard.save()
       .then((id) => {
-        this.stateMonitor.setInitialState(this.appState.toJSON());
         this.lastSavedDashboardFilters = this.getFilterState();
         this.stateDefaults = getStateDefaults(this.dashboard);
         this.stateDefaults.viewMode = DashboardViewMode.VIEW;
         // Make sure new app state defaults are using the new defaults.
         this.appState.setDefaults(this.stateDefaults);
+        this.stateMonitor.setInitialState(this.appState.toJSON());
         return id;
       });
   }
@@ -354,5 +363,15 @@ export class DashboardState {
       DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     const options = this.dashboard.id ? { id: this.dashboard.id } : {};
     return { url, options };
+  }
+
+  reloadLastSavedFilterBars() {
+    // Need to make a copy to ensure they are not overwritten. The filter bar automatically updates
+    // appState.filters elsewhere.
+    this.stateDefaults.filters = this.appState.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
+    this.appState.setDefaults(this.stateDefaults);
+    this.stateMonitor.setInitialState(this.appState.toJSON());
+    this.isDirty = false;
+    this.saveState();
   }
 }

@@ -109,6 +109,39 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         const query = await PageObjects.dashboard.getQuery();
         expect(query).to.equal(originalQuery);
       });
+
+      bdd.it('when a filter is deleted', async function () {
+        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.dashboard.filterOnPieSlice();
+        await PageObjects.dashboard.saveDashboard(dashboardName);
+
+        // This may seem like a pointless line but there was a bug that only arose when the dashboard
+        // was loaded initially
+        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+        await PageObjects.dashboard.clickEdit();
+
+        const originalFilters = await PageObjects.dashboard.getFilters();
+
+        // Click to cause hover menu to show up, but it will also actually click the filter, which will turn
+        // it off, so we need to click twice to turn it back on.
+        await originalFilters[0].click();
+        await originalFilters[0].click();
+
+        const removeFilterButton = await PageObjects.common.findTestSubject('removeFilter-memory');
+        await removeFilterButton.click();
+
+        const noFilters = await PageObjects.dashboard.getFilters(1000);
+        expect(noFilters.length).to.equal(0);
+
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        // confirm lose changes
+        await PageObjects.common.clickConfirmOnModal();
+
+        const reloadedFilters = await PageObjects.dashboard.getFilters();
+        expect(reloadedFilters.length).to.equal(1);
+      });
     });
 
     bdd.describe('and preserves edits on cancel', function () {

@@ -378,6 +378,10 @@ export default class DashboardPage {
     }
   }
 
+  async getFilters(timeout = defaultFindTimeout) {
+    return PageObjects.common.findAllByCssSelector('.filter-bar > .filter', timeout);
+  }
+
   async getFilterDescriptions(timeout = defaultFindTimeout) {
     const filters = await PageObjects.common.findAllByCssSelector(
       '.filter-bar > .filter > .filter-description',
