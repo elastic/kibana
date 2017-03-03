@@ -60,9 +60,12 @@ export default class HeaderPage {
     .catch(() => false);
   }
 
-  clickAbsoluteButton() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText('Absolute').click();
+  async clickAbsoluteButton() {
+    await PageObjects.common.try(async () => {
+      await this.remote.setFindTimeout(defaultFindTimeout);
+      const absoluteButton = await this.remote.findByLinkText('Absolute');
+      await absoluteButton.click();
+    });
   }
 
   clickQuickButton() {

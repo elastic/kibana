@@ -178,6 +178,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       function updateViewMode(newMode) {
         $scope.topNavMenu = getTopNavConfig(newMode, navActions);
         dashboardState.switchViewMode(newMode);
+        $scope.dashboardViewMode = newMode;
       }
 
       const onChangeViewMode = (newMode) => {

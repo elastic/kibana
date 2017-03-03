@@ -387,9 +387,11 @@ export default class DashboardPage {
 
   async filterOnPieSlice() {
     PageObjects.common.debug('Filtering on a pie slice');
-    const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
-    PageObjects.common.debug('Slices found:' + slices.length);
-    return slices[0].click();
+    await PageObjects.common.try(async () => {
+      const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
+      PageObjects.common.debug('Slices found:' + slices.length);
+      return slices[0].click();
+    });
   }
 
   getSharedItemsCount() {

@@ -30,26 +30,41 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
     expect(inViewMode).to.equal(true);
   });
 
-  bdd.it('view mode hides panel edit controls', async function () {
-    await PageObjects.dashboard.gotoDashboardLandingPage();
-    await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+  bdd.describe('panel edit controls', function () {
+    bdd.it('are hidden in view mode', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
 
-    const editLinkExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelEditLink');
-    const moveExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelMoveIcon');
-    const removeExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelRemoveIcon');
+      const editLinkExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelEditLink');
+      const moveExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelMoveIcon');
+      const removeExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelRemoveIcon');
 
-    expect(editLinkExists).to.equal(false);
-    expect(moveExists).to.equal(false);
-    expect(removeExists).to.equal(false);
+      expect(editLinkExists).to.equal(false);
+      expect(moveExists).to.equal(false);
+      expect(removeExists).to.equal(false);
+    });
+
+    bdd.it('are shown in edit mode', async function () {
+      await PageObjects.dashboard.clickEdit();
+
+      const editLinkExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelEditLink');
+      const moveExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelMoveIcon');
+      const removeExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelRemoveIcon');
+
+      expect(editLinkExists).to.equal(true);
+      expect(moveExists).to.equal(true);
+      expect(removeExists).to.equal(true);
+    });
   });
 
-  bdd.it('view mode shows expand on a panel', async function () {
+  // Panel expand should also be shown in view mode, but only on mouse hover.
+  bdd.describe('panel expand control shown in edit mode', async function () {
+    await PageObjects.dashboard.clickEdit();
     const expandExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelExpandIcon');
     expect(expandExists).to.equal(true);
   });
 
   bdd.it('save auto exits out of edit mode', async function () {
-    await PageObjects.dashboard.clickEdit();
     await PageObjects.dashboard.saveDashboard(dashboardName);
     const isViewMode = await PageObjects.dashboard.getIsInViewMode();
 
