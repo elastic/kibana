@@ -25,7 +25,8 @@
               <small ng-show="index.nameInterval.name == 'weeks'">
                 <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
                 <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
-                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
+                <span translate="KIBANA-SEE"></span>
+                <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
               </small>
             </div>
 
@@ -76,7 +77,7 @@
             <p class="help-block" translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"></p>
 
             <p class="help-block">
-              <span translate="KIBANA-SEARCH_AGAINST_INDX_PATTERN"></span>
+              <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
               <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
               <span translate="KIBANA-ACTUALLY_QUERY"></span>
               <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
@@ -163,7 +164,8 @@
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
             class="btn">
-            <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="index.fetchFieldsError">{{index.fetchFieldsError}}</span>
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="!index.fetchFieldsError" translate="KIBANA-CREATE"></span>
             <span ng-show="form.name.$error.indexNameInput" translate="KIBANA-INVALID_INDEX_PATTERN"></span>
           </button>
         </form>

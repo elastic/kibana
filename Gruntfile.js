@@ -29,14 +29,6 @@ module.exports = function (grunt) {
       }
     }()),
 
-    i18nextract: {
-      default_options: {
-        src: [ 'src/**/*.js', 'src/**/*.html' ],
-        lang: ['en'],
-        dest: 'build/tmp'
-      }
-    },
-
     nodeVersion: grunt.file.read('.node-version').trim(),
 
     meta: {
@@ -73,7 +65,4 @@ module.exports = function (grunt) {
   // load task definitions
   grunt.task.loadTasks('tasks');
   grunt.task.loadTasks('tasks/build');
-
- // load NPM tasks
-  grunt.loadNpmTasks('grunt-angular-translate');
 };

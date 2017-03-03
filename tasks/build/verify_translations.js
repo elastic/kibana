@@ -53,7 +53,7 @@ export default function (grunt) {
 
 function verifyTranslations(uiI18nObj)
 {
-  const angularTranslations = require(fromRoot('build/tmp/en.json'));
+  const angularTranslations = require(fromRoot('build/i18n_extract/en.json'));
   const translationKeys = Object.keys(angularTranslations);
   const translationPatterns = [
     { regEx: 'i18n\\(\'(.*)\'\\)',

@@ -24,7 +24,7 @@
   "KIBANA-INDEX_NAME_VAR": "{{indexName}} ",
   "KIBANA-SEARCH_ALL_DATA": "and will have to search through all matching indices regardless of whether they have data that matches the current time range.",
   "KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE": "By default, searches against any time-based index pattern that contains a wildcard will automatically be expanded to query only the indices that contain data within the currently selected time range.",
-  "KIBANA-SEARCH_AGAINST_INDX_PATTERN": "Searching against the index pattern ",
+  "KIBANA-SEARCH_AGAINST_INDEX_PATTERN": "Searching against the index pattern ",
   "KIBANA-LOGSTASH_WILDCARD": "logstash-*",
   "KIBANA-ACTUALLY_QUERY": " will actually query elasticsearch for the specific matching indices (e.g. ",
   "KIBANA-EXAMPLE_TIME_RANGE": "logstash-2015.12.21",
@@ -45,5 +45,12 @@
   "KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME" : "This field will be used to filter events with the global time filter",
   "KIBANA-INTERVAL_INDEX_NAMES_ROTATE" : "The interval at which index names rotate.",
   "KIBANA-WARNING" : "Warning",
-  "KIBANA-NO_DEFAULT_INDEX_PATTERN" : "No default index pattern. You must select or create one to continue."
+  "KIBANA-NO_DEFAULT_INDEX_PATTERN" : "No default index pattern. You must select or create one to continue.",
+  "KIBANA-LOADING": "Loading",
+  "KIBANA-SET_INDEX_NAME_FIRST": "Set an index name first",
+  "KIBANA-INTERVAL_INDICES_POPULATED" : "Select the interval at which your indices are populated.",
+  "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
+  "KIBANA-ADD_NEW" : "Add New",
+  "KIBANA-SEE" : "See",
+  "KIBANA-CREATE" : "Create"
 }
