@@ -6,7 +6,7 @@ import SeriesConfig from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Tooltip from '../../tooltip';
 import Split from '../../split';
-import calculateLabel from '../../lib/calculate_label';
+import calculateLabel from '../../../../common/calculate_label';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 
