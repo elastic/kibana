@@ -171,9 +171,9 @@ uiModules.get('apps/management')
 
         return new Promise((resolve) => {
           confirmModal(
-            `Would you like to overwrite any existing saved objects?`, {
+            `If any of the objects already exist, do you want to automatically overwrite them?`, {
               confirmButtonText: `Yes, overwrite all`,
-              cancelButtonText: `No, ask me each time`,
+              cancelButtonText: `No, prompt me for each one`,
               onConfirm: () => resolve(true),
               onCancel: () => resolve(false),
             }
