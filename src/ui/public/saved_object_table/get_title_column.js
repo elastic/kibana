@@ -15,13 +15,10 @@ SortableTitleHeader.propTypes = {
   onSort: React.PropTypes.any
 };
 
-export function getTitleColumn(getEditUrlForItem) {
+export function getTitleColumn(getEditUrlForItem, titleSortOrder, onSort) {
   return {
     id: TITLE_COLUMN_ID,
-    isSortable: true,
-    getHeaderCell: (onSort, sortOrder) => {
-      return <SortableTitleHeader key={TITLE_COLUMN_ID} onSort={() => onSort(TITLE_COLUMN_ID)} sortOrder={sortOrder}/>;
-    },
+    getHeaderCell: () => <SortableTitleHeader key={TITLE_COLUMN_ID} onSort={onSort} sortOrder={titleSortOrder}/>,
     getRowCell: (item) => <KuiTableCellLink
       key={item.id + TITLE_COLUMN_ID}
       title={item.title}

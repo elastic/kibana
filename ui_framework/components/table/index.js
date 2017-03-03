@@ -8,4 +8,3 @@ export { CheckBoxTableCell } from './check_box_table_cell';
 export { ItemTable } from './landing_page_table/item_table';
 export { columnPropType } from './landing_page_table/column_prop_type';
 export { SortOrder } from './sort_order';
-export { ItemTableRow } from './landing_page_table/item_table_row';
