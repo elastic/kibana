@@ -3,47 +3,56 @@ function clamp(val, min, max) {
 }
 
 export class Pager {
-  constructor(itemsPerPage) {
-    this.itemsPerPage = itemsPerPage;
+  constructor(totalItems, pageSize, startingPage) {
+    this.currentPage = startingPage;
+    this.totalItems = totalItems;
+    this.pageSize = pageSize;
+    this.startIndex = 0;
+    this.updateMeta();
   }
 
-  canPagePrevious(currentPage) {
-    return currentPage > 0;
+  get pageCount() {
+    return Math.ceil(this.totalItems / this.pageSize);
   }
 
-  canPageNext(itemsCount, currentPage) {
-    const pagesCount = this.getPagesCount(itemsCount);
-    return currentPage < pagesCount - 1;
+  get hasNextPage() {
+    return this.currentPage < this.totalPages;
   }
 
-  getItemsOnPage(items, currentPage) {
-    const startIndex = currentPage * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return items.filter((item, index) => (
-      index >= startIndex
-      && index < endIndex
-    ));
+  get hasPreviousPage() {
+    return this.currentPage > 1;
   }
 
-  getPagesCount(itemsCount) {
-    return Math.ceil(itemsCount / this.itemsPerPage);
+  nextPage() {
+    this.currentPage += 1;
+    this.updateMeta();
   }
 
-  getLastPageIndex(itemsCount) {
-    const pagesCount = this.getPagesCount(itemsCount);
-    return pagesCount > 0 ? pagesCount - 1 : 0;
+  previousPage() {
+    this.currentPage -= 1;
+    this.updateMeta();
   }
 
-  getStartNumber(itemsCount, currentPageIndex) {
-    if (itemsCount === 0) return 0;
-    const startNumber = (currentPageIndex * this.itemsPerPage) + 1;
-    return clamp(startNumber, 0, itemsCount);
+  setTotalItems(count) {
+    this.totalItems = count;
+    this.updateMeta();
   }
 
-  getEndNumber(itemsCount, currentPage) {
-    if (itemsCount === 0) return 0;
-    const startNumber = this.getStartNumber(itemsCount, currentPage);
-    const endNumber = (startNumber - 1) + this.itemsPerPage;
-    return clamp(endNumber, 0, itemsCount);
+  setPageSize(count) {
+    this.pageSize = count;
+    this.updateMeta();
+  }
+
+  updateMeta() {
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.currentPage = clamp(this.currentPage, 1, this.totalPages);
+
+    this.startItem = ((this.currentPage - 1) * this.pageSize) + 1;
+    this.startItem = clamp(this.startItem, 0, this.totalItems);
+
+    this.endItem = (this.startItem - 1) + this.pageSize;
+    this.endItem = clamp(this.endItem, 0, this.totalItems);
+
+    this.startIndex = this.startItem - 1;
   }
 }

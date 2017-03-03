@@ -9,7 +9,7 @@ import { TITLE_COLUMN_ID } from 'ui/saved_object_table/get_title_column';
 import { getCheckBoxColumn } from 'ui/saved_object_table/get_checkbox_column';
 import { getTitleColumn } from 'ui/saved_object_table/get_title_column';
 import { TYPE_COLUMN_ID, getTypeColumn } from './get_type_column';
-import { Pager, ToolBarPager } from 'ui/pager';
+import { PagerHelper, ToolBarPager } from 'ui/pager';
 import { ListingTableActions } from 'ui/saved_object_table/listing_table_actions';
 
 import {
@@ -32,7 +32,7 @@ export class VisualizeLandingPageTable extends React.Component {
     super(props);
 
     this.state = ListingTableActions.getInitialState();
-    this.pager = new Pager(ITEMS_PER_PAGE);
+    this.pager = new PagerHelper(ITEMS_PER_PAGE);
   }
 
   componentDidMount() {

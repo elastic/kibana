@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Pager } from './pager';
+import { PagerHelper } from './index';
 import { KuiToolBarPager } from 'ui_framework/components';
 
 export function ToolBarPager({ currentPageIndex, itemsPerPage, totalItems, onNextPage, onPreviousPage }) {
-  const pager = new Pager(itemsPerPage ? itemsPerPage : 20);
+  const pager = new PagerHelper(itemsPerPage ? itemsPerPage : 20);
   const startNumber = pager.getStartNumber(totalItems, currentPageIndex);
   const endNumber = pager.getEndNumber(totalItems, currentPageIndex);
   const hasPreviousPage = pager.canPagePrevious(currentPageIndex);

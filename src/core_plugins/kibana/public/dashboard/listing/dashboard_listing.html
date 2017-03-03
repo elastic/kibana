@@ -15,10 +15,170 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
   <!-- ControlledTable -->
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
-    <dashboard-landing-page-table
-      delete-items="tableProps.deleteItems"
-      fetch="tableProps.fetch"
-      kbn-url="tableProps.kbnUrl"
-    ></dashboard-landing-page-table>
+    <!-- ToolBar -->
+    <div class="kuiToolBar">
+      <div class="kuiToolBarSearch">
+        <div class="kuiToolBarSearchBox">
+          <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
+          <input
+            class="kuiToolBarSearchBox__input"
+            type="text"
+            placeholder="Search..."
+            aria-label="Filter"
+            data-test-subj="searchFilter"
+            ng-model="listingController.filter"
+          >
+        </div>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Bulk delete button -->
+        <button
+          class="kuiButton kuiButton--danger"
+          ng-click="listingController.deleteSelectedItems()"
+          aria-label="Delete selected objects"
+          ng-if="listingController.getSelectedItemsCount() > 0"
+          tooltip="Delete selected dashboards"
+          tooltip-append-to-body="true"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
+        </button>
+
+        <!-- Create dashboard button -->
+        <a
+          class="kuiButton kuiButton--primary"
+          href="#/dashboard/create"
+          aria-label="Create new dashboard"
+          data-test-subj="newDashboardLink"
+          ng-if="listingController.getSelectedItemsCount() === 0"
+          tooltip="Create new dashboard"
+          tooltip-append-to-body="true"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+        </a>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+
+    <!-- NoItems -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && listingController.filter"
+    >
+      <div class="kuiNoItems">
+        No dashboards matched your search.
+      </div>
+    </div>
+
+    <!-- PromptForItems -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
+    >
+      <div class="kuiPromptForItems">
+        <div class="kuiPromptForItems__message">
+          Looks like you don&rsquo;t have any dashboards. Let&rsquo;s create some!
+        </div>
+
+        <div class="kuiPromptForItems__actions">
+          <a
+            class="kuiButton kuiButton--primary kuiButton--iconText"
+            href="#/dashboard/create"
+          >
+            <span class="kuiButton__icon kuiIcon fa-plus"></span>
+            Create a dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <table class="kuiTable" ng-if="listingController.items.length">
+      <thead>
+      <tr>
+        <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+          <input
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-checked="listingController.areAllItemsChecked()"
+            ng-click="listingController.toggleAll()"
+          >
+        </th>
+
+        <th class="kuiTableHeaderCell" ng-click="listingController.toggleSort()">
+          Name
+          <span
+            class="fa"
+            ng-class="listingController.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+          </span>
+        </th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        ng-repeat="item in listingController.pageOfItems track by item.id"
+        class="kuiTableRow"
+      >
+        <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+          <div class="kuiTableRowCell__liner">
+            <input
+              type="checkbox"
+              class="kuiCheckBox"
+              ng-click="listingController.toggleItem(item)"
+              ng-checked="listingController.isItemChecked(item)"
+            >
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
+              {{ item.title }}
+            </a>
+          </div>
+        </td>
+      </tr>
+
+      </tbody>
+    </table>
+
+    <!-- ToolBarFooter -->
+    <div class="kuiToolBarFooter">
+      <div class="kuiToolBarFooterSection">
+        <div class="kuiToolBarText" ng-hide="listingController.getSelectedItemsCount() === 0">
+          {{ listingController.getSelectedItemsCount() }} selected
+        </div>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
   </div>
 </div>
