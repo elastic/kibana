@@ -57,6 +57,13 @@ uiModules.get('apps/management')
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
   });
 
+  $scope.indexedFieldTypes = ['string', 'boolean', 'number', 'date', 'geo_point', 'ip'];
+  $scope.scriptedFieldLanguages = ['expression', 'painless'];
+
+  $scope.changeFilter = function (filter, val) {
+    $scope[filter] = val || ''; // null causes filter to check for null explicitly
+  };
+
   $scope.changeTab = function (obj) {
     $state.tab = obj.index;
     $state.save();
