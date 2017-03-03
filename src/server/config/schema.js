@@ -143,10 +143,15 @@ module.exports = () => Joi.object({
     }),
     profile: Joi.boolean().default(false)
   }).default(),
-
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
+  vectormap: Joi.object({
+    layers: Joi.array().items(Joi.object({
+      url: Joi.string(),
+      type: Joi.string()
+    }))
+  }),
   tilemap: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,

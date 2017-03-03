@@ -6,15 +6,25 @@ import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_cli
 import ChoroplethLayer from './choropleth_layer';
 import colorramps from 'ui/vislib/components/color/colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
+import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
 
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
-  const containerNode = $element[0];
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
+  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+
+
+  const resizeChecker = new ResizeChecker($element);
+  const containerNode = $element[0];
 
   let kibanaMap = null;
+  resizeChecker.on('resize', () => {
+    if (kibanaMap) {
+      kibanaMap.resize();
+    }
+  });
   let choroplethLayer = null;
 
   async function makeKibanaMap() {
@@ -57,15 +67,12 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
       updateChoroplethLayer(options.selectedLayer.url);
       choroplethLayer.setMetrics(results, metricsAgg);
-
-
       if ($scope.vis.aggs.bySchemaName.segment[0]) {
         const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
         choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
       } else {
         choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
       }
-
       kibanaMap.resize();
       $element.trigger('renderComplete');
     });
@@ -86,19 +93,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       $element.trigger('renderComplete');
     });
   });
-
-
-  //todo: switch with ResizeChecker
-  $scope.$watch(getContainerSize, _.debounce(() => {
-    if (kibanaMap) {
-      kibanaMap.resize();
-    }
-  }, 500, { trailing: true }), true);
-
-  function getContainerSize() {
-    return { width: $element.width(), height: $element.height() };
-  }
-
 
   function updateChoroplethLayer(url) {
 

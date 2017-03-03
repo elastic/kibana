@@ -71,8 +71,6 @@ class KibanaMap extends EventEmitter {
   constructor(containerNode, options) {
 
     super();
-
-
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
     this._baseLayerSettings = null;
