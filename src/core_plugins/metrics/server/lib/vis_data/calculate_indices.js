@@ -7,8 +7,8 @@ function getParams(req, indexPattern, timeField, offsetBy) {
 
   const indexConstraints = {};
   indexConstraints[timeField] = {
-    max_value: { gte: from.toISOString() },
-    min_value: { lte: to.toISOString() }
+    max_value: { gte: from.valueOf(), format: 'epoch_millis' },
+    min_value: { lte: to.valueOf(), format: 'epoch_millis' }
   };
 
   return {
