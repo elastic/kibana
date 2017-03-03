@@ -1,3 +1,4 @@
+import angular from 'angular';
 import { noop } from 'lodash';
 import uiModules from 'ui/modules';
 import template from './confirm_modal.html';
@@ -73,11 +74,19 @@ module.factory('confirmModal', function ($rootScope, $compile) {
 
     const modalInstance = $compile(template)(confirmScope);
     modalPopover = new ModalOverlay(modalInstance);
+
+    angular.element(document.body).on('keydown', (event) => {
+      if(event.keyCode === 27) {
+        confirmScope.onCancel();
+      }
+    });
+
     modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
 
     function destroy() {
       modalPopover.destroy();
       modalPopover = undefined;
+      angular.element(document.body).off('keydown');
       confirmScope.$destroy();
     }
   };

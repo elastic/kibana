@@ -37,6 +37,7 @@ The Docker image provides several methods for configuring Kibana. The convention
 approach is to provide a `kibana.yml` file as described in <<settings>>, but it's
 also possible to use environment variables to define settings.
 
+[[docker-bind-mount-config]]
 ==== Bind-mounted configuration
 
 One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
@@ -51,6 +52,7 @@ services:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 --------------------------------------------
 
+[[docker-env-config]]
 ==== Environment variable configuration
 
 Under Docker, Kibana can be configured via environment variables. The following
@@ -88,6 +90,18 @@ mappings are available:
 `SERVER_PORT`:: `server.port`
 `SERVER_SSL_CERT`:: `server.ssl.cert`
 `SERVER_SSL_KEY`:: `server.ssl.key`
+`XPACK_MONITORING_ELASTICSEARCH_URL`:: `xpack.monitoring.elasticsearch.url`
+`XPACK_MONITORING_ELASTICSEARCH_USERNAME`:: `xpack.monitoring.elasticsearch.username`
+`XPACK_MONITORING_ELASTICSEARCH_PASSWORD`:: `xpack.monitoring.elasticsearch.password`
+`XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
+`XPACK_MONITORING_MAX_BUCKET_SIZE`:: `xpack.monitoring.max_bucket_size`
+`XPACK_MONITORING_MIN_INTERVAL_SECONDS`:: `xpack.monitoring.min_interval_seconds`
+`XPACK_MONITORING_NODE_RESOLVER`:: `xpack.monitoring.node_resolver`
+`XPACK_MONITORING_REPORT_STATS`:: `xpack.monitoring.report_stats`
+`XPACK_MONITORING_KIBANA_COLLECTION_ENABLED`:: `xpack.monitoring.kibana.collection.enabled`
+`XPACK_MONITORING_KIBANA_COLLECTION_INTERVAL`:: `xpack.monitoring.kibana.collection.interval`
+`XPACK_MONITORING_UI_CONTAINER_ELASTICSEARCH_ENABLED`:: `xpack.monitoring.ui.container.elasticsearch.enabled`
+`XPACK_SECURITY_ENABLED`:: `xpack.security.enabled`
 `XPACK_SECURITY_COOKIENAME`:: `xpack.security.cookieName`
 `XPACK_SECURITY_ENCRYPTIONKEY`:: `xpack.security.encryptionKey`
 `XPACK_SECURITY_SECURECOOKIES`:: `xpack.security.secureCookies`
@@ -115,5 +129,8 @@ The following settings have different default values when using the Docker image
 `elasticsearch.url`:: `http://elasticsearch:9200`
 `elasticsearch.username`:: `elastic`
 `elasticsearch.password`:: `changeme`
+`xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
 
-
+These settings are defined in the default `kibana.yml`. They can be overridden
+with a <<docker-bind-mount-config,custom `kibana.yml`>> or via
+<<docker-env-config,environment variables>>.

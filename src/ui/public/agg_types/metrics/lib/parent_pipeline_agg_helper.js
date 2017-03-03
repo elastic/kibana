@@ -16,11 +16,13 @@ const ParentPipelineAggHelperProvider = function (Private) {
       group: 'none',
       name: 'metricAgg',
       title: 'Metric Agg',
+      hideCustomLabel: true,
       aggFilter: metricAggFilter
     }
   ])).all[0];
 
   return {
+    subtype: 'Parent Pipeline Aggregations',
     params: function () {
       return [
         {

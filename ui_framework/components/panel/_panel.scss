@@ -13,11 +13,10 @@
 }
 
 .kuiPanelHeader {
+  @include bar;
   @include buttonOnStandoutBackground;
   @include selectOnStandoutBackground;
 
-  display: flex;
-  align-items: center;
   padding: $toolBarPadding;
   height: $toolBarHeight;
   background-color: $standoutBackgroundColor;
@@ -27,6 +26,18 @@
     font-size: $titleFontSize;
     line-height: $lineHeight;
   }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  @include barSection;
+
+  &:only-child {
+    margin-left: 0; /* 1 */
+    margin-right: auto; /* 1 */
+  }
+}
 
 .kuiPanelBody {
   padding: $toolBarPadding;

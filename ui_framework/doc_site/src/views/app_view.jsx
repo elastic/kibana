@@ -58,7 +58,8 @@ export class AppView extends Component {
           onToggleNav={this.onToggleNav}
           onClickNavItem={this.onClickNavItem}
           version={pkg.version}
-          items={Routes.components}
+          components={Routes.components}
+          sandboxes={Routes.sandboxes}
         />
 
         <div className={contentClasses}>
@@ -68,7 +69,7 @@ export class AppView extends Component {
         <GuideCodeViewer
           isOpen={this.props.isCodeViewerOpen}
           onClose={this.onCloseCodeViewer}
-          title={'No title'}
+          title={this.props.title}
           source={this.props.source}
         />
       </div>
@@ -86,6 +87,7 @@ AppView.propTypes = {
   unregisterSection: PropTypes.func,
   sections: PropTypes.array,
   source: PropTypes.array,
+  title: PropTypes.string,
 };
 
 AppView.defaultProps = {

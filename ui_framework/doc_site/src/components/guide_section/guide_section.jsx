@@ -16,7 +16,7 @@ export class GuideSection extends Component {
   }
 
   onClickSource() {
-    this.props.openCodeViewer(this.props.source);
+    this.props.openCodeViewer(this.props.source, this.props.title);
   }
 
   componentWillMount() {
@@ -37,10 +37,12 @@ export class GuideSection extends Component {
           <div className="guideSection__title">
             {this.props.title}
           </div>
-          <div
-            className="guideSection__sourceButton fa fa-code"
+          <button
+            className="guideSection__sourceButton"
             onClick={this.onClickSource}
-          />
+          >
+            <span className="fa fa-code"></span>
+          </button>
         </div>
 
         {this.props.children}

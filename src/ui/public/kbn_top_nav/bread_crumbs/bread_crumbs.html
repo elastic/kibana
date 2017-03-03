@@ -1,9 +1,9 @@
-<div class="kuiLocalBreadcrumbs">
-  <div class="kuiLocalBreadcrumb" ng-if="useLinks" ng-repeat="breadCrumbUrl in breadCrumbUrls">
-    <a class=kuiLocalBreadcrumb__link" href="{{breadCrumbUrl.url}}">{{breadCrumbUrl.breadcrumb}}</a>
+<div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
+  <div class="kuiLocalBreadcrumb" ng-if="useLinks && (!omitPages || !omitPages.includes(breadcrumb.path))" ng-repeat="breadcrumb in breadcrumbs">
+    <a class=kuiLocalBreadcrumb__link" href="{{breadcrumb.url}}">{{breadcrumb.title}}</a>
   </div>
-  <div class="kuiLocalBreadcrumb" ng-if="!useLinks" ng-repeat="breadcrumb in breadcrumbs">
-    {{ breadcrumb }}
+  <div class="kuiLocalBreadcrumb" ng-if="!useLinks && (!omitPages || !omitPages.includes(breadcrumb.path))" ng-repeat="breadcrumb in breadcrumbs">
+    {{ breadcrumb.title }}
   </div>
   <div class="kuiLocalBreadcrumb" ng-if="pageTitle">
     {{ pageTitle }}

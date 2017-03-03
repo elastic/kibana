@@ -125,7 +125,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should change average series type to histogram', function () {
       return PageObjects.visualizeOptions.toggleCollapsibleTitle('RightAxis-1')
         .then(function () {
-          return PageObjects.visualizeOptions.setSeriesType(1, 'histogram');
+          return PageObjects.visualizeOptions.setSeriesType(1, 'bar');
         })
         .then(function () {
           return PageObjects.visualize.clickGo();
