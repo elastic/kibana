@@ -4,5 +4,5 @@ export const DashboardConstants = {
   NEW_VISUALIZATION_ID_PARAM: 'addVisualization',
   LANDING_PAGE_PATH: '/dashboard',
   CREATE_NEW_DASHBOARD_URL: '/dashboard/create',
-  EXISTING_DASHBOARD_URL: '/dashboard/{{id}}',
+  EXISTING_DASHBOARD_URL: '/dashboard/{{id}}'
 };

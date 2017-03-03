@@ -23,6 +23,12 @@ function getStateDefaults(dashboard) {
   };
 }
 
+/**
+ * Depending on how a dashboard is loaded, the filter object may contain a $$hashKey and $state that will throw
+ * off a filter comparison. This removes those variables.
+ * @param filters {Array.<Object>}
+ * @returns {Array.<Object>}
+ */
 function cleanFiltersForComparison(filters) {
   return _.map(filters, (filter) => _.omit(filter, ['$$hashKey', '$state']));
 }
@@ -58,15 +64,11 @@ export class DashboardState {
     this.uiState = this.appState.makeStateful('uiState');
     this.isDirty = false;
 
+    // We can't compare the filters stored on this.appState to this.dashboard because in order to apply
+    // the filters to the visualizations, we need to save it on the dashboard. We keep track of the original
+    // filter state in order to let the user know if their filters changed and provide this specific information
+    //in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
-
-    // Unfortunately there is a hashkey stored with the filters on the appState, but not always
-    // in the dashboard searchSource.  On a page refresh with a filter, this will cause the state
-    // monitor to count them as different even if they aren't. Hence this is a bit of a hack to get around
-    // that. TODO: Improve state monitor factory to take custom comparison functions for certain paths.
-    if (!this.getFilterBarChanged()) {
-      this.stateDefaults.filters = this.appState.filters;
-    }
 
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
@@ -91,7 +93,6 @@ export class DashboardState {
 
   setTitle(title) {
     this.appState.title = title;
-    this.dashboard.title = title;
     this.saveState();
   }
 
@@ -186,19 +187,15 @@ export class DashboardState {
     return this.getViewMode() === DashboardViewMode.EDIT;
   }
 
-
   /**
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
   getIsDirty(timeFilter) {
-    const existingTitleChanged =
-      this.dashboard.lastSavedTitle &&
-      this.dashboard.lastSavedTitle !== this.dashboard.title;
-
     return this.isDirty ||
-      this.getFiltersChanged(timeFilter) ||  // Not all filter changes are tracked by the state monitor.
-      existingTitleChanged;
+      // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
+      // changes are not tracked by the state monitor.
+      this.getFiltersChanged(timeFilter);
   }
 
   getPanels() {
@@ -272,10 +269,6 @@ export class DashboardState {
     }
   }
 
-  setQuery(newQuery) {
-    this.appState.query = newQuery;
-  }
-
   saveState() {
     this.appState.save();
   }
@@ -286,6 +279,7 @@ export class DashboardState {
    * @param toJson {function} A custom toJson function. Used because the previous code used
    * the angularized toJson version, and it was unclear whether there was a reason not to use
    * JSON.stringify
+   * @param timefilter
    * @returns {Promise<string>} A promise that if resolved, will contain the id of the newly saved
    * dashboard.
    */
@@ -315,11 +309,11 @@ export class DashboardState {
   }
 
   /**
-   * Stores the given filter with the dashboard and to the state.
-   * @param filter
+   * Applies the current filter state to the dashboard.
+   * @param filter {Array.<Object>} An array of filter bar filters.
    */
-  updateFilters(filter) {
-    const filters = filter.getFilters();
+  applyFilters(query, filters) {
+    this.appState.query = query;
     if (this.appState.query) {
       this.dashboard.searchSource.set('filter', _.union(filters, [{
         query: this.appState.query
@@ -335,7 +329,8 @@ export class DashboardState {
     this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
 
     this.stateMonitor.ignoreProps('viewMode');
-    this.stateMonitor.ignoreProps('filters'); // Filters need some tweaking to compare correctly.
+    // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
+    this.stateMonitor.ignoreProps('filters');
 
     this.stateMonitor.onChange(status => {
       this.isDirty = status.dirty;
@@ -359,27 +354,5 @@ export class DashboardState {
       DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     const options = this.dashboard.id ? { id: this.dashboard.id } : {};
     return { url, options };
-  }
-
-  refreshStateMonitor() {
-    if (this.stateMonitor) {
-      this.stateMonitor.destroy();
-    }
-    this.createStateMonitor();
-  }
-
-  reloadLastSavedFilters() {
-    // Need to make a copy to ensure nothing overwrites the originals.
-    this.stateDefaults.filters = this.appState.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
-    this.stateDefaults.query = this.appState.query = Object.assign({}, this.getLastSavedQuery());
-
-    if (this.dashboard.timeRestore) {
-      this.timefilter.time.from = this.lastSavedDashboardFilters.timeFrom;
-      this.timefilter.time.to = this.lastSavedDashboardFilters.timeTo;
-    }
-
-    this.refreshStateMonitor();
-    this.isDirty = false;
-    this.saveState();
   }
 }

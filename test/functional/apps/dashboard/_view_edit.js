@@ -93,6 +93,22 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         expect(newFromTime).to.equal(originalFromTime);
         expect(newToTime).to.equal(originalToTime);
       });
+
+      bdd.it('when the query is edited and applied', async function () {
+        await PageObjects.dashboard.clickEdit();
+
+        const originalQuery = await PageObjects.dashboard.getQuery();
+        await PageObjects.dashboard.appendQuery('extra stuff');
+        await PageObjects.dashboard.clickFilterButton();
+
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        // confirm lose changes
+        await PageObjects.common.clickConfirmOnModal();
+
+        const query = await PageObjects.dashboard.getQuery();
+        expect(query).to.equal(originalQuery);
+      });
     });
 
     bdd.describe('and preserves edits on cancel', function () {
@@ -142,6 +158,23 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
 
       const isOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isOpen).to.be(false);
+    });
+
+    // See https://github.com/elastic/kibana/issues/10110 - this is intentional.
+    bdd.it('when the query is edited but not applied', async function () {
+      await PageObjects.dashboard.clickEdit();
+
+      const originalQuery = await PageObjects.dashboard.getQuery();
+      await PageObjects.dashboard.appendQuery('extra stuff');
+
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+      const isOpen = await PageObjects.common.isConfirmModalOpen();
+      expect(isOpen).to.be(false);
+
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+      const query = await PageObjects.dashboard.getQuery();
+      expect(query).to.equal(originalQuery);
     });
   });
 });
