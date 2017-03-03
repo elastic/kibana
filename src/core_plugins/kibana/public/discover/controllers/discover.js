@@ -144,7 +144,8 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.searchSource
   .set('index', $scope.indexPattern)
-  .highlightAll(true);
+  .highlightAll(true)
+  .version(true);
 
   if (savedSearch.id) {
     docTitle.change(savedSearch.title);

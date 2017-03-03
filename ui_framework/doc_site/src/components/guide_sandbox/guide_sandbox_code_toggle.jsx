@@ -10,7 +10,7 @@ export class GuideSandboxCodeToggle extends Component {
   }
 
   onClickSource() {
-    this.props.openCodeViewer(this.props.source);
+    this.props.openCodeViewer(this.props.source, this.props.title);
   }
 
   render() {
@@ -27,5 +27,6 @@ export class GuideSandboxCodeToggle extends Component {
 
 GuideSandboxCodeToggle.propTypes = {
   source: PropTypes.array,
+  title: PropTypes.string,
   openCodeViewer: PropTypes.func,
 };
