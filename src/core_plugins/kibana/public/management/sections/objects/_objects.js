@@ -178,30 +178,32 @@ uiModules.get('apps/management')
               onCancel: () => resolve(false),
             }
           );
-        }).then((overwriteAll) => {
-          return Promise.map(docs, (doc) => {
-            const { service } = find($scope.services, { type: doc._type }) || {};
+        })
+          .then((overwriteAll) => {
+            return Promise.map(docs, (doc) => {
+              const { service } = find($scope.services, { type: doc._type }) || {};
 
-            if (!service) {
-              const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-              const reason = `Invalid type: "${doc._type}"`;
+              if (!service) {
+                const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+                const reason = `Invalid type: "${doc._type}"`;
 
-              notify.warning(`${msg}, ${reason}`, {
-                lifetime: 0,
-              });
+                notify.warning(`${msg}, ${reason}`, {
+                  lifetime: 0,
+                });
 
-              return;
-            }
+                return;
+              }
 
-            return service.get().then(function (obj) {
-              obj.id = doc._id;
-              return obj.applyESResp(doc).then(() => obj.save({ confirmOverwrite : !overwriteAll }));
-            });
-          })
-          .then(refreshIndex)
-          .then(refreshData)
-          .catch(notify.error);
-        });
+              return service.get()
+                .then(function (obj) {
+                  obj.id = doc._id;
+                  return obj.applyESResp(doc).then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+                });
+            })
+              .then(refreshIndex)
+              .then(refreshData)
+              .catch(notify.error);
+          });
       };
 
       function refreshIndex() {
