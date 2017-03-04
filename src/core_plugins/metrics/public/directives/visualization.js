@@ -19,6 +19,8 @@ app.directive('metricsVisualization', (timefilter, $timeout) => {
 
       // For Metrics, Gauges and markdown visualizations we want to hide the
       // panel title because it just doens't make sense to show it.
+      // This is wrapped in a timeout so it happens after the directive is mouted.
+      // otherwise the .panel might not be available.
       $timeout(() => {
         const panel = $($el[0]).parents('.panel');
         if (panel.length) {
