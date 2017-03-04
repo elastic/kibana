@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
-import ResizeAware from 'simianhacker-react-resize-aware';
 import getLastValue from '../lib/get_last_value';
+import Resize from './resize';
 import reactcss from 'reactcss';
 
 class Metric extends Component {
@@ -20,16 +20,7 @@ class Metric extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.addEventListener('resize', this.handleResize);
     this.handleResize();
-  }
-
-  componentWillUnmount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.removeEventListener('resize', this.handleResize);
   }
 
   calculateCorrdinates() {
@@ -161,7 +152,10 @@ class Metric extends Component {
 
     return (
       <div className="rhythm_metric" style={styles.container}>
-        <ResizeAware ref={(el) => this.resize = el} className="rhythm_metric__resize">
+        <Resize
+          onResize={this.handleResize}
+          ref={(el) => this.resize = el}
+          className="rhythm_metric__resize">
           <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }
@@ -169,7 +163,7 @@ class Metric extends Component {
             </div>
             { secondarySnippet }
           </div>
-        </ResizeAware>
+        </Resize>
       </div>
     );
   }
