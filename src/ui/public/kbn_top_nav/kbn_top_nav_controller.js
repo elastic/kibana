@@ -18,7 +18,7 @@ export default function ($compile) {
         interval: intervalTemplate,
         filter: filterTemplate,
       };
-      this.controllers = [];
+      this.locals = {};
 
       this.addItems(opts);
     }
@@ -36,8 +36,8 @@ export default function ($compile) {
         this.opts.push(opt);
         if (!opt.hideButton()) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
-        if (opt.controller) {
-          this.controllers[opt.key] = opt.controller;
+        if (opt.locals) {
+          this.locals[opt.key] = opt.locals;
         }
       });
     }
@@ -111,8 +111,8 @@ export default function ($compile) {
       }
 
       const $childScope = $scope.$new();
-      if (this.controllers[currentKey]) {
-        $childScope.controller = this.controllers[currentKey];
+      if (this.locals[currentKey]) {
+        Object.assign($childScope, this.locals[currentKey]);
       }
       const $el = $element.find('#template_wrapper').html(templateToRender).contents();
       $compile($el)($childScope);
