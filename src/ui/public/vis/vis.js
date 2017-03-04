@@ -83,8 +83,15 @@ export default function VisFactory(Notifier, Private) {
 
   Vis.prototype.setState = function (state) {
     this.title = state.title || '';
-    this.type = state.type || this.type;
-    if (_.isString(this.type)) this.type = visTypes.byName[this.type];
+    const type = state.type || this.type;
+    if (_.isString(type)) {
+      this.type = visTypes.byName[type];
+      if (!this.type) {
+        throw new Error(`Invalid type "${type}"`);
+      }
+    } else {
+      this.type = type;
+    }
 
     this.listeners = _.assign({}, state.listeners, this.type.listeners);
     this.params = _.defaults({},
