@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import $ from '../lib/flot';
-import ResizeAware from 'simianhacker-react-resize-aware';
+import Resize from './resize';
 import _ from 'lodash';
 import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
@@ -56,16 +56,7 @@ class GaugeVis extends Component {
   }
 
   componentDidMount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.addEventListener('resize', this.handleResize);
     this.handleResize();
-  }
-
-  componentWillUnmount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.removeEventListener('resize', this.handleResize);
   }
 
   // When the component updates it might need to be resized so we need to
@@ -162,11 +153,14 @@ class GaugeVis extends Component {
       );
     }
     return (
-      <ResizeAware ref={(el) => this.resize = el} style={styles.resize}>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        style={styles.resize}>
         <div style={styles.svg} ref={(el) => this.inner = el}>
           {svg}
         </div>
-      </ResizeAware>
+      </Resize>
     );
   }
 
