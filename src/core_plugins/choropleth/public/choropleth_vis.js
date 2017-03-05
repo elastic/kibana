@@ -47,10 +47,24 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
     template: choroplethTemplate,
     params: {
       defaults: {
+        legendPosition: 'bottomright',
         colorSchema: 'Yellow to Red',
         selectedLayer: vectorLayers[0],
         selectedJoinField: vectorLayers[0].fields[0]
       },
+      legendPositions: [{
+        value: 'bottomleft',
+        text: 'bottom left',
+      }, {
+        value: 'bottomright',
+        text: 'bottom right',
+      }, {
+        value: 'topleft',
+        text: 'top left',
+      }, {
+        value: 'topright',
+        text: 'top right',
+      }],
       colorSchemas: Object.keys(colorramps),
       vectormap: vectorLayers,
       editor: '<choropleth-vis-params></choropleth-vis-params>'
