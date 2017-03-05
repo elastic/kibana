@@ -75,7 +75,7 @@ module.exports = class KbnServer {
   }
 
   /**
-   * Extend the KbnServer outside of the constraits of a plugin. This allows access
+   * Extend the KbnServer outside of the constraints of a plugin. This allows access
    * to APIs that are not exposed (intentionally) to the plugins and should only
    * be used when the code will be kept up to date with Kibana.
    *
