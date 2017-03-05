@@ -6,11 +6,12 @@ import VisSchemasProvider from 'ui/vis/schemas';
 import choroplethTemplate from 'plugins/choropleth/choropleth_controller.html';
 import visTypes from 'ui/registry/vis_types';
 import colorramps from 'ui/vislib/components/color/colormaps';
-import vectorMaps from 'plugins/choropleth/vector_maps';
 
-visTypes.register(function ChoroplethProvider(Private) {
+visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
+
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
+
 
   return new TemplateVisType({
     name: 'choropleth',
@@ -22,11 +23,11 @@ visTypes.register(function ChoroplethProvider(Private) {
     params: {
       defaults: {
         colorSchema: 'Yellow to Red',
-        selectedLayer: vectorMaps.Countries,
-        selectedJoinField: vectorMaps.Countries.fields[0]
+        selectedLayer: vectormapsConfig.layers[0],
+        selectedJoinField: vectormapsConfig.layers[0].fields[0]
       },
       colorSchemas: Object.keys(colorramps),
-      vectorMaps: vectorMaps,
+      vectormap: vectormapsConfig,
       editor: '<choropleth-vis-params></choropleth-vis-params>'
     },
     schemas: new Schemas([

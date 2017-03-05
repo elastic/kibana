@@ -56,6 +56,7 @@ module.exports = function (kibana) {
 
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            vectormapsConfig: serverConfig.get('vectormap'),
             tilemapsConfig: {
               deprecated: {
                 isOverridden: isOverridden,

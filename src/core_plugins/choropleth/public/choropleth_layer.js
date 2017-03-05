@@ -78,6 +78,17 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this.emit('styleChanged');
   }
 
+  getMetrics() {
+    return this._metrics;
+  }
+
+  getMetricsAgg() {
+    return this._metricsAgg;
+  }
+
+  getUrl() {
+    return this._geojsonUrl;
+  }
 
   setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName) {
     this._tooltipFormatter = (geojsonFeature) => {
