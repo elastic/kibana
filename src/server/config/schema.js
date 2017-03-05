@@ -152,7 +152,12 @@ module.exports = () => Joi.object({
   vectormap: Joi.object({
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
-      type: Joi.string()
+      type: Joi.string(),
+      name: Joi.string(),
+      fields: Joi.array().items(Joi.object({
+        name: Joi.string(),
+        description: Joi.string()
+      }))
     }))
   }),
   tilemap: Joi.object({

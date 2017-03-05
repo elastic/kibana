@@ -8,6 +8,10 @@ uiModules.get('kibana/choropleth')
       template: choroplethVisParamsTemplate,
       link: function ($scope, $element) {
 
+        $scope.onLayerChange = function () {
+          $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
+        };
+
       }
     };
   });

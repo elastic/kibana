@@ -9,12 +9,11 @@ import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter'
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
-module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
+module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings, vectormapsConfig, config) {
 
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(VislibLibResizeCheckerProvider);
-
 
   const resizeChecker = new ResizeChecker($element);
   const containerNode = $element[0];
@@ -46,6 +45,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   const kibanaMapReady = makeKibanaMap();
   $scope.$watch('esResponse', async function (response) {
+
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
       const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
@@ -61,11 +61,11 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
           };
         });
       }
-      const options = $scope.vis.params;
-      if (!options.selectedJoinField) {
-        options.selectedJoinField = options.selectedLayer.fields[0];
+
+      if (!$scope.vis.params.selectedJoinField) {
+        $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
       }
-      updateChoroplethLayer(options.selectedLayer.url);
+      updateChoroplethLayer($scope.vis.params.selectedLayer.url);
       choroplethLayer.setMetrics(results, metricsAgg);
       if ($scope.vis.aggs.bySchemaName.segment[0]) {
         const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
@@ -78,15 +78,15 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     });
   });
 
-  $scope.$watch('vis.params', (options) => {
+  $scope.$watch('vis.params', (visParams) => {
     kibanaMapReady.then(() => {
-      if (!options.selectedJoinField) {
-        options.selectedJoinField = options.selectedLayer.fields[0];
+      if (!visParams.selectedJoinField) {
+        visParams.selectedJoinField = visParams.selectedLayer.fields[0];
       }
 
-      updateChoroplethLayer(options.selectedLayer.url);
-      choroplethLayer.setJoinField(options.selectedJoinField);
-      choroplethLayer.setColorRamp(colorramps[options.colorSchema]);
+      updateChoroplethLayer(visParams.selectedLayer.url);
+      choroplethLayer.setJoinField(visParams.selectedJoinField.name);
+      choroplethLayer.setColorRamp(colorramps[visParams.colorSchema]);
 
       kibanaMap.setShowTooltip(true);
       kibanaMap.resize();
@@ -100,7 +100,13 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       return;
     }
     kibanaMap.removeLayer(choroplethLayer);
+
+    const previousMetrics = choroplethLayer ? choroplethLayer.getMetrics() : null;
+    const previousMetricsAgg = choroplethLayer ? choroplethLayer.getMetricsAgg() : null;
     choroplethLayer = new ChoroplethLayer(url);
+    if (previousMetrics && previousMetricsAgg) {
+      choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
+    }
     choroplethLayer.on('select', function (event) {
       const appState = getAppState();
       const clickHandler = filterBarClickHandler(appState);

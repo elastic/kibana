@@ -21,7 +21,9 @@
         id="vectorMap"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.selectedLayer"
-        ng-options="layer for (layer, meta) in vis.type.params.vectorMaps"
+        ng-options="layer.name for layer in vis.type.params.vectormap.layers"
+        ng-change="onLayerChange()"
+        ng-init="vis.params.selectedLayer=vis.type.params.vectormap.layers[0]"
       ></select>
     </div>
   </div>
@@ -33,7 +35,7 @@
     <div class="kuiSideBarFormRow__control">
       <select id="joinField"
               ng-model="vis.params.selectedJoinField"
-              ng-options="field for field in vis.params.selectedLayer.fields"
+              ng-options="field.description for field in vis.params.selectedLayer.fields"
               ng-init="vis.params.selectedJoinField=vis.params.selectedLayer.fields[0]"
       >
         <option value=''>Select</option></select>
