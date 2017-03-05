@@ -84,6 +84,8 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
           this._doRenderComplete();
         }
       });
+
+
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
