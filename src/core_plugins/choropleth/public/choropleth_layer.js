@@ -138,7 +138,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     }
 
     const titleText = this._metricsAgg.makeLabel();
-    // const titleText = 'foobar';
     const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
     jqueryDiv.append($title);
 
@@ -212,13 +211,6 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
       fillOpacity: 0.7
     };
   };
-  // const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
-  // const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(colorramp);
-
-  // return {
-  //   styleFunction: styleFunction,
-  //   legendQuantizer: legendQuantizer
-  // };
 }
 
 

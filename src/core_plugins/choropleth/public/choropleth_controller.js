@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import KibanaMap from 'ui/vis_maps/kibana_map';
@@ -39,11 +40,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
-
-
-    kibanaMap.on('moveend', () => {
-      persistUIStateFromMap();
-    });
+    kibanaMap.on('moveend', () =>persistUIStateFromMap());
   }
 
   const kibanaMapReady = makeKibanaMap();
@@ -76,6 +73,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       } else {
         choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
       }
+
       useUIState();
       kibanaMap.resize();
       $element.trigger('renderComplete');
@@ -91,7 +89,10 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       updateChoroplethLayer(visParams.selectedLayer.url);
       choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       choroplethLayer.setColorRamp(colorramps[visParams.colorSchema]);
-      kibanaMap.setShowTooltip(true);
+
+      kibanaMap.setShowTooltip(visParams.addTooltip);
+      kibanaMap.setLegendPosition(visParams.legendPosition);
+
       useUIState();
       kibanaMap.resize();
       $element.trigger('renderComplete');
