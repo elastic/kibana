@@ -13,6 +13,31 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
   const Schemas = Private(VisSchemasProvider);
 
 
+  const defaultLayers = [
+    {
+      type: 'default',
+      url: '../plugins/choropleth/data/world_countries.geojson',
+      name: 'World Countries',
+      fields: [
+        {
+          name: 'iso',
+          description: '2-digit country abbreviation'
+        }]
+    },
+    {
+      type: 'default',
+      url: '../plugins/choropleth/data/state.geojson',
+      name: 'US States',
+      fields: [{
+        name: 'NAME',
+        description: 'State name'
+      }]
+    }
+  ];
+
+  const vectorLayers = vectormapsConfig.layers.concat(defaultLayers);
+
+
   return new TemplateVisType({
     name: 'choropleth',
     title: 'Vector Map',
@@ -23,11 +48,11 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
     params: {
       defaults: {
         colorSchema: 'Yellow to Red',
-        selectedLayer: vectormapsConfig.layers[0],
-        selectedJoinField: vectormapsConfig.layers[0].fields[0]
+        selectedLayer: vectorLayers[0],
+        selectedJoinField: vectorLayers[0].fields[0]
       },
       colorSchemas: Object.keys(colorramps),
-      vectormap: vectormapsConfig,
+      vectormap: vectorLayers,
       editor: '<choropleth-vis-params></choropleth-vis-params>'
     },
     schemas: new Schemas([

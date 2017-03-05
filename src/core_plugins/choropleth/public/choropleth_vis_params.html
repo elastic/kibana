@@ -21,9 +21,9 @@
         id="vectorMap"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.selectedLayer"
-        ng-options="layer.name for layer in vis.type.params.vectormap.layers"
+        ng-options="layer.name for layer in vis.type.params.vectormap"
         ng-change="onLayerChange()"
-        ng-init="vis.params.selectedLayer=vis.type.params.vectormap.layers[0]"
+        ng-init="vis.params.selectedLayer=vis.type.params.vectormap[0]"
       ></select>
     </div>
   </div>
