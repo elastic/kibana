@@ -1,9 +1,7 @@
-import _ from 'lodash';
 import supports from 'ui/utils/supports';
 import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
-import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
