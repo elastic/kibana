@@ -42,12 +42,14 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
     name: 'choropleth',
     title: 'Vector Map',
     implementsRenderComplete: true,
-    description: 'Show metrics on a thematic map. Darker colors represent higher values.',
+    description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
+    'Darker colors represent higher values.',
     icon: 'fa-globe',
     template: choroplethTemplate,
     params: {
       defaults: {
         legendPosition: 'bottomright',
+        addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: vectorLayers[0],
         selectedJoinField: vectorLayers[0].fields[0]

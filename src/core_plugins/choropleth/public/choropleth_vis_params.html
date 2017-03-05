@@ -1,20 +1,11 @@
 <div class="form-group">
 
-  <vislib-basic-options></vislib-basic-options>
-
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="colorSchema">
-      Color Schema
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <select
-        id="colorSchema"
-        class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.colorSchema"
-        ng-options="mode for mode in vis.type.params.colorSchemas"
-      ></select>
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Layer Settings
     </div>
   </div>
+
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="vectorMap">
       Vector map
@@ -44,5 +35,36 @@
         <option value=''>Select</option></select>
     </div>
   </div>
+
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Style Settings
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" >
+    <label class="kuiSideBarFormRow__label" for="colorSchema">
+      Color Schema
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.colorSchema"
+        ng-options="mode for mode in vis.type.params.colorSchemas"
+      ></select>
+    </div>
+  </div>
+
+
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Basic Settings
+    </div>
+  </div>
+
+
+  <vislib-basic-options></vislib-basic-options>
+
 
 </div>

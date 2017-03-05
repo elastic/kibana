@@ -1,5 +1,6 @@
 import uiModules from 'ui/modules';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+// import 'ui/vis_maps/styles/_tilemap.less';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import KibanaMap from 'ui/vis_maps/kibana_map';
@@ -67,7 +68,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
       updateChoroplethLayer($scope.vis.params.selectedLayer.url);
       choroplethLayer.setMetrics(results, metricsAgg);
-      if ($scope.vis.aggs.bySchemaName.segment[0]) {
+      if ($scope.vis.aggs.bySchemaName.segment && $scope.vis.aggs.bySchemaName.segment[0]) {
         const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
         choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
       } else {
