@@ -53,8 +53,7 @@ module.exports = function (kibana) {
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
-
-          const vectormapsConfig = (!serverConfig.get('vectormap')) ? serverConfig.get('vectormap') : { layers: [] };
+          const vectormapsConfig = (serverConfig.get('vectormap')) ? serverConfig.get('vectormap') : { layers: [] };
 
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
