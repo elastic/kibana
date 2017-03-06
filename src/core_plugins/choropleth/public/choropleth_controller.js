@@ -1,6 +1,5 @@
 import uiModules from 'ui/modules';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-// import 'ui/vis_maps/styles/_tilemap.less';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import KibanaMap from 'ui/vis_maps/kibana_map';

@@ -22,7 +22,8 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
         {
           name: 'iso',
           description: '2-digit country abbreviation'
-        }]
+        }
+      ]
     },
     {
       type: 'default',
