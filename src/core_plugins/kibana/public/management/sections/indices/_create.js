@@ -29,7 +29,7 @@ uiModules.get('apps/management')
     sampleCount: 5,
     nameIntervalOptions: intervals,
 
-    fetchFieldsError: 'Loading'
+    fetchFieldsError: $translate.instant('KIBANA-LOADING')
   };
 
   index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
@@ -214,12 +214,12 @@ uiModules.get('apps/management')
 
     // we don't have enough info to continue
     if (!index.name) {
-      fetchFieldsError = 'Set an index name first';
+      fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
       return;
     }
 
     if (useIndexList && !index.nameInterval) {
-      fetchFieldsError = 'Select the interval at which your indices are populated.';
+      fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
       return;
     }
 
@@ -231,7 +231,7 @@ uiModules.get('apps/management')
       .catch(function (err) {
         // TODO: we should probably display a message of some kind
         if (err instanceof IndexPatternMissingIndices) {
-          fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
+          fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
           return [];
         }
 
@@ -287,7 +287,7 @@ uiModules.get('apps/management')
     index.patternErrors = [];
     index.samples = null;
     index.existing = null;
-    index.fetchFieldsError = 'Loading';
+    index.fetchFieldsError = $translate.instant('KIBANA-LOADING');
   }
 
   function getPatternDefault(interval) {
