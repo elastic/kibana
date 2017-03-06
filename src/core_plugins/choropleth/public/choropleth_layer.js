@@ -193,10 +193,15 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
 
   const { min, max } = getMinMax(data);
 
+
   return function (geojsonFeature) {
 
     const match = data.find((bucket) => {
-      return bucket.term === geojsonFeature.properties[joinField];
+      if (typeof bucket.term === 'string' && typeof geojsonFeature.properties[joinField] === 'string') {
+        return normalizeString(bucket.term) === normalizeString(geojsonFeature.properties[joinField]);
+      } else {
+        return bucket.term === geojsonFeature.properties[joinField];
+      }
     });
 
     if (!match) {
@@ -214,8 +219,12 @@ function makeChoroplethStyleFunction(data, colorramp, joinField) {
 }
 
 
-function getLegendColors(colorRamp) {
+function normalizeString(string) {
+  return string.trim().toLowerCase();
+}
 
+
+function getLegendColors(colorRamp) {
   const colors = [];
   colors[0] = getColor(colorRamp, 0);
   colors[1] = getColor(colorRamp, Math.floor(colorRamp.length * 1 / 4));

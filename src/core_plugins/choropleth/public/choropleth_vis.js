@@ -21,7 +21,11 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
       fields: [
         {
           name: 'iso',
-          description: '2-digit country abbreviation'
+          description: '2-letter abbreviation'
+        },
+        {
+          name: 'name',
+          description: 'Country name'
         }
       ]
     },
@@ -30,15 +34,16 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
       url: '../plugins/choropleth/data/state.geojson',
       name: 'US States',
       fields: [{
-        name: 'NAME',
+        name: 'STUSPS10',
+        description: '2-letter abbreviation'
+      }, {
+        name: 'NAME10',
         description: 'State name'
       }]
     }
   ];
 
   const vectorLayers = vectormapsConfig.layers.concat(defaultLayers);
-
-
   return new TemplateVisType({
     name: 'choropleth',
     title: 'Vector Map',
