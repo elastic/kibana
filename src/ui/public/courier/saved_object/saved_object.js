@@ -115,6 +115,21 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
+
+      // TODO extract this into its own module and update it to use range filter constructor instead of manually setting properties
+      // TODO Figure out how to convert ALL filters, not just "own". Does this get called for every search source already?
+      //      if so maybe we don't have to do anything special
+      _.map(this.searchSource.getOwn('filter'), (filter) => {
+        if (filter.range) {
+          const fieldName = Object.keys(filter.range)[0];
+          const params = filter.range[fieldName];
+
+          _.set(filter, 'meta.field', fieldName);
+          _.set(filter, 'meta.type', 'range');
+          _.set(filter, 'meta.params', params);
+        }
+        else return filter;
+      });
     };
 
     /**
