@@ -537,8 +537,6 @@ function makeStyleFunction(min, max, legendColors, quantizeDomain) {
 function dataToHeatArray(max, heatNormalizeData, featureCollection) {
 
   return featureCollection.features.map((feature) => {
-    // const lat = feature.properties.center[0];
-    // const lng = feature.properties.center[1];
     const lat = feature.geometry.coordinates[1];
     const lng = feature.geometry.coordinates[0];
     let heatIntensity;

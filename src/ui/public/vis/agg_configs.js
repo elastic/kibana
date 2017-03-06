@@ -108,7 +108,6 @@ export default function AggConfigsFactory(Private) {
       })
       .value();
     }
-
     this.getRequestAggs()
     .filter(function (config) {
       return !config.type.hasNoDsl;
@@ -145,14 +144,45 @@ export default function AggConfigsFactory(Private) {
     });
 
     removeParentAggs(dslTopLvl);
-
     return dslTopLvl;
   };
 
   AggConfigs.prototype.getRequestAggs = function () {
-    return _.sortBy(this, function (agg) {
+
+
+    const aggregations = _.sortBy(this, function (agg) {
       return agg.schema.group === 'metrics' ? 1 : 0;
     });
+
+
+    let shouldAddGeocentroid = false;
+    let centroidField = null;
+    aggregations.forEach(function (config) {
+      if (config.type.name === 'geohash_grid' && config.params.useGeocentroid === true) {
+        shouldAddGeocentroid = true;
+        centroidField = config.getField();
+      }
+    });
+
+    if (shouldAddGeocentroid) {
+      const geocentroid = AggConfig.aggTypes.find(aggType => aggType.name === 'geo_centroid');
+      const geocentroidMetric = new AggConfig(this.vis, {
+        type: 'geo_centroid',
+        enabled:true,
+        params: {
+          field: centroidField
+        },
+        schema: 'metric'
+      });
+
+      aggregations.push(geocentroidMetric);
+    }
+    // console.log('arg', arf);
+
+    //add
+
+    return aggregations;
+
   };
 
   /**
