@@ -12,7 +12,9 @@ import {
   GuideText,
 } from '../../components';
 
+const labelHtml = require('./label.html');
 const textInputHtml = require('./text_input.html');
+const searchInputHtml = require('./search_input.html');
 const staticInputHtml = require('./static_input.html');
 const textAreaHtml = require('./text_area.html');
 const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
@@ -22,6 +24,18 @@ const selectHtml = require('./select.html');
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
+      title="Label"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: labelHtml,
+      }]}
+    >
+      <GuideDemo
+        html={labelHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
       title="TextInput"
       source={[{
         type: GuideSectionTypes.HTML,
@@ -30,6 +44,18 @@ export default props => (
     >
       <GuideDemo
         html={textInputHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="SearchInput"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: searchInputHtml,
+      }]}
+    >
+      <GuideDemo
+        html={searchInputHtml}
       />
     </GuideSection>
 

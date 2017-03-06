@@ -18,6 +18,9 @@ import EventsSandbox
 import FormExample
   from '../../views/form/form_example.jsx';
 
+import FormLayoutExample
+  from '../../views/form_layout/form_layout_example.jsx';
+
 import HeaderBarExample
   from '../../views/header_bar/header_bar_example.jsx';
 
@@ -91,6 +94,9 @@ const components = [{
 }, {
   name: 'Form',
   component: FormExample,
+}, {
+  name: 'FormLayout',
+  component: FormLayoutExample,
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,

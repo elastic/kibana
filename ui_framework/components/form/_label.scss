@@ -1,0 +1,9 @@
+/**
+ * 1. Override inherited Bootstrap styles.
+ */
+.kuiLabel {
+  color: $labelFontColor;
+  font-size: $fontSize;
+  line-height: $lineHeight;
+  font-weight: 400; /* 1 */
+}
