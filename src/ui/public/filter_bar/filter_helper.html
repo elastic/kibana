@@ -1,6 +1,10 @@
+<div style="position: absolute; right: 52px; width: 50%; z-index: 10; background: white; padding: 10px; border: 1px solid lightgray; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-top: none;">
   <div class="row" ng-repeat="helper in filterHelper.helpers" style="padding: 0.5em 0">
-    <div class="col-md-2">
-      <ui-select ng-model="helper.field">
+    <div class="col-md-3">
+      <ui-select
+        ng-model="helper.field"
+        on-select="filterHelper.refreshSuggestions(helper.field)"
+      >
         <ui-select-match>
           {{$select.selected.name}}
         </ui-select-match>
@@ -9,25 +13,37 @@
         </ui-select-choices>
       </ui-select>
     </div>
-    <div class="col-md-1">
+    <div class="col-md-2">
       <select
         class="form-control"
         ng-model="helper.type"
-        ng-options="type.label for type in filterHelper.types"
+        ng-options="type.label for type in filterHelper.filterByType(filterHelper.types, helper.field)"
       ></select>
     </div>
-    <div class="col-md-4" ng-if="helper.type.label === 'matches'">
-      <input ng-model="helper.params.query" type="text" class="form-control" />
+    <div class="col-md-5" ng-if="helper.type.id === 'query.match'">
+      <ui-select ng-model="helper.params.query">
+        <ui-select-match>
+          {{$select.selected}}
+        </ui-select-match>
+        <ui-select-choices
+          repeat="value in filterHelper.suggestions[helper.field]"
+          refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
+          refresh-delay="0"
+        >
+          <div ng-bind-html="value"></div>
+        </ui-select-choices>
+      </ui-select>
     </div>
-    <div class="col-md-4" ng-if="helper.type.label === 'between'">
-      <form class="form-inline">
-        <input ng-model="helper.params.gte" type="number" class="form-control" /> and
+    <div class="col-md-2" ng-if="helper.type.id === 'range'">
+        <input ng-model="helper.params.gte" type="number" class="form-control" />
+    </div>
+    <div class="col-md-1" ng-if="helper.type.id === 'range'">and</div>
+    <div class="col-md-2" ng-if="helper.type.id === 'range'">
         <input ng-model="helper.params.lt" type="number" class="form-control" />
-      </form>
     </div>
-    <div class="col-md-4" ng-if="helper.type.label === 'exists'"></div>
-    <div class="col-md-5 text-right">
-      <button class="kuiButton kuiButton--danger kuiButton--iconText" ng-click="filterHelper.removeHelper(helper)">
+    <div class="col-md-5" ng-if="helper.type.id === 'exists'"></div>
+    <div class="col-md-2 text-right">
+      <button class="kuiButton kuiButton--default kuiButton--iconText" ng-click="filterHelper.removeHelper(helper)">
         <span class="kuiButton__icon kuiIcon fa-trash"></span>
       </button>
     </div>
@@ -39,12 +55,11 @@
         Add a filter
       </button>
     </div>
+      <div class="col-md-10 text-right">
+        <button class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="filterHelper.applyHelpers()">
+          <span class="kuiButton__icon kuiIcon fa-search"></span>
+          Search
+        </button>
+      </div>
   </div>
-  <div class="row" style="padding: 0.5em 0">
-    <div class="col-md-12 text-right">
-      <button class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="filterHelper.applyHelpers()">
-        <span class="kuiButton__icon kuiIcon fa-search"></span>
-        Search
-      </button>
-    </div>
-  </div>
+</div>

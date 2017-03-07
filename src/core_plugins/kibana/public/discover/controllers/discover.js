@@ -101,6 +101,8 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     location: 'Discover'
   });
 
+  $scope.showFilterHelper = false;
+  $scope.toggleFilterHelper = () => $scope.showFilterHelper = !$scope.showFilterHelper;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
 

@@ -44,6 +44,7 @@
             >
               <span class="fa fa-search" aria-hidden="true"></span>
             </button>
+            <button class="fa fa-caret-down" ng-click="toggleFilterHelper()" style="position: absolute; top: 2px; right: 45px; background: none; color: gray !important;"></button>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
         </div>
@@ -52,7 +53,7 @@
   </kbn-top-nav>
 
   <div class="container-fluid" role="main">
-    <filter-helper index-pattern="indexPattern"></filter-helper>
+    <filter-helper index-pattern="indexPattern" ng-if="showFilterHelper" on-apply="toggleFilterHelper()"></filter-helper>
     <div class="row">
       <filter-bar state="state"></filter-bar>
     </div>

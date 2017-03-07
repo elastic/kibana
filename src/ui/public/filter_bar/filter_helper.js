@@ -5,14 +5,15 @@ import QueryFilterProvider from './query_filter';
 import buildPhraseFilter from '../filter_manager/lib/phrase';
 import buildRangeFilter from '../filter_manager/lib/range';
 
-uiModules.get('kibana').directive('filterHelper', function (Private) {
+uiModules.get('kibana').directive('filterHelper', function (Private, es) {
   const queryFilter = Private(QueryFilterProvider);
 
   return {
     template,
     restrict: 'E',
     scope: {
-      indexPattern: '='
+      indexPattern: '=',
+      onApply: '&'
     },
     controllerAs: 'filterHelper',
     controller: function ($scope) {
@@ -22,10 +23,22 @@ uiModules.get('kibana').directive('filterHelper', function (Private) {
         label: 'matches'
       }, {
         id: 'range',
-        label: 'between'
+        label: 'is between'
       }, {
         id: 'exists',
         label: 'exists'
+      }, {
+        id: 'query.match',
+        label: 'does not match',
+        negate: true
+      }, {
+        id: 'range',
+        label: 'is not between',
+        negate: true
+      }, {
+        id: 'exists',
+        label: 'does not exist',
+        negate: true
       }];
 
       this.helpers = queryFilter.getFilters()
@@ -34,6 +47,13 @@ uiModules.get('kibana').directive('filterHelper', function (Private) {
       .filter(helper => helper !== null);
 
       this.removedHelpers = [];
+      this.suggestions = {};
+
+      this.filterByType = (types, field) => {
+        return types.filter(type => {
+          return type.id !== 'range' || this.indexPattern.fields.byName[field].type === 'number';
+        });
+      };
 
       this.addHelper = () => {
         this.helpers = [...this.helpers, {
@@ -60,6 +80,30 @@ uiModules.get('kibana').directive('filterHelper', function (Private) {
           return getFilterFromHelper(helper, $scope.indexPattern);
         });
         queryFilter.addFilters(filters);
+
+        $scope.onApply();
+      };
+
+      this.refreshSuggestions = (field, value) => {
+        const include = this.indexPattern.fields.byName[field].type === 'string' && value ? `.*${value}.*` : undefined;
+        return es.search({
+          index: this.indexPattern.id,
+          body: {
+            aggs: {
+              suggestions: {
+                terms: {
+                  field,
+                  include
+                }
+              }
+            }
+          },
+        })
+        .then(result => {
+          const suggestions = result.aggregations.suggestions.buckets.map(bucket => bucket.key);
+          if (value) suggestions.unshift(value);
+          this.suggestions[field] = suggestions;
+        });
       };
     }
   };
@@ -67,7 +111,7 @@ uiModules.get('kibana').directive('filterHelper', function (Private) {
 
 function getHelperFromFilter(filter, types) {
   const type = types.find(type => {
-    return _.has(filter, type.id);
+    return _.has(filter, type.id) && !!filter.meta.negate === !!type.negate;
   });
 
   if (!type) return null;
@@ -95,21 +139,22 @@ function getHelperFromFilter(filter, types) {
 function getFilterFromHelper(helper, indexPattern) {
   const field = indexPattern.fields.byName[helper.field];
   if (helper.type.id === 'query.match') {
-    return buildPhraseFilter(field, helper.params.query, indexPattern);
+    return buildPhraseFilter(field, helper.params.query, indexPattern, helper.type.negate);
   } else if (helper.type.id === 'range') {
     return buildRangeFilter(field, {
       gte: helper.params.gte,
       lt:  helper.params.lt
-    }, indexPattern);
+    }, indexPattern, null, helper.type.negate);
   } else {
-    return buildExistsFilter(field.name, indexPattern);
+    return buildExistsFilter(field.name, indexPattern, helper.type.negate);
   }
 }
 
-function buildExistsFilter(field, indexPattern) {
+function buildExistsFilter(field, indexPattern, negate = false) {
   return {
     exists: { field },
     meta: {
+      negate,
       index: indexPattern.id,
       key: 'exists',
       value: field
