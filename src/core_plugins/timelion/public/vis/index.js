@@ -16,7 +16,7 @@ define(function (require) {
     // Vis object of this type.
     return new TemplateVisType({
       name: 'timelion',
-      title: 'Timeseries',
+      title: 'Timelion',
       icon: 'fa-clock-o',
       description: 'Create timeseries charts using the timelion expression language. ' +
         'Perfect for computing and combining timeseries sets with functions such as derivatives and moving averages',

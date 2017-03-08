@@ -169,30 +169,49 @@ uiModules.get('apps/management')
           notify.error('The file could not be processed.');
         }
 
-        return Promise.map(docs, (doc) => {
-          const { service } = find($scope.services, { type: doc._type }) || {};
+        return new Promise((resolve) => {
+          confirmModal(
+            `If any of the objects already exist, do you want to automatically overwrite them?`, {
+              confirmButtonText: `Yes, overwrite all`,
+              cancelButtonText: `No, prompt me for each one`,
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            }
+          );
+        })
+          .then((overwriteAll) => {
+            return Promise.map(docs, (doc) => {
+              const { service } = find($scope.services, { type: doc._type }) || {};
 
-          if (!service) {
-            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-            const reason = `Invalid type: "${doc._type}"`;
+              if (!service) {
+                const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+                const reason = `Invalid type: "${doc._type}"`;
 
-            notify.warning(`${msg}, ${reason}`, {
-              lifetime: 0,
-            });
+                notify.warning(`${msg}, ${reason}`, {
+                  lifetime: 0,
+                });
 
-            return;
-          }
+                return;
+              }
 
-          return service.get().then(function (obj) {
-            obj.id = doc._id;
-            return obj.applyESResp(doc).then(function () {
-              return obj.save({ confirmOverwrite : true });
+              return service.get()
+                .then(function (obj) {
+                  obj.id = doc._id;
+                  return obj.applyESResp(doc)
+                    .then(() => {
+                      return obj.save({ confirmOverwrite : !overwriteAll });
+                    })
+                    .catch((err) => {
+                      // swallow errors here so that the remaining promise chain executes
+                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                      notify.error(err);
+                    });
+                })
+                .then(refreshIndex)
+                .then(refreshData)
+                .catch(notify.error);
             });
           });
-        })
-        .then(refreshIndex)
-        .then(refreshData)
-        .catch(notify.error);
       };
 
       function refreshIndex() {
