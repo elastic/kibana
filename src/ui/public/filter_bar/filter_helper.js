@@ -22,6 +22,9 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
         id: 'query.match',
         label: 'matches'
       }, {
+        id: 'query.terms',
+        label: 'is one of'
+      }, {
         id: 'range',
         label: 'is between'
       }, {
@@ -30,6 +33,10 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
       }, {
         id: 'query.match',
         label: 'does not match',
+        negate: true
+      }, {
+        id: 'query.terms',
+        label: 'is not one of',
         negate: true
       }, {
         id: 'range',
@@ -127,11 +134,18 @@ function getHelperFromFilter(filter, types) {
 
   const query = _.get(filter, type.id);
   const field = Object.keys(query)[0];
+  let params = _.cloneDeep(query[field]);
+  if (type.id === 'range') {
+    params = _.mapValues(query[field], parseFloat);
+  } else if (type.id === 'query.terms') {
+    params = { terms: query[field] };
+  }
+
   return {
     filter,
     type,
     field,
-    params: _.cloneDeep(query[field]),
+    params,
     negate: filter.meta.negate
   };
 }
@@ -140,11 +154,10 @@ function getFilterFromHelper(helper, indexPattern) {
   const field = indexPattern.fields.byName[helper.field];
   if (helper.type.id === 'query.match') {
     return buildPhraseFilter(field, helper.params.query, indexPattern, helper.type.negate);
+  } else if (helper.type.id === 'query.terms') {
+    return buildTermsFilter(field.name, helper.params.terms, indexPattern, helper.type.negate);
   } else if (helper.type.id === 'range') {
-    return buildRangeFilter(field, {
-      gte: helper.params.gte,
-      lt:  helper.params.lt
-    }, indexPattern, null, helper.type.negate);
+    return buildRangeFilter(field, helper.params, indexPattern, null, helper.type.negate);
   } else {
     return buildExistsFilter(field.name, indexPattern, helper.type.negate);
   }
@@ -155,9 +168,21 @@ function buildExistsFilter(field, indexPattern, negate = false) {
     exists: { field },
     meta: {
       negate,
-      index: indexPattern.id,
-      key: 'exists',
-      value: field
+      index: indexPattern.id
+    }
+  };
+}
+
+function buildTermsFilter(field, values, indexPattern, negate = false) {
+  return {
+    query: {
+      terms: {
+        [field]: values
+      }
+    },
+    meta: {
+      negate,
+      index: indexPattern.id
     }
   };
 }

@@ -34,6 +34,20 @@
         </ui-select-choices>
       </ui-select>
     </div>
+    <div class="col-md-5" ng-if="helper.type.id === 'query.terms'">
+      <ui-select ng-model="helper.params.terms" multiple>
+        <ui-select-match>
+          {{$item}}
+        </ui-select-match>
+        <ui-select-choices
+          repeat="value in filterHelper.suggestions[helper.field]"
+          refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
+          refresh-delay="0"
+        >
+          <div ng-bind-html="value"></div>
+        </ui-select-choices>
+      </ui-select>
+    </div>
     <div class="col-md-2" ng-if="helper.type.id === 'range'">
         <input ng-model="helper.params.gte" type="number" class="form-control" />
     </div>
