@@ -157,7 +157,7 @@ function getFilterFromHelper(helper, indexPattern) {
   } else if (helper.type.id === 'query.terms') {
     return buildTermsFilter(field.name, helper.params.terms, indexPattern, helper.type.negate);
   } else if (helper.type.id === 'range') {
-    return buildRangeFilter(field, helper.params, indexPattern, null, helper.type.negate);
+    return buildRangeFilter(field, _.pick(helper.params, ['gte', 'lte', 'gt', 'lt']), indexPattern, null, helper.type.negate);
   } else {
     return buildExistsFilter(field.name, indexPattern, helper.type.negate);
   }
