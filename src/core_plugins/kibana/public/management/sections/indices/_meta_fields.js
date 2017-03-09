@@ -41,7 +41,7 @@ uiModules.get('apps/management')
         _.invoke(rowScopes, '$destroy');
         rowScopes.length = 0;
 
-        const fields = filter($scope.indexPattern.getMetaFields(), $scope.fieldFilter);
+        const fields = filter($scope.indexPattern.getMetaFields(), { name: $scope.fieldFilter });
         _.find($scope.editSections, { index: 'metaFields' }).count = fields.length; // Update the tab count
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });
