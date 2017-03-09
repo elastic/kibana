@@ -13,7 +13,8 @@ uiModules
       vis: '=',
       savedVis: '=',
       uiState: '=',
-      editor: '='
+      editor: '=',
+      stageEditableVis: '='
     },
     link: function ($scope, $el) {
       const $optionContainer = $el.find('.visualization-options');
