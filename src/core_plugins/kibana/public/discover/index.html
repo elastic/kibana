@@ -44,8 +44,8 @@
             >
               <span class="fa fa-search" aria-hidden="true"></span>
             </button>
-            <button class="fa fa-caret-down" ng-click="showFilterHelper = !showFilterHelper" style="position: absolute; top: 2px; right: 45px; background: none; color: gray !important;"></button>
-            <filter-helper index-pattern="indexPattern" ng-if="showFilterHelper" on-apply="showFilterHelper = !showFilterHelper"></filter-helper>
+            <button class="fa fa-caret-down" ng-click="discoverApp.showFilterHelper = !discoverApp.showFilterHelper" style="position: absolute; top: 2px; right: 45px; background: none; color: gray !important;"></button>
+            <filter-helper index-pattern="indexPattern" ng-show="discoverApp.showFilterHelper" on-apply="discoverApp.showFilterHelper = !discoverApp.showFilterHelper"></filter-helper>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
         </div>
