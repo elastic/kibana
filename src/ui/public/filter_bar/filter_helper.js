@@ -50,15 +50,15 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
         negate: true
       }];
 
-      this.helpers = queryFilter.getFilters()
-      .filter(filter => !filter.meta.disabled)
-      .map(filter => getHelperFromFilter(filter, this.types))
-      .filter(helper => helper !== null);
-
+      this.helpers = getHelpersFromFilters(queryFilter.getFilters(), this.types);
       this.removedHelpers = [];
       this.suggestions = {};
 
-      this.filterByType = (types, field) => {
+      $scope.$listen(queryFilter, 'update', () => {
+        this.helpers = getHelpersFromFilters(queryFilter.getFilters(), this.types);
+      });
+
+      this.filterTypesByField = (types, field) => {
         return types.filter(type => {
           return type.id !== 'range' || this.indexPattern.fields.byName[field].type === 'number';
         });
@@ -85,9 +85,7 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
           if (helper.filter) queryFilter.removeFilter(helper.filter);
         });
 
-        const filters = this.helpers.map(helper => {
-          return getFilterFromHelper(helper, $scope.indexPattern);
-        });
+        const filters = this.helpers.map(helper => getFilterFromHelper(helper, $scope.indexPattern));
         queryFilter.addFilters(filters);
 
         $scope.onApply();
@@ -118,38 +116,34 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
   };
 });
 
+function getHelpersFromFilters(filters, types) {
+  return filters.filter(filter => !filter.meta.disabled)
+  .map(filter => getHelperFromFilter(filter, types))
+  .filter(helper => helper !== null);
+}
+
 function getHelperFromFilter(filter, types) {
   const type = types.find(type => {
     return _.has(filter, type.id) && !!filter.meta.negate === !!type.negate;
   });
-
   if (!type) return null;
 
-  if (type.id === 'exists') {
-    return {
-      filter,
-      type,
-      field: filter.exists.field,
-      negate: filter.meta.negate
-    };
-  }
-
-  const query = _.get(filter, type.id);
-  const field = Object.keys(query)[0];
-  let params = _.cloneDeep(query[field]);
-  if (type.id === 'range') {
-    params = _.mapValues(query[field], parseFloat);
+  let field;
+  let params;
+  if (type.id === 'query.match') {
+    field = Object.keys(filter.query.match)[0];
+    params = { ...filter.query.match[field] };
   } else if (type.id === 'query.terms') {
-    params = { terms: query[field] };
+    field = Object.keys(filter.query.terms)[0];
+    params = [...filter.query.terms[field]];
+  } else if (type.id === 'range') {
+    field = Object.keys(filter.range)[0];
+    params = _.mapValues(filter.range[field], parseFloat);
+  } else {
+    field = filter.exists.field;
   }
 
-  return {
-    filter,
-    type,
-    field,
-    params,
-    negate: filter.meta.negate
-  };
+  return { filter, type, field, params, negate: filter.meta.negate };
 }
 
 function getFilterFromHelper(helper, indexPattern) {
