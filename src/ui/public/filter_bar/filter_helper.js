@@ -4,6 +4,8 @@ import uiModules from 'ui/modules';
 import QueryFilterProvider from './query_filter';
 import buildPhraseFilter from '../filter_manager/lib/phrase';
 import buildRangeFilter from '../filter_manager/lib/range';
+import buildExistsFilter from '../filter_manager/lib/exists';
+import buildTermsFilter from '../filter_manager/lib/terms';
 
 uiModules.get('kibana').directive('filterHelper', function (Private, es) {
   const queryFilter = Private(QueryFilterProvider);
@@ -161,28 +163,4 @@ function getFilterFromHelper(helper, indexPattern) {
   } else {
     return buildExistsFilter(field.name, indexPattern, helper.type.negate);
   }
-}
-
-function buildExistsFilter(field, indexPattern, negate = false) {
-  return {
-    exists: { field },
-    meta: {
-      negate,
-      index: indexPattern.id
-    }
-  };
-}
-
-function buildTermsFilter(field, values, indexPattern, negate = false) {
-  return {
-    query: {
-      terms: {
-        [field]: values
-      }
-    },
-    meta: {
-      negate,
-      index: indexPattern.id
-    }
-  };
 }
