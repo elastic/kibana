@@ -27,7 +27,7 @@ module.exports = function (dataTuples, targetTuples) {
 
     dataTuplesQueue.splice(0, i);
 
-    const sum = _.reduce(avgSet, function (sum, num) { return sum + num; }, 0);
+    const sum = avgSet.reduce((sum, num) => sum + num);
 
     return avgSet.length ? (sum / avgSet.length) : NaN;
   });
