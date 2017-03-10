@@ -98,10 +98,23 @@ uiModules
             formattedColumn.class = 'visualize-table-right';
           }
 
-          const isFieldNumeric = (field && field.type === 'number');
-          const isFieldDate = (field && field.type === 'date');
+          let fieldType = 'string';
+          const aggType = agg.type;
+          if (aggType && aggType.type === 'metrics') {
+            if (aggType.name === 'top_hits') {
+              if (agg._opts.params.aggregate === 'concat') {
+                fieldType = 'string';
+              } else {
+                fieldType = 'number';
+              }
+            } else {
+              fieldType = 'number';
+            }
+          } else if (field) {
+            fieldType = field.type;
+          }
 
-          if (isFieldNumeric || isFieldDate) {
+          if (fieldType === 'number' || fieldType === 'date') {
             function sum(tableRows) {
               return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
             }
@@ -109,12 +122,12 @@ uiModules
 
             switch ($scope.totalFunc) {
               case 'sum':
-                if (!isFieldDate) {
+                if (fieldType !== 'date') {
                   formattedColumn.total = formatter(sum(table.rows));
                 }
                 break;
               case 'avg':
-                if (!isFieldDate) {
+                if (fieldType !== 'date') {
                   formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
                 }
                 break;
