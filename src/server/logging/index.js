@@ -12,4 +12,4 @@ export default function (kbnServer, server, config) {
       options: loggingConfiguration(config)
     }, cb);
   });
-};
+}

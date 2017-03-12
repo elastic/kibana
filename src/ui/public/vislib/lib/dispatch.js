@@ -26,21 +26,21 @@ export default function DispatchClass(Private, config) {
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
      * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-    * series: *, config: *, data: (Object|*),
-   * e: (d3.event|*), handler: (Object|*)}} Event response object
+     * series: *, config: *, data: (Object|*),
+     * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     eventResponse(d, i) {
       const datum = d._input || d;
       const data = d3.event.target.nearestViewportElement ?
         d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const label = d.label ? d.label : d.name;
+      const label = d.label ? d.label : (d.series || 'Count');
       const isSeries = !!(data && data.series);
       const isSlices = !!(data && data.slices);
       const series = isSeries ? data.series : undefined;
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
       const color = _.get(handler, 'data.color');
-      const isPercentage = (handler && handler._attr.mode === 'percentage');
+      const isPercentage = (handler && handler.visConfig.get('mode', 'normal') === 'percentage');
 
       const eventData = {
         value: d.y,
@@ -51,7 +51,7 @@ export default function DispatchClass(Private, config) {
         pointIndex: i,
         series: series,
         slices: slices,
-        config: handler && handler._attr,
+        config: handler && handler.visConfig,
         data: data,
         e: d3.event,
         handler: handler
@@ -59,17 +59,19 @@ export default function DispatchClass(Private, config) {
 
       if (isSeries) {
         // Find object with the actual d value and add it to the point object
-        const object = _.find(series, {'label': d.label});
-        eventData.value = +object.values[i].y;
+        const object = _.find(series, { 'label': label });
+        if (object) {
+          eventData.value = +object.values[i].y;
 
-        if (isPercentage) {
-          // Add the formatted percentage to the point object
-          eventData.percent = (100 * d.y).toFixed(1) + '%';
+          if (isPercentage) {
+            // Add the formatted percentage to the point object
+            eventData.percent = (100 * d.y).toFixed(1) + '%';
+          }
         }
       }
 
       return eventData;
-    };
+    }
 
     /**
      * Returns a function that adds events and listeners to a D3 selection
@@ -89,7 +91,7 @@ export default function DispatchClass(Private, config) {
           }
         });
       };
-    };
+    }
 
     /**
      *
@@ -116,7 +118,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('mouseover', hover);
-    };
+    }
 
     /**
      *
@@ -136,7 +138,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('mouseout', mouseout);
-    };
+    }
 
     /**
      *
@@ -152,7 +154,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return addEvent('click', click);
-    };
+    }
 
     /**
      * Determine if we will allow brushing
@@ -161,11 +163,11 @@ export default function DispatchClass(Private, config) {
      * @returns {Boolean}
      */
     allowBrushing() {
-      const xAxis = this.handler.xAxis;
+      const xAxis = this.handler.categoryAxes[0];
 
       //Allow brushing for ordered axis - date histogram and histogram
       return Boolean(xAxis.ordered);
-    };
+    }
 
     /**
      * Determine if brushing is currently enabled
@@ -175,7 +177,7 @@ export default function DispatchClass(Private, config) {
      */
     isBrushable() {
       return this.allowBrushing() && this.listenerCount('brush') > 0;
-    };
+    }
 
     /**
      *
@@ -186,7 +188,7 @@ export default function DispatchClass(Private, config) {
       if (!this.isBrushable()) return;
 
       const self = this;
-      const xScale = this.handler.xAxis.xScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
       const brush = this.createBrush(xScale, svg);
 
       function simulateClickWithBrushEnabled(d, i) {
@@ -212,7 +214,7 @@ export default function DispatchClass(Private, config) {
       }
 
       return this.addEvent('mousedown', simulateClickWithBrushEnabled);
-    };
+    }
 
     /**
      * Mouseover Behavior
@@ -222,7 +224,7 @@ export default function DispatchClass(Private, config) {
      */
     addMousePointer() {
       return d3.select(this).style('cursor', 'pointer');
-    };
+    }
 
     /**
      * Highlight the element that is under the cursor
@@ -237,7 +239,7 @@ export default function DispatchClass(Private, config) {
       const dimming = config.get('visualization:dimmingOpacity');
       $(element).parent().find('[data-label]')
         .css('opacity', 1)//Opacity 1 is needed to avoid the css application
-        .not((els, el) => $(el).data('label') === label)
+        .not((els, el) => String($(el).data('label')) === label)
         .css('opacity', justifyOpacity(dimming));
     }
 
@@ -249,7 +251,7 @@ export default function DispatchClass(Private, config) {
      */
     unHighlight(element) {
       $('[data-label]', element.parentNode).css('opacity', 1);
-    };
+    }
 
     /**
      * Adds D3 brush to SVG and returns the brush function
@@ -260,14 +262,19 @@ export default function DispatchClass(Private, config) {
      */
     createBrush(xScale, svg) {
       const self = this;
-      const attr = self.handler._attr;
-      const height = attr.height;
-      const margin = attr.margin;
+      const visConfig = self.handler.visConfig;
+      const { width, height } = svg.node().getBBox();
+      const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
 
       // Brush scale
-      const brush = d3.svg.brush()
-      .x(xScale)
-      .on('brushend', function brushEnd() {
+      const brush = d3.svg.brush();
+      if (isHorizontal) {
+        brush.x(xScale);
+      } else {
+        brush.y(xScale);
+      }
+
+      brush.on('brushend', function brushEnd() {
 
         // Assumes data is selected at the chart level
         // In this case, the number of data objects should always be 1
@@ -282,7 +289,7 @@ export default function DispatchClass(Private, config) {
 
         return self.emit('brush', {
           range: range,
-          config: attr,
+          config: visConfig,
           e: d3.event,
           data: data
         });
@@ -290,23 +297,28 @@ export default function DispatchClass(Private, config) {
 
       // if `addBrushing` is true, add brush canvas
       if (self.listenerCount('brush')) {
-        svg.insert('g', 'g')
-        .attr('class', 'brush')
-        .call(brush)
-        .call(function (brushG) {
-          // hijack the brush start event to filter out right/middle clicks
-          const brushHandler = brushG.on('mousedown.brush');
-          if (!brushHandler) return; // touch events in use
-          brushG.on('mousedown.brush', function () {
-            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
-          });
-        })
-        .selectAll('rect')
-        .attr('height', height - margin.top - margin.bottom);
+        const rect = svg.insert('g', 'g')
+          .attr('class', 'brush')
+          .call(brush)
+          .call(function (brushG) {
+            // hijack the brush start event to filter out right/middle clicks
+            const brushHandler = brushG.on('mousedown.brush');
+            if (!brushHandler) return; // touch events in use
+            brushG.on('mousedown.brush', function () {
+              if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+            });
+          })
+          .selectAll('rect');
+
+        if (isHorizontal) {
+          rect.attr('height', height);
+        } else {
+          rect.attr('width', width);
+        }
 
         return brush;
       }
-    };
+    }
   }
 
   /**
@@ -337,4 +349,4 @@ export default function DispatchClass(Private, config) {
   }
 
   return Dispatch;
-};
+}

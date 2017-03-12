@@ -3,9 +3,11 @@ import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import urlTemplate from 'ui/stringify/editors/url.html';
-export default function UrlFormatProvider(Private, highlightFilter) {
+import { getHighlightHtml } from 'ui/highlight';
 
-  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
+export default function UrlFormatProvider(Private) {
+
+  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
 
   _.class(Url).inherits(FieldFormat);
@@ -31,7 +33,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
     template: urlTemplate,
     controllerAs: 'url',
     controller: function ($scope) {
-      let iconPattern = '/bundles/src/ui/public/stringify/icons/{{value}}.png';
+      const iconPattern = '/bundles/src/ui/public/stringify/icons/{{value}}.png';
 
       this.samples = {
         a: [ 'john', '/some/pathname/asset.png', 1234 ],
@@ -39,7 +41,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
       };
 
       $scope.$watch('editor.formatParams.type', function (type, prev) {
-        let params = $scope.editor.formatParams;
+        const params = $scope.editor.formatParams;
         if (type === 'img' && type !== prev && !params.urlTemplate) {
           params.urlTemplate = iconPattern;
         }
@@ -60,7 +62,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   ];
 
   Url.prototype._formatUrl = function (value) {
-    let template = this.param('urlTemplate');
+    const template = this.param('urlTemplate');
     if (!template) return value;
 
     return this._compileTemplate(template)({
@@ -70,7 +72,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   };
 
   Url.prototype._formatLabel = function (value, url) {
-    let template = this.param('labelTemplate');
+    const template = this.param('labelTemplate');
     if (url == null) url = this._formatUrl(value);
     if (!template) return url;
 
@@ -86,7 +88,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
     },
 
     html: function (rawValue, field, hit) {
-      let url = _.escape(this._formatUrl(rawValue));
+      const url = _.escape(this._formatUrl(rawValue));
       let label = _.escape(this._formatLabel(rawValue, url));
 
       switch (this.param('type')) {
@@ -94,7 +96,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
           return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
         default:
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            label = highlightFilter(label, hit.highlight[field.name]);
+            label = getHighlightHtml(label, hit.highlight[field.name]);
           }
 
           return '<a href="' + url + '" target="_blank">' + label + '</a>';
@@ -103,7 +105,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   };
 
   Url.prototype._compileTemplate = function (template) {
-    let parts = template.split(Url.templateMatchRE).map(function (part, i) {
+    const parts = template.split(Url.templateMatchRE).map(function (part, i) {
       // trim all the odd bits, the variable names
       return (i % 2) ? part.trim() : part;
     });
@@ -115,7 +117,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
       while (++i < parts.length) {
         if (i % 2) {
           if (locals.hasOwnProperty(parts[i])) {
-            let local = locals[parts[i]];
+            const local = locals[parts[i]];
             output += local == null ? '' : local;
           }
         } else {
@@ -128,4 +130,4 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   };
 
   return Url;
-};
+}

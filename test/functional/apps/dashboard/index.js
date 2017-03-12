@@ -14,4 +14,6 @@ bdd.describe('dashboard app', function () {
   });
 
   require('./_dashboard');
+  require('./_dashboard_save');
+  require('./_dashboard_time');
 });

@@ -5,14 +5,16 @@ import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
+import directivesProvider from '../directives';
+
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-module.exports = function (chrome, internals) {
+export default function (chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
-    let kibana = modules.get('kibana');
+    const kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -27,8 +29,13 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('chrome', chrome)
     .value('esUrl', (function () {
-      let a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');
+      return a.href;
+    }()))
+    .value('esAdminUrl', (function () {
+      const a = document.createElement('a');
+      a.href = chrome.addBasePath('/es_admin');
       return a.href;
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
@@ -43,7 +50,7 @@ module.exports = function (chrome, internals) {
       };
 
       chrome.getBreadcrumbs = () => {
-        let path = $location.path();
+        const path = $location.path();
         let length = path.length - 1;
 
         // trim trailing slash
@@ -52,7 +59,6 @@ module.exports = function (chrome, internals) {
         }
 
         return path.substr(1, length)
-          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
           .split('/');
       };
 
@@ -90,9 +96,9 @@ module.exports = function (chrome, internals) {
       $rootScope.$on('$routeChangeStart', check);
     });
 
-    require('../directives')(chrome, internals);
+    directivesProvider(chrome, internals);
 
     modules.link(kibana);
   };
 
-};
+}

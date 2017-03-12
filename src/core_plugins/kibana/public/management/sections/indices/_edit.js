@@ -40,7 +40,8 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
+.controller('managementIndicesEdit', function (
+    $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
 
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
@@ -66,27 +67,42 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
+    $scope.conflictFields = _.filter($scope.indexPattern.fields, { type: 'conflict' });
   });
 
   $scope.refreshFields = function () {
-    $scope.indexPattern.refreshFields();
+    const confirmModalOptions = {
+      confirmButtonText: 'Refresh fields',
+      onConfirm: () => { $scope.indexPattern.refreshFields(); }
+    };
+    confirmModal(
+      'This will reset the field popularity counters. Are you sure you want to refresh your fields?',
+      confirmModalOptions
+    );
   };
 
   $scope.removePattern = function () {
-    if ($scope.indexPattern.id === config.get('defaultIndex')) {
-      config.remove('defaultIndex');
-      if (otherIds.length) {
-        config.set('defaultIndex', otherIds[0]);
+    function doRemove() {
+      if ($scope.indexPattern.id === config.get('defaultIndex')) {
+        config.remove('defaultIndex');
+        if (otherIds.length) {
+          config.set('defaultIndex', otherIds[0]);
+        }
       }
+
+      courier.indexPatterns.delete($scope.indexPattern)
+        .then(refreshKibanaIndex)
+        .then(function () {
+          $location.url('/management/kibana/index');
+        })
+        .catch(notify.fatal);
     }
 
-    courier.indexPatterns.delete($scope.indexPattern)
-    .then(refreshKibanaIndex)
-    .then(function () {
-      $location.url('/management/kibana/index');
-    })
-    .catch(notify.fatal);
+    const confirmModalOptions = {
+      confirmButtonText: 'Remove index pattern',
+      onConfirm: doRemove
+    };
+    confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
   };
 
   $scope.setDefaultPattern = function () {

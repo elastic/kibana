@@ -12,5 +12,8 @@ export default function toUser(text) {
     if (text.query_string) return toUser(text.query_string.query);
     return angular.toJson(text);
   }
+  if (text === '*') {
+    return '';
+  }
   return '' + text;
-};
+}

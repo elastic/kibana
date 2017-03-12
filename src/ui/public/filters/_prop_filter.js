@@ -13,17 +13,22 @@ function propFilter(prop) {
    * must contain
    *
    * @param  {array} list - array of items to filter
-   * @param  {array|string} filters - the values to match against the list. Can be
-   *                                an array, a single value as a string, or a comma
-   *                                -seperated list of items
+   * @param  {function|array|string} filters - the values to match against the list
+   *   - if a function, it is expected to take the field property as argument and returns true to keep it.
+   *   - Can be also an array, a single value as a string, or a comma-seperated list of items
    * @return {array} - the filtered list
    */
   return function (list, filters) {
     if (!filters) return filters;
+
+    if (_.isFunction(filters)) {
+      return list.filter((item) => filters(item[prop]));
+    }
+
     if (!_.isArray(filters)) filters = filters.split(',');
     if (_.contains(filters, '*')) return list;
 
-    let options = filters.reduce(function (options, filter) {
+    const options = filters.reduce(function (options, filter) {
       let type = 'include';
       let value = filter;
 
@@ -38,12 +43,12 @@ function propFilter(prop) {
     }, {});
 
     return list.filter(function (item) {
-      let value = item[prop];
+      const value = item[prop];
 
-      let excluded = options.exclude && _.contains(options.exclude, value);
+      const excluded = options.exclude && _.contains(options.exclude, value);
       if (excluded) return false;
 
-      let included = !options.include || _.contains(options.include, value);
+      const included = !options.include || _.contains(options.include, value);
       if (included) return true;
 
       return false;

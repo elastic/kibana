@@ -38,8 +38,13 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
     set('optimize.lazy', true);
-    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.ssl.cert', DEV_SSL_CERT_PATH);
+
+    if (opts.ssl) {
+      set('server.ssl.enabled', true);
+    }
+
+    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
   }
@@ -77,7 +82,7 @@ module.exports = function (program) {
   .option(
     '-c, --config <path>',
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
-    'Use mulitple --config args to include multiple config files.',
+    'Use multiple --config args to include multiple config files.',
     configPathCollector,
     [ getConfig() ]
   )

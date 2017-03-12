@@ -1,11 +1,11 @@
 import _ from 'lodash';
-export default function GetIndexPatternIdsFn(es, kbnIndex) {
+export default function GetIndexPatternIdsFn(esAdmin, kbnIndex) {
 
   // many places may require the id list, so we will cache it seperately
   // didn't incorportate with the indexPattern cache to prevent id collisions.
   let cachedPromise;
 
-  let getIds = function () {
+  const getIds = function () {
     if (cachedPromise) {
       // retrun a clone of the cached response
       return cachedPromise.then(function (cachedResp) {
@@ -13,7 +13,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
       });
     }
 
-    cachedPromise = es.search({
+    cachedPromise = esAdmin.search({
       index: kbnIndex,
       type: 'index-pattern',
       storedFields: [],
@@ -37,4 +37,4 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
   };
 
   return getIds;
-};
+}

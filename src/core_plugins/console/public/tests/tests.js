@@ -1,5 +1,14 @@
 require('ace');
 
+const module = require('ui/modules').get('app/sense');
+
+module.run(function (Private, $rootScope) {
+  module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
+    // mock the resize checker
+  };
+});
+
+
 require('ui/chrome')
   .setRootTemplate(require('./index.html'))
   .setRootController(function () {
@@ -11,13 +20,15 @@ require('ui/chrome')
     QUnit.config.autostart = false;
     QUnit.init();
 
+    require('./src/utils_tests.js');
     require('./src/url_autocomplete_tests.js');
     require('./src/url_params_tests.js');
     require('./src/curl_parsing_tests.js');
     require('./src/kb_tests.js');
     require('./src/mapping_tests.js');
     require('./src/editor_tests.js');
-    require('./src/tokenization_tests.js');
+    require('./src/input_tokenization_tests.js');
+    require('./src/output_tokenization_tests.js');
     require('./src/integration_tests.js');
 
     console.log('all tests loaded');

@@ -8,14 +8,17 @@ import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
+import shortUrlLookupProvider from './short_url_lookup';
+import setupConnectionMixin from './setup_connection';
+import registerHapiPluginsMixin from './register_hapi_plugins';
+import xsrfMixin from './xsrf';
 
 module.exports = async function (kbnServer, server, config) {
-
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = require('./short_url_lookup')(server);
-  await kbnServer.mixin(require('./register_hapi_plugins'));
-  await kbnServer.mixin(require('./setup_connection'));
+  const shortUrlLookup = shortUrlLookupProvider(server);
+  await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -29,7 +32,7 @@ module.exports = async function (kbnServer, server, config) {
           lookupCompressed: true
         }
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -41,7 +44,7 @@ module.exports = async function (kbnServer, server, config) {
       handler: {
         file: filePath
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -69,7 +72,7 @@ module.exports = async function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    const response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -97,7 +100,7 @@ module.exports = async function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      let path = req.path;
+      const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
@@ -144,5 +147,5 @@ module.exports = async function (kbnServer, server, config) {
 
   kbnServer.mixin(versionCheckMixin);
 
-  return kbnServer.mixin(require('./xsrf'));
+  return kbnServer.mixin(xsrfMixin);
 };

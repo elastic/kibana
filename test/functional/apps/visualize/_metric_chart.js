@@ -9,12 +9,12 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
-  var fromTime = '2015-09-19 06:31:44.000';
-  var toTime = '2015-09-23 18:31:44.000';
+  const fromTime = '2015-09-19 06:31:44.000';
+  const toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickMetric');
       return PageObjects.visualize.clickMetric();
@@ -31,7 +31,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('metric chart', function indexPatternCreation() {
 
     bdd.it('should show Count', function () {
-      var expectedCount = ['14,004', 'Count'];
+      const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
       return PageObjects.common.try(function tryingForTime() {
@@ -44,7 +44,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Average', function () {
-      var avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
+      const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
       return PageObjects.visualize.clickMetricEditor()
       .then(function () {
         PageObjects.common.debug('Aggregation = Average');
@@ -52,7 +52,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function selectField() {
         PageObjects.common.debug('Field = machine.ram');
-        return PageObjects.visualize.selectField('machine.ram');
+        return PageObjects.visualize.selectField('machine.ram', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -68,12 +68,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Sum', function () {
-      var sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
+      const sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
       PageObjects.common.debug('Aggregation = Sum');
       return PageObjects.visualize.selectAggregation('Sum')
       .then(function selectField() {
         PageObjects.common.debug('Field = phpmemory');
-        return PageObjects.visualize.selectField('phpmemory');
+        return PageObjects.visualize.selectField('phpmemory', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -89,13 +89,13 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Median', function () {
-      var medianBytes = ['5,565.263', '50th percentile of bytes'];
+      const medianBytes = ['5,565.263', '50th percentile of bytes'];
       //  For now, only comparing the text label part of the metric
       PageObjects.common.debug('Aggregation = Median');
       return PageObjects.visualize.selectAggregation('Median')
       .then(function selectField() {
         PageObjects.common.debug('Field = bytes');
-        return PageObjects.visualize.selectField('bytes');
+        return PageObjects.visualize.selectField('bytes', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -112,12 +112,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Min', function () {
-      var minTimestamp = ['September 20th 2015, 00:00:00.000', 'Min @timestamp'];
+      const minTimestamp = ['September 20th 2015, 00:00:00.000', 'Min @timestamp'];
       PageObjects.common.debug('Aggregation = Min');
       return PageObjects.visualize.selectAggregation('Min')
       .then(function selectField() {
         PageObjects.common.debug('Field = @timestamp');
-        return PageObjects.visualize.selectField('@timestamp');
+        return PageObjects.visualize.selectField('@timestamp', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -133,12 +133,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Max', function () {
-      var maxRelatedContentArticleModifiedTime = ['April 4th 2015, 00:54:41.000', 'Max relatedContent.article:modified_time'];
+      const maxRelatedContentArticleModifiedTime = ['April 4th 2015, 00:54:41.000', 'Max relatedContent.article:modified_time'];
       PageObjects.common.debug('Aggregation = Max');
       return PageObjects.visualize.selectAggregation('Max')
       .then(function selectField() {
         PageObjects.common.debug('Field = relatedContent.article:modified_time');
-        return PageObjects.visualize.selectField('relatedContent.article:modified_time');
+        return PageObjects.visualize.selectField('relatedContent.article:modified_time', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -154,7 +154,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Standard Deviation', function () {
-      var standardDeviationBytes = [
+      const standardDeviationBytes = [
         '-1,435.138', 'Lower Standard Deviation of bytes',
         '12,889.766', 'Upper Standard Deviation of bytes'
       ];
@@ -162,7 +162,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Standard Deviation')
       .then(function selectField() {
         PageObjects.common.debug('Field = bytes');
-        return PageObjects.visualize.selectField('bytes');
+        return PageObjects.visualize.selectField('bytes', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -178,12 +178,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Unique Count', function () {
-      var uniqueCountClientip = ['1,000', 'Unique count of clientip'];
+      const uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       PageObjects.common.debug('Aggregation = Unique Count');
       return PageObjects.visualize.selectAggregation('Unique Count')
       .then(function selectField() {
         PageObjects.common.debug('Field = clientip');
-        return PageObjects.visualize.selectField('clientip');
+        return PageObjects.visualize.selectField('clientip', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -206,7 +206,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Percentiles', function () {
-      var percentileMachineRam = [
+      const percentileMachineRam = [
         '2,147,483,648', '1st percentile of machine.ram',
         '3,221,225,472', '5th percentile of machine.ram',
         '7,516,192,768', '25th percentile of machine.ram',
@@ -220,7 +220,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.selectAggregation('Percentiles')
       .then(function selectField() {
         PageObjects.common.debug('Field =  machine.ram');
-        return PageObjects.visualize.selectField('machine.ram');
+        return PageObjects.visualize.selectField('machine.ram', 'metrics');
       })
       .then(function clickGo() {
         return PageObjects.visualize.clickGo();
@@ -236,12 +236,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show Percentile Ranks', function () {
-      var percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
+      const percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
       PageObjects.common.debug('Aggregation = Percentile Ranks');
       return PageObjects.visualize.selectAggregation('Percentile Ranks')
       .then(function selectField() {
         PageObjects.common.debug('Field =  bytes');
-        return PageObjects.visualize.selectField('memory');
+        return PageObjects.visualize.selectField('memory', 'metrics');
       })
       .then(function selectField() {
         PageObjects.common.debug('Values =  99');

@@ -9,13 +9,13 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
-  var fromTime = '2015-09-19 06:31:44.000';
-  var toTime = '2015-09-23 18:31:44.000';
+  const fromTime = '2015-09-19 06:31:44.000';
+  const toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
 
     PageObjects.common.debug('navigateToApp visualize');
-    return PageObjects.common.navigateToApp('visualize')
+    return PageObjects.common.navigateToUrl('visualize', 'new')
     .then(function () {
       PageObjects.common.debug('clickTileMap');
       return PageObjects.visualize.clickTileMap();
@@ -45,14 +45,14 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 
   bdd.describe('tile map chart', function indexPatternCreation() {
 
     bdd.it('should show correct tile map data on default zoom level', function () {
-      var expectedTableData = [ 'dn 1,429', 'dp 1,418', '9y 1,215', '9z 1,099', 'dr 1,076',
+      const expectedTableData = [ 'dn 1,429', 'dp 1,418', '9y 1,215', '9z 1,099', 'dr 1,076',
         'dj 982', '9v 938', '9q 722', '9w 475', 'cb 457', 'c2 453', '9x 420', 'dq 399',
         '9r 396', '9t 274', 'c8 271', 'dh 214', 'b6 207', 'bd 206', 'b7 167', 'f0 141',
         'be 128', '9m 126', 'bf 85', 'de 73', 'bg 71', '9p 71', 'c1 57', 'c4 50', '9u 48',
@@ -75,7 +75,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
     bdd.it('should zoom out to level 1 from default level 2', function () {
-      var expectedPrecision2Circles =  [ { color: '#750000', radius: 48 },
+      const expectedPrecision2Circles =  [ { color: '#750000', radius: 48 },
         { color: '#750000', radius: 48 },
         { color: '#750000', radius: 44 },
         { color: '#a40000', radius: 42 },
@@ -129,21 +129,30 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       // we can tell we're at level 1 because zoom out is disabled
       .then(function () {
-        return PageObjects.visualize.getMapZoomOutEnabled();
-      })
-      .then(function (enabled) {
-        expect(enabled).to.be(false);
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomOutEnabled()
+            .then(function (enabled) {
+              //should be able to zoom more as current config has 0 as min level.
+              expect(enabled).to.be(true);
+            });
+        });
       })
       .then(function () {
-        return PageObjects.visualize.getTileMapData();
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getTileMapData()
+          .then(function (data) {
+            expect(data).to.eql(expectedPrecision2Circles);
+          });
+        });
       })
-      .then(function (data) {
-        expect(data).to.eql(expectedPrecision2Circles);
+      .then(function takeScreenshot() {
+        PageObjects.common.debug('Take screenshot (success)');
+        PageObjects.common.saveScreenshot('map-after-zoom-from-1-to-2');
       });
     });
 
     bdd.it('Fit data bounds should zoom to level 3', function () {
-      var expectedPrecision2ZoomCircles =   [ { color: '#750000', radius: 192 },
+      const expectedPrecision2ZoomCircles =   [ { color: '#750000', radius: 192 },
         { color: '#750000', radius: 191 },
         { color: '#750000', radius: 177 },
         { color: '#a40000', radius: 168 },
@@ -206,12 +215,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     ** changed, then open the saved viz and check that it's back to the original data.
     */
     bdd.it('should save with zoom level and load, take screenshot', function () {
-      var vizName1 = 'Visualization TileMap';
-      var expectedTableData =  [ 'dr4 127', 'dr7 92', '9q5 91', '9qc 89', 'drk 87',
+      const vizName1 = 'Visualization TileMap';
+      const expectedTableData =  [ 'dr4 127', 'dr7 92', '9q5 91', '9qc 89', 'drk 87',
         'dps 82', 'dph 82', 'dp3 79', 'dpe 78', 'dp8 77'
       ];
 
-      var expectedTableDataZoomed = [ 'dr5r 21', 'dps8 20', '9q5b 19', 'b6uc 17',
+      const expectedTableDataZoomed = [ 'dr5r 21', 'dps8 20', '9q5b 19', 'b6uc 17',
         '9y63 17', 'c20g 16', 'dqfz 15', 'dr8h 14', 'dp8p 14', 'dp3k 14'
       ];
 
@@ -284,7 +293,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
 
-
     bdd.it('should zoom in to level 10', function () {
       // 6
       return PageObjects.visualize.clickMapZoomIn()
@@ -301,11 +309,14 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {
-        return PageObjects.visualize.getMapZoomInEnabled();
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomInEnabled()
+            .then(function (enabled) {
+              expect(enabled).to.be(true);
+            });
+        });
       })
-      .then(function (enabled) {
-        // we are at zoom level 9 here and zoom out should still be enabled
-        expect(enabled).to.be(true);
+      .then(function () {
         return PageObjects.visualize.clickMapZoomIn();
       })
       .then(function () {

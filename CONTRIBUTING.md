@@ -142,18 +142,19 @@ Start the development server.
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
+Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `npm start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
 #### Customizing `config/kibana.dev.yml`
 
-The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
+The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/current/settings.html).
 
-The `config/kibana.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibana.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
+#### Potential Optimization Pitfalls
 
-```yaml
-optimize:
-  sourceMaps: '#cheap-source-map' # options -> http://webpack.github.io/docs/configuration.html#devtool
-  unsafeCache: true
-  lazyPrebuild: false
-```
+In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
+
+ - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
+ - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
+ - (if you discover other scenarios, please send a PR!)
 
 #### Setting Up SSL
 

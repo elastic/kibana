@@ -4,19 +4,34 @@ import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
+import { transformDeprecations } from '../config/transform_deprecations';
+import { createTransform } from '../../deprecation';
+import Joi from 'joi';
 
-let byIdCache = Symbol('byIdCache');
-let pluginApis = Symbol('pluginApis');
+const byIdCache = Symbol('byIdCache');
+const pluginApis = Symbol('pluginApis');
 
 async function addPluginConfig(pluginCollection, plugin) {
+  const { config, server, settings } = pluginCollection.kbnServer;
+
+  const transformedSettings = transformDeprecations(settings);
+  const pluginSettings = get(transformedSettings, plugin.configPrefix);
+  const deprecations = plugin.getDeprecations();
+  const transformedPluginSettings = createTransform(deprecations)(pluginSettings, (message) => {
+    server.log(['warning', plugin.configPrefix, 'config', 'deprecation'], message);
+  });
+
   const configSchema = await plugin.getConfigSchema();
-  let { config } = pluginCollection.kbnServer;
-  config.extendSchema(plugin.configPrefix, configSchema);
+  config.extendSchema(configSchema, transformedPluginSettings, plugin.configPrefix);
 }
 
-function removePluginConfig(pluginCollection, plugin) {
-  let { config } = pluginCollection.kbnServer;
+function disablePluginConfig(pluginCollection, plugin) {
+  // when disabling a plugin's config we remove the existing schema and
+  // replace it with a simple schema/config that only has enabled set to false
+  const { config } = pluginCollection.kbnServer;
   config.removeSchema(plugin.configPrefix);
+  const schema = Joi.object({ enabled: Joi.bool() });
+  config.extendSchema(schema, { enabled: false }, plugin.configPrefix);
 }
 
 module.exports = class Plugins extends Collection {
@@ -28,18 +43,18 @@ module.exports = class Plugins extends Collection {
   }
 
   async new(path) {
-    let api = new PluginApi(this.kbnServer, path);
+    const api = new PluginApi(this.kbnServer, path);
     this[pluginApis].add(api);
 
-    let output = [].concat(require(path)(api) || []);
-    let config = this.kbnServer.config;
+    const output = [].concat(require(path)(api) || []);
+    const config = this.kbnServer.config;
 
     if (!output.length) return;
 
     // clear the byIdCache
     this[byIdCache] = null;
 
-    for (let plugin of output) {
+    for (const plugin of output) {
       if (!plugin instanceof api.Plugin) {
         throw new TypeError('unexpected plugin export ' + inspect(plugin));
       }
@@ -50,7 +65,7 @@ module.exports = class Plugins extends Collection {
   }
 
   async disable(plugin) {
-    removePluginConfig(this, plugin);
+    disablePluginConfig(this, plugin);
     this.delete(plugin);
   }
 

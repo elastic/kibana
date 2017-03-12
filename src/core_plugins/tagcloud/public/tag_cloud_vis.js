@@ -15,7 +15,7 @@ visTypes.register(function TagCloudProvider(Private) {
     title: 'Tag cloud',
     implementsRenderComplete: true,
     description: 'A tag cloud visualization is a visual representation of text data, ' +
-    'typically used to visualize free form text. Tags are usually single words. The font size of word corresponds' +
+    'typically used to visualize individual words. The font size of a word corresponds ' +
     'with its importance.',
     icon: 'fa-cloud',
     template: tagCloudTemplate,
@@ -37,7 +37,7 @@ visTypes.register(function TagCloudProvider(Private) {
         title: 'Tag Size',
         min: 1,
         max: 1,
-        aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks'],
+        aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]

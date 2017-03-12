@@ -10,9 +10,6 @@
       <ul class="list-unstyled sidebar-item index-pattern-selection">
         <li css-truncate class="sidebar-item-title" title="{{id}}" ng-repeat="id in indexPatternList | orderBy" ng-show="indexPattern.id != id" ng-click="setIndexPattern(id)">{{id}}</li>
       </ul>
-      <div ng-click="showIndexPatternSelection = !showIndexPatternSelection" class="discover-field-details-close">
-        <i class="fa fa-chevron-up"></i>
-      </div>
     </div>
   </div>
   <div ng-hide="indexPatternList.length > 1">
@@ -49,9 +46,6 @@
   </div>
 
   <div class="sidebar-item" ng-show="showFilter">
-    <div ng-click="showFilter = !showFilter" class="discover-field-details-close">
-        <i aria-hidden="true" class="fa fa-chevron-up"></i>
-    </div>
     <form role="form" class="discover-field-details">
       <div class="form-group">
         <label>

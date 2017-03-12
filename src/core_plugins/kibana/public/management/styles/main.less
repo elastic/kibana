@@ -12,22 +12,15 @@ kbn-management-objects-view {
   display: block;
 }
 
-/**
- * 1. Allow navbar to get taller on narrow screens.
-*/
-.management-navbar {
-  min-height: 70px; /* 1 */
+.tab-account {
+  background-color: #FFFFFF;
 }
 
 .tab-management {
-  background-color: @kibanaGray6;
+  background-color: #FFFFFF;
 }
 
-.settings-nav {
-  text-transform: capitalize;
-}
-
-li.kbn-management-tab:first-letter {
+.kbn-management-tab:first-letter {
   text-transform: capitalize;
 }
 
@@ -45,6 +38,9 @@ kbn-management-landing {
     .panel-body {
       padding-bottom: 30px;
       position: relative;
+      border-left: 1px solid #E4E4E3;
+      border-right: 1px solid #E4E4E3;
+      border-bottom: 1px solid #E4E4E3;
     }
   }
 
@@ -150,9 +146,6 @@ kbn-management-advanced {
 }
 
 kbn-management-objects-view {
-  label {
-    font-family: @font-family-monospace;
-  }
   .ace_editor { height: 300px; }
 }
 
@@ -188,19 +181,6 @@ kbn-management-objects-view {
     }
     &:hover .field-popularize {
       display: inline;
-    }
-  }
-
-  .index-pattern-name {
-    display: flex;
-    align-items: center;
-
-    .title {
-      flex: 1 1 auto;
-    }
-
-    .controls {
-      flex: 4 0 auto;
     }
   }
 }

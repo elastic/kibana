@@ -41,7 +41,7 @@ module.factory('SavedSheet', function (courier, config) {
     title: 'text',
     hits: 'integer',
     description: 'text',
-    timelion_sheet: 'keyword',
+    timelion_sheet: 'text',
     timelion_interval: 'keyword',
     timelion_other_interval: 'keyword',
     timelion_chart_height: 'integer',
@@ -49,6 +49,9 @@ module.factory('SavedSheet', function (courier, config) {
     timelion_rows: 'integer',
     version: 'integer'
   };
+
+  // Order these fields to the top, the rest are alphabetical
+  SavedSheet.fieldOrder = ['title', 'description'];
 
   return SavedSheet;
 });

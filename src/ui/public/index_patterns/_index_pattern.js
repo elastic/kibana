@@ -7,14 +7,14 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
 import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import DocSourceProvider from 'ui/courier/data_source/doc_source';
+import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, safeConfirm) {
+export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
@@ -45,7 +45,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
-      type: 'keyword',
+      type: 'text',
       _serialize(map = {}) {
         const serialized = _.transform(map, serialize);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
@@ -337,7 +337,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         }
         const confirmMessage = 'Are you sure you want to overwrite this?';
 
-        return safeConfirm(confirmMessage)
+        return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
         .then(() => Promise
           .try(() => {
             const cached = patternCache.get(this.id);
@@ -383,4 +383,4 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   }
 
   return IndexPattern;
-};
+}

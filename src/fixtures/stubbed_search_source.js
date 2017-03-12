@@ -4,8 +4,9 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 export default function stubSearchSource(Private, $q, Promise) {
   let deferedResult = $q.defer();
-  let indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
+  let onResultsCount = 0;
   return {
     sort: sinon.spy(),
     size: sinon.spy(),
@@ -24,10 +25,15 @@ export default function stubSearchSource(Private, $q, Promise) {
       deferedResult = $q.defer();
     },
     onResults: function () {
+      onResultsCount++;
+
       // Up to the test to resolve this manually
       // For example:
       // someHandler.resolve(require('fixtures/search_response'))
       return deferedResult.promise;
+    },
+    getOnResultsCount: function () {
+      return onResultsCount;
     },
     onError: function () { return $q.defer().promise; },
     _flatten: function () {
@@ -35,4 +41,4 @@ export default function stubSearchSource(Private, $q, Promise) {
     }
   };
 
-};
+}

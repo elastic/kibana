@@ -7,18 +7,20 @@
       <bread-crumbs
         data-transclude-slot="topLeftCorner"
         omit-current-page="true"
+        use-links="true"
+        omit-pages="omitPages"
       ></bread-crumbs>
 
       <!-- Tabs. -->
-      <div data-transclude-slot="bottomRow" class="localTabs">
-        <span ng-if="!sectionName" class="localTab">
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <span ng-if="!sectionName" class="kuiLocalTab">
           {{::section.display}}
         </span>
         <a
           ng-if="sectionName"
           ng-repeat="item in section.items.inOrder"
-          class="localTab"
-          ng-class="{ 'localTab-isSelected': item.active, 'localTab-disabled': !item.url }"
+          class="kuiLocalTab"
+          ng-class="{ 'kuiLocalTab-isSelected': item.active, 'kuiLocalTab-disabled': !item.url }"
           kbn-href="{{::item.url}}"
           data-test-subj="{{::item.name}}"
           tooltip="{{::item.tooltip}}"

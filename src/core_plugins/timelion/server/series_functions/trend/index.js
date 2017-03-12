@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var Chainable = require('../../lib/classes/chainable');
+const _ = require('lodash');
+const Chainable = require('../../lib/classes/chainable');
 import * as regress from './lib/regress';
 
-var validRegressions = {
+const validRegressions = {
   linear: 'linear',
   log: 'logarithmic',
 };
@@ -33,7 +33,7 @@ module.exports = new Chainable('trend', {
   ],
   help: 'Draws a trend line using a specified regression algorithm',
   fn: function absFn(args) {
-    let newSeries = _.cloneDeep(args.byName.inputSeries);
+    const newSeries = _.cloneDeep(args.byName.inputSeries);
 
     _.each(newSeries.list, function (series) {
       const length = series.data.length;

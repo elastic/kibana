@@ -10,10 +10,10 @@ describe('addToSiri', function () {
   }));
 
   it('creates a new series the first time it sees an id', function () {
-    let series = new Map();
-    let point = {};
-    let id = 'id';
-    addToSiri(series, point, id);
+    const series = new Map();
+    const point = {};
+    const id = 'id';
+    addToSiri(series, point, id, id, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
@@ -23,14 +23,14 @@ describe('addToSiri', function () {
   });
 
   it('adds points to existing series if id has been seen', function () {
-    let series = new Map();
-    let id = 'id';
+    const series = new Map();
+    const id = 'id';
 
-    let point = {};
-    addToSiri(series, point, id);
+    const point = {};
+    addToSiri(series, point, id, id, { id: id });
 
-    let point2 = {};
-    addToSiri(series, point2, id);
+    const point2 = {};
+    addToSiri(series, point2, id, id, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
@@ -41,11 +41,11 @@ describe('addToSiri', function () {
   });
 
   it('allows overriding the series label', function () {
-    let series = new Map();
-    let id = 'id';
-    let label = 'label';
-    let point = {};
-    addToSiri(series, point, id, label);
+    const series = new Map();
+    const id = 'id';
+    const label = 'label';
+    const point = {};
+    addToSiri(series, point, id, label, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');

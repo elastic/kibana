@@ -1,12 +1,12 @@
 
-var path = require('path');
+const path = require('path');
 
 module.exports = function (kibana) {
-  var mainFile = 'plugins/timelion/app';
+  let mainFile = 'plugins/timelion/app';
 
-  var ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
-  var protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
-  var descriptor = ownDescriptor || protoDescriptor || {};
+  const ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
+  const protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
+  const descriptor = ownDescriptor || protoDescriptor || {};
   if (descriptor.get) {
     // the autoload list has been replaced with a getter that complains about
     // improper access, bypass that getter by seeing if it is defined
@@ -23,7 +23,7 @@ module.exports = function (kibana) {
         icon: 'plugins/timelion/icon.svg',
         main: mainFile,
         injectVars: function (server, options) {
-          var config = server.config();
+          const config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
@@ -37,44 +37,7 @@ module.exports = function (kibana) {
       ],
       visTypes: [
         'plugins/timelion/vis'
-      ],
-      modules: {
-        flot$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot'),
-          imports: 'jquery'
-        },
-        flotTime$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.time'),
-          imports: 'flot'
-        },
-        /*flotCanvas$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.canvas'),
-          imports: 'flot'
-        },*/
-        flotSymbol$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.symbol'),
-          imports: 'flot'
-        },
-        angularSortableView$: {
-          path: path.resolve(__dirname, 'bower_components/angular-sortable-view/src/angular-sortable-view.js')
-        },
-        flotCrosshair$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.crosshair'),
-          imports: 'flot'
-        },
-        flotSelection$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.selection'),
-          imports: 'flot'
-        },
-        flotStack$: {
-          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.stack'),
-          imports: 'flot'
-        },
-        flotAxisLabels$: {
-          path: path.resolve(__dirname, 'vendor_components/flot/jquery.flot.axislabels'),
-          imports: 'flot'
-        }
-      }
+      ]
     },
     init: require('./init.js'),
   });

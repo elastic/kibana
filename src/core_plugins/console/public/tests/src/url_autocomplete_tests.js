@@ -2,7 +2,7 @@ let _ = require('lodash');
 let url_pattern_matcher = require('../../src/autocomplete/url_pattern_matcher');
 let autocomplete_engine = require('../../src/autocomplete/engine');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
 module("Url autocomplete");
 
@@ -32,7 +32,7 @@ function patterns_test(name, endpoints, tokenPath, expectedContext, globalUrlCom
     if (expectedContext.autoCompleteSet) {
       expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
         if (_.isString(t)) {
-          t = {name: t}
+          t = { name: t }
         }
         return t;
       });
@@ -63,7 +63,7 @@ function patterns_test(name, endpoints, tokenPath, expectedContext, globalUrlCom
 
 function t(name, meta) {
   if (meta) {
-    return {name: name, meta: meta};
+    return { name: name, meta: meta };
   }
   return name;
 }
@@ -79,14 +79,14 @@ function t(name, meta) {
   patterns_test("simple single path - completion",
     endpoints,
     "a/b$",
-    {endpoint: "1"}
+    { endpoint: "1" }
   );
 
 
   patterns_test("simple single path - completion, with auto complete",
     endpoints,
     "a/b",
-    {autoCompleteSet: []}
+    { autoCompleteSet: [] }
   );
 
   patterns_test("simple single path - partial, without auto complete",
@@ -98,13 +98,13 @@ function t(name, meta) {
   patterns_test("simple single path - partial, with auto complete",
     endpoints,
     "a",
-    {autoCompleteSet: ["b"]}
+    { autoCompleteSet: ["b"] }
   );
 
   patterns_test("simple single path - partial, with auto complete",
     endpoints,
     [],
-    {autoCompleteSet: ["a/b"]}
+    { autoCompleteSet: ["a/b"] }
   );
 
   patterns_test("simple single path - different path",
@@ -132,31 +132,31 @@ function t(name, meta) {
   patterns_test("shared path  - completion 1",
     endpoints,
     "a/b$",
-    {endpoint: "1"}
+    { endpoint: "1" }
   );
 
   patterns_test("shared path  - completion 2",
     endpoints,
     "a/c$",
-    {endpoint: "2"}
+    { endpoint: "2" }
   );
 
   patterns_test("shared path  - completion 1 with param",
     endpoints,
     "a/b/v$",
-    {endpoint: "1", p: "v"}
+    { endpoint: "1", p: "v" }
   );
 
   patterns_test("shared path - partial, with auto complete",
     endpoints,
     "a",
-    {autoCompleteSet: ["b", "c"]}
+    { autoCompleteSet: ["b", "c"] }
   );
 
   patterns_test("shared path - partial, with auto complete of param, no options",
     endpoints,
     "a/b",
-    {autoCompleteSet: []}
+    { autoCompleteSet: [] }
   );
 
   patterns_test("shared path - partial, without auto complete",
@@ -168,7 +168,7 @@ function t(name, meta) {
   patterns_test("shared path - different path - with auto complete",
     endpoints,
     "a/e",
-    {autoCompleteSet: []}
+    { autoCompleteSet: [] }
   );
 
   patterns_test("shared path - different path - without auto complete",
@@ -198,25 +198,25 @@ function t(name, meta) {
   patterns_test("option testing - completion 1",
     endpoints,
     "a/a$",
-    {endpoint: "1", p: ["a"]}
+    { endpoint: "1", p: ["a"] }
   );
 
   patterns_test("option testing - completion 2",
     endpoints,
     "a/b$",
-    {endpoint: "1", p: ["b"]}
+    { endpoint: "1", p: ["b"] }
   );
 
   patterns_test("option testing - completion 3",
     endpoints,
     "a/b,a$",
-    {endpoint: "1", p: ["b", "a"]}
+    { endpoint: "1", p: ["b", "a"] }
   );
 
   patterns_test("option testing - completion 4",
     endpoints,
     "a/c$",
-    {endpoint: "2"}
+    { endpoint: "2" }
   );
 
   patterns_test("option testing  - completion 5",
@@ -228,7 +228,7 @@ function t(name, meta) {
   patterns_test("option testing - partial, with auto complete",
     endpoints,
     "a",
-    {autoCompleteSet: [t("a", "p"), t("b", "p"), "c"]}
+    { autoCompleteSet: [t("a", "p"), t("b", "p"), "c"] }
   );
 
   patterns_test("option testing - partial, without auto complete",
@@ -241,7 +241,7 @@ function t(name, meta) {
   patterns_test("option testing - different path - with auto complete",
     endpoints,
     "a/e",
-    {autoCompleteSet: []}
+    { autoCompleteSet: [] }
   );
 
 
@@ -284,14 +284,14 @@ function t(name, meta) {
   patterns_test("global parameters testing - completion 1",
     endpoints,
     "a/a$",
-    {endpoint: "1", p: ["a"]},
+    { endpoint: "1", p: ["a"] },
     globalFactories
   );
 
   patterns_test("global parameters testing - completion 2",
     endpoints,
     "b/g1$",
-    {endpoint: "2", p: ["g1"]},
+    { endpoint: "2", p: ["g1"] },
     globalFactories
   );
 
@@ -299,27 +299,27 @@ function t(name, meta) {
   patterns_test("global parameters testing - partial, with auto complete",
     endpoints,
     "a",
-    {autoCompleteSet: [t("a", "p"), t("b", "p")]},
+    { autoCompleteSet: [t("a", "p"), t("b", "p")] },
     globalFactories
   );
 
   patterns_test("global parameters testing - partial, with auto complete 2",
     endpoints,
     "b",
-    {autoCompleteSet: [t("g1", "p"), t("g2", "p"), t("la", "l"), t("lb", "l")]},
+    { autoCompleteSet: [t("g1", "p"), t("g2", "p"), t("la", "l"), t("lb", "l")] },
     globalFactories
   );
 
   patterns_test("Non valid token acceptance - partial, with auto complete 1",
     endpoints,
     "b/la",
-    {autoCompleteSet: ["c"], "l": ["la"]},
+    { autoCompleteSet: ["c"], "l": ["la"] },
     globalFactories
   );
   patterns_test("Non valid token acceptance - partial, with auto complete 2",
     endpoints,
     "b/non_valid",
-    {autoCompleteSet: ["c"], "l": ["non_valid"]},
+    { autoCompleteSet: ["c"], "l": ["non_valid"] },
     globalFactories
   );
 
@@ -336,25 +336,25 @@ function t(name, meta) {
   patterns_test("look ahead - autocomplete before param 1",
     endpoints,
     "a",
-    {autoCompleteSet: ["b"]}
+    { autoCompleteSet: ["b"] }
   );
 
   patterns_test("look ahead - autocomplete before param 2",
     endpoints,
     [],
-    {autoCompleteSet: ["a/b"]}
+    { autoCompleteSet: ["a/b"] }
   );
 
   patterns_test("look ahead - autocomplete after param 1",
     endpoints,
     "a/b/v",
-    {autoCompleteSet: ["c/e"], "p": "v"}
+    { autoCompleteSet: ["c/e"], "p": "v" }
   );
 
   patterns_test("look ahead - autocomplete after param 2",
     endpoints,
     "a/b/v/c",
-    {autoCompleteSet: ["e"], "p": "v"}
+    { autoCompleteSet: ["e"], "p": "v" }
   );
 })();
 
@@ -380,7 +380,7 @@ function t(name, meta) {
   patterns_test("Competing endpoints - priority 1",
     e,
     "a/b$",
-    {method: "GET", endpoint: "1_param", "p": "b"}
+    { method: "GET", endpoint: "1_param", "p": "b" }
   );
   e = _.cloneDeep(endpoints);
   e["1_param"].priority = 1;
@@ -388,7 +388,7 @@ function t(name, meta) {
   patterns_test("Competing endpoints - priority 2",
     e,
     "a/b$",
-    {method: "GET", endpoint: "2_explicit"}
+    { method: "GET", endpoint: "2_explicit" }
   );
 
   e = _.cloneDeep(endpoints);
@@ -396,7 +396,7 @@ function t(name, meta) {
   patterns_test("Competing endpoints - priority 3",
     e,
     "a/b$",
-    {method: "GET", endpoint: "2_explicit"}
+    { method: "GET", endpoint: "2_explicit" }
   );
 
 })();
@@ -431,44 +431,44 @@ function t(name, meta) {
   patterns_test("Competing endpoint - sub url of another - auto complete",
     endpoints,
     "a",
-    {method: "GET", autoCompleteSet: ["b"]}
+    { method: "GET", autoCompleteSet: ["b"] }
   );
   patterns_test("Competing endpoint - sub url of another, complete 1",
     endpoints,
     "a$",
-    {method: "GET", endpoint: "1_GET"}
+    { method: "GET", endpoint: "1_GET" }
   );
   patterns_test("Competing endpoint - sub url of another, complete 2",
     endpoints,
     "a$",
-    {method: "PUT", endpoint: "1_PUT"}
+    { method: "PUT", endpoint: "1_PUT" }
   );
   patterns_test("Competing endpoint - sub url of another, complete 3",
     endpoints,
     "a$",
-    {method: "DELETE"}
+    { method: "DELETE" }
   );
 
   patterns_test("Competing endpoint - extension of another, complete 1, auto complete",
     endpoints,
     "a/b$",
-    {method: "PUT", autoCompleteSet: []}
+    { method: "PUT", autoCompleteSet: [] }
   );
 
   patterns_test("Competing endpoint - extension of another, complete 1",
     endpoints,
     "a/b$",
-    {method: "GET", endpoint: "2_GET"}
+    { method: "GET", endpoint: "2_GET" }
   );
 
   patterns_test("Competing endpoint - extension of another, complete 1",
     endpoints,
     "a/b$",
-    {method: "DELETE", endpoint: "2_DELETE"}
+    { method: "DELETE", endpoint: "2_DELETE" }
   );
   patterns_test("Competing endpoint - extension of another, complete 1",
     endpoints,
     "a/b$",
-    {method: "PUT"}
+    { method: "PUT" }
   );
 })();

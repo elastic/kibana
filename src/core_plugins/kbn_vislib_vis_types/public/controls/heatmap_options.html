@@ -1,0 +1,206 @@
+<div>
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="colorSchema">
+      Color Schema
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.colorSchema"
+        ng-options="mode for mode in vis.type.params.colorSchemas"
+      ></select>
+    </div>
+    <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="invertColors">
+      Reverse Color Schema
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="vis.params.invertColors">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="axisScale">
+      Color Scale
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="axisScale"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="valueAxis.scale.type"
+        ng-options="mode for mode in vis.type.params.scales"
+      ></select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="defaultYExtents">
+      Scale to Data Bounds
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="valueAxis.scale.defaultYExtents">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
+    <label class="kuiSideBarFormRow__label" for="percentageMode">
+      Percentage Mode
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="vis.params.percentageMode">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
+    <label class="kuiSideBarFormRow__label" for="colorsNumber">
+      Number of colors
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        id="colorsNumber"
+        class="kuiSideBarInput"
+        ng-model="vis.params.colorsNumber"
+        type="number"
+        greater-than="1"
+        less-than="11"
+      >
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="toggleColorRangeSection()"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          Custom Ranges
+        </span>
+      </div>
+      <input aria-label="enable"
+             ng-model="vis.params.setColorRange"
+             type="checkbox"
+             class="kuiSideBarSectionTitle__action"
+             ng-click="toggleColorRangeSection(true)"
+      >
+    </div>
+
+    <div ng-if="vis.params.setColorRange" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
+          <tr>
+            <th>
+              <label>From</label>
+            </th>
+            <th colspan="2">
+              <label>To</label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in vis.params.colorsRange track by $index">
+            <td>
+              <input
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-or-equal-than="{{getGreaterThan($index)}}"
+                step="any" />
+            </td>
+            <td>
+              <input
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-than="range.from"
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                class="btn btn-danger btn-xs">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!vis.params.colorsRange.length">
+          <p>
+            <i class="fa fa-danger text-danger"></i>
+            <strong>Required:</strong> You must specify at least one range.
+          </p>
+        </div>
+
+        <div
+          ng-click="addRange()"
+          class="sidebar-item-button primary">
+          Add Range
+        </div>
+        <div class="text text-center text-info">Note: colors can be changed in the legend</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="toggleLabelSection()"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{
+          'fa-caret-down': showLabels,
+          'fa-caret-right': !showLabels
+          }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          Show Labels
+        </span>
+      </div>
+      <input aria-label="enable"
+             ng-model="valueAxis.labels.show"
+             type="checkbox"
+             class="kuiSideBarSectionTitle__action"
+      >
+    </div>
+    <div ng-if="valueAxis.labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="rotateLabels">
+            Rotate
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="options.rotateLabels">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="labelColor">
+            Color
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="labelColor"
+              class="kuiSideBarInput"
+              ng-model="valueAxis.labels.color"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

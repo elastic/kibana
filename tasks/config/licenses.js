@@ -29,6 +29,7 @@ module.exports = function (grunt) {
         'MIT/X11',
         'OFL-1.1 AND MIT',
         'Public domain',
+        'Unlicense',
         'WTFPL',
         'new BSD, and MIT'
       ],
@@ -48,6 +49,7 @@ module.exports = function (grunt) {
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
+        'ua-parser-js@0.7.12': ['MIT']
       }
     }
   };

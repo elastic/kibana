@@ -1,20 +1,20 @@
-var filename = require('path').basename(__filename);
-var fn = require(`../${filename}`);
+const filename = require('path').basename(__filename);
+const fn = require(`../${filename}`);
 
-var _ = require('lodash');
-var expect = require('chai').expect;
-var seriesList = require('./fixtures/seriesList.js')();
-var invoke = require('./helpers/invoke_series_fn.js');
+const _ = require('lodash');
+const expect = require('chai').expect;
+const seriesList = require('./fixtures/seriesList.js')();
+const invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, function () {
   it('should return the positive value of every value', function () {
 
     return invoke(fn, [seriesList]).then(function (result) {
-      var before = _.filter(result.input[0].list[0].data, function (point) {
+      const before = _.filter(result.input[0].list[0].data, function (point) {
         return (point[1] < 0);
       });
 
-      var after = _.filter(result.output.list[0].data, function (point) {
+      const after = _.filter(result.output.list[0].data, function (point) {
         return (point[1] < 0);
       });
 

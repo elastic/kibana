@@ -15,8 +15,8 @@ describe('Date Format', function () {
     settings = config;
 
     fieldFormats = Private(RegistryFieldFormatsProvider);
-    let DateFormat = fieldFormats.getType('date');
-    let date = new DateFormat();
+    const DateFormat = fieldFormats.getType('date');
+    const date = new DateFormat();
 
     convert = date.convert.bind(date);
   }));
@@ -30,17 +30,17 @@ describe('Date Format', function () {
     function setDefaultTimezone() {
       moment.tz.setDefault(settings.get('dateFormat:tz'));
     }
-    let time = 1445027693942;
+    const time = 1445027693942;
 
     off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
 
     settings.set('dateFormat:tz', 'America/Chicago');
     $scope.$digest();
-    let chicagoTime = convert(time);
+    const chicagoTime = convert(time);
 
     settings.set('dateFormat:tz', 'America/Phoenix');
     $scope.$digest();
-    let phoenixTime = convert(time);
+    const phoenixTime = convert(time);
 
     expect(chicagoTime).not.to.equal(phoenixTime);
     off();

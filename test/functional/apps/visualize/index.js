@@ -19,9 +19,9 @@ bdd.describe('visualize app', function () {
     remote.setWindowSize(1280,800);
 
     PageObjects.common.debug('Starting visualize before method');
-    var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+    return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');
@@ -40,4 +40,7 @@ bdd.describe('visualize app', function () {
   require('./_pie_chart');
   require('./_tile_map');
   require('./_vertical_bar_chart');
+  require('./_heatmap_chart');
+  require('./_point_series_options');
+  require('./_shared_item');
 });

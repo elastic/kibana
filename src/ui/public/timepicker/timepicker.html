@@ -4,7 +4,7 @@
 
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <div class="localDropdownTitle">Time Range</div>
+      <div class="kuiLocalDropdownTitle">Time Range</div>
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
@@ -106,7 +106,7 @@
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.from" max-date="absolute.to" show-weeks="false"></datepicker>
+                    <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="absolute.to" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
@@ -119,7 +119,7 @@
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.to" min-date="absolute.from" show-weeks="false"></datepicker>
+                    <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="absolute.from" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
@@ -141,7 +141,7 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <div class="localDropdownTitle">Refresh Interval</div>
+      <div class="kuiLocalDropdownTitle">Refresh Interval</div>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">

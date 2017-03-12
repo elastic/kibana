@@ -19,10 +19,10 @@ export default function (chrome, internals) {
   };
 
   chrome.addBasePath = function (url) {
-    let isUrl = url && isString(url);
+    const isUrl = url && isString(url);
     if (!isUrl) return url;
 
-    let parsed = parse(url, true, true);
+    const parsed = parse(url, true, true);
     if (!parsed.host && parsed.pathname) {
       if (parsed.pathname[0] === '/') {
         parsed.pathname = chrome.getBasePath() + parsed.pathname;
@@ -126,7 +126,7 @@ export default function (chrome, internals) {
 
   internals.nav.forEach(link => {
     // convert all link urls to absolute urls
-    let a = document.createElement('a');
+    const a = document.createElement('a');
     a.setAttribute('href', link.url);
     link.url = a.href;
   });
@@ -134,4 +134,4 @@ export default function (chrome, internals) {
   // simulate a possible change in url to initialize the
   // link.active and link.lastUrl properties
   internals.trackPossibleSubUrl(document.location.href);
-};
+}

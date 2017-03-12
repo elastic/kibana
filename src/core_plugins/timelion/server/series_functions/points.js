@@ -1,7 +1,7 @@
-var alter = require('../lib/alter.js');
-var _ = require('lodash');
+const alter = require('../lib/alter.js');
+const _ = require('lodash');
 
-var Chainable = require('../lib/classes/chainable');
+const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('points', {
   args: [
     {
@@ -58,7 +58,7 @@ module.exports = new Chainable('points', {
       }
 
       symbol = symbol || 'circle';
-      var validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
+      const validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
       if (!_.contains(['triangle', 'cross', 'square', 'diamond', 'circle'], symbol)) {
         throw new Error('Valid symbols are: ' + validSymbols.join(', '));
       }

@@ -1,5 +1,8 @@
 
 import expect from 'expect.js';
+import {
+  DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
+} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
 import {
   bdd,
@@ -11,122 +14,114 @@ import {
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('dashboard tab', function describeIndexTests() {
-  bdd.before(function () {
-    PageObjects.common.debug('Starting dashboard before method');
-    var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
-    // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
-    // and load a set of makelogs data
-    .then(function loadkibanaVisualizations() {
-      PageObjects.common.debug('load kibana index with visualizations');
-      return elasticDump.elasticLoad('dashboard','.kibana');
-    })
-    .then(function () {
-      PageObjects.common.debug('navigateToApp dashboard');
-      return PageObjects.common.navigateToApp('dashboard');
-    })
-    // wait for the logstash data load to finish if it hasn't already
-    .then(function () {
-      return logstash;
-    });
+  bdd.before(async function () {
+    return PageObjects.dashboard.initTests();
   });
 
-  bdd.describe('add visualizations to dashboard', function dashboardTest() {
-    var visualizations = ['Visualization漢字 AreaChart',
-      'Visualization☺漢字 DataTable',
-      'Visualization漢字 LineChart',
-      'Visualization PieChart',
-      'Visualization TileMap',
-      'Visualization☺ VerticalBarChart',
-      'Visualization MetricChart'
-    ];
+  bdd.it('should be able to add visualizations to dashboard', async function addVisualizations() {
+    PageObjects.common.saveScreenshot('Dashboard-no-visualizations');
 
-    bdd.it('should be able to add visualizations to dashboard', function addVisualizations() {
-      PageObjects.common.saveScreenshot('Dashboard-no-visualizations');
+    // This flip between apps fixes the url so state is preserved when switching apps in test mode.
+    // Without this flip the url in test mode looks something like
+    // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
+    // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
+    await PageObjects.header.clickVisualize();
+    await PageObjects.header.clickDashboard();
 
-      function addVisualizations(arr) {
-        return arr.reduce(function (promise, vizName) {
-          return promise
-          .then(function () {
-            return PageObjects.dashboard.addVisualization(vizName);
-          });
-        }, Promise.resolve());
-      }
+    await PageObjects.dashboard.clickNewDashboard();
+    await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
-      return addVisualizations(visualizations)
-      .then(function () {
-        PageObjects.common.debug('done adding visualizations');
-        PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
-      });
+    PageObjects.common.debug('done adding visualizations');
+    PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
+  });
+
+  bdd.it('set the timepicker time to that which contains our test data', async function setTimepicker() {
+    await PageObjects.dashboard.setTimepickerInDataRange();
+  });
+
+  bdd.it('should save and load dashboard', async function saveAndLoadDashboard() {
+    const dashboardName = 'Dashboard Test 1';
+    await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.dashboard.gotoDashboardLandingPage();
+
+    await PageObjects.common.try(function () {
+      PageObjects.common.debug('now re-load previously saved dashboard');
+      return PageObjects.dashboard.loadSavedDashboard(dashboardName);
     });
+    await PageObjects.common.saveScreenshot('Dashboard-load-saved');
+  });
 
-    bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
-      var fromTime = '2015-09-19 06:31:44.000';
-      var toTime = '2015-09-23 18:31:44.000';
-
-      // .then(function () {
-      PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      return PageObjects.header.setAbsoluteRange(fromTime, toTime)
-      .then(function () {
-        return PageObjects.header.isGlobalLoadingIndicatorHidden();
-      })
-      .then(function takeScreenshot() {
-        PageObjects.common.saveScreenshot('Dashboard-set-timepicker');
-      });
-    });
-
-    bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
-      const dashboardName = 'Dashboard Test 1';
-      // TODO: save time on the dashboard and test it
-      return PageObjects.dashboard.saveDashboard(dashboardName)
-      // click New Dashboard just to clear the one we just created
-      .then(function () {
-        return PageObjects.common.try(function () {
-          PageObjects.common.debug('saved Dashboard, now click New Dashboard');
-          return PageObjects.dashboard.clickNewDashboard();
-        });
-      })
-      .then(function () {
-        return PageObjects.common.try(function () {
-          PageObjects.common.debug('now re-load previously saved dashboard');
-          return PageObjects.dashboard.loadSavedDashboard(dashboardName);
-        });
-      })
-      .then(function () {
-        PageObjects.common.saveScreenshot('Dashboard-load-saved');
-      });
-    });
-
-    bdd.it('should have all the expected visualizations', function checkVisualizations() {
-      return PageObjects.common.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelTitles()
+  bdd.it('should have all the expected visualizations', function checkVisualizations() {
+    return PageObjects.common.tryForTime(10000, function () {
+      return PageObjects.dashboard.getPanelTitles()
         .then(function (panelTitles) {
           PageObjects.common.log('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql(visualizations);
+          expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
         });
-      })
+    })
       .then(function () {
         PageObjects.common.saveScreenshot('Dashboard-has-visualizations');
       });
-    });
+  });
 
-    bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
-        { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
-        { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
-        { dataCol: '10', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization PieChart' },
-        { dataCol: '1', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization TileMap' },
-        { dataCol: '4', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺ VerticalBarChart' },
-        { dataCol: '7', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization MetricChart' }
-      ];
-      return PageObjects.common.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelData()
+  bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
+    const width = DEFAULT_PANEL_WIDTH;
+    const height = DEFAULT_PANEL_HEIGHT;
+    const titles = PageObjects.dashboard.getTestVisualizationNames();
+    const visObjects = [
+      { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[0] },
+      {  dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
+      { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[2] },
+      { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[3] },
+      { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[4] },
+      { dataCol: width + 1, dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[5] },
+      { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: titles[6] }
+    ];
+    return PageObjects.common.tryForTime(10000, function () {
+      return PageObjects.dashboard.getPanelSizeData()
         .then(function (panelTitles) {
           PageObjects.common.log('visualization titles = ' + panelTitles);
           PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
           expect(panelTitles).to.eql(visObjects);
         });
+    });
+  });
+
+
+  bdd.it('filters when a pie chart slice is clicked', async function () {
+    let descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
+    expect(descriptions.length).to.equal(0);
+
+    await PageObjects.dashboard.filterOnPieSlice();
+    descriptions = await PageObjects.dashboard.getFilterDescriptions();
+    expect(descriptions.length).to.equal(1);
+  });
+
+  bdd.it('retains dark theme in state', async function () {
+    await PageObjects.dashboard.useDarkTheme(true);
+    await PageObjects.header.clickVisualize();
+    await PageObjects.header.clickDashboard();
+    const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
+    expect(isDarkThemeOn).to.equal(true);
+  });
+
+  bdd.it('should have shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
+      .then(function (count) {
+        PageObjects.common.log('shared-items-count = ' + count);
+        expect(count).to.eql(visualizations.length);
       });
+  });
+
+  bdd.it('should have panels with expected shared-item title and description', function checkTitles() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, function () {
+      return PageObjects.dashboard.getPanelSharedItemData()
+        .then(function (data) {
+          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
+          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+        });
     });
   });
 });

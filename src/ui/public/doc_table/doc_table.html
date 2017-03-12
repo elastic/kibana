@@ -1,4 +1,5 @@
 <div
+  class="doc-table-container"
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
@@ -10,7 +11,7 @@
         sorting="sorting">
       </thead>
       <tbody>
-        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score"
+        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
           columns="columns"
           sorting="sorting"
@@ -21,7 +22,7 @@
     </table>
   </paginate>
 
-  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
+  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
     <thead
       kbn-table-header
       columns="columns"
@@ -29,13 +30,16 @@
       sorting="sorting">
     </thead>
     <tbody>
-      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score"
+      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
         kbn-table-row="row"
         columns="columns"
         sorting="sorting"
         index-pattern="indexPattern"
         filter="filter"
-        class="discover-table-row"></tr>
+        class="discover-table-row"
+        ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
+        data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+      ></tr>
     </tbody>
   </table>
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>

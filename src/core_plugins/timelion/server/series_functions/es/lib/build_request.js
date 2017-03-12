@@ -1,38 +1,38 @@
-var  _ = require('lodash');
-var createDateAgg = require('./create_date_agg');
+const  _ = require('lodash');
+const createDateAgg = require('./create_date_agg');
 
 module.exports =  function buildRequest(config, tlConfig) {
 
-  var bool = {must: [], must_not: []};
+  const bool = { must: [] };
 
-  var timeFilter = {range:{}};
-  timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+  const timeFilter = { range:{} };
+  timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
   bool.must.push(timeFilter);
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter') || {};
+    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
   }
 
-  var aggs = {
+  const aggs = {
     'q': {
-      meta: {type: 'split'},
+      meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q).map(function (q) {
-          return [q, {query_string:{query: q}}];
+          return [q, { query_string:{ query: q } }];
         }).zipObject().value(),
       },
       aggs: {}
     }
   };
 
-  var aggCursor = aggs.q.aggs;
+  let aggCursor = aggs.q.aggs;
 
   _.each(config.split, function (clause, i) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       aggCursor[clause[0]] = {
-        meta: {type: 'split'},
+        meta: { type: 'split' },
         terms: {
           field: clause[0],
           size: parseInt(clause[1], 10)

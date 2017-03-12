@@ -1,5 +1,5 @@
 import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
+import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
@@ -60,7 +60,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     return $http.post(chrome.addBasePath(`/api/kibana/${indexPattern}/_data`), formData, {
       params: params,
       transformRequest: angular.identity,
-      headers: {'Content-Type': undefined}
+      headers: { 'Content-Type': undefined }
     });
   };
 

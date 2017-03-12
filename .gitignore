@@ -31,6 +31,9 @@ config/*
 coverage
 selenium
 .babelcache.json
+.webpack.babelcache
 *.swp
 *.swo
 *.out
+ui_framework/doc_site/build/*.js*
+yarn.lock

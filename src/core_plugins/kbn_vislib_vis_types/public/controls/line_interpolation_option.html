@@ -1,7 +1,11 @@
 <div>
   <label>
-    <input type="checkbox" value="{{smoothLines}}" ng-model="vis.params.smoothLines" name="smoothLines"
-           ng-checked="vis.params.smoothLines">
-    Smooth Lines
+    Line Mode
   </label>
+  <select
+    class="form-control"
+    ng-model="vis.params.interpolate"
+    ng-options="mode.value as mode.text for mode in vis.type.params.interpolationModes"
+  >
+  </select>
 </div>

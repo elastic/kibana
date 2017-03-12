@@ -7,7 +7,7 @@ import errors from 'ui/errors';
 import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
-import DocSourceProvider from 'ui/courier/data_source/doc_source';
+import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
@@ -24,7 +24,7 @@ describe('index pattern', function () {
   let DocSource;
   let config;
   let docSourceResponse;
-  let indexPatternId = 'test-pattern';
+  const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
   let $rootScope;
@@ -217,7 +217,7 @@ describe('index pattern', function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        const expected = _.filter(indexPattern.fields, {scripted: true});
+        const expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(['script number']);
       });
     });
@@ -463,7 +463,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

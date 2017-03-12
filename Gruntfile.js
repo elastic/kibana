@@ -1,5 +1,5 @@
 const camelCase = require('lodash').camelCase;
-require('babel/register')(require('./src/optimize/babel_options').node);
+require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
@@ -38,18 +38,6 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
-
-    lintThese: [
-      'Gruntfile.js',
-      '<%= root %>/tasks/**/*.js',
-      '<%= root %>/test/**/*.js',
-      '<%= src %>/**/*.js',
-      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
-      '!<%= src %>/core_plugins/timelion/bower_components/**/*.js',
-      '!<%= src %>/core_plugins/timelion/vendor_components/**/*.js',
-      '!<%= src %>/fixtures/**/*.js',
-      '!<%= root %>/test/fixtures/scenarios/**/*.js'
-    ]
   };
 
   grunt.config.merge(config);

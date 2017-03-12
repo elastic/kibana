@@ -1,8 +1,7 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
-import vislibComponentsSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
-import {EventEmitter} from 'events';
-
+import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
+import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
   'single': () => 0,
@@ -19,7 +18,6 @@ const D3_SCALING_FUNCTIONS = {
   'log': () => d3.scale.log(),
   'square root': () => d3.scale.sqrt()
 };
-
 
 class TagCloud extends EventEmitter {
 
@@ -53,14 +51,16 @@ class TagCloud extends EventEmitter {
     this._words = null;
 
     //UTIL
-    this._handle = null;
-    this._queue = [];
+    this._setTimeoutId = null;
+    this._pendingJob = null;
+    this._layoutIsUpdating = null;
     this._allInViewBox = false;
-    this._inFlight = false;
+    this._DOMisUpdating = false;
 
   }
 
   setOptions(options) {
+
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
@@ -101,7 +101,7 @@ class TagCloud extends EventEmitter {
   }
 
   destroy() {
-    clearTimeout(this._handle);
+    clearTimeout(this._setTimeoutId);
     this._element.innerHTML = '';
   }
 
@@ -116,102 +116,143 @@ class TagCloud extends EventEmitter {
     this._svgGroup.attr('height', this._size[1]);
   }
 
-  _processQueue() {
+  _isJobRunning() {
+    return (this._setTimeoutId || this._layoutIsUpdating || this._DOMisUpdating);
+  }
 
-    if (!this._queue.length) {
+  async _processPendingJob() {
+
+    if (!this._pendingJob) {
+      return;
+    }
+
+    if (this._isJobRunning()) {
+      return;
+    }
+
+
+    this._completedJob = null;
+    const job = await this._pickPendingJob();
+    if (job.words.length) {
+      if (job.refreshLayout) {
+        await this._updateLayout(job);
+      }
+      await this._updateDOM(job);
+      const cloudBBox = this._svgGroup[0][0].getBBox();
+      this._cloudWidth = cloudBBox.width;
+      this._cloudHeight = cloudBBox.height;
+      this._allInViewBox = cloudBBox.x >= 0 &&
+        cloudBBox.y >= 0 &&
+        cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
+        cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
+    } else {
+      this._emptyDOM(job);
+    }
+
+    if (this._pendingJob) {
+      this._processPendingJob();//pick up next job
+    } else {
+      this._completedJob = job;
       this.emit('renderComplete');
-      return;
     }
-
-    if (this._inFlight) {
-      return;
-    }
-
-    const job = this._queue.pop();
-    this._inFlight = true;
-    this._onLayoutEnd(job);
 
   }
 
-  _onLayoutEnd(job) {
+  async _pickPendingJob() {
+    return await new Promise((resolve) => {
+      this._setTimeoutId = setTimeout(async() => {
+        const job = this._pendingJob;
+        this._pendingJob = null;
+        this._setTimeoutId = null;
+        resolve(job);
+      }, 0);
+    });
+  }
 
-    if (this._handle !== null) {//a new configuration is coming, no need to update
-      this._processQueue();
+
+  _emptyDOM() {
+    this._svgGroup.selectAll('text').remove();
+    this._cloudWidth = 0;
+    this._cloudHeight = 0;
+    this._allInViewBox = true;
+    this._DOMisUpdating = false;
+  }
+
+  async _updateDOM(job) {
+
+    const canSkipDomUpdate = this._pendingJob || this._setTimeoutId;
+    if (canSkipDomUpdate) {
+      this._DOMisUpdating = false;
       return;
     }
 
-    this._currentJob = null;
+    this._DOMisUpdating = true;
     const affineTransform = positionWord.bind(null, this._element.offsetWidth / 2, this._element.offsetHeight / 2);
     const svgTextNodes = this._svgGroup.selectAll('text');
     const stage = svgTextNodes.data(job.words, getText);
 
-    const enterSelection = stage.enter();
-    const enteringTags = enterSelection.append('text');
-    enteringTags.style('font-size', getSizeInPixels);
-    enteringTags.style('font-style', this._fontStyle);
-    enteringTags.style('font-weight', () => this._fontWeight);
-    enteringTags.style('font-family', () => this._fontFamily);
-    enteringTags.style('fill', getFill);
-    enteringTags.attr('text-anchor', () => 'middle');
-    enteringTags.attr('transform', affineTransform);
-    enteringTags.text(getText);
+    await new Promise((resolve) => {
 
-    const self = this;
-    enteringTags.on({
-      click: function (event) {
-        self.emit('select', event.text);
-      },
-      mouseover: function (d) {
-        d3.select(this).style('cursor', 'pointer');
-      },
-      mouseout: function (d) {
-        d3.select(this).style('cursor', 'default');
-      }
+      const enterSelection = stage.enter();
+      const enteringTags = enterSelection.append('text');
+      enteringTags.style('font-size', getSizeInPixels);
+      enteringTags.style('font-style', this._fontStyle);
+      enteringTags.style('font-weight', () => this._fontWeight);
+      enteringTags.style('font-family', () => this._fontFamily);
+      enteringTags.style('fill', getFill);
+      enteringTags.attr('text-anchor', () => 'middle');
+      enteringTags.attr('transform', affineTransform);
+      enteringTags.text(getText);
+
+      const self = this;
+      enteringTags.on({
+        click: function (event) {
+          self.emit('select', event.text);
+        },
+        mouseover: function () {
+          d3.select(this).style('cursor', 'pointer');
+        },
+        mouseout: function () {
+          d3.select(this).style('cursor', 'default');
+        }
+      });
+
+      const movingTags = stage.transition();
+      movingTags.duration(600);
+      movingTags.style('font-size', getSizeInPixels);
+      movingTags.style('font-style', this._fontStyle);
+      movingTags.style('font-weight', () => this._fontWeight);
+      movingTags.style('font-family', () => this._fontFamily);
+      movingTags.attr('transform', affineTransform);
+
+      const exitingTags = stage.exit();
+      const exitTransition = exitingTags.transition();
+      exitTransition.duration(200);
+      exitingTags.style('fill-opacity', 1e-6);
+      exitingTags.attr('font-size', 1);
+      exitingTags.remove();
+
+      let exits = 0;
+      let moves = 0;
+      const resolveWhenDone = () => {
+        if (exits === 0 && moves === 0) {
+          this._DOMisUpdating = false;
+          resolve(true);
+        }
+      };
+      exitTransition.each(_ => exits++);
+      exitTransition.each('end', () => {
+        exits--;
+        resolveWhenDone();
+      });
+      movingTags.each(_ => moves++);
+      movingTags.each('end', () => {
+        moves--;
+        resolveWhenDone();
+      });
+
     });
-
-    const movingTags = stage.transition();
-    movingTags.duration(600);
-    movingTags.style('font-size', getSizeInPixels);
-    movingTags.style('font-style', this._fontStyle);
-    movingTags.style('font-weight', () => this._fontWeight);
-    movingTags.style('font-family', () => this._fontFamily);
-    movingTags.attr('transform', affineTransform);
-
-    const exitingTags = stage.exit();
-    const exitTransition = exitingTags.transition();
-    exitTransition.duration(200);
-    exitingTags.style('fill-opacity', 1e-6);
-    exitingTags.attr('font-size', 1);
-    exitingTags.remove();
-
-    let exits = 0;
-    let moves = 0;
-    const resolveWhenDone = () => {
-      if (exits === 0 && moves === 0) {
-        const cloudBBox = this._svgGroup[0][0].getBBox();
-        this._cloudWidth = cloudBBox.width;
-        this._cloudHeight = cloudBBox.height;
-        this._allInViewBox = cloudBBox.x >= 0 && cloudBBox.y >= 0 &&
-          cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
-          cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
-
-        this._inFlight = false;
-        this._currentJob = job;
-        this._processQueue();
-      }
-    };
-    exitTransition.each(_ => exits++);
-    exitTransition.each('end', () => {
-      exits--;
-      resolveWhenDone();
-    });
-    movingTags.each(_ => moves++);
-    movingTags.each('end', () => {
-      moves--;
-      resolveWhenDone();
-    });
-
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
@@ -223,9 +264,27 @@ class TagCloud extends EventEmitter {
     return mapSizeToFontSize;
   }
 
-  _makeJob() {
+  _makeNewJob() {
     return {
+      refreshLayout: true,
+      size: this._size.slice(),
       words: this._words.map(toWordTag)
+    };
+  }
+
+  _makeJobPreservingLayout() {
+    return {
+      refreshLayout: false,
+      size: this._size.slice(),
+      words: this._completedJob.words.map(tag => {
+        return {
+          x: tag.x,
+          y: tag.y,
+          rotate: tag.rotate,
+          size: tag.size,
+          text: tag.text
+        };
+      })
     };
   }
 
@@ -235,56 +294,41 @@ class TagCloud extends EventEmitter {
       return;
     }
 
-    clearTimeout(this._handle);
-    this._handle = setTimeout(() => {
-      this._handle = null;
-      this._updateContainerSize();
-      if (keepLayout && this._currentJob && this._queue.length === 0) {
-        this._scheduleLayout({
-          words: this._currentJob.words.map(tag => {
-            return {
-              x: tag.x,
-              y: tag.y,
-              rotate: tag.rotate,
-              size: tag.size,
-              text: tag.text
-            };
-          })
-        });
-      } else {
-        this._updateLayout();
-      }
-    }, 0);//unhook from callstack. this avoids kicking off multiple layouts if multiple changes come in succession
+    this._updateContainerSize();
+
+    const canReuseLayout = keepLayout && !this._isJobRunning() && this._completedJob;
+    this._pendingJob = (canReuseLayout) ? this._makeJobPreservingLayout() : this._makeNewJob();
+    this._processPendingJob();
   }
 
-  _scheduleLayout(job) {
-    this._queue.unshift(job);
-    this._processQueue();
-  }
 
-  _updateLayout() {
+  async _updateLayout(job) {
 
-    const job = this._makeJob();
     const mapSizeToFontSize = this._makeTextSizeMapper();
-
     const tagCloudLayoutGenerator = d3TagCloud();
-    tagCloudLayoutGenerator.size(this._size);
+    tagCloudLayoutGenerator.size(job.size);
     tagCloudLayoutGenerator.padding(this._padding);
     tagCloudLayoutGenerator.rotate(ORIENTATIONS[this._orientation]);
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => {
-      return mapSizeToFontSize(tag.value);
-    });
+    tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
-    tagCloudLayoutGenerator.on('end', () => this._scheduleLayout(job));
-    tagCloudLayoutGenerator.start();
+
+    this._layoutIsUpdating = true;
+    await new Promise((resolve) => {
+      tagCloudLayoutGenerator.on('end', () => {
+        this._layoutIsUpdating = false;
+        resolve(true);
+      });
+      tagCloudLayoutGenerator.start();
+    });
   }
+
 
   /**
    * Returns debug info. For debugging only.
@@ -292,21 +336,31 @@ class TagCloud extends EventEmitter {
    */
   getDebugInfo() {
     const debug = {};
-    debug.positions = this._currentJob ? this._currentJob.words.map(tag => [tag.text, tag.x, tag.y, tag.rotate]) : [];
-    debug.size = this._size.slice();
+    debug.positions = this._completedJob ? this._completedJob.words.map(tag => {
+      return {
+        text: tag.text,
+        x: tag.x,
+        y: tag.y,
+        rotate: tag.rotate
+      };
+    }) : [];
+    debug.size = {
+      width: this._size[0],
+      height: this._size[1]
+    };
     return debug;
   }
 
 }
 
-TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
+TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
 function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
-  return {value: word.value, text: word.text};
+  return { value: word.value, text: word.text };
 }
 
 
@@ -349,7 +403,7 @@ function hashCode(string) {
     return hash;
   }
   for (let i = 0; i < string.length; i++) {
-    let char = string.charCodeAt(i);
+    const char = string.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32bit integer
   }

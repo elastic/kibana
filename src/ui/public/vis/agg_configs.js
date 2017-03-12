@@ -12,13 +12,13 @@ import IndexedArray from 'ui/indexed_array';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 export default function AggConfigsFactory(Private) {
-  let AggConfig = Private(VisAggConfigProvider);
+  const AggConfig = Private(VisAggConfigProvider);
 
   AggConfig.aggTypes = Private(AggTypesIndexProvider);
 
   _.class(AggConfigs).inherits(IndexedArray);
   function AggConfigs(vis, configStates) {
-    let self = this;
+    const self = this;
     self.vis = vis;
 
     configStates = AggConfig.ensureIds(configStates || []);
@@ -45,9 +45,9 @@ export default function AggConfigsFactory(Private) {
       })
       .each(function (schema) {
         if (!self.bySchemaName[schema.name]) {
-          let defaults = schema.defaults.slice(0, schema.max);
+          const defaults = schema.defaults.slice(0, schema.max);
           _.each(defaults, function (defaultState) {
-            let state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
+            const state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
             self.push(new AggConfig(vis, state));
           });
         }
@@ -73,8 +73,24 @@ export default function AggConfigsFactory(Private) {
     return true;
   };
 
+  function removeParentAggs(obj) {
+    for(const prop in obj) {
+      if (prop === 'parentAggs') delete obj[prop];
+      else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+    }
+  }
+
+  function parseParentAggs(dslLvlCursor, dsl) {
+    if (dsl.parentAggs) {
+      _.each(dsl.parentAggs, (agg, key) => {
+        dslLvlCursor[key] = agg;
+        parseParentAggs(dslLvlCursor, agg);
+      });
+    }
+  }
+
   AggConfigs.prototype.toDsl = function () {
-    let dslTopLvl = {};
+    const dslTopLvl = {};
     let dslLvlCursor;
     let nestedMetrics;
 
@@ -102,8 +118,8 @@ export default function AggConfigsFactory(Private) {
         // start at the top level
         dslLvlCursor = dslTopLvl;
       } else {
-        let prevConfig = list[i - 1];
-        let prevDsl = dslLvlCursor[prevConfig.id];
+        const prevConfig = list[i - 1];
+        const prevDsl = dslLvlCursor[prevConfig.id];
 
         // advance the cursor and nest under the previous agg, or
         // put it on the same level if the previous agg doesn't accept
@@ -111,8 +127,10 @@ export default function AggConfigsFactory(Private) {
         dslLvlCursor = prevDsl.aggs || dslLvlCursor;
       }
 
-      let dsl = dslLvlCursor[config.id] = config.toDsl();
+      const dsl = dslLvlCursor[config.id] = config.toDsl();
       let subAggs;
+
+      parseParentAggs(dslLvlCursor, dsl);
 
       if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
@@ -125,6 +143,8 @@ export default function AggConfigsFactory(Private) {
         });
       }
     });
+
+    removeParentAggs(dslTopLvl);
 
     return dslTopLvl;
   };
@@ -148,7 +168,7 @@ export default function AggConfigsFactory(Private) {
    */
   AggConfigs.prototype.getResponseAggs = function () {
     return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
-      let aggs = agg.getResponseAggs();
+      const aggs = agg.getResponseAggs();
       return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
     }, []);
   };
@@ -163,7 +183,7 @@ export default function AggConfigsFactory(Private) {
    */
   AggConfigs.prototype.getResponseAggById = function (id) {
     id = String(id);
-    let reqAgg = _.find(this.getRequestAggs(), function (agg) {
+    const reqAgg = _.find(this.getRequestAggs(), function (agg) {
       return id.substr(0, String(agg.id).length) === agg.id;
     });
     if (!reqAgg) return;
@@ -171,4 +191,4 @@ export default function AggConfigsFactory(Private) {
   };
 
   return AggConfigs;
-};
+}

@@ -8,7 +8,6 @@ let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
 let _ = require('lodash');
 let ext_lang_tools = require('ace/ext-language_tools');
 
-
 var AceRange = ace.require('ace/range').Range;
 
 var LAST_EVALUATED_TOKEN = null;
@@ -76,9 +75,9 @@ module.exports = function (editor) {
   function addMetaToTermsList(list, meta, template) {
     return _.map(list, function (t) {
       if (typeof t !== "object") {
-        t = {name: t};
+        t = { name: t };
       }
-      return _.defaults(t, {meta: meta, template: template});
+      return _.defaults(t, { meta: meta, template: template });
     });
   }
 
@@ -165,13 +164,13 @@ module.exports = function (editor) {
       var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
         case "paren.rparen":
-          newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
           break;
         case "punctuation.colon":
           nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
           if ((nonEmptyToken || {}).type == "paren.lparen") {
             nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-            newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+            newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
               newPos.column++;
             } // don't stand on "
@@ -180,7 +179,7 @@ module.exports = function (editor) {
         case "paren.lparen":
         case "punctuation.comma":
           tokenIter.stepForward();
-          newPos = {row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn()};
+          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
           break;
       }
       editor.moveCursorToPosition(newPos);
@@ -225,7 +224,6 @@ module.exports = function (editor) {
       default:
         return null;
     }
-
 
     if (!context.autoCompleteSet) {
       return null; // nothing to do..
@@ -324,7 +322,7 @@ module.exports = function (editor) {
 
     context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
     if (!context.updatedForToken) {
-      context.updatedForToken = {value: "", start: pos.column};
+      context.updatedForToken = { value: "", start: pos.column };
     } // empty line
 
     var anchorToken = context.createdWithToken;
@@ -373,7 +371,7 @@ module.exports = function (editor) {
         break;
     }
 
-    context.textBoxPosition = {row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column};
+    context.textBoxPosition = { row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column };
 
     switch (context.autoCompleteType) {
       case "path":
@@ -445,7 +443,6 @@ module.exports = function (editor) {
         break; // for now play safe and do nothing. May be made smarter.
     }
 
-
     // go back to see whether we have one of ( : { & [ do not require a comma. All the rest do.
     tokenIter = editor.iterForCurrentLoc();
     nonEmptyToken = tokenIter.getCurrentToken();
@@ -470,7 +467,6 @@ module.exports = function (editor) {
     if (editor.parser.isEmptyToken(nonEmptyToken) || insertingRelativeToToken <= 0) {
       nonEmptyToken = editor.parser.prevNonEmptyToken(tokenIter);
     }
-
 
     switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
       case "NOTOKEN":
@@ -513,7 +509,7 @@ module.exports = function (editor) {
 
   function addMethodAutoCompleteSetToContext(context, pos) {
     context.autoCompleteSet = _.map(["GET", "PUT", "POST", "DELETE", "HEAD"], function (m, i) {
-      return {name: m, score: -i, meta: "method"}
+      return { name: m, score: -i, meta: "method" }
     })
   }
 
@@ -581,7 +577,6 @@ module.exports = function (editor) {
       return context;
     }
 
-
     // needed for scope linking + global term resolving
     context.endpointComponentResolver = kb.getEndpointBodyCompleteComponents;
     context.globalComponentResolver = kb.getGlobalAutocompleteComponents;
@@ -596,7 +591,6 @@ module.exports = function (editor) {
 
     return context;
   }
-
 
   function getCurrentMethodAndTokenPaths(pos) {
     var tokenIter = editor.iterForPosition(pos.row, pos.column);
@@ -645,7 +639,6 @@ module.exports = function (editor) {
           state = STATES.looking_for_scope_start; // skip everything until the beginning of this scope
           break;
 
-
         case "paren.lparen":
           bodyTokenPath.unshift(t.value);
           if (state == STATES.looking_for_scope_start) {
@@ -676,6 +669,29 @@ module.exports = function (editor) {
           {
             return {};
           }
+          continue;
+        case "punctuation.end_triple_quote":
+          // reset the search for key
+          state = STATES.looking_for_scope_start;
+          for (t = tokenIter.stepBackward(); t; t = tokenIter.stepBackward()) {
+            if (t.type === "punctuation.start_tripple_qoute") {
+                t = tokenIter.stepBackward();
+                break;
+            }
+          }
+          if (!t) // oops we run out.. we don't know what's up return null;
+          {
+            return {};
+          }
+          continue;
+        case "punctuation.start_triple_quote":
+          if (state == STATES.start) {
+            state = STATES.looking_for_key;
+          }
+          else if (state == STATES.looking_for_key) {
+            state = STATES.looking_for_scope_start;
+          }
+          bodyTokenPath.unshift('"""');
           continue;
         case "string":
         case "constant.numeric":
@@ -761,7 +777,6 @@ module.exports = function (editor) {
       t = tokenIter.stepBackward();
     }
 
-
     curUrlPart = null;
     while (t && t.type.indexOf("url") != -1) {
       switch (t.type) {
@@ -814,7 +829,6 @@ module.exports = function (editor) {
     return ret;
   }
 
-
   var evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(pos) {
     var session = editor.getSession();
     var currentToken = session.getTokenAt(pos.row, pos.column);
@@ -824,7 +838,7 @@ module.exports = function (editor) {
         LAST_EVALUATED_TOKEN = null;
         return;
       }
-      currentToken = {start: 0, value: ""}; // empty row
+      currentToken = { start: 0, value: "" }; // empty row
     }
 
     currentToken.row = pos.row; // extend token with row. Ace doesn't supply it by default
@@ -842,7 +856,6 @@ module.exports = function (editor) {
       }
       return;
     }
-
 
     if (!LAST_EVALUATED_TOKEN) {
       LAST_EVALUATED_TOKEN = currentToken;
@@ -885,7 +898,6 @@ module.exports = function (editor) {
   function removeChangeListener() {
     editor.off("changeSelection", editorChangeListener)
   }
-
 
   function getCompletions(aceEditor, session, pos, prefix, callback) {
     try {
@@ -949,7 +961,6 @@ module.exports = function (editor) {
     }
   }
 
-
   addChangeListener();
 
   // Hook into Ace
@@ -996,7 +1007,6 @@ module.exports = function (editor) {
 
       prefix = getAutoCompleteValueFromToken(token);
     }
-
 
     var matches = [];
     aceUtils.parForEach(ace_editor.completers, function (completer, next) {

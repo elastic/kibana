@@ -1,0 +1,17 @@
+
+@import "../../variables";
+
+.guidePage {
+  display: flex;
+}
+
+.guidePageBody {
+  $topPadding: 40px;
+
+  flex: 1 1 auto;
+  padding: $topPadding 80px 0 120px + $guideSideNavWidth;
+
+  @include whenNarrowerThan($normalBreakpoint) {
+    padding: $topPadding 20px 0 20px + $guideSideNavSmallWidth;
+  }
+}

@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import data from 'fixtures/vislib/mock_data/date_histogram/_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
 
 describe('Vislib Dispatch Class Test Suite', function () {
 
@@ -26,9 +26,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
     let SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       vis.render(data, persistedState);
       SimpleEmitter = require('ui/utils/simple_emitter');
     }));
@@ -51,9 +51,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
     let persistedState;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)();
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));
@@ -88,7 +88,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
         it('returns a function that binds ' + event + ' events to a selection', function () {
           const chart = _.first(vis.handler.charts);
-          const apply = chart.events[name](d3.select(document.createElement('svg')));
+          const apply = chart.events[name](chart.series[0].chartEl);
           expect(apply).to.be.a('function');
 
           const els = getEls(vis.el, 3, 'div');
@@ -121,9 +121,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
       let vis;
       let persistedState;
       ngMock.module('kibana');
-      ngMock.inject(function (Private) {
+      ngMock.inject(function (Private, $injector) {
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        persistedState = new ($injector.get('PersistedState'))();
         vis.on('someEvent', _.noop);
         vis.render(data, persistedState);
 
@@ -140,9 +140,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
       let vis;
       let persistedState;
       ngMock.module('kibana');
-      ngMock.inject(function (Private) {
+      ngMock.inject(function (Private, $injector) {
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        persistedState = new ($injector.get('PersistedState'))();
         vis.render(data, persistedState);
         vis.on('someEvent', _.noop);
 

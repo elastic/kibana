@@ -4,28 +4,28 @@ import { buildInlineScriptForPhraseFilter } from './lib/phrase';
 
 // Adds a filter to a passed state
 export default function (Private) {
-  let queryFilter = Private(FilterBarQueryFilterProvider);
-  let filterManager = {};
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const filterManager = {};
 
   filterManager.add = function (field, values, operation, index) {
     values = _.isArray(values) ? values : [values];
-    let fieldName = _.isObject(field) ? field.name : field;
-    let filters = _.flatten([queryFilter.getAppFilters()]);
-    let newFilters = [];
+    const fieldName = _.isObject(field) ? field.name : field;
+    const filters = _.flatten([queryFilter.getAppFilters()]);
+    const newFilters = [];
 
-    let negate = (operation === '-');
+    const negate = (operation === '-');
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
     _.each(values, function (value) {
       let filter;
-      let existing = _.find(filters, function (filter) {
+      const existing = _.find(filters, function (filter) {
         if (!filter) return;
 
         if (fieldName === '_exists_' && filter.exists) {
           return filter.exists.field === value;
         }
 
-        if (_.get(filter, 'query.match')) {
+        if (_.has(filter, 'query.match')) {
           return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
         }
 
@@ -83,5 +83,5 @@ export default function (Private) {
   };
 
   return filterManager;
-};
+}
 

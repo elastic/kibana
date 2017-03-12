@@ -6,11 +6,13 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
+import 'ui/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
   let Data;
+  let VisConfig;
   let persistedState;
   let chartTitle;
   let el;
@@ -75,10 +77,11 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     ChartTitle = Private(VislibLibChartTitleProvider);
     Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    VisConfig = Private(VislibLibVisConfigProvider);
+    persistedState = new ($injector.get('PersistedState'))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')
@@ -88,8 +91,14 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, {}, persistedState);
-    chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
+    dataObj = new Data(data, persistedState);
+    const visConfig = new VisConfig({
+      type: 'histogram',
+      title: {
+        'text': 'rows'
+      }
+    }, data, persistedState, el.node());
+    chartTitle = new ChartTitle(visConfig);
   }));
 
   afterEach(function () {

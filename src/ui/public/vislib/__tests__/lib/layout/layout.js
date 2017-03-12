@@ -11,7 +11,9 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
+import VislibVisConfig from 'ui/vislib/lib/vis_config';
+
 const dateHistogramArray = [
   series,
   columns,
@@ -32,14 +34,16 @@ dateHistogramArray.forEach(function (data, i) {
     let persistedState;
     let numberOfCharts;
     let testLayout;
+    let VisConfig;
 
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
-      ngMock.inject(function (Private) {
+      ngMock.inject(function (Private, $injector) {
         Layout = Private(VislibLibLayoutLayoutProvider);
         vis = Private(FixturesVislibVisFixtureProvider)();
-        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        persistedState = new ($injector.get('PersistedState'))();
+        VisConfig = Private(VislibVisConfig);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
@@ -52,22 +56,25 @@ dateHistogramArray.forEach(function (data, i) {
     describe('createLayout Method', function () {
       it('should append all the divs', function () {
         expect($(vis.el).find('.vis-wrapper').length).to.be(1);
-        expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(1);
+        expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(2);
         expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
-        expect($(vis.el).find('.y-axis-col').length).to.be(1);
-        expect($(vis.el).find('.y-axis-title').length).to.be(1);
-        expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(1);
-        expect($(vis.el).find('.y-axis-spacer-block').length).to.be(1);
+        expect($(vis.el).find('.y-axis-col').length).to.be(2);
+        expect($(vis.el).find('.y-axis-title').length).to.be(2);
+        expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(2);
+        expect($(vis.el).find('.y-axis-spacer-block').length).to.be(4);
         expect($(vis.el).find('.chart-wrapper').length).to.be(numberOfCharts);
-        expect($(vis.el).find('.x-axis-wrapper').length).to.be(1);
-        expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(1);
-        expect($(vis.el).find('.x-axis-title').length).to.be(1);
+        expect($(vis.el).find('.x-axis-wrapper').length).to.be(2);
+        expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(2);
+        expect($(vis.el).find('.x-axis-title').length).to.be(2);
       });
     });
 
     describe('layout Method', function () {
       beforeEach(function () {
-        testLayout = new Layout(vis.el, vis.data, 'histogram');
+        const visConfig = new VisConfig({
+          type: 'histogram'
+        }, data, persistedState, vis.el);
+        testLayout = new Layout(visConfig);
       });
 
       it('should append a div with the correct class name', function () {

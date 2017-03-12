@@ -1,16 +1,16 @@
-var alter = require('../lib/alter.js');
-var Chainable = require('../lib/classes/chainable');
-var _ = require('lodash');
+const alter = require('../lib/alter.js');
+const Chainable = require('../lib/classes/chainable');
+const _ = require('lodash');
 
 function unflatten(data) {
   if (Object(data) !== data || _.isArray(data)) return data;
 
-  var regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
-  var result = {};
+  const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
+  const result = {};
   _.each(data, function (val, p) {
-    var cur = result;
-    var prop = '';
-    var m;
+    let cur = result;
+    let prop = '';
+    let m;
     while (m = regex.exec(p)) {
       cur = cur[prop] || (cur[prop] = (m[2] ? [] : {}));
       prop = m[2] || m[1];
@@ -19,7 +19,7 @@ function unflatten(data) {
   });
 
   return result[''] || result;
-};
+}
 
 module.exports = new Chainable('props', {
   args: [
@@ -43,7 +43,7 @@ module.exports = new Chainable('props', {
   // They will be passed as args._extended:{}
   help: 'Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)',
   fn: function firstFn(args) {
-    var properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
+    const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
 
     if (args.byName.global) {
       _.assign(args.byName.inputSeries, properties);

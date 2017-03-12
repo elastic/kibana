@@ -37,7 +37,7 @@ module.exports = function (grunt) {
     grunt.config('aws_s3.options', {
       accessKeyId: config.key,
       secretAccessKey: config.secret,
-      bucket: config.bucket || grunt.config.get('aws_s3.config.bucket'),
+      bucket: config.bucket || grunt.config.get('aws_s3.options.bucket'),
       region: config.region
     });
   });
@@ -50,7 +50,7 @@ module.exports = function (grunt) {
 
     fs.readdirSync('./target').forEach((file) => {
       if (path.extname(file) !== '.txt') {
-        let link = url.format({
+        const link = url.format({
           protocol: 'https',
           hostname: 'download.elastic.co',
           pathname: config[0].dest + file

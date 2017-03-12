@@ -12,10 +12,6 @@
   }
 }
 
-.x.axis path {
-  display: none;
-}
-
 .tick text {
   font-size: 8pt;
   fill: @svg-tick-text-color;
@@ -32,7 +28,6 @@
 
 /* SVG Element Default Styling */
 rect {
-  stroke: none;
   opacity: 1;
 
   &:hover {
@@ -52,6 +47,12 @@ circle {
 
 .overlap_area {
   opacity: 0.6;
+}
+
+.series > path,
+.series > rect {
+  fill-opacity: 0.6;
+  stroke-opacity: 1;
 }
 
 .blur_shape {

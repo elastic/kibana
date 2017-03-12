@@ -26,7 +26,7 @@ describe('filterBarClickHandler', function () {
           {
             type: 'terms',
             schema: 'segment',
-            params: { field: '_type' }
+            params: { field: 'non-filterable' }
           }
         ]
       });
@@ -47,14 +47,14 @@ describe('filterBarClickHandler', function () {
     it('warns about trying to filter on a non-filterable field', function () {
       const { clickHandler, aggConfigResult } = setup();
       expect(notify._notifs).to.have.length(0);
-      clickHandler({ point: { aggConfigResult }});
+      clickHandler({ point: { aggConfigResult } });
       expect(notify._notifs).to.have.length(1);
     });
 
     it('does not warn if the event is click is being simulated', function () {
       const { clickHandler, aggConfigResult } = setup();
       expect(notify._notifs).to.have.length(0);
-      clickHandler({ point: { aggConfigResult }}, true);
+      clickHandler({ point: { aggConfigResult } }, true);
       expect(notify._notifs).to.have.length(0);
     });
   });

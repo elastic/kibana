@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
-import {geohashColumns} from 'ui/utils/decode_geo_hash';
+import { geohashColumns } from 'ui/utils/decode_geo_hash';
 
 export default function GeoHashAggDefinition(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -11,7 +11,7 @@ export default function GeoHashAggDefinition(Private, config) {
    * Map Leaflet zoom levels to geohash precision levels.
    * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
    */
-  let zoomPrecision = {};
+  const zoomPrecision = {};
   const minGeohashPixels = 16;
   for (let zoom = 0; zoom <= 21; zoom += 1) {
     const worldPixels = 256 * Math.pow(2, zoom);
@@ -65,6 +65,7 @@ export default function GeoHashAggDefinition(Private, config) {
       {
         name: 'precision',
         editor: precisionTemplate,
+        default: defaultPrecision,
         deserialize: getPrecision,
         controller: function ($scope) {
         },
@@ -80,4 +81,4 @@ export default function GeoHashAggDefinition(Private, config) {
       }
     ]
   });
-};
+}

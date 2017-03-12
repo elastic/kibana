@@ -3,10 +3,10 @@ import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_fiel
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
-  let notify = new Notifier({ location: 'IndexPattern Field' });
-  let FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
-  let fieldTypes = Private(IndexPatternsFieldTypesProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const notify = new Notifier({ location: 'IndexPattern Field' });
+  const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+  const fieldTypes = Private(IndexPatternsFieldTypesProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function Field(indexPattern, spec) {
     // unwrap old instances of Field
@@ -15,7 +15,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // constuct this object using ObjDefine class, which
     // extends the Field.prototype but gets it's properties
     // defined using the logic below
-    let obj = new ObjDefine(spec, Field.prototype);
+    const obj = new ObjDefine(spec, Field.prototype);
 
     if (spec.name === '_source') {
       spec.type = '_source';
@@ -38,13 +38,13 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
       format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
     }
 
-    let indexed = !!spec.indexed;
-    let scripted = !!spec.scripted;
-    let sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
-    let filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
-    let searchable = !!spec.searchable || scripted;
-    let aggregatable = !!spec.aggregatable || scripted;
-    let visualizable = aggregatable;
+    const indexed = !!spec.indexed;
+    const scripted = !!spec.scripted;
+    const searchable = !!spec.searchable || scripted;
+    const aggregatable = !!spec.aggregatable || scripted;
+    const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
+    const filterable = spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
+    const visualizable = aggregatable;
 
     obj.fact('name');
     obj.fact('type');
@@ -86,4 +86,4 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
   };
 
   return Field;
-};
+}

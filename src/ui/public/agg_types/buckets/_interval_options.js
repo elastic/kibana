@@ -3,7 +3,7 @@ import moment from 'moment';
 export default function IntervalOptionsService(Private) {
 
   // shorthand
-  let ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
+  const ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
 
   return [
     {
@@ -52,4 +52,4 @@ export default function IntervalOptionsService(Private) {
       val: 'custom'
     }
   ];
-};
+}

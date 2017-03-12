@@ -55,11 +55,14 @@ uiModules
   SavedVis.mapping = {
     title: 'text',
     visState: 'json',
-    uiStateJSON: 'keyword',
+    uiStateJSON: 'text',
     description: 'text',
     savedSearchId: 'keyword',
     version: 'integer'
   };
+
+  // Order these fields to the top, the rest are alphabetical
+  SavedVis.fieldOrder = ['title', 'description'];
 
   SavedVis.searchSource = true;
 

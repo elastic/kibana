@@ -13,21 +13,21 @@ export default class SettingsPage {
     this.remote = remote;
   }
 
-  clickNavigation() {
+  async clickNavigation() {
     // TODO: find better way to target the element
-    return this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
+    await this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
   }
 
-  clickLinkText(text) {
-    return this.remote.findDisplayedByLinkText(text).click();
+  async clickLinkText(text) {
+    await this.remote.findDisplayedByLinkText(text).click();
   }
 
-  clickKibanaSettings() {
-    return this.clickLinkText('Advanced Settings');
+  async clickKibanaSettings() {
+    await this.clickLinkText('Advanced Settings');
   }
 
-  clickKibanaIndicies() {
-    return this.clickLinkText('Index Patterns');
+  async clickKibanaIndicies() {
+    await this.clickLinkText('Index Patterns');
   }
 
   getAdvancedSettings(propertyName) {
@@ -36,43 +36,19 @@ export default class SettingsPage {
     .getVisibleText();
   }
 
-  setAdvancedSettings(propertyName, propertyValue) {
-    var self = this;
-
-    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-      return self.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('option[label="' + propertyValue + '"]')
-      .click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(function setAdvancedSettingsClickSaveButton() {
-      return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton')
-      .click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+  async setAdvancedSettings(propertyName, propertyValue) {
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-editButton');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.sleep(1000);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('option[label="' + propertyValue + '"]').click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-saveButton');
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  getAdvancedSettings(propertyName) {
-    var self = this;
-    PageObjects.common.debug('in setAdvancedSettings');
-    return PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-currentValue')
-    .getVisibleText();
-  }
-
-  navigateTo() {
-    return PageObjects.common.navigateToApp('settings');
+  async navigateTo() {
+    await PageObjects.common.navigateToApp('settings');
   }
 
   getTimeBasedEventsCheckbox() {
@@ -97,32 +73,22 @@ export default class SettingsPage {
       .findDisplayedByCssSelector('select[ng-model="index.timeField"]');
   }
 
-  selectTimeFieldOption(selection) {
+  async selectTimeFieldOption(selection) {
     // open dropdown
-    return this.getTimeFieldNameField().click()
-    .then(() => {
-      // close dropdown, keep focus
-      return this.getTimeFieldNameField().click();
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.getTimeFieldOption(selection).click()
-        .then(() => {
-          return this.getTimeFieldOption(selection).isSelected();
-        })
-        .then(selected => {
-          if (!selected) throw new Error('option not selected: ' + selected);
-        });
-      });
+    (await this.getTimeFieldNameField()).click();
+    // close dropdown, keep focus
+    (await this.getTimeFieldNameField()).click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.try(async () => {
+      (await this.getTimeFieldOption(selection)).click();
+      const selected = (await this.getTimeFieldOption(selection)).isSelected();
+      if (!selected) throw new Error('option not selected: ' + selected);
     });
   }
 
   getTimeFieldOption(selection) {
     return this.remote.setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector('option[label="' + selection + '"]').click();
+      .findDisplayedByCssSelector('option[label="' + selection + '"]');
   }
 
   getCreateButton() {
@@ -130,28 +96,24 @@ export default class SettingsPage {
       .findDisplayedByCssSelector('[type="submit"]');
   }
 
-  clickDefaultIndexButton() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-success.ng-scope').click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+  async clickDefaultIndexButton() {
+    await PageObjects.common.findTestSubject('setDefaultIndexPatternButton').click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  clickDeletePattern() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-danger.ng-scope').click();
+  async clickDeletePattern() {
+    await PageObjects.common.findTestSubject('deleteIndexPatternButton').click();
   }
 
   getIndexPageHeading() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
+    return PageObjects.common.findTestSubject('indexPatternTitle');
   }
 
   getConfigureHeader() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('h1');
   }
+
   getTableHeader() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('table.table.table-condensed thead tr th');
@@ -167,13 +129,13 @@ export default class SettingsPage {
           if (chartString === columnName) {
             return chart.click()
             .then(function () {
-              return PageObjects.header.isGlobalLoadingIndicatorHidden();
+              return PageObjects.header.waitUntilLoadingHasFinished();
             });
           }
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -188,26 +150,32 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    var self = this;
-    var selector = 'li.kbn-management-tab.active a small';
-
-    return PageObjects.common.try(function () {
-      return self.remote.setFindTimeout(defaultFindTimeout / 10)
-      .findByCssSelector(selector).getVisibleText()
-      .then(function (theText) {
+    return PageObjects.common.try(() => {
+      return PageObjects.common.findTestSubject('tab-count-indexedFields')
+        .getVisibleText()
+        .then((theText) => {
         // the value has () around it, remove them
-        return theText.replace(/\((.*)\)/, '$1');
-      });
+          return theText.replace(/\((.*)\)/, '$1');
+        });
+    });
+  }
+
+  async getScriptedFieldsTabCount() {
+    const selector = '[data-test-subj="tab-count-scriptedFields"]';
+    return await PageObjects.common.try(async () => {
+      const theText = await this.remote.setFindTimeout(defaultFindTimeout / 10)
+      .findByCssSelector(selector).getVisibleText();
+      return theText.replace(/\((.*)\)/, '$1');
     });
   }
 
   getPageSize() {
-    var selectedItemLabel = '';
+    let selectedItemLabel = '';
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        var thisChart = chart;
+        const thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -219,7 +187,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      const getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {
@@ -234,140 +202,232 @@ export default class SettingsPage {
     });
   }
 
-  goToPage(pageNum) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async goToPage(pageNum) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
       (pageNum + 1) + ') a.ng-binding')
-    .click()
-    .then(function () {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  openControlsRow(row) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async openControlsRow(row) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
       (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
     .click();
   }
 
-  openControlsByName(name) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async openControlsByName(name) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
     .click();
   }
 
-  increasePopularity() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async increasePopularity() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   getPopularity() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('input[ng-model="editor.field.count"]')
-    .then(input => {
-      return input.getProperty('value');
-    });
+    .getProperty('value');
   }
 
-  controlChangeCancel() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async controlChangeCancel() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
+    .click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  controlChangeSave() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
+  async controlChangeSave() {
+    await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+    .click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async setPageSize(size) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+    .click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async createIndexPattern() {
+    await PageObjects.common.try(async () => {
+      await this.navigateTo();
+      await this.clickKibanaIndicies();
+      await this.selectTimeFieldOption('@timestamp');
+      await this.getCreateButton().click();
+    });
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.try(async () => {
+      const currentUrl = await this.remote.getCurrentUrl();
+      PageObjects.common.log('currentUrl', currentUrl);
+      if (!currentUrl.match(/indices\/.+\?/)) {
+        throw new Error('Index pattern not created');
+      } else {
+        PageObjects.common.debug('Index pattern created: ' + currentUrl);
+      }
     });
   }
 
-  setPageSize(size) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
-    .click()
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    });
-  }
-
-  createIndexPattern() {
-    return PageObjects.common.try(() => {
-      return this.navigateTo()
-        .then(() => {
-          return this.clickKibanaIndicies();
-        })
-        .then(() => {
-          return this.selectTimeFieldOption('@timestamp');
-        })
-        .then(() => {
-          return this.getCreateButton().click();
-        });
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            PageObjects.common.log('currentUrl', currentUrl);
-
-            if (!currentUrl.match(/indices\/.+\?/)) {
-              throw new Error('Index pattern not created');
-            } else {
-              PageObjects.common.debug('Index pattern created: ' + currentUrl);
-            }
-          });
-      });
-    });
-  }
-
-  removeIndexPattern() {
-    var alertText;
-
-    return PageObjects.common.try(() => {
+  async removeIndexPattern() {
+    let alertText;
+    await PageObjects.common.try(async () => {
       PageObjects.common.debug('click delete index pattern button');
-      return this.clickDeletePattern();
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('getAlertText');
-        return this.remote.getAlertText();
-      });
-    })
-    .then(function (text) {
-      alertText = text;
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('acceptAlert');
-        return this.remote.acceptAlert();
-      });
-    })
-    .then(() => {
-      return PageObjects.common.try(() => {
-        return this.remote.getCurrentUrl()
-        .then(function (currentUrl) {
-          if (currentUrl.match(/indices\/.+\?/)) {
-            throw new Error('Index pattern not removed');
-          }
-        });
-      });
-    })
-    .then(() => {
-      return alertText;
+      await this.clickDeletePattern();
     });
+    await PageObjects.common.try(async () => {
+      PageObjects.common.debug('getAlertText');
+      alertText = await PageObjects.common.findTestSubject('confirmModalBodyText').getVisibleText();
+    });
+    await PageObjects.common.try(async () => {
+      PageObjects.common.debug('acceptConfirmation');
+      await PageObjects.common.clickTestSubject('confirmModalConfirmButton');
+    });
+    await PageObjects.common.try(async () => {
+      const currentUrl = await this.remote.getCurrentUrl();
+      if (currentUrl.match(/indices\/.+\?/)) {
+        throw new Error('Index pattern not removed');
+      }
+    });
+    return alertText;
   }
+
+  async clickFieldsTab() {
+    PageObjects.common.debug('click Fields tab');
+    await PageObjects.common.clickTestSubject('tab-indexFields');
+  }
+
+  async clickScriptedFieldsTab() {
+    PageObjects.common.debug('click Scripted Fields tab');
+    await PageObjects.common.clickTestSubject('tab-scriptedFields');
+  }
+
+  async clickSourceFiltersTab() {
+    PageObjects.common.debug('click Source Filters tab');
+    await PageObjects.common.clickTestSubject('tab-sourceFilters');
+  }
+
+  async addScriptedField(name, language, type, format, popularity, script) {
+    await this.clickAddScriptedField();
+    await this.setScriptedFieldName(name);
+    if (language) await this.setScriptedFieldLanguage(language);
+    if (type) await this.setScriptedFieldType(type);
+    if (format) {
+      await this.setScriptedFieldFormat(format.format);
+      // null means leave - default - which has no other settings
+      // Url adds Type, Url Template, and Label Template
+      // Date adds moment.js format pattern (Default: "MMMM Do YYYY, HH:mm:ss.SSS")
+      // String adds Transform
+      switch(format.format) {
+        case 'Url':
+          await this.setScriptedFieldUrlType(format.type);
+          await this.setScriptedFieldUrlTemplate(format.template);
+          await this.setScriptedFieldUrlLabelTemplate(format.labelTemplate);
+          break;
+        case 'Date':
+          await this.setScriptedFieldDatePattern(format.datePattern);
+          break;
+        case 'String':
+          await this.setScriptedFieldStringTransform(format.stringTransform);
+          break;
+      }
+    }
+    if (popularity) await this.setScriptedFieldPopularity(popularity);
+    await this.setScriptedFieldScript(script);
+    await this.clickSaveScriptedField();
+  }
+
+  async clickAddScriptedField() {
+    PageObjects.common.debug('click Add Scripted Field');
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('a[aria-label="Add Scripted Field"]')
+    .click();
+  }
+
+  async clickSaveScriptedField() {
+    PageObjects.common.debug('click Save Scripted Field');
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('button[aria-label="Create Field"]')
+    .click();
+  }
+
+  async setScriptedFieldName(name) {
+    PageObjects.common.debug('set scripted field name = ' + name);
+    await PageObjects.common.findTestSubject('editorFieldName').type(name);
+  }
+
+  async setScriptedFieldLanguage(language) {
+    PageObjects.common.debug('set scripted field language = ' + language);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorFieldLang"] > option[label="' + language + '"]')
+    .click();
+  }
+
+  async setScriptedFieldType(type) {
+    PageObjects.common.debug('set scripted field type = ' + type);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorFieldType"] > option[label="' + type + '"]')
+    .click();
+  }
+
+  async setScriptedFieldFormat(format) {
+    PageObjects.common.debug('set scripted field format = ' + format);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[label="' + format + '"]')
+    .click();
+  }
+
+  async setScriptedFieldUrlType(type) {
+    PageObjects.common.debug('set scripted field Url type = ' + type);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.formatParams.type"] > option[label="' + type + '"]')
+    .click();
+  }
+
+  async setScriptedFieldUrlTemplate(template) {
+    PageObjects.common.debug('set scripted field Url Template = ' + template);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+    .type(template);
+  }
+
+  async setScriptedFieldUrlLabelTemplate(labelTemplate) {
+    PageObjects.common.debug('set scripted field Url Label Template = ' + labelTemplate);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+    .type(labelTemplate);
+  }
+
+  async setScriptedFieldDatePattern(datePattern) {
+    PageObjects.common.debug('set scripted field Date Pattern = ' + datePattern);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[ng-model="model"]')
+    .clearValue().type(datePattern);
+  }
+
+  async setScriptedFieldStringTransform(stringTransform) {
+    PageObjects.common.debug('set scripted field string Transform = ' + stringTransform);
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[ng-model="editor.formatParams.transform"] > option[label="' + stringTransform + '"]')
+    .click();
+  }
+
+  async setScriptedFieldPopularity(popularity) {
+    PageObjects.common.debug('set scripted field popularity = ' + popularity);
+    await PageObjects.common.findTestSubject('editorFieldCount').type(popularity);
+  }
+
+  async setScriptedFieldScript(script) {
+    PageObjects.common.debug('set scripted field script = ' + script);
+    await PageObjects.common.findTestSubject('editorFieldScript').type(script);
+  }
+
 
 }

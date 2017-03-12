@@ -5,9 +5,10 @@ function makeDirectiveDef(id, compare) {
     return {
       require: 'ngModel',
       link: function ($scope, $el, $attr, ngModel) {
-        let getBound = function () { return $parse($attr[id])(); };
-        let defaultVal = {
+        const getBound = function () { return $parse($attr[id])(); };
+        const defaultVal = {
           'greaterThan': -Infinity,
+          'greaterOrEqualThan': -Infinity,
           'lessThan': Infinity
         }[id];
 
@@ -19,8 +20,8 @@ function makeDirectiveDef(id, compare) {
         });
 
         function validate(val) {
-          let bound = !isNaN(getBound()) ? +getBound() : defaultVal;
-          let valid = !isNaN(bound) && !isNaN(val) && compare(val, bound);
+          const bound = !isNaN(getBound()) ? +getBound() : defaultVal;
+          const valid = !isNaN(bound) && !isNaN(val) && compare(val, bound);
           ngModel.$setValidity(id, valid);
           return val;
         }
@@ -36,4 +37,7 @@ uiModules
   }))
   .directive('lessThan', makeDirectiveDef('lessThan', function (a, b) {
     return a < b;
+  }))
+  .directive('greaterOrEqualThan', makeDirectiveDef('greaterOrEqualThan', function (a, b) {
+    return a >= b;
   }));

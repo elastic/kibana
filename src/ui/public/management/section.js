@@ -1,4 +1,4 @@
-import {assign} from 'lodash';
+import { assign } from 'lodash';
 import IndexedArray from 'ui/indexed_array';
 
 export default class ManagementSection {
@@ -72,6 +72,17 @@ export default class ManagementSection {
    */
 
   getSection(id) {
-    return this.items.byId[id];
+    if (!id) {
+      return;
+    }
+
+    const sectionPath = id.split('/');
+    return sectionPath.reduce((currentSection, nextSection) => {
+      if (!currentSection) {
+        return;
+      }
+
+      return currentSection.items.byId[nextSection];
+    }, this);
   }
 }

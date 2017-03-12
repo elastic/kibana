@@ -1,17 +1,19 @@
 let ace = require('ace');
 let es = require('../../src/es');
-let input = require('../../src/input');
+import { initializeInput } from '../../src/input';
 let editor_input1 = require('raw!./editor_input1.txt');
+let utils = require('../../src/utils');
 
 var aceRange = ace.require("ace/range");
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
+let input;
 
 module("Editor", {
   setup: function () {
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
-
   },
   teardown: function () {
     input.$el.hide();
@@ -85,7 +87,6 @@ var multi_doc_request = {
   ]
 };
 multi_doc_request.data = multi_doc_request.data_as_array.join("\n");
-
 
 utils_test("simple request range", simple_request.prefix, simple_request.data, function () {
   input.getRequestRange(function (range) {
@@ -257,6 +258,42 @@ utils_test("multi doc request data", multi_doc_request.prefix, multi_doc_request
   });
 });
 
+var script_request = {
+  prefix: 'POST _search',
+  data: [
+    '{',
+    '   "query": { "script": """',
+    '   some script ',
+    '   """}',
+    '}'
+  ].join('\n')
+};
+
+utils_test("script request range", script_request.prefix, script_request.data, function () {
+  input.getRequestRange(function (range) {
+    var expected = new aceRange.Range(
+      0, 0,
+      5, 1
+    );
+    compareRequest(range, expected);
+    start();
+  });
+});
+
+utils_test("simple request data", simple_request.prefix, simple_request.data, function () {
+  input.getRequest(function (request) {
+    var expected = {
+      method: "POST",
+      url: "_search",
+      data: [utils.collapseLiteralStrings(simple_request.data)]
+    };
+
+    compareRequest(request, expected);
+    start();
+  });
+});
+
+
 function multi_req_test(name, editor_input, range, expected) {
   utils_test("multi request select - " + name, editor_input, function () {
     input.getRequestsInRange(range, function (requests) {
@@ -272,7 +309,7 @@ function multi_req_test(name, editor_input, range, expected) {
 }
 
 multi_req_test("mid body to mid body", editor_input1,
-  {start: {row: 12}, end: {row: 17}}, [{
+  { start: { row: 12 }, end: { row: 17 } }, [{
     method: "PUT",
     url: "index_1/type1/1",
     data: {
@@ -287,7 +324,7 @@ multi_req_test("mid body to mid body", editor_input1,
   }]);
 
 multi_req_test("single request start to end", editor_input1,
-  {start: {row: 10}, end: {row: 13}}, [{
+  { start: { row: 10 }, end: { row: 13 } }, [{
     method: "PUT",
     url: "index_1/type1/1",
     data: {
@@ -296,7 +333,7 @@ multi_req_test("single request start to end", editor_input1,
   }]);
 
 multi_req_test("start to end, with comment", editor_input1,
-  {start: {row: 6}, end: {row: 13}}, [{
+  { start: { row: 6 }, end: { row: 13 } }, [{
     method: "GET",
     url: "_stats?level=shards",
     data: null
@@ -310,7 +347,7 @@ multi_req_test("start to end, with comment", editor_input1,
     }]);
 
 multi_req_test("before start to after end, with comments", editor_input1,
-  {start: {row: 4}, end: {row: 14}}, [{
+  { start: { row: 4 }, end: { row: 14 } }, [{
     method: "GET",
     url: "_stats?level=shards",
     data: null
@@ -324,13 +361,13 @@ multi_req_test("before start to after end, with comments", editor_input1,
     }]);
 
 multi_req_test("between requests", editor_input1,
-  {start: {row: 21}, end: {row: 22}}, []);
+  { start: { row: 21 }, end: { row: 22 } }, []);
 
 multi_req_test("between requests - with comment", editor_input1,
-  {start: {row: 20}, end: {row: 22}}, []);
+  { start: { row: 20 }, end: { row: 22 } }, []);
 
 multi_req_test("between requests - before comment", editor_input1,
-  {start: {row: 19}, end: {row: 22}}, []);
+  { start: { row: 19 }, end: { row: 22 } }, []);
 
 
 function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
@@ -344,12 +381,12 @@ function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
 
 
 multi_req_copy_as_curl_test("start to end, with comment", editor_input1,
-  {start: {row: 6}, end: {row: 13}}, `
+  { start: { row: 6 }, end: { row: 13 } }, `
 curl -XGET "http://localhost:9200/_stats?level=shards"
 
 #in between comment
 
-curl -XPUT "http://localhost:9200/index_1/type1/1" -d'
+curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
 {
   "f": 1
 }'`.trim()

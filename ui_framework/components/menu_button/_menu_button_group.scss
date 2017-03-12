@@ -1,0 +1,11 @@
+.kuiMenuButtonGroup {
+  display: flex;
+
+  .kuiMenuButton + .kuiMenuButton {
+    margin-left: 4px;
+  }
+}
+
+.kuiMenuButtonGroup--alignRight {
+  justify-content: flex-end;
+}

@@ -2,18 +2,17 @@ import _ from 'lodash';
 import d3 from 'd3';
 import Binder from 'ui/binder';
 import errors from 'ui/errors';
-import 'ui/vislib/styles/main.less';
-import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
 import EventsProvider from 'ui/events';
-import VislibLibHandlerHandlerTypesProvider from 'ui/vislib/lib/handler/handler_types';
-import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
+import './styles/main.less';
+import VisConifgProvider from './lib/vis_config';
+import VisHandlerProvider from './lib/handler';
+
 export default function VisFactory(Private) {
-
-
-  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  const ResizeChecker = Private(ResizeCheckerProvider);
   const Events = Private(EventsProvider);
-  const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
-  const chartTypes = Private(VislibVisualizationsVisTypesProvider);
+  const VisConfig = Private(VisConifgProvider);
+  const Handler = Private(VisHandlerProvider);
 
   /**
    * Creates the visualizations.
@@ -24,14 +23,11 @@ export default function VisFactory(Private) {
    * @param config {Object} Parameters that define the chart type and chart options
    */
   class Vis extends Events {
-    constructor($el, config) {
+    constructor($el, visConfigArgs) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults({}, config || {}, {
-        legendOpen: true
-      });
+      this.visConfigArgs = _.cloneDeep(visConfigArgs);
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -39,6 +35,9 @@ export default function VisFactory(Private) {
       this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
+    hasLegend() {
+      return this.visConfigArgs.addLegend;
+    }
     /**
      * Renders the visualization
      *
@@ -46,8 +45,6 @@ export default function VisFactory(Private) {
      * @param data {Object} Elasticsearch query results
      */
     render(data, uiState) {
-      const chartType = this._attr.type;
-
       if (!data) {
         throw new Error('No valid data!');
       }
@@ -69,9 +66,19 @@ export default function VisFactory(Private) {
         uiState.on('change', this._uiStateChangeHandler);
       }
 
-      this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
+
+      this.handler = new Handler(this, this.visConfig);
       this._runWithoutResizeChecker('render');
-    };
+    }
+
+    getLegendLabels() {
+      return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
+    }
+
+    getLegendColors() {
+      return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
+    }
 
     /**
      * Resizes the visualization
@@ -80,7 +87,6 @@ export default function VisFactory(Private) {
      */
     resize() {
       if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
         return;
       }
 
@@ -89,14 +95,12 @@ export default function VisFactory(Private) {
       } else {
         this.render(this.data, this.uiState);
       }
-    };
+    }
 
     _runWithoutResizeChecker(method) {
-      this.resizeChecker.stopSchedule();
-      this._runOnHandler(method);
-      this.resizeChecker.saveSize();
-      this.resizeChecker.saveDirty(false);
-      this.resizeChecker.continueSchedule();
+      this.resizeChecker.modifySizeWithoutTriggeringResize(() => {
+        this._runOnHandler(method);
+      });
     }
 
     _runOnHandler(method) {
@@ -111,7 +115,7 @@ export default function VisFactory(Private) {
         }
 
       }
-    };
+    }
 
     /**
      * Destroys the visualization
@@ -130,7 +134,7 @@ export default function VisFactory(Private) {
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
-    };
+    }
 
     /**
      * Sets attributes on the visualization
@@ -140,9 +144,9 @@ export default function VisFactory(Private) {
      * @param val {*} Value to which the attribute name is set
      */
     set(name, val) {
-      this._attr[name] = val;
+      this.visConfigArgs[name] = val;
       this.render(this.data, this.uiState);
-    };
+    }
 
     /**
      * Gets attributes from the visualization
@@ -152,8 +156,8 @@ export default function VisFactory(Private) {
      * @returns {*} The value of the attribute name
      */
     get(name) {
-      return this._attr[name];
-    };
+      return this.visConfig.get(name);
+    }
 
     /**
      * Turns on event listeners.
@@ -172,7 +176,7 @@ export default function VisFactory(Private) {
       if (first && added && this.handler) this.handler.enable(event);
 
       return ret;
-    };
+    }
 
     /**
      * Turns off event listeners.
@@ -189,8 +193,8 @@ export default function VisFactory(Private) {
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
-    };
+    }
   }
 
   return Vis;
-};
+}

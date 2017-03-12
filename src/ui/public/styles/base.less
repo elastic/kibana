@@ -3,9 +3,6 @@
 @import (reference) "./variables";
 @import (reference) "~ui/styles/bootstrap/bootstrap";
 
-// Kibana UI Framework
-@import (less) "~@elastic/kibana-ui-framework/dist/framework.css";
-
 html,
 body {
   .flex-parent();
@@ -200,23 +197,6 @@ a {
   .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
 }
 
-.navbar-timepicker {
-  > li > a {
-    padding-left: 7px !important;
-    padding-right: 7px !important;
-  }
-
-  .fa {
-    font-size: 16px;
-    vertical-align: middle;
-  }
-
-  button {
-    background-color: transparent;
-    border-radius: 0;
-  }
-}
-
   .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
@@ -273,7 +253,6 @@ kbn-table, .kbn-table {
       visibility: visible;
     }
   }
-
 }
 
 //== Generic Table
@@ -511,6 +490,16 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
+  position: relative;
+
+  .table-cell-filter {
+    position: absolute;
+    background-color: @table-cell-hover-bg;
+    white-space: nowrap;
+    right: 0;
+    top: 5px;
+    display: none;
+  }
 }
 
   .cell-hover-show {
@@ -519,8 +508,9 @@ style-compile {
   }
 
 .cell-hover:hover {
-  background-color: @table-cell-hover-hover-bg;
-  cursor: cell;
+  .table-cell-filter {
+    display: inline;
+  }
 
   .cell-hover-show {
     visibility: visible;
@@ -611,6 +601,8 @@ fieldset {
   }
 }
 
+// TODO: Extract these styles into the UI Framework.
+
 .page-row {
   padding: 0 10px;
   margin: 10px 0;
@@ -621,12 +613,202 @@ fieldset {
   font-size: 14px;
 }
 
+.kuiNotice {
+  padding: 40px 60px 48px;
+  margin: 20px;
+  background-color: white;
+}
+
+.kuiNotice__header {
+  margin-bottom: 18px;
+}
+
+/**
+ * 1. Override h1 styles.
+ */
+.kuiNoticeTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+  margin-top: 0; // 1
+}
+
+.kuiNoticeText {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.kuiCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+  .kuiCard__description {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 18px 0;
+  }
+
+    .kuiCard__descriptionTitle {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+    .kuiCard__descriptionText {
+      font-size: 14px;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+  .kuiCard__footer {
+    text-align: center;
+    font-size: 14px;
+    padding: 0 15px 20px;
+  }
+
+.kuiCard--fixedWidth {
+  max-width: 120px;
+}
+
+.kuiCardGroup {
+  display: flex;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+  .kuiCardGroup__card {
+    flex: 1 1 0%;
+    border: none;
+    border-radius: 0;
+
+    & + & {
+      border-left: 1px solid #E0E0E0;
+    }
+  }
+
+  .kuiCardGroup__cardDescription {
+    flex: 1 1 auto;
+  }
+
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.kuiFormSection {
+  margin-bottom: 16px;
+}
+
+.kuiFormSubSection {
+  margin-bottom: 8px;
+}
+
+.kuiFormLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.kuiFormSubLabel {
+  display: block;
+  font-weight: normal;
+}
+
+  .kuiFormSubLabel__note {
+    opacity: 0.5;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+.kuiInputNote {
+  margin: 5px 0 10px;
+}
+
+.kuiInputNote--danger {
+  color: #E74C3C;
+}
+
+.kuiInputNote--warning {
+  color: #F39C12;
+}
+
+/**
+ * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
+ */
+.ui-select-multiple.ui-select-bootstrap {
+  padding: 3px 5px 2px !important; // 1
+  border: 1px solid #D4D4D4; // 1
+  background-color: #ffffff !important; // 1
+
+  &.kuiInputError {
+    border-color: #E74C3C; // 1
+  }
+}
+
+/**
+ * 1. Override label styles.
+ */
+.kuiOptionLabel {
+  font-weight: normal; // 1
+  cursor: pointer;
+}
+
+.kuiFormPanel {
+  border: 1px solid #D4D4D4;
+  padding: 12px;
+}
+
+.kuiList {
+  margin-bottom: 10px;
+}
+
+.kuiListItem {
+  padding: 12px 0;
+
+  & + & {
+    border-top: 2px dashed rgba(212, 212, 212, 0.5);
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
 /**
  * Utility class.
  * TODO: Move to UI Framework.
  */
 .fullWidth {
-  width: 100%;
+  width: 100% !important;
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.noPadding {
+  padding: 0 !important;
 }
 
 /**
@@ -640,5 +822,237 @@ fieldset {
   .flexGroup__filler {
     flex: 1 1 auto;
   }
+
+.kuiColumn + .kuiColumn {
+  padding-left: 10px;
+}
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+// $numColumns: 12;
+// @for $i from 1 through $numColumns {
+//   .kiuColumn--#{$i} {
+//     display: inline-block; /* 1 */
+//     vertical-align: top; /* 2 */
+//     width: $i / $numColumns * 100%;
+//   }
+// }
+
+.makeKuiColumns(12);
+
+.makeKuiColumns(@n, @i: 1) when (@i =< @n) {
+  .kuiColumn--@{i} {
+    display: inline-block; /* 1 */
+    vertical-align: top; /* 2 */
+    width: (@i * 100% / @n);
+  }
+  .makeKuiColumns(@n, (@i + 1));
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.kuiLocalDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
+  }
+}
+
+// TODO: Extract these styles into the UI Framework.
+
+.kuiFormSection {
+  margin-bottom: 16px;
+}
+
+.kuiFormLabel {
+  display: block;
+}
+
+.kuiFormSubLabel {
+  display: block;
+  font-weight: normal;
+}
+
+.kuiSideBarSelect {
+  // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
+  height: 24px;
+  width: 100%;
+  font-size: 12px;
+  padding: 0 15px;
+}
+
+.kuiSideBarInput {
+  // TODO: @include kuiInput styles when this is moved to the UI Framework and we're using SASS.
+  display: block;
+  width: 100%;
+  height: 24px;
+  font-size: 12px;
+  color: #2d2d2d;
+  border: 1px solid #D4D4D4;
+  border-radius: 4px;
+  padding: 5px 15px;
+}
+
+.kuiSideBarSection {
+  margin-bottom: 6px;
+}
+
+.kuiSideBarSection__main {
+  margin-bottom: 25px;
+}
+
+.kuiSideBarSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #D4D4D4;
+}
+
+.kuiSideBarSection__main .kuiSideBarSectionTitle {
+  background-color: #E4E4E4;
+  padding: 2px 10px;
+}
+
+.kuiSideBarSectionTitle__text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+/**
+ * 1. Override Bootstrap button styles.
+ */
+.kuiSideBarSectionTitle__action {
+  background-color: transparent; // 1
+  padding: 0; // 1
+  cursor: pointer;
+  color: #328CAA;
+
+  &:hover {
+    color: #105A73;
+  }
+}
+
+.kuiSideBarCollapsibleTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #E8E8E8;
+}
+
+.kuiSideBarCollapsibleTitle__label {
+  display: flex;
+  align-items: center;
+}
+
+/**
+ * 1. Override FontAwesome .fa styles.
+ */
+.kuiSideBarCollapsibleTitle__caret {
+  width: 12px;
+  height: 12px;
+  font-size: 12px !important; // 1
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+.kuiSideBarCollapsibleTitle__text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+/**
+ * 1. Override Bootstrap button styles.
+ */
+.kuiSideBarCollapsibleTitle__action {
+  background-color: transparent; // 1
+  padding: 0; // 1
+  cursor: pointer;
+  color: #328CAA;
+
+  &:hover {
+    color: #105A73;
+  }
+}
+
+.kuiSideBarCollapsibleSection {
+  padding-left: 16px;
+}
+
+/**
+ * 1. Override Bootstrap h1 styles.
+ */
+.kuiSideBarFormSectionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5A5A5A;
+  border-bottom: 1px solid #E8E8E8;
+  margin: 4px 0 !important; // 1
+  padding-bottom: 2px;
+}
+
+.kuiSideBarFormRow {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 1px;
+}
+
+/**
+ * 1. Override .vis-editor-sidebar styles.
+ */
+.kuiSideBarFormRow__label {
+  display: flex;
+  align-items: center;
+  flex: 1 1 40% !important; // 1
+  font-weight: 400;
+}
+
+.kuiSideBarFormRow__label__colorbox {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 10px;
+  border: 1px ridge lightgray;
+}
+
+.kuiSideBarFormRow__control {
+  display: flex;
+  align-items: center;
+  flex: 1 1 60%;
+}
+
+/**
+ * 1. Override .sidebar-item styles.
+ */
+.kuiSideBarOptionsLink {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #328CAA !important; // 1
+
+  &:hover {
+    color: #105A73 !important; // 1
+  }
+}
+
+.kuiSideBarOptionsLink__caret {
+  width: 10px;
+  height: 10px;
+}
+
+.kuiSideBarOptionsLink__text {
+  margin-left: 2px;
+}
+
 
 @import "~dragula/dist/dragula.css";

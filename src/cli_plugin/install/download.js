@@ -3,12 +3,34 @@ import downloadLocalFile from './downloaders/file';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { parse } from 'url';
 
+function _isWindows() {
+  return /^win/.test(process.platform);
+}
+
+export function _getFilePath(filePath, sourceUrl) {
+  const decodedPath = decodeURI(filePath);
+  const prefixedDrive = /^\/[a-zA-Z]:/.test(decodedPath);
+  if (_isWindows() && prefixedDrive) {
+    return decodedPath.slice(1);
+  }
+
+  return decodedPath;
+}
+
+export function _checkFilePathDeprecation(sourceUrl, logger) {
+  const twoSlashes = /^file:\/\/(?!\/)/.test(sourceUrl);
+  if (_isWindows() && twoSlashes) {
+    logger.log('Install paths with file:// are deprecated, use file:/// instead');
+  }
+}
+
 export function _downloadSingle(settings, logger, sourceUrl) {
   const urlInfo = parse(sourceUrl);
   let downloadPromise;
 
   if (/^file/.test(urlInfo.protocol)) {
-    downloadPromise = downloadLocalFile(logger, decodeURI(urlInfo.path), settings.tempArchiveFile);
+    _checkFilePathDeprecation(sourceUrl, logger);
+    downloadPromise = downloadLocalFile(logger, _getFilePath(urlInfo.path, sourceUrl), settings.tempArchiveFile);
   } else if (/^https?/.test(urlInfo.protocol)) {
     downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
   } else {
@@ -42,4 +64,4 @@ export function download(settings, logger) {
   }
 
   return tryNext();
-};
+}

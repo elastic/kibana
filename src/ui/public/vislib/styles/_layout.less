@@ -12,6 +12,11 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+  padding: 10px 0;
+}
+
+.vis-wrapper svg {
+  overflow: visible;
 }
 
 /* YAxis logic */
@@ -31,7 +36,7 @@
 }
 
 .y-axis-spacer-block {
-  min-height: 45px;
+  min-height: 0px;
 }
 
 .y-axis-div-wrapper {
@@ -43,13 +48,14 @@
 
 .y-axis-div {
   flex: 1 1 25px;
-  min-width: 14px;
+  min-width: 1px;
   min-height: 14px;
+  margin: 5px 0px;
 }
 
 .y-axis-title {
   min-height: 14px;
-  min-width: 14px;
+  min-width: 1px;
 }
 
 .y-axis-chart-title {
@@ -57,7 +63,6 @@
   flex-direction: column;
   min-height: 14px;
   min-width: 0;
-  width: 14px;
 }
 
 .y-axis-title text, .x-axis-title text {
@@ -83,7 +88,6 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  margin-right: 8px;
 }
 
 .chart-wrapper {
@@ -93,6 +97,17 @@
   margin: 0;
   min-height: 0;
   min-width: 0;
+  margin: 5px;
+}
+
+.chart-wrapper-row .chart-wrapper {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.chart-wrapper-column .chart-wrapper {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .chart-wrapper-column {
@@ -138,7 +153,7 @@
 .x-axis-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 45px;
+  min-height: 0px;
   min-width: 0;
   overflow: visible;
 }
@@ -146,27 +161,45 @@
 .x-axis-div-wrapper {
   display: flex;
   flex-direction: row;
-  min-height: 20px;
+  min-height: 0px;
   min-width: 0;
 }
 
 .x-axis-chart-title {
   display: flex;
   flex-direction: row;
-  min-height: 15px;
+  min-height: 1px;
   max-height: 15px;
   min-width: 20px;
 }
 
 .x-axis-title {
-  min-height: 15px;
+  min-height: 0px;
   max-height: 15px;
   min-width: 20px;
   overflow: hidden;
 }
 
 .x-axis-div {
-  margin-top: -5px;
-  min-height: 20px;
+  min-height: 0px;
   min-width: 20px;
+  margin: 0px 5px;
+  width: 100%;
+}
+
+.x-axis-div svg {
+  float: left; /* for some reason svg wont get positioned in top left corner of container div without this */
+}
+
+.axis-wrapper-top .axis-div svg {
+  margin-bottom: -5px;
+}
+
+.chart-first {
+  margin-top: 0px;
+  margin-left: 0px
+}
+.chart-last {
+  margin-bottom: 0px;
+  margin-right: 0px;
 }

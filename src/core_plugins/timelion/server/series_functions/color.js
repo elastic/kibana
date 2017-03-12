@@ -1,6 +1,6 @@
-var alter = require('../lib/alter.js');
-var Chainable = require('../lib/classes/chainable');
-var tinygradient = require('tinygradient');
+const alter = require('../lib/alter.js');
+const Chainable = require('../lib/classes/chainable');
+const tinygradient = require('tinygradient');
 
 module.exports = new Chainable('color', {
   args: [
@@ -17,13 +17,13 @@ module.exports = new Chainable('color', {
   ],
   help: 'Change the color of the series',
   fn: function colorFn(args) {
-    var colors = args.byName.color.split(':');
+    let colors = args.byName.color.split(':');
 
     if (colors.length > 1 && args.byName.inputSeries.list.length > 1) {
       colors = tinygradient(colors).rgb(args.byName.inputSeries.list.length);
     }
 
-    var i = 0;
+    let i = 0;
     return alter(args, function (eachSeries) {
       if (colors.length === 1 || args.byName.inputSeries.list.length === 1) {
         eachSeries.color = colors[0];

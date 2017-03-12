@@ -18,16 +18,26 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const clickHandler = filterBarClickHandler(appState);
     const aggs = $scope.vis.aggs.getResponseAggs();
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-    clickHandler({point: {aggConfigResult: aggConfigResult}});
+    clickHandler({ point: { aggConfigResult: aggConfigResult } });
   });
   tagCloud.on('renderComplete', () => {
+
+    const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
+    const incompleteMessage = containerNode.querySelector('.tagcloud-incomplete-message');
+
+    if (!$scope.vis.aggs[0] || !$scope.vis.aggs[1]) {
+      incompleteMessage.style.display = 'none';
+      truncatedMessage.style.display = 'none';
+      return;
+    }
+
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
     bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
 
-    const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
+
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
-    const incompleteMessage = containerNode.querySelector('.tagcloud-incomplete-message');
+
     const status = tagCloud.getStatus();
 
     if (TagCloud.STATUS.COMPLETE === status) {
@@ -36,17 +46,20 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
       incompleteMessage.style.display = 'block';
     }
 
+
     $element.trigger('renderComplete');
   });
 
   $scope.$watch('esResponse', async function (response) {
 
     if (!response) {
+      tagCloud.setData([]);
       return;
     }
 
     const tagsAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
     if (!tagsAggId || !response.aggregations) {
+      tagCloud.setData([]);
       return;
     }
 
@@ -76,11 +89,11 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();
-  }, 1000, {trailing: true}), true);
+  }, 1000, { trailing: true }), true);
 
 
   function getContainerSize() {
-    return {width: $element.width(), height: $element.height()};
+    return { width: $element.width(), height: $element.height() };
   }
 
   function getValue(metricsAgg, bucket) {

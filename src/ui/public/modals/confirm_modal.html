@@ -1,0 +1,38 @@
+<div class="kuiModal" style="width: 450px" data-test-subj="confirmModal">
+  <div class="kuiModalHeader" ng-if="title">
+    <div class="kuiModalHeader__title" data-test-subj="confirmModalTitleText">
+      {{title}}
+    </div>
+    <div
+      ng-if="showClose"
+      class="kuiModalHeaderCloseButton kuiIcon fa-times"
+      data-test-subj="confirmModalCloseButton"
+      ng-click="onClose()"
+    ></div>
+  </div>
+  <div class="kuiModalBody">
+    <div
+      class="kuiModalBodyText"
+      data-test-subj="confirmModalBodyText"
+    >
+      {{message}}
+    </div>
+  </div>
+
+  <div class="kuiModalFooter">
+    <button
+      class="kuiButton kuiButton--hollow"
+      data-test-subj="confirmModalCancelButton"
+      ng-click="onCancel()"
+    >
+      {{cancelButtonText}}
+    </button>
+    <button
+      class="kuiButton kuiButton--primary"
+      data-test-subj="confirmModalConfirmButton"
+      ng-click="onConfirm()"
+    >
+      {{confirmButtonText}}
+    </button>
+  </div>
+</div>

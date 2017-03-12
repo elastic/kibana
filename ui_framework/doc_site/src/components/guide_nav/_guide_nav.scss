@@ -1,0 +1,97 @@
+.guideNav {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $guideNavHeight;
+  background-color: #e8488b;
+  color: #ffffff;
+  box-shadow:
+    inset 0 -20px 18px rgba(#5a1029, 0.2),
+    inset 0 -5px 4px rgba(#5a1029, 0.3);
+  transition: height 0.3s ease;
+  overflow: hidden;
+
+  &.is-guide-nav-open {
+    height: 100%;
+  }
+}
+
+  .guideNav__header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 20px;
+  }
+
+    .guideNav__menu {
+      cursor: pointer;
+      margin-right: 10px;
+      padding: 10px;
+      border-radius: 3px;
+
+      &.is-menu-button-pinned,
+      &:hover {
+        background-color: rgba(black, 0.15);
+      }
+
+      &:active {
+        background-color: rgba(black, 0.2);
+        box-shadow: inset 0 2px 8px rgba(black, 0.2);
+      }
+    }
+
+    .guideNav__title {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .guideNav__version {
+      margin-left: 10px;
+      font-weight: 300;
+      font-size: 14px;
+    }
+
+.guideNavItemsContainer {
+  @include scrollbar;
+  display: flex;
+  overflow: auto;
+  min-height: calc(100vh - 100px);
+}
+
+.guideNavItems {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.guideNavSectionTitle {
+  min-width: 200px;
+  padding: 8px 20px;
+  margin-left: 5px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+.guideNavItem {
+  min-width: 200px;
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  line-height: 20px;
+  padding: 8px 20px;
+  margin-left: 5px;
+  border-radius: 3px;
+
+  &:hover {
+    background-color: rgba(black, 0.15);
+  }
+}

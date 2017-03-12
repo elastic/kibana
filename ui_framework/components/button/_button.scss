@@ -1,0 +1,134 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ * 3. Safari won't respect :enabled:active on links.
+ */
+.kuiButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 4px 12px 5px;
+  font-size: $fontSize;
+  font-weight: 400;
+  line-height: $lineHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $buttonBorderRadius;
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none; /* 2 */
+  }
+
+  &:active { /* 3 */
+    transform: translateY(1px);
+  }
+
+  &:focus {
+    @include focus;
+  }
+}
+
+.kuiButton--iconText {
+  .kuiButton__icon {
+    &:first-child {
+      margin-right: 4px;
+    }
+
+    &:last-child {
+      margin-left: 4px;
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiButton--basic {
+  color: #5a5a5a;
+  background-color: #F2F2F2;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: #5a5a5a !important; /* 1 */
+  }
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: #ffffff !important; /* 1 */
+    background-color: #9B9B9B;
+  }
+
+  &:disabled {
+    color: #9B9B9B;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiButton--primary {
+  color: #FFFFFF;
+  background-color: #6EADC1;
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: #FFFFFF !important; /* 1 */
+    background-color: #006E8A;
+  }
+
+  &:disabled {
+    background-color: #B6D6E0;
+  }
+
+  &:focus {
+    color: #FFFFFF !important; /* 1 */
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiButton--danger {
+  color: #FFFFFF;
+  background-color: #D76051;
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: #FFFFFF !important; /* 1 */
+    background-color: #A52E1F;
+  }
+
+  &:disabled {
+    background-color: #efc0ba;
+  }
+
+  &:focus {
+    @include focus($focusDangerColor);
+    color: #FFFFFF !important; /* 1 */
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
+ * 3. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiButton--hollow {
+  color: $linkColor !important; /* 2 */
+  background-color: transparent;
+
+  &:hover, /* 3 */
+  &:active { /* 3 */
+    color: $linkHoverColor !important; /* 1 */
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: #dddddd !important; /* 1 */
+  }
+}

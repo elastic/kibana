@@ -1,13 +1,15 @@
+import Joi from 'joi';
+import Boom from 'boom';
+import apiServer from './api_server/server';
+import { existsSync } from 'fs';
+import { resolve, join, sep } from 'path';
+import { has, startsWith, endsWith } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
+import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
 
-module.exports = function (kibana) {
-  let { resolve, join, sep } = require('path');
-  let Joi = require('joi');
-  let Boom = require('boom');
-  let modules = resolve(__dirname, 'public/webpackShims/');
-  let src = resolve(__dirname, 'public/src/');
-  let { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
+export default function (kibana) {
+  const modules = resolve(__dirname, 'public/webpackShims/');
+  const src = resolve(__dirname, 'public/src/');
 
   const apps = [];
 
@@ -49,22 +51,18 @@ module.exports = function (kibana) {
               key: Joi.string()
             }).default()
           })
-        ).default([
-          {
-            match: {
-              protocol: '*',
-              host: '*',
-              port: '*',
-              path: '*'
-            },
-
-            timeout: 180000,
-            ssl: {
-              verify: true
-            }
-          }
-        ])
+        ).default()
       }).default();
+    },
+
+    deprecations: function () {
+      return [
+        (settings, log) => {
+          if (has(settings, 'proxyConfig')) {
+            log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+          }
+        }
+      ];
     },
 
     init: function (server, options) {
@@ -88,7 +86,7 @@ module.exports = function (kibana) {
 
             if (!filters.some(re => re.test(uri))) {
               const err = Boom.forbidden();
-              err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+              err.output.payload = `Error connecting to '${uri}':\n\nUnable to send requests to that url.`;
               err.output.headers['content-type'] = 'text/plain';
               reply(err);
             } else {
@@ -107,21 +105,29 @@ module.exports = function (kibana) {
 
           const requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
           const filterHeaders = server.plugins.elasticsearch.filterHeaders;
+
+          let additionalConfig;
+          if (server.config().get('console.proxyConfig')) {
+            additionalConfig = proxyConfigCollection.configForUri(uri);
+          } else {
+            additionalConfig = getElasticsearchProxyConfig(server);
+          }
+
           reply.proxy({
             mapUri: function (request, done) {
-              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist))
+              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
             },
             xforward: true,
             onResponse(err, res, request, reply, settings, ttl) {
               if (err != null) {
-                reply("Error connecting to '" + uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                reply(`Error connecting to '${uri}':\n\n${err.message}`).type('text/plain').statusCode = 502;
               } else {
                 reply(null, res);
               }
             },
 
-            ...proxyConfigCollection.configForUri(uri)
-          })
+            ...additionalConfig
+          });
         }
       };
 
@@ -150,14 +156,13 @@ module.exports = function (kibana) {
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
         handler: function (req, reply) {
-          let server = require('./api_server/server');
-          let {sense_version, apis} = req.query;
+          const { sense_version, apis } = req.query;
           if (!apis) {
             reply(Boom.badRequest('"apis" is a required param.'));
             return;
           }
 
-          return server.resolveApi(sense_version, apis.split(","), reply);
+          return apiServer.resolveApi(sense_version, apis.split(','), reply);
         }
       });
 
@@ -175,7 +180,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       apps: apps,
-
+      hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
 
       injectDefaultVars(server, options) {
@@ -190,5 +195,5 @@ module.exports = function (kibana) {
         join(src, 'sense_editor/mode/worker.js')
       ]
     }
-  })
-};
+  });
+}

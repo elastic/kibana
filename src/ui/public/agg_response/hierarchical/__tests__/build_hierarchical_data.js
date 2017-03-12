@@ -35,7 +35,7 @@ describe('buildHierarchicalData', function () {
     let results;
 
     beforeEach(function () {
-      let id = 1;
+      const id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -48,7 +48,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the slices with one child to a consistent label', function () {
-      let checkLabel = 'Count';
+      const checkLabel = 'Count';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);
@@ -68,35 +68,35 @@ describe('buildHierarchicalData', function () {
 
     it('should set the rows', function () {
       let id = 1;
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension', row: true }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension', row: true } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-      let results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+      const results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
       expect(results).to.have.property('rows');
     });
 
     it('should set the columns', function () {
       let id = 1;
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-      let results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+      const results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
       expect(results).to.have.property('columns');
     });
 
@@ -112,9 +112,9 @@ describe('buildHierarchicalData', function () {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
       // We need to set the aggs to a known value.
@@ -157,7 +157,7 @@ describe('buildHierarchicalData', function () {
             type: 'count',
             schema: 'metric'
           },
-          { type: 'histogram', schema: 'segment', params: { field: 'bytes', interval: 8192 }}
+          { type: 'histogram', schema: 'segment', params: { field: 'bytes', interval: 8192 } }
         ]
       });
       // We need to set the aggs to a known value.
@@ -281,7 +281,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the hits attribute for the results', function () {
-      let errCall = Notifier.prototype.error.getCall(0);
+      const errCall = Notifier.prototype.error.getCall(0);
       expect(errCall).to.be.ok();
       expect(errCall.args[0]).to.contain('not supported');
 

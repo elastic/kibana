@@ -4,9 +4,14 @@ import uiModules from 'ui/modules';
 
 const SCROLLER_HEIGHT = 20;
 
+/**
+ * This directive adds a fixed horizontal scrollbar to the bottom of the window that proxies its scroll events
+ * to the target element's real scrollbar. This is useful when the target element's horizontal scrollbar
+ * might be waaaay down the page, like the doc table on Discover.
+ */
 uiModules
 .get('kibana')
-.directive('fixedScroll', function ($timeout) {
+.directive('fixedScroll', function (debounce) {
   return {
     restrict: 'A',
     link: function ($scope, $el) {
@@ -98,15 +103,29 @@ uiModules
         listen();
       }
 
-      // reset when the width or scrollWidth of the $el changes
-      $scope.$watchMulti([
-        function () { return $el.prop('scrollWidth'); },
-        function () { return $el.width(); }
-      ], setup);
+      let width;
+      let scrollWidth;
+      function checkWidth() {
+        const newScrollWidth = $el.prop('scrollWidth');
+        const newWidth = $el.width();
+
+        if (scrollWidth !== newScrollWidth || width !== newWidth) {
+          $scope.$apply(setup);
+
+          scrollWidth = newScrollWidth;
+          width = newWidth;
+        }
+      }
+
+      const debouncedCheckWidth = debounce(checkWidth, 100, {
+        invokeApply: false,
+      });
+      $scope.$watch(debouncedCheckWidth);
 
       // cleanup when the scope is destroyed
       $scope.$on('$destroy', function () {
         cleanUp();
+        debouncedCheckWidth.cancel();
         $scroller = $window = null;
       });
     }

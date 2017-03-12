@@ -18,14 +18,14 @@ describe('ui/utils/mapping_setup', function () {
     });
 
     it('can set type as an option', function () {
-      const mapping = mappingSetup.expandShorthand({ foo: {type: 'integer'} });
+      const mapping = mappingSetup.expandShorthand({ foo: { type: 'integer' } });
       expect(mapping.foo.type).to.be('integer');
     });
 
     context('when type is json', function () {
-      it('returned object is type keyword', function () {
+      it('returned object is type text', function () {
         const mapping = mappingSetup.expandShorthand({ foo: 'json' });
-        expect(mapping.foo.type).to.be('keyword');
+        expect(mapping.foo.type).to.be('text');
       });
 
       it('returned object has _serialize function', function () {

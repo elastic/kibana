@@ -9,7 +9,7 @@ module.exports = function (api) {
     },
     data_autocomplete_rules: {
       indices: "*",
-      ignore_unavailable: {__one_of: [true, false]},
+      ignore_unavailable: { __one_of: [true, false] },
       include_global_state: false,
       rename_pattern: "index_(.+)",
       rename_replacement: "restored_index_$1"
@@ -41,9 +41,9 @@ module.exports = function (api) {
     },
     data_autocomplete_rules: {
       indices: "*",
-      ignore_unavailable: {__one_of: [true, false]},
-      include_global_state: {__one_of: [true, false]},
-      partial: {__one_of: [true, false]}
+      ignore_unavailable: { __one_of: [true, false] },
+      include_global_state: { __one_of: [true, false] },
+      partial: { __one_of: [true, false] }
     }
   });
 
@@ -86,7 +86,7 @@ module.exports = function (api) {
       '_snapshot/{id}'
     ],
     data_autocomplete_rules: {
-      __template: {"type": ""},
+      __template: { "type": "" },
 
       "type": {
         __one_of: ["fs", "url", "s3", "hdfs"]
@@ -101,7 +101,7 @@ module.exports = function (api) {
             location: "path"
           },
           location: "path",
-          compress: {__one_of: [true, false]},
+          compress: { __one_of: [true, false] },
           concurrent_streams: 5,
           chunk_size: "10m",
           max_restore_bytes_per_sec: "20mb",
@@ -129,7 +129,7 @@ module.exports = function (api) {
             base_path: "",
             concurrent_streams: 5,
             chunk_size: "10m",
-            compress: {__one_of: [true, false]}
+            compress: { __one_of: [true, false] }
           },
           {// hdfs
             __condition: {
@@ -140,10 +140,10 @@ module.exports = function (api) {
             },
             uri: "",
             path: "some/path",
-            load_defaults: {__one_of: [true, false]},
+            load_defaults: { __one_of: [true, false] },
             conf_location: "cfg.xml",
             concurrent_streams: 5,
-            compress: {__one_of: [true, false]},
+            compress: { __one_of: [true, false] },
             chunk_size: "10m"
           }
         ]

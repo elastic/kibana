@@ -25,10 +25,8 @@ To create a visualization:
 . Choose the visualization type:
 +
 [horizontal]
-<<area-chart,Area chart>>:: Visualize the total contribution of several
-different series.
+<<xy-chart,Line, Area and Bar chart>>:: Compare different series in X/Y charts.
 <<data-table,Data table>>:: Display the raw data of a composed aggregation.
-<<line-chart,Line chart>>:: Compare different series.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
 <<metric-chart,Metric>>:: Display a single number.
@@ -36,9 +34,8 @@ instructions.
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
-Timeseries:: Compute and combine data from multiple time series
+Timelion:: Compute and combine data from multiple time series
 data sets.
-<<vertical-bar-chart,Vertical bar chart>>:: Graph values in a bar chart.
 
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
@@ -104,11 +101,9 @@ For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
-include::visualize/area.asciidoc[]
+include::visualize/xychart.asciidoc[]
 
 include::visualize/datatable.asciidoc[]
-
-include::visualize/line.asciidoc[]
 
 include::visualize/markdown.asciidoc[]
 
@@ -118,6 +113,6 @@ include::visualize/pie.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
 
-include::visualize/vertbar.asciidoc[]
-
 include::visualize/tagcloud.asciidoc[]
+
+include::visualize/heatmap.asciidoc[]

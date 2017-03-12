@@ -15,6 +15,8 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
      * @return {Promise} - a promise that is fulfilled by the request body
      */
     reqsFetchParamsToBody: function (reqsFetchParams) {
+      const indexToListMapping = {};
+
       return Promise.map(reqsFetchParams, function (fetchParams) {
         return Promise.resolve(fetchParams.index)
         .then(function (indexList) {
@@ -23,7 +25,11 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           }
 
           const timeBounds = timefilter.getBounds();
-          return indexList.toIndexList(timeBounds.min, timeBounds.max);
+
+          if (!indexToListMapping[indexList.id]) {
+            indexToListMapping[indexList.id] = indexList.toIndexList(timeBounds.min, timeBounds.max);
+          }
+          return indexToListMapping[indexList.id];
         })
         .then(function (indexList) {
           let body = fetchParams.body || {};
@@ -64,7 +70,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
       return resp.responses;
     }
   };
-};
+}
 
 function emptySearch() {
   return {

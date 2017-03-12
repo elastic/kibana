@@ -36,7 +36,7 @@ describe('plugins/elasticsearch', function () {
       }
 
       describe(format('%s %s', options.method, options.url), function () {
-        it('should should return ' + statusCode, function (done) {
+        it('should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
             if (res.statusCode === statusCode) {
               done();
@@ -94,13 +94,13 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/__kibanaQueryValidator/_validate/query?explain=true&ignore_unavailable=true',
-      payload: {query: {query_string: {analyze_wildcard: true, query: '*'}}}
+      payload: { query: { query_string: { analyze_wildcard: true, query: '*' } } }
     });
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/_mget',
-      payload: {docs: [{_index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD'}]}
+      payload: { docs: [{ _index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
     });
 
     testRoute({

@@ -1,4 +1,23 @@
 [[breaking-changes-6.0]]
 == Breaking changes in 6.0
 
-There are not yet any breaking changes in Kibana 6.0
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 6.0.
+
+[float]
+=== Removed option to use unsupported scripting languages
+*Details:* Kibana 5.x allowed users to create scripted fields using any scripting language enabled in Elasticsearch.
+Kibana 6.0 will only support Painless and Lucene expression based scripts.
+
+
+*Impact:* You will need to migrate your groovy, python, javascript, etc. scripted fields to Painless or Lucene expressions.
+
+[float]
+=== Changed response format of status API
+*Details:* In an effort to align with our style guidelines and provide a digestible response,
+the status API has changed:
+
+* Properties are now snake cased and several have been renamed
+* Metrics now provide the latest available data instead of samples over time
+
+*Impact:* You will need to update anything using the status API and expecting the previous response format.
