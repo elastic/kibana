@@ -1,0 +1,62 @@
+.rhythm_metric {
+  font-size: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.rhythm_metric__resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.rhythm_metric__primary {
+}
+
+.rhythm_metric__primary-label {
+  text-align: center;
+  color: @textColor;
+  font-size: 0.5em;
+  margin-bottom: 0.25em;
+  line-height: 1em;
+}
+
+.rhythm_metric__primary-value {
+  text-align: center;
+  color: @valueColor;
+  font-size: 1em;
+  font-weight: bold;
+  line-height: 1em;
+}
+
+.rhythm_metric__secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.05em;
+}
+
+.rhythm_metric__secondary-label {
+  font-size: 0.35em;
+  margin-right: 0.3em;
+  color: @textColor;
+  line-height: 1em;
+}
+
+.rhythm_metric__secondary-value {
+  font-size: 0.35em;
+  color: @valueColor;
+  line-height: 1em;
+}
+
+.rhythm_metric__inner {
+  position: absolute;
+  padding: 0.25em 0.5em 0.5em;
+}
+

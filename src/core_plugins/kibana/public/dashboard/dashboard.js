@@ -87,6 +87,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
+      dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
       // Following the "best practice" of always have a '.' in your ng-models –

@@ -24,10 +24,10 @@ describe('globalNavLink directive', () => {
         is-disabled="isDisabled"
         tooltip-content="tooltipContent"
         on-click="onClick()"
-        href="href"
+        url="href"
         kbn-route="kbnRoute"
         icon="icon"
-        title="title"
+        label="title"
       />
     `;
 
@@ -185,26 +185,6 @@ describe('globalNavLink directive', () => {
           const placeholder = element.find('[data-test-subj=appLinkIconPlaceholder]');
           expect(placeholder.text()).to.contain(attrs.title[0]);
         });
-      });
-    });
-
-    describe('title attribute', () => {
-      it('is displayed', () => {
-        const attrs = {
-          title: 'demo title',
-        };
-        const element = create(attrs);
-        const title = element.find('.global-nav-link__title');
-        expect(title.text().trim()).to.be(attrs.title);
-      });
-
-      it('is set as a title attribute on the anchor tag', () => {
-        const attrs = {
-          title: 'demo title',
-        };
-        const element = create(attrs);
-        const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('title')).to.be(attrs.title);
       });
     });
   });
