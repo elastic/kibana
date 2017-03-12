@@ -21,6 +21,7 @@ const module = uiModules.get('kibana');
 
 module.factory('confirmModal', function ($rootScope, $compile) {
   let modalPopover;
+  const confirmQueue = [];
 
   /**
    * @param {String} message - the message to show in the body of the confirmation dialog.
@@ -47,11 +48,6 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     // onCancel callback.
     options.onClose = customOptions.onClose || options.onCancel;
 
-    if (modalPopover) {
-      throw new Error('You\'ve called confirmModal but there\'s already a modal open. ' +
-        'You can only have one modal open at a time.');
-    }
-
     const confirmScope = $rootScope.$new();
 
     confirmScope.message = message;
@@ -72,22 +68,33 @@ module.factory('confirmModal', function ($rootScope, $compile) {
       options.onClose();
     };
 
-    const modalInstance = $compile(template)(confirmScope);
-    modalPopover = new ModalOverlay(modalInstance);
+    function showModal(confirmScope) {
+      const modalInstance = $compile(template)(confirmScope);
+      modalPopover = new ModalOverlay(modalInstance);
+      angular.element(document.body).on('keydown', (event) => {
+        if (event.keyCode === 27) {
+          confirmScope.onCancel();
+        }
+      });
 
-    angular.element(document.body).on('keydown', (event) => {
-      if(event.keyCode === 27) {
-        confirmScope.onCancel();
-      }
-    });
+      modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+    }
 
-    modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+    if (modalPopover) {
+      confirmQueue.unshift(confirmScope);
+    } else {
+      showModal(confirmScope);
+    }
 
     function destroy() {
       modalPopover.destroy();
       modalPopover = undefined;
       angular.element(document.body).off('keydown');
       confirmScope.$destroy();
+
+      if (confirmQueue.length > 0) {
+        showModal(confirmQueue.pop());
+      }
     }
   };
 });
