@@ -36,6 +36,9 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
 * https://github.com/virusu/3D_kibana_charts_vis[3D Charts] (virusu)
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
+* https://github.com/elo7/cohort[Cohort analysis] (elo7)
+* https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
+* https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
 
 [float]
 === Other
