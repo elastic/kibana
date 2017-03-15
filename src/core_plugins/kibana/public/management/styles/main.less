@@ -37,16 +37,6 @@ kbn-management-landing {
 
   }
 
-  .management-panel__heading-icon {
-    font-size: 0.9em;
-    padding: 5px;
-  }
-
-  .management-panel__heading-icon--secondary {
-    font-size: 0.9em;
-    padding: 5px;
-  }
-
   .management-panel__body {
     padding-bottom: 30px;
   }
@@ -79,12 +69,17 @@ kbn-management-landing {
     }
   }
 
+  /**
+   * 1. Set icon size.
+   * 2. Hack the panel title to move to the left a bit.
+   */
   .management-panel__heading-icon {
-    width: 32px;
-    height: 32px;
-    background-position: 3px 3px;
+    width: 20px; /* 1 */
+    height: 20px; /* 1 */
+    background-position: center;
     background-repeat: no-repeat;
-    background-size: 26px 26px;
+    background-size: contain; /* 1 */
+    margin-right: -3px; /* 2 */
   }
 
   .management-panel__heading-icon--elasticsearch {
@@ -101,6 +96,11 @@ kbn-management-landing {
 
   .management-panel__heading-icon--logstash {
     background-image: url("~ui/icons/logstash-gray.svg");
+  }
+
+  .management-panel__heading-icon--secondary {
+    font-size: 0.9em;
+    padding: 5px;
   }
 }
 
