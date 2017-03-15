@@ -15,6 +15,7 @@ import xsrfMixin from './xsrf';
 
 module.exports = async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
+  server.realm.modifiers.route.prefix = config.get('server.prefix');
 
   const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);

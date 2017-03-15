@@ -40,6 +40,7 @@ module.exports = () => Joi.object({
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    prefix: Joi.string().default('').allow('').regex(/^\/./, `start with a slash and can't be empty`),
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),
       certificate: Joi.string().when('enabled', {
