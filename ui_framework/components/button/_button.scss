@@ -58,7 +58,7 @@
   &:hover, /* 2 */
   &:active { /* 2 */
     color: #ffffff !important; /* 1 */
-    background-color: #9B9B9B;
+    background-color: #9B9B9B !important;
   }
 
   &:disabled {
