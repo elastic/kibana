@@ -508,9 +508,7 @@ module.exports = function (editor) {
   }
 
   function addMethodAutoCompleteSetToContext(context, pos) {
-    context.autoCompleteSet = _.map(["GET", "PUT", "POST", "DELETE", "HEAD"], function (m, i) {
-      return { name: m, score: -i, meta: "method" }
-    })
+    context.autoCompleteSet = ["GET", "PUT", "POST", "DELETE", "HEAD"].map((m, i) => {name: m; score: -i; meta: 'method'});
   }
 
   function addPathAutoCompleteSetToContext(context, pos) {
