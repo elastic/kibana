@@ -87,7 +87,7 @@ class ColorPicker extends Component {
 
 ColorPicker.propTypes = {
   name: PropTypes.string.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disableTrash: PropTypes.bool,
   onChange: PropTypes.func
 };
