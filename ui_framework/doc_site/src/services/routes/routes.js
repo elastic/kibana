@@ -3,11 +3,20 @@ import Slugify from '../string/slugify';
 import ActionItemExample
   from '../../views/action_item/action_item_example.jsx';
 
+import BadgeExample
+  from '../../views/badge/badge_example.jsx';
+
 import BarExample
   from '../../views/bar/bar_example.jsx';
 
 import ButtonExample
   from '../../views/button/button_example.jsx';
+
+import CardExample
+  from '../../views/card/card_example.jsx';
+
+import ColumnExample
+  from '../../views/column/column_example.jsx';
 
 import EventExample
   from '../../views/event/event_example.jsx';
@@ -48,6 +57,9 @@ import MicroButtonExample
 import ModalExample
   from '../../views/modal/modal_example.jsx';
 
+import NoticeSandbox
+  from '../../views/notice/notice_sandbox.jsx';
+
 import PanelExample
   from '../../views/panel/panel_example.jsx';
 
@@ -80,11 +92,20 @@ const components = [{
   name: 'ActionItem',
   component: ActionItemExample,
 }, {
+  name: 'Badge',
+  component: BadgeExample,
+}, {
   name: 'Bar',
   component: BarExample,
 }, {
   name: 'Button',
   component: ButtonExample,
+}, {
+  name: 'Card',
+  component: CardExample,
+}, {
+  name: 'Column',
+  component: ColumnExample,
 }, {
   name: 'Event',
   component: EventExample,
@@ -150,6 +171,9 @@ const sandboxes = [{
 }, {
   name: 'HeaderBar with Table',
   component: HeaderBarSandbox,
+}, {
+  name: 'Notice',
+  component: NoticeSandbox,
 }, {
   name: 'View',
   component: ViewSandbox,
