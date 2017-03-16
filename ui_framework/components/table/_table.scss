@@ -37,7 +37,7 @@ $tableCellPadding: 7px 8px 8px;
   @include tableCell;
   padding: $tableCellPadding;
   line-height: $lineHeight;
-  color: $labelFontColor;
+  color: #a7a7a7;
 }
 
 /**

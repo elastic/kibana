@@ -338,16 +338,6 @@ body {
     opacity: 0.3;
     cursor: not-allowed; }
 
-/**
- * 1. Override inherited Bootstrap styles.
- */
-.kuiLabel {
-  color: #a7a7a7;
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 400;
-  /* 1 */ }
-
 .kuiSearchInput {
   display: inline-block;
   position: relative;
@@ -531,16 +521,6 @@ body {
           flex: 1 1 auto; }
   .kuiFieldGroupSection--wide > * {
     width: 100%; }
-
-.kuiFieldGroupSection__label {
-  display: block;
-  margin-bottom: 5px; }
-
-/**
-   * 1. Override the regular component styles.
-   */
-.kuiFieldGroupSection__control {
-  display: block !important; }
 
 .kuiHeaderBar {
   display: -webkit-box;

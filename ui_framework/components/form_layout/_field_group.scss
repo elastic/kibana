@@ -15,15 +15,3 @@
     width: 100%;
   }
 }
-
-  .kuiFieldGroupSection__label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  /**
-   * 1. Override the regular component styles.
-   */
-  .kuiFieldGroupSection__control {
-    display: block !important;
-  }
