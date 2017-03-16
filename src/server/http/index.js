@@ -119,8 +119,19 @@ module.exports = async function (kbnServer, server, config) {
       try {
         const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
-        reply().redirect(config.get('server.basePath') + url);
+
+        const uiSettings = server.uiSettings();
+        const stateStoreInSessionStorage = await uiSettings.get(request, 'state:storeInSessionStorage');
+        if (!stateStoreInSessionStorage) {
+          reply().redirect(config.get('server.basePath') + url);
+        }
+
+        const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+        reply.renderApp(app, {
+          redirectUrl: url,
+        });
       } catch (err) {
+        console.log(err);
         reply(handleShortUrlError(err));
       }
     }
