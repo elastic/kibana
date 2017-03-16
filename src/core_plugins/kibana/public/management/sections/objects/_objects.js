@@ -209,19 +209,25 @@ uiModules.get('apps/management')
                 });
             }
 
-            const docTypes = docs.reduce((types, doc) => {
-              switch (doc._type) {
-                case 'search':
-                  types.searches.push(doc);
-                  break;
-                default:
-                  types.other.push(doc);
-              }
-              return types;
-            }, {
-              searches: [],
-              other: [],
-            });
+            function groupByType(docs) {
+              const defaultDocTypes = {
+                searches: [],
+                other: [],
+              };
+
+              return docs.reduce((types, doc) => {
+                switch (doc._type) {
+                  case 'search':
+                    types.searches.push(doc);
+                    break;
+                  default:
+                    types.other.push(doc);
+                }
+                return types;
+              }, defaultDocTypes);
+            }
+
+            const docTypes = groupByType(docs);
 
             return Promise.map(docTypes.searches, importDocument)
               .then(() => Promise.map(docTypes.other, importDocument))
