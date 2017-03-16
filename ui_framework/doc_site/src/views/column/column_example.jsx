@@ -24,6 +24,10 @@ export default props => (
       }]}
     >
       <GuideText>
+        <strong>Note:</strong> Don't use this. It's subject to change as we evolve our grid system.
+      </GuideText>
+
+      <GuideText>
         This is a substitute grid system. It uses <GuideCode>display: inline-block</GuideCode>, so
         you need to structure your markup to leave no whitespace between each column.
       </GuideText>
