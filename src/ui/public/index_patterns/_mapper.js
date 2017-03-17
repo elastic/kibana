@@ -5,12 +5,13 @@ import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fi
 import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
-export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
+export default function MapperService(Private, Promise, Notifier, es, esAdmin, config, kbnIndex) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
   const LocalCache = Private(IndexPatternsLocalCacheProvider);
+  const notify = new Notifier();
 
   function Mapper() {
 
@@ -73,6 +74,10 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
       .then(function (fields) {
         fieldCache.set(id, fields);
         return fieldCache.get(id);
+      })
+      .catch(err => {
+        notify.error(err);
+        return Promise.reject(err);
       });
     };
 
