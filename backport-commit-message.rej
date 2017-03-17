@@ -1,0 +1,15 @@
+Adds disabled, visible, and tooltip properties to section class/template
+
+Backports PR #10784
+
+**Commit 1:**
+Adds disabled, visible, and tooltip properties to section class/template
+
+* Original sha: 24d4159714aabc8075e6fdc9ec0eb4251784db3c
+* Authored by Jim Unger <bigfunger@gmail.com> on 2017-03-17T15:57:24Z
+
+**Commit 2:**
+adds tests
+
+* Original sha: 2f848bffb1ee43b2ec52d1413282aa522ceeb932
+* Authored by Jim Unger <bigfunger@gmail.com> on 2017-03-17T16:53:22Z
