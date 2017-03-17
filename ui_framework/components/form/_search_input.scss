@@ -1,0 +1,24 @@
+.kuiSearchInput {
+  display: inline-block;
+  position: relative;
+  font-size: $fontSize;
+  line-height: $lineHeight;
+}
+
+  .kuiSearchInput__icon {
+    position: absolute;
+    top: 0.5em;
+    left: 0.7em;
+    font-size: 1em;
+    color: #ACACAC;
+  }
+
+  /**
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
+   */
+  .kuiSearchInput__input {
+    @include formControl;
+    padding-left: 28px; /* 1 */
+    width: 100%; /* 2 */
+  }
