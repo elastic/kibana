@@ -228,6 +228,7 @@ uiModules.get('apps/management')
 
       return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
         skipIndexPatternCache: true,
+        silenceErrors: true,
       })
       .catch(function (err) {
         // TODO: we should probably display a message of some kind

@@ -76,7 +76,7 @@ export default function MapperService(Private, Promise, Notifier, es, esAdmin, c
         return fieldCache.get(id);
       })
       .catch(err => {
-        notify.error(err);
+        if (!opts.silenceErrors) notify.error(err);
         return Promise.reject(err);
       });
     };
