@@ -194,13 +194,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
-          // We need to do a hard reset of the filter state and timepicker. appState will not reload like
-          // it does on 'open' because it's been saved to the url (we need appState to preserve the viewMode
-          // for new, unsaved dashboards, otherwise they will default to edit mode.
-          // The timepicker won't work naturally because of the getAppState.previouslyStored() check on reload. The
-          // filter bar doesn't work naturally because unsaved filters are stored with the dashboard in order to
-          // get the visualizations to load.
-          dashboardState.reloadLastSavedFilterBars();
+          // We need to do a hard reset of the timepicker. appState will not reload like
+          // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+          // reload will cause it not to sync.
           if (dashboardState.getIsTimeSavedWithDashboard()) {
             dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
           }

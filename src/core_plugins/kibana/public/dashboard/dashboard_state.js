@@ -75,6 +75,17 @@ export class DashboardState {
   }
 
   resetState() {
+    // appState.reset uses the internal defaults to reset the state, but some of the default settings (e.g. the panels
+    // array) point to the same object that is stored on appState and is getting modified.
+    // The right way to fix this might be to ensure the defaults object stored on state is a deep
+    // clone, but given how much code uses the state object, I determined that to be too risky of a change for
+    // now.  TODO: revisit this!
+    this.stateDefaults = getStateDefaults(this.dashboard);
+    // The original query won't be restored by the above because the query on this.dashboard is applied
+    // in place in order for it to affect the visualizations.
+    this.stateDefaults.query = this.lastSavedDashboardFilters.query;
+    this.reloadLastSavedFilterBars();
+    this.appState.setDefaults(this.stateDefaults);
     this.appState.reset();
   }
 

@@ -11,6 +11,13 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
   });
 
   bdd.it('create new dashboard opens in edit mode', async function () {
+    // This flip between apps fixes the url so state is preserved when switching apps in test mode.
+    // Without this flip the url in test mode looks something like
+    // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
+    // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
+    await PageObjects.header.clickVisualize();
+    await PageObjects.header.clickDashboard();
+
     await PageObjects.dashboard.clickNewDashboard();
     await PageObjects.dashboard.clickCancelOutOfEditMode();
   });
@@ -169,6 +176,41 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
 
         const reloadedFilters = await PageObjects.dashboard.getFilters();
         expect(reloadedFilters.length).to.equal(1);
+      });
+
+      bdd.it('when a new vis is added', async function () {
+        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+        await PageObjects.dashboard.clickEdit();
+
+        await PageObjects.dashboard.clickAddVisualization();
+        await PageObjects.dashboard.clickAddNewVisualizationLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualization('new viz panel');
+
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        // confirm lose changes
+        await PageObjects.common.clickConfirmOnModal();
+
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+        expect(panelTitles.length).to.eql(visualizations.length);
+      });
+
+      bdd.it('when an existing vis is added', async function () {
+        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+        await PageObjects.dashboard.clickEdit();
+
+        await PageObjects.dashboard.addVisualization('new viz panel');
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        // confirm lose changes
+        await PageObjects.common.clickConfirmOnModal();
+
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+        expect(panelTitles.length).to.eql(visualizations.length);
       });
     });
 
