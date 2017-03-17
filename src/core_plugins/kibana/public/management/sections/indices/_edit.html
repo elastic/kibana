@@ -13,13 +13,12 @@
         delete="removePattern()"
       ></kbn-management-index-header>
 
-      <p class="kuiText kuiVerticalRhythm">
-        <div ng-if="indexPattern.timeFieldName" class="bs-callout bs-callout-primary">
-          <i class="fa fa-clock-o"></i> Time based index. Time field: {{indexPattern.timeFieldName}}
-        </div>
-        <div ng-if="!indexPattern.timeFieldName" class="bs-callout bs-callout-primary">
-          Index is not time based
-        </div>
+      <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
+        <kbn-tooltip text="Index pattern is time-based">
+          <span class="label label-info">
+            <i class="fa fa-clock-o"></i> Field: {{indexPattern.timeFieldName}}
+          </span>
+        </kbn-tooltip>
       </p>
 
       <p class="kuiText kuiVerticalRhythm">
