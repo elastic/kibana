@@ -7,7 +7,7 @@
 
     <!-- Management sections for the ES stack -->
     <div
-      ng-if="section.items.length > 0"
+      ng-if="section.visibleItems.length > 0"
       ng-repeat="section in sections"
       ng-class="{ 'management-section-info-expanded': section.showInfo }"
       class="page-row"
@@ -38,12 +38,12 @@
             <ul class="list-unstyled">
               <li
                 class="col-xs-4 col-md-3"
-                ng-repeat="item in section.items.inOrder"
+                ng-repeat="item in section.visibleItems"
               >
                 <a
                   class="management-panel__link"
-                  ng-class="{ 'management-panel__link--disabled': !item.url }"
-                  kbn-href="{{::item.url}}"
+                  ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
+                  kbn-href="{{::item.disabled ? '' : item.url}}"
                   tooltip="{{::item.tooltip}}"
                   tooltip-placement="bottom"
                   tooltip-popup-delay="400"
