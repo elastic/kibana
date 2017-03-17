@@ -1,0 +1,17 @@
+.kuiFieldGroup {
+  display: flex;
+}
+
+.kuiFieldGroupSection {
+  & + & {
+    margin-left: 10px;
+  }
+}
+
+.kuiFieldGroupSection--wide {
+  flex: 1 1 auto;
+
+  & > * {
+    width: 100%;
+  }
+}
