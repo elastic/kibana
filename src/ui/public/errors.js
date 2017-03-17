@@ -50,7 +50,7 @@ export class SearchTimeout extends KbnError {
 export class RequestFailure extends KbnError {
   constructor(err, resp) {
     err = err || false;
-    super('Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
+    super(`Request to Elasticsearch failed: ${angular.toJson(resp || err.message)}`,
           RequestFailure);
 
     this.origError = err;
@@ -66,7 +66,7 @@ export class RequestFailure extends KbnError {
 export class FetchFailure extends KbnError {
   constructor(resp) {
     super(
-      'Failed to get the doc: ' + angular.toJson(resp),
+      `Failed to get the doc: ${angular.toJson(resp)}`,
       FetchFailure);
 
     this.resp = resp;
@@ -80,7 +80,7 @@ export class FetchFailure extends KbnError {
 export class ShardFailure extends KbnError {
   constructor(resp) {
     super(
-      resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+      `${resp._shards.failed} of ${resp._shards.total} shards failed.`,
       ShardFailure);
 
     this.resp = resp;
@@ -108,7 +108,7 @@ export class VersionConflict extends KbnError {
 export class MappingConflict extends KbnError {
   constructor(field) {
     super(
-      'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
+      `Field "${field}" is defined with at least two different types in indices matching the pattern`,
       MappingConflict);
   }
 }
@@ -119,8 +119,8 @@ export class MappingConflict extends KbnError {
  */
 export class RestrictedMapping extends KbnError {
   constructor(field, index) {
-    let msg = field + ' is a restricted field name';
-    if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
+    let msg = `"${field}" is a restricted field name`;
+    if (index) msg += `, found it while attempting to fetch mapping for index pattern: ${index}`;
 
     super(msg, RestrictedMapping);
   }
@@ -144,7 +144,7 @@ export class CacheWriteFailure extends KbnError {
 export class FieldNotFoundInCache extends KbnError {
   constructor(name) {
     super(
-      'The ' + name + ' field was not found in the cached mappings',
+      `The "${name}" field was not found in the cached mappings`,
       FieldNotFoundInCache);
   }
 }
@@ -156,7 +156,7 @@ export class FieldNotFoundInCache extends KbnError {
 export class DuplicateField extends KbnError {
   constructor(name) {
     super(
-      'The "' + name + '" field already exists in this mapping',
+      `The field "${name}" already exists in this mapping`,
       DuplicateField);
   }
 }
@@ -166,9 +166,9 @@ export class DuplicateField extends KbnError {
  */
 export class SavedObjectNotFound extends KbnError {
   constructor(type, id) {
-    const idMsg = id ? ' (id: ' + id + ')' : '';
+    const idMsg = id ? ` (id: ${id})` : '';
     super(
-      'Could not locate that ' + type + idMsg,
+      `Could not locate that ${type}${idMsg}`,
       SavedObjectNotFound);
 
     this.savedObjectType = type;
