@@ -82,7 +82,6 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     });
   });
 
-
   bdd.it('filters when a pie chart slice is clicked', async function () {
     let descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
     expect(descriptions.length).to.equal(0);
@@ -117,6 +116,22 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
           expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
         });
+    });
+  });
+
+  bdd.it('add new visualization link', async function checkTitles() {
+    await PageObjects.dashboard.clickAddVisualization();
+    await PageObjects.dashboard.clickAddNewVisualizationLink();
+    await PageObjects.visualize.clickAreaChart();
+    await PageObjects.visualize.clickNewSearch();
+    await PageObjects.visualize.saveVisualization('visualization from add new link');
+
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, async function () {
+      const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+      PageObjects.common.log('visualization titles = ' + panelTitles);
+      PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
+      expect(panelTitles.length).to.eql(visualizations.length + 1);
     });
   });
 });
