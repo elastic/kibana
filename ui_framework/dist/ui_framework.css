@@ -523,6 +523,56 @@ body {
     opacity: 0.3;
     cursor: not-allowed; }
 
+.kuiSearchInput {
+  display: inline-block;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.5; }
+
+.kuiSearchInput__icon {
+  position: absolute;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
+  color: #ACACAC; }
+
+/**
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
+   */
+.kuiSearchInput__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-left: 28px;
+  /* 1 */
+  width: 100%;
+  /* 2 */ }
+  .kuiSearchInput__input:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiSearchInput__input:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSearchInput__input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
@@ -639,6 +689,23 @@ body {
   .kuiTextInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+
+.kuiFieldGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiFieldGroupSection + .kuiFieldGroupSection {
+  margin-left: 10px; }
+
+.kuiFieldGroupSection--wide {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+  .kuiFieldGroupSection--wide > * {
+    width: 100%; }
 
 .kuiHeaderBar {
   display: -webkit-box;
