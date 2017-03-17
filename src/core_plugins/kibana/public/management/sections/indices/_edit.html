@@ -14,6 +14,15 @@
       ></kbn-management-index-header>
 
       <p class="kuiText kuiVerticalRhythm">
+        <div ng-if="indexPattern.timeFieldName" class="bs-callout bs-callout-primary">
+          <i class="fa fa-clock-o"></i> Time based index. Time field: {{indexPattern.timeFieldName}}
+        </div>
+        <div ng-if="!indexPattern.timeFieldName" class="bs-callout bs-callout-primary">
+          Index is not time based
+        </div>
+      </p>
+
+      <p class="kuiText kuiVerticalRhythm">
         This page lists every field in the <strong>{{::indexPattern.id}}</strong>
         index and the field's associated core type as recorded by Elasticsearch.
         While this list allows you to view the core type of each field, changing
