@@ -146,8 +146,7 @@ uiModules
         });
 
       /**
-       * Determines whether or not to show edit controls.
-       * @returns {boolean}
+       * @returns {boolean} True if the user can only view, not edit.
        */
       $scope.isViewOnlyMode = () => {
         return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;

@@ -55,6 +55,11 @@ function areTimesEqual(timeA, timeB) {
 }
 
 export class DashboardState {
+  /**
+   *
+   * @param dashboard {SavedDashboard}
+   * @param AppState {AppState}
+   */
   constructor(dashboard, AppState) {
     this.dashboard = dashboard;
 
@@ -74,6 +79,9 @@ export class DashboardState {
     this.createStateMonitor();
   }
 
+  /**
+   * Resets the state back to the last saved version of the dashboard.
+   */
   resetState() {
     // appState.reset uses the internal defaults to reset the state, but some of the default settings (e.g. the panels
     // array) point to the same object that is stored on appState and is getting modified.
@@ -84,11 +92,19 @@ export class DashboardState {
     // The original query won't be restored by the above because the query on this.dashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
-    this.reloadLastSavedFilterBars();
+    // Need to make a copy to ensure they are not overwritten.
+    this.stateDefaults.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
+
+    this.isDirty = false;
     this.appState.setDefaults(this.stateDefaults);
     this.appState.reset();
+    this.stateMonitor.setInitialState(this.appState.toJSON());
   }
 
+  /**
+   * Returns an object which contains the current filter state of this.dashboard.
+   * @returns {{timeTo: String, timeFrom: String, filterBars: Array, query: Object}}
+   */
   getFilterState() {
     return {
       timeTo: this.dashboard.timeTo,
@@ -164,11 +180,19 @@ export class DashboardState {
     return !_.isEqual(this.appState.query, this.getLastSavedQuery());
   }
 
+  /**
+   * @returns {boolean} True if the filter bar state has changed since the last time the dashboard was saved,
+   * or if it's a new dashboard, if the query differs from the default.
+   */
   getFilterBarChanged() {
     return !_.isEqual(cleanFiltersForComparison(this.appState.filters),
       cleanFiltersForComparison(this.getLastSavedFilterBars()));
   }
 
+  /**
+   * @param timeFilter
+   * @returns {boolean} True if the time state has changed since the time saved with the dashboard.
+   */
   getTimeChanged(timeFilter) {
     return (
       !areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.time.from) ||
@@ -289,10 +313,12 @@ export class DashboardState {
     }
   }
 
+  /**
+   * Saves the current application state to the URL.
+   */
   saveState() {
     this.appState.save();
   }
-
 
   /**
    * Saves the dashboard.
@@ -345,6 +371,9 @@ export class DashboardState {
     this.saveState();
   }
 
+  /**
+   * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
+   */
   createStateMonitor() {
     this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
 
@@ -357,11 +386,17 @@ export class DashboardState {
     });
   }
 
+  /**
+   * @param newMode {DashboardViewMode}
+   */
   switchViewMode(newMode) {
     this.appState.viewMode = newMode;
     this.saveState();
   }
 
+  /**
+   * Destroys and cleans up this object when it's no longer used.
+   */
   destroy() {
     if (this.stateMonitor) {
       this.stateMonitor.destroy();
@@ -369,20 +404,14 @@ export class DashboardState {
     this.dashboard.destroy();
   }
 
+  /**
+   * Returns a url and url options that can be used to reload the page.
+   * @returns {{url: string, options: Object}}
+   */
   getReloadDashboardUrl() {
     const url = this.dashboard.id ?
       DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     const options = this.dashboard.id ? { id: this.dashboard.id } : {};
     return { url, options };
-  }
-
-  reloadLastSavedFilterBars() {
-    // Need to make a copy to ensure they are not overwritten. The filter bar automatically updates
-    // appState.filters elsewhere.
-    this.stateDefaults.filters = this.appState.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
-    this.appState.setDefaults(this.stateDefaults);
-    this.stateMonitor.setInitialState(this.appState.toJSON());
-    this.isDirty = false;
-    this.saveState();
   }
 }

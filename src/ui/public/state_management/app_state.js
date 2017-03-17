@@ -15,7 +15,7 @@ import 'ui/persisted_state';
 
 const urlParam = '_a';
 
-function AppStateProvider(Private, $rootScope, $location, $injector, kbnUrl) {
+function AppStateProvider(Private, $rootScope, $location, $injector) {
   const State = Private(StateManagementStateProvider);
   const PersistedState = $injector.get('PersistedState');
   let persistedStates;
