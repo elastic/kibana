@@ -147,7 +147,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
   function fetchFields(indexPattern) {
     return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
+    .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
