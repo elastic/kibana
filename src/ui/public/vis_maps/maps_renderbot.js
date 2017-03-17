@@ -140,9 +140,8 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     updateParams() {
 
       this._paramsDirty = true;
-      this._kibanaMapReady.then(_ => {
+      this._kibanaMapReady.then(() => {
         const mapParams = this._getMapsParams();
-        //todo: when WMS changes, recreate the kibana-map
         if (mapParams.wms.enabled) {
           const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
           this._kibanaMap.setBaseLayer({

@@ -177,10 +177,6 @@ export default function AggConfigsFactory(Private) {
 
       aggregations.push(geocentroidMetric);
     }
-    // console.log('arg', arf);
-
-    //add
-
     return aggregations;
 
   };
