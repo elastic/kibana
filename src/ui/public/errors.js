@@ -180,9 +180,11 @@ export class SavedObjectNotFound extends KbnError {
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
 export class IndexPatternMissingIndices extends KbnError {
-  constructor() {
+  constructor(message) {
+    const defaultMessage = 'IndexPattern\'s configured pattern does not match any indices';
+
     super(
-      'IndexPattern\'s configured pattern does not match any indices',
+      message.length ? `No matching indices found: ${message}` : defaultMessage,
       IndexPatternMissingIndices);
   }
 }

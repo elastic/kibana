@@ -123,7 +123,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
   function handleMissingIndexPattern(err) {
     if (err.status >= 400) {
       // transform specific error type
-      return Promise.reject(new IndexPatternMissingIndices());
+      return Promise.reject(new IndexPatternMissingIndices(err.message));
     } else {
       // rethrow all others
       throw err;
