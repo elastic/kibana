@@ -259,7 +259,7 @@ class KibanaMap extends EventEmitter {
   }
 
   getAutoPrecision() {
-    return zoomToPrecision(this._leafletMap.getZoom(), 12);
+    return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
 
   getBounds() {
