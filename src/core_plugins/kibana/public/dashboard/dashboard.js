@@ -87,8 +87,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         this.appStatus.dirty = status.dirty || !dash.id;
       });
 
-      // Merge any "pinned" filters in the filter bar, along with any filters stored with the dashboard.
-      //const mergedFilters = filterBar.getFilters().concat(dashboardState.getDashboardFilterBars());
       dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
       let pendingVisCount = _.size(dashboardState.getPanels());
 

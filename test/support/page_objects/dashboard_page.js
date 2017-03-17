@@ -398,6 +398,19 @@ export default class DashboardPage {
     });
   }
 
+  async toggleExpandPanel() {
+    PageObjects.common.debug('toggleExpandPanel');
+    const expandShown = await PageObjects.common.doesTestSubjectExist('dashboardPanelExpandIcon');
+    if (!expandShown) {
+      const panelElements = await this.findTimeout.findAllByCssSelector('span.panel-title');
+      PageObjects.common.debug('click title');
+      await panelElements[0].click(); // Click to simulate hover.
+    }
+    const expandButton = await PageObjects.common.findTestSubject('dashboardPanelExpandIcon');
+    PageObjects.common.debug('click expand icon');
+    expandButton.click();
+  }
+
   getSharedItemsCount() {
     PageObjects.common.debug('in getSharedItemsCount');
     const attributeName = 'shared-items-count';

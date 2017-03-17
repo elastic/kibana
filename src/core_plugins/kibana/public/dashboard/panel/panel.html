@@ -18,13 +18,13 @@
       </a>
       <a aria-label="Move"
          data-test-subj="dashboardPanelMoveIcon"
-         ng-show="!isViewOnlyMode()"
+         ng-show="!isViewOnlyMode() && !isExpanded"
          class="panel-move">
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
       <a aria-label="Remove"
          data-test-subj="dashboardPanelRemoveIcon"
-         ng-show="!isViewOnlyMode()"
+         ng-show="!isViewOnlyMode() && !isExpanded"
          ng-click="remove()">
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
