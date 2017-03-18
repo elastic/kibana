@@ -234,8 +234,8 @@ export default function MarkerFactory() {
     }
 
     _createTooltip(content, latLng) {
-      L.popup({ autoPan: false })
-      .setLatLng(latLng)
+      this._popup = L.popup({ autoPan: false });
+      this._popup.setLatLng(latLng)
       .setContent(content)
       .openOn(this.map);
     }
@@ -249,6 +249,7 @@ export default function MarkerFactory() {
     _hidePopup() {
       if (!this.map) return;
 
+      this._popup = null;
       this.map.closePopup();
     }
 
