@@ -208,6 +208,15 @@ export default function AreaChartFactory(Private) {
       return circles;
     }
 
+    addPathEvents(path) {
+      const events = this.events;
+      if (this.handler.visConfig.get('enableHover')) {
+        const hover = events.addHoverEvent();
+        const mouseout = events.addMouseoutEvent();
+        path.call(hover).call(mouseout);
+      }
+    }
+
     /**
      * Renders d3 visualization
      *
@@ -222,7 +231,8 @@ export default function AreaChartFactory(Private) {
           const svg = self.chartEl.append('g');
           svg.data([self.chartData]);
 
-          self.addPath(svg, self.chartData);
+          const path = self.addPath(svg, self.chartData);
+          self.addPathEvents(path);
           const circles = self.addCircles(svg, self.chartData);
           self.addCircleEvents(circles);
 
