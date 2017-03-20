@@ -17,18 +17,12 @@
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->
     <div class="kuiToolBar">
-      <div class="kuiToolBarSearch">
-        <div class="kuiToolBarSearchBox">
-          <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
-          <input
-            class="kuiToolBarSearchBox__input"
-            type="text"
-            placeholder="Search..."
-            aria-label="Filter"
-            ng-model="listingController.filter"
-          >
-        </div>
-      </div>
+      <tool-bar-search-box
+        class="kuiToolBarSection"
+        filter="listingController.filter"
+        on-filter="listingController.onFilter"
+      >
+      </tool-bar-search-box>
 
       <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
