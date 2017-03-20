@@ -83,8 +83,8 @@ module.exports = class ClusterManager {
   }
 
   setupWatching(extraPaths) {
-    const chokidar = require('chokidar');
-    const fromRoot = require('../../utils/from_root');
+    const chokidar = require('chokidar'); // kibana-jscodeshift-ignore
+    const fromRoot = require('../../utils/from_root'); // kibana-jscodeshift-ignore
 
     const watchPaths = [
       fromRoot('src/core_plugins'),
@@ -114,7 +114,7 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
-    const readline = require('readline');
+    const readline = require('readline'); // kibana-jscodeshift-ignore
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
