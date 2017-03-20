@@ -166,11 +166,12 @@ class BaseOptimizer {
 
     // In the test env we need to add react-addons (and a few other bits) for the
     // enzyme tests to work.
+    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
     if (this.env.context.env === 'development') {
       config.externals = {
         'react/lib/ExecutionEnvironment': true,
         'react/addons': true,
-        'react/lib/ReactContext': 'window',
+        'react/lib/ReactContext': true,
       };
     }
 
