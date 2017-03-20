@@ -55,6 +55,11 @@ export default function GeoHashAggDefinition(Private, config) {
         write: _.noop
       },
       {
+        name: 'useGeocentroid',
+        default: true,
+        write: _.noop
+      },
+      {
         name: 'mapZoom',
         write: _.noop
       },
