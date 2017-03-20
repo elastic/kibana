@@ -55,10 +55,22 @@ uiModules.get('apps/management')
 
   $scope.$watch('indexPattern.fields', function () {
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+    $scope.refreshFilters();
   });
 
-  $scope.indexedFieldTypes = ['string', 'boolean', 'number', 'date', 'geo_point', 'ip'];
-  $scope.scriptedFieldLanguages = ['expression', 'painless'];
+  $scope.refreshFilters = function () {
+    const indexedFieldTypes = $scope.indexPattern.fields
+      .filter(field => field.indexed)
+      .map(field => field.type);
+    const scriptedFieldLanguages = $scope.indexPattern.fields
+      .filter(field => field.scripted)
+      .map(field => field.lang);
+
+    $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
+    $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
+  }
+
+  $scope.refreshFilters();
 
   $scope.changeFilter = function (filter, val) {
     $scope[filter] = val || ''; // null causes filter to check for null explicitly

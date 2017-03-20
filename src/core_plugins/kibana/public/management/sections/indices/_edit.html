@@ -114,7 +114,7 @@
 
         <div
           class="kuiFieldGroupSection"
-          ng-if="state.tab == 'indexedFields'"
+          ng-if="state.tab == 'indexedFields' && indexedFieldTypes.length > 0"
         >
           <select
             data-test-subj="indexedFieldTypeFilterDropdown"
@@ -129,7 +129,7 @@
 
         <div
           class="kuiFieldGroupSection"
-          ng-if="state.tab == 'scriptedFields'"
+          ng-if="state.tab == 'scriptedFields' && scriptedFieldLanguages.length > 0"
         >
           <select
             data-test-subj="scriptedFieldLanguageFilterDropdown"
