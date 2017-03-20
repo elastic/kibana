@@ -486,9 +486,9 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   });
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function (field, values, operation) {
+  $scope.filterQuery = function (field, values, operation, fieldPrefix) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterManager.add(field, values, operation, $state.index);
+    filterManager.add(field, values, operation, $state.index, fieldPrefix);
   };
 
   $scope.toTop = function () {
