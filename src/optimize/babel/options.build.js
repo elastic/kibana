@@ -1,3 +1,5 @@
+// kibana-jscodeshift-ignore-file
+
 const {
   nodePresets,
   webpackPresets,
