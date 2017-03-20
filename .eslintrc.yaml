@@ -4,6 +4,7 @@ parser: babel-eslint
 plugins:
   - mocha
   - babel
+  - react
 
 env:
   es6: true
@@ -78,3 +79,7 @@ rules:
   valid-typeof: error
   wrap-iife: [ error, outside ]
   yoda: off
+  react/jsx-uses-react: error
+  react/jsx-uses-vars: error
+  react/jsx-no-undef: error
+  react/jsx-pascal-case: error

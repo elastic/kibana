@@ -25,6 +25,7 @@
     "babel-eslint": "6.1.2"
   },
   "devDependencies": {
+    "eslint-plugin-react": "^6.10.3",
     "js-yaml": "^3.6.1"
   }
 }
