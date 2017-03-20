@@ -1,3 +1,4 @@
+// kibana-jscodeshift-ignore-file
 const path = require('path');
 
 module.exports = {
