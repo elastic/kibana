@@ -10,15 +10,17 @@ class Resize extends Component {
 
   checkSize() {
     const el = findDOMNode(this.el);
+    if (!el) return;
     this.timeout = setTimeout(() => {
       const { currentHeight, currentWidth } = this.state;
-      if (currentHeight !== el.clientHeight || currentWidth !== el.clientWidth) {
+      if (currentHeight !== el.parentNode.clientHeight || currentWidth !== el.parentNode.clientWidth) {
         this.setState({
           currentWidth: el.parentNode.clientWidth,
           currentHeight: el.parentNode.clientHeight
         });
         this.handleResize();
       }
+      clearTimeout(this.timeout);
       this.checkSize();
     }, this.props.frequency);
   }
