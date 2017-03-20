@@ -18,6 +18,7 @@ import controlsApi from './api/controls';
 import navApi from './api/nav';
 import templateApi from './api/template';
 import themeApi from './api/theme';
+import translationsApi from './api/translations';
 import xsrfApi from './api/xsrf';
 
 const chrome = {};
@@ -43,6 +44,7 @@ angularApi(chrome, internals);
 controlsApi(chrome, internals);
 templateApi(chrome, internals);
 themeApi(chrome, internals);
+translationsApi(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();

@@ -15,6 +15,9 @@ function init() {
     $timeoutSpy = sinon.spy($timeout);
 
     debounce = $injector.get('debounce');
+
+    // ensure there is a clean slate before testing deferred tasks
+    $timeout.flush();
   });
 }
 
