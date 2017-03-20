@@ -68,19 +68,20 @@ function TimeseriesConfig(props) {
         <div className="vis_editor__label">Fill (0 to 1)</div>
         <input
           className="vis_editor__input-grows"
-          type="text"
+          type="number"
+          step="0.1"
           onChange={handleTextChange('fill')}
           value={model.fill}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
-          type="text"
+          type="number"
           onChange={handleTextChange('line_width')}
           value={model.line_width}/>
         <div className="vis_editor__label">Point Size</div>
         <input
           className="vis_editor__input-grows"
-          type="text"
+          type="number"
           onChange={handleTextChange('point_size')}
           value={model.point_size}/>
         <div className="vis_editor__label">Steps</div>
@@ -113,13 +114,14 @@ function TimeseriesConfig(props) {
         <div className="vis_editor__label">Fill (0 to 1)</div>
         <input
           className="vis_editor__input-grows"
-          type="text"
+          type="number"
+          step="0.5"
           onChange={handleTextChange('fill')}
           value={model.fill}/>
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
-          type="text"
+          type="number"
           onChange={handleTextChange('line_width')}
           value={model.line_width}/>
       </div>
@@ -172,14 +174,14 @@ function TimeseriesConfig(props) {
           <div className="vis_editor__label">Axis Min</div>
           <input
             className="vis_editor__input-grows"
-            type="text"
+            type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_min')}
             value={model.axis_min}/>
           <div className="vis_editor__label">Axis Max</div>
           <input
             className="vis_editor__input-grows"
-            type="text"
+            type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_max')}
             value={model.axis_max}/>
