@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import reIdSeries from './lib/re_id_series';
-import _ from 'lodash';
 import Series from './series';
 import {
   handleAdd,

@@ -1,9 +1,6 @@
 import Bluebird from 'bluebird';
 
 import PageObjects from './';
-import {
-  defaultFindTimeout,
-} from '../';
 
 async function getVisibleTextFromAceEditor(editor) {
   const lines = await editor.findAllByClassName('ace_line_group');

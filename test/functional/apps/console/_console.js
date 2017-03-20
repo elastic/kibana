@@ -2,10 +2,7 @@
 import expect from 'expect.js';
 
 import PageObjects from '../../../support/page_objects';
-import {
-  bdd,
-  scenarioManager
-} from '../../../support';
+import { bdd } from '../../../support';
 
 const DEFAULT_REQUEST = `
 

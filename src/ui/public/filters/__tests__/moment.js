@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import moment from 'moment';

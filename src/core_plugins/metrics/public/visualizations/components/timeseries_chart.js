@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import FlotChart from './flot_chart';

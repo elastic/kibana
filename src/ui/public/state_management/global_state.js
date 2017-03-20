@@ -1,7 +1,5 @@
 import _ from 'lodash';
-import angular from 'angular';
 import qs from 'ui/utils/query_string';
-import rison from 'rison-node';
 import StateManagementStateProvider from 'ui/state_management/state';
 import uiModules from 'ui/modules';
 

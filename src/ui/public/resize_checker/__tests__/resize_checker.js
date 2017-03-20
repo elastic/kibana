@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { delay, fromNode } from 'bluebird';
+import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 

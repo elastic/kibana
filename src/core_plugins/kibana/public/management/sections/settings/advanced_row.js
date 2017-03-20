@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
 import uiModules from 'ui/modules';

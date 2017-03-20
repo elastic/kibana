@@ -1,10 +1,7 @@
 import _ from 'lodash';
-import numeral from 'numeral';
 import React, { Component, PropTypes } from 'react';
-import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
-import Resize from './resize';
 import GaugeVis from './gauge_vis';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';

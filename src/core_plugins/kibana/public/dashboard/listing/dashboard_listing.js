@@ -1,7 +1,6 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
 export function DashboardListingController($injector, $scope) {

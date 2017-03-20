@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import Binder from 'ui/binder';
 export default function AlertsFactory(Private) {
 
   /**

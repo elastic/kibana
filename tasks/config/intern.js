@@ -1,6 +1,3 @@
-import path from 'path';
-
-
 module.exports = function (grunt) {
   return {
     options: {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import reqRespStatsHTML from 'plugins/spy_modes/req_resp_stats_spy_mode.html';
 import spyModesRegistry from 'ui/registry/spy_modes';
 

@@ -1,5 +1,4 @@
-import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
+import React, { PropTypes } from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from '../../series_config';

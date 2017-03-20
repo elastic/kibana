@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import Select from 'react-select';
 import AggRow from './agg_row';

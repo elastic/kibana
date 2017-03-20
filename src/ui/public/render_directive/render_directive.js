@@ -1,5 +1,4 @@
 import { isPlainObject } from 'lodash';
-import $ from 'jquery';
 import uiModules from 'ui/modules';
 import applyScopeBindingsProvider from './apply_scope_bindings';
 

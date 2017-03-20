@@ -2,7 +2,6 @@
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
-import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
 import { transformDeprecations } from '../config/transform_deprecations';
 import { createTransform } from '../../deprecation';

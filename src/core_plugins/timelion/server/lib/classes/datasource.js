@@ -3,7 +3,6 @@ const fitFunctions  = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
 import offsetTime from '../offset_time';
 import _ from 'lodash';
-import moment from 'moment';
 
 
 function offsetSeries(response, offset) {

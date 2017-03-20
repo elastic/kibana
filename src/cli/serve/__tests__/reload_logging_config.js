@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { writeFileSync, readFile } from 'fs';
+import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';

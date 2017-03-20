@@ -4,7 +4,6 @@ import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import collectionActions from '../lib/collection_actions';
-import calculateSiblings from '../lib/calculate_siblings';
 import AddDeleteButtons from '../add_delete_buttons';
 import Select from 'react-select';
 import uuid from 'node-uuid';

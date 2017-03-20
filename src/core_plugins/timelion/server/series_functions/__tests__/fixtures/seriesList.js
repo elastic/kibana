@@ -1,8 +1,6 @@
-import Promise from 'bluebird';
 import buckets from './bucketList';
 import getSeries from '../helpers/get_series';
 import getSeriesList from '../helpers/get_series_list';
-import _ from 'lodash';
 
 module.exports = function () {
   return getSeriesList([

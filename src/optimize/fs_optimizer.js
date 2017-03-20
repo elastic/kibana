@@ -1,8 +1,6 @@
 
 import BaseOptimizer from './base_optimizer';
-import fromRoot from '../utils/from_root';
 import { fromNode } from 'bluebird';
-import { writeFile } from 'fs';
 
 module.exports = class FsOptimizer extends BaseOptimizer {
   async init() {

@@ -1,7 +1,6 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-import _ from 'lodash';
 const expect = require('chai').expect;
 
 describe(filename, () => {

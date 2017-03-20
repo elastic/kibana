@@ -6,7 +6,6 @@ import _ from 'lodash';
 import L from 'leaflet';
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
-import $ from 'jquery';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vis_maps/visualizations/marker_types/base_marker';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vis_maps/visualizations/marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vis_maps/visualizations/marker_types/scaled_circles';

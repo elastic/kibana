@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
 function VisPickerItem(props) {
   const { label, icon, type } = props;

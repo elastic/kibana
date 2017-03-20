@@ -1,6 +1,6 @@
-import { Promise, map, fromNode, promisify } from 'bluebird';
+import { Promise, map, promisify } from 'bluebird';
 import { resolve, basename, dirname, join } from 'path';
-import { createReadStream, createWriteStream, writeFile } from 'fs';
+import { createReadStream, writeFile } from 'fs';
 import { createGunzip } from 'zlib';
 import { Extract } from 'tar';
 import { fromFile } from 'check-hash';

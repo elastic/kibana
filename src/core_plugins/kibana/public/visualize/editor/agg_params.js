@@ -1,5 +1,3 @@
-import IndexedArray from 'ui/indexed_array';
-import _ from 'lodash';
 import $ from 'jquery';
 import aggSelectHtml from 'plugins/kibana/visualize/editor/agg_select.html';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
