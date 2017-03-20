@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const glob = require('glob');
-const path = require('path');
-const processFunctionDefinition = require('./process_function_definition');
+import _ from 'lodash';
+import glob from 'glob';
+import path from 'path';
+import processFunctionDefinition from './process_function_definition';
 
 module.exports = function (directory) {
 

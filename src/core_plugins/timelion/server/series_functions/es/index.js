@@ -1,8 +1,8 @@
-const _ = require('lodash');
-const moment = require('moment');
-const toMS = require('../../lib/to_milliseconds.js');
-const Datasource = require('../../lib/classes/datasource');
-const buildRequest = require('./lib/build_request');
+import _ from 'lodash';
+import moment from 'moment';
+import toMS from '../../lib/to_milliseconds.js';
+import Datasource from '../../lib/classes/datasource';
+import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
 module.exports = new Datasource('es', {

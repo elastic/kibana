@@ -1,5 +1,5 @@
 const defaults = require('lodash').defaults;
-const babelOptions = require('../../src/optimize/babel/options');
+import babelOptions from '../../src/optimize/babel/options';
 
 require('source-map-support').install();
 require('babel-register')(defaults({

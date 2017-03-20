@@ -1,17 +1,14 @@
 
-const _ = require('lodash');
-const glob = require('glob');
-const Promise = require('bluebird');
-
-const parseSheet = require('./lib/parse_sheet.js');
-const parseDateMath = require('../lib/date_math.js');
-const calculateInterval = require('../../public/lib/calculate_interval.js');
-
-const repositionArguments = require('./lib/reposition_arguments.js');
-const indexArguments = require('./lib/index_arguments.js');
-const validateTime = require('./lib/validate_time.js');
-
-const loadFunctions = require('../lib/load_functions.js');
+import _ from 'lodash';
+import glob from 'glob';
+import Promise from 'bluebird';
+import parseSheet from './lib/parse_sheet.js';
+import parseDateMath from '../lib/date_math.js';
+import calculateInterval from '../../public/lib/calculate_interval.js';
+import repositionArguments from './lib/reposition_arguments.js';
+import indexArguments from './lib/index_arguments.js';
+import validateTime from './lib/validate_time.js';
+import loadFunctions from '../lib/load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 
 module.exports = function (tlConfig) {

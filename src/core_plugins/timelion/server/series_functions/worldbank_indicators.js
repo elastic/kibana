@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const fetch = require('node-fetch');
-const moment = require('moment');
-const worldbank = require('./worldbank.js');
-const Promise = require('bluebird');
-const Datasource = require('../lib/classes/datasource');
+import _ from 'lodash';
+import fetch from 'node-fetch';
+import moment from 'moment';
+import worldbank from './worldbank.js';
+import Promise from 'bluebird';
+import Datasource from '../lib/classes/datasource';
 
 
 module.exports = new Datasource ('worldbank_indicators', {

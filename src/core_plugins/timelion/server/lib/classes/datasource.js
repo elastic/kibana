@@ -1,10 +1,9 @@
-const loadFunctions = require('../load_functions.js');
+import loadFunctions from '../load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
-const TimelionFunction = require('./timelion_function');
-const offsetTime = require('../offset_time');
-
-const _ = require('lodash');
-const moment = require('moment');
+import TimelionFunction from './timelion_function';
+import offsetTime from '../offset_time';
+import _ from 'lodash';
+import moment from 'moment';
 
 
 function offsetSeries(response, offset) {

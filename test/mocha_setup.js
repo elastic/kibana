@@ -1,5 +1,5 @@
-const sinon = require('sinon');
-const autoRelease = require('auto-release-sinon');
+import sinon from 'sinon';
+import autoRelease from 'auto-release-sinon';
 
 require('../src/optimize/babel/register');
 
