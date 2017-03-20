@@ -57,6 +57,8 @@ uiModules
 
       self.cancel = redirectAway;
       self.save = function () {
+        self.saving = true;
+
         const indexPattern = self.indexPattern;
         const fields = indexPattern.fields;
         const field = self.field.toActualField();

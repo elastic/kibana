@@ -16,7 +16,7 @@
       class="form-control"
       data-test-subj="editorFieldName">
   </div>
-  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.field.name]" class="hintbox">
+  <div ng-if="!editor.saving && editor.creating && editor.indexPattern.fields.byName[editor.field.name]" class="hintbox">
     <p>
       <i class="fa fa-danger text-danger"></i>
       <strong>Mapping Conflict:</strong>
