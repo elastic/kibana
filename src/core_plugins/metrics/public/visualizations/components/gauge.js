@@ -6,8 +6,8 @@ import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import Resize from './resize';
 import GaugeVis from './gauge_vis';
-import { findDOMNode } from 'react-dom';
 import reactcss from 'reactcss';
+import calculateCorrdinates from '../lib/calculate_corrdinates';
 
 class Gauge extends Component {
 
@@ -24,68 +24,31 @@ class Gauge extends Component {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  calculateCorrdinates() {
-    const inner = findDOMNode(this.inner);
-    const resize = findDOMNode(this.resize);
-    let scale = this.state.scale;
+  componentWillMount() {
+    const check = () => {
+      this.timeout = setTimeout(() => {
+        const newState = calculateCorrdinates(this.inner, this.resize, this.state);
+        if (newState && this.state && !_.isEqual(newState, this.state)) {
+          this.handleResize();
+        }
+        check();
+      }, 500);
+    };
+    check();
+  }
 
-    if (!inner || !resize) return;
-
-    // Let's start by scaling to the largest dimension
-    if (resize.clientWidth - resize.clientHeight < 0) {
-      scale = resize.clientWidth / inner.clientWidth;
-    } else {
-      scale = resize.clientHeight / inner.clientHeight;
-    }
-    let [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
-
-    // Now we need to check to see if it will still fit
-    if (newWidth > resize.clientWidth) {
-      scale = resize.clientWidth / inner.clientWidth;
-    }
-    if (newHeight > resize.clientHeight) {
-      scale = resize.clientHeight / inner.clientHeight;
-    }
-
-    // Calculate the final dimensions
-    [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
-
-    // Because scale is middle out we need to translate
-    // the new X,Y corrdinates
-    const translateX = (newWidth - inner.clientWidth) / 2;
-    const translateY = (newHeight - inner.clientHeight) / 2;
-
-    // Center up and down
-    const top = Math.floor((resize.clientHeight - newHeight) / 2);
-    const left = Math.floor((resize.clientWidth - newWidth) / 2);
-
-    return { scale, top, left, translateY, translateX };
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   componentDidMount() {
     this.handleResize();
   }
 
-  // When the component updates it might need to be resized so we need to
-  // recalculate the corrdinates and only update if things changed a little. THis
-  // happens when the number is too wide or you add a new series.
-  componentDidUpdate() {
-    const newState = this.calculateCorrdinates();
-    if (newState && !_.isEqual(newState, this.state)) {
-      this.setState(newState);
-    }
-  }
-
-  calcDimensions(el, scale) {
-    const newWidth = Math.floor(el.clientWidth * scale);
-    const newHeight = Math.floor(el.clientHeight * scale);
-    return [newWidth, newHeight];
-  }
-
   handleResize() {
     // Bingo!
-    const newState = this.calculateCorrdinates();
-    newState && this.setState(newState);
+    const newState = calculateCorrdinates(this.inner, this.resize, this.state);
+    this.setState(newState);
   }
 
   render() {
@@ -122,50 +85,47 @@ class Gauge extends Component {
     }
 
     let metrics;
-    if (metric) {
-      if (type === 'half') {
-        metrics = (
+    if (type === 'half') {
+      metrics = (
+        <div
+          className="thorHalfGauge__metrics"
+          ref={(el) => this.inner = el}
+          style={styles.inner}>
           <div
-            className="thorHalfGauge__metrics"
-            ref={(el) => this.inner = el}
-            style={styles.inner}>
-            <div
-              className="thorHalfGauge__label"
-              ref="title">{ title }</div>
-            <div
-              className="thorHalfGauge__value"
-              style={valueStyle}
-              ref="label">{ formatter(value) }</div>
-          </div>
-        );
-      } else {
-        metrics = (
+            className="thorHalfGauge__label"
+            ref="title">{ title }</div>
           <div
-            className="thorCircleGauge__metrics"
-            ref="inner"
-            style={styles.inner}>
-            <div
-              className="thorCircleGauge__value"
-              style={valueStyle}
-              ref="label">{ formatter(value) }</div>
-            <div
-              className="thorCircleGauge__label"
-              ref="title">{ title }</div>
-          </div>
-        );
-      }
+            className="thorHalfGauge__value"
+            style={valueStyle}
+            ref="label">{ formatter(value) }</div>
+        </div>
+      );
+    } else {
+      metrics = (
+        <div
+          className="thorCircleGauge__metrics"
+          ref={(el) => this.inner = el}
+          style={styles.inner}>
+          <div
+            className="thorCircleGauge__value"
+            style={valueStyle}
+            ref="label">{ formatter(value) }</div>
+          <div
+            className="thorCircleGauge__label"
+            ref="title">{ title }</div>
+        </div>
+      );
     }
     let className = type === 'half' ? 'thorHalfGauge' : 'thorCircleGauge';
     if (this.props.reversed) className = `reversed ${className}`;
     return (
       <div className={className}>
-        <Resize
-          onResize={this.handleResize}
-          className={`${className}__resize`}
-          ref={(el) => this.resize = el}>
+        <div
+          ref={(el) => this.resize = el}
+          className={`${className}__resize`}>
           { metrics }
           <GaugeVis {...gaugeProps}/>
-        </Resize>
+        </div>
       </div>
     );
   }
