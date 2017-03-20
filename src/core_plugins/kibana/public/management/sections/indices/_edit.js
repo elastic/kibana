@@ -59,18 +59,22 @@ uiModules.get('apps/management')
   });
 
   $scope.refreshFilters = function () {
-    const indexedFieldTypes = $scope.indexPattern.fields
-      .filter(field => field.indexed)
-      .map(field => field.type);
-    const scriptedFieldLanguages = $scope.indexPattern.fields
-      .filter(field => field.scripted)
-      .map(field => field.lang);
+    const filterTypes = { indexedFieldTypes: [], scriptedFieldLanguages: [] };
+    const { indexedFieldTypes, scriptedFieldLanguages } = $scope.indexPattern.fields.reduce((acc, field) => {
+      if (field.indexed) {
+        acc.indexedFieldTypes.push(field.type);
+      }
+
+      if (field.scripted) {
+        acc.scriptedFieldLanguages.push(field.lang);
+      }
+
+      return acc;
+    }, filterTypes);
 
     $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
     $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
-  }
-
-  $scope.refreshFilters();
+  };
 
   $scope.changeFilter = function (filter, val) {
     $scope[filter] = val || ''; // null causes filter to check for null explicitly
