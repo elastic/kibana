@@ -36,7 +36,7 @@ function createProxy(server, method, path, config) {
       },
       handler: {
         proxy: {
-          mapUri: mapUri(cluster, proxyPrefix, serverPrefix),
+          mapUri: mapUri(cluster, new RegExp(`^${serverPrefix}${proxyPrefix}`)),
           agent: createAgent({
             url: cluster.getUrl(),
             ssl: cluster.getSsl()
