@@ -7,14 +7,14 @@ import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_cli
 import ChoroplethLayer from './choropleth_layer';
 import colorramps from 'ui/vislib/components/color/colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
-import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings, vectormapsConfig, config) {
 
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
-  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  const ResizeChecker = Private(ResizeCheckerProvider);
 
   const resizeChecker = new ResizeChecker($element);
   const containerNode = $element[0];

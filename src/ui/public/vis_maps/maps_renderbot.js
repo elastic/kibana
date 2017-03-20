@@ -7,12 +7,12 @@ import KibanaMap from './kibana_map';
 import GeohashLayer from './geohash_layer';
 import './lib/tilemap_settings';
 import './styles/_tilemap.less';
-import VislibLibResizeCheckerProvider from '../vislib/lib/resize_checker';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 
 module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier, courier, getAppState) {
 
-  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(MapsVisTypeBuildChartDataProvider);
   const notify = new Notifier({ location: 'Tilemap' });
