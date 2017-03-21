@@ -33,7 +33,7 @@ describe('Filter Bar Directive', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
     });
 
-    ngMock.inject(function(Private, $injector, _$rootScope_, _$compile_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
       Promise = $injector.get('Promise');

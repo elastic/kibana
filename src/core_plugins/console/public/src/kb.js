@@ -134,35 +134,35 @@ IdAutocompleteComponent.prototype = _.create(
 
 var parametrizedComponentFactories = {
 
-  'index': function(name, parent) {
+  'index': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, false);
   },
-  'indices': function(name, parent) {
+  'indices': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, true);
   },
-  'type': function(name, parent) {
+  'type': function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, false);
   },
-  'types': function(name, parent) {
+  'types': function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, true);
   },
-  'id': function(name, parent) {
+  'id': function (name, parent) {
     return new IdAutocompleteComponent(name, parent);
   },
-  'ids': function(name, parent) {
+  'ids': function (name, parent) {
     return new IdAutocompleteComponent(name, parent, true);
   },
-  'fields': function(name, parent) {
+  'fields': function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
   },
-  'field': function(name, parent) {
+  'field': function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  'nodes': function(name, parent) {
+  'nodes': function (name, parent) {
     return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
       "master:true", "master:false"], parent)
   },
-  'node': function(name, parent) {
+  'node': function (name, parent) {
     return new autocomplete_engine.ListComponent(name, [], parent, false)
   }
 };
@@ -224,7 +224,7 @@ function setActiveApi(api) {
         dataType: "json", // disable automatic guessing
       }
     ).then(
-      function(data) {
+      function (data) {
         setActiveApi(loadApisFromJson(data));
       },
       function (jqXHR) {

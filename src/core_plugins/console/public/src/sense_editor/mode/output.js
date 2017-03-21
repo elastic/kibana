@@ -22,7 +22,7 @@ var Mode = function () {
 oop.inherits(Mode, JSONMode);
 
 (function () {
-  this.createWorker = function() {
+  this.createWorker = function () {
     return null;
   };
 

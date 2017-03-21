@@ -964,7 +964,7 @@ module.exports = function (editor) {
   // Hook into Ace
 
   // disable standard context based autocompletion.
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(require, exports) {
+  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports) {
     exports.getCompletions = function (editor, session, pos, prefix, callback) {
       callback(null, []);
     }

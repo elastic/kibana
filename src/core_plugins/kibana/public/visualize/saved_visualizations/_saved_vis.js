@@ -12,7 +12,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('app/visualize')
-.factory('SavedVis', function(config, $injector, courier, Promise, savedSearches, Private) {
+.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
   const Vis = Private(VisProvider);
 
   _.class(SavedVis).inherits(courier.SavedObject);
