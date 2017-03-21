@@ -1,5 +1,5 @@
 import { createGunzip } from 'zlib';
-import { PassThrough, Transform } from 'stream';
+import { PassThrough } from 'stream';
 
 import {
   createSplitStream,
