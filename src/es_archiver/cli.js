@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Run `node scripts/es_archiver -- --help` for usage information
+ *  Run `node scripts/es_archiver --help` for usage information
  *
  *************************************************************/
 
@@ -21,21 +21,24 @@ cmd
   .option('--es-url [url]', 'url for elasticsearch')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
-  .option('--config [path]', 'path to a functional test config file to use for default values')
   .on('--help', () => {
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
 
 cmd.command('save <name> <indices...>')
-  .action((name, indices) => execute('save', { name, indices }));
+  .description('archive the <indices ...> into the --dir with <name>')
+  .action((name, indices) => execute('save', name, indices));
 
 cmd.command('load <name>')
-  .action(name => execute('load', { name }));
+  .description('load the archive in --dir with <name>')
+  .action(name => execute('load', name));
 
 cmd.command('unload <name>')
-  .action(name => execute('unload', { name }));
+  .description('remove indices created by the archive in --dir with <name>')
+  .action(name => execute('unload', name));
 
 cmd.command('rebuild-all')
+  .description('[internal] read and write all archives in --dir to remove any inconsistencies')
   .action(name => execute('rebuildAll'));
 
 cmd.parse(process.argv);
@@ -59,10 +62,10 @@ async function execute(operation, options) {
 
     if (!operation) error('Missing or invalid command');
     if (!cmd.esUrl) {
-      error('You must specify either --es-url or --config flags');
+      error('You must specify either --es-url flag');
     }
     if (!cmd.dir) {
-      error('You must specify either --dir or --config flags');
+      error('You must specify either --dir flag');
     }
 
     // if there was a validation error display the help
