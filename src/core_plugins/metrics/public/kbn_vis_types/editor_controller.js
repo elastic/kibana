@@ -50,7 +50,7 @@ app.controller('MetricsEditorController', (
     }
   }
 
-  $scope.$watchCollection('model', (newValue, oldValue) => {
+  $scope.$watchCollection('model', newValue => {
     angular.copy(newValue, $scope.vis._editableVis.params);
     $scope.stageEditableVis();
     debouncedFetch();

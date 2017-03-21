@@ -18,7 +18,7 @@ export default function RegexAggParamFactory(Private) {
    *
    * @return {bool}
    */
-  RegexAggParam.prototype.disabled = function (aggConfig) {
+  RegexAggParam.prototype.disabled = function() {
     return false;
   };
 

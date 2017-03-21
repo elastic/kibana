@@ -1,4 +1,4 @@
-export default function (grunt) {
+export default function() {
   return {
     default_options: {
       src: ['src/**/*.js', 'src/**/*.html'],
@@ -6,4 +6,4 @@ export default function (grunt) {
       dest: 'build/i18n_extract'
     }
   };
-}
+};

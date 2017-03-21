@@ -44,13 +44,13 @@ uiModules
         return label ? label : '';
       };
 
-      $scope.$on('drag-start', e => {
+      $scope.$on('drag-start', () => {
         $scope.editorWasOpen = $scope.editorOpen;
         $scope.editorOpen = false;
         $scope.$emit('agg-drag-start', $scope.agg);
       });
 
-      $scope.$on('drag-end', e => {
+      $scope.$on('drag-end', () => {
         $scope.editorOpen = $scope.editorWasOpen;
         $scope.$emit('agg-drag-end', $scope.agg);
       });

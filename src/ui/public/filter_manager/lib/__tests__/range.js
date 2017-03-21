@@ -9,7 +9,7 @@ let expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function(Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));
     }));

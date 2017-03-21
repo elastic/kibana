@@ -8,8 +8,8 @@ describe('buildProcessorFunction(chain, ...args)', () => {
   const series = {};
 
   it('should call each processor', () => {
-    const first = sinon.spy((req, panel, series) => next => doc => next(doc));
-    const second = sinon.spy((req, panel, series) => next => doc => next(doc));
+    const first = sinon.spy(() => next => doc => next(doc));
+    const second = sinon.spy(() => next => doc => next(doc));
     const fn = buildProcessorFunction([first, second], req, panel, series);
     expect(first.calledOnce).to.equal(true);
     expect(second.calledOnce).to.equal(true);
@@ -19,8 +19,8 @@ describe('buildProcessorFunction(chain, ...args)', () => {
     const first = sinon.spy(next => doc => next(doc));
     const second = sinon.spy(next => doc => next(doc));
     const fn = buildProcessorFunction([
-      (req, panel, series) => first,
-      (req, panel, series) => second
+      () => first,
+      () => second
     ], req, panel, series);
     expect(first.calledOnce).to.equal(true);
     expect(second.calledOnce).to.equal(true);
@@ -30,11 +30,11 @@ describe('buildProcessorFunction(chain, ...args)', () => {
     const first = sinon.spy();
     const second = sinon.spy();
     const fn = buildProcessorFunction([
-      (req, panel, series) => next => doc => {
+      () => next => doc => {
         first();
         next(doc);
       },
-      (req, panel, series) => next => doc => {
+      () => next => doc => {
         second();
         next(doc);
       }

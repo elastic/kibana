@@ -121,7 +121,7 @@ module.exports = class ClusterManager {
     rl.setPrompt('');
     rl.prompt();
 
-    rl.on('line', line => {
+    rl.on('line', () => {
       nls = nls + 1;
 
       if (nls >= 2) {

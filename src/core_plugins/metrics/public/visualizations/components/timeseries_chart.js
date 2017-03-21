@@ -75,7 +75,7 @@ class TimeseriesChart extends Component {
     }
   }
 
-  handleMouseLeave(e, plot) {
+  handleMouseLeave() {
     this.state.mouseHoverTimer = window.setTimeout(() => {
       this.setState({ showTooltip: false });
     }, 250);

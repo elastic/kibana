@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import $ from 'jquery';
-export default function AxisLabelsFactory(Private) {
+export default function AxisLabelsFactory() {
   class AxisLabels {
     constructor(axisConfig, scale) {
       this.axisConfig = axisConfig;
@@ -18,7 +18,7 @@ export default function AxisLabelsFactory(Private) {
 
         if (config.get('labels.rotate')) {
           text
-          .style('text-anchor', function (d, i) {
+          .style('text-anchor', function() {
             const currentValue = $(this).css('text-anchor');
             const rotateDeg = config.get('labels.rotate');
             if (!rotateDeg) return currentValue;

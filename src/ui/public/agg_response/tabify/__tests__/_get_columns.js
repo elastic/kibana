@@ -9,7 +9,7 @@ describe('get columns', function () {
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function(Private) {
     getColumns = Private(AggResponseTabifyGetColumnsProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

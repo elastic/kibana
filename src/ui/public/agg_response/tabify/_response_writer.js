@@ -265,10 +265,10 @@ export default function TabbedAggResponseWriterProvider(Private) {
     });
 
     // walk the tree and write the columns to each table
-    (function step(table, group) {
+    ((function step(table) {
       if (table.tables) table.tables.forEach(step);
       else table.columns = columns.slice(0);
-    }(this.root));
+    })(this.root));
 
     if (this.canSplit) return this.root;
 

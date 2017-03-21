@@ -106,9 +106,9 @@ class TopNPanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={e => this.switchTab('data')}>Data</div>
+            onClick={() => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={e => this.switchTab('options')}>Panel Options</div>
+            onClick={() => this.switchTab('options')}>Panel Options</div>
         </div>
         {view}
       </div>

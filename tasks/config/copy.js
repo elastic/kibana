@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function() {
   return {
     devSource: {
       options: { mode: true },

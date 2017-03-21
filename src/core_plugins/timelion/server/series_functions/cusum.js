@@ -18,7 +18,7 @@ module.exports = new Chainable('cusum', {
     return alter(args, function (eachSeries, base) {
       const pairs = eachSeries.data;
       let total = base || 0;
-      eachSeries.data = _.map(pairs, function (point, i) {
+      eachSeries.data = _.map(pairs, function(point) {
         total += point[1];
         return [point[0], total];
       });

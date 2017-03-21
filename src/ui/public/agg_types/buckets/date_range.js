@@ -5,7 +5,7 @@ import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/c
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
 
-export default function DateRangeAggDefinition(Private, config) {
+export default function DateRangeAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);

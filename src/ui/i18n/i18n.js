@@ -55,7 +55,7 @@ export class I18n {
     });
 
     return Promise.all(translations)
-    .then(translations => _.assign({}, localeTranslations));
+    .then(() => _.assign({}, localeTranslations));
   }
 
   /**
@@ -122,10 +122,10 @@ export class I18n {
     const translations = _.map(translationFiles, (filename) => {
       return asyncReadFile(filename, 'utf8')
       .then(fileContents => JSON.parse(fileContents))
-      .catch(SyntaxError, function (e) {
+      .catch(SyntaxError, function() {
         throw new Error('Invalid json in ' + filename);
       })
-      .catch(function (e) {
+      .catch(function() {
         throw new Error('Cannot read file ' + filename);
       });
     });

@@ -24,7 +24,7 @@ class MarkdownEditor extends Component {
   }
 
   handleVarClick(snippet) {
-    return (e) => {
+    return () => {
       if (this.ace) this.ace.insert(snippet);
     };
   }

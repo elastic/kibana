@@ -24,7 +24,7 @@ const dataTypesArray = [
   ['stackedSeries', 'stacked', stackedSeries],
 ];
 
-dataTypesArray.forEach(function (dataType, i) {
+dataTypesArray.forEach(function(dataType) {
   const name = dataType[0];
   const mode = dataType[1];
   const data = dataType[2];

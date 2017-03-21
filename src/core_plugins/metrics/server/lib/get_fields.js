@@ -12,7 +12,7 @@ export function getParams(req) {
 }
 
 export function handleResponse(resp) {
-  return _.reduce(resp, (acc, index, key) => {
+  return _.reduce(resp, (acc, index) => {
     _.each(index.mappings, (type) => {
       _.each(type, (field, fullName) => {
         const name = _.last(fullName.split(/\./));

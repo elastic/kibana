@@ -28,7 +28,7 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function (clause, i) {
+  _.each(config.split, function(clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       aggCursor[clause[0]] = {

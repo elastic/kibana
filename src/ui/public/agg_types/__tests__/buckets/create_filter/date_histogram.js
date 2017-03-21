@@ -23,7 +23,7 @@ describe('AggConfig Filters', function () {
     let init;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, $injector) {
+    beforeEach(ngMock.inject(function(Private) {
       const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);

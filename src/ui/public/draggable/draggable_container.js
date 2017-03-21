@@ -20,7 +20,7 @@ uiModules
 
       this.getList = () => $parse($attrs.draggableContainer)($scope);
     },
-    link($scope, $el, attr) {
+    link($scope, $el) {
       const drake = dragula({
         containers: $el.toArray(),
         moves(el, source, handle) {

@@ -11,7 +11,7 @@ let config;
 const anchor = '2014-01-01T06:06:06.666';
 let clock;
 
-const init = function (expandable) {
+const init = function() {
   // Load the application
   ngMock.module('kibana');
 

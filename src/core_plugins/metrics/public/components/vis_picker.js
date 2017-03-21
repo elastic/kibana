@@ -11,7 +11,7 @@ function VisPickerItem(props) {
     labelClassName += ' selected';
   }
   return (
-    <div className={itemClassName} onClick={e => props.onClick(type)}>
+    <div className={itemClassName} onClick={() => props.onClick(type)}>
       <div className={iconClassName}>
         <i className={`fa ${icon}`}></i>
       </div>
@@ -42,7 +42,7 @@ function VisPicker(props) {
     { type: 'top_n', icon: 'fa-bar-chart fa-rotate-90', label: 'Top N' },
     { type: 'gauge', icon: 'fa-circle-o-notch', label: 'Gauge' },
     { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown' }
-  ].map((item, i, items) => {
+  ].map(item => {
     return (
       <VisPickerItem
         key={item.type}
