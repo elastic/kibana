@@ -46,7 +46,6 @@ module.exports = class Plugins extends Collection {
     this[pluginApis].add(api);
 
     const output = [].concat(require(path)(api) || []);
-    const config = this.kbnServer.config;
 
     if (!output.length) return;
 

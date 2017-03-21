@@ -32,7 +32,6 @@ bdd.describe('discover app', function describeIndexTests() {
 
   bdd.describe('query', function () {
     const queryName1 = 'Query # 1';
-    const queryDescription1 = 'Query # 1 Description';
 
     bdd.it('should show correct time range string by timepicker', async function () {
       const actualTimeString = await PageObjects.discover.getTimespanText();
@@ -192,7 +191,6 @@ bdd.describe('discover app', function describeIndexTests() {
         }
       });
     }
-
   });
 
   bdd.describe('query #2, which has an empty time range', function () {

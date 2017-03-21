@@ -9,7 +9,11 @@ import createTextHandler from '../lib/create_text_handler';
 class FilterRatioAgg extends Component {
 
   render() {
-    const { series, fields, siblings, panel } = this.props;
+    const {
+      series,
+      fields,
+      panel
+    } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, this.props.model);
     const handleSelectChange = createSelectHandler(handleChange);

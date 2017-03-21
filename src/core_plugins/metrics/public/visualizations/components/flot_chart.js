@@ -64,7 +64,9 @@ class FlotChart extends Component {
 
   componentWillReceiveProps(newProps) {
     if (this.plot) {
-      const { series, markings } = newProps;
+      const {
+        series
+      } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
       this.plot.setData(this.calculateData(series, newProps.show));
@@ -86,7 +88,6 @@ class FlotChart extends Component {
   }
 
   calculateData(data, show) {
-    const series = [];
     return _(data)
       .filter(this.filterByShow(show))
       .map((set) => {

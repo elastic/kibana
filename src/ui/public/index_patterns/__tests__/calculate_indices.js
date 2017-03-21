@@ -6,8 +6,6 @@ import ngMock from 'ng_mock';
 import moment from 'moment';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 describe('ui/index_patterns/_calculate_indices', () => {
-
-  let Promise;
   let $rootScope;
   let calculateIndices;
   let es;

@@ -34,7 +34,6 @@ class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const { fields } = this.props;
     const defaults = { drilldown_url: '', filter: '' };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);

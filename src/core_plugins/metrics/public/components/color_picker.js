@@ -19,7 +19,9 @@ class ColorPicker extends Component {
   }
 
   handleChange(color) {
-    const { rgb, hex } = color;
+    const {
+      rgb
+    } = color;
     const part = {};
     part[this.props.name] = `rgba(${rgb.r},${rgb.g},${rgb.b},${rgb.a})`;
     if (this.props.onChange) this.props.onChange(part);

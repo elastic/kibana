@@ -9,7 +9,6 @@ import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 let YAxis;
-let Data;
 let persistedState;
 let el;
 let buildYAxis;
@@ -95,7 +94,6 @@ describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (Private, $injector) {
-    Data = Private(VislibLibDataProvider);
     persistedState = new ($injector.get('PersistedState'))();
     YAxis = Private(VislibLibYAxisProvider);
     VisConfig = Private(VislibVisConfig);
@@ -318,9 +316,7 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYAxis method', function () {
-    let mode;
     let yMax;
-    let yScale;
     beforeEach(function () {
       createData(defaultGraphData);
       yMax = yAxis.yMax;
@@ -346,7 +342,6 @@ describe('Vislib yAxis Class Test Suite', function () {
       const tickFormat = yAxis.getAxis().tickFormat();
       expect(tickFormat(0.8)).to.be('0.8');
     });
-
   });
 
   describe('draw Method', function () {

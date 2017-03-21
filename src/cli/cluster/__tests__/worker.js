@@ -133,7 +133,6 @@ describe('CLI cluster manager', function () {
     context('when sent WORKER_LISTENING message', function () {
       it('sets the listening flag and emits the listening event', function () {
         const worker = setup();
-        const data = {};
         const stub = sinon.stub(worker, 'emit');
         expect(worker).to.have.property('listening', false);
         worker.onMessage('WORKER_LISTENING');

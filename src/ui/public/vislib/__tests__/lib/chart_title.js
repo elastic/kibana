@@ -14,7 +14,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   let persistedState;
   let chartTitle;
   let el;
-  let dataObj;
   const data = {
     hits: 621,
     ordered: {
@@ -89,7 +88,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, persistedState);
     const visConfig = new VisConfig({
       type: 'histogram',
       title: {
@@ -122,5 +120,4 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       expect(_.isFunction(chartTitle.draw())).to.be(true);
     });
   });
-
 });

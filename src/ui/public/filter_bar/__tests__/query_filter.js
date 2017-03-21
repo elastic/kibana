@@ -11,13 +11,11 @@ import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import EventsProvider from 'ui/events';
 let queryFilter;
 let EventEmitter;
-let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-      $rootScope = _$rootScope_;
       queryFilter = Private(FilterBarQueryFilterProvider);
       EventEmitter = Private(EventsProvider);
     }));

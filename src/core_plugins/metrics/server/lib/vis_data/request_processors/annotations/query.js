@@ -3,7 +3,9 @@ import getTimerange from '../../helpers/get_timerange';
 export default function query(req, panel, annotation) {
   return next => doc => {
     const timeField = annotation.time_field;
-    const { bucketSize, intervalString } = getBucketSize(req, 'auto');
+    const {
+      bucketSize
+    } = getBucketSize(req, 'auto');
     const { from, to } = getTimerange(req);
 
     doc.size = 0;

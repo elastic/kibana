@@ -6,7 +6,6 @@ import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size
 
 export default function AggTypeMetricTopProvider(Private) {
   const MetricAggType = Private(MetricAggTypeProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   const isNumber = function (type) {
     return type === 'number';

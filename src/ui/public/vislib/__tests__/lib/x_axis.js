@@ -10,12 +10,10 @@ import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 describe('Vislib xAxis Class Test Suite', function () {
   let Axis;
-  let Data;
   let persistedState;
   let xAxis;
   let el;
   let fixture;
-  let dataObj;
   let VisConfig;
   const data = {
     hits: 621,
@@ -81,7 +79,6 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    Data = Private(VislibLibDataProvider);
     persistedState = new ($injector.get('PersistedState'))();
     Axis = Private(VislibLibAxisProvider);
     VisConfig = Private(VislibVisConfig);
@@ -126,11 +123,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getScale, getDomain, getTimeDomain, and getRange Methods', function () {
-    let ordered;
     let timeScale;
-    let timeDomain;
-    let ordinalScale;
-    let ordinalDomain;
     let width;
     let range;
 
@@ -138,7 +131,6 @@ describe('Vislib xAxis Class Test Suite', function () {
       width = $('.x-axis-div').width();
       xAxis.getAxis(width);
       timeScale = xAxis.getScale();
-      timeDomain = xAxis.axisScale.getExtents();
       range = xAxis.axisScale.getRange(width);
     });
 
@@ -213,7 +205,6 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   describe('getXAxis Method', function () {
     let width;
-    let axis;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
@@ -230,5 +221,4 @@ describe('Vislib xAxis Class Test Suite', function () {
       expect(_.isFunction(xAxis.draw())).to.be(true);
     });
   });
-
 });

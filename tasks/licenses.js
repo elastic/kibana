@@ -7,7 +7,6 @@ export default function licenses(grunt) {
     const config = this.options();
     const done = this.async();
 
-    const result = [];
     const options = {
       start: process.cwd(),
       production: true,

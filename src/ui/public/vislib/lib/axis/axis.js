@@ -43,7 +43,6 @@ export default function AxisFactory(Private) {
 
       const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
       if (stackedMode) {
-        const self = this;
         this.stack = this._stackNegAndPosVals;
       }
     }

@@ -6,7 +6,10 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 
 function SeriesAgg(props) {
-  const { model, panel, fields } = props;
+  const {
+    model,
+    panel
+  } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);

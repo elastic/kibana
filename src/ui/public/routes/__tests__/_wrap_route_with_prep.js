@@ -26,12 +26,10 @@ describe('wrapRouteWithPrep fn', function () {
       let setupComplete = false;
       let userWorkComplete = false;
       let route;
-      let Private;
       let Promise;
       let $injector;
 
       ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
-        Private = _Private_;
         Promise = _Promise_;
         $injector = _$injector_;
       });

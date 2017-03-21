@@ -7,7 +7,6 @@ import errors from 'ui/errors';
 import 'ui/persisted_state';
 
 let PersistedState;
-let Events;
 
 describe('Persisted State Provider', function () {
   noDigestPromises.activateForSuite();

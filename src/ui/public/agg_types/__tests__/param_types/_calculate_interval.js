@@ -7,16 +7,13 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import AggTypesParamTypesCalculateIntervalProvider from 'ui/agg_types/param_types/_calculate_interval';
 
 describe('calculateInterval()', function () {
-  let AggConfig;
   let indexPattern;
   let Vis;
-  let createFilter;
   let calculateInterval;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     calculateInterval = Private(AggTypesParamTypesCalculateIntervalProvider);
   }));
@@ -84,5 +81,4 @@ describe('calculateInterval()', function () {
     metricScale: 1,
     description: 'year'
   });
-
 });

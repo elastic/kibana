@@ -9,15 +9,11 @@ import EventsProvider from 'ui/events';
 describe('Events', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
-  let $rootScope;
   let Events;
-  let Notifier;
   let Promise;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
-    $rootScope = $injector.get('$rootScope');
-    Notifier = $injector.get('Notifier');
     Promise = $injector.get('Promise');
     Events = Private(EventsProvider);
   }));

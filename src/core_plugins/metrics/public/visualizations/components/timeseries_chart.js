@@ -20,7 +20,6 @@ class TimeseriesChart extends Component {
   }
 
   calculateLeftRight(item, plot) {
-    const el = this.container;
     const offset = plot.offset();
     const canvas = plot.getCanvas();
     const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
