@@ -1,20 +1,16 @@
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import 'ui/filters/moment';
 
-
 let filter;
-
-const anchor = '2014-01-01T06:06:06.666';
 
 const init = function () {
   // Load the application
   ngMock.module('kibana');
 
   // Create the scope
-  ngMock.inject(function ($filter, _config_) {
+  ngMock.inject(function ($filter) {
     filter = $filter('moment');
   });
 };

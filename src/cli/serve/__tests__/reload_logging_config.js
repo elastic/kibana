@@ -33,7 +33,7 @@ describe(`Server logging configuration`, function () {
 
       let asserted = false;
       let json = Infinity;
-      const conf = setLoggingJson(true);
+      setLoggingJson(true);
       const child = spawn(cli, [`--config`, testConfigFile]);
 
       child.on('error', err => {

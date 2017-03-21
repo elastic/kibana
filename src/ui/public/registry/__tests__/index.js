@@ -68,7 +68,8 @@ describe('Registry', function () {
   describe('spec.constructor', function () {
     it('executes before the modules are returned', function () {
       let i = 0;
-      const reg = registry({
+
+      registry({
         constructor: function () {
           i = i + 1;
         }

@@ -15,10 +15,6 @@ uiModules
 .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
   const Vis = Private(VisProvider);
 
-  const notify = new Notifier({
-    location: 'SavedVis'
-  });
-
   _.class(SavedVis).inherits(courier.SavedObject);
   function SavedVis(opts) {
     const self = this;

@@ -40,7 +40,7 @@ describe('ResponseWriter class', function () {
 
     it('gets the columns for the vis', function () {
       const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      const writer = new ResponseWriter(vis);
+      new ResponseWriter(vis);
 
       expect(getColumns).to.have.property('callCount', 1);
       expect(getColumns.firstCall.args[0]).to.be(vis);

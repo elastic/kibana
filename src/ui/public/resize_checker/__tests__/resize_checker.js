@@ -121,7 +121,7 @@ describe('Resize Checker', () => {
       const { createChecker, createEl, createListener } = setup();
 
       const checker = createChecker(createEl());
-      const listener = createListener();
+      createListener();
 
       checker.destroy();
       expect(!checker._observer).to.be(true);

@@ -110,7 +110,6 @@ class FlotChart extends Component {
 
     const lineColor = this.props.reversed ? colors.lineColorReversed : colors.lineColor;
     const textColor = this.props.reversed ? colors.textColorReversed : colors.textColor;
-    const valueColor = this.props.reversed ? colors.valueColorReversed : colors.valueColor;
 
     const opts = {
       legend: { show: false },
@@ -169,7 +168,6 @@ class FlotChart extends Component {
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       const { series } = this.props;
-      const parent = $(this.target.parentElement);
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(this.target, data, this.getOptions());

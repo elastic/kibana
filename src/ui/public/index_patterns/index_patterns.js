@@ -16,8 +16,6 @@ function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
   const IndexPattern = Private(IndexPatternsIndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
 
-  const notify = new Notifier({ location: 'IndexPatterns Service' });
-
   self.get = function (id) {
     if (!id) return self.make();
 

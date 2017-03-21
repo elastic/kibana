@@ -48,7 +48,7 @@ export default function downloadNodeBuilds(grunt) {
       return false;
     }
 
-    return checkHashFromFileAsync(filePath, expected).then(([passed, actual]) => {
+    return checkHashFromFileAsync(filePath, expected).then(([passed]) => {
       if (!passed) {
         grunt.log.error(`${platform.name} shasum check failed`);
       }

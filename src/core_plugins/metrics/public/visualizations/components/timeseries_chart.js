@@ -20,7 +20,6 @@ class TimeseriesChart extends Component {
   }
 
   calculateLeftRight(item, plot) {
-    const offset = plot.offset();
     const canvas = plot.getCanvas();
     const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
     const edge = (point.left + 10) / canvas.width;
@@ -162,7 +161,6 @@ class TimeseriesChart extends Component {
       const metric = series.find(r => r.id === item.series.id);
       const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
-      const caretClassName = right ? 'fa fa-caret-right' : 'fa-caret-left';
       tooltip = (
         <div style={styles.tooltipContainer}>
           <i className="fa fa-caret-left" style={styles.leftCaret}></i>
@@ -179,7 +177,6 @@ class TimeseriesChart extends Component {
           <i className="fa fa-caret-right" style={styles.rightCaret}></i>
         </div>
       );
-
     }
 
     const container = {

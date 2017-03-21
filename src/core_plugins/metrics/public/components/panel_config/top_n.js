@@ -36,12 +36,7 @@ class TopNPanelConfig extends Component {
     const { selectedTab } = this.state;
     const defaults = { drilldown_url: '', filter: '' };
     const model = { ...defaults, ...this.props.model };
-    const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
     let view;
     if (selectedTab === 'data') {
       view = (

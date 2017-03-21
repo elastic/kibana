@@ -31,10 +31,6 @@ class MetricPanelConfig extends Component {
     const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
     let view;
     if (selectedTab === 'data') {
       view = (

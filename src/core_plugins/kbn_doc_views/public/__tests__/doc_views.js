@@ -77,7 +77,6 @@ describe('docViews', function () {
       initView(docViews.byName.Table);
     });
     it('should have a row for each field', function () {
-      const rows = $elem.find('tr');
       expect($elem.find('tr').length).to.be(_.keys(flattened).length);
     });
 

@@ -44,16 +44,6 @@ class MarkdownPanelConfig extends Component {
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
-
-    const legendPositionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' },
-      { label: 'Bottom', value: 'bottom' }
-    ];
 
     const alignOptions = [
       { label: 'Top', value: 'top' },

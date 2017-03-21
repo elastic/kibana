@@ -131,7 +131,6 @@ class PercentileAgg extends Component {
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleNumberChange = createNumberHandler(handleChange);
     const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
     return (

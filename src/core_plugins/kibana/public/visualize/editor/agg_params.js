@@ -12,10 +12,6 @@ uiModules
 .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier) {
   const aggTypes = Private(AggTypesIndexProvider);
 
-  const notify = new Notifier({
-    location: 'visAggGroup'
-  });
-
   return {
     restrict: 'E',
     template: aggParamsTemplate,

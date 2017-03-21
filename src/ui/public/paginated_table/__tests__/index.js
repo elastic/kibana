@@ -118,7 +118,6 @@ describe('paginated table', function () {
       const rowCount = 7;
       const perPageCount = 10;
       const data = makeData(3, rowCount);
-      const pageCount = Math.ceil(rowCount / perPageCount);
 
       renderTable(data.columns, data.rows, perPageCount, null, false);
       const tableRows = $el.find('tbody tr');
