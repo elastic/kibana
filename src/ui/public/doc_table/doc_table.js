@@ -8,8 +8,6 @@ import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
 import uiModules from 'ui/modules';
 
-
-
 uiModules.get('kibana')
 .directive('docTable', function (config, Notifier, getAppState) {
   return {
@@ -51,6 +49,8 @@ uiModules.get('kibana')
           };
         };
       }());
+
+      $scope.sampleSize = config.get('discover:sampleSize');
 
       $scope.addRows = function () {
         $scope.limit += 50;
