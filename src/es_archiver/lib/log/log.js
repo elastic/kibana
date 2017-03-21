@@ -1,9 +1,12 @@
 import { format } from 'util';
 import { PassThrough } from 'stream';
 
+import { createLogLevelFlags } from './log_levels';
 import { magenta, yellow, red, blue, brightBlack } from 'ansicolors';
 
-export function createLog(logLevel = 0) {
+export function createLog(logLevel) {
+  const logLevelFlags = createLogLevelFlags(logLevel);
+
   function write(stream, ...args) {
     format(...args).split('\n').forEach((line, i) => {
       stream.write(`${i === 0 ? '' : '    '}${line}\n`);
@@ -12,17 +15,17 @@ export function createLog(logLevel = 0) {
 
   class Log extends PassThrough {
     debug(...args) {
-      if (logLevel < 3) return;
+      if (!logLevelFlags.debug) return;
       write(this, ' %s ', brightBlack('debg'), format(...args));
     }
 
     info(...args) {
-      if (logLevel < 2) return;
+      if (!logLevelFlags.info) return;
       write(this, ' %s ', blue('info'), format(...args));
     }
 
     error(err) {
-      if (logLevel < 1) return;
+      if (!logLevelFlags.error) return;
 
       if (typeof err !== 'string' && !(err instanceof Error)) {
         err = new Error(`"${err}" thrown`);

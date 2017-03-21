@@ -1,13 +1,15 @@
 import expect from 'expect.js';
+import Chance from 'chance';
 import sinon from 'sinon';
 
 import {
   createConcatStream,
   createPromiseFromStreams
-} from '../../../utils';
+} from '../../../../utils';
 
 import { createLog } from '../';
 
+const chance = new Chance();
 const capture = (level, block) => {
   const log = createLog(level);
   block(log);
@@ -35,7 +37,7 @@ const somethingTest = (logLevel, method) => {
 
 describe('esArchiver: createLog(logLevel, output)', () => {
   it('is a readable stream', async () => {
-    const log = createLog(3);
+    const log = createLog('debug');
     log.info('Foo');
     log.info('Bar');
     log.info('Baz');
@@ -52,25 +54,35 @@ describe('esArchiver: createLog(logLevel, output)', () => {
   });
 
   describe('log level', () => {
-    context('logLevel=0', () => {
-      nothingTest(0, 'debug');
-      nothingTest(0, 'info');
-      nothingTest(0, 'error');
+    context('logLevel=silent', () => {
+      nothingTest('silent', 'debug');
+      nothingTest('silent', 'info');
+      nothingTest('silent', 'error');
     });
-    context('logLevel=1', () => {
-      nothingTest(1, 'debug');
-      nothingTest(1, 'info');
-      somethingTest(1, 'error');
+    context('logLevel=error', () => {
+      nothingTest('error', 'debug');
+      nothingTest('error', 'info');
+      somethingTest('error', 'error');
     });
-    context('logLevel=2', () => {
-      nothingTest(2, 'debug');
-      somethingTest(2, 'info');
-      somethingTest(2, 'error');
+    context('logLevel=info', () => {
+      nothingTest('info', 'debug');
+      somethingTest('info', 'info');
+      somethingTest('info', 'error');
     });
-    context('logLevel=3', () => {
-      somethingTest(3, 'debug');
-      somethingTest(3, 'info');
-      somethingTest(3, 'error');
+    context('logLevel=debug', () => {
+      somethingTest('debug', 'debug');
+      somethingTest('debug', 'info');
+      somethingTest('debug', 'error');
+    });
+    context('invalid logLevel', () => {
+      it('throw error', () => {
+        // avoid the impossiblity that a valid level is generated
+        // by specifying a long length
+        const level = chance.word({ length: 10 });
+
+        expect(() => createLog(level))
+          .to.throwError(level);
+      });
     });
   });
 });

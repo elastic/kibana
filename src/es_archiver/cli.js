@@ -50,7 +50,7 @@ if (missingCommand) {
 
 async function execute(operation, ...args) {
   try {
-    const log = createLog(cmd.verbose ? 3 : 2);
+    const log = createLog(cmd.verbose ? 'debug' : 'info');
     log.pipe(process.stdout);
 
     // log and count all validation errors
