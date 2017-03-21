@@ -145,7 +145,7 @@ function compileList(listRule, compilingContext) {
 }
 
 /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
-function compileCondition(description, compiledObject, compilingContext) {
+function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
     return new ConditionalProxy(function (context, editor) {
       let lines = editor.getSession().getLines(context.requestStartRow, editor.getCursorPosition().row).join("\n");
@@ -350,11 +350,11 @@ GlobalOnlyComponent.prototype = _.create(
 
 (function (cls) {
 
-  cls.getTerms = function (context, editor) {
+  cls.getTerms = function() {
     return null;
   };
 
-  cls.match = function (token, context, editor) {
+  cls.match = function(token, context) {
     var result = {
       next: []
     };
