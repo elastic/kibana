@@ -46,7 +46,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       }
 
       if (tilemapSettings.getError()) {
-        //Still allow the visualization to be build, but show a toast that there was a problem retrieving map settings
+        //Still allow the visualization to be built, but show a toast that there was a problem retrieving map settings
         //Even though the basemap will not display, the user will at least still see the overlay data
         notify.warning(tilemapSettings.getError().message);
       }
@@ -58,7 +58,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
 
-      const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
