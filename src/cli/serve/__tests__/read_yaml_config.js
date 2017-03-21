@@ -8,7 +8,7 @@ function fixture(name) {
 
 describe('cli/serve/read_yaml_config', function () {
   it('reads a single config file', function () {
-    const config = readYamlConfig(fixture('one.yml'));
+    readYamlConfig(fixture('one.yml'));
 
     expect(readYamlConfig(fixture('one.yml'))).to.eql({
       foo: 1,

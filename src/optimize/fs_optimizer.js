@@ -10,7 +10,7 @@ module.exports = class FsOptimizer extends BaseOptimizer {
   async run() {
     if (!this.compiler) await this.init();
 
-    const stats = await fromNode(cb => {
+    await fromNode(cb => {
       this.compiler.run((err, stats) => {
         if (err || !stats) return cb(err);
 

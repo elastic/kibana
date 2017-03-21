@@ -88,7 +88,6 @@ export default function LineChartFactory(Private) {
 
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
-          const margin = self.handler.visConfig.get('style.margin');
           const width = self.baseChart.chartConfig.width;
           const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
@@ -138,7 +137,6 @@ export default function LineChartFactory(Private) {
     addLine(svg, data) {
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.getValueAxis().getScale();
-      const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
       const interpolate = this.seriesConfig.interpolate;

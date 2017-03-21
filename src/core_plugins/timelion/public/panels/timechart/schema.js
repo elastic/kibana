@@ -14,7 +14,6 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        const timezone = Private(require('plugins/timelion/services/timezone'))();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?

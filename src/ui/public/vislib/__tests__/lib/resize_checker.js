@@ -185,7 +185,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('repeats the last value in the schedule', function () {
-      let timerId = checker.startSchedule(schedule);
+      checker.startSchedule(schedule);
 
       // start at 1, and go until there is one left
       for (let i = 1; i < schedule.length - 1; i++) {

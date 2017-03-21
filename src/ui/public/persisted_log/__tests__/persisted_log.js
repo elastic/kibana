@@ -49,7 +49,7 @@ describe('PersistedLog', function () {
 
   describe('internal functionality', function () {
     it('reads from storage', function () {
-      const log = new PersistedLog(historyName);
+      new PersistedLog(historyName);
 
       expect(storage.get.calledOnce).to.be(true);
       expect(storage.get.calledWith(historyName)).to.be(true);

@@ -22,7 +22,6 @@ module.exports = function (directory) {
   })
   .map(function (file) {
     const parts = file.split('/');
-    const name = parts[parts.length - 2];
     return getTuple(directory, parts[parts.length - 2]);
   }).value();
 

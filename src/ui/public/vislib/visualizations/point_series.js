@@ -188,7 +188,6 @@ export default function PointSeriesFactory(Private) {
     draw() {
       const self = this;
       const $elem = $(this.chartEl);
-      const margin = this.handler.visConfig.get('style.margin');
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
       const xScale = this.handler.categoryAxes[0].getScale();
