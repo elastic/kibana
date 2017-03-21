@@ -7,7 +7,7 @@ const resolve = relativePath => path.resolve(__dirname, `..`, ``, relativePath);
 const config = {
   rootDir,
   collectCoverage: true,
-  collectCoverageFrom: ['components/**/*.{js,jsx}'],
+  collectCoverageFrom: ['components/**/*.js', '!components/index.js', '!components/**/*/index.js'],
   coverageDirectory: '<rootDir>/jest/report',
   coverageReporters: ['html'],
   moduleFileExtensions: ['jsx', 'js', 'json'],

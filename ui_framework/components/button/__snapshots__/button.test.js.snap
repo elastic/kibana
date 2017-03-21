@@ -1,15 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`KuiBasicButton is rendered with basic class 1`] = `
-<KuiButton
-  className="kuiButton--basic"
-/>
+<button
+  class="kuiButton kuiButton--basic"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Baseline is rendered 1`] = `
+<button
+  className="kuiButton"
+  onClick={null}
+  type={null}
+  value={null}
+>
+  <span />
+</button>
 `;
 
 exports[`KuiButton Props children is rendered 1`] = `
 <button
   className="kuiButton"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -24,7 +37,7 @@ exports[`KuiButton Props children is rendered 1`] = `
 exports[`KuiButton Props className renders the classes 1`] = `
 <button
   className="kuiButton testClass1 testClass2"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -36,7 +49,7 @@ exports[`KuiButton Props href changes the element from a button to an anchor tag
 <a
   className="kuiButton"
   href="#"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -47,7 +60,7 @@ exports[`KuiButton Props href changes the element from a button to an anchor tag
 exports[`KuiButton Props icon is rendered with children 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -63,7 +76,7 @@ exports[`KuiButton Props icon is rendered with children 1`] = `
 exports[`KuiButton Props icon is rendered without children 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -77,7 +90,7 @@ exports[`KuiButton Props isDisabled sets the disabled attribute 1`] = `
 <button
   className="kuiButton"
   disabled={true}
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -88,7 +101,7 @@ exports[`KuiButton Props isDisabled sets the disabled attribute 1`] = `
 exports[`KuiButton Props isIconOnRight moves the icon to the right 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -104,7 +117,7 @@ exports[`KuiButton Props isIconOnRight moves the icon to the right 1`] = `
 exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -117,7 +130,7 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 exports[`KuiButton Props isLoading renders a spinner 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -130,7 +143,7 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
 exports[`KuiButton Props isSubmit changes the element from a button to an input[type=submit] 1`] = `
 <input
   className="kuiButton"
-  onClick={[Function]}
+  onClick={null}
   type="submit"
 />
 `;
@@ -138,7 +151,7 @@ exports[`KuiButton Props isSubmit changes the element from a button to an input[
 exports[`KuiButton Props isSubmit doesn't throw an error if it receives string children 1`] = `
 <input
   className="kuiButton"
-  onClick={[Function]}
+  onClick={null}
   type="submit"
   value="Hello"
 />
@@ -157,7 +170,7 @@ exports[`KuiButton Props isSubmit throws an error if it receives non-string chil
 exports[`KuiButton Props target is rendered 1`] = `
 <button
   className="kuiButton"
-  onClick={[Function]}
+  onClick={null}
   target="_blank"
   type={null}
   value={null}
@@ -170,7 +183,7 @@ exports[`KuiButton Props testSubject is rendered 1`] = `
 <button
   className="kuiButton"
   data-test-subj="test subject string"
-  onClick={[Function]}
+  onClick={null}
   type={null}
   value={null}
 >
@@ -179,19 +192,25 @@ exports[`KuiButton Props testSubject is rendered 1`] = `
 `;
 
 exports[`KuiDangerButton is rendered with danger class 1`] = `
-<KuiButton
-  className="kuiButton--danger"
-/>
+<button
+  class="kuiButton kuiButton--danger"
+>
+  <span />
+</button>
 `;
 
 exports[`KuiHollowButton is rendered with hollow class 1`] = `
-<KuiButton
-  className="kuiButton--hollow"
-/>
+<button
+  class="kuiButton kuiButton--hollow"
+>
+  <span />
+</button>
 `;
 
 exports[`KuiPrimaryButton is rendered with primary class 1`] = `
-<KuiButton
-  className="kuiButton--primary"
-/>
+<button
+  class="kuiButton kuiButton--primary"
+>
+  <span />
+</button>
 `;

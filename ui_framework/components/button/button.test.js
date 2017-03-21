@@ -1,5 +1,8 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import {
+  shallow,
+  render,
+} from 'enzyme';
 import sinon from 'sinon';
 
 import {
@@ -11,6 +14,17 @@ import {
 } from './button';
 
 describe('KuiButton', () => {
+  describe('Baseline', () => {
+    test('is rendered', () => {
+      const $button = shallow(
+        <KuiButton />
+      );
+
+      expect($button)
+        .toMatchSnapshot();
+    });
+  });
+
   describe('Props', () => {
     describe('testSubject', () => {
       test('is rendered', () => {
@@ -241,7 +255,7 @@ describe('KuiButton', () => {
 
 describe('KuiBasicButton', () => {
   test('is rendered with basic class', () => {
-    const $button = shallow(
+    const $button = render(
       <KuiBasicButton />
     );
 
@@ -252,7 +266,7 @@ describe('KuiBasicButton', () => {
 
 describe('KuiHollowButton', () => {
   test('is rendered with hollow class', () => {
-    const $button = shallow(
+    const $button = render(
       <KuiHollowButton />
     );
 
@@ -263,7 +277,7 @@ describe('KuiHollowButton', () => {
 
 describe('KuiDangerButton', () => {
   test('is rendered with danger class', () => {
-    const $button = shallow(
+    const $button = render(
       <KuiDangerButton />
     );
 
@@ -274,7 +288,7 @@ describe('KuiDangerButton', () => {
 
 describe('KuiPrimaryButton', () => {
   test('is rendered with primary class', () => {
-    const $button = shallow(
+    const $button = render(
       <KuiPrimaryButton />
     );
 
