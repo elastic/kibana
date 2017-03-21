@@ -3,13 +3,11 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
 import 'ui/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
-  let Data;
   let VisConfig;
   let persistedState;
   let chartTitle;
@@ -76,7 +74,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     ChartTitle = Private(VislibLibChartTitleProvider);
-    Data = Private(VislibLibDataProvider);
     VisConfig = Private(VislibLibVisConfigProvider);
     persistedState = new ($injector.get('PersistedState'))();
 

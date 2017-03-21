@@ -46,11 +46,6 @@ class GaugePanelConfig extends Component {
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    const handleNumberChange = createNumberHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
     const styleOptions = [
       { label: 'Circle', value: 'circle' },
       { label: 'Half Circle', value: 'half' }

@@ -95,7 +95,6 @@ export default {
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       derivative: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -110,7 +109,6 @@ export default {
 
   serial_diff: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       serial_diff: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -125,7 +123,6 @@ export default {
 
   cumulative_sum: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     return {
       cumulative_sum: {
         buckets_path: getBucketsPath(bucket.field, metrics)
@@ -135,7 +132,6 @@ export default {
 
   moving_average: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       moving_avg: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -155,7 +151,6 @@ export default {
     const body = {
       bucket_script: {
         buckets_path: bucket.variables.reduce((acc, row) => {
-          const metric = _.find(metrics, { id: row.field });
           acc[row.name] = getBucketsPath(row.field, metrics);
           return acc;
         }, {}),

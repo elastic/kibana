@@ -35,7 +35,6 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
-      const buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);

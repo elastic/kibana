@@ -113,7 +113,6 @@ describe('tilemaptest - Marker Tests', function () {
 
         // should always get the same color back
         _.times(5, function () {
-          const num = _.random(0, 100);
           const randColor = markerLayer._legendQuantizer(0);
           expect(randColor).to.equal(color);
         });
@@ -134,7 +133,7 @@ describe('tilemaptest - Marker Tests', function () {
 
       it('should use the legendQuantizer', function () {
         const spy = sinon.spy(markerLayer, '_legendQuantizer');
-        const style = markerLayer.applyShadingStyle(100);
+        markerLayer.applyShadingStyle(100);
         expect(spy.callCount).to.equal(1);
       });
     });
@@ -228,7 +227,6 @@ describe('tilemaptest - Marker Tests', function () {
     describe('radiusScale method', function () {
       const valueArray = [10, 20, 30, 40, 50, 60];
       const max = _.max(valueArray);
-      const prev = -1;
 
       it('should return 0 for value of 0', function () {
         expect(markerLayer._radiusScale(0)).to.equal(0);

@@ -4,10 +4,8 @@ import parseInterval from 'ui/utils/parse_interval';
 import TimeBucketsCalcAutoIntervalProvider from 'ui/time_buckets/calc_auto_interval';
 import TimeBucketsCalcEsIntervalProvider from 'ui/time_buckets/calc_es_interval';
 export default function IntervalHelperProvider(Private, timefilter, config) {
-
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
-  const tzOffset = moment().format('Z');
 
   function isValidMoment(m) {
     return m && ('isValid' in m) && m.isValid();

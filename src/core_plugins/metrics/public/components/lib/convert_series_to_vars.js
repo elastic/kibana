@@ -8,8 +8,6 @@ export default (series, model) => {
     series
       .filter(row => _.startsWith(row.id, seriesModel.id))
       .forEach(row => {
-        const metric = _.last(seriesModel.metrics);
-
         const varName = [
           _.snakeCase(row.label),
           _.snakeCase(seriesModel.var_name)
@@ -32,7 +30,6 @@ export default (series, model) => {
         };
         _.set(variables, varName, data);
         _.set(variables, `${_.snakeCase(row.label)}.label`, row.label);
-
       });
   });
   return variables;

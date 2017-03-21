@@ -1,21 +1,6 @@
 import fromRoot from '../utils/from_root';
 import { includes, flow, escapeRegExp } from 'lodash';
 
-const asRegExp = flow(
-  escapeRegExp,
-  function (path) {
-    const last = path.slice(-1);
-    if (last === '/' || last === '\\') {
-      // match a directory explicitly
-      return path + '.*';
-    } else {
-      // match a directory or files or just the absolute path
-      return path + '(?:\\.js$|$|\\\\|\\/)?';
-    }
-  },
-  RegExp
-);
-
 const arr = v => [].concat(v || []);
 
 module.exports = class UiBundlerEnv {

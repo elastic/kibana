@@ -30,7 +30,7 @@ describe('ui settings', function () {
 
     it('updates a single value in one operation', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.setMany(req, { one: 'value' });
+      uiSettings.setMany(req, { one: 'value' });
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value'
       });
@@ -38,7 +38,7 @@ describe('ui settings', function () {
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.setMany(req, { one: 'value', another: 'val' });
+      uiSettings.setMany(req, { one: 'value', another: 'val' });
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value', another: 'val'
       });
@@ -54,7 +54,7 @@ describe('ui settings', function () {
 
     it('updates single values by (key, value)', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.set(req, 'one', 'value');
+      uiSettings.set(req, 'one', 'value');
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: 'value'
       });
@@ -70,7 +70,7 @@ describe('ui settings', function () {
 
     it('removes single values by key', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.remove(req, 'one');
+      uiSettings.remove(req, 'one');
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null
       });
@@ -86,7 +86,7 @@ describe('ui settings', function () {
 
     it('removes a single value', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.removeMany(req, ['one']);
+      uiSettings.removeMany(req, ['one']);
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null
       });
@@ -94,7 +94,7 @@ describe('ui settings', function () {
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet, req } = instantiate();
-      const result = uiSettings.removeMany(req, ['one', 'two', 'three']);
+      uiSettings.removeMany(req, ['one', 'two', 'three']);
       expectElasticsearchUpdateQuery(server, req, configGet, {
         one: null, two: null, three: null
       });
@@ -138,7 +138,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = { user: 'customized' };
       const { server, uiSettings, configGet, req } = instantiate({ getResult });
-      const result = await uiSettings.getUserProvided(req);
+      await uiSettings.getUserProvided(req);
       expectElasticsearchGetQuery(server, req, configGet);
     });
 
@@ -241,7 +241,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet, req } = instantiate({ getResult });
-      const result = await uiSettings.getRaw(req);
+      await uiSettings.getRaw(req);
       expectElasticsearchGetQuery(server, req, configGet);
     });
 
@@ -284,7 +284,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet, req } = instantiate({ getResult });
-      const result = await uiSettings.getAll(req);
+      await uiSettings.getAll(req);
       expectElasticsearchGetQuery(server, req, configGet);
     });
 
@@ -340,7 +340,7 @@ describe('ui settings', function () {
     it('pulls user configuration from ES', async function () {
       const getResult = {};
       const { server, uiSettings, configGet, req } = instantiate({ getResult });
-      const result = await uiSettings.get(req);
+      await uiSettings.get(req);
       expectElasticsearchGetQuery(server, req, configGet);
     });
 
@@ -464,7 +464,7 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   const config = {
     get: configGet
   };
-  const setupSettings = init(kbnServer, server, config);
+  init(kbnServer, server, config);
   const uiSettings = server.uiSettings();
   return { server, uiSettings, configGet, req };
 }
