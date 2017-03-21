@@ -1,4 +1,3 @@
-// kibana-jscodeshift-no-babel
 const path = require('path');
 
 module.exports = {

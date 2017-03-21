@@ -1,5 +1,3 @@
-// kibana-jscodeshift-no-babel
-
 const {
   nodePresets,
   webpackPresets,
