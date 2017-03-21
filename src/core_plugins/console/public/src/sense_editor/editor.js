@@ -10,10 +10,6 @@ import chrome from 'ui/chrome';
 
 import smartResize from '../smart_resize';
 
-function isInt(x) {
-  return !isNaN(parseInt(x, 10));
-}
-
 function createInstance($el) {
   var aceEditor = ace.edit($el[0]);
 

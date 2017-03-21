@@ -3,9 +3,7 @@ require('ace');
 const module = require('ui/modules').get('app/sense');
 
 module.run(function () {
-  module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    // mock the resize checker
-  };
+  module.setupResizeCheckerForRootEditors = () => {};
 });
 
 

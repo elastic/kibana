@@ -271,18 +271,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
           }
         });
       }
-
-      function scrollIntoView($element, snapTop) {
-        const el = $element[0];
-
-        if (!el) return;
-
-        if ('scrollIntoViewIfNeeded' in el) {
-          el.scrollIntoViewIfNeeded(snapTop);
-        } else if ('scrollIntoView' in el) {
-          el.scrollIntoView(snapTop);
-        }
-      }
     }
   };
 });

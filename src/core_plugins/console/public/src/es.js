@@ -1,4 +1,3 @@
-let _ = require('lodash');
 let $ = require('jquery');
 
 let esVersion = [];
@@ -14,9 +13,6 @@ module.exports.send = function (method, path, data) {
   if (data && method == "GET") {
     method = "POST";
   }
-
-  // delayed loading for circular references
-  var settings = require("./settings");
 
   let contentType;
   if (data) {

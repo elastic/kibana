@@ -1,7 +1,6 @@
 let $ = require('jquery');
 let _ = require('lodash');
 let mappings = require('./mappings');
-let es = require('./es');
 let Api = require('./kb/api');
 let autocomplete_engine = require('./autocomplete/engine');
 
@@ -166,14 +165,6 @@ var parametrizedComponentFactories = {
     return new autocomplete_engine.ListComponent(name, [], parent, false)
   }
 };
-
-
-function expandAliases(indices) {
-  if (indices && indices.length > 0) {
-    indices = mappings.expandAliases(indices);
-  }
-  return indices;
-}
 
 function getUnmatchedEndpointComponents() {
   return ACTIVE_API.getUnmatchedEndpointComponents();
