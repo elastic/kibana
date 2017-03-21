@@ -13,7 +13,10 @@
 
 import expect from 'expect.js';
 
-import { bdd, esClient } from '../../../support';
+import {
+  bdd,
+  esClient
+} from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

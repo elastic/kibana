@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import createRawData from 'ui/agg_response/hierarchical/_create_raw_data';
+import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_list';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
@@ -33,6 +34,7 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
+      arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);

@@ -130,7 +130,10 @@ dataArray.forEach(function (data, i) {
       let listeners;
 
       beforeEach(function () {
-        listeners = [];
+        listeners = [
+          function () {},
+          function () {}
+        ];
 
         // Add event and listeners to chart
         listeners.forEach(function (listener) {
