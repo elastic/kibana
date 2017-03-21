@@ -458,6 +458,33 @@ class KibanaMap extends EventEmitter {
     }
   }
 
+  persistUiStateForVisualization(visualization) {
+    this.on('moveend', () => {
+      const uiState = visualization.getUiState();
+      const centerFromUIState = uiState.get('mapCenter');
+      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+      if (isNaN(zoomFromUiState) || this.getZoomLevel() !== zoomFromUiState) {
+        uiState.set('mapZoom', this.getZoomLevel());
+      }
+      const centerFromMap = this.getCenter();
+      if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
+        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
+      }
+    });
+  }
+
+  useUiStateFromVisualization(visualization) {
+    const uiState = visualization.getUiState();
+    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+    const centerFromUIState = uiState.get('mapCenter');
+    if (!isNaN(zoomFromUiState)) {
+      this.setZoomLevel(zoomFromUiState);
+    }
+    if (centerFromUIState) {
+      this.setCenter(centerFromUIState[0], centerFromUIState[1]);
+    }
+  }
+
 
 }
 
