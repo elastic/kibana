@@ -48,7 +48,7 @@ if (missingCommand) {
   execute();
 }
 
-async function execute(operation, options) {
+async function execute(operation, ...args) {
   try {
     const log = createLog(cmd.verbose ? 3 : 2);
     log.pipe(process.stdout);
@@ -87,7 +87,7 @@ async function execute(operation, options) {
         client,
         dataDir: resolve(cmd.dir)
       });
-      await esArchiver[operation](options);
+      await esArchiver[operation](...args);
     } finally {
       await client.close();
     }

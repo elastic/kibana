@@ -16,12 +16,11 @@ export class EsArchiver {
    *  Extract data and mappings from an elasticsearch index and store
    *  it in the dataDir so it can be used later to recreate the index.
    *
-   *  @param {Object} options
-   *  @property {String} options.name - the name of this archive, used to determine filename
-   *  @property {String|Array<String>} options.indices - the indices to archive
+   *  @param {String} name - the name of this archive, used to determine filename
+   *  @param {String|Array<String>} indices - the indices to archive
    *  @return Promise<Stats>
    */
-  async save({ name, indices }) {
+  async save(name, indices) {
     return await saveAction({
       name,
       indices,
@@ -40,14 +39,12 @@ export class EsArchiver {
    *                                           be ignored or overwritten
    *  @return Promise<Stats>
    */
-  async load(options) {
-    if (typeof options === 'string') {
-      options = { name: options };
-    }
+  async load(name, options = {}) {
+    const { skipExisting } = options;
 
     return await loadAction({
-      name: options.name,
-      skipExisting: !!options.skipExisting,
+      name,
+      skipExisting: !!skipExisting,
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,

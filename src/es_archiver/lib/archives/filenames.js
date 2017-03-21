@@ -30,7 +30,7 @@ export function isMappingFile(path) {
  *  need to be imported so that data files will have their
  *  indexes before the docs are indexed.
  *
- *  @param {Array<String>} paths
+ *  @param {Array<String>} filenames
  *  @return {Array<String>}
  */
 export function prioritizeMappings(filenames) {
