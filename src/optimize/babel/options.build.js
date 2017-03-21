@@ -1,4 +1,4 @@
-// kibana-jscodeshift-ignore-file
+// kibana-jscodeshift-no-babel
 
 const {
   nodePresets,

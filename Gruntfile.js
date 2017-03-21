@@ -1,3 +1,4 @@
+// kibana-jscodeshift-no-babel
 require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {
