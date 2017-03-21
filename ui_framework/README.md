@@ -1,5 +1,9 @@
 # Kibana UI Framework
 
+> React UI components for quickly building user interfaces for Kibana.
+
+Not using React? No problem! You can still use the CSS behind each component.
+
 ## Development
 
 * Start development server with `npm run uiFramework:start`.

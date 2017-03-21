@@ -234,6 +234,7 @@
     "gulp-sourcemaps": "1.7.3",
     "highlight.js": "9.0.0",
     "history": "2.1.1",
+    "html": "1.0.0",
     "html-loader": "0.4.3",
     "husky": "0.8.1",
     "image-diff": "1.6.0",

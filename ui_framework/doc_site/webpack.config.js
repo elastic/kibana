@@ -18,8 +18,17 @@ module.exports = {
     ]
   },
 
+  externals: {
+    'react/lib/ExecutionEnvironment': true,
+    'react/lib/ReactContext': true,
+    'react/addons': true,
+  },
+
   module: {
     loaders: [{
+      test: /\.json$/,
+      loader: 'json-loader',
+    }, {
       test: /\.jsx?$/,
       loader: 'babel',
       exclude: /node_modules/,

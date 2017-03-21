@@ -9,11 +9,11 @@ import {
 } from '../../../../components';
 
 export default class LoadingButton extends Component {
-  constructor() {
+  constructor(props) {
     super();
 
     this.state = {
-      isLoading: false,
+      isLoading: props.isLoading || false,
     };
 
     this.onClick = this.onClick.bind(this);
