@@ -60,12 +60,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
+
+      this._kibanaMap.persistUiStateForVisualization(this.vis);
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
-      });
-      this._kibanaMap.on('moveend', () => {
-        this._persistUIStateFromMap();
       });
       this._kibanaMap.on('zoomend', () => {
 
@@ -120,7 +119,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         this._chartData = this._buildChartData(esResponse);
         this._geohashGeoJson = this._chartData.geoJson;
         this._recreateGeohashLayer();
-        this._useUIState();
+        this._kibanaMap.useUiStateFromVisualization(this.vis);
         this._kibanaMap.resize();
         this._dataDirty = false;
         this._doRenderComplete();
@@ -171,45 +170,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         this._kibanaMap.setShowTooltip(mapParams.addTooltip);
         this._kibanaMap.setLegendPosition(mapParams.legendPosition);
 
-        this._useUIState();
+        this._kibanaMap.useUiStateFromVisualization(this.vis);
         this._kibanaMap.resize();
         this._paramsDirty = false;
         this._doRenderComplete();
       });
-    }
-
-
-    _useUIState() {
-      const uiState = this.vis.getUiState();
-      const newParams = this._getMapsParams();
-
-      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-      const centerFromUIState = uiState.get('mapCenter');
-      if (!isNaN(zoomFromUiState)) {
-        this._kibanaMap.setZoomLevel(zoomFromUiState);
-      } else {
-        this._kibanaMap.setZoomLevel(newParams.mapZoom);
-      }
-      if (centerFromUIState) {
-        this._kibanaMap.setCenter(centerFromUIState[0], centerFromUIState[1]);
-      } else {
-        this._kibanaMap.setCenter(newParams.mapCenter[0], newParams.mapCenter[1]);
-      }
-    }
-
-    _persistUIStateFromMap() {
-
-      const uiState = this.vis.getUiState();
-      const zoomFromUIState = parseInt(uiState.get('mapZoom'));
-      const centerFromUIState = uiState.get('mapCenter');
-      if (isNaN(zoomFromUIState) || this._kibanaMap.getZoomLevel() !== zoomFromUIState) {
-        uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
-      }
-
-      const centerFromMap = this._kibanaMap.getCenter();
-      if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
-        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
-      }
     }
 
     _getMapsParams() {

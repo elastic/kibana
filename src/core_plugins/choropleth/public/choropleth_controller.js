@@ -40,7 +40,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
-    kibanaMap.on('moveend', () =>persistUIStateFromMap());
+    kibanaMap.persistUiStateForVisualization($scope.vis);
   }
 
   const kibanaMapReady = makeKibanaMap();
@@ -74,7 +74,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
         choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
       }
 
-      useUIState();
+      kibanaMap.useUiStateFromVisualization($scope.vis);
       kibanaMap.resize();
       $element.trigger('renderComplete');
     });
@@ -92,8 +92,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
       kibanaMap.setShowTooltip(visParams.addTooltip);
       kibanaMap.setLegendPosition(visParams.legendPosition);
-
-      useUIState();
+      kibanaMap.useUiStateFromVisualization($scope.vis);
       kibanaMap.resize();
       $element.trigger('renderComplete');
     });
@@ -122,39 +121,10 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     kibanaMap.addLayer(choroplethLayer);
   }
 
-
-  //todo: refactor out commonalities with maps_renderbot
-  async function persistUIStateFromMap() {
-    await kibanaMapReady;
-    const uiState = $scope.vis.getUiState();
-    const zoomFromUIState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
-    if (isNaN(zoomFromUIState) || kibanaMap.getZoomLevel() !== zoomFromUIState) {
-      uiState.set('mapZoom', kibanaMap.getZoomLevel());
-    }
-    const centerFromMap = kibanaMap.getCenter();
-    if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
-      uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
-    }
-  }
-
-  async function useUIState() {
-    await kibanaMapReady;
-    const uiState = $scope.vis.getUiState();
-
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
-    if (!isNaN(zoomFromUiState)) {
-      kibanaMap.setZoomLevel(zoomFromUiState);
-    }
-    if (centerFromUIState) {
-      kibanaMap.setCenter(centerFromUIState[0], centerFromUIState[1]);
-    }
-  }
-
-
-
 });
+
+
+
 
 
 function getValue(metricsAgg, bucket) {
