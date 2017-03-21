@@ -119,8 +119,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
-      $scope.showEditHelpText = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
-      $scope.showViewHelpText = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
+      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
+      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
@@ -179,8 +179,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       const onChangeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
-        const leavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
-        const willLoseChanges = leavingEditMode && dashboardState.getIsDirty(timefilter);
+        const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
 
         if (!willLoseChanges) {
           updateViewMode(newMode);
@@ -189,8 +189,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         function revertChangesAndExitEditMode() {
           dashboardState.resetState();
-          const refreshUrl = dashboardState.getReloadDashboardUrl();
-          kbnUrl.change(refreshUrl.url, refreshUrl.options);
+          const refreshUrl = dash.id ?
+            DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+          const refreshUrlOptions = dash.id ? { id: dash.id } : {};
+          kbnUrl.change(refreshUrl, refreshUrlOptions);
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
@@ -203,7 +205,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
 
         confirmModal(
-          DashboardStrings.getUnsavedChangesWarningMessage(dashboardState.getChangedFiltersForDisplay(timefilter)),
+          getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,

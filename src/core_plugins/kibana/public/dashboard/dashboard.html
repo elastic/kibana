@@ -57,12 +57,12 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div ng-show="showEditHelpText()" class="text-center start-screen">
+  <div ng-show="getShouldShowEditHelp()" class="text-center start-screen">
     <h2>This dashboard is empty. Let's fill it up!</h2>
     <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit <a href="#/visualize" title="Visualize">"Visualize"</a> to create your first visualization.</p>
   </div>
 
-  <div ng-show="showViewHelpText()" class="text-center start-screen">
+  <div ng-show="getShouldShowViewHelp()" class="text-center start-screen">
     <h2>This dashboard is empty. Let's fill it up!</h2>
     <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
   </div>

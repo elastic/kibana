@@ -6,7 +6,8 @@
     <div class="btn-group">
       <a aria-label="Expand"
          data-test-subj="dashboardPanelExpandIcon"
-         ng-click="toggleExpand()">
+         ng-click="toggleExpand()"
+      >
         <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
       <a aria-label="Edit"
@@ -19,13 +20,15 @@
       <a aria-label="Move"
          data-test-subj="dashboardPanelMoveIcon"
          ng-show="!isViewOnlyMode() && !isExpanded"
-         class="panel-move">
+         class="panel-move"
+      >
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
       <a aria-label="Remove"
          data-test-subj="dashboardPanelRemoveIcon"
          ng-show="!isViewOnlyMode() && !isExpanded"
-         ng-click="remove()">
+         ng-click="remove()"
+      >
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
     </div>

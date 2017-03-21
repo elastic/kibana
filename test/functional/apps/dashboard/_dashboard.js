@@ -82,13 +82,17 @@ bdd.describe('dashboard tab', function describeIndexTests() {
   });
 });
 
-bdd.it('filters when a pie chart slice is clicked', async function () {
-  let descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
-  expect(descriptions.length).to.equal(0);
+bdd.describe('filters', async function () {
+  bdd.it('are not selected by default', async function () {
+    const descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
+    expect(descriptions.length).to.equal(0);
+  });
 
-  await PageObjects.dashboard.filterOnPieSlice();
-  descriptions = await PageObjects.dashboard.getFilterDescriptions();
-  expect(descriptions.length).to.equal(1);
+  bdd.it('are added when a pie chart slice is clicked', async function () {
+    await PageObjects.dashboard.filterOnPieSlice();
+    const descriptions = await PageObjects.dashboard.getFilterDescriptions();
+    expect(descriptions.length).to.equal(1);
+  });
 });
 
 bdd.it('retains dark theme in state', async function () {

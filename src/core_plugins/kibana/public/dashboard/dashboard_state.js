@@ -57,19 +57,19 @@ function areTimesEqual(timeA, timeB) {
 export class DashboardState {
   /**
    *
-   * @param dashboard {SavedDashboard}
+   * @param savedDashboard {SavedDashboard}
    * @param AppState {AppState}
    */
-  constructor(dashboard, AppState) {
-    this.dashboard = dashboard;
+  constructor(savedDashboard, AppState) {
+    this.savedDashboard = savedDashboard;
 
-    this.stateDefaults = getStateDefaults(this.dashboard);
+    this.stateDefaults = getStateDefaults(this.savedDashboard);
 
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
     this.isDirty = false;
 
-    // We can't compare the filters stored on this.appState to this.dashboard because in order to apply
+    // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
     // the filters to the visualizations, we need to save it on the dashboard. We keep track of the original
     // filter state in order to let the user know if their filters changed and provide this specific information
     //in the 'lose changes' warning message.
@@ -88,8 +88,8 @@ export class DashboardState {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
-    this.stateDefaults = getStateDefaults(this.dashboard);
-    // The original query won't be restored by the above because the query on this.dashboard is applied
+    this.stateDefaults = getStateDefaults(this.savedDashboard);
+    // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
     // Need to make a copy to ensure they are not overwritten.
@@ -102,13 +102,13 @@ export class DashboardState {
   }
 
   /**
-   * Returns an object which contains the current filter state of this.dashboard.
+   * Returns an object which contains the current filter state of this.savedDashboard.
    * @returns {{timeTo: String, timeFrom: String, filterBars: Array, query: Object}}
    */
   getFilterState() {
     return {
-      timeTo: this.dashboard.timeTo,
-      timeFrom: this.dashboard.timeFrom,
+      timeTo: this.savedDashboard.timeTo,
+      timeFrom: this.savedDashboard.timeFrom,
       filterBars: this.getDashboardFilterBars(),
       query: this.getDashboardQuery()
     };
@@ -153,15 +153,15 @@ export class DashboardState {
    * @returns {boolean}
    */
   getIsTimeSavedWithDashboard() {
-    return this.dashboard.timeRestore;
+    return this.savedDashboard.timeRestore;
   }
 
   getDashboardFilterBars() {
-    return FilterUtils.getFilterBarsForDashboard(this.dashboard);
+    return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
   }
 
   getDashboardQuery() {
-    return FilterUtils.getQueryFilterForDashboard(this.dashboard);
+    return FilterUtils.getQueryFilterForDashboard(this.savedDashboard);
   }
 
   getLastSavedFilterBars() {
@@ -260,19 +260,10 @@ export class DashboardState {
   }
 
   /**
-   * @return {boolean} True if filters (query, filter bar filters, and time picker if time is stored
-   * with the dashboard) have changed since the last saved state (or if the dashboard hasn't been saved,
-   * the default state).
+   * @param timeFilter
+   * @returns {Array.<string>} An array of user friendly strings indicating the filter types that have changed.
    */
-  getFiltersChanged(timeFilter) {
-    return (
-      this.getQueryChanged() ||
-      this.getFilterBarChanged() ||
-      (this.dashboard.timeRestore && this.getTimeChanged(timeFilter))
-    );
-  }
-
-  getChangedFiltersForDisplay(timeFilter) {
+  getChangedFilterTypes(timeFilter) {
     const changedFilters = [];
     if (this.getFilterBarChanged()) {
       changedFilters.push('filter');
@@ -280,10 +271,19 @@ export class DashboardState {
     if (this.getQueryChanged()) {
       changedFilters.push('query');
     }
-    if (this.dashboard.timeRestore && this.getTimeChanged(timeFilter)) {
+    if (this.savedDashboard.timeRestore && this.getTimeChanged(timeFilter)) {
       changedFilters.push('time range');
     }
     return changedFilters;
+  }
+
+  /**
+   * @return {boolean} True if filters (query, filter bar filters, and time picker if time is stored
+   * with the dashboard) have changed since the last saved state (or if the dashboard hasn't been saved,
+   * the default state).
+   */
+  getFiltersChanged(timeFilter) {
+    return this.getChangedFilterTypes(timeFilter).length > 0;
   }
 
   /**
@@ -293,23 +293,23 @@ export class DashboardState {
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
     if (!this.getIsTimeSavedWithDashboard()) {
-      throw 'The time is not saved with this dashboard so should not be synced.';
+      throw new Error('The time is not saved with this dashboard so should not be synced.');
     }
 
-    timeFilter.time.to = this.dashboard.timeTo;
-    timeFilter.time.from = this.dashboard.timeFrom;
-    const isMoment = moment(this.dashboard.timeTo).isValid();
+    timeFilter.time.to = this.savedDashboard.timeTo;
+    timeFilter.time.from = this.savedDashboard.timeFrom;
+    const isMoment = moment(this.savedDashboard.timeTo).isValid();
     if (isMoment) {
       timeFilter.time.mode = 'absolute';
     } else {
       const quickTime = _.find(
         quickTimeRanges,
-        (timeRange) => timeRange.from === this.dashboard.timeFrom && timeRange.to === this.dashboard.timeTo);
+        (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
 
       timeFilter.time.mode = quickTime ? 'quick' : 'relative';
     }
-    if (this.dashboard.refreshInterval) {
-      timeFilter.refreshInterval = this.dashboard.refreshInterval;
+    if (this.savedDashboard.refreshInterval) {
+      timeFilter.refreshInterval = this.savedDashboard.refreshInterval;
     }
   }
 
@@ -333,19 +333,19 @@ export class DashboardState {
     this.saveState();
 
     const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
-    this.dashboard.title = this.appState.title;
-    this.dashboard.timeRestore = this.appState.timeRestore;
-    this.dashboard.panelsJSON = toJson(this.appState.panels);
-    this.dashboard.uiStateJSON = toJson(this.uiState.getChanges());
-    this.dashboard.timeFrom = this.dashboard.timeRestore ? convertTimeToString(timeFilter.time.from) : undefined;
-    this.dashboard.timeTo = this.dashboard.timeRestore ? convertTimeToString(timeFilter.time.to) : undefined;
-    this.dashboard.refreshInterval = this.dashboard.timeRestore ? timeRestoreObj : undefined;
-    this.dashboard.optionsJSON = toJson(this.appState.options);
+    this.savedDashboard.title = this.appState.title;
+    this.savedDashboard.timeRestore = this.appState.timeRestore;
+    this.savedDashboard.panelsJSON = toJson(this.appState.panels);
+    this.savedDashboard.uiStateJSON = toJson(this.uiState.getChanges());
+    this.savedDashboard.timeFrom = this.savedDashboard.timeRestore ? convertTimeToString(timeFilter.time.from) : undefined;
+    this.savedDashboard.timeTo = this.savedDashboard.timeRestore ? convertTimeToString(timeFilter.time.to) : undefined;
+    this.savedDashboard.refreshInterval = this.savedDashboard.timeRestore ? timeRestoreObj : undefined;
+    this.savedDashboard.optionsJSON = toJson(this.appState.options);
 
-    return this.dashboard.save()
+    return this.savedDashboard.save()
       .then((id) => {
         this.lastSavedDashboardFilters = this.getFilterState();
-        this.stateDefaults = getStateDefaults(this.dashboard);
+        this.stateDefaults = getStateDefaults(this.savedDashboard);
         this.stateDefaults.viewMode = DashboardViewMode.VIEW;
         // Make sure new app state defaults are using the new defaults.
         this.appState.setDefaults(this.stateDefaults);
@@ -361,11 +361,11 @@ export class DashboardState {
   applyFilters(query, filters) {
     this.appState.query = query;
     if (this.appState.query) {
-      this.dashboard.searchSource.set('filter', _.union(filters, [{
+      this.savedDashboard.searchSource.set('filter', _.union(filters, [{
         query: this.appState.query
       }]));
     } else {
-      this.dashboard.searchSource.set('filter', filters);
+      this.savedDashboard.searchSource.set('filter', filters);
     }
 
     this.saveState();
@@ -401,17 +401,6 @@ export class DashboardState {
     if (this.stateMonitor) {
       this.stateMonitor.destroy();
     }
-    this.dashboard.destroy();
-  }
-
-  /**
-   * Returns a url and url options that can be used to reload the page.
-   * @returns {{url: string, options: Object}}
-   */
-  getReloadDashboardUrl() {
-    const url = this.dashboard.id ?
-      DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
-    const options = this.dashboard.id ? { id: this.dashboard.id } : {};
-    return { url, options };
+    this.savedDashboard.destroy();
   }
 }
