@@ -6,7 +6,7 @@ import {
 
 export default () => (
   <div>
-    <KuiBasicButton>
+    <KuiBasicButton onClick={() => window.alert('Button clicked')}>
       Basic button
     </KuiBasicButton>
 

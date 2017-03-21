@@ -2,8 +2,9 @@
 
 ## Development
 
-* Start development server `npm run uiFramework:start`.
+* Start development server with `npm run uiFramework:start`.
 * View docs on `http://localhost:8020/`.
+* Run tests with `npm run uiFramework:test` (coverage report generated in `/jest/report`).
 
 ## What is this?
 

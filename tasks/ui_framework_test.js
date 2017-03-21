@@ -1,0 +1,29 @@
+const jest = require(`jest`);
+const path = require(`path`);
+
+const rootDir = `ui_framework`;
+const resolve = relativePath => path.resolve(__dirname, `..`, ``, relativePath);
+
+const config = {
+  rootDir,
+  collectCoverage: true,
+  collectCoverageFrom: ['components/**/*.{js,jsx}'],
+  coverageDirectory: '<rootDir>/jest/report',
+  coverageReporters: ['html'],
+  moduleFileExtensions: ['jsx', 'js', 'json'],
+  moduleNameMapper: {
+    '^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)$': resolve('config/jest/FileStub.js'),
+    '^.+\\.css$': resolve('config/jest/CSSStub.js'),
+    '^.+\\.scss$': resolve('config/jest/CSSStub.js')
+  },
+  testPathIgnorePatterns: ['<rootDir>/(dist|doc_site|jest)/'],
+  testEnvironment: 'node',
+  testRegex: '.*\.test\.(js|jsx)$',
+  snapshotSerializers: ['<rootDir>/../node_modules/enzyme-to-json/serializer']
+};
+
+const argv = process.argv.slice(2);
+
+argv.push(`--config`, JSON.stringify(config));
+
+jest.run(argv);

@@ -63,7 +63,8 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "grunt uiFramework:start"
+    "uiFramework:start": "grunt uiFramework:start",
+    "uiFramework:test": "node tasks/ui_framework_test --env=jsdom"
   },
   "repository": {
     "type": "git",
@@ -95,6 +96,7 @@
     "autoprefixer-loader": "2.0.0",
     "babel-cli": "6.18.0",
     "babel-core": "6.21.0",
+    "babel-jest": "18.0.0",
     "babel-loader": "6.2.10",
     "babel-plugin-add-module-exports": "0.2.1",
     "babel-polyfill": "6.20.0",
@@ -199,6 +201,7 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.4.0",
+    "@spalger/babel-presets": "0.3.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "6.1.2",
@@ -209,6 +212,7 @@
     "chromedriver": "2.24.1",
     "classnames": "2.2.5",
     "enzyme": "2.7.0",
+    "enzyme-to-json": "1.4.5",
     "eslint": "3.11.1",
     "eslint-plugin-babel": "4.0.0",
     "eslint-plugin-mocha": "4.7.0",
@@ -235,6 +239,8 @@
     "image-diff": "1.6.0",
     "intern": "3.2.3",
     "istanbul-instrumenter-loader": "0.1.3",
+    "jest": "19.0.0",
+    "jest-cli": "19.0.0",
     "jsdom": "9.9.1",
     "karma": "1.2.0",
     "karma-chrome-launcher": "0.2.0",

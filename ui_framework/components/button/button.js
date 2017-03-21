@@ -10,7 +10,7 @@ import { KuiLoadingButtonIcon } from './button_icon';
 const KuiButton = props => {
   if (props.isSubmit) {
     // input is a void element tag and can't have children.
-    if (typeof props.children !== 'string' || props.icon) {
+    if ((props.children && typeof props.children !== 'string') || props.icon) {
       throw new Error(
         `KuiButton with isSubmit prop set to true can only accept string children, and can't
         display icons. This is because input is a void element and can't contain children.`
@@ -86,7 +86,6 @@ const KuiButton = props => {
 
 KuiButton.propTypes = {
   testSubject: PropTypes.string,
-  data: PropTypes.any,
   icon: PropTypes.node,
   isIconOnRight: PropTypes.bool,
   children: PropTypes.node,
@@ -94,6 +93,7 @@ KuiButton.propTypes = {
   href: PropTypes.string,
   target: PropTypes.string,
   onClick: PropTypes.func,
+  data: PropTypes.any,
   isDisabled: PropTypes.bool,
   isLoading: PropTypes.bool,
   className: PropTypes.oneOfType([
