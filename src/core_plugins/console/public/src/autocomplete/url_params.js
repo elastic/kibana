@@ -40,10 +40,10 @@ function UrlParams(description, defaults) {
     var component;
     component = new ParamComponent(param, this.rootComponent, p_description);
     if (_.isArray(p_description)) {
-      values = new engine.ListComponent(param, p_description, component);
+      new engine.ListComponent(param, p_description, component);
     }
     else if (p_description === "__flag__") {
-      values = new engine.ListComponent(param, ["true", "false"], component);
+      new engine.ListComponent(param, ["true", "false"], component);
     }
   }, this);
 
