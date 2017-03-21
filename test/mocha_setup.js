@@ -1,3 +1,4 @@
+// kibana-jscodeshift-no-babel
 const sinon = require('sinon');
 const autoRelease = require('auto-release-sinon');
 
