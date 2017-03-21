@@ -69,12 +69,13 @@ describe('Registry', function () {
     it('executes before the modules are returned', function () {
       let i = 0;
 
-      registry({
+      const reg = registry({
         constructor: function () {
           i = i + 1;
         }
       });
 
+      Private(reg);
       expect(i).to.be(1);
     });
 

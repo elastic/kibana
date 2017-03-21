@@ -1,4 +1,4 @@
-import shield from './shield';
+const shield = require('./shield');
 
 const kibanaURL = '/app/kibana';
 

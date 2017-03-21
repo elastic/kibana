@@ -1,18 +1,24 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import '../dashboard_state';
+import { DashboardState } from '../dashboard_state';
 
 describe('DashboardState', function () {
+  let AppState;
   let savedDashboard;
   let SavedDashboard;
   let timefilter;
+  let quickTimeRanges;
 
-  function initDashboardState() {}
+  function initDashboardState() {
+    new DashboardState(savedDashboard, timefilter, true, quickTimeRanges, AppState);
+  }
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
     timefilter = $injector.get('timefilter');
+    quickTimeRanges = $injector.get('quickRanges');
+    AppState = $injector.get('AppState');
     SavedDashboard = $injector.get('SavedDashboard');
     savedDashboard = new SavedDashboard();
   }));
