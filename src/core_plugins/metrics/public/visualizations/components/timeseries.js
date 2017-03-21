@@ -68,7 +68,8 @@ class Timeseries extends Component {
               if (row.data[i] && pos.x < row.data[i][0]) break;
             }
             if (!row.data[closest]) return values[row.id] = null;
-            values[row.id] =  || null;
+            const [ , value ] = row.data[closest];
+            values[row.id] = value != null && value || null;
           }
         }
       });

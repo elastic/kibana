@@ -11,6 +11,7 @@ describe('Segmented Request Size Picking', function () {
   let SegmentedReq;
   let MockSource;
   let HitSortFn;
+  let Promise;
 
   NoDigestPromises.activateForSuite();
 

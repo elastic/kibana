@@ -10,6 +10,7 @@ let Private;
 let config;
 let $elemScope;
 let $elem;
+let Promise;
 
 let cycleIndex = 0;
 const markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
