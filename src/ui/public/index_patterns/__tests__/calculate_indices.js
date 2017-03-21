@@ -13,6 +13,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   let config;
   let constraints;
   let indices;
+  let Promise;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
