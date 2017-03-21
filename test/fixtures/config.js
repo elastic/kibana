@@ -1,4 +1,4 @@
-import path from 'path';
+const path = require('path');
 const rootDir = path.join(__dirname, 'scenarios');
 
 module.exports = {
