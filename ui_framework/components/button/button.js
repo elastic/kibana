@@ -19,10 +19,6 @@ const KuiButton = props => {
   }
 
   function onClick() {
-    // Don't even trigger the onClick handler if we're disabled.
-    if (props.isDisabled) {
-      return;
-    }
     props.onClick(props.data);
   }
 
@@ -75,8 +71,8 @@ const KuiButton = props => {
     target: props.target,
     type: props.isSubmit ? 'submit' : null,
     disabled: props.isDisabled,
-    // onClick is optional, so don't even call it if it's not passed in.
-    onClick: props.onClick ? onClick : null,
+    // onClick is optional, so don't even call it if it's not passed in, or if we're disabled.
+    onClick: props.onClick && !props.isDisabled ? onClick : () => {},
     value: props.isSubmit ? props.children : null,
   }, children);
 };

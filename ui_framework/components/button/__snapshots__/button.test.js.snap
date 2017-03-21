@@ -11,7 +11,7 @@ exports[`KuiBasicButton is rendered with basic class 1`] = `
 exports[`KuiButton Baseline is rendered 1`] = `
 <button
   className="kuiButton"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -22,7 +22,7 @@ exports[`KuiButton Baseline is rendered 1`] = `
 exports[`KuiButton Props children is rendered 1`] = `
 <button
   className="kuiButton"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -37,7 +37,7 @@ exports[`KuiButton Props children is rendered 1`] = `
 exports[`KuiButton Props className renders the classes 1`] = `
 <button
   className="kuiButton testClass1 testClass2"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -49,7 +49,7 @@ exports[`KuiButton Props href changes the element from a button to an anchor tag
 <a
   className="kuiButton"
   href="#"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -60,7 +60,7 @@ exports[`KuiButton Props href changes the element from a button to an anchor tag
 exports[`KuiButton Props icon is rendered with children 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -76,7 +76,7 @@ exports[`KuiButton Props icon is rendered with children 1`] = `
 exports[`KuiButton Props icon is rendered without children 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -90,7 +90,7 @@ exports[`KuiButton Props isDisabled sets the disabled attribute 1`] = `
 <button
   className="kuiButton"
   disabled={true}
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -101,7 +101,7 @@ exports[`KuiButton Props isDisabled sets the disabled attribute 1`] = `
 exports[`KuiButton Props isIconOnRight moves the icon to the right 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -117,7 +117,7 @@ exports[`KuiButton Props isIconOnRight moves the icon to the right 1`] = `
 exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -130,7 +130,7 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 exports[`KuiButton Props isLoading renders a spinner 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
@@ -143,7 +143,7 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
 exports[`KuiButton Props isSubmit changes the element from a button to an input[type=submit] 1`] = `
 <input
   className="kuiButton"
-  onClick={null}
+  onClick={[Function]}
   type="submit"
 />
 `;
@@ -151,7 +151,7 @@ exports[`KuiButton Props isSubmit changes the element from a button to an input[
 exports[`KuiButton Props isSubmit doesn't throw an error if it receives string children 1`] = `
 <input
   className="kuiButton"
-  onClick={null}
+  onClick={[Function]}
   type="submit"
   value="Hello"
 />
@@ -170,7 +170,7 @@ exports[`KuiButton Props isSubmit throws an error if it receives non-string chil
 exports[`KuiButton Props target is rendered 1`] = `
 <button
   className="kuiButton"
-  onClick={null}
+  onClick={[Function]}
   target="_blank"
   type={null}
   value={null}
@@ -183,7 +183,7 @@ exports[`KuiButton Props testSubject is rendered 1`] = `
 <button
   className="kuiButton"
   data-test-subj="test subject string"
-  onClick={null}
+  onClick={[Function]}
   type={null}
   value={null}
 >
