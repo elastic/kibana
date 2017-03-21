@@ -1,3 +1,4 @@
+// kibana-jscodeshift-no-babel
 const defaults = require('lodash').defaults;
 const babelOptions = require('../../src/optimize/babel/options');
 

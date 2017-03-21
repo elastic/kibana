@@ -1,4 +1,4 @@
-const camelCase = require('lodash').camelCase;
+// kibana-jscodeshift-no-babel
 require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {
