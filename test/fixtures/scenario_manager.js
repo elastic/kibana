@@ -1,6 +1,6 @@
-import path from 'path';
-import elasticsearch from 'elasticsearch';
-import Promise from 'bluebird';
+const path = require('path');
+const elasticsearch = require('elasticsearch');
+const Promise = require('bluebird');
 const config = require('./config').scenarios;
 
 function ScenarioManager(server) {
