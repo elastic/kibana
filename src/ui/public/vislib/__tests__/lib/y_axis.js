@@ -3,7 +3,6 @@ import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
 import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';

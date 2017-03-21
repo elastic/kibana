@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
 import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size.html';
 

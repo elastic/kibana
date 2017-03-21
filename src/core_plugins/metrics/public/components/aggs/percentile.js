@@ -9,7 +9,6 @@ import Select from 'react-select';
 import uuid from 'node-uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import createNumberHandler from '../lib/create_number_handler';
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };

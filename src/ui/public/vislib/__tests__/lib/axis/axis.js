@@ -3,7 +3,6 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
 import VislibLibAxisProvider from 'ui/vislib/lib/axis';
 import VislibVisConfig from 'ui/vislib/lib/vis_config';

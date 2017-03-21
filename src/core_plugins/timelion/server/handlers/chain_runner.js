@@ -7,7 +7,6 @@ import calculateInterval from '../../public/lib/calculate_interval.js';
 import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
-import loadFunctions from '../lib/load_functions.js';
 
 module.exports = function (tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
