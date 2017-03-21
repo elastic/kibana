@@ -52,13 +52,12 @@ uiModules
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];
+      self.existingFieldNames = self.indexPattern.fields.map(field => field.name); //used for mapping conflict validation
       self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
       self.defFormatType = initDefaultFormat();
 
       self.cancel = redirectAway;
       self.save = function () {
-        self.saving = true;
-
         const indexPattern = self.indexPattern;
         const fields = indexPattern.fields;
         const field = self.field.toActualField();
