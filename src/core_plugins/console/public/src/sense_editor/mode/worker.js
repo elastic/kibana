@@ -701,7 +701,6 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
     var disabled = handlers._disabled_[eventName];
 
     if (handlers[eventName] == callback) {
-      var old = handlers[eventName];
       if (disabled)
         this.setDefaultHandler(eventName, disabled.pop());
     } else if (disabled) {
@@ -1642,7 +1641,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     request = function () {
       white();
-      var meth = method();
+      method();
       strictWhite();
       url();
       strictWhite(); // advance to one new line
@@ -1811,4 +1810,3 @@ define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oo
   }).call(SenseWorker.prototype);
 
 });
-

@@ -2,7 +2,7 @@ let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let autocomplete_engine = require('../../src/autocomplete/engine');
 
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { test, module, deepEqual } = QUnit;
 
 module("Knowledge base", {
   setup: function () {

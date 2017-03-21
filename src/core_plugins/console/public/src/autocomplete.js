@@ -1,12 +1,10 @@
-let history = require('./history');
 let kb = require('./kb');
-let mappings = require('./mappings');
-let ace = require('ace');
 let utils = require('./utils');
 let autocomplete_engine = require('./autocomplete/engine');
 let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
 let _ = require('lodash');
-let ext_lang_tools = require('ace/ext-language_tools');
+let ace = require('ace');
+require('ace/ext-language_tools');
 
 var AceRange = ace.require('ace/range').Range;
 
@@ -79,17 +77,6 @@ module.exports = function (editor) {
       }
       return _.defaults(t, { meta: meta, template: template });
     });
-  }
-
-  function termToFilterRegex(term, prefix, suffix) {
-    if (!prefix) {
-      prefix = "";
-    }
-    if (!suffix) {
-      suffix = "";
-    }
-
-    return new RegExp(prefix + term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + suffix, 'i');
   }
 
   function applyTerm(term) {
@@ -318,7 +305,6 @@ module.exports = function (editor) {
     //   - Nice token, broken before: {, "bla"
 
     var session = editor.getSession();
-    var insertingRelativeToToken;
 
     context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
     if (!context.updatedForToken) {
@@ -593,7 +579,7 @@ module.exports = function (editor) {
   function getCurrentMethodAndTokenPaths(pos) {
     var tokenIter = editor.iterForPosition(pos.row, pos.column);
     var startPos = pos;
-    var bodyTokenPath = [], last_var = "", first_scope = true, ret = {};
+    var bodyTokenPath = [], ret = {};
 
     var STATES = {
       looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
