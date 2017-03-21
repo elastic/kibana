@@ -31,11 +31,15 @@ describe('Private module loader', function () {
 
   it('detects circular dependencies', function () {
     expect(function () {
-      function Provider1() {}
+      function Provider1() {
+        Private(Provider2);
+      }
 
-      function Provider2() {}
+      function Provider2() {
+        Private(Provider1);
+      }
 
-      function Provider3() {}
+      Private(Provider1);
     }).to.throwException(/circular/i);
   });
 

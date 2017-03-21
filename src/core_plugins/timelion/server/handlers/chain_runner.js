@@ -15,10 +15,6 @@ module.exports = function (tlConfig) {
   const stats = {};
   let sheet;
 
-  function getQueryCacheKey(query) {
-    return JSON.stringify(_.omit(query, 'label'));
-  }
-
   function throwWithCell(cell, exception) {
     throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);
   }
