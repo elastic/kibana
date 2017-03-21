@@ -131,7 +131,7 @@ module.exports = function (kibana) {
       }
     },
 
-    init: function(server) {
+    init: function (server) {
       // uuid
       manageUuid(server);
       // routes

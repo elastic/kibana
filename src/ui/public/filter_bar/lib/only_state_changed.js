@@ -7,7 +7,7 @@ const compareOptions = { disabled: true, negate: true };
  * @returns {bool} Only disabled filters
  */
 export default function (newFilters, oldFilters) {
-  return _.every(newFilters, function(newFilter) {
+  return _.every(newFilters, function (newFilter) {
     const match = _.find(oldFilters, function (oldFilter) {
       return compareFilters(newFilter, oldFilter, compareOptions);
     });

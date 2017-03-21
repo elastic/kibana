@@ -2,7 +2,7 @@ import proxyquire from 'proxyquire';
 import Promise from 'bluebird';
 const expect = require('chai').expect;
 
-const graphiteResponse = function() {
+const graphiteResponse = function () {
   return Promise.resolve({
     json: function () {
       return [{

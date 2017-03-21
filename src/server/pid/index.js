@@ -36,7 +36,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    const clean = _.once(function() {
+    const clean = _.once(function () {
       unlink(path);
     });
 
@@ -48,7 +48,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       process.kill(process.pid, 'SIGINT');
     });
 
-    process.on('unhandledRejection', function(reason) {
+    process.on('unhandledRejection', function (reason) {
       server.log(['warning'], `Detected an unhandled Promise rejection.\n${reason}`);
     });
   });

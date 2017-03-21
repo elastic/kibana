@@ -29,7 +29,7 @@ uiModules
 
         $scope.$watch(function () {
           return $attrs.range;
-        }, function(range) {
+        }, function (range) {
           if (!range) {
             self.range = defaultRange;
             return;

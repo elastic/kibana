@@ -32,7 +32,7 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function($scope, Notifier, kbnUrl) {
+    controller: function ($scope, Notifier, kbnUrl) {
       const self = this;
       const notify = new Notifier({ location: 'Field Editor' });
 

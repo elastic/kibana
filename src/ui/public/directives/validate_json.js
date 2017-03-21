@@ -2,7 +2,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('validateJson', function() {
+module.directive('validateJson', function () {
   return {
     restrict: 'A',
     require: 'ngModel',

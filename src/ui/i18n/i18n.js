@@ -122,10 +122,10 @@ export class I18n {
     const translations = _.map(translationFiles, (filename) => {
       return asyncReadFile(filename, 'utf8')
       .then(fileContents => JSON.parse(fileContents))
-      .catch(SyntaxError, function() {
+      .catch(SyntaxError, function () {
         throw new Error('Invalid json in ' + filename);
       })
-      .catch(function() {
+      .catch(function () {
         throw new Error('Cannot read file ' + filename);
       });
     });

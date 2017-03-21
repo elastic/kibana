@@ -84,7 +84,7 @@ describe('AggTable Directive', function () {
       expect(bytesAsNum === 0 || bytesAsNum > 1000).to.be.ok();
     }
 
-    $rows.each(function() {
+    $rows.each(function () {
       // 6 cells in every row
       const $cells = $(this).find('td');
       expect($cells.size()).to.be(6);

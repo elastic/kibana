@@ -35,7 +35,7 @@ describe('plugin folder rename', function () {
     });
 
     return renamePlugin('/foo/bar', '/bar/foo')
-    .then(function() {
+    .then(function () {
       expect(renameStub.callCount).to.be(1);
     })
     .catch(function () {

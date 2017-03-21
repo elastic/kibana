@@ -18,7 +18,7 @@ export default function AxisLabelsFactory() {
 
         if (config.get('labels.rotate')) {
           text
-          .style('text-anchor', function() {
+          .style('text-anchor', function () {
             const currentValue = $(this).css('text-anchor');
             const rotateDeg = config.get('labels.rotate');
             if (!rotateDeg) return currentValue;

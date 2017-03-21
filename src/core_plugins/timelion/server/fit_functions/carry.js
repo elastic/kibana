@@ -12,7 +12,7 @@ module.exports = function (dataTuples, targetTuples) {
   }
 
   let currentCarry = dataTuples[0][1];
-  return _.map(targetTuples, function(bucket) {
+  return _.map(targetTuples, function (bucket) {
     const targetTime = bucket[0];
     const dataTime = dataTuples[0][0];
 

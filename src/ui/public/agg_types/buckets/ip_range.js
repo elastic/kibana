@@ -13,7 +13,7 @@ export default function RangeAggDefinition(Private) {
     name: 'ip_range',
     title: 'IPv4 Range',
     createFilter: createFilter,
-    getKey: function(bucket, key) {
+    getKey: function (bucket, key) {
       if (key) return key;
       const from = _.get(bucket, 'from', '-Infinity');
       const to = _.get(bucket, 'to', 'Infinity');

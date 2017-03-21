@@ -73,7 +73,7 @@ uiModules.get('kibana')
       });
 
 
-      $scope.$watch('searchSource', prereq(function() {
+      $scope.$watch('searchSource', prereq(function () {
         if (!$scope.searchSource) return;
 
         $scope.indexPattern = $scope.searchSource.get('index');

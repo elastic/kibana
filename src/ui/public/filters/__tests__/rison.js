@@ -7,7 +7,7 @@ import 'plugins/kibana/discover/index';
 let rison;
 let risonDecode;
 
-const init = function() {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 

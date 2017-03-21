@@ -92,7 +92,7 @@ uiModules
     return filter;
   };
 
-  Timefilter.prototype.getBounds = function() {
+  Timefilter.prototype.getBounds = function () {
     return {
       min: dateMath.parse(this.time.from),
       max: dateMath.parse(this.time.to, true)

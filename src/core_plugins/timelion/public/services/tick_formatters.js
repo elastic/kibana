@@ -1,4 +1,4 @@
-define(function() {
+define(function () {
 
   function baseTickFormatter(value, axis) {
     const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
@@ -20,7 +20,7 @@ define(function() {
 
   return function ticketFormatters() {
     const formatters =  {
-      'bits': function(val) {
+      'bits': function (val) {
         const labels = ['b','kb','mb','gb','tb','pb'];
         let index = 0;
         while (val >= 1000 && index < labels.length) {
@@ -29,7 +29,7 @@ define(function() {
         }
         return (Math.round(val * 100) / 100) + labels[index];
       },
-      'bits/s': function(val) {
+      'bits/s': function (val) {
         const labels = ['b/s','kb/s','mb/s','gb/s','tb/s','pb/s'];
         let index = 0;
         while (val >= 1000 && index < labels.length) {
@@ -38,7 +38,7 @@ define(function() {
         }
         return (Math.round(val * 100) / 100) + labels[index];
       },
-      'bytes': function(val) {
+      'bytes': function (val) {
         const labels = ['B','KB','MB','GB','TB','PB'];
         let index = 0;
         while (val >= 1024 && index < labels.length) {
@@ -47,7 +47,7 @@ define(function() {
         }
         return (Math.round(val * 100) / 100) + labels[index];
       },
-      'bytes/s': function(val) {
+      'bytes/s': function (val) {
         const labels = ['B/s','KB/s','MB/s','GB/s','TB/s','PB/s'];
         let index = 0;
         while (val >= 1024 && index < labels.length) {

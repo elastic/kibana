@@ -67,7 +67,7 @@ export default function GeoHashAggDefinition(Private, config) {
         editor: precisionTemplate,
         default: defaultPrecision,
         deserialize: getPrecision,
-        controller: function() {
+        controller: function () {
         },
         write: function (aggConfig, output) {
           const vis = aggConfig.vis;

@@ -22,7 +22,7 @@ export default function RenderbotFactory() {
    * @param {object} esResp - The raw elasticsearch response
    * @return {undefined}
    */
-  Renderbot.prototype.render = function() {
+  Renderbot.prototype.render = function () {
     throw new Error('not implemented');
   };
 

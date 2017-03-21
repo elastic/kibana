@@ -24,7 +24,7 @@ const dataTypes = [
 ];
 
 describe('Vislib Line Chart', function () {
-  dataTypes.forEach(function(type) {
+  dataTypes.forEach(function (type) {
     const name = type[0];
     const data = type[1];
 

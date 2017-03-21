@@ -12,7 +12,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementAdvanced', function(config) {
+.directive('kbnManagementAdvanced', function (config) {
   return {
     restrict: 'E',
     link: function ($scope) {
