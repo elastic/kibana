@@ -1,58 +1,102 @@
 # Kibana UI Framework
 
-> React UI components for quickly building user interfaces for Kibana.
+> The Kibana UI Framework is a collection of React UI components for quickly building user interfaces
+> for Kibana. Not using React? No problem! You can still use the CSS behind each component.
 
-Not using React? No problem! You can still use the CSS behind each component.
+## Using the Framework
 
-## Development
+### Documentation
 
-* Start development server with `npm run uiFramework:start`.
-* View docs on `http://localhost:8020/`.
-* Run tests with `npm run uiFramework:test` (coverage report generated in `/jest/report`).
+You can view interactive documentation by running `npm run uiFramework:start` and then visiting
+`http://localhost:8020/`.
 
-## What is this?
+### React components
 
-The Kibana UI Framework provides you with UI components you can quickly use to build user interfaces for Kibana.
+Here are the components you can import from the Framnework:
 
-The UI Framework comes with interactive examples which document how to use its various UI components. These components are currently only implemented in CSS, but eventually they'll grow to involve JS as well.
+```javascript
+import {
+  KuiBasicButton,
+  KuiButton,
+  KuiButtonGroup,
+  KuiButtonIcon,
+  KuiCreateButtonIcon,
+  KuiDangerButton,
+  KuiDeleteButtonIcon,
+  KuiHollowButton,
+  KuiLoadingButtonIcon,
+  KuiNextButtonIcon,
+  KuiPreviousButtonIcon,
+  KuiPrimaryButton,
+} from '../path/to/ui_framework/components';
+```
 
-When you build a UI using this framework (e.g. a plugin's UI), you can rest assured it will integrate seamlessly into the overall Kibana UI.
+## Creating components
 
-## How to create a new component
+There are four steps to creating a new component:
 
-There are two steps to creating a new component:
+1. Create the SCSS for the component in `ui_framework/components`.
+2. Create the React portion of the component.
+3. Document it with examples in `ui_framework/doc_site`.
+4. Write tests.
 
-1. Create the CSS for the component in `ui_framework/components`.
-2. Document it with examples in `ui_framework/doc_site`.
-
-### Create the component CSS
+### Create component SCSS
 
 1. Create a directory for your component in `ui_framework/components`.
 2. In this directory, create `_{component name}.scss`.
-3. _Optional:_ Create any other components that should be logically-grouped in this directory (see below).
-4. Create an `_index.scss` file in this directory that import all of the new component SCSS files you created.
+3. _Optional:_ Create any other components that should be [logically-grouped](#logically-grouped-components)
+in this directory.
+4. Create an `_index.scss` file in this directory that import all of the new component SCSS files
+you created.
 5. Import the `_index.scss` file into `ui_framework/components/index.scss`.
 
 This makes your styles available to Kibana and the UI Framework documentation.
 
-#### Logically-grouped components
+### Create the React component
 
-If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g. Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput, TextArea, and CheckBox), then they belong in the same logicaly grouping. In this case, you can create additional SCSS files for these components in the same component directory.
+1. Create the React component(s) in the same directory as the related SCSS file(s).
+2. Export these components from an `index.js` file.
+3. Re-export these components from `ui_framework/components/index.js`.
+
+This makes your React component available for import into Kibana.
 
 ### Document the component with examples
 
-1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the component.
-2. Create a `{component name}_example.js` file inside the directory. You'll use this file to define the different examples for your component.
+1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the
+component.
+2. Create a `{component name}_example.js` file inside the directory. You'll use this file to define
+the different examples for your component.
 3. Add the route to this file in `ui_framework/doc_site/src/services/routes/Routes.js`.
-4. In the `{component name}_example.js` file you created, define examples which demonstrate the component. An example consists of a title, an optional description, an HTML file and an optional JavaScript file. It might help to refer to other examples to see how they're structured.
+4. In the `{component name}_example.js` file you created, define examples which demonstrate the component and describe
+its role from a UI perspective.
 
-The complexity of the component should determine how many examples you need to create, and how complex they should be. In general, your examples should demonstrate:
+The complexity of the component should determine how many examples you need to create, and how
+complex they should be. In general, your examples should demonstrate:
 
 * The most common use-cases for the component.
-* How the component handles edge cases, e.g. overflowing content, text-based vs. element-based content.
+* How the component handles edge cases, e.g. overflowing content, text-based vs. element-based
+content.
 * The various states of the component, e.g. disabled, selected, empty of content, error state.
 
-## Writing CSS
+### Test the component
+
+1. Create test files with the name pattern of `{component name}.test.js`.
+2. Create your tests.
+3. Run tests with `npm run uiFramework:test`.
+
+You can check how well the components have been covered
+by the tests by viewing the generated report at `ui_framework/jest/report/index.html`.
+
+## Principles
+
+### Logically-grouped components
+
+If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g.
+Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput,
+TextArea, and CheckBox), then they belong in the same logicaly grouping. In this case, you can create
+additional SCSS files for these components in the same component directory.
+
+### Writing CSS
 
 Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/css_style_guide.md).
 
@@ -60,7 +104,9 @@ Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/st
 
 ### Dynamic, interactive documentation
 
-By having a "living style guide", we relieve our designers of the burden of creating and maintaining static style guides. This also makes it easier for our engineers to translate mockups, prototypes, and wireframes into products.
+By having a "living style guide", we relieve our designers of the burden of creating and maintaining
+static style guides. This also makes it easier for our engineers to translate mockups, prototypes,
+and wireframes into products.
 
 ### Copy-pasteable UI
 
@@ -68,13 +114,18 @@ Engineers can copy and paste sample code into their projects to quickly get reli
 
 ### Remove CSS from the day-to-day
 
-The CSS portion of this framework means engineers don't need to spend mental cycles translating a design into CSS. These cycles can be spent on the things critical to the identity of the specific project they're working on, like architecture and business logic.
+The CSS portion of this framework means engineers don't need to spend mental cycles translating a
+design into CSS. These cycles can be spent on the things critical to the identity of the specific
+project they're working on, like architecture and business logic.
 
-Once this framework also provides JS components, engineers won't even need to _see_ CSS -- it will be encapsulated behind the JS components' interfaces.
+If they use the React components, engineers won't even need to _see_ CSS -- it will be encapsulated
+behind the React components' interfaces.
 
 ### More UI tests === fewer UI bugs
 
-By covering our UI components with great unit tests and having those tests live within the framework itself, we can rest assured that our UI layer is tested and remove some of that burden from out integration/end-to-end tests.
+By covering our UI components with great unit tests and having those tests live within the framework
+itself, we can rest assured that our UI layer is tested and remove some of that burden from our
+integration/end-to-end tests.
 
 ## Why not just use Bootstrap?
 
@@ -89,7 +140,8 @@ We also gain the ability to fix some of the common issues with third-party CSS f
 * They have non-semantic markup.
 * They deeply nest their selectors.
 
-For a more in-depth analysis of the problems with Bootstrap (and similar frameworks), check out this article and the links it has at the bottom: ["Bootstrap Bankruptcy"](http://www.matthewcopeland.me/blog/2013/11/04/bootstrap-bankruptcy/).
+For a more in-depth analysis of the problems with Bootstrap (and similar frameworks), check out this
+article and the links it has at the bottom: ["Bootstrap Bankruptcy"](http://www.matthewcopeland.me/blog/2013/11/04/bootstrap-bankruptcy/).
 
 ## Examples of other in-house UI frameworks
 
