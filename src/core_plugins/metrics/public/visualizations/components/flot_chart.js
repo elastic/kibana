@@ -3,11 +3,16 @@ import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from '../lib/flot';
 import eventBus from '../lib/events';
-import ResizeAware from 'simianhacker-react-resize-aware';
+import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
 import colors from '../lib/colors';
 
 class FlotChart extends Component {
+
+  constructor(props) {
+    super(props);
+    this.handleResize = this.handleResize.bind(this);
+  }
 
   shouldComponentUpdate(props, state) {
     if (!this.plot) return true;
@@ -42,7 +47,6 @@ class FlotChart extends Component {
       eventBus.off('thorPlotover', this.handleThorPlotover);
       eventBus.off('thorPlotleave', this.handleThorPlotleave);
     }
-    findDOMNode(this.resize).removeEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
@@ -148,6 +152,17 @@ class FlotChart extends Component {
     return _.assign(opts, this.props.options);
   }
 
+  handleResize() {
+    const resize = findDOMNode(this.resize);
+    if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
+      if (!this.plot) return;
+      this.plot.resize();
+      this.plot.setupGrid();
+      this.plot.draw();
+      this.handleDraw(this.plot);
+    }
+  }
+
   renderChart() {
     const resize = findDOMNode(this.resize);
 
@@ -159,19 +174,7 @@ class FlotChart extends Component {
       this.plot = $.plot(this.target, data, this.getOptions());
       this.handleDraw(this.plot);
 
-      this.handleResize = (e) => {
-        const resize = findDOMNode(this.resize);
-        if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
-          if (!this.plot) return;
-          this.plot.resize();
-          this.plot.setupGrid();
-          this.plot.draw();
-          this.handleDraw(this.plot);
-        }
-      };
-
       _.defer(() => this.handleResize());
-      findDOMNode(this.resize).addEventListener('resize', this.handleResize);
 
 
       this.handleMouseOver = (...args) => {
@@ -235,9 +238,12 @@ class FlotChart extends Component {
       flex: '1 0 auto',
     };
     return (
-      <ResizeAware ref={(el) => this.resize = el} style={style}>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        style={style}>
         <div ref={(el) => this.target = el} style={style}/>
-      </ResizeAware>);
+      </Resize>);
   }
 
 }

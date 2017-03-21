@@ -1,9 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
-import { findDOMNode } from 'react-dom';
-import ResizeAware from 'simianhacker-react-resize-aware';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
+import calculateCorrdinates from '../lib/calculate_corrdinates';
 
 class Metric extends Component {
 
@@ -19,76 +18,30 @@ class Metric extends Component {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  componentDidMount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.addEventListener('resize', this.handleResize);
-    this.handleResize();
+  componentWillMount() {
+    const check = () => {
+      this.timeout = setTimeout(() => {
+        const newState = calculateCorrdinates(this.inner, this.resize, this.state);
+        if (newState && this.state && !_.isEqual(newState, this.state)) {
+          this.handleResize();
+        }
+        check();
+      }, 500);
+    };
+    check();
   }
 
   componentWillUnmount() {
-    const resize = findDOMNode(this.resize);
-    if (!resize) return;
-    resize.removeEventListener('resize', this.handleResize);
+    clearTimeout(this.timeout);
   }
 
-  calculateCorrdinates() {
-    const inner = findDOMNode(this.inner);
-    const resize = findDOMNode(this.resize);
-    let scale = this.state.scale;
-
-    if (!resize) return;
-
-    // Let's start by scaling to the largest dimension
-    if (resize.clientWidth - resize.clientHeight < 0) {
-      scale = resize.clientWidth / inner.clientWidth;
-    } else {
-      scale = resize.clientHeight / inner.clientHeight;
-    }
-    let [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
-
-    // Now we need to check to see if it will still fit
-    if (newWidth > resize.clientWidth) {
-      scale = resize.clientWidth / inner.clientWidth;
-    }
-    if (newHeight > resize.clientHeight) {
-      scale = resize.clientHeight / inner.clientHeight;
-    }
-
-    // Calculate the final dimensions
-    [ newWidth, newHeight ] = this.calcDimensions(inner, scale);
-
-    // Because scale is middle out we need to translate
-    // the new X,Y corrdinates
-    const translateX = (newWidth - inner.clientWidth) / 2;
-    const translateY = (newHeight - inner.clientHeight) / 2;
-
-    // Center up and down
-    const top = Math.floor((resize.clientHeight - newHeight) / 2);
-    const left = Math.floor((resize.clientWidth - newWidth) / 2);
-
-    return { scale, top, left, translateY, translateX };
-  }
-
-  // When the component updates it might need to be resized so we need to
-  // recalculate the corrdinates and only update if things changed a little. THis
-  // happens when the number is too wide or you add a new series.
-  componentDidUpdate() {
-    const newState = this.calculateCorrdinates();
-    if (!_.isEqual(newState, this.state)) {
-      this.setState(newState);
-    }
-  }
-
-  calcDimensions(el, scale) {
-    const newWidth = Math.floor(el.clientWidth * scale);
-    const newHeight = Math.floor(el.clientHeight * scale);
-    return [newWidth, newHeight];
+  componentDidMount() {
+    this.handleResize();
   }
 
   handleResize() {
     // Bingo!
-    const newState = this.calculateCorrdinates();
+    const newState = calculateCorrdinates(this.inner, this.resize, this.state);
     this.setState(newState);
   }
 
@@ -161,7 +114,9 @@ class Metric extends Component {
 
     return (
       <div className="rhythm_metric" style={styles.container}>
-        <ResizeAware ref={(el) => this.resize = el} className="rhythm_metric__resize">
+        <div
+          ref={(el) => this.resize = el}
+          className="rhythm_metric__resize">
           <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }
@@ -169,7 +124,7 @@ class Metric extends Component {
             </div>
             { secondarySnippet }
           </div>
-        </ResizeAware>
+        </div>
       </div>
     );
   }

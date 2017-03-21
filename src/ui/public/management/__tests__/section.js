@@ -10,14 +10,40 @@ describe('ManagementSection', () => {
       expect(section.display).to.be('kibana');
     });
 
+    it('defaults visible to true', () => {
+      const section = new ManagementSection('kibana');
+      expect(section.visible).to.be(true);
+    });
+
+    it('defaults disabled to false', () => {
+      const section = new ManagementSection('kibana');
+      expect(section.disabled).to.be(false);
+    });
+
+    it('defaults tooltip to empty string', () => {
+      const section = new ManagementSection('kibana');
+      expect(section.tooltip).to.be('');
+    });
+
+    it('defaults url to empty string', () => {
+      const section = new ManagementSection('kibana');
+      expect(section.url).to.be('');
+    });
+
     it('exposes items', () => {
       const section = new ManagementSection('kibana');
       expect(section.items).to.be.empty();
     });
 
+    it('exposes visibleItems', () => {
+      const section = new ManagementSection('kibana');
+      expect(section.visibleItems).to.be.empty();
+    });
+
     it('assigns all options', () => {
-      const section = new ManagementSection('kibana', { description: 'test' });
+      const section = new ManagementSection('kibana', { description: 'test', url: 'foobar' });
       expect(section.description).to.be('test');
+      expect(section.url).to.be('foobar');
     });
   });
 
@@ -132,5 +158,67 @@ describe('ManagementSection', () => {
       const ids = section.items.inOrder.map((i) => { return i.id; });
       expect(ids).to.eql(['one', 'two', 'three']);
     });
+  });
+
+  describe('visible', () => {
+    let section;
+
+    beforeEach(() => {
+      section = new ManagementSection('kibana');
+    });
+
+    it('hide sets visible to false', () => {
+      section.hide();
+      expect(section.visible).to.be(false);
+    });
+
+    it('show sets visible to true', () => {
+      section.hide();
+      section.show();
+      expect(section.visible).to.be(true);
+    });
+  });
+
+  describe('disabled', () => {
+    let section;
+
+    beforeEach(() => {
+      section = new ManagementSection('kibana');
+    });
+
+    it('disable sets disabled to true', () => {
+      section.disable();
+      expect(section.disabled).to.be(true);
+    });
+
+    it('enable sets disabled to false', () => {
+      section.enable();
+      expect(section.disabled).to.be(false);
+    });
+  });
+
+  describe('visibleItems', () => {
+    let section;
+
+    beforeEach(() => {
+      section = new ManagementSection('kibana');
+
+      section.register('three', { order: 3 });
+      section.register('one', { order: 1 });
+      section.register('two', { order: 2 });
+    });
+
+    it('maintains the order', () => {
+      const ids = section.visibleItems.map((i) => { return i.id; });
+      expect(ids).to.eql(['one', 'two', 'three']);
+    });
+
+    it('does not include hidden items', () => {
+      section.getSection('two').hide();
+
+      const ids = section.visibleItems.map((i) => { return i.id; });
+      expect(ids).to.eql(['one', 'three']);
+    });
+
   });
 });
