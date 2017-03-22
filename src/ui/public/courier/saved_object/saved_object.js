@@ -19,6 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import { MigrateSearchSourceProvider } from '../data_source/migration/migrateSearchSource';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -45,6 +46,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
   const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
+  const migrateSearchSource = Private(MigrateSearchSourceProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
@@ -115,21 +117,6 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
-
-      // TODO extract this into its own module and update it to use range filter constructor instead of manually setting properties
-      // TODO Figure out how to convert ALL filters, not just "own". Does this get called for every search source already?
-      //      if so maybe we don't have to do anything special
-      _.map(this.searchSource.getOwn('filter'), (filter) => {
-        if (filter.range) {
-          const fieldName = Object.keys(filter.range)[0];
-          const params = filter.range[fieldName];
-
-          _.set(filter, 'meta.field', fieldName);
-          _.set(filter, 'meta.type', 'range');
-          _.set(filter, 'meta.params', params);
-        }
-        else return filter;
-      });
     };
 
     /**
@@ -255,13 +242,14 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
         parseSearchSource(meta.searchSourceJSON);
         return hydrateIndexPattern();
       })
-        .then(() => {
-          return Promise.cast(afterESResp.call(this, resp));
-        })
-        .then(() => {
-          // Any time obj is updated, re-call applyESResp
-          docSource.onUpdate().then(this.applyESResp, notify.fatal);
-        });
+      .then(() => migrateSearchSource(this.searchSource))
+      .then(() => {
+        return Promise.cast(afterESResp.call(this, resp));
+      })
+      .then(() => {
+        // Any time obj is updated, re-call applyESResp
+        docSource.onUpdate().then(this.applyESResp, notify.fatal);
+      });
     };
 
     /**
