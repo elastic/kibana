@@ -1,9 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -108,7 +106,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       ];
 
       return PageObjects.visualize.collapseChart()
-      .then(function showData(data) {
+      .then(function showData() {
         return PageObjects.visualize.getDataTableData();
       })
       .then(function showData(data) {

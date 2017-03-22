@@ -4,7 +4,7 @@
  * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration.
  * Note that order matters and the top nav will be displayed in the same order.
  */
-export function getTopNavConfig(kbnUrl) {
+export function getTopNavConfig() {
   return [
     getAddConfig(),
     getSaveConfig(),

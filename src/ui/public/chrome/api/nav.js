@@ -1,5 +1,5 @@
 import { parse, format } from 'url';
-import { startsWith, isString, find } from 'lodash';
+import { startsWith, isString } from 'lodash';
 
 export default function (chrome, internals) {
   chrome.getNavLinks = function () {

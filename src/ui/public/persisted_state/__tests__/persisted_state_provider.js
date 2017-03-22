@@ -7,7 +7,6 @@ import errors from 'ui/errors';
 import 'ui/persisted_state';
 
 let PersistedState;
-let Events;
 
 describe('Persisted State Provider', function () {
   noDigestPromises.activateForSuite();
@@ -190,7 +189,7 @@ describe('Persisted State Provider', function () {
   describe('child state removal', function () {
     it('should clear path from parent state', function () {
       const persistedState = new PersistedState();
-      const childState = persistedState.createChild('child', { userId: 1234 });
+      persistedState.createChild('child', { userId: 1234 });
       expect(persistedState.get()).to.eql({ child: { userId: 1234 } });
       persistedState.removeChild('child');
       expect(persistedState.get()).to.eql({});
@@ -198,7 +197,7 @@ describe('Persisted State Provider', function () {
 
     it('should reset original parent value at path', function () {
       const persistedState = new PersistedState({ user: 1234 });
-      const childState = persistedState.createChild('user', { id: 5678 });
+      persistedState.createChild('user', { id: 5678 });
       expect(persistedState.get()).to.eql({ user: { id: 5678 } });
 
       persistedState.removeChild('user');
@@ -219,7 +218,7 @@ describe('Persisted State Provider', function () {
   describe('deep child state removal', function () {
     it('should clear path from parent state', function () {
       const persistedState = new PersistedState();
-      const childState = persistedState.createChild('child.state', { userId: 1234 });
+      persistedState.createChild('child.state', { userId: 1234 });
       expect(persistedState.get()).to.eql({ child: { state: { userId: 1234 } } });
       persistedState.removeChild('child.state');
       expect(persistedState.get()).to.eql({});
@@ -227,7 +226,7 @@ describe('Persisted State Provider', function () {
 
     it('should reset original parent value at path', function () {
       const persistedState = new PersistedState({ user: { id: 1234 } });
-      const childState = persistedState.createChild('user.id', 5678);
+      persistedState.createChild('user.id', 5678);
       expect(persistedState.get()).to.eql({ user: { id: 5678 } });
 
       persistedState.removeChild('user.id');
@@ -236,7 +235,7 @@ describe('Persisted State Provider', function () {
 
     it('should reset original parent other values at path', function () {
       const persistedState = new PersistedState({ user: { name: 'user' } });
-      const childState = persistedState.createChild('user.id', 5678);
+      persistedState.createChild('user.id', 5678);
       expect(persistedState.get()).to.eql({ user: { name: 'user', id: 5678 } });
 
       persistedState.removeChild('user.id');
@@ -258,7 +257,7 @@ describe('Persisted State Provider', function () {
   describe('child state conditions', function () {
     it('should be merged with the parent state', function () {
       const parent = new PersistedState({ name: 'test' });
-      const child = parent.createChild('child', 'value');
+      parent.createChild('child', 'value');
       expect(parent.get()).to.eql({
         name: 'test',
         child: 'value'
@@ -279,7 +278,7 @@ describe('Persisted State Provider', function () {
 
     it('should give child state precedence', function () {
       const parent = new PersistedState({ user: { id: 1234, name: 'test' } });
-      const child = parent.createChild('user', { name: 'child test' });
+      parent.createChild('user', { name: 'child test' });
       expect(parent.get()).to.eql({
         user: {
           id: 1234,
@@ -293,7 +292,7 @@ describe('Persisted State Provider', function () {
 
     it('should be cleaned up with removeChild', function () {
       const parent = new PersistedState({ name: 'test' });
-      const child = parent.createChild('child', 'value');
+      parent.createChild('child', 'value');
       expect(parent.get()).to.eql({
         name: 'test',
         child: 'value'

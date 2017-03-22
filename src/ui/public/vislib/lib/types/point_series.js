@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function ColumnHandler(Private) {
+export default function ColumnHandler() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {

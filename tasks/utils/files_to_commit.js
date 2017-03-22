@@ -1,6 +1,5 @@
 import SimpleGit from 'simple-git';
 import { promisify } from 'bluebird';
-import { includes } from 'lodash';
 
 export default function filesToCommit(path) {
   const simpleGit = new SimpleGit(path);

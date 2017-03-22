@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';

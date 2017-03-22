@@ -30,7 +30,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
-    controller: function ($scope, $element, $timeout) {
+    controller: function ($scope, $element) {
       const self = this;
 
       // the text input element
@@ -229,7 +229,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         }
       };
 
-      self.hitBlur = function ($event) {
+      self.hitBlur = function () {
         self.selector.index = -1;
         self.selector.enabled = false;
       };
@@ -270,18 +270,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
             self.hits = _.sortBy(hits.hits, 'title');
           }
         });
-      }
-
-      function scrollIntoView($element, snapTop) {
-        const el = $element[0];
-
-        if (!el) return;
-
-        if ('scrollIntoViewIfNeeded' in el) {
-          el.scrollIntoViewIfNeeded(snapTop);
-        } else if ('scrollIntoView' in el) {
-          el.scrollIntoView(snapTop);
-        }
       }
     }
   };

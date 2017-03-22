@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import Select from 'react-select';
 import DataFormatPicker from './data_format_picker';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
@@ -8,7 +7,6 @@ import IndexPattern from './index_pattern';
 
 class SeriesConfig extends Component {
   render() {
-    const { fields } = this.props;
     const defaults = { offset_time: '', value_template: '' };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);

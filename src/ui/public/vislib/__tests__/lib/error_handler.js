@@ -1,6 +1,5 @@
 
 import expect from 'expect.js';
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 

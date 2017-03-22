@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import $ from '../lib/flot';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';
@@ -46,8 +45,17 @@ class GaugeVis extends Component {
   }
 
   render() {
-    const { type, value, max, color, reversed } = this.props;
-    const { scale, translateX, translateY, top, left } = this.state;
+    const {
+      type,
+      value,
+      max,
+      color
+    } = this.props;
+    const {
+      scale,
+      translateX,
+      translateY
+    } = this.state;
     const size = 2 * Math.PI * 50;
     const sliceSize = type === 'half' ? 0.6 : 1;
     const percent = value < max ? value / max : 1;

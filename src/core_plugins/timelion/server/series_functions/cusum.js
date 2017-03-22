@@ -1,6 +1,6 @@
-const alter = require('../lib/alter.js');
-const _ = require('lodash');
-const Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('cusum', {
   args: [
     {
@@ -18,7 +18,7 @@ module.exports = new Chainable('cusum', {
     return alter(args, function (eachSeries, base) {
       const pairs = eachSeries.data;
       let total = base || 0;
-      eachSeries.data = _.map(pairs, function (point, i) {
+      eachSeries.data = _.map(pairs, function (point) {
         total += point[1];
         return [point[0], total];
       });

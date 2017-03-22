@@ -6,8 +6,8 @@ import {
   EsClient,
   Log
 } from './utils';
+
 import { EsArchiver } from '../../src/es_archiver';
-import PageObjects from './page_objects';
 
 // Intern values provided via the root index file of the test suite.
 const kbnInternVars = global.__kibana__intern__;

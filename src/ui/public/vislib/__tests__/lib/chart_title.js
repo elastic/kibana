@@ -1,22 +1,17 @@
 import d3 from 'd3';
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
 import 'ui/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
-  let Data;
   let VisConfig;
   let persistedState;
   let chartTitle;
   let el;
-  let dataObj;
   const data = {
     hits: 621,
     ordered: {
@@ -79,7 +74,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     ChartTitle = Private(VislibLibChartTitleProvider);
-    Data = Private(VislibLibDataProvider);
     VisConfig = Private(VislibLibVisConfigProvider);
     persistedState = new ($injector.get('PersistedState'))();
 
@@ -91,7 +85,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, persistedState);
     const visConfig = new VisConfig({
       type: 'histogram',
       title: {
@@ -124,5 +117,4 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       expect(_.isFunction(chartTitle.draw())).to.be(true);
     });
   });
-
 });

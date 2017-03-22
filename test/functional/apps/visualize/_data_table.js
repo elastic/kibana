@@ -1,9 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -71,7 +69,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data, take screenshot', function () {
-      const chartHeight = 0;
       const expectedChartData = [
         '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
         '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'

@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
@@ -8,7 +7,7 @@ import 'plugins/kibana/discover/index';
 let rison;
 let risonDecode;
 
-const init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 

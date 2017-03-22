@@ -2,7 +2,6 @@ import {
   bdd,
   defaultTimeout,
   esArchiver,
-  common,
 } from '../../../support';
 
 bdd.describe('settings app', function () {

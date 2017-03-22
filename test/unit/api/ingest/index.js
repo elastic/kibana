@@ -4,8 +4,6 @@ define(function (require) {
   const { emptyKibana } = require('intern/dojo/node!../lib/es');
   let request = require('intern/dojo/node!supertest-as-promised');
   const url = require('intern/dojo/node!url');
-  const _ = require('intern/dojo/node!lodash');
-  const expect = require('intern/dojo/node!expect.js');
   const fieldCapabilities = require('./_field_capabilities');
 
   bdd.describe('ingest API', function () {

@@ -1,6 +1,6 @@
 let mappings = require('../../src/mappings');
 
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { test, module, deepEqual } = QUnit;
 
 module("Mappings", {
   setup: function () {

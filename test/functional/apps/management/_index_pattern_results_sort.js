@@ -3,7 +3,6 @@ import expect from 'expect.js';
 
 import {
   bdd,
-  defaultTimeout,
   esClient
 } from '../../../support';
 

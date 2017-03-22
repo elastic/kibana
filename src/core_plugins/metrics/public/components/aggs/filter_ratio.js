@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
-import MetricSelect from './metric_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
@@ -11,7 +9,11 @@ import createTextHandler from '../lib/create_text_handler';
 class FilterRatioAgg extends Component {
 
   render() {
-    const { series, fields, siblings, panel } = this.props;
+    const {
+      series,
+      fields,
+      panel
+    } = this.props;
 
     const handleChange = createChangeHandler(this.props.onChange, this.props.model);
     const handleSelectChange = createSelectHandler(handleChange);

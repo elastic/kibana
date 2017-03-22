@@ -2,7 +2,6 @@
 import {
   bdd,
   defaultTimeout,
-  remote,
   esArchiver,
 } from '../../../support';
 

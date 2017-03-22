@@ -2,7 +2,7 @@ import { fromNode } from 'bluebird';
 
 
 module.exports = class WeirdControlFlow {
-  constructor(work) {
+  constructor() {
     this.handlers = [];
   }
 

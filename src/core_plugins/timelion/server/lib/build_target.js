@@ -1,6 +1,5 @@
-const moment = require('moment');
-
-const splitInterval = require('./split_interval.js');
+import moment from 'moment';
+import splitInterval from './split_interval.js';
 
 module.exports = function (tlConfig) {
   const min = moment(tlConfig.time.from);

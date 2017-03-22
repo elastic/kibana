@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function getSeries(name, buckets, points) {
   const fill = _.partial(_.zip, _.map(buckets, function (bucket) { return bucket.valueOf(); }));

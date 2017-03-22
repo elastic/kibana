@@ -5,14 +5,13 @@ import { DashboardState } from '../dashboard_state';
 
 describe('DashboardState', function () {
   let AppState;
-  let dashboardState;
   let savedDashboard;
   let SavedDashboard;
   let timefilter;
   let quickTimeRanges;
 
   function initDashboardState() {
-    dashboardState = new DashboardState(savedDashboard, timefilter, true, quickTimeRanges, AppState);
+    new DashboardState(savedDashboard, timefilter, true, quickTimeRanges, AppState);
   }
 
   beforeEach(ngMock.module('kibana'));

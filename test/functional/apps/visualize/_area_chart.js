@@ -1,9 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -108,7 +106,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct chart, take screenshot', function () {
-      const chartHeight = 0;
       const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
         '2015-09-22 00:00', '2015-09-23 00:00'
       ];

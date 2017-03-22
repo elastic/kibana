@@ -1,9 +1,8 @@
 
 import {
   bdd,
-  remote,
   esArchiver,
-  defaultTimeout
+  defaultTimeout,
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';

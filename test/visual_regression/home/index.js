@@ -1,7 +1,7 @@
 import {
   bdd,
   remote,
-  defaultTimeout
+  defaultTimeout,
 } from '../../support';
 
 bdd.describe('Home', function () {

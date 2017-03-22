@@ -1,7 +1,7 @@
 import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
-import { createWriteStream, unlinkSync } from 'fs';
+import { createWriteStream } from 'fs';
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.

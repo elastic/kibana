@@ -1,8 +1,7 @@
-const alter = require('../lib/alter.js');
-const _ = require('lodash');
-const Chainable = require('../lib/classes/chainable');
-
-const loadFunctions = require('../lib/load_functions.js');
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
+import loadFunctions from '../lib/load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 
 module.exports = new Chainable('fit', {

@@ -17,10 +17,8 @@ import getUrl from '../../utils/get_url';
 
 import {
   config,
-  defaultTryTimeout,
   defaultFindTimeout,
-  remote,
-  shieldPage,
+  defaultTryTimeout,
   esClient
 } from '../index';
 
@@ -87,7 +85,7 @@ export default class Common {
     return this.remote.get(appUrl);
   }
 
-  navigateToApp(appName, testStatusPage) {
+  navigateToApp(appName) {
     const self = this;
     const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);
@@ -189,7 +187,7 @@ export default class Common {
           });
         });
       })
-      .then(async (currentUrl) => {
+      .then(async () => {
         if (appName === 'status_page') return;
         if (await self.doesTestSubjectExist('statusPageContainer')) {
           throw new Error('Navigation ended up at the status page.');

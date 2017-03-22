@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import AddDeleteButtons from '../add_delete_buttons';
-import Tooltip from '../tooltip';
 
 describe('<AddDeleteButtons />', () => {
 
@@ -64,4 +63,3 @@ describe('<AddDeleteButtons />', () => {
   });
 
 });
-

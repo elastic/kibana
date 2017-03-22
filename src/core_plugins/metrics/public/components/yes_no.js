@@ -1,11 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import _ from 'lodash';
 
 function YesNo(props) {
   const { name, value } = props;
   const handleChange = value => {
     const { name } = props;
-    return (e) => {
+    return () => {
       const parts = { [name]: value };
       props.onChange(parts);
     };
