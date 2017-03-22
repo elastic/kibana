@@ -129,7 +129,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     const visualizations = PageObjects.dashboard.getTestVisualizations();
     return PageObjects.common.tryForTime(10000, async function () {
       const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-      PageObjects.common.log('visualization titles = ' + panelTitles);
+      PageObjects.common.log('visualization titles = ' + panelTitles.map(item => item.title));
       PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
       expect(panelTitles.length).to.eql(visualizations.length + 1);
     });
