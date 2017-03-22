@@ -73,14 +73,14 @@ export default class HeaderPage {
       .findByLinkText('Quick').click();
   }
 
-  async getFromTime(timeString) {
+  async getFromTime() {
     await this.ensureTimePickerIsOpen();
     return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.from\']')
       .getProperty('value');
   }
 
-  async getToTime(timeString) {
+  async getToTime() {
     await this.ensureTimePickerIsOpen();
     return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.to\']')

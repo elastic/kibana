@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { FilterUtils } from './filter_utils';
 
-import { DashboardConstants } from './dashboard_constants';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
