@@ -118,8 +118,7 @@ KuiLinkButton.propTypes = Object.assign({}, commonPropTypes, {
 });
 
 const KuiSubmitButton = props => {
-  const icon = getIcon(props);
-  const commonProps = getCommonProps(props, icon);
+  const commonProps = getCommonProps(props);
 
   return (
     <input
