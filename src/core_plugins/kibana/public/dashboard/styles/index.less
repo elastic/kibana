@@ -35,10 +35,6 @@ dashboard-grid {
 
   .gs-w {
 
-    .panel {
-      border: 2px dashed transparent;
-    }
-
     .panel .panel-heading .btn-group {
       display: none;
     }
@@ -71,6 +67,20 @@ dashboard-grid {
   }
 }
 
+.panel {
+  border: 2px dashed transparent;
+}
+
+.panel--edit-mode {
+  border-color: @kibanaGray4;
+  .visualize-show-spy {
+    visibility: visible;
+  }
+  .panel-heading .btn-group {
+    display: block !important;
+  }
+}
+
 .dashboard-container {
   flex: 1;
   display: flex;
@@ -99,7 +109,6 @@ dashboard-panel {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    border: 0 solid transparent;
 
     .panel-heading {
       padding: 0px 0px 0px 5px;
