@@ -7,12 +7,26 @@ import keyMirror from 'keymirror';
 
 import { KuiButtonIcon } from './button_icon';
 
-const KuiButton = props => {
-  const icon =
-    props.isLoading
-    ? <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
-    : props.icon;
+const commonPropTypes = {
+  type: PropTypes.string,
+  testSubject: PropTypes.string,
+  isDisabled: PropTypes.bool,
+  onClick: PropTypes.func,
+  data: PropTypes.any,
+  className: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+    PropTypes.object,
+  ]),
+};
 
+const getIcon = props => (
+  props.isLoading
+    ? <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
+    : props.icon
+);
+
+const getClassName = (props, icon) => {
   const typeToClassNameMap = {
     [KuiButton.TYPE.BASIC]: 'kuiButton--basic',
     [KuiButton.TYPE.HOLLOW]: 'kuiButton--hollow',
@@ -20,54 +34,18 @@ const KuiButton = props => {
     [KuiButton.TYPE.PRIMARY]: 'kuiButton--primary',
   };
 
-  const className = classNames('kuiButton', props.className, {
+  return classNames('kuiButton', props.className, {
     [typeToClassNameMap[KuiButton.TYPE[props.type]]]: props.type,
     'kuiButton--iconText': icon,
   });
+};
 
-  let wrappedChildren;
+const getChildren = (props, icon) => {
+  // We need to wrap the text so that the icon's :first-child etc. seudo-selectors get applied
+  // correctly.
+  const wrappedChildren = props.children ? <span>{props.children}</span> : undefined;
 
-  if (props.children) {
-    // We need to wrap the text so that the icon's :first-child etc. seudo-selectors get applied
-    // correctly.
-    wrappedChildren = (
-      <span>{props.children}</span>
-    );
-  }
-
-  // onClick is optional, so don't even call it if it's not passed in, or if we're disabled.
-  const onClick =
-    props.onClick && !props.isDisabled
-    ? () => props.onClick(props.data)
-    : () => {};
-
-  const baseProps = {
-    'data-test-subj': props.testSubject,
-    className,
-    disabled: props.isDisabled,
-    onClick,
-  };
-
-  if (props.isSubmit) {
-    // input is a void element tag and can't have children.
-    if ((props.children && typeof props.children !== 'string') || props.icon) {
-      throw new Error(
-        `KuiButton with isSubmit prop set to true can only accept string children, and can't
-        display icons. This is because input is a void element and can't contain children.`
-      );
-    }
-
-    return (
-      <input
-        type="submit"
-        value={props.children}
-        {...baseProps}
-      />
-    );
-  }
-
-  const children =
-    props.isIconOnRight
+  return props.isIconOnRight
     ? (
       <span>
         {wrappedChildren}
@@ -79,83 +57,92 @@ const KuiButton = props => {
         {wrappedChildren}
       </span>
     );
+};
 
-  if (props.href) {
-    return (
-      <a
-        href={props.href}
-        target={props.target}
-        {...baseProps}
-      >
-        {children}
-      </a>
-    );
-  }
+const getOnClick = props => (
+  // onClick is optional, so don't even call it if it's not passed in, or if we're disabled.
+  props.onClick && !props.isDisabled
+    ? () => props.onClick(props.data)
+    : () => {}
+);
+
+const getCommonProps = (props, icon) => ({
+  'data-test-subj': props.testSubject,
+  className: getClassName(props, icon),
+  onClick: getOnClick(props),
+  disabled: props.isDisabled,
+});
+
+const KuiButton = props => {
+  const icon = getIcon(props);
+  const children = getChildren(props, icon);
+  const commonProps = getCommonProps(props, icon);
 
   return (
-    <button {...baseProps}>
+    <button {...commonProps}>
       {children}
     </button>
   );
 };
 
-KuiButton.TYPE = keyMirror({
+KuiButton.propTypes = Object.assign({}, commonPropTypes, {
+  icon: PropTypes.node,
+  isIconOnRight: PropTypes.bool,
+  children: PropTypes.node,
+  isLoading: PropTypes.bool,
+});
+
+const KuiLinkButton = props => {
+  const icon = getIcon(props);
+  const children = getChildren(props, icon);
+  const commonProps = getCommonProps(props, icon);
+
+  return (
+    <a
+      href={props.href}
+      target={props.target}
+      {...commonProps}
+    >
+      {children}
+    </a>
+  );
+};
+
+KuiLinkButton.propTypes = Object.assign({}, commonPropTypes, {
+  href: PropTypes.string,
+  target: PropTypes.string,
+  icon: PropTypes.node,
+  isIconOnRight: PropTypes.bool,
+  children: PropTypes.node,
+  isLoading: PropTypes.bool,
+});
+
+const KuiSubmitButton = props => {
+  const icon = getIcon(props);
+  const commonProps = getCommonProps(props, icon);
+
+  return (
+    <input
+      type="submit"
+      value={props.children}
+      {...commonProps}
+    />
+  );
+};
+
+KuiSubmitButton.propTypes = Object.assign({}, commonPropTypes, {
+  children: PropTypes.string,
+});
+
+KuiButton.TYPE = KuiSubmitButton.TYPE = KuiLinkButton.TYPE = keyMirror({
   BASIC: null,
   HOLLOW: null,
   DANGER: null,
   PRIMARY: null,
 });
 
-KuiButton.propTypes = {
-  type: PropTypes.string,
-  testSubject: PropTypes.string,
-  icon: PropTypes.node,
-  isIconOnRight: PropTypes.bool,
-  children: PropTypes.node,
-  isSubmit: PropTypes.bool,
-  href: PropTypes.string,
-  target: PropTypes.string,
-  onClick: PropTypes.func,
-  data: PropTypes.any,
-  isDisabled: PropTypes.bool,
-  isLoading: PropTypes.bool,
-  className: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.object,
-  ]),
-};
-
-// function createButtonVariation(hardCodedProps) {
-//   const ButtonVariation = props => {
-//     return React.createElement(KuiButton, Object.assign({}, props, hardCodedProps));
-//   };
-
-//   ButtonVariation.propTypes = Object.assign({}, KuiButton.propTypes);
-
-//   return ButtonVariation;
-// }
-
-// const KuiBasicButton = createButtonVariation({
-//   className: 'kuiButton--basic',
-// });
-
-// const KuiHollowButton = createButtonVariation({
-//   className: 'kuiButton--hollow',
-// });
-
-// const KuiDangerButton = createButtonVariation({
-//   className: 'kuiButton--danger',
-// });
-
-// const KuiPrimaryButton = createButtonVariation({
-//   className: 'kuiButton--primary',
-// });
-
 export {
   KuiButton,
-  // KuiBasicButton,
-  // KuiHollowButton,
-  // KuiDangerButton,
-  // KuiPrimaryButton,
+  KuiLinkButton,
+  KuiSubmitButton,
 };

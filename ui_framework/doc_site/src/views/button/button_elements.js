@@ -2,6 +2,8 @@ import React from 'react';
 
 import {
   KuiButton,
+  KuiLinkButton,
+  KuiSubmitButton,
 } from '../../../../components';
 
 export default () => (
@@ -14,21 +16,21 @@ export default () => (
 
     <form onSubmit={e => {
       e.preventDefault();
-      console.log('Submit');
+      window.alert('Submit');
     }}>
-      <KuiButton type={KuiButton.TYPE.BASIC} isSubmit>
+      <KuiSubmitButton type={KuiSubmitButton.TYPE.BASIC}>
         Submit input element
-      </KuiButton>
+      </KuiSubmitButton>
     </form>
 
     &nbsp;
 
-    <KuiButton
-      type={KuiButton.TYPE.BASIC}
+    <KuiLinkButton
+      type={KuiLinkButton.TYPE.BASIC}
       href="http://www.google.com"
       target="_blank"
     >
       Anchor element
-    </KuiButton>
+    </KuiLinkButton>
   </div>
 );

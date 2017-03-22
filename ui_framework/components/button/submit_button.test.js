@@ -6,14 +6,14 @@ import {
 import sinon from 'sinon';
 
 import {
-  KuiButton,
+  KuiSubmitButton,
 } from './button';
 
-describe('KuiButton', () => {
+describe('KuiSubmitButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
       const $button = shallow(
-        <KuiButton />
+        <KuiSubmitButton />
       );
 
       expect($button)
@@ -26,7 +26,7 @@ describe('KuiButton', () => {
       describe('basic', () => {
         test('renders the basic class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.BASIC} />
+            <KuiSubmitButton type={KuiSubmitButton.TYPE.BASIC} />
           );
 
           expect($button)
@@ -37,7 +37,7 @@ describe('KuiButton', () => {
       describe('hollow', () => {
         test('renders the hollow class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.HOLLOW} />
+            <KuiSubmitButton type={KuiSubmitButton.TYPE.HOLLOW} />
           );
 
           expect($button)
@@ -48,7 +48,7 @@ describe('KuiButton', () => {
       describe('danger', () => {
         test('renders the danger class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.DANGER} />
+            <KuiSubmitButton type={KuiSubmitButton.TYPE.DANGER} />
           );
 
           expect($button)
@@ -59,7 +59,7 @@ describe('KuiButton', () => {
       describe('primary', () => {
         test('renders the primary class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.PRIMARY} />
+            <KuiSubmitButton type={KuiSubmitButton.TYPE.PRIMARY} />
           );
 
           expect($button)
@@ -71,42 +71,7 @@ describe('KuiButton', () => {
     describe('testSubject', () => {
       test('is rendered', () => {
         const $button = shallow(
-          <KuiButton testSubject="test subject string" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('icon', () => {
-      test('is rendered with children', () => {
-        const $button = shallow(
-          <KuiButton icon="Icon">
-            Hello
-          </KuiButton>
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-
-      test('is rendered without children', () => {
-        const $button = shallow(
-          <KuiButton icon="Icon" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('isIconOnRight', () => {
-      test('moves the icon to the right', () => {
-        const $button = shallow(
-          <KuiButton icon="Icon" isIconOnRight>
-            Hello
-          </KuiButton>
+          <KuiSubmitButton testSubject="test subject string" />
         );
 
         expect($button)
@@ -115,11 +80,11 @@ describe('KuiButton', () => {
     });
 
     describe('children', () => {
-      test('is rendered', () => {
+      test('is rendered as value', () => {
         const $button = shallow(
-          <KuiButton>
+          <KuiSubmitButton>
             Hello
-          </KuiButton>
+          </KuiSubmitButton>
         );
 
         expect($button)
@@ -132,7 +97,7 @@ describe('KuiButton', () => {
         const onClickHandler = sinon.stub();
 
         const $button = shallow(
-          <KuiButton onClick={onClickHandler} />
+          <KuiSubmitButton onClick={onClickHandler} />
         );
 
         sinon.assert.notCalled(onClickHandler);
@@ -142,7 +107,7 @@ describe('KuiButton', () => {
         const onClickHandler = sinon.stub();
 
         const $button = shallow(
-          <KuiButton onClick={onClickHandler} />
+          <KuiSubmitButton onClick={onClickHandler} />
         );
 
         $button.simulate('click');
@@ -155,7 +120,7 @@ describe('KuiButton', () => {
         const data = 'data';
 
         const $button = shallow(
-          <KuiButton onClick={onClickHandler} data={data} />
+          <KuiSubmitButton onClick={onClickHandler} data={data} />
         );
 
         $button.simulate('click');
@@ -167,7 +132,7 @@ describe('KuiButton', () => {
     describe('isDisabled', () => {
       test('sets the disabled attribute', () => {
         const $button = shallow(
-          <KuiButton isDisabled />
+          <KuiSubmitButton isDisabled />
         );
 
         expect($button)
@@ -178,7 +143,7 @@ describe('KuiButton', () => {
         const onClickHandler = sinon.stub();
 
         const $button = shallow(
-          <KuiButton isDisabled onClick={onClickHandler} />
+          <KuiSubmitButton isDisabled onClick={onClickHandler} />
         );
 
         $button.simulate('click');
@@ -187,30 +152,10 @@ describe('KuiButton', () => {
       });
     });
 
-    describe('isLoading', () => {
-      test('renders a spinner', () => {
-        const $button = shallow(
-          <KuiButton isLoading />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-
-      test(`doesn't render the icon prop`, () => {
-        const $button = shallow(
-          <KuiButton isLoading icon="Icon" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
     describe('className', () => {
       test('renders the classes', () => {
         const $button = shallow(
-          <KuiButton className="testClass1 testClass2" />
+          <KuiSubmitButton className="testClass1 testClass2" />
         );
 
         expect($button)

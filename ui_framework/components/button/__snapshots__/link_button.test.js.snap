@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiLinkButton Baseline is rendered 1`] = `
+<a
+  className="kuiButton"
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props children is rendered 1`] = `
+<a
+  className="kuiButton"
+  onClick={[Function]}
+>
+  <span>
+    <span>
+      Hello
+    </span>
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props className renders the classes 1`] = `
+<a
+  className="kuiButton testClass1 testClass2"
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props href is rendered 1`] = `
+<a
+  className="kuiButton"
+  href="#"
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props icon is rendered with children 1`] = `
+<a
+  className="kuiButton kuiButton--iconText"
+  onClick={[Function]}
+>
+  <span>
+    Icon
+    <span>
+      Hello
+    </span>
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props icon is rendered without children 1`] = `
+<a
+  className="kuiButton kuiButton--iconText"
+  onClick={[Function]}
+>
+  <span>
+    Icon
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props isDisabled sets the disabled attribute 1`] = `
+<a
+  className="kuiButton"
+  disabled={true}
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props isIconOnRight moves the icon to the right 1`] = `
+<a
+  className="kuiButton kuiButton--iconText"
+  onClick={[Function]}
+>
+  <span>
+    <span>
+      Hello
+    </span>
+    Icon
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props isLoading doesn't render the icon prop 1`] = `
+<a
+  className="kuiButton kuiButton--iconText"
+  onClick={[Function]}
+>
+  <span>
+    <KuiButtonIcon
+      type="LOADING"
+    />
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props isLoading renders a spinner 1`] = `
+<a
+  className="kuiButton kuiButton--iconText"
+  onClick={[Function]}
+>
+  <span>
+    <KuiButtonIcon
+      type="LOADING"
+    />
+  </span>
+</a>
+`;
+
+exports[`KuiLinkButton Props target is rendered 1`] = `
+<a
+  className="kuiButton"
+  onClick={[Function]}
+  target="_blank"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props testSubject is rendered 1`] = `
+<a
+  className="kuiButton"
+  data-test-subj="test subject string"
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props type basic renders the basic class 1`] = `
+<a
+  class="kuiButton kuiButton--basic"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props type danger renders the danger class 1`] = `
+<a
+  class="kuiButton kuiButton--danger"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props type hollow renders the hollow class 1`] = `
+<a
+  class="kuiButton kuiButton--hollow"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton Props type primary renders the primary class 1`] = `
+<a
+  class="kuiButton kuiButton--primary"
+>
+  <span />
+</a>
+`;
