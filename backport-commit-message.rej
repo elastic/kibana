@@ -1,0 +1,15 @@
+allowing 0 for extent value
+
+Backports PR #10528
+
+**Commit 1:**
+allowing 0 for extent value
+
+* Original sha: 17f72c9bcb317a986d385340cb49952073296bcf
+* Authored by ppisljar <peter.pisljar@gmail.com> on 2017-02-23T09:23:48Z
+
+**Commit 2:**
+fixing based on review
+
+* Original sha: dbef23a8db3673a1d3b219e1eab4b7a070a00fe4
+* Authored by ppisljar <peter.pisljar@gmail.com> on 2017-02-28T10:15:30Z
