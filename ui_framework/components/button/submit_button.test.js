@@ -68,10 +68,10 @@ describe('KuiSubmitButton', () => {
       });
     });
 
-    describe('testSubject', () => {
+    describe('data-test-subj', () => {
       test('is rendered', () => {
         const $button = shallow(
-          <KuiSubmitButton testSubject="test subject string" />
+          <KuiSubmitButton data-test-subj="test subject string" />
         );
 
         expect($button)

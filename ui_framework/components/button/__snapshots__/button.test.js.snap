@@ -31,6 +31,16 @@ exports[`KuiButton Props className renders the classes 1`] = `
 </button>
 `;
 
+exports[`KuiButton Props data-test-subj is rendered 1`] = `
+<button
+  className="kuiButton"
+  data-test-subj="test subject string"
+  onClick={[Function]}
+>
+  <span />
+</button>
+`;
+
 exports[`KuiButton Props icon is rendered with children 1`] = `
 <button
   className="kuiButton kuiButton--iconText"
@@ -103,16 +113,6 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
       type="loading"
     />
   </span>
-</button>
-`;
-
-exports[`KuiButton Props testSubject is rendered 1`] = `
-<button
-  className="kuiButton"
-  data-test-subj="test subject string"
-  onClick={[Function]}
->
-  <span />
 </button>
 `;
 

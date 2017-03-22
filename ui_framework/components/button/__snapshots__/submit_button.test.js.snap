@@ -25,19 +25,19 @@ exports[`KuiSubmitButton Props className renders the classes 1`] = `
 />
 `;
 
-exports[`KuiSubmitButton Props isDisabled sets the disabled attribute 1`] = `
+exports[`KuiSubmitButton Props data-test-subj is rendered 1`] = `
 <input
   className="kuiButton"
-  disabled={true}
+  data-test-subj="test subject string"
   onClick={[Function]}
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props testSubject is rendered 1`] = `
+exports[`KuiSubmitButton Props isDisabled sets the disabled attribute 1`] = `
 <input
   className="kuiButton"
-  data-test-subj="test subject string"
+  disabled={true}
   onClick={[Function]}
   type="submit"
 />

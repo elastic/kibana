@@ -16,7 +16,7 @@ const BUTTON_TYPES = [
 
 const commonPropTypes = {
   type: PropTypes.oneOf(BUTTON_TYPES),
-  testSubject: PropTypes.string,
+  'data-test-subj': PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
   data: PropTypes.any,
@@ -92,7 +92,7 @@ const getOnClick = props => (
 );
 
 const getCommonProps = (props, icon) => ({
-  'data-test-subj': props.testSubject,
+  'data-test-subj': props['data-test-subj'],
   className: getClassName(props, icon),
   onClick: getOnClick(props),
   disabled: props.isDisabled,

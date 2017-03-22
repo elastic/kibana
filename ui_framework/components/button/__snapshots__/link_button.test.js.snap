@@ -31,6 +31,16 @@ exports[`KuiLinkButton Props className renders the classes 1`] = `
 </a>
 `;
 
+exports[`KuiLinkButton Props data-test-subj is rendered 1`] = `
+<a
+  className="kuiButton"
+  data-test-subj="test subject string"
+  onClick={[Function]}
+>
+  <span />
+</a>
+`;
+
 exports[`KuiLinkButton Props href is rendered 1`] = `
 <a
   className="kuiButton"
@@ -121,16 +131,6 @@ exports[`KuiLinkButton Props target is rendered 1`] = `
   className="kuiButton"
   onClick={[Function]}
   target="_blank"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton Props testSubject is rendered 1`] = `
-<a
-  className="kuiButton"
-  data-test-subj="test subject string"
-  onClick={[Function]}
 >
   <span />
 </a>
