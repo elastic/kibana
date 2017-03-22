@@ -8,6 +8,7 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_tim
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
 import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import compareFilters from './lib/compare_filters';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 
@@ -52,8 +53,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.applyFilters = function (filters) {
-        // add new filters
-        $scope.addFilters(filterAppliedAndUnwrap(filters));
+        addAndInvertFilters(filterAppliedAndUnwrap(filters));
         $scope.newFilters = [];
 
         // change time filter
@@ -128,9 +128,26 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
             return filters;
           })
           .then(filterOutTimeBasedFilter)
-          .then($scope.addFilters);
+          .then(addAndInvertFilters);
         }
       });
+
+      function addAndInvertFilters(filters) {
+        const existingFilters = queryFilter.getFilters();
+        const inversionFilters = _.filter(existingFilters, (existingFilter) => {
+          const newMatchingFilter = _.find(filters, _.partial(compareFilters, existingFilter));
+          return newMatchingFilter
+            && newMatchingFilter.meta
+            && existingFilter.meta
+            && existingFilter.meta.negate !== newMatchingFilter.meta.negate;
+        });
+        const newFilters = _.reject(filters, (filter) => {
+          return _.find(inversionFilters, _.partial(compareFilters, filter));
+        });
+
+        _.forEach(inversionFilters, $scope.invertFilter);
+        $scope.addFilters(newFilters);
+      }
 
       function convertToEditableFilter(filter) {
         return _.omit(_.cloneDeep(filter), function (val, key) {
