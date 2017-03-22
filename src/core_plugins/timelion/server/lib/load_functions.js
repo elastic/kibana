@@ -6,7 +6,6 @@ import processFunctionDefinition from './process_function_definition';
 module.exports = function (directory) {
 
   function getTuple(directory, name) {
-    const func = require('../' + directory + '/' + name);
     return [name, require('../' + directory + '/' + name)];
   }
 
