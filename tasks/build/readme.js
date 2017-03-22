@@ -1,8 +1,8 @@
-const marked = require('marked');
-const Promise = require('bluebird');
-const { join } = require('path');
-const _ = require('lodash');
-const fs = require('fs');
+import marked from 'marked';
+import Promise from 'bluebird';
+import { join } from 'path';
+import _ from 'lodash';
+import fs from 'fs';
 
 module.exports = function (grunt) {
   grunt.registerTask('_build:readme', function () {

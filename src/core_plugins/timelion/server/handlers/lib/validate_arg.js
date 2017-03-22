@@ -1,5 +1,5 @@
-const argType = require('./arg_type');
-const _ = require('lodash');
+import argType from './arg_type';
+import _ from 'lodash';
 
 module.exports = function (functionDef) {
   return function validateArg(value, name, argDef) {

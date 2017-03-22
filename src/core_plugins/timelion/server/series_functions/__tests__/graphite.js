@@ -1,6 +1,6 @@
-const proxyquire =  require('proxyquire');
-const Promise = require('bluebird');
-const _ = require('lodash');
+import proxyquire from 'proxyquire';
+import Promise from 'bluebird';
+import _ from 'lodash';
 const expect = require('chai').expect;
 
 const graphiteResponse = function (url) {
@@ -22,7 +22,7 @@ const graphiteResponse = function (url) {
 const filename = require('path').basename(__filename);
 const fn = proxyquire(`../${filename}`, { 'node-fetch': graphiteResponse });
 
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, function () {
   it('should wrap the graphite response up in a seriesList', function () {

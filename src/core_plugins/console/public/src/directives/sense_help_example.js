@@ -1,4 +1,4 @@
-const SenseEditor = require('../sense_editor/editor');
+import SenseEditor from '../sense_editor/editor';
 const exampleText = require('raw!./helpExample.txt').trim();
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 

@@ -3,10 +3,11 @@ import {
   Log,
 } from './';
 
+import util from 'util';
+import path from 'path';
+import url from 'url';
+
 export default (function () {
-  const util = require('util');
-  const path = require('path');
-  const url = require('url');
   const resolve = require('path').resolve;
   const Elasticdump = require('elasticdump').elasticdump;
 

@@ -4,11 +4,10 @@ import {
   Try,
 } from './';
 
+import elasticsearch from 'elasticsearch';
+import Promise from 'bluebird';
+
 export default (function () {
-
-  const elasticsearch = require('elasticsearch');
-  const Promise = require('bluebird');
-
   function EsClient(server) {
     if (!server) throw new Error('No server defined');
 

@@ -1,5 +1,5 @@
-const moment = require('moment');
-const timelionDefaults = require('../../../lib/get_namespaced_settings');
+import moment from 'moment';
+import timelionDefaults from '../../../lib/get_namespaced_settings';
 
 module.exports = function () {
   const tlConfig = require('../../../handlers/lib/tl_config.js')({

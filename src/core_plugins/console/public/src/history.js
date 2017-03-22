@@ -1,6 +1,6 @@
-const $ = require('jquery');
-const { uniq } = require('lodash');
-const storage = require('./storage');
+import $ from 'jquery';
+import { uniq } from 'lodash';
+import storage from './storage';
 
 const history = module.exports = {
   restoreFromHistory() {

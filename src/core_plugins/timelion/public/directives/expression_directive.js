@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const $ = require('jquery');
-const grammar = require('raw!../chain.peg');
-const PEG = require('pegjs');
+import _ from 'lodash';
+import $ from 'jquery';
+import grammar from 'raw!../chain.peg';
+import PEG from 'pegjs';
 const Parser = PEG.buildParser(grammar);
-const template =  require('./partials/suggestion.html');
+import template from './partials/suggestion.html';
 
 const app = require('ui/modules').get('apps/timelion', []);
 

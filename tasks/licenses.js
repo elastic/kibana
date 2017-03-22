@@ -3,6 +3,8 @@ import { fromNode } from 'bluebird';
 import npm from 'npm';
 import npmLicense from 'license-checker';
 
+import util from 'util';
+
 export default function licenses(grunt) {
   grunt.registerTask('licenses', 'Checks dependency licenses', async function () {
     const config = this.options();
@@ -58,7 +60,6 @@ export default function licenses(grunt) {
     });
 
     if (Object.keys(invalidPackages).length) {
-      const util = require('util');
       const execSync = require('child_process').execSync;
       const names = Object.keys(invalidPackages);
 
