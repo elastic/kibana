@@ -1,49 +1,61 @@
 import React from 'react';
 
 import {
-  KuiBasicButton,
+  KuiButton,
   KuiButtonIcon,
-  KuiCreateButtonIcon,
-  KuiDangerButton,
-  KuiDeleteButtonIcon,
-  KuiNextButtonIcon,
-  KuiPreviousButtonIcon,
-  KuiLoadingButtonIcon,
-  KuiPrimaryButton,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiPrimaryButton icon={<KuiCreateButtonIcon />}>
+    <KuiButton
+      type={KuiButton.TYPE.PRIMARY}
+      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.CREATE} />}
+    >
       Create
-    </KuiPrimaryButton>
+    </KuiButton>
 
     <br />
 
-    <KuiDangerButton icon={<KuiDeleteButtonIcon />}>
+    <KuiButton
+      type={KuiButton.TYPE.DANGER}
+      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.DELETE} />}
+    >
       Delete
-    </KuiDangerButton>
+    </KuiButton>
 
     <br />
 
-    <KuiBasicButton icon={<KuiPreviousButtonIcon />}>
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
+      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />}
+    >
       Previous
-    </KuiBasicButton>
+    </KuiButton>
 
     <br />
 
-    <KuiBasicButton icon={<KuiNextButtonIcon />} isIconOnRight>
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
+      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />}
+      isIconOnRight
+    >
       Next
-    </KuiBasicButton>
+    </KuiButton>
 
     <br />
 
-    <KuiBasicButton icon={<KuiLoadingButtonIcon />}>
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
+      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />}
+    >
       Loading
-    </KuiBasicButton>
+    </KuiButton>
 
     <br />
 
-    <KuiBasicButton icon={<KuiButtonIcon className="fa-plane" />}/>
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
+      icon={<KuiButtonIcon className="fa-plane" />}
+    />
   </div>
 );

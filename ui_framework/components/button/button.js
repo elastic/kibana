@@ -5,15 +5,23 @@ import React, {
 import classNames from 'classnames';
 import keyMirror from 'keymirror';
 
-import { KuiLoadingButtonIcon } from './button_icon';
+import { KuiButtonIcon } from './button_icon';
 
 const KuiButton = props => {
   const icon =
     props.isLoading
-    ? <KuiLoadingButtonIcon />
+    ? <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
     : props.icon;
 
+  const typeToClassNameMap = {
+    [KuiButton.TYPE.BASIC]: 'kuiButton--basic',
+    [KuiButton.TYPE.HOLLOW]: 'kuiButton--hollow',
+    [KuiButton.TYPE.DANGER]: 'kuiButton--danger',
+    [KuiButton.TYPE.PRIMARY]: 'kuiButton--primary',
+  };
+
   const className = classNames('kuiButton', props.className, {
+    [typeToClassNameMap[KuiButton.TYPE[props.type]]]: props.type,
     'kuiButton--iconText': icon,
   });
 
@@ -91,7 +99,15 @@ const KuiButton = props => {
   );
 };
 
+KuiButton.TYPE = keyMirror({
+  BASIC: null,
+  HOLLOW: null,
+  DANGER: null,
+  PRIMARY: null,
+});
+
 KuiButton.propTypes = {
+  type: PropTypes.string,
   testSubject: PropTypes.string,
   icon: PropTypes.node,
   isIconOnRight: PropTypes.bool,
@@ -110,36 +126,36 @@ KuiButton.propTypes = {
   ]),
 };
 
-function createButtonVariation(hardCodedProps) {
-  const ButtonVariation = props => {
-    return React.createElement(KuiButton, Object.assign({}, props, hardCodedProps));
-  };
+// function createButtonVariation(hardCodedProps) {
+//   const ButtonVariation = props => {
+//     return React.createElement(KuiButton, Object.assign({}, props, hardCodedProps));
+//   };
 
-  ButtonVariation.propTypes = Object.assign({}, KuiButton.propTypes);
+//   ButtonVariation.propTypes = Object.assign({}, KuiButton.propTypes);
 
-  return ButtonVariation;
-}
+//   return ButtonVariation;
+// }
 
-const KuiBasicButton = createButtonVariation({
-  className: 'kuiButton--basic',
-});
+// const KuiBasicButton = createButtonVariation({
+//   className: 'kuiButton--basic',
+// });
 
-const KuiHollowButton = createButtonVariation({
-  className: 'kuiButton--hollow',
-});
+// const KuiHollowButton = createButtonVariation({
+//   className: 'kuiButton--hollow',
+// });
 
-const KuiDangerButton = createButtonVariation({
-  className: 'kuiButton--danger',
-});
+// const KuiDangerButton = createButtonVariation({
+//   className: 'kuiButton--danger',
+// });
 
-const KuiPrimaryButton = createButtonVariation({
-  className: 'kuiButton--primary',
-});
+// const KuiPrimaryButton = createButtonVariation({
+//   className: 'kuiButton--primary',
+// });
 
 export {
   KuiButton,
-  KuiBasicButton,
-  KuiHollowButton,
-  KuiDangerButton,
-  KuiPrimaryButton,
+  // KuiBasicButton,
+  // KuiHollowButton,
+  // KuiDangerButton,
+  // KuiPrimaryButton,
 };

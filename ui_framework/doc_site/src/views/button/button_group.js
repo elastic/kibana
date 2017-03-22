@@ -1,31 +1,32 @@
 import React from 'react';
 
 import {
-  KuiBasicButton,
+  KuiButton,
   KuiButtonGroup,
-  KuiPrimaryButton,
 } from '../../../../components';
 
 export default () => (
   <div>
     <KuiButtonGroup>
-      <KuiBasicButton>
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Cancel
-      </KuiBasicButton>
-      <KuiBasicButton>
+      </KuiButton>
+
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Duplicate
-      </KuiBasicButton>
-      <KuiPrimaryButton>
+      </KuiButton>
+
+      <KuiButton type={KuiButton.TYPE.PRIMARY}>
         Save
-      </KuiPrimaryButton>
+      </KuiButton>
     </KuiButtonGroup>
 
     <br />
 
     <KuiButtonGroup>
-      <KuiBasicButton>
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Button group with one button
-      </KuiBasicButton>
+      </KuiButton>
     </KuiButtonGroup>
   </div>
 );

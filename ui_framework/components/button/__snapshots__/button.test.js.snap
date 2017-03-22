@@ -1,13 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KuiBasicButton is rendered with basic class 1`] = `
-<button
-  class="kuiButton kuiButton--basic"
->
-  <span />
-</button>
-`;
-
 exports[`KuiButton Baseline is rendered 1`] = `
 <button
   className="kuiButton"
@@ -104,7 +96,9 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
   onClick={[Function]}
 >
   <span>
-    <KuiLoadingButtonIcon />
+    <KuiButtonIcon
+      type="LOADING"
+    />
   </span>
 </button>
 `;
@@ -115,7 +109,9 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
   onClick={[Function]}
 >
   <span>
-    <KuiLoadingButtonIcon />
+    <KuiButtonIcon
+      type="LOADING"
+    />
   </span>
 </button>
 `;
@@ -166,7 +162,15 @@ exports[`KuiButton Props testSubject is rendered 1`] = `
 </button>
 `;
 
-exports[`KuiDangerButton is rendered with danger class 1`] = `
+exports[`KuiButton Props type basic renders the basic class 1`] = `
+<button
+  class="kuiButton kuiButton--basic"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props type danger renders the danger class 1`] = `
 <button
   class="kuiButton kuiButton--danger"
 >
@@ -174,7 +178,7 @@ exports[`KuiDangerButton is rendered with danger class 1`] = `
 </button>
 `;
 
-exports[`KuiHollowButton is rendered with hollow class 1`] = `
+exports[`KuiButton Props type hollow renders the hollow class 1`] = `
 <button
   class="kuiButton kuiButton--hollow"
 >
@@ -182,7 +186,7 @@ exports[`KuiHollowButton is rendered with hollow class 1`] = `
 </button>
 `;
 
-exports[`KuiPrimaryButton is rendered with primary class 1`] = `
+exports[`KuiButton Props type primary renders the primary class 1`] = `
 <button
   class="kuiButton kuiButton--primary"
 >

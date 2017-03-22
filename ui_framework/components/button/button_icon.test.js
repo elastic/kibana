@@ -7,11 +7,6 @@ import sinon from 'sinon';
 
 import {
   KuiButtonIcon,
-  KuiCreateButtonIcon,
-  KuiDeleteButtonIcon,
-  KuiPreviousButtonIcon,
-  KuiNextButtonIcon,
-  KuiLoadingButtonIcon,
 } from './button_icon';
 
 describe('KuiButtonIcon', () => {
@@ -27,6 +22,63 @@ describe('KuiButtonIcon', () => {
   });
 
   describe('Props', () => {
+    describe('type', () => {
+      describe('create', () => {
+        test('renders the create class', () => {
+          const $buttonIcon = render(
+            <KuiButtonIcon type={KuiButtonIcon.TYPE.CREATE} />
+          );
+
+          expect($buttonIcon)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('delete', () => {
+        test('renders the delete class', () => {
+          const $buttonIcon = render(
+            <KuiButtonIcon type={KuiButtonIcon.TYPE.DELETE} />
+          );
+
+          expect($buttonIcon)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('previous', () => {
+        test('renders the previous class', () => {
+          const $buttonIcon = render(
+            <KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />
+          );
+
+          expect($buttonIcon)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('next', () => {
+        test('renders the next class', () => {
+          const $buttonIcon = render(
+            <KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />
+          );
+
+          expect($buttonIcon)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('loading', () => {
+        test('renders the loading class', () => {
+          const $buttonIcon = render(
+            <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
+          );
+
+          expect($buttonIcon)
+            .toMatchSnapshot();
+        });
+      });
+    });
+
     describe('className', () => {
       test('renders the classes', () => {
         const $buttonIcon = shallow(
@@ -37,60 +89,5 @@ describe('KuiButtonIcon', () => {
           .toMatchSnapshot();
       });
     });
-  });
-});
-
-describe('KuiCreateButtonIcon', () => {
-  test('is rendered with create class', () => {
-    const $buttonIcon = render(
-      <KuiCreateButtonIcon />
-    );
-
-    expect($buttonIcon)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiDeleteButtonIcon', () => {
-  test('is rendered with delete class', () => {
-    const $buttonIcon = render(
-      <KuiDeleteButtonIcon />
-    );
-
-    expect($buttonIcon)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiPreviousButtonIcon', () => {
-  test('is rendered with previous class', () => {
-    const $buttonIcon = render(
-      <KuiPreviousButtonIcon />
-    );
-
-    expect($buttonIcon)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiNextButtonIcon', () => {
-  test('is rendered with next class', () => {
-    const $buttonIcon = render(
-      <KuiNextButtonIcon />
-    );
-
-    expect($buttonIcon)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiLoadingButtonIcon', () => {
-  test('is rendered with loading class', () => {
-    const $buttonIcon = render(
-      <KuiLoadingButtonIcon />
-    );
-
-    expect($buttonIcon)
-      .toMatchSnapshot();
   });
 });

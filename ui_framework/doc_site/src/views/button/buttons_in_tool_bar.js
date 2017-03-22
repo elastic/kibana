@@ -1,35 +1,42 @@
 import React from 'react';
 
 import {
-  KuiBasicButton,
-  KuiDangerButton,
-  KuiPrimaryButton,
+  KuiButton,
 } from '../../../../components';
 
 export default () => (
   <div className="kuiToolBar">
-    <KuiBasicButton>
+    <KuiButton type={KuiButton.TYPE.BASIC}>
       Basic button
-    </KuiBasicButton>
+    </KuiButton>
 
-    <KuiBasicButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
+      isDisabled
+    >
       Basic button, disabled
-    </KuiBasicButton>
+    </KuiButton>
 
-    <KuiPrimaryButton>
+    <KuiButton type={KuiButton.TYPE.PRIMARY}>
       Primary button
-    </KuiPrimaryButton>
+    </KuiButton>
 
-    <KuiPrimaryButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.PRIMARY}
+      isDisabled
+    >
       Primary button, disabled
-    </KuiPrimaryButton>
+    </KuiButton>
 
-    <KuiDangerButton>
+    <KuiButton type={KuiButton.TYPE.DANGER}>
       Danger button
-    </KuiDangerButton>
+    </KuiButton>
 
-    <KuiDangerButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.DANGER}
+      isDisabled
+    >
       Danger button, disabled
-    </KuiDangerButton>
+    </KuiButton>
   </div>
 );

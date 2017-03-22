@@ -16,18 +16,9 @@ Here are the components you can import from the Framnework:
 
 ```javascript
 import {
-  KuiBasicButton,
   KuiButton,
   KuiButtonGroup,
   KuiButtonIcon,
-  KuiCreateButtonIcon,
-  KuiDangerButton,
-  KuiDeleteButtonIcon,
-  KuiHollowButton,
-  KuiLoadingButtonIcon,
-  KuiNextButtonIcon,
-  KuiPreviousButtonIcon,
-  KuiPrimaryButton,
 } from '../path/to/ui_framework/components';
 ```
 

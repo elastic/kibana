@@ -1,19 +1,22 @@
 import React from 'react';
 
 import {
-  KuiHollowButton,
+  KuiButton,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiHollowButton>
+    <KuiButton type={KuiButton.TYPE.HOLLOW}>
       Hollow button
-    </KuiHollowButton>
+    </KuiButton>
 
     <br />
 
-    <KuiHollowButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.HOLLOW}
+      isDisabled
+    >
       Hollow button, disabled
-    </KuiHollowButton>
+    </KuiButton>
   </div>
 );

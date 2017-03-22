@@ -1,14 +1,14 @@
 import React from 'react';
 
 import {
-  KuiBasicButton,
+  KuiButton,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiBasicButton>
+    <KuiButton type={KuiButton.TYPE.BASIC}>
       Button element
-    </KuiBasicButton>
+    </KuiButton>
 
     &nbsp;
 
@@ -16,18 +16,19 @@ export default () => (
       e.preventDefault();
       console.log('Submit');
     }}>
-      <KuiBasicButton isSubmit>
+      <KuiButton type={KuiButton.TYPE.BASIC} isSubmit>
         Submit input element
-      </KuiBasicButton>
+      </KuiButton>
     </form>
 
     &nbsp;
 
-    <KuiBasicButton
+    <KuiButton
+      type={KuiButton.TYPE.BASIC}
       href="http://www.google.com"
       target="_blank"
     >
       Anchor element
-    </KuiBasicButton>
+    </KuiButton>
   </div>
 );

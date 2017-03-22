@@ -1,31 +1,39 @@
 import React from 'react';
 
 import {
-  KuiBasicButton,
+  KuiButton,
   KuiButtonGroup,
-  KuiNextButtonIcon,
-  KuiPreviousButtonIcon,
+  KuiButtonIcon,
 } from '../../../../components';
 
 export default () => (
   <div>
     <KuiButtonGroup isUnited>
-      <KuiBasicButton>
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Option A
-      </KuiBasicButton>
-      <KuiBasicButton>
+      </KuiButton>
+
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Option B
-      </KuiBasicButton>
-      <KuiBasicButton>
+      </KuiButton>
+
+      <KuiButton type={KuiButton.TYPE.BASIC}>
         Option C
-      </KuiBasicButton>
+      </KuiButton>
     </KuiButtonGroup>
 
     <br />
 
     <KuiButtonGroup isUnited>
-      <KuiBasicButton icon={<KuiPreviousButtonIcon />}/>
-      <KuiBasicButton icon={<KuiNextButtonIcon />}/>
+      <KuiButton
+        type={KuiButton.TYPE.BASIC}
+        icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />}
+      />
+
+      <KuiButton
+        type={KuiButton.TYPE.BASIC}
+        icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />}
+      />
     </KuiButtonGroup>
   </div>
 );

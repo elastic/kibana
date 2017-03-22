@@ -1,20 +1,23 @@
 import React from 'react';
 
 import {
-  KuiDangerButton,
+  KuiButton,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiDangerButton>
+    <KuiButton type={KuiButton.TYPE.DANGER}>
       Danger button
-    </KuiDangerButton>
+    </KuiButton>
 
     <br />
 
-    <KuiDangerButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.DANGER}
+      isDisabled
+    >
       Danger button, disabled
-    </KuiDangerButton>
+    </KuiButton>
   </div>
 
 );

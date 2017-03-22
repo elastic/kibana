@@ -12,31 +12,31 @@ exports[`KuiButtonIcon Props className renders the classes 1`] = `
 />
 `;
 
-exports[`KuiCreateButtonIcon is rendered with create class 1`] = `
+exports[`KuiButtonIcon Props type create renders the create class 1`] = `
 <span
   class="kuiButton__icon kuiIcon fa-plus"
 />
 `;
 
-exports[`KuiDeleteButtonIcon is rendered with delete class 1`] = `
+exports[`KuiButtonIcon Props type delete renders the delete class 1`] = `
 <span
   class="kuiButton__icon kuiIcon fa-trash"
 />
 `;
 
-exports[`KuiLoadingButtonIcon is rendered with loading class 1`] = `
+exports[`KuiButtonIcon Props type loading renders the loading class 1`] = `
 <span
   class="kuiButton__icon kuiIcon fa-spinner fa-spin"
 />
 `;
 
-exports[`KuiNextButtonIcon is rendered with next class 1`] = `
+exports[`KuiButtonIcon Props type next renders the next class 1`] = `
 <span
   class="kuiButton__icon kuiIcon fa-chevron-right"
 />
 `;
 
-exports[`KuiPreviousButtonIcon is rendered with previous class 1`] = `
+exports[`KuiButtonIcon Props type previous renders the previous class 1`] = `
 <span
   class="kuiButton__icon kuiIcon fa-chevron-left"
 />

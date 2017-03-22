@@ -1,1 +1,5 @@
-export * from './button';
+export {
+  KuiButton,
+  KuiButtonGroup,
+  KuiButtonIcon,
+} from './button';

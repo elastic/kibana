@@ -7,10 +7,6 @@ import sinon from 'sinon';
 
 import {
   KuiButton,
-  KuiBasicButton,
-  KuiHollowButton,
-  KuiDangerButton,
-  KuiPrimaryButton,
 } from './button';
 
 describe('KuiButton', () => {
@@ -26,6 +22,52 @@ describe('KuiButton', () => {
   });
 
   describe('Props', () => {
+    describe('type', () => {
+      describe('basic', () => {
+        test('renders the basic class', () => {
+          const $button = render(
+            <KuiButton type={KuiButton.TYPE.BASIC} />
+          );
+
+          expect($button)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('hollow', () => {
+        test('renders the hollow class', () => {
+          const $button = render(
+            <KuiButton type={KuiButton.TYPE.HOLLOW} />
+          );
+
+          expect($button)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('danger', () => {
+        test('renders the danger class', () => {
+          const $button = render(
+            <KuiButton type={KuiButton.TYPE.DANGER} />
+          );
+
+          expect($button)
+            .toMatchSnapshot();
+        });
+      });
+
+      describe('primary', () => {
+        test('renders the primary class', () => {
+          const $button = render(
+            <KuiButton type={KuiButton.TYPE.PRIMARY} />
+          );
+
+          expect($button)
+            .toMatchSnapshot();
+        });
+      });
+    });
+
     describe('testSubject', () => {
       test('is rendered', () => {
         const $button = shallow(
@@ -250,49 +292,5 @@ describe('KuiButton', () => {
           .toMatchSnapshot();
       });
     });
-  });
-});
-
-describe('KuiBasicButton', () => {
-  test('is rendered with basic class', () => {
-    const $button = render(
-      <KuiBasicButton />
-    );
-
-    expect($button)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiHollowButton', () => {
-  test('is rendered with hollow class', () => {
-    const $button = render(
-      <KuiHollowButton />
-    );
-
-    expect($button)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiDangerButton', () => {
-  test('is rendered with danger class', () => {
-    const $button = render(
-      <KuiDangerButton />
-    );
-
-    expect($button)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiPrimaryButton', () => {
-  test('is rendered with primary class', () => {
-    const $button = render(
-      <KuiPrimaryButton />
-    );
-
-    expect($button)
-      .toMatchSnapshot();
   });
 });

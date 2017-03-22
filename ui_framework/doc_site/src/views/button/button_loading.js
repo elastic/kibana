@@ -3,9 +3,8 @@ import React, {
 } from 'react';
 
 import {
-  KuiCreateButtonIcon,
-  KuiPrimaryButton,
-  KuiBasicButton,
+  KuiButtonIcon,
+  KuiButton,
 } from '../../../../components';
 
 export default class LoadingButton extends Component {
@@ -34,24 +33,26 @@ export default class LoadingButton extends Component {
   render() {
     return (
       <div>
-        <KuiBasicButton
+        <KuiButton
+          type={KuiButton.TYPE.BASIC}
           onClick={this.onClick}
           isLoading={this.state.isLoading}
           isDisabled={this.state.isLoading}
         >
           {this.state.isLoading ? 'Loading...' : 'Load more'}
-        </KuiBasicButton>
+        </KuiButton>
 
         <br />
 
-        <KuiPrimaryButton
+        <KuiButton
+          type={KuiButton.TYPE.PRIMARY}
           onClick={this.onClick}
-          icon={<KuiCreateButtonIcon />}
+          icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.CREATE} />}
           isLoading={this.state.isLoading}
           isDisabled={this.state.isLoading}
         >
           {this.state.isLoading ? 'Creating...' : 'Create'}
-        </KuiPrimaryButton>
+        </KuiButton>
       </div>
     );
   }

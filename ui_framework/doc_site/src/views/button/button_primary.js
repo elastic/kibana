@@ -1,19 +1,22 @@
 import React from 'react';
 
 import {
-  KuiPrimaryButton,
+  KuiButton,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiPrimaryButton>
+    <KuiButton type={KuiButton.TYPE.PRIMARY}>
       Primary button
-    </KuiPrimaryButton>
+    </KuiButton>
 
     <br />
 
-    <KuiPrimaryButton isDisabled>
+    <KuiButton
+      type={KuiButton.TYPE.PRIMARY}
+      isDisabled
+    >
       Primary button, disabled
-    </KuiPrimaryButton>
+    </KuiButton>
   </div>
 );
