@@ -10,14 +10,12 @@ import TimeBucketsProvider from 'ui/time_buckets';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-
     let vis;
     let agg;
     let field;
     let filter;
     let bucketKey;
     let bucketStart;
-    let getIntervalStub;
     let intervalOptions;
 
     let init;
@@ -27,7 +25,6 @@ describe('AggConfig Filters', function () {
       const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
-      const TimeBuckets = Private(TimeBucketsProvider);
       intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {

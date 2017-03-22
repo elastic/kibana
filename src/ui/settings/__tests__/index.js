@@ -103,7 +103,9 @@ describe('ui settings', function () {
 
   describe('#getDefaults()', function () {
     it('is promised the default values', async function () {
-      const { server, uiSettings, configGet } = instantiate();
+      const {
+        uiSettings
+      } = instantiate();
       const defaults = await uiSettings.getDefaults();
       expect(isEqual(defaults, defaultsProvider())).to.equal(true);
     });
@@ -142,7 +144,10 @@ describe('ui settings', function () {
 
     it('returns user configuration', async function () {
       const getResult = { user: 'customized' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }
@@ -151,7 +156,10 @@ describe('ui settings', function () {
 
     it('ignores null user configuration (because default values)', async function () {
       const getResult = { user: 'customized', usingDefault: null, something: 'else' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
@@ -239,14 +247,20 @@ describe('ui settings', function () {
 
     it(`without user configuration it's equal to the defaults`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
       expect(isEqual(result, defaultsProvider())).to.equal(true);
     });
 
     it(`user configuration gets merged with defaults`, async function () {
       const getResult = { foo: 'bar' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
       const merged = defaultsProvider();
       merged.foo = { userValue: 'bar' };
@@ -255,7 +269,10 @@ describe('ui settings', function () {
 
     it(`user configuration gets merged into defaults`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
       const merged = defaultsProvider();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
@@ -273,7 +290,10 @@ describe('ui settings', function () {
 
     it(`returns key value pairs`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
@@ -285,7 +305,10 @@ describe('ui settings', function () {
 
     it(`returns key value pairs including user configuration`, async function () {
       const getResult = { something: 'user-provided' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
@@ -298,7 +321,10 @@ describe('ui settings', function () {
 
     it(`returns key value pairs including user configuration for existing settings`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
       const defaults = defaultsProvider();
       const expectation = {};
@@ -320,7 +346,10 @@ describe('ui settings', function () {
 
     it(`returns the promised value for a key`, async function () {
       const getResult = {};
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.get(req, 'dateFormat');
       const defaults = defaultsProvider();
       expect(result).to.equal(defaults.dateFormat.value);
@@ -328,14 +357,20 @@ describe('ui settings', function () {
 
     it(`returns the user-configured value for a custom key`, async function () {
       const getResult = { custom: 'value' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.get(req, 'custom');
       expect(result).to.equal('value');
     });
 
     it(`returns the user-configured value for a modified key`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
-      const { server, uiSettings, configGet, req } = instantiate({ getResult });
+      const {
+        uiSettings,
+        req
+      } = instantiate({ getResult });
       const result = await uiSettings.get(req, 'dateFormat');
       expect(result).to.equal('YYYY-MM-DD');
     });

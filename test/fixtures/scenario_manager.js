@@ -125,8 +125,6 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
   if (!scenario) throw new Error('No scenario found for ' + id);
 
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
-    let loadIndexDefinition;
-
     return self.client.count({
       index: bulk.indexName
     })

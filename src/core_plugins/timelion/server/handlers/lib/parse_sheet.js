@@ -10,7 +10,6 @@ module.exports = function parseSheet(sheet) {
     try {
       return Parser.parse(plot).tree;
     } catch (e) {
-      let message;
       if (e.expected) {
         throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
       } else {

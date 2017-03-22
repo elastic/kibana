@@ -14,7 +14,6 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let VisConfig;
   let Data;
   let PersistedState;
-  let axisTitle;
   let el;
   let dataObj;
   let xTitle;
@@ -155,5 +154,4 @@ describe('Vislib AxisTitle Class Test Suite', function () {
       expect(_.isFunction(xTitle.draw())).to.be(true);
     });
   });
-
 });

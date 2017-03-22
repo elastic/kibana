@@ -7,9 +7,6 @@ import aggTemplate from 'plugins/kibana/visualize/editor/agg.html';
 uiModules
 .get('app/visualize')
 .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-
-  const aggTypes = Private(AggTypesIndexProvider);
-
   const notify = new Notifier({
     location: 'visAggGroup'
   });

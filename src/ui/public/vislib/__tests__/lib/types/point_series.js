@@ -6,7 +6,6 @@ import VislibLibVisPointSeriesTypeConfigProvider from 'ui/vislib/lib/types/point
 describe('Point Series Config Type Class Test Suite', function () {
   let pointSeriesConfig;
   let parsedConfig;
-  let el;
   const histogramConfig = {
     type: 'histogram',
     addLegend: true,
@@ -112,5 +111,4 @@ describe('Point Series Config Type Class Test Suite', function () {
       expect(parsedConfig.valueAxes.length).to.equal(2);
     });
   });
-
 });

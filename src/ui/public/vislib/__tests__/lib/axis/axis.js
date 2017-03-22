@@ -10,7 +10,6 @@ import VislibVisConfig from 'ui/vislib/lib/vis_config';
 
 describe('Vislib Axis Class Test Suite', function () {
   let Axis;
-  let Data;
   let persistedState;
   let yAxis;
   let el;
@@ -87,7 +86,6 @@ describe('Vislib Axis Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    Data = Private(VislibLibDataProvider);
     persistedState = new ($injector.get('PersistedState'))();
     Axis = Private(VislibLibAxisProvider);
     VisConfig = Private(VislibVisConfig);
@@ -224,5 +222,4 @@ describe('Vislib Axis Class Test Suite', function () {
     });
 
   });
-
 });

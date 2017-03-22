@@ -5,8 +5,6 @@ import ngMock from 'ng_mock';
 import SearchStrategyProvider from '../search';
 
 describe('ui/courier/fetch/strategy/search', () => {
-
-  let Promise;
   let $rootScope;
   let search;
   let reqsFetchParams;

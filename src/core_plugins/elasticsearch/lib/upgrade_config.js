@@ -18,8 +18,6 @@ module.exports = function (server) {
   }
 
   return function (response) {
-    const newConfig = {};
-
     // Check to see if there are any doc. If not then we set the build number and id
     if (response.hits.hits.length === 0) {
       return createNewConfig();

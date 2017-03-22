@@ -328,7 +328,6 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
       const resource = resources[breakers[prop]];
       const setup = resource.setup;
       const changes = resource.changes;
-      const deps = resource.deps;
       const fn = self[prop];
 
       return {

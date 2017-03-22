@@ -9,18 +9,13 @@ function TopNSeries(props) {
     panel,
     model,
     fields,
-    onAdd,
-    onDelete,
-    disableDelete,
-    disableAdd,
     selectedTab,
-    visible,
+    visible
   } = props;
 
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  let caretClassName = 'fa fa-caret-down';
-  if (!visible) caretClassName = 'fa fa-caret-right';
+  !visible;
 
   let body = null;
   if (visible) {
@@ -85,7 +80,6 @@ function TopNSeries(props) {
       { body }
     </div>
   );
-
 }
 
 TopNSeries.propTypes = {

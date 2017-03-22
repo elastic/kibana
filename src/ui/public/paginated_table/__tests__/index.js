@@ -10,8 +10,6 @@ describe('paginated table', function () {
   let $rootScope;
   let $compile;
   let $scope;
-  let $elScope;
-  let $orderBy;
   const defaultPerPage = 10;
 
   const makeData = function (colCount, rowCount) {
@@ -71,7 +69,6 @@ describe('paginated table', function () {
   beforeEach(ngMock.inject(function (_$rootScope_, _$compile_, $filter) {
     $rootScope = _$rootScope_;
     $compile = _$compile_;
-    $orderBy = $filter('orderBy');
     $scope = $rootScope.$new();
   }));
 
