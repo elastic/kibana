@@ -33,13 +33,16 @@ uiModules.get('apps/management')
         { title: 'controls', sortable: false }
       ];
 
-      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter'], refreshRows);
+      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'scriptedFieldLanguageFilter'], refreshRows);
 
       function refreshRows() {
         _.invoke(rowScopes, '$destroy');
         rowScopes.length = 0;
 
-        const fields = filter($scope.indexPattern.getScriptedFields(), { name: $scope.fieldFilter });
+        const fields = filter($scope.indexPattern.getScriptedFields(), {
+          name: $scope.fieldFilter,
+          lang: $scope.scriptedFieldLanguageFilter
+        });
         _.find($scope.editSections, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
@@ -49,7 +52,12 @@ uiModules.get('apps/management')
 
           return [
             _.escape(field.name),
-            _.escape(field.lang),
+            {
+              markup: field.lang,
+              attr: {
+                'data-test-subj': 'scriptedFieldLang'
+              }
+            },
             _.escape(field.script),
             _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
             {
