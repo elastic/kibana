@@ -59,18 +59,15 @@ uiModules.get('apps/management')
   });
 
   $scope.refreshFilters = function () {
-    const filterTypes = { indexedFieldTypes: [], scriptedFieldLanguages: [] };
-    const { indexedFieldTypes, scriptedFieldLanguages } = $scope.indexPattern.fields.reduce((acc, field) => {
-      if (field.indexed) {
-        acc.indexedFieldTypes.push(field.type);
-      }
-
+    const indexedFieldTypes = [];
+    const scriptedFieldLanguages = [];
+    $scope.indexPattern.fields.forEach(field => {
       if (field.scripted) {
-        acc.scriptedFieldLanguages.push(field.lang);
+        scriptedFieldLanguages.push(field.lang);
+      } else {
+        indexedFieldTypes.push(field.type);
       }
-
-      return acc;
-    }, filterTypes);
+    });
 
     $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
     $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
