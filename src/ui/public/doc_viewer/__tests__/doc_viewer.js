@@ -30,7 +30,7 @@ describe('docViewer', function () {
     });
 
     // Create the scope
-    ngMock.inject(function() {});
+    ngMock.inject(function () {});
   });
 
   beforeEach(function () {

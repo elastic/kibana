@@ -6,7 +6,7 @@ describe('Base Object', function () {
   let BaseObject;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function() {
+  beforeEach(ngMock.inject(function () {
     BaseObject = require('ui/utils/base_object');
   }));
 

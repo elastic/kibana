@@ -29,7 +29,7 @@ describe('index pattern', function () {
   let intervals;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function(Private) {
+  beforeEach(ngMock.inject(function (Private) {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 

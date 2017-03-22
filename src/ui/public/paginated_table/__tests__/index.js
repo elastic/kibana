@@ -66,7 +66,7 @@ describe('paginated table', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function(_$rootScope_, _$compile_) {
+  beforeEach(ngMock.inject(function (_$rootScope_, _$compile_) {
     $rootScope = _$rootScope_;
     $compile = _$compile_;
     $scope = $rootScope.$new();
