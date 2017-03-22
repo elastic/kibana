@@ -2,7 +2,7 @@ import { Transform } from 'stream';
 
 import { get } from 'lodash';
 
-export function createDeleteIndexStream({ client, stats, skipExisting }) {
+export function createDeleteIndexStream(client, stats) {
 
   async function deleteIndex(index) {
     try {

@@ -36,9 +36,10 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({ client, stats })
       ]);
 
-      sinon.assert.callCount(stats.skippedIndex, 0);
-      sinon.assert.callCount(stats.deletedIndex, 1);
-      sinon.assert.callCount(stats.createdIndex, 2);
+      expect(stats.getTestSummary()).to.eql({
+        deletedIndex: 1,
+        createdIndex: 2
+      });
       sinon.assert.callCount(client.indices.delete, 1);
       sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing
     });
@@ -121,9 +122,10 @@ describe('esArchiver: createCreateIndexStream()', () => {
         })
       ]);
 
-      sinon.assert.callCount(stats.skippedIndex, 1);
-      sinon.assert.callCount(stats.deletedIndex, 0);
-      sinon.assert.callCount(stats.createdIndex, 1);
+      expect(stats.getTestSummary()).to.eql({
+        skippedIndex: 1,
+        createdIndex: 2,
+      });
       sinon.assert.callCount(client.indices.delete, 0);
       sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing
       expect(client.indices.create.args[0][0]).to.have.property('index', 'new-index');
@@ -150,9 +152,10 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createConcatStream([])
       ]);
 
-      sinon.assert.callCount(stats.skippedIndex, 1);
-      sinon.assert.callCount(stats.deletedIndex, 0);
-      sinon.assert.callCount(stats.createdIndex, 1);
+      expect(stats.getTestSummary()).to.eql({
+        skippedIndex: 1,
+        createdIndex: 1
+      });
       sinon.assert.callCount(client.indices.delete, 0);
       sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing
 

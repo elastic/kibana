@@ -27,7 +27,7 @@ export async function unloadAction({ name, client, dataDir, log }) {
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream({ client, stats })
+      createDeleteIndexStream(client, stats)
     ]);
   }
 

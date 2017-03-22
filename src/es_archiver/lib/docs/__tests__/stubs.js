@@ -5,6 +5,7 @@ const chance = new Chance();
 
 export const createStubStats = () => ({
   indexedDoc: sinon.stub(),
+  archivedDoc: sinon.stub(),
 });
 
 export const createPersonDocRecords = n => times(n, () => ({

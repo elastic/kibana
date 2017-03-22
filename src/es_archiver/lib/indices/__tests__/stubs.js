@@ -4,6 +4,16 @@ export const createStubStats = () => ({
   createdIndex: sinon.stub(),
   deletedIndex: sinon.stub(),
   skippedIndex: sinon.stub(),
+  archivedIndex: sinon.stub(),
+  getTestSummary() {
+    const summary = {};
+    Object.keys(this).forEach(key => {
+      if (this[key].callCount) {
+        summary[key] = this[key].callCount;
+      }
+    });
+    return summary;
+  },
 });
 
 export const createStubIndexRecord = (index) => ({
@@ -28,6 +38,18 @@ const createEsClientError = (errorType) => {
 
 export const createStubClient = (existingIndices = []) => ({
   indices: {
+    get: sinon.spy(async ({ index }) => {
+      if (!existingIndices.includes(index)) {
+        throw createEsClientError('index_not_found_exception');
+      }
+
+      return {
+        [index]: {
+          mappings: {},
+          settings: {},
+        }
+      };
+    }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
         throw createEsClientError('resource_already_exists_exception');
