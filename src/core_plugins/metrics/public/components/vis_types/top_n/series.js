@@ -15,8 +15,6 @@ function TopNSeries(props) {
 
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  !visible;
-
   let body = null;
   if (visible) {
     let metricsClassName = 'kbnTabs__tab';
