@@ -6,7 +6,6 @@ import {
 import url from 'url';
 
 export default (function () {
-  const resolve = require('path').resolve;
   const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {
