@@ -1,7 +1,7 @@
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 
-module.directive('cssTruncate', function ($timeout) {
+module.directive('cssTruncate', function() {
   return {
     restrict: 'A',
     scope: {},

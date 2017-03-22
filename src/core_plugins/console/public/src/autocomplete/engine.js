@@ -7,7 +7,7 @@ module.exports.AutocompleteComponent = function (name) {
 /** called to get the possible suggestions for tokens, when this object is at the end of
  * the resolving chain (and thus can suggest possible continuation paths)
  */
-module.exports.AutocompleteComponent.prototype.getTerms = function (context, editor) {
+module.exports.AutocompleteComponent.prototype.getTerms = function() {
   return [];
 };
 
@@ -21,7 +21,7 @@ module.exports.AutocompleteComponent.prototype.getTerms = function (context, edi
  priority: optional priority to solve collisions between multiple paths. Min value is used across entire chain
  }
  */
-module.exports.AutocompleteComponent.prototype.match = function (token, context, editor) {
+module.exports.AutocompleteComponent.prototype.match = function() {
   return {
     next: this.next
   };
@@ -97,7 +97,7 @@ module.exports.ListComponent = ListComponent;
     return ret;
   };
 
-  cls.validateTokens = function (tokens, context, editor) {
+  cls.validateTokens = function(tokens) {
     if (!this.multi_valued && tokens.length > 1) {
       return false;
     }
@@ -114,11 +114,11 @@ module.exports.ListComponent = ListComponent;
     return true;
   };
 
-  cls.getContextKey = function (context, editor) {
+  cls.getContextKey = function() {
     return this.name;
   };
 
-  cls.getDefaultTermMeta = function (context, editor) {
+  cls.getDefaultTermMeta = function() {
     return this.name;
   };
 

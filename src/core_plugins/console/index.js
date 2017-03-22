@@ -118,7 +118,7 @@ export default function (kibana) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
             },
             xforward: true,
-            onResponse(err, res, request, reply, settings, ttl) {
+            onResponse(err, res, request, reply) {
               if (err != null) {
                 reply(`Error connecting to '${uri}':\n\n${err.message}`).type('text/plain').statusCode = 502;
               } else {

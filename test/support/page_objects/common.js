@@ -82,7 +82,7 @@ export default class Common {
     return this.remote.get(appUrl);
   }
 
-  navigateToApp(appName, testStatusPage) {
+  navigateToApp(appName) {
     const self = this;
     const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);

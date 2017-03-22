@@ -1,14 +1,14 @@
 import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
-app.directive('timelionGrid', function ($compile) {
+app.directive('timelionGrid', function() {
   return {
     restrict: 'A',
     scope: {
       timelionGridRows: '=',
       timelionGridColumns: '='
     },
-    link: function ($scope, $elem, attrs) {
+    link: function($scope, $elem) {
 
       function init() {
         setDimensions();

@@ -1,7 +1,7 @@
 let ace = require('ace');
 
 ace.define("ace/theme/sense-dark", ['require', 'exports', 'module'],
-  function (require, exports, module) {
+  function(require, exports) {
     exports.isDark = true;
     exports.cssClass = "ace-sense-dark";
     exports.cssText = ".ace-sense-dark .ace_gutter {\

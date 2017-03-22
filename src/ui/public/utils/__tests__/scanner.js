@@ -57,7 +57,7 @@ describe('Scanner', function () {
       search.restore();
       search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
       return scanner.scanAndMap('')
-      .then(function (response) {
+      .then(function() {
         done(new Error('should reject'));
       })
       .catch(function (error) {
@@ -68,7 +68,7 @@ describe('Scanner', function () {
 
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function (response) {
+      .then(function() {
         expect(search.called).to.be(true);
         expect(scroll.called).to.be(true);
       });

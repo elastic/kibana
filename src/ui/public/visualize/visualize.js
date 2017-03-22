@@ -185,7 +185,7 @@ uiModules
         }).catch(notify.fatal);
       }));
 
-      $scope.$watch('esResp', prereq(function (resp, prevResp) {
+      $scope.$watch('esResp', prereq(function(resp) {
         if (!resp) return;
         $scope.renderbot.render(resp);
       }));

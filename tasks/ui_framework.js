@@ -66,7 +66,7 @@ module.exports = function (grunt) {
   function uiFrameworkWatch() {
     const debouncedCompile = debounce(uiFrameworkCompile, 400, { leading: true });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(() => {
       debouncedCompile();
 
       chokidar.watch('ui_framework/components', { ignoreInitial: true }).on('all', (event, path) => {

@@ -23,7 +23,7 @@ const dataTypesArray = [
 ];
 
 describe('Vislib Heatmap Chart Test Suite', function () {
-  dataTypesArray.forEach(function (dataType, i) {
+  dataTypesArray.forEach(function(dataType) {
     const name = dataType[0];
     const data = dataType[1];
 

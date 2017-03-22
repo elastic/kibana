@@ -72,7 +72,7 @@ module.directive('fileUpload', function () {
           }
         });
 
-        $button.on('click', function (e) {
+        $button.on('click', function() {
           $fileInput.val(null);
           $fileInput.trigger('click');
         });

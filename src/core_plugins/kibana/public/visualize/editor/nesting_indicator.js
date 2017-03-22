@@ -12,7 +12,7 @@ uiModules
       item: '=',
       list: '='
     },
-    link: function ($scope, $el, attr) {
+    link: function($scope, $el) {
       $scope.$watchCollection('list', function () {
         if (!$scope.list || !$scope.item) return;
 

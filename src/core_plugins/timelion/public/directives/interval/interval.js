@@ -4,7 +4,7 @@ import $ from 'jquery';
 const app = require('ui/modules').get('apps/timelion', []);
 import html from './interval.html';
 
-app.directive('timelionInterval', function ($compile, $timeout, timefilter) {
+app.directive('timelionInterval', function($compile, $timeout) {
   return {
     restrict: 'E',
     scope: {

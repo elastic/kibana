@@ -266,7 +266,7 @@ describe('Saved Object', function () {
           });
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save()
-            .then((id) => {
+            .then(() => {
               expect(savedObject.isSaving).to.be(false);
             });
         });

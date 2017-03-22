@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import errors from 'ui/errors';
 
-export default function PointSeriesProvider(Private) {
+export default function PointSeriesProvider() {
 
   class PointSeries {
     constructor(handler, seriesEl, seriesData, seriesConfig) {

@@ -8,7 +8,7 @@ import uiModules from 'ui/modules';
 
 const chrome = require('ui/chrome')
 .setRootTemplate(require('plugins/status_page/status_page.html'))
-.setRootController('ui', function ($http, $scope) {
+.setRootController('ui', function($http) {
   const ui = this;
   ui.loading = false;
 

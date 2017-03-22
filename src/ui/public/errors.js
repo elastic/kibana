@@ -28,7 +28,7 @@ _.class(KbnError).inherits(Error);
  * If the error permits, propagate the error to be rendered on screen
  * @param handler the handlers that can render the error message to the screen.
  */
-KbnError.prototype.displayToScreen = function (handler) {
+KbnError.prototype.displayToScreen = function() {
   throw this;
 };
 
@@ -183,7 +183,7 @@ _.class(errors.SavedObjectNotFound).inherits(KbnError);
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-errors.IndexPatternMissingIndices = function IndexPatternMissingIndices(type) {
+errors.IndexPatternMissingIndices = function IndexPatternMissingIndices() {
   KbnError.call(this,
     'IndexPattern\'s configured pattern does not match any indices',
     errors.IndexPatternMissingIndices);
@@ -193,7 +193,7 @@ _.class(errors.IndexPatternMissingIndices).inherits(KbnError);
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-errors.NoDefinedIndexPatterns = function NoDefinedIndexPatterns(type) {
+errors.NoDefinedIndexPatterns = function NoDefinedIndexPatterns() {
   KbnError.call(this,
     'Define at least one index pattern to continue',
     errors.NoDefinedIndexPatterns);
@@ -204,7 +204,7 @@ _.class(errors.NoDefinedIndexPatterns).inherits(KbnError);
 /**
  * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
  */
-errors.NoDefaultIndexPattern = function NoDefaultIndexPattern(type) {
+errors.NoDefaultIndexPattern = function NoDefaultIndexPattern() {
   KbnError.call(this,
     'Please specify a default index pattern',
     errors.NoDefaultIndexPattern);
@@ -212,7 +212,7 @@ errors.NoDefaultIndexPattern = function NoDefaultIndexPattern(type) {
 _.class(errors.NoDefaultIndexPattern).inherits(KbnError);
 
 
-errors.PersistedStateError = function PersistedStateError(msg) {
+errors.PersistedStateError = function PersistedStateError() {
   KbnError.call(this,
   'This container is too small to render the visualization',
   errors.ContainerTooSmall);

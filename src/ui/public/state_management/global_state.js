@@ -5,7 +5,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana/global_state');
 
-function GlobalStateProvider(Private, $rootScope, $location) {
+function GlobalStateProvider(Private) {
   const State = Private(StateManagementStateProvider);
 
   _.class(GlobalState).inherits(State);

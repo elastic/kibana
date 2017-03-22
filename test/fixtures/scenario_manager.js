@@ -136,7 +136,7 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
       }
     });
   }))
-  .catch(function (reason) {
+  .catch(function() {
     return self.load(id);
   });
 };

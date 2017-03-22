@@ -12,7 +12,7 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     display: 'Table',
     order: 1,
     template: tableSpyModeTemplate,
-    link: function tableLinkFn($scope, $el) {
+    link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
         'esResp'

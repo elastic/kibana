@@ -103,13 +103,13 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           $rootScope.$broadcast('timelionPlotLeave');
         });
 
-        $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotHover', function(angularEvent, flotEvent, pos) {
           if (!$scope.plot) return;
           $scope.plot.setCrosshair(pos);
           debouncedSetLegendNumbers(pos);
         });
 
-        $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotLeave', function() {
           if (!$scope.plot) return;
           $scope.plot.clearCrosshair();
           clearLegendNumbers();
