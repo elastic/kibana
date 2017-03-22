@@ -7,7 +7,7 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
-import { DashboardStrings } from './dashboard_strings';
+import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -113,7 +113,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      $scope.getDashTitle = () => DashboardStrings.getDashboardTitle(
+      $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
         dashboardState.getViewMode(),
         dashboardState.getIsDirty(timefilter));
