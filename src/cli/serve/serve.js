@@ -137,13 +137,13 @@ module.exports = function (program) {
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      const ClusterManager = require('../cluster/cluster_manager'); // kibana-jscodeshift-ignore
+      const ClusterManager = require('../cluster/cluster_manager');
       new ClusterManager(opts, settings);
       return;
     }
 
     let kbnServer = {};
-    const KbnServer = require('../../server/kbn_server'); // kibana-jscodeshift-ignore
+    const KbnServer = require('../../server/kbn_server');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
