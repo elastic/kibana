@@ -68,6 +68,7 @@ export default function PointSeriesVisType(Private) {
             data: {
               label: 'Count'
             },
+            valueAxis: 'ValueAxis-1',
             drawLinesBetweenPoints: true,
             showCircles: true
           }
