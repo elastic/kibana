@@ -1,7 +1,6 @@
 import _ from 'lodash';
-const alter = require('../lib/alter.js');
-
-const Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
 const tickFormatters = {
   'bits':'bits',
   'bits/s':'bits/s',

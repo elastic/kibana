@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
-import popularityHtml from 'plugins/kibana/management/sections/indices/_field_popularity.html';
 import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
 import dateScripts from 'plugins/kibana/management/sections/indices/_date_scripts';
 import uiModules from 'ui/modules';

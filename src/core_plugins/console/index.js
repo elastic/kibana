@@ -3,7 +3,7 @@ import Boom from 'boom';
 import apiServer from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
-import { has, startsWith, endsWith } from 'lodash';
+import { has } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
 import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
 
@@ -118,7 +118,7 @@ export default function (kibana) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
             },
             xforward: true,
-            onResponse(err, res, request, reply, settings, ttl) {
+            onResponse(err, res, request, reply) {
               if (err != null) {
                 reply(`Error connecting to '${uri}':\n\n${err.message}`).type('text/plain').statusCode = 502;
               } else {

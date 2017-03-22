@@ -1,5 +1,4 @@
 import { Cluster } from './cluster';
-import { get, set } from 'lodash';
 
 export function createClusters(server) {
   const esPlugin = server.plugins.elasticsearch;

@@ -117,7 +117,7 @@ describe('UiExports', function () {
       injectReplacer(kbnServer, stub);
       kbnServer.uiExports.defaultInjectedVars.from_defaults = true;
 
-      const resp = await kbnServer.inject('/app/test_app');
+      await kbnServer.inject('/app/test_app');
       sinon.assert.calledOnce(stub);
       expect(stub.firstCall.args[0]).to.eql({ from_defaults: true, from_test_app: true });
     });

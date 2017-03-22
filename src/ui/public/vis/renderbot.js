@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function RenderbotFactory(Private) {
+export default function RenderbotFactory() {
 
   /**
    * "Abstract" renderbot class which just defines the expected API
@@ -22,7 +22,7 @@ export default function RenderbotFactory(Private) {
    * @param {object} esResp - The raw elasticsearch response
    * @return {undefined}
    */
-  Renderbot.prototype.render = function (esResp) {
+  Renderbot.prototype.render = function () {
     throw new Error('not implemented');
   };
 

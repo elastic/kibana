@@ -1,6 +1,6 @@
 require('./sense_help_example');
 
-const storage = require('../storage');
+import storage from '../storage';
 
 require('ui/modules')
 .get('app/sense')

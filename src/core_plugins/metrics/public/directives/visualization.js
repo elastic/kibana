@@ -10,7 +10,7 @@ const app = modules.get('apps/metrics/directives');
 app.directive('metricsVisualization', (timefilter, $timeout) => {
   return {
     restrict: 'E',
-    link: ($scope, $el, $attrs) => {
+    link: ($scope, $el) => {
       const addToState = ['model', 'visData', 'reversed'];
       const Component = addScope(Visualization, $scope, addToState);
       const handleBrush = createBrushHandler($scope, timefilter);

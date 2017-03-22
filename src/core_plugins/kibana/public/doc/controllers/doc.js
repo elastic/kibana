@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import angular from 'angular';
 import 'ui/notify';
 import 'ui/courier';
 import 'ui/doc_viewer';

@@ -2,12 +2,10 @@ import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
 import AceEditor from 'react-ace';
-import brace from 'brace';
 import 'brace/mode/less';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import DataFormatPicker from '../data_format_picker';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
@@ -46,16 +44,6 @@ class MarkdownPanelConfig extends Component {
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
-
-    const legendPositionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' },
-      { label: 'Bottom', value: 'bottom' }
-    ];
 
     const alignOptions = [
       { label: 'Top', value: 'top' },
@@ -135,11 +123,11 @@ class MarkdownPanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
-            onClick={e => this.switchTab('markdown')}>Markdown</div>
+            onClick={() => this.switchTab('markdown')}>Markdown</div>
           <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={e => this.switchTab('data')}>Data</div>
+            onClick={() => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={e => this.switchTab('options')}>Panel Options</div>
+            onClick={() => this.switchTab('options')}>Panel Options</div>
         </div>
         {view}
       </div>

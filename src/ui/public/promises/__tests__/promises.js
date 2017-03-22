@@ -119,7 +119,7 @@ describe('Promise service', function () {
     context('argument is undefined', () => {
       it('rejects the promise', async () => {
         const football = {};
-        expect(await Promise.race().catch(e => football)).to.be(football);
+        expect(await Promise.race().catch(() => football)).to.be(football);
       });
     });
     context('argument is a string', () => {
@@ -130,7 +130,7 @@ describe('Promise service', function () {
     context('argument is a non-iterable object', () => {
       it('reject the promise', async () => {
         const football = {};
-        expect(await Promise.race({}).catch(e => football)).to.be(football);
+        expect(await Promise.race({}).catch(() => football)).to.be(football);
       });
     });
     context('argument is a generator', () => {

@@ -64,7 +64,9 @@ describe('chrome nav apis', function () {
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }
       ];
-      const { chrome, internals } = init({ appUrlStore, nav });
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
 
       const navLink = chrome.getNavLinkById('kibana:discover');
       expect(navLink).to.eql(nav[0]);
@@ -75,11 +77,13 @@ describe('chrome nav apis', function () {
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }
       ];
-      const { chrome, internals } = init({ appUrlStore, nav });
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
 
       let errorThrown = false;
       try {
-        const navLink = chrome.getNavLinkById('nonexistent');
+        chrome.getNavLinkById('nonexistent');
       } catch (e) {
         errorThrown = true;
       }
@@ -99,7 +103,9 @@ describe('chrome nav apis', function () {
         return l;
       });
 
-      const { chrome, internals } = init({ appUrlStore, nav });
+      const {
+        internals
+      } = init({ appUrlStore, nav });
 
       internals.trackPossibleSubUrl('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
       expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/app/kibana#discover?_g=globalstate');

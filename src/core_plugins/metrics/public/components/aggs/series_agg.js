@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import Select from 'react-select';
 import AggRow from './agg_row';
@@ -7,7 +6,10 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 
 function SeriesAgg(props) {
-  const { model, panel, fields } = props;
+  const {
+    model,
+    panel
+  } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
