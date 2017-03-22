@@ -87,6 +87,6 @@ export class EsArchiver {
    *  @return Promise<Stats>
    */
   async loadIfNeeded(name) {
-    return this.load({ name, skipExisting: true });
+    return this.load(name, { skipExisting: true });
   }
 }
