@@ -189,7 +189,7 @@ describe('Vislib Resize Checker', function () {
 
       // start at 1, and go until there is one left
       for (let i = 1; i < schedule.length - 1; i++) {
-        timerId = checker.continueSchedule();
+        checker.continueSchedule();
       }
 
       const last = _.last(schedule);
