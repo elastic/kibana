@@ -5,7 +5,7 @@ import React, {
 import classNames from 'classnames';
 import keyMirror from 'keymirror';
 
-import { KuiButtonIcon } from './button_icon';
+import { KuiButtonIcon } from './button_icon/button_icon';
 
 const commonPropTypes = {
   type: PropTypes.string,
