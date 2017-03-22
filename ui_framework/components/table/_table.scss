@@ -59,6 +59,7 @@ $tableCellPadding: 7px 8px 8px;
 }
 
 .kuiTableSortIcon {
+  margin-left: 5px;
   pointer-events: none;
 }
 
@@ -127,4 +128,8 @@ $tableCellPadding: 7px 8px 8px;
   .kuiTableRowCell__liner {
     overflow: visible; /* 3 */
   }
+}
+
+.kuiTableHeaderCell__sortable {
+  cursor: pointer;
 }

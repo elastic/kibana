@@ -3,6 +3,8 @@ import _ from 'lodash';
 import uiModules from 'ui/modules';
 const module = uiModules.get('app/dashboard');
 
+import { DashboardConstants } from '../dashboard_constants';
+
 // Used only by the savedDashboards service, usually no reason to change this
 module.factory('SavedDashboard', function (courier, config) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
@@ -42,7 +44,7 @@ module.factory('SavedDashboard', function (courier, config) {
   }
 
   // save these objects with the 'dashboard' type
-  SavedDashboard.type = 'dashboard';
+  SavedDashboard.type = DashboardConstants.TYPE_NAME;
 
   // if type:dashboard has no mapping, we push this mapping into ES
   SavedDashboard.mapping = {

@@ -10,6 +10,8 @@ import _ from 'lodash';
 import VisProvider from 'ui/vis';
 import uiModules from 'ui/modules';
 
+import { VisualizeConstants } from '../visualize_constants';
+
 uiModules
 .get('app/visualize')
 .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
@@ -50,7 +52,7 @@ uiModules
     });
   }
 
-  SavedVis.type = 'visualization';
+  SavedVis.type = VisualizeConstants.SAVED_VIS_TYPE;
 
   SavedVis.mapping = {
     title: 'text',

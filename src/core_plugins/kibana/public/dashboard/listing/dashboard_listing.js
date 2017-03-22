@@ -1,6 +1,6 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
-import 'ui/pager';
+import { Pager } from 'ui/pager';
 import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
@@ -9,7 +9,6 @@ export function DashboardListingController($injector, $scope) {
   const confirmModal = $injector.get('confirmModal');
   const kbnUrl = $injector.get('kbnUrl');
   const Notifier = $injector.get('Notifier');
-  const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
 
@@ -31,8 +30,8 @@ export function DashboardListingController($injector, $scope) {
   const sortItems = () => {
     this.items =
       this.isAscending
-      ? _.sortBy(this.items, 'title')
-      : _.sortBy(this.items, 'title').reverse();
+        ? _.sortBy(this.items, 'title')
+        : _.sortBy(this.items, 'title').reverse();
   };
 
   const calculateItemsOnPage = () => {
@@ -65,7 +64,7 @@ export function DashboardListingController($injector, $scope) {
   this.pageOfItems = [];
   this.filter = '';
 
-  this.pager = pagerFactory.create(this.items.length, 20, 1);
+  this.pager = new Pager(this.items.length, 20, 1);
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();
