@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { get, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import sinon from 'sinon';
 
 import { createStats, createLog } from '../';

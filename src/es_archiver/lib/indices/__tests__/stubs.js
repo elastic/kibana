@@ -66,7 +66,7 @@ export const createStubClient = (existingIndices = []) => ({
         throw createEsClientError('index_not_found_exception');
       }
     }),
-    exists: sinon.spy(async ({ index }) => {
+    exists: sinon.spy(async () => {
       throw new Error('Do not use indices.exists(). React to errors instead.');
     })
   }

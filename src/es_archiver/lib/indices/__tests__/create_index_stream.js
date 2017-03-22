@@ -1,5 +1,3 @@
-import { Writable } from 'stream';
-
 import expect from 'expect.js';
 import sinon from 'sinon';
 import Chance from 'chance';

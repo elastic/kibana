@@ -2,7 +2,7 @@ import { format } from 'util';
 import { PassThrough } from 'stream';
 
 import { createLogLevelFlags } from './log_levels';
-import { magenta, yellow, red, blue, brightBlack } from 'ansicolors';
+import { red, blue, brightBlack } from 'ansicolors';
 
 export function createLog(logLevel = 'silent') {
   const logLevelFlags = createLogLevelFlags(logLevel);

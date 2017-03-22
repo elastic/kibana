@@ -1,7 +1,5 @@
 import { Writable } from 'stream';
 
-import { delay } from 'bluebird';
-
 export function createIndexDocRecordsStream(client, stats) {
 
   async function indexDocs(docs) {

@@ -13,15 +13,6 @@ import {
   createPersonDocRecords,
 } from './stubs';
 
-const createDefer = () => {
-  const defer = {};
-  defer.promise = new Promise((resolve, reject) => {
-    defer.resolve = resolve;
-    defer.reject = reject;
-  });
-  return defer;
-};
-
 const recordsToBulkBody = records => {
   return records.reduce((acc, record) => {
     const { index, type, id, source } = record.value;
@@ -149,8 +140,8 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
     const records = createPersonDocRecords(2);
     const stats = createStubStats();
     const client = createStubClient([
-      async (name, params) => ({ ok: true }),
-      async (name, params) => ({ errors: true, forcedError: true })
+      async () => ({ ok: true }),
+      async () => ({ errors: true, forcedError: true })
     ]);
 
     try {

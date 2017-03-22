@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import Chance from 'chance';
-import sinon from 'sinon';
 
 import {
   createConcatStream,

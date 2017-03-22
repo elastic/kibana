@@ -18,7 +18,7 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        const resp = await client.indices.create({
+        await client.indices.create({
           method: 'PUT',
           index,
           body: { settings, mappings },

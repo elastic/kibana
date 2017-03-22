@@ -39,7 +39,7 @@ function elasticdumpModule(myinput, myoutput, index, mytype) {
   };
   const dumper = new Elasticdump(options.input, options.output, options);
   const promise = new Promise(function (resolve, reject) {
-    dumper.dump(function (error, totalWrites) {
+    dumper.dump(function (error) {
       if (error) {
         reject(Error(error));
       } else {

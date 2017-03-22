@@ -6,7 +6,6 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
-import { format as formatUrl } from 'url';
 
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
@@ -39,7 +38,7 @@ cmd.command('unload <name>')
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
-  .action(name => execute('rebuildAll'));
+  .action(() => execute('rebuildAll'));
 
 cmd.parse(process.argv);
 
