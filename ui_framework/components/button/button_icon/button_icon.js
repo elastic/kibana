@@ -7,15 +7,15 @@ import keyMirror from 'keymirror';
 
 const KuiButtonIcon = props => {
   const typeToClassNameMap = {
-    [KuiButtonIcon.TYPE.CREATE]: 'fa-plus',
-    [KuiButtonIcon.TYPE.DELETE]: 'fa-trash',
-    [KuiButtonIcon.TYPE.PREVIOUS]: 'fa-chevron-left',
-    [KuiButtonIcon.TYPE.NEXT]: 'fa-chevron-right',
-    [KuiButtonIcon.TYPE.LOADING]: 'fa-spinner fa-spin',
+    create: 'fa-plus',
+    delete: 'fa-trash',
+    previous: 'fa-chevron-left',
+    next: 'fa-chevron-right',
+    loading: 'fa-spinner fa-spin',
   };
 
   const iconClasses = classNames('kuiButton__icon kuiIcon', props.className, {
-    [typeToClassNameMap[KuiButtonIcon.TYPE[props.type]]]: props.type,
+    [typeToClassNameMap[props.type]]: props.type,
   });
 
   return (
@@ -23,16 +23,14 @@ const KuiButtonIcon = props => {
   );
 };
 
-KuiButtonIcon.TYPE = keyMirror({
-  CREATE: null,
-  DELETE: null,
-  PREVIOUS: null,
-  NEXT: null,
-  LOADING: null,
-});
-
 KuiButtonIcon.propTypes = {
-  type: PropTypes.string,
+  type: PropTypes.oneOf([
+    'create',
+    'delete',
+    'previous',
+    'next',
+    'loading',
+  ]),
   className: PropTypes.string,
 };
 

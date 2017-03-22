@@ -6,34 +6,34 @@ import {
 
 export default () => (
   <div className="kuiToolBar">
-    <KuiButton type={KuiButton.TYPE.BASIC}>
+    <KuiButton type="basic">
       Basic button
     </KuiButton>
 
     <KuiButton
-      type={KuiButton.TYPE.BASIC}
+      type="basic"
       isDisabled
     >
       Basic button, disabled
     </KuiButton>
 
-    <KuiButton type={KuiButton.TYPE.PRIMARY}>
+    <KuiButton type="primary">
       Primary button
     </KuiButton>
 
     <KuiButton
-      type={KuiButton.TYPE.PRIMARY}
+      type="primary"
       isDisabled
     >
       Primary button, disabled
     </KuiButton>
 
-    <KuiButton type={KuiButton.TYPE.DANGER}>
+    <KuiButton type="danger">
       Danger button
     </KuiButton>
 
     <KuiButton
-      type={KuiButton.TYPE.DANGER}
+      type="danger"
       isDisabled
     >
       Danger button, disabled

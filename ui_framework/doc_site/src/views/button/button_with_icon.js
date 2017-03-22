@@ -8,8 +8,8 @@ import {
 export default () => (
   <div>
     <KuiButton
-      type={KuiButton.TYPE.PRIMARY}
-      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.CREATE} />}
+      type="primary"
+      icon={<KuiButtonIcon type="create" />}
     >
       Create
     </KuiButton>
@@ -17,8 +17,8 @@ export default () => (
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.DANGER}
-      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.DELETE} />}
+      type="danger"
+      icon={<KuiButtonIcon type="delete" />}
     >
       Delete
     </KuiButton>
@@ -26,8 +26,8 @@ export default () => (
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.BASIC}
-      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />}
+      type="basic"
+      icon={<KuiButtonIcon type="previous" />}
     >
       Previous
     </KuiButton>
@@ -35,9 +35,9 @@ export default () => (
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.BASIC}
-      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />}
-      isIconOnRight
+      type="basic"
+      icon={<KuiButtonIcon type="next" />}
+      iconPosition='right'
     >
       Next
     </KuiButton>
@@ -45,8 +45,8 @@ export default () => (
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.BASIC}
-      icon={<KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />}
+      type="basic"
+      icon={<KuiButtonIcon type="loading" />}
     >
       Loading
     </KuiButton>
@@ -54,7 +54,7 @@ export default () => (
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.BASIC}
+      type="basic"
       icon={<KuiButtonIcon className="fa-plane" />}
     />
   </div>

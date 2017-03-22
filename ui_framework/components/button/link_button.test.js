@@ -26,7 +26,7 @@ describe('KuiLinkButton', () => {
       describe('basic', () => {
         test('renders the basic class', () => {
           const $button = render(
-            <KuiLinkButton type={KuiLinkButton.TYPE.BASIC} />
+            <KuiLinkButton type="basic" />
           );
 
           expect($button)
@@ -37,7 +37,7 @@ describe('KuiLinkButton', () => {
       describe('hollow', () => {
         test('renders the hollow class', () => {
           const $button = render(
-            <KuiLinkButton type={KuiLinkButton.TYPE.HOLLOW} />
+            <KuiLinkButton type="hollow" />
           );
 
           expect($button)
@@ -48,7 +48,7 @@ describe('KuiLinkButton', () => {
       describe('danger', () => {
         test('renders the danger class', () => {
           const $button = render(
-            <KuiLinkButton type={KuiLinkButton.TYPE.DANGER} />
+            <KuiLinkButton type="danger" />
           );
 
           expect($button)
@@ -59,7 +59,7 @@ describe('KuiLinkButton', () => {
       describe('primary', () => {
         test('renders the primary class', () => {
           const $button = render(
-            <KuiLinkButton type={KuiLinkButton.TYPE.PRIMARY} />
+            <KuiLinkButton type="primary" />
           );
 
           expect($button)
@@ -101,10 +101,13 @@ describe('KuiLinkButton', () => {
       });
     });
 
-    describe('isIconOnRight', () => {
+    describe('iconPosition', () => {
       test('moves the icon to the right', () => {
         const $button = shallow(
-          <KuiLinkButton icon="Icon" isIconOnRight>
+          <KuiLinkButton
+            icon="Icon"
+            iconPosition="right"
+          >
             Hello
           </KuiLinkButton>
         );

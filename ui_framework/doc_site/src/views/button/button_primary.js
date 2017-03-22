@@ -6,14 +6,14 @@ import {
 
 export default () => (
   <div>
-    <KuiButton type={KuiButton.TYPE.PRIMARY}>
+    <KuiButton type="primary">
       Primary button
     </KuiButton>
 
     <br />
 
     <KuiButton
-      type={KuiButton.TYPE.PRIMARY}
+      type="primary"
       isDisabled
     >
       Primary button, disabled

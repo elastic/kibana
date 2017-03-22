@@ -8,7 +8,12 @@ import keyMirror from 'keymirror';
 import { KuiButtonIcon } from './button_icon/button_icon';
 
 const commonPropTypes = {
-  type: PropTypes.string,
+  type: PropTypes.oneOf([
+    'basic',
+    'hollow',
+    'danger',
+    'primary',
+  ]),
   testSubject: PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
@@ -16,22 +21,36 @@ const commonPropTypes = {
   className: PropTypes.string,
 };
 
+const nonVoidPropTypes = {
+  icon: PropTypes.node,
+  iconPosition: PropTypes.oneOf([
+    'left',
+    'right',
+  ]),
+  children: PropTypes.node,
+  isLoading: PropTypes.bool,
+};
+
+const nonVoidDefaultProps = {
+  iconPosition: 'left',
+};
+
 const getIcon = props => (
   props.isLoading
-    ? <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
+    ? <KuiButtonIcon type="loading" />
     : props.icon
 );
 
 const getClassName = (props, icon) => {
   const typeToClassNameMap = {
-    [KuiButton.TYPE.BASIC]: 'kuiButton--basic',
-    [KuiButton.TYPE.HOLLOW]: 'kuiButton--hollow',
-    [KuiButton.TYPE.DANGER]: 'kuiButton--danger',
-    [KuiButton.TYPE.PRIMARY]: 'kuiButton--primary',
+    basic: 'kuiButton--basic',
+    hollow: 'kuiButton--hollow',
+    danger: 'kuiButton--danger',
+    primary: 'kuiButton--primary',
   };
 
   return classNames('kuiButton', props.className, {
-    [typeToClassNameMap[KuiButton.TYPE[props.type]]]: props.type,
+    [typeToClassNameMap[props.type]]: props.type,
     'kuiButton--iconText': icon,
   });
 };
@@ -41,18 +60,23 @@ const getChildren = (props, icon) => {
   // correctly.
   const wrappedChildren = props.children ? <span>{props.children}</span> : undefined;
 
-  return props.isIconOnRight
-    ? (
-      <span>
-        {wrappedChildren}
-        {icon}
-      </span>
-    ) : (
-      <span>
-        {icon}
-        {wrappedChildren}
-      </span>
-    );
+  switch(props.iconPosition) {
+    case 'left':
+      return (
+        <span>
+          {icon}
+          {wrappedChildren}
+        </span>
+      );
+
+    case 'right':
+      return (
+        <span>
+          {wrappedChildren}
+          {icon}
+        </span>
+      );
+  }
 };
 
 const getOnClick = props => (
@@ -82,11 +106,12 @@ const KuiButton = props => {
 };
 
 KuiButton.propTypes = {
-  icon: PropTypes.node,
-  isIconOnRight: PropTypes.bool,
-  children: PropTypes.node,
-  isLoading: PropTypes.bool,
+  ...nonVoidPropTypes,
   ...commonPropTypes,
+};
+
+KuiButton.defaultProps = {
+  ...nonVoidDefaultProps,
 };
 
 const KuiLinkButton = props => {
@@ -108,11 +133,12 @@ const KuiLinkButton = props => {
 KuiLinkButton.propTypes = {
   href: PropTypes.string,
   target: PropTypes.string,
-  icon: PropTypes.node,
-  isIconOnRight: PropTypes.bool,
-  children: PropTypes.node,
-  isLoading: PropTypes.bool,
+  ...nonVoidPropTypes,
   ...commonPropTypes,
+};
+
+KuiLinkButton.defaultProps = {
+  ...nonVoidDefaultProps,
 };
 
 const KuiSubmitButton = props => {
@@ -131,13 +157,6 @@ KuiSubmitButton.propTypes = {
   children: PropTypes.string,
   ...commonPropTypes,
 };
-
-KuiButton.TYPE = KuiSubmitButton.TYPE = KuiLinkButton.TYPE = keyMirror({
-  BASIC: null,
-  HOLLOW: null,
-  DANGER: null,
-  PRIMARY: null,
-});
 
 export {
   KuiButton,

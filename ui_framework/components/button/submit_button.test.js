@@ -26,7 +26,7 @@ describe('KuiSubmitButton', () => {
       describe('basic', () => {
         test('renders the basic class', () => {
           const $button = render(
-            <KuiSubmitButton type={KuiSubmitButton.TYPE.BASIC} />
+            <KuiSubmitButton type="basic" />
           );
 
           expect($button)
@@ -37,7 +37,7 @@ describe('KuiSubmitButton', () => {
       describe('hollow', () => {
         test('renders the hollow class', () => {
           const $button = render(
-            <KuiSubmitButton type={KuiSubmitButton.TYPE.HOLLOW} />
+            <KuiSubmitButton type="hollow" />
           );
 
           expect($button)
@@ -48,7 +48,7 @@ describe('KuiSubmitButton', () => {
       describe('danger', () => {
         test('renders the danger class', () => {
           const $button = render(
-            <KuiSubmitButton type={KuiSubmitButton.TYPE.DANGER} />
+            <KuiSubmitButton type="danger" />
           );
 
           expect($button)
@@ -59,7 +59,7 @@ describe('KuiSubmitButton', () => {
       describe('primary', () => {
         test('renders the primary class', () => {
           const $button = render(
-            <KuiSubmitButton type={KuiSubmitButton.TYPE.PRIMARY} />
+            <KuiSubmitButton type="primary" />
           );
 
           expect($button)

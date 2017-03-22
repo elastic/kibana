@@ -8,15 +8,15 @@ import {
 export default () => (
   <div>
     <KuiButtonGroup>
-      <KuiButton type={KuiButton.TYPE.BASIC}>
+      <KuiButton type="basic">
         Cancel
       </KuiButton>
 
-      <KuiButton type={KuiButton.TYPE.BASIC}>
+      <KuiButton type="basic">
         Duplicate
       </KuiButton>
 
-      <KuiButton type={KuiButton.TYPE.PRIMARY}>
+      <KuiButton type="primary">
         Save
       </KuiButton>
     </KuiButtonGroup>
@@ -24,7 +24,7 @@ export default () => (
     <br />
 
     <KuiButtonGroup>
-      <KuiButton type={KuiButton.TYPE.BASIC}>
+      <KuiButton type="basic">
         Button group with one button
       </KuiButton>
     </KuiButtonGroup>

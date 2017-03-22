@@ -26,7 +26,7 @@ describe('KuiButtonIcon', () => {
       describe('create', () => {
         test('renders the create class', () => {
           const $buttonIcon = render(
-            <KuiButtonIcon type={KuiButtonIcon.TYPE.CREATE} />
+            <KuiButtonIcon type="create" />
           );
 
           expect($buttonIcon)
@@ -37,7 +37,7 @@ describe('KuiButtonIcon', () => {
       describe('delete', () => {
         test('renders the delete class', () => {
           const $buttonIcon = render(
-            <KuiButtonIcon type={KuiButtonIcon.TYPE.DELETE} />
+            <KuiButtonIcon type="delete" />
           );
 
           expect($buttonIcon)
@@ -48,7 +48,7 @@ describe('KuiButtonIcon', () => {
       describe('previous', () => {
         test('renders the previous class', () => {
           const $buttonIcon = render(
-            <KuiButtonIcon type={KuiButtonIcon.TYPE.PREVIOUS} />
+            <KuiButtonIcon type="previous" />
           );
 
           expect($buttonIcon)
@@ -59,7 +59,7 @@ describe('KuiButtonIcon', () => {
       describe('next', () => {
         test('renders the next class', () => {
           const $buttonIcon = render(
-            <KuiButtonIcon type={KuiButtonIcon.TYPE.NEXT} />
+            <KuiButtonIcon type="next" />
           );
 
           expect($buttonIcon)
@@ -70,7 +70,7 @@ describe('KuiButtonIcon', () => {
       describe('loading', () => {
         test('renders the loading class', () => {
           const $buttonIcon = render(
-            <KuiButtonIcon type={KuiButtonIcon.TYPE.LOADING} />
+            <KuiButtonIcon type="loading" />
           );
 
           expect($buttonIcon)

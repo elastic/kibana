@@ -8,7 +8,7 @@ import {
 
 export default () => (
   <div>
-    <KuiButton type={KuiButton.TYPE.BASIC}>
+    <KuiButton type="basic">
       Button element
     </KuiButton>
 
@@ -18,7 +18,7 @@ export default () => (
       e.preventDefault();
       window.alert('Submit');
     }}>
-      <KuiSubmitButton type={KuiSubmitButton.TYPE.BASIC}>
+      <KuiSubmitButton type="basic">
         Submit input element
       </KuiSubmitButton>
     </form>
@@ -26,7 +26,7 @@ export default () => (
     &nbsp;
 
     <KuiLinkButton
-      type={KuiLinkButton.TYPE.BASIC}
+      type="basic"
       href="http://www.google.com"
       target="_blank"
     >

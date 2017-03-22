@@ -26,7 +26,7 @@ describe('KuiButton', () => {
       describe('basic', () => {
         test('renders the basic class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.BASIC} />
+            <KuiButton type="basic" />
           );
 
           expect($button)
@@ -37,7 +37,7 @@ describe('KuiButton', () => {
       describe('hollow', () => {
         test('renders the hollow class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.HOLLOW} />
+            <KuiButton type="hollow" />
           );
 
           expect($button)
@@ -48,7 +48,7 @@ describe('KuiButton', () => {
       describe('danger', () => {
         test('renders the danger class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.DANGER} />
+            <KuiButton type="danger" />
           );
 
           expect($button)
@@ -59,7 +59,7 @@ describe('KuiButton', () => {
       describe('primary', () => {
         test('renders the primary class', () => {
           const $button = render(
-            <KuiButton type={KuiButton.TYPE.PRIMARY} />
+            <KuiButton type="primary" />
           );
 
           expect($button)
@@ -101,10 +101,13 @@ describe('KuiButton', () => {
       });
     });
 
-    describe('isIconOnRight', () => {
+    describe('iconPosition', () => {
       test('moves the icon to the right', () => {
         const $button = shallow(
-          <KuiButton icon="Icon" isIconOnRight>
+          <KuiButton
+            icon="Icon"
+            iconPosition="right"
+          >
             Hello
           </KuiButton>
         );
