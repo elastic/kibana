@@ -1,4 +1,4 @@
-import settings from '../settings';
+import * as settings from '../settings';
 require('ui/directives/input_focus');
 
 require('ui/modules')
