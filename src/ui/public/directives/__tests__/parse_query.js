@@ -22,9 +22,6 @@ const init = function () {
   // Load the application
   ngMock.module('kibana');
 
-  ngMock.module('kibana', function () {
-  });
-
   // Create the scope
   ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Private_, _config_) {
     $compile = _$compile_;
