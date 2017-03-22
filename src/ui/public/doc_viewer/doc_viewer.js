@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 import DocViewsProvider from 'ui/registry/doc_views';

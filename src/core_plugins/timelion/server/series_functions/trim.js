@@ -1,7 +1,6 @@
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
-import argType from '../handlers/lib/arg_type.js';
 
 module.exports = new Chainable('trim', {
   args: [

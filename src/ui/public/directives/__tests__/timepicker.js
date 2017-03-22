@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
 import 'plugins/kibana/discover/index';

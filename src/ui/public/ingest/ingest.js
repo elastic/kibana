@@ -1,5 +1,5 @@
 import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
+import { keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';

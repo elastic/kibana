@@ -3,8 +3,6 @@ import {
   Log,
 } from './';
 
-import util from 'util';
-import path from 'path';
 import url from 'url';
 
 export default (function () {

@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_time_filter';

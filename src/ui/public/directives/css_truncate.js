@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import _ from 'lodash';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 

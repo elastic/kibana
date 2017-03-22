@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 import { join, relative, resolve } from 'path';
 import readYamlConfig from '../read_yaml_config';
-import sinon from 'auto-release-sinon';
 
 function fixture(name) {
   return resolve(__dirname, 'fixtures', name);

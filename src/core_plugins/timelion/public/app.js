@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import logoUrl from './logo.png';
 import moment from 'moment-timezone';
 
 require('plugins/timelion/directives/cells/cells');

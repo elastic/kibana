@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import Scanner from 'ui/utils/scanner';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
 import uiModules from 'ui/modules';
 const module = uiModules.get('app/dashboard');

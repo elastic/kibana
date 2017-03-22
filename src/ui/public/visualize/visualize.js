@@ -1,7 +1,6 @@
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
-import $ from 'jquery';
 import _ from 'lodash';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';

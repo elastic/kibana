@@ -1,9 +1,6 @@
 import _ from 'lodash';
 import { fromNode } from 'bluebird';
-import npm from 'npm';
 import npmLicense from 'license-checker';
-
-import util from 'util';
 
 export default function licenses(grunt) {
   grunt.registerTask('licenses', 'Checks dependency licenses', async function () {

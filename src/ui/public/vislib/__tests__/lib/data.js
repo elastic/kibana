@@ -1,11 +1,7 @@
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';
-import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
-import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
 

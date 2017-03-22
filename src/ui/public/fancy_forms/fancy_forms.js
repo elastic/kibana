@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import KbnFormController from 'ui/fancy_forms/kbn_form_controller';
 import uiModules from 'ui/modules';
 

@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
 import isUpgradeable from './is_upgradeable';
 import _ from 'lodash';
-import { format } from 'util';
 
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;

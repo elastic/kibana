@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
-import toMS from '../../lib/to_milliseconds.js';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';

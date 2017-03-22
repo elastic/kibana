@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import errors from 'ui/errors';
-
 import RequestQueueProvider from '../../_request_queue';
 import ErrorHandlerRequestProvider from './error_handler';
 

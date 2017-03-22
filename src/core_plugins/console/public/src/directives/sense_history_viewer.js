@@ -1,4 +1,3 @@
-import history from '../history';
 let SenseEditor = require('../sense_editor/editor');
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 

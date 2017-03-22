@@ -17,14 +17,7 @@ import util from 'util';
 
 import getUrl from '../../utils/get_url';
 
-import {
-  config,
-  defaultTryTimeout,
-  defaultFindTimeout,
-  remote,
-  shieldPage,
-  esClient
-} from '../index';
+import { config, defaultFindTimeout, esClient } from '../index';
 
 import PageObjects from './index';
 

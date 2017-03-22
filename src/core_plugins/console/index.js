@@ -3,7 +3,7 @@ import Boom from 'boom';
 import apiServer from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
-import { has, startsWith, endsWith } from 'lodash';
+import { has } from 'lodash';
 import { ProxyConfigCollection } from './server/proxy_config_collection';
 import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
 

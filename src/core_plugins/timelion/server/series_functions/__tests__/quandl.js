@@ -1,6 +1,5 @@
 import proxyquire from 'proxyquire';
 import Promise from 'bluebird';
-import _ from 'lodash';
 import assert from 'chai';
 const expect = assert.expect;
 

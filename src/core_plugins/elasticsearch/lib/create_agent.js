@@ -1,5 +1,5 @@
 import url from 'url';
-import { get, size } from 'lodash';
+import { get } from 'lodash';
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 import http from 'http';
 import https from 'https';

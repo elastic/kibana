@@ -1,7 +1,5 @@
 import fromRoot from '../utils/from_root';
 import { includes, flow, escapeRegExp } from 'lodash';
-import { isString, isArray, isPlainObject, get } from 'lodash';
-import { keys } from 'lodash';
 
 const asRegExp = flow(
   escapeRegExp,

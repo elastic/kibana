@@ -1,8 +1,6 @@
 import expect from 'expect.js';
 import mapUri from '../map_uri';
-import { get, defaults } from 'lodash';
-import sinon from 'sinon';
-import url from 'url';
+import { defaults } from 'lodash';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/map_uri', function () {

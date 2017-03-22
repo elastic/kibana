@@ -1,7 +1,5 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { times } from 'lodash';
-import sinon from 'auto-release-sinon';
 
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
 import NoDigestPromises from 'test_utils/no_digest_promises';

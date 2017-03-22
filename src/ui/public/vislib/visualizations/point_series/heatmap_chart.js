@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 import getColor from 'ui/vislib/components/color/heatmap_color';

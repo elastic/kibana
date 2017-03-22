@@ -1,8 +1,6 @@
 import 'plugins/kibana/visualize/editor/agg_params';
 import 'plugins/kibana/visualize/editor/agg_add';
 import _ from 'lodash';
-import $ from 'jquery';
-import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import uiModules from 'ui/modules';
 import aggTemplate from 'plugins/kibana/visualize/editor/agg.html';

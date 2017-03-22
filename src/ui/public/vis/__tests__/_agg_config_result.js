@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

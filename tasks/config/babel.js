@@ -1,4 +1,3 @@
-import { defaults } from 'lodash';
 import babelOptions from '../../src/optimize/babel_options';
 
 module.exports = {

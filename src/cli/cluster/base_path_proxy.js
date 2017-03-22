@@ -1,6 +1,6 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { map, merge, sample } from 'lodash';
+import { map, sample } from 'lodash';
 import { format as formatUrl } from 'url';
 import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
@@ -11,7 +11,6 @@ import setupConnection from '../../server/http/setup_connection';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
-import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
