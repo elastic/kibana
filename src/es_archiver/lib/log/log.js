@@ -4,7 +4,7 @@ import { PassThrough } from 'stream';
 import { createLogLevelFlags } from './log_levels';
 import { magenta, yellow, red, blue, brightBlack } from 'ansicolors';
 
-export function createLog(logLevel) {
+export function createLog(logLevel = 'silent') {
   const logLevelFlags = createLogLevelFlags(logLevel);
 
   function write(stream, ...args) {

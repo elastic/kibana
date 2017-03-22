@@ -124,7 +124,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       expect(stats.getTestSummary()).to.eql({
         skippedIndex: 1,
-        createdIndex: 2,
+        createdIndex: 1,
       });
       sinon.assert.callCount(client.indices.delete, 0);
       sinon.assert.callCount(client.indices.create, 2); // one failed create because of existing

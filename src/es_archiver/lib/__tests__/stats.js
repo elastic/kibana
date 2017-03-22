@@ -54,7 +54,7 @@ describe('esArchiver: Stats', () => {
     });
 
     it('logs that the index was skipped', async () => {
-      const log = createLog(3);
+      const log = createLog('debug');
       const stats = createStats('name', log);
       stats.skippedIndex('index-name');
       expect(await drain(log)).to.contain('Skipped');
@@ -69,7 +69,7 @@ describe('esArchiver: Stats', () => {
       expect(indexStats).to.have.property('deleted', true);
     });
     it('logs that the index was deleted', async () => {
-      const log = createLog(3);
+      const log = createLog('debug');
       const stats = createStats('name', log);
       stats.deletedIndex('index-name');
       expect(await drain(log)).to.contain('Deleted');
@@ -84,14 +84,14 @@ describe('esArchiver: Stats', () => {
       expect(indexStats).to.have.property('created', true);
     });
     it('logs that the index was created', async () => {
-      const log = createLog(3);
+      const log = createLog('debug');
       const stats = createStats('name', log);
       stats.createdIndex('index-name');
       expect(await drain(log)).to.contain('Created');
     });
     context('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
-        const log = createLog(3);
+        const log = createLog('debug');
         const stats = createStats('name', log);
         stats.createdIndex('index-name', {
           foo: 'bar'
@@ -103,7 +103,7 @@ describe('esArchiver: Stats', () => {
     });
     context('without metadata', () => {
       it('no debug logging', async () => {
-        const log = createLog(3);
+        const log = createLog('debug');
         const stats = createStats('name', log);
         stats.createdIndex('index-name');
         const output = await drain(log);
@@ -120,14 +120,14 @@ describe('esArchiver: Stats', () => {
       expect(indexStats).to.have.property('archived', true);
     });
     it('logs that the index was archived', async () => {
-      const log = createLog(3);
+      const log = createLog('debug');
       const stats = createStats('name', log);
       stats.archivedIndex('index-name');
       expect(await drain(log)).to.contain('Archived');
     });
     context('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
-        const log = createLog(3);
+        const log = createLog('debug');
         const stats = createStats('name', log);
         stats.archivedIndex('index-name', {
           foo: 'bar'
@@ -139,7 +139,7 @@ describe('esArchiver: Stats', () => {
     });
     context('without metadata', () => {
       it('no debug logging', async () => {
-        const log = createLog(3);
+        const log = createLog('debug');
         const stats = createStats('name', log);
         stats.archivedIndex('index-name');
         const output = await drain(log);
