@@ -64,9 +64,7 @@ class FlotChart extends Component {
 
   componentWillReceiveProps(newProps) {
     if (this.plot) {
-      const {
-        series
-      } = newProps;
+      const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
       this.plot.setData(this.calculateData(series, newProps.show));
@@ -263,4 +261,3 @@ FlotChart.propTypes = {
 };
 
 export default FlotChart;
-

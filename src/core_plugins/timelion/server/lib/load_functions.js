@@ -22,7 +22,8 @@ module.exports = function (directory) {
   })
   .map(function (file) {
     const parts = file.split('/');
-    return getTuple(directory, parts[parts.length - 2]);
+    const name = parts[parts.length - 2];
+    return getTuple(directory, name);
   }).value();
 
   const functions = _.zipObject(files.concat(directories));

@@ -44,6 +44,7 @@ export default class DashboardPage {
       await PageObjects.common.try(async () => {
         const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
         await goToDashboardLink.click();
+        // Once the searchFilter can be found, we know the page finished loading.
         await PageObjects.common.findTestSubject('searchFilter');
       });
     }

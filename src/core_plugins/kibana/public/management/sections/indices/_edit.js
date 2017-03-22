@@ -64,7 +64,8 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.indexPattern.fields.filter(() => { type: 'conflict'; });
+    $scope.conflictFields = $scope.indexPattern.fields
+      .filter(field => field.type === 'conflict');
   });
 
   $scope.refreshFields = function () {
