@@ -3,7 +3,6 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import keyMap from 'ui/utils/key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
-const KeyboardEvent = window.KeyboardEvent;
 
 /**
  * Simulate keyboard events in an element. This allows testing the way that
@@ -90,7 +89,7 @@ export default function ($el, sequence) {
     });
   }
 
-  function fire(type, key, repeat) {
+  function fire(type, key) {
     const keyCode = reverseKeyMap[key];
     if (!keyCode) throw new TypeError('invalid key "' + key + '"');
 

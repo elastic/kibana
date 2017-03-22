@@ -1,7 +1,5 @@
 import expiry from 'expiry-js';
-import { intersection } from 'lodash';
 import { resolve } from 'path';
-import { arch, platform } from 'os';
 
 function generateUrls({ version, plugin }) {
   return [

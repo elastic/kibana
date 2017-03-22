@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import reactcss from 'reactcss';
 import _ from 'lodash';
 
 function ErrorComponent(props) {

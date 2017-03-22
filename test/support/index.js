@@ -7,7 +7,6 @@ import {
   EsClient,
 } from './utils';
 import ScenarioManager from '../fixtures/scenario_manager';
-import PageObjects from './page_objects';
 
 // Intern values provided via the root index file of the test suite.
 const kbnInternVars = global.__kibana__intern__;

@@ -1,10 +1,10 @@
 require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
-const _ = require('lodash');
-const $ = require('jquery');
-const moment = require('moment-timezone');
-const observeResize = require('plugins/timelion/lib/observe_resize');
-const calculateInterval = require('plugins/timelion/lib/calculate_interval');
+import _ from 'lodash';
+import $ from 'jquery';
+import moment from 'moment-timezone';
+import observeResize from 'plugins/timelion/lib/observe_resize';
+import calculateInterval from 'plugins/timelion/lib/calculate_interval';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 
@@ -14,7 +14,6 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        const timezone = Private(require('plugins/timelion/services/timezone'))();
         const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
         const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
@@ -105,13 +104,13 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           $rootScope.$broadcast('timelionPlotLeave');
         });
 
-        $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos) {
           if (!$scope.plot) return;
           $scope.plot.setCrosshair(pos);
           debouncedSetLegendNumbers(pos);
         });
 
-        $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotLeave', function () {
           if (!$scope.plot) return;
           $scope.plot.clearCrosshair();
           clearLegendNumbers();

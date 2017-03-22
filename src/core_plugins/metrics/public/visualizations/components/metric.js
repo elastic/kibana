@@ -47,7 +47,11 @@ class Metric extends Component {
 
   render() {
     const { metric, secondary } = this.props;
-    const { scale, translateX, translateY, top, left } = this.state;
+    const {
+      scale,
+      translateX,
+      translateY
+    } = this.state;
     const primaryFormatter = metric && (metric.tickFormatter || metric.formatter) || (n => n);
     const primaryValue = primaryFormatter(getLastValue(metric && metric.data || 0));
     const styles = reactcss({

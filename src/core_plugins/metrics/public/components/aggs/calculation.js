@@ -3,7 +3,6 @@ import _ from 'lodash';
 import uuid from 'node-uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
-import Select from 'react-select';
 
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';

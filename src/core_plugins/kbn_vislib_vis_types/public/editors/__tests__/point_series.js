@@ -10,7 +10,6 @@ import AggConfigProvider from 'ui/vis/agg_config';
 
 describe('point series editor', function () {
   let $parentScope;
-  let $scope;
   let $container;
   let $elem;
   let lineVisType;
@@ -55,9 +54,6 @@ describe('point series editor', function () {
 
     // Digest everything
     $elem.scope().$digest();
-
-    // give us a scope to work with
-    $scope = $elem.isolateScope();
   }));
 
   afterEach(function () {

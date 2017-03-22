@@ -10,7 +10,6 @@ describe('kibana cli', function () {
     describe('progressReporter', function () {
       let logger;
       let progress;
-      let request;
 
       beforeEach(function () {
         logger = new Logger({ silent: false, quiet: false });
@@ -87,7 +86,6 @@ describe('kibana cli', function () {
         });
 
       });
-
     });
 
   });

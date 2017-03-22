@@ -2,10 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import _ from 'lodash';
 import IndexPattern from '../index_pattern';
-import Select from 'react-select';
-import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import DataFormatPicker from '../data_format_picker';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'node-uuid';
@@ -36,15 +33,9 @@ class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const { fields } = this.props;
     const defaults = { drilldown_url: '', filter: '' };
     const model = { ...defaults, ...this.props.model };
-    const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -108,9 +99,9 @@ class TopNPanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={e => this.switchTab('data')}>Data</div>
+            onClick={() => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={e => this.switchTab('options')}>Panel Options</div>
+            onClick={() => this.switchTab('options')}>Panel Options</div>
         </div>
         {view}
       </div>

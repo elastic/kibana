@@ -4,14 +4,11 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import tabifyPm from 'ui/agg_response/tabify/tabify';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
-
   let $rootScope;
-  let TableGroup;
   let $compile;
   let Private;
   let $scope;
@@ -27,7 +24,6 @@ describe('Controller', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(StateManagementAppStateProvider);
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
   }));
 

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Downsampling of cummulative metrics
 // Good: count, sum

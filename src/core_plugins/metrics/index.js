@@ -20,8 +20,7 @@ export default function (kibana) {
     },
 
 
-    init(server, options) {
-      const { status } = server.plugins.elasticsearch;
+    init(server) {
       fieldsRoutes(server);
       visDataRoutes(server);
     }
