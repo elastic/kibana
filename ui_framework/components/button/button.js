@@ -13,11 +13,7 @@ const commonPropTypes = {
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
   data: PropTypes.any,
-  className: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.object,
-  ]),
+  className: PropTypes.string,
 };
 
 const getIcon = props => (
@@ -85,12 +81,13 @@ const KuiButton = props => {
   );
 };
 
-KuiButton.propTypes = Object.assign({}, commonPropTypes, {
+KuiButton.propTypes = {
   icon: PropTypes.node,
   isIconOnRight: PropTypes.bool,
   children: PropTypes.node,
   isLoading: PropTypes.bool,
-});
+  ...commonPropTypes,
+};
 
 const KuiLinkButton = props => {
   const icon = getIcon(props);
@@ -108,14 +105,15 @@ const KuiLinkButton = props => {
   );
 };
 
-KuiLinkButton.propTypes = Object.assign({}, commonPropTypes, {
+KuiLinkButton.propTypes = {
   href: PropTypes.string,
   target: PropTypes.string,
   icon: PropTypes.node,
   isIconOnRight: PropTypes.bool,
   children: PropTypes.node,
   isLoading: PropTypes.bool,
-});
+  ...commonPropTypes,
+};
 
 const KuiSubmitButton = props => {
   const commonProps = getCommonProps(props);
@@ -129,9 +127,10 @@ const KuiSubmitButton = props => {
   );
 };
 
-KuiSubmitButton.propTypes = Object.assign({}, commonPropTypes, {
+KuiSubmitButton.propTypes = {
   children: PropTypes.string,
-});
+  ...commonPropTypes,
+};
 
 KuiButton.TYPE = KuiSubmitButton.TYPE = KuiLinkButton.TYPE = keyMirror({
   BASIC: null,
