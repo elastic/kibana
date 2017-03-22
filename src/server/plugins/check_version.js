@@ -1,14 +1,11 @@
-import { cleanVersion, versionSatisfies } from '../../utils/version';
+import { versionSatisfies } from '../../utils/version';
 import { get } from 'lodash';
 
 function compatibleWithKibana(kbnServer, plugin) {
   //core plugins have a version of 'kibana' and are always compatible
   if (plugin.kibanaVersion === 'kibana') return true;
 
-  const pluginKibanaVersion = cleanVersion(plugin.kibanaVersion);
-  const kibanaVersion = cleanVersion(kbnServer.version);
-
-  return versionSatisfies(pluginKibanaVersion, kibanaVersion);
+  return versionSatisfies(kbnServer.version, plugin.kibanaVersion);
 }
 
 export default async function (kbnServer, server, config) {
@@ -22,7 +19,8 @@ export default async function (kbnServer, server, config) {
     const name = get(plugin, 'pkg.name');
 
     if (!compatibleWithKibana(kbnServer, plugin)) {
-      const message = `Plugin "${name}" was disabled because it expected Kibana version "${version}", and found "${kbnServer.version}".`;
+      const message = `Plugin "${name}" was disabled because it expected Kibana version to be in range: ` +
+          `"${version}", but found "${kbnServer.version}".`;
       warningMessages.add(message);
       plugins.disable(plugin);
     }

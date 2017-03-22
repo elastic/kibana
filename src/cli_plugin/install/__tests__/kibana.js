@@ -83,7 +83,21 @@ describe('kibana cli', function () {
             errorStub(err);
           }
 
-          expect(errorStub.firstCall.args[0]).to.match(/incorrect kibana version/i);
+          expect(errorStub.firstCall.args[0]).to.match(/requires kibana version to be in range/i);
+        });
+
+        it('should throw an error if plugin kibanaVersion is a range and does not satisfy kibana version', function () {
+          const errorStub = sinon.stub();
+          settings.plugins[0].kibanaVersion = '<1.0.0 || >=2.0.0';
+
+          try {
+            assertVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.firstCall.args[0]).to.match(/requires kibana version to be in range/i);
         });
 
         it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
@@ -100,9 +114,9 @@ describe('kibana cli', function () {
           expect(errorStub.called).to.be(false);
         });
 
-        it('should ignore version info after the dash in checks on valid version', function () {
+        it('should support a semver version range', function () {
           const errorStub = sinon.stub();
-          settings.plugins[0].kibanaVersion = '1.0.0-foo-bar-version-1.2.3';
+          settings.plugins[0].kibanaVersion = '>=1.0.0';
 
           try {
             assertVersion(settings);
@@ -112,20 +126,6 @@ describe('kibana cli', function () {
           }
 
           expect(errorStub.called).to.be(false);
-        });
-
-        it('should ignore version info after the dash in checks on invalid version', function () {
-          const errorStub = sinon.stub();
-          settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
-
-          try {
-            assertVersion(settings);
-          }
-          catch (err) {
-            errorStub(err);
-          }
-
-          expect(errorStub.firstCall.args[0]).to.match(/incorrect kibana version/i);
         });
       });
 

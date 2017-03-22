@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { fromRoot } from '../../utils';
 import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../../cli/serve/read_yaml_config';
-import { versionSatisfies, cleanVersion } from '../../utils/version';
+import { versionSatisfies } from '../../utils/version';
 import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {
@@ -53,10 +53,10 @@ export function assertVersion(settings) {
     throw new Error (`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
   }
 
-  const actual = cleanVersion(settings.plugins[0].kibanaVersion);
-  const expected = cleanVersion(settings.version);
-  if (!versionSatisfies(actual, expected)) {
-    throw new Error (`Incorrect Kibana version in plugin [${settings.plugins[0].name}]. ` +
-      `Expected [${expected}]; found [${actual}]`);
+  const expectedRange = settings.plugins[0].kibanaVersion;
+  const actualVersion = settings.version;
+  if (!versionSatisfies(actualVersion, expectedRange)) {
+    throw new Error (`Plugin [${settings.plugins[0].name}] requires Kibana version to be in range: ` +
+      `[${expectedRange}], but found [${actualVersion}]`);
   }
 }

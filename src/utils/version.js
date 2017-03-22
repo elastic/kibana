@@ -1,15 +1,9 @@
 import semver from 'semver';
 
-export function versionSatisfies(cleanActual, cleanExpected) {
+export function versionSatisfies(cleanActual, expectedRange) {
   try {
-    return (cleanActual === cleanExpected);
+    return semver.satisfies(cleanActual, expectedRange);
   } catch (err) {
     return false;
   }
-}
-
-export function cleanVersion(version) {
-  const match = version.match(/\d+\.\d+\.\d+/);
-  if (!match) return version;
-  return match[0];
 }
