@@ -4,7 +4,7 @@ export default function ColumnHandler(Private) {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
-      return seri.label.endsWith(seriConfig.data.label);
+      return seri.aggId === seriConfig.data.id;
     }) : null;
 
 
