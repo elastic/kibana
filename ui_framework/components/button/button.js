@@ -21,6 +21,9 @@ const commonPropTypes = {
   className: PropTypes.string,
 };
 
+// KuiSubmitButton is an `input` element, which is a void element and can't contain children. But
+// the regular KuiButton and KuiLink button are non-void elements, so they can contain children.
+// These propTypes will only apply to these components.
 const nonVoidPropTypes = {
   icon: PropTypes.node,
   iconPosition: PropTypes.oneOf([
