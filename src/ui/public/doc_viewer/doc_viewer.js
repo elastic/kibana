@@ -16,7 +16,7 @@ uiModules.get('kibana')
       filter: '=?',
       columns: '=?'
     },
-    template: function($el) {
+    template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
       $el.append($viewer);
       const $tabs = $('<ul class="nav nav-tabs">');

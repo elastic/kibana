@@ -50,7 +50,7 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function() {
+          .then(function () {
             expect(errorStub.called).to.be(false);
           });
         });
@@ -76,7 +76,7 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function() {
+          .then(function () {
             expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
           });
         });
@@ -101,7 +101,7 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function() {
+          .then(function () {
             expect(errorStub.called).to.be(false);
           });
         });

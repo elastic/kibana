@@ -5,7 +5,7 @@ describe('Table Group class', function () {
   let TableGroup;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function(Private) {
+  beforeEach(ngMock.inject(function (Private) {
     TableGroup = Private(AggResponseTabifyTableGroupProvider);
   }));
 

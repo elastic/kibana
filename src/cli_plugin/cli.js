@@ -30,7 +30,7 @@ program
 
 program
 .command('*', null, { noHelp: true })
-.action(function(cmd) {
+.action(function (cmd) {
   program.error(`unknown command ${cmd}`);
 });
 

@@ -58,7 +58,7 @@ export default function MarkerFactory() {
         const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
         $div.append($title);
 
-        _.each(self._legendColors, function(color) {
+        _.each(self._legendColors, function (color) {
           const labelText = self._legendQuantizer
           .invertExtent(color)
           .map(self._valueFormatter)

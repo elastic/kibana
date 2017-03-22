@@ -293,7 +293,7 @@ describe('index pattern', function () {
     });
 
     it('should decrement the poplarity count', function () {
-      indexPattern.fields.forEach(function(field) {
+      indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
         const decrementAmount = -2;

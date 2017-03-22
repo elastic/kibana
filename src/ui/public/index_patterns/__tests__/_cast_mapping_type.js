@@ -7,7 +7,7 @@ describe('type normalizer (castMappingType)', function () {
   let fn;
   let fields;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function(Private) {
+  beforeEach(ngMock.inject(function (Private) {
     fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 

@@ -119,7 +119,7 @@ export default function AreaChartFactory(Private) {
       }
 
       // update
-      path.attr('d', function() {
+      path.attr('d', function () {
         const area = getArea()
         .defined(function (d) {
           return !_.isNull(d.y);

@@ -19,7 +19,7 @@ export default function VisTypeFactory(Private) {
     this.implementsRenderComplete = opts.implementsRenderComplete || false;
   }
 
-  VisType.prototype.createRenderbot = function() {
+  VisType.prototype.createRenderbot = function () {
     throw new Error('not implemented');
   };
 

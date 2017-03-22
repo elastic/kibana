@@ -7,7 +7,7 @@ import aggGroupTemplate from 'plugins/kibana/visualize/editor/agg_group.html';
 
 uiModules
 .get('app/visualize')
-.directive('visEditorAggGroup', function() {
+.directive('visEditorAggGroup', function () {
 
   return {
     restrict: 'E',

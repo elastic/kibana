@@ -350,11 +350,11 @@ GlobalOnlyComponent.prototype = _.create(
 
 (function (cls) {
 
-  cls.getTerms = function() {
+  cls.getTerms = function () {
     return null;
   };
 
-  cls.match = function(token, context) {
+  cls.match = function (token, context) {
     var result = {
       next: []
     };

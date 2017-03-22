@@ -24,7 +24,7 @@ const init = function () {
   // Load the application
   ngMock.module('kibana');
 
-  ngMock.module('kibana', function() {
+  ngMock.module('kibana', function () {
   });
 
   // Create the scope
