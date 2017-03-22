@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import { format } from 'util';
 
 import * as kbnTestServer from '../../../../../test/utils/kbn_server';

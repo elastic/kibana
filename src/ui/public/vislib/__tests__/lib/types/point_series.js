@@ -1,5 +1,3 @@
-import d3 from 'd3';
-import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';

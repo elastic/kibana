@@ -1,5 +1,3 @@
-import { resolve } from 'path';
-import { appendFileSync } from 'fs';
 import exec from '../utils/exec';
 import { capitalize } from 'lodash';
 

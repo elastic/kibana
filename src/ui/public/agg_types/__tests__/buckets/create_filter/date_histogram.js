@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

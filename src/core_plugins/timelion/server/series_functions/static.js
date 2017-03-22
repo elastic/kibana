@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import fetch from 'node-fetch';
-import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 import Promise from 'bluebird';
 

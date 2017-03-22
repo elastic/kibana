@@ -5,7 +5,6 @@ import IndexPattern from '../index_pattern';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import DataFormatPicker from '../data_format_picker';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 

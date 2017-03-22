@@ -1,6 +1,5 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import uiModules from 'ui/modules';
 import $ from 'jquery';
 
 import '../directives/loading_indicator/loading_indicator';

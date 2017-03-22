@@ -1,6 +1,5 @@
 import proxyquire from 'proxyquire';
 import Promise from 'bluebird';
-import _ from 'lodash';
 const expect = require('chai').expect;
 
 const graphiteResponse = function (url) {

@@ -1,5 +1,4 @@
 import { basename, resolve } from 'path';
-import { forOwn } from 'lodash';
 module.exports = function (grunt) {
   const exec = require('../utils/exec').silent;
 

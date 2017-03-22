@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('Status class', function () {

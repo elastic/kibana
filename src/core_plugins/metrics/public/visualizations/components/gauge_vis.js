@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import $ from '../lib/flot';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';

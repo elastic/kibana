@@ -1,8 +1,5 @@
-import cluster from 'cluster';
-import { join, resolve } from 'path';
-import { format as formatUrl } from 'url';
-import Hapi from 'hapi';
-import { debounce, compact, get, invoke, bindAll, once, sample, uniq } from 'lodash';
+import { resolve } from 'path';
+import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 
 import Log from '../log';
 import Worker from './worker';

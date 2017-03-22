@@ -1,4 +1,3 @@
-import errors from 'ui/errors';
 export default function EnsureSomeIndexPatternsFn(Private, Notifier, $location, kbnUrl) {
   const notify = new Notifier();
 

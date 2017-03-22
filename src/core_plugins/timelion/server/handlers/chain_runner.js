@@ -1,6 +1,5 @@
 
 import _ from 'lodash';
-import glob from 'glob';
 import Promise from 'bluebird';
 import parseSheet from './lib/parse_sheet.js';
 import parseDateMath from '../lib/date_math.js';

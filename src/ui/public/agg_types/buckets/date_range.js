@@ -1,4 +1,3 @@
-import moment from 'moment';
 import dateRange from 'ui/utils/date_range';
 import 'ui/directives/validate_date_math';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';

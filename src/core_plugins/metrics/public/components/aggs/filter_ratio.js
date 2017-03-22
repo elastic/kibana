@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
-import MetricSelect from './metric_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';

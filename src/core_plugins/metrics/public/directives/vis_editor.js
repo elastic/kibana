@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import modules from 'ui/modules';

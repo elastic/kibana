@@ -1,7 +1,6 @@
 import { format } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
-import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';

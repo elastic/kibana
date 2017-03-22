@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import moment from 'moment';
 
 const app = require('ui/modules').get('apps/timelion', []);
 import html from './interval.html';

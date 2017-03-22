@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import _ from 'lodash';
 import createLegendSeries from '../lib/create_legend_series';
 
 function HorizontalLegend(props) {

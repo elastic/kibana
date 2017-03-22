@@ -1,6 +1,4 @@
 
-import path from 'path';
-
 module.exports = function (kibana) {
   let mainFile = 'plugins/timelion/app';
 

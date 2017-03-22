@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import { uniq } from 'lodash';
 import storage from './storage';
 
 const history = module.exports = {

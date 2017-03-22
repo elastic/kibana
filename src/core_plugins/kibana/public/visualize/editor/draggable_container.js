@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import dragula from 'dragula';
 import uiModules from 'ui/modules';
 

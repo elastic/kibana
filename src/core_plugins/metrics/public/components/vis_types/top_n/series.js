@@ -1,13 +1,7 @@
-import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import React, { PropTypes } from 'react';
 import SeriesConfig from '../../series_config';
 import Sortable from 'react-anything-sortable';
-import Tooltip from '../../tooltip';
-import MetricSelect from '../../aggs/metric_select';
 import Split from '../../split';
-import { handleChange } from '../../lib/collection_actions';
 import createAggRowRender from '../../lib/create_agg_row_render';
 
 function TopNSeries(props) {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import ordinalSuffix from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';

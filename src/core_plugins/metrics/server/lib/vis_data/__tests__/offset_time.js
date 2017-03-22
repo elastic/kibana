@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import { expect } from 'chai';
 import moment from 'moment';
 import offsetTime from '../offset_time';

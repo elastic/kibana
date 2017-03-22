@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import Boom from 'boom';
 import handleESError from '../handle_es_error';
 import { errors as esErrors } from 'elasticsearch';
 

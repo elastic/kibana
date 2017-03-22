@@ -1,4 +1,4 @@
-import { defaultsDeep, partial } from 'lodash';
+import { defaultsDeep } from 'lodash';
 import defaultsProvider from './defaults';
 import Bluebird from 'bluebird';
 

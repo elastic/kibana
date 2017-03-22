@@ -1,10 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
-import Select from 'react-select';
-import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import DataFormatPicker from '../data_format_picker';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'node-uuid';
