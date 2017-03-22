@@ -1,4 +1,4 @@
-module.exports = function() {
+module.exports = function () {
   return {
     release: {
       bucket: 'download.elasticsearch.org',
