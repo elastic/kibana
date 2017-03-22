@@ -6,6 +6,7 @@ import {
 import sinon from 'sinon';
 
 import {
+  BUTTON_TYPES,
   KuiButton,
 } from './button';
 
@@ -23,47 +24,12 @@ describe('KuiButton', () => {
 
   describe('Props', () => {
     describe('type', () => {
-      describe('basic', () => {
-        test('renders the basic class', () => {
-          const $button = render(
-            <KuiButton type="basic" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('hollow', () => {
-        test('renders the hollow class', () => {
-          const $button = render(
-            <KuiButton type="hollow" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('danger', () => {
-        test('renders the danger class', () => {
-          const $button = render(
-            <KuiButton type="danger" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('primary', () => {
-        test('renders the primary class', () => {
-          const $button = render(
-            <KuiButton type="primary" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
+      BUTTON_TYPES.forEach(type => {
+        describe(type, () => {
+          test(`renders the ${type} class`, () => {
+            const $button = render(<KuiButton type={ type } />);
+            expect($button).toMatchSnapshot();
+          });
         });
       });
     });

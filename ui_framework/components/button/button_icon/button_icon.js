@@ -5,6 +5,14 @@ import React, {
 import classNames from 'classnames';
 import keyMirror from 'keymirror';
 
+const ICON_TYPES = [
+  'create',
+  'delete',
+  'previous',
+  'next',
+  'loading',
+];
+
 const KuiButtonIcon = props => {
   const typeToClassNameMap = {
     create: 'fa-plus',
@@ -24,16 +32,11 @@ const KuiButtonIcon = props => {
 };
 
 KuiButtonIcon.propTypes = {
-  type: PropTypes.oneOf([
-    'create',
-    'delete',
-    'previous',
-    'next',
-    'loading',
-  ]),
+  type: PropTypes.oneOf(ICON_TYPES),
   className: PropTypes.string,
 };
 
 export {
+  ICON_TYPES,
   KuiButtonIcon,
 };

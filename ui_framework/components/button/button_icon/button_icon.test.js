@@ -6,6 +6,7 @@ import {
 import sinon from 'sinon';
 
 import {
+  ICON_TYPES,
   KuiButtonIcon,
 } from './button_icon';
 
@@ -23,58 +24,12 @@ describe('KuiButtonIcon', () => {
 
   describe('Props', () => {
     describe('type', () => {
-      describe('create', () => {
-        test('renders the create class', () => {
-          const $buttonIcon = render(
-            <KuiButtonIcon type="create" />
-          );
-
-          expect($buttonIcon)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('delete', () => {
-        test('renders the delete class', () => {
-          const $buttonIcon = render(
-            <KuiButtonIcon type="delete" />
-          );
-
-          expect($buttonIcon)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('previous', () => {
-        test('renders the previous class', () => {
-          const $buttonIcon = render(
-            <KuiButtonIcon type="previous" />
-          );
-
-          expect($buttonIcon)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('next', () => {
-        test('renders the next class', () => {
-          const $buttonIcon = render(
-            <KuiButtonIcon type="next" />
-          );
-
-          expect($buttonIcon)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('loading', () => {
-        test('renders the loading class', () => {
-          const $buttonIcon = render(
-            <KuiButtonIcon type="loading" />
-          );
-
-          expect($buttonIcon)
-            .toMatchSnapshot();
+      ICON_TYPES.forEach(type => {
+        describe(type, () => {
+          test(`renders the ${type} class`, () => {
+            const $buttonIcon = render(<KuiButtonIcon type={ type } />);
+            expect($buttonIcon).toMatchSnapshot();
+          });
         });
       });
     });

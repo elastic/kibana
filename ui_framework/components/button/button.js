@@ -7,13 +7,15 @@ import keyMirror from 'keymirror';
 
 import { KuiButtonIcon } from './button_icon/button_icon';
 
+const BUTTON_TYPES = [
+  'basic',
+  'hollow',
+  'danger',
+  'primary',
+];
+
 const commonPropTypes = {
-  type: PropTypes.oneOf([
-    'basic',
-    'hollow',
-    'danger',
-    'primary',
-  ]),
+  type: PropTypes.oneOf(BUTTON_TYPES),
   testSubject: PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
@@ -162,6 +164,7 @@ KuiSubmitButton.propTypes = {
 };
 
 export {
+  BUTTON_TYPES,
   KuiButton,
   KuiLinkButton,
   KuiSubmitButton,
