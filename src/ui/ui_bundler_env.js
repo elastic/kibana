@@ -1,5 +1,5 @@
 import fromRoot from '../utils/from_root';
-import { includes, flow, escapeRegExp } from 'lodash';
+import { includes } from 'lodash';
 
 const arr = v => [].concat(v || []);
 

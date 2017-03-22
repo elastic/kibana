@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';

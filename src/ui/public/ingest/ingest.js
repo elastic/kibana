@@ -1,4 +1,3 @@
-import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';

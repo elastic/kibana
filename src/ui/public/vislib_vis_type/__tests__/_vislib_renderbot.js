@@ -8,7 +8,6 @@ import VislibVisProvider from 'ui/vislib/vis';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 import 'ui/persisted_state';
-import AggResponseIndexProvider from 'ui/agg_response/index';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 describe('renderbot', function exportWrapper() {

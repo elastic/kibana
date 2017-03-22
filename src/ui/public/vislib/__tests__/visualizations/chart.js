@@ -2,9 +2,7 @@ import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
-import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {

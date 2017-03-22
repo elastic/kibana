@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import _ from 'lodash';
 import IndexPattern from '../index_pattern';
-import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
