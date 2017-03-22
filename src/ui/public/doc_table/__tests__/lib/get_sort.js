@@ -8,7 +8,7 @@ let indexPattern;
 describe('docTable', function () {
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function(Private) {
+  beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

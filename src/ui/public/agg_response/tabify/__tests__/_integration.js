@@ -13,7 +13,7 @@ describe('tabifyAggResponse Integration', function () {
   let tabifyAggResponse;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function(Private) {
+  beforeEach(ngMock.inject(function (Private) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

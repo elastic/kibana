@@ -50,7 +50,7 @@ export default (function () {
       dumper.on('error', function (error)   { Log.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
       const promise = new Promise(function (resolve, reject) {
-        dumper.dump(function(error) {
+        dumper.dump(function (error) {
           if (error) {
             Log.debug('THERE WAS AN ERROR :-(');
             reject(Error(error));

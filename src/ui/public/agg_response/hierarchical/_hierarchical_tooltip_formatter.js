@@ -18,7 +18,7 @@ export default function HierarchicalTooltipFormaterProvider($rootScope, $compile
       const metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
       // Map those values to what the tooltipSource.rows format.
-      _.forEachRight($tooltipScope.rows, function(row) {
+      _.forEachRight($tooltipScope.rows, function (row) {
         row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
         let percent;

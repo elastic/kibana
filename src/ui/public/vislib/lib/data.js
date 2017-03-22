@@ -278,7 +278,7 @@ export default function DataFactory(Private) {
       const names = [];
       const self = this;
 
-      _.forEach(array, function(obj) {
+      _.forEach(array, function (obj) {
         names.push({
           label: obj.name,
           values: obj,

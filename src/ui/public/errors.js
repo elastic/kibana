@@ -28,7 +28,7 @@ _.class(KbnError).inherits(Error);
  * If the error permits, propagate the error to be rendered on screen
  * @param handler the handlers that can render the error message to the screen.
  */
-KbnError.prototype.displayToScreen = function() {
+KbnError.prototype.displayToScreen = function () {
   throw this;
 };
 

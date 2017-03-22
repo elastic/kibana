@@ -18,7 +18,7 @@ module.exports = function createDateAgg(config, tlConfig) {
   };
 
   dateAgg.time_buckets.aggs = {};
-  _.each(config.metric, function(metric) {
+  _.each(config.metric, function (metric) {
     metric = metric.split(':');
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment

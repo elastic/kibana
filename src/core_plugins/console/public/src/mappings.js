@@ -89,7 +89,7 @@ function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(type_dict, function(type) {
+    $.each(type_dict, function (type) {
       ret.push(type);
     });
 

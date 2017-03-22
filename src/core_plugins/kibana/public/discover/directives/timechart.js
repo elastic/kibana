@@ -2,7 +2,7 @@ import VislibProvider from 'ui/vislib';
 import uiModules from 'ui/modules';
 uiModules
 .get('apps/discover')
-.directive('discoverTimechart', function(Private) {
+.directive('discoverTimechart', function (Private) {
   const vislib = Private(VislibProvider);
 
   return {

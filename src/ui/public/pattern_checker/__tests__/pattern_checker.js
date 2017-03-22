@@ -21,7 +21,7 @@ describe('pattern checker', function () {
     });
   }));
 
-  beforeEach(ngMock.inject(function($injector) {
+  beforeEach(ngMock.inject(function ($injector) {
     $httpBackend = $injector.get('$httpBackend');
     $compile = $injector.get('$compile');
     $rootScope = $injector.get('$rootScope');

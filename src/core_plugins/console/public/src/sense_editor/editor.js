@@ -562,11 +562,11 @@ function SenseEditor($el) {
     });
   };
 
-  editor.getSession().on('tokenizerUpdate', function() {
+  editor.getSession().on('tokenizerUpdate', function () {
     editor.highlightCurrentRequestsAndUpdateActionBar();
   });
 
-  editor.getSession().selection.on('changeCursor', function() {
+  editor.getSession().selection.on('changeCursor', function () {
     editor.highlightCurrentRequestsAndUpdateActionBar();
   });
 

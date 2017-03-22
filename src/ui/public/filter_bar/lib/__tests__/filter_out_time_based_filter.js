@@ -16,7 +16,7 @@ describe('Filter Bar Directive', function () {
       }
     ));
 
-    beforeEach(ngMock.inject(function(Private, _$rootScope_) {
+    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
       $rootScope = _$rootScope_;
     }));
