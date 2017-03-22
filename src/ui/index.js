@@ -1,11 +1,8 @@
-import { format as formatUrl } from 'url';
-import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import { props } from 'bluebird';
 import Boom from 'boom';
 import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
-import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import notify from 'ui/notify';
 import 'ui/autoload/styles';
 import 'plugins/status_page/status_page_metric';

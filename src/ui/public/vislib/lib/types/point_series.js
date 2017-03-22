@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
 
 export default function ColumnHandler() {
 

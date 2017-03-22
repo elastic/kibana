@@ -37,7 +37,6 @@ export default class SettingsPage {
   }
 
   async setAdvancedSettings(propertyName, propertyValue) {
-    const self = this;
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import errors from 'ui/errors';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 export default function ColumnChartFactory(Private) {
