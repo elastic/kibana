@@ -7,6 +7,8 @@ import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
+import importApi from './server/routes/api/import';
+import exportApi from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
@@ -139,6 +141,8 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+      importApi(server);
+      exportApi(server);
 
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
