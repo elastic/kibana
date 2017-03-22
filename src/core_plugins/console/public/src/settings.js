@@ -1,5 +1,3 @@
-let $ = require('jquery');
-let es = require('./es');
 const storage = require('./storage');
 
 import getInput from './input'
@@ -21,12 +19,6 @@ function getWrapMode() {
 
 function setWrapMode(mode) {
   storage.set('wrap_mode', mode);
-  applyCurrentSettings();
-  return true;
-}
-
-function setBasicAuth(mode) {
-  storage.set('basic_auth', mode);
   applyCurrentSettings();
   return true;
 }

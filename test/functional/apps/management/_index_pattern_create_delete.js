@@ -1,12 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  remote,
-  scenarioManager,
-  esClient
-} from '../../../support';
+import { bdd, remote, esClient } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

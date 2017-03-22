@@ -100,7 +100,7 @@ uiModules
 
           if (isFieldNumeric || isFirstValueNumeric) {
             function sum(tableRows) {
-              return _.reduce(tableRows, function (prev, curr, n, all) {return prev + curr[i].value; }, 0);
+              return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
             }
 
             switch ($scope.totalFunc) {

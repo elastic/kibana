@@ -1,10 +1,7 @@
 import _ from 'lodash';
-import numeral from 'numeral';
 import React, { Component, PropTypes } from 'react';
-import $ from '../lib/flot';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
-import Resize from './resize';
 import GaugeVis from './gauge_vis';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';
@@ -53,7 +50,11 @@ class Gauge extends Component {
 
   render() {
     const { metric, type } = this.props;
-    const { scale, translateX, translateY, top, left } = this.state;
+    const {
+      scale,
+      translateX,
+      translateY
+    } = this.state;
     const value = metric && getLastValue(metric.data, 5) || 0;
     const max = metric && getValueBy('max', metric.data) || 1;
     const formatter = (metric && (metric.tickFormatter || metric.formatter)) ||

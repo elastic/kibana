@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const _ = require('lodash');
+import fs from 'fs';
+import path from 'path';
+import _ from 'lodash';
 const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
-const PEG = require('pegjs');
+import PEG from 'pegjs';
 const Parser = PEG.buildParser(grammar);
 
 module.exports = function parseSheet(sheet) {
@@ -10,7 +10,6 @@ module.exports = function parseSheet(sheet) {
     try {
       return Parser.parse(plot).tree;
     } catch (e) {
-      let message;
       if (e.expected) {
         throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
       } else {

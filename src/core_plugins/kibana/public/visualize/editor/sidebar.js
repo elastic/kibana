@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg_group';
 import 'plugins/kibana/visualize/editor/vis_options';
 import uiModules from 'ui/modules';

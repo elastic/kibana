@@ -4,7 +4,7 @@ let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let $ = require('jquery');
 
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { module, ok, asyncTest, deepEqual, equal, start } = QUnit;
 
 module("Integration", {
   setup: function () {

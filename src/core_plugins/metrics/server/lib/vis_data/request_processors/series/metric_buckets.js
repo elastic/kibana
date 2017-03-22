@@ -4,8 +4,12 @@ import bucketTransform from '../../helpers/bucket_transform';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 export default function metricBuckets(req, panel, series) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel, series);
-    const { bucketSize, intervalString } = getBucketSize(req, interval);
+    const {
+      interval
+    } = getIntervalAndTimefield(panel, series);
+    const {
+      intervalString
+    } = getBucketSize(req, interval);
     series.metrics
       .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
       .forEach(metric => {

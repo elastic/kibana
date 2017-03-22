@@ -63,7 +63,7 @@ export function isBasicAgg(item) {
   return _.includes(Object.keys(byType.basic), item.type);
 }
 
-export function createOptions(type = '_all', siblings = []) {
+export function createOptions(type = '_all') {
   let aggs = byType[type];
   if (!aggs)  aggs = byType._all;
   return _(aggs)
@@ -75,4 +75,3 @@ export function createOptions(type = '_all', siblings = []) {
     .value();
 }
 export default lookup;
-

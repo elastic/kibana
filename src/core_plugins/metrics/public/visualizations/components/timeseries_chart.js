@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
@@ -21,8 +20,6 @@ class TimeseriesChart extends Component {
   }
 
   calculateLeftRight(item, plot) {
-    const el = this.container;
-    const offset = plot.offset();
     const canvas = plot.getCanvas();
     const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
     const edge = (point.left + 10) / canvas.width;
@@ -76,7 +73,7 @@ class TimeseriesChart extends Component {
     }
   }
 
-  handleMouseLeave(e, plot) {
+  handleMouseLeave() {
     this.state.mouseHoverTimer = window.setTimeout(() => {
       this.setState({ showTooltip: false });
     }, 250);
@@ -164,7 +161,6 @@ class TimeseriesChart extends Component {
       const metric = series.find(r => r.id === item.series.id);
       const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
-      const caretClassName = right ? 'fa fa-caret-right' : 'fa-caret-left';
       tooltip = (
         <div style={styles.tooltipContainer}>
           <i className="fa fa-caret-left" style={styles.leftCaret}></i>
@@ -181,7 +177,6 @@ class TimeseriesChart extends Component {
           <i className="fa fa-caret-right" style={styles.rightCaret}></i>
         </div>
       );
-
     }
 
     const container = {

@@ -3,11 +3,9 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 describe('type normalizer (castMappingType)', function () {
-
   let fn;
-  let fields;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 
@@ -66,5 +64,4 @@ describe('type normalizer (castMappingType)', function () {
   it('should treat everything else as a string', function () {
     expect(fn('fooTypeIsNotReal')).to.be('string');
   });
-
 });

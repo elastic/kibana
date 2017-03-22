@@ -1,7 +1,6 @@
 import modules from 'ui/modules';
 import '../services/executor';
 import 'plugins/timelion/directives/refresh_hack';
-import $ from 'jquery';
 import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
 import _ from 'lodash';
@@ -51,7 +50,7 @@ app.controller('MetricsEditorController', (
     }
   }
 
-  $scope.$watchCollection('model', (newValue, oldValue) => {
+  $scope.$watchCollection('model', newValue => {
     angular.copy(newValue, $scope.vis._editableVis.params);
     $scope.stageEditableVis();
     debouncedFetch();

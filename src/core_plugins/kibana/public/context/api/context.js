@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import { addComputedFields } from './utils/fields';
-import { getDocumentUid } from './utils/ids';
 import { createSuccessorsQueryBody } from './utils/queries.js';
 import { reverseQuerySort } from './utils/sorting';
 

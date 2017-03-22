@@ -7,8 +7,6 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 
-const MAX_SIZE = Math.pow(2, 31) - 1;
-
 uiRoutes
 .when('/management/kibana/objects', {
   template: objectIndexHTML
@@ -56,8 +54,7 @@ uiModules.get('apps/management')
 
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
-          let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = find($scope.services, { title: $state.tab });
+          if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);

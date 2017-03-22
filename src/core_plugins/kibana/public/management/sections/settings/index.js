@@ -12,7 +12,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementAdvanced', function (config, Notifier, Private, $rootScope) {
+.directive('kbnManagementAdvanced', function (config) {
   return {
     restrict: 'E',
     link: function ($scope) {
@@ -22,7 +22,7 @@ uiModules.get('apps/management')
       // initial config setup
       changed();
 
-      function changed(values) {
+      function changed() {
         const all = config.getAll();
         const editable = _(all)
           .map((def, name) => toEditableConfig({

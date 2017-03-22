@@ -1,11 +1,11 @@
-import _ from 'lodash';
-import moment from 'moment';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
 export default function query(req, panel, annotation) {
   return next => doc => {
     const timeField = annotation.time_field;
-    const { bucketSize, intervalString } = getBucketSize(req, 'auto');
+    const {
+      bucketSize
+    } = getBucketSize(req, 'auto');
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
