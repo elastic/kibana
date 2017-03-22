@@ -32,12 +32,15 @@ uiModules.get('apps/management')
         { title: 'controls', sortable: false }
       ];
 
-      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter'], refreshRows);
+      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'indexedFieldTypeFilter'], refreshRows);
 
       function refreshRows() {
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
-        const fields = filter($scope.indexPattern.getNonScriptedFields(), { name: $scope.fieldFilter });
+        const fields = filter($scope.indexPattern.getNonScriptedFields(), {
+          name: $scope.fieldFilter,
+          type: $scope.indexedFieldTypeFilter
+        });
         const sourceFilters = $scope.indexPattern.sourceFilters && $scope.indexPattern.sourceFilters.map(f => f.value) || [];
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
@@ -60,7 +63,10 @@ uiModules.get('apps/management')
             {
               markup: typeHtml,
               scope: childScope,
-              value: field.type
+              value: field.type,
+              attr: {
+                'data-test-subj': 'indexedFieldType'
+              }
             },
             _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
             {
