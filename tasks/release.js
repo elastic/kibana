@@ -1,10 +1,9 @@
+import readline from 'readline';
+import url from 'url';
+import fs from 'fs';
+import path from 'path';
+import _ from 'lodash';
 module.exports = function (grunt) {
-  const readline = require('readline');
-  const url = require('url');
-  const fs = require('fs');
-  const path = require('path');
-  const _ = require('lodash');
-
   // build, then zip and upload to s3
   grunt.registerTask('release', [
     '_release:confirmUpload',

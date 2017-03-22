@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const $ = require('jquery');
+import _ from 'lodash';
+import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
 app.directive('timelionGrid', function ($compile) {

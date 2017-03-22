@@ -1,8 +1,8 @@
-const sass = require('node-sass');
-const postcss = require('postcss');
-const postcssConfig = require('../src/optimize/postcss.config');
-const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+import sass from 'node-sass';
+import postcss from 'postcss';
+import postcssConfig from '../src/optimize/postcss.config';
+import chokidar from 'chokidar';
+import debounce from 'lodash/function/debounce';
 const platform = require('os').platform();
 
 module.exports = function (grunt) {

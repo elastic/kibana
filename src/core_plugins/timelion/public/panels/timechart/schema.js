@@ -1,10 +1,10 @@
 require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
-const _ = require('lodash');
-const $ = require('jquery');
-const moment = require('moment-timezone');
-const observeResize = require('plugins/timelion/lib/observe_resize');
-const calculateInterval = require('plugins/timelion/lib/calculate_interval');
+import _ from 'lodash';
+import $ from 'jquery';
+import moment from 'moment-timezone';
+import observeResize from 'plugins/timelion/lib/observe_resize';
+import calculateInterval from 'plugins/timelion/lib/calculate_interval';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 

@@ -1,4 +1,4 @@
-const moment = require('moment');
+import moment from 'moment';
 
 module.exports = function xaxisFormatterProvider(config, timefilter) {
 

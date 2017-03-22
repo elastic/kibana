@@ -1,6 +1,6 @@
-const _ = require('lodash');
-const logoUrl = require('./logo.png');
-const moment = require('moment-timezone');
+import _ from 'lodash';
+import logoUrl from './logo.png';
+import moment from 'moment-timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');

@@ -1,5 +1,5 @@
 const tzDetect = require('jstimezonedetect').jstz;
-const moment = require('moment');
+import moment from 'moment';
 
 module.exports = function timezoneFn(config, Private) {
   return function () {
