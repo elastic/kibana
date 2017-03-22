@@ -17,7 +17,6 @@ describe('renderbot', function exportWrapper() {
   let Renderbot;
   let VislibRenderbot;
   let persistedState;
-  let normalizeChartData;
   const mockVisType = {
     name: 'test'
   };
@@ -31,7 +30,6 @@ describe('renderbot', function exportWrapper() {
       Renderbot = Private(VisRenderbotProvider);
       VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
       persistedState = new ($injector.get('PersistedState'))();
-      normalizeChartData = Private(AggResponseIndexProvider);
     });
   }
 
@@ -122,7 +120,6 @@ describe('renderbot', function exportWrapper() {
 
     const vis = { type: mockVisType, isHierarchical: _.constant(false) };
     const $el = $('<div>testing</div>');
-    const stubs = {};
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));

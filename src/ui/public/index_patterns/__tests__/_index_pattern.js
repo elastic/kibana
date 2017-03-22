@@ -22,18 +22,14 @@ describe('index pattern', function () {
   let mappingSetup;
   let mockLogstashFields;
   let DocSource;
-  let config;
   let docSourceResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
-  let $rootScope;
   let intervals;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
-    $rootScope = $injector.get('$rootScope');
-    config = _config_;
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
@@ -147,11 +143,9 @@ describe('index pattern', function () {
     // override the default indexPattern, with a truncated field list
     const indexPatternId = 'test-pattern';
     let indexPattern;
-    let fieldLength;
     let customFields;
 
     beforeEach(function () {
-      fieldLength = mockLogstashFields.length;
       customFields = [{
         analyzed: true,
         count: 30,

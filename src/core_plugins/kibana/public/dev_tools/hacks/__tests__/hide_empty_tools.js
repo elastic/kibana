@@ -5,7 +5,6 @@ import chrome from 'ui/chrome';
 import { hideEmptyDevTools } from '../hide_empty_tools';
 
 describe('hide dev tools', function () {
-  let Private;
   let navlinks;
 
   function PrivateWithoutTools() {

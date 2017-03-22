@@ -10,7 +10,6 @@ import routeBasedNotifierProvider from 'ui/route_based_notifier';
 
 export default function TermsAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  const bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);

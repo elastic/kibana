@@ -16,7 +16,6 @@ uiModules
       $scope.$watchCollection('list', function () {
         if (!$scope.list || !$scope.item) return;
 
-        const item = $scope.item;
         const index = $scope.list.indexOf($scope.item);
         const bars = $scope.list.slice(0, index + 1);
         const colors = getColors(bars.length);

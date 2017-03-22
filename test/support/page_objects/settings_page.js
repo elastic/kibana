@@ -154,7 +154,6 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    const selector = 'a[data-test-subj="tab-indexedFields"] small';
     return PageObjects.common.try(() => {
       return this.remote.setFindTimeout(defaultFindTimeout / 10)
       .findByCssSelector('a[data-test-subj="tab-indexedFields"] small').getVisibleText()

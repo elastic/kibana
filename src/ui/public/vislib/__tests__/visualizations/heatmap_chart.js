@@ -65,10 +65,6 @@ describe('Vislib Heatmap Chart Test Suite', function () {
 
       describe('addSquares method', function () {
         it('should append rects', function () {
-          let numOfSeries;
-          let numOfValues;
-          let product;
-
           vis.handler.charts.forEach(function (chart) {
             const numOfRects = chart.chartData.series.reduce((result, series) => {
               return result + series.values.length;

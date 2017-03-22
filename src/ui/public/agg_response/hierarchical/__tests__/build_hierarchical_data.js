@@ -11,7 +11,6 @@ import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_respons
 
 let Vis;
 let Notifier;
-let AggConfigs;
 let indexPattern;
 let buildHierarchicalData;
 
@@ -24,7 +23,6 @@ describe('buildHierarchicalData', function () {
     sinon.stub(Notifier.prototype, 'error');
 
     Vis = Private(VisProvider);
-    AggConfigs = Private(VisAggConfigsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
   }));
@@ -35,7 +33,6 @@ describe('buildHierarchicalData', function () {
     let results;
 
     beforeEach(function () {
-      const id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -44,7 +41,6 @@ describe('buildHierarchicalData', function () {
       });
       vis.aggs[0].id = 'agg_1';
       results = buildHierarchicalData(vis, fixtures.metricOnly);
-
     });
 
     it('should set the slices with one child to a consistent label', function () {

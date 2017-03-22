@@ -41,7 +41,9 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('_release:complete', function () {
-    const { sha, version } = grunt.config.get('build');
+    const {
+      version
+    } = grunt.config.get('build');
     const config = grunt.config.get('aws_s3.staging.files');
 
     grunt.log.ok('Builds uploaded');

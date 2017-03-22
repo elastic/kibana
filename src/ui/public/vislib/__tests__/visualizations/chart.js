@@ -8,12 +8,9 @@ import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_c
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  let PieChart;
   let Chart;
-  let Data;
   let persistedState;
   let Vis;
-  const chartData = {};
   let vis;
   let el;
   let myChart;
@@ -86,9 +83,7 @@ describe('Vislib _chart Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     Vis = Private(VislibVisProvider);
-    Data = Private(VislibLibDataProvider);
     persistedState = new ($injector.get('PersistedState'))();
-    PieChart = Private(VislibVisualizationsPieChartProvider);
     Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
@@ -128,5 +123,4 @@ describe('Vislib _chart Test Suite', function () {
       myChart.render();
     }).to.throwError();
   });
-
 });

@@ -37,10 +37,6 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
   bdd.describe('field data', function () {
-    const queryName1 = 'Query # 1';
-    const fromTimeString = 'September 19th 2015, 06:31:44.000';
-    const toTimeString = 'September 23rd 2015, 18:31:44.000';
-
     bdd.it('search php should show the correct hit count', function () {
       const expectedHitCount = '445';
       return PageObjects.discover.query('php')
@@ -230,7 +226,6 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
     bdd.it('a bad syntax query should show an error message', function () {
-      const expectedHitCount = '1011,156';
       const expectedError = 'Discover: Failed to parse query [xxx(yyy]';
       return PageObjects.discover.query('xxx(yyy')
       .then(function () {

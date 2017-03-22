@@ -6,11 +6,8 @@ import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_g
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Integration', function () {
-
   let $rootScope;
-  let TableGroup;
   let $compile;
-  let $scope;
   let $el;
   let Vis;
   let indexPattern;
@@ -21,7 +18,6 @@ describe('Integration', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
@@ -36,8 +32,6 @@ describe('Integration', function () {
     $el = $('<visualize vis="vis" es-resp="esResponse" ui-state="uiState">');
     $compile($el)($rootScope);
     $rootScope.$apply();
-
-    $scope = $el.isolateScope();
   }
 
   function OneRangeVis(params) {

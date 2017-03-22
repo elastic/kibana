@@ -191,7 +191,6 @@ bdd.describe('discover app', function describeIndexTests() {
         }
       });
     }
-
   });
 
   bdd.describe('query #2, which has an empty time range', function () {

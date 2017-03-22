@@ -12,7 +12,6 @@ let rowsLabels;
 let seriesArr;
 let rowsArr;
 let uniqLabels;
-let error;
 
 const seriesData = {
   'label': '',

@@ -9,9 +9,7 @@ import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
-
   let $rootScope;
-  let TableGroup;
   let $compile;
   let Private;
   let $scope;
@@ -27,7 +25,6 @@ describe('Controller', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(StateManagementAppStateProvider);
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
   }));
 

@@ -14,8 +14,6 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vis_maps/visualiz
 const defaultSWCoords = [13.496, -143.789];
 const defaultNECoords = [55.526, -57.919];
 const bounds = {};
-let MarkerType;
-let map;
 
 angular.module('MarkerFactory', ['kibana']);
 

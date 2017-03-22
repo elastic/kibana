@@ -178,7 +178,6 @@ describe(filename, () => {
       it('does not include filters if config.kibana = false', () => {
         config.kibana = false;
         const request = fn(config, tlConfig);
-        const filter = request.body.query.bool.filter;
         expect(request.body.query.bool.filter).to.eql(undefined);
       });
 

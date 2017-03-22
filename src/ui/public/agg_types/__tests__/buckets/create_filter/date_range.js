@@ -8,7 +8,6 @@ import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/c
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
-    let AggConfig;
     let indexPattern;
     let Vis;
     let createFilter;
@@ -16,7 +15,6 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
-      AggConfig = Private(VisAggConfigProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
     }));

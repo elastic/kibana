@@ -9,7 +9,6 @@ import getPercentileValue from './percentiles_get_value';
 export default function AggTypeMetricPercentilesProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   // required by the percentiles editor
 

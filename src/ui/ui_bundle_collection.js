@@ -4,10 +4,7 @@ import { transform, pluck } from 'lodash';
 import { promisify } from 'bluebird';
 import { makeRe } from 'minimatch';
 
-const rimraf = promisify(require('rimraf'));
 const mkdirp = promisify(require('mkdirp'));
-const unlink = promisify(require('fs').unlink);
-const readdir = promisify(require('fs').readdir);
 
 class UiBundleCollection {
   constructor(bundlerEnv, filter) {

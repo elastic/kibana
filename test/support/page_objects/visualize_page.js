@@ -423,7 +423,6 @@ export default class VisualizePage {
     const chartData = [];
     let tempArray = [];
     let chartSections = 0;
-    const height = 0;
     let yAxisLabel = 0;
     let yAxisHeight = 0;
 
@@ -601,8 +600,6 @@ export default class VisualizePage {
   }
 
   getHeatmapData() {
-    const self = this.remote;
-
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
       .setFindTimeout(defaultFindTimeout * 2)
