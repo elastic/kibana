@@ -13,7 +13,7 @@ describe('tabifyAggResponse Integration', function () {
   let tabifyAggResponse;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function(Private) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -251,7 +251,7 @@ describe('tabifyAggResponse Integration', function () {
         minimalColumns: false
       });
 
-      expectRootGroup(tabbed, function expectTable(table, splitKey) {
+      expectRootGroup(tabbed, function expectTable(table) {
         expectColumns(table, [src, os, avg]);
 
         table.rows.forEach(function (row) {

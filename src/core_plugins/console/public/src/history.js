@@ -54,7 +54,7 @@ const history = module.exports = {
     return { time, content };
   },
 
-  clearHistory($el) {
+  clearHistory() {
     history
       .getHistoryKeys()
       .forEach(key => storage.delete(key));

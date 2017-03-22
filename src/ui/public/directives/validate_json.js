@@ -2,7 +2,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('validateJson', function ($compile) {
+module.directive('validateJson', function() {
   return {
     restrict: 'A',
     require: 'ngModel',
@@ -13,7 +13,7 @@ module.directive('validateJson', function ($compile) {
     link: function ($scope, $elem, attr, ngModel) {
       $scope.$watch('ngModel', validator);
 
-      function validator(newValue, oldValue) {
+      function validator(newValue) {
         if (!newValue || newValue.length === 0) {
           setValid();
           return;

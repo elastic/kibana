@@ -80,7 +80,7 @@ export default function setupSettings(kbnServer, server, config) {
     if (ignore401Errors) allowedErrors.push(errors[401]);
 
     return Bluebird.resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
-      .catch(...allowedErrors, err => ({}))
+      .catch(...allowedErrors, () => ({}))
       .then(resp => resp._source || {})
       .then(source => hydrateUserSettings(source));
   }

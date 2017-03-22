@@ -186,7 +186,7 @@ describe('Events', function () {
     const expected = 'some value';
     let testValue;
 
-    function handler(arg1, arg2) {
+    function handler() {
       testValue = this.getVal();
     }
     handler.getVal = _.constant(expected);

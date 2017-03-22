@@ -8,7 +8,7 @@ module.directive('kbnInfiniteScroll', function () {
     scope: {
       more: '='
     },
-    link: function ($scope, $element, attrs) {
+    link: function($scope, $element) {
       const $window = $(window);
       let checkTimer;
 

@@ -6,7 +6,7 @@ import 'angular-sanitize';
 
 const module = uiModules.get('kibana', ['ngSanitize']);
 
-module.directive('kbnTruncated', function ($compile) {
+module.directive('kbnTruncated', function() {
   return {
     restrict: 'E',
     scope: {
@@ -15,7 +15,7 @@ module.directive('kbnTruncated', function ($compile) {
       isHtml: '@'
     },
     template: truncatedTemplate,
-    link: function ($scope, $element, attrs) {
+    link: function($scope) {
       const source = $scope.source;
       const max = $scope.length;
       const truncated = $scope.isHtml

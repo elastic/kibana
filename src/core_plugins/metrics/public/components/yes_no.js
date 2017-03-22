@@ -5,7 +5,7 @@ function YesNo(props) {
   const { name, value } = props;
   const handleChange = value => {
     const { name } = props;
-    return (e) => {
+    return () => {
       const parts = { [name]: value };
       props.onChange(parts);
     };

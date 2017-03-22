@@ -507,7 +507,7 @@ module.exports = function (editor) {
     context.suffixToAdd = "";
   }
 
-  function addMethodAutoCompleteSetToContext(context, pos) {
+  function addMethodAutoCompleteSetToContext(context) {
     context.autoCompleteSet = _.map(["GET", "PUT", "POST", "DELETE", "HEAD"], function (m, i) {
       return { name: m, score: -i, meta: "method" }
     })
@@ -883,7 +883,7 @@ module.exports = function (editor) {
     editor.execCommand("startAutocomplete");
   }, 100);
 
-  function editorChangeListener(e) {
+  function editorChangeListener() {
     var cursor = editor.selection.lead;
     if (editor.__ace.completer && editor.__ace.completer.activated) {
       return;
@@ -966,8 +966,7 @@ module.exports = function (editor) {
   // Hook into Ace
 
   // disable standard context based autocompletion.
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports,
-                                                                                            module) {
+  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(require, exports) {
     exports.getCompletions = function (editor, session, pos, prefix, callback) {
       callback(null, []);
     }

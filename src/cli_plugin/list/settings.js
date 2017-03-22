@@ -1,4 +1,4 @@
-export function parse(command, options) {
+export function parse(command) {
   const settings = {
     pluginDir: command.pluginDir || ''
   };

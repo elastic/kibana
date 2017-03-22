@@ -8,7 +8,7 @@ uiModules.get('kibana')
   $rootScope.$on('$routeChangeError', docTitle.update);
   $rootScope.$on('$routeChangeSuccess', docTitle.update);
 })
-.service('docTitle', function ($rootScope) {
+.service('docTitle', function() {
   const baseTitle = document.title;
   const self = this;
 

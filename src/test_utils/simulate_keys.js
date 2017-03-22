@@ -90,7 +90,7 @@ export default function ($el, sequence) {
     });
   }
 
-  function fire(type, key, repeat) {
+  function fire(type, key) {
     const keyCode = reverseKeyMap[key];
     if (!keyCode) throw new TypeError('invalid key "' + key + '"');
 

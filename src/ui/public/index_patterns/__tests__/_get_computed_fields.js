@@ -9,7 +9,7 @@ describe('get computed fields', function () {
 
   let fn;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function(Private) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     getComputedFields = require('ui/index_patterns/_get_computed_fields');
     indexPattern.getComputedFields = getComputedFields.bind(indexPattern);

@@ -225,7 +225,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function () {
         return PageObjects.visualize.clickMapZoomIn();
       })
-      .then(function (message) {
+      .then(function() {
         return PageObjects.visualize.saveVisualization(vizName1);
       })
       .then(function (message) {

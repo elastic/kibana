@@ -71,7 +71,7 @@ describe('Point Series Config Type Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function(Private) {
     pointSeriesConfig = Private(VislibLibVisPointSeriesTypeConfigProvider);
   }));
 

@@ -25,7 +25,7 @@ export default function VisTypeFactory(Private) {
     }
   }
 
-  VisType.prototype.createRenderbot = function (vis, $el, uiState) {
+  VisType.prototype.createRenderbot = function() {
     throw new Error('not implemented');
   };
 

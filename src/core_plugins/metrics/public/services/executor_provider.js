@@ -61,7 +61,7 @@ export default function executorProvider(Promise, $timeout, timefilter) {
     .finally(reset);
   }
 
-  function reFetch(_changes) {
+  function reFetch() {
     cancel();
     run();
   }

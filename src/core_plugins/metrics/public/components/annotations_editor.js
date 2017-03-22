@@ -33,7 +33,7 @@ class AnnotationsEditor extends Component {
     };
   }
 
-  renderRow(row, i, items) {
+  renderRow(row) {
     const { fields } = this.props;
     const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
     const model = { ...defaults, ...row };

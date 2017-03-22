@@ -28,7 +28,7 @@ var Mode = function () {
 oop.inherits(Mode, TextMode);
 
 (function () {
-  this.getCompletions = function (editor, session, pos, prefix) {
+  this.getCompletions = function() {
     // autocomplete is done by the autocomplete module.
     return [];
   };

@@ -114,7 +114,7 @@ describe('Status class', function () {
     it(`should trigger the "${color}" listner when #${color}() is called`, function (done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
-      status.on(color, function (prev, prevMsg) {
+      status.on(color, function() {
         expect(status.state).to.be(color);
         expect(status.message).to.be(message);
         done();

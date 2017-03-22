@@ -27,7 +27,7 @@ function extendStats(bucket) {
   return body;
 }
 
-function extendStatsBucket(bucket, metrics, bucketSize) {
+function extendStatsBucket(bucket, metrics) {
   const bucketsPath = 'timeseries > ' + getBucketsPath(bucket.field, metrics);
   const body = { extended_stats_bucket: { buckets_path: bucketsPath } };
   if (bucket.sigma) body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
@@ -35,7 +35,7 @@ function extendStatsBucket(bucket, metrics, bucketSize) {
 }
 
 export default {
-  count: (bucket) => {
+  count: () => {
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
@@ -108,7 +108,7 @@ export default {
     return body;
   },
 
-  serial_diff: (bucket, metrics, bucketSize) => {
+  serial_diff: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
     const metric = _.find(metrics, { id: bucket.field });
     const body = {

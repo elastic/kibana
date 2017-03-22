@@ -15,7 +15,7 @@ describe('Filter Bar Directive', function () {
       }
     ));
 
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function(Private, _$rootScope_) {
       extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
       $rootScope = _$rootScope_;
     }));

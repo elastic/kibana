@@ -20,7 +20,7 @@ describe('kibana cli', function () {
       workingPath: testWorkingPath,
       tempArchiveFile: tempArchiveFilePath,
       plugin: 'test-plugin',
-      setPlugin: function (plugin) {}
+      setPlugin: function() {}
     };
 
     function shouldReject() {

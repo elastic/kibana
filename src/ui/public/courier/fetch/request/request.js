@@ -77,7 +77,7 @@ export default function AbstractReqProvider(Private, Promise) {
       return resp;
     }
 
-    filterError(resp) {
+    filterError() {
       return false;
     }
 

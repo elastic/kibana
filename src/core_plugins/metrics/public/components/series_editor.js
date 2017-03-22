@@ -21,7 +21,7 @@ class SeriesEditor extends Component {
     handleAdd.call(null, this.props, () => newSeries);
   }
 
-  renderRow(row, index) {
+  renderRow(row) {
     const { props } = this;
     const { fields, model, name, limit, colorPicker } = props;
     return (

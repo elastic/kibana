@@ -66,7 +66,7 @@ export default function DurationFormatProvider(Private) {
   Duration.editor = {
     template: durationTemplate,
     controllerAs: 'cntrl',
-    controller($scope, $interval) {
+    controller() {
       this.sampleInputs = [
         -123,
         1,

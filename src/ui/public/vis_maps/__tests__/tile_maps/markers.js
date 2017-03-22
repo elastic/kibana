@@ -147,7 +147,7 @@ describe('tilemaptest - Marker Tests', function () {
 
         markerLayer = createMarker(MarkerClass, null, Function.prototype);//create marker with tooltip
         markerLayer._attr.addTooltip = true;
-        const stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
+        const stub = sinon.stub(markerLayer, '_tooltipFormatter', function() {
           return;
         });
         markerLayer._showTooltip(sample);
@@ -162,7 +162,7 @@ describe('tilemaptest - Marker Tests', function () {
 
       beforeEach(function () {
         addToSpy = sinon.spy();
-        leafletControlStub = sinon.stub(L, 'control', function (options) {
+        leafletControlStub = sinon.stub(L, 'control', function() {
           return {
             addTo: addToSpy
           };
