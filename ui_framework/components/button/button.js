@@ -63,14 +63,12 @@ const KuiButton = ({
   className,
   type,
   icon,
-  onClick,
   children,
   ...rest
 }) => {
   return (
     <button
       className={getClassName({ className, type, icon })}
-      onClick={onClick}
       { ...rest }
     >
       <ContentWithIcon
@@ -90,7 +88,6 @@ KuiButton.propTypes = {
   children: PropTypes.node,
   isLoading: PropTypes.bool,
   type: PropTypes.oneOf(BUTTON_TYPES),
-  onClick: PropTypes.func,
   className: PropTypes.string,
 };
 
@@ -131,7 +128,6 @@ KuiLinkButton.propTypes = {
 const KuiSubmitButton = ({
   className,
   type,
-  onClick,
   children,
   ...rest
 }) => {
@@ -140,7 +136,6 @@ const KuiSubmitButton = ({
       type="submit"
       value={children}
       className={getClassName({ className, type })}
-      onClick={onClick}
       { ...rest }
     />
   );
@@ -149,7 +144,6 @@ const KuiSubmitButton = ({
 KuiSubmitButton.propTypes = {
   children: PropTypes.string,
   type: PropTypes.oneOf(BUTTON_TYPES),
-  onClick: PropTypes.func,
   className: PropTypes.string,
 };
 
