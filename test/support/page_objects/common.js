@@ -341,14 +341,28 @@ export default class Common {
     };
   }
 
+  /**
+   * Makes sure the modal overlay is not showing, tries a few times in case it is in the process of hiding.
+   */
+  async ensureModalOverlayHidden() {
+    return PageObjects.common.try(async () => {
+      const shown = await this.doesTestSubjectExist('modalOverlay');
+      if (shown) {
+        throw new Error('Modal overlay is showing');
+      }
+    });
+  }
+
   async clickConfirmOnModal() {
     this.debug('Clicking modal confirm');
     await this.findTestSubject('confirmModalConfirmButton').click();
+    await this.ensureModalOverlayHidden();
   }
 
   async clickCancelOnModal() {
     this.debug('Clicking modal cancel');
     await this.findTestSubject('confirmModalCancelButton').click();
+    await this.ensureModalOverlayHidden();
   }
 
   async isConfirmModalOpen() {
