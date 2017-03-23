@@ -14,7 +14,8 @@ describe('dashboard panels', function () {
       $route.current = {
         locals: {
           dash: dashboard
-        }
+        },
+        params: {}
       };
 
       $el = angular.element(`
