@@ -3,8 +3,6 @@ import expect from 'expect.js';
 
 import {
   bdd,
-  defaultTimeout,
-  scenarioManager,
   esClient
 } from '../../../support';
 
@@ -33,7 +31,7 @@ bdd.describe('index pattern filter', function describeIndexTests() {
   bdd.it('should filter indexed fields', async function () {
     await PageObjects.settings.navigateTo();
     await PageObjects.settings.clickKibanaIndicies();
-    const fieldTypesBefore = await PageObjects.settings.getFieldTypes();
+    await PageObjects.settings.getFieldTypes();
 
 
     await PageObjects.settings.setFieldTypeFilter('string');
