@@ -12,13 +12,14 @@ export default function collectDashboards(req, ids) {
     .then(resp => {
       return Promise.all(resp.docs.map(d => collectPanels(req, d)))
         .then(results => {
-          const objects = results.reduce((acc, result) => {
+          return results.reduce((acc, result) => {
             return acc.concat(result);
-          });
-          return {
-            version: config.get('pkg.version'),
-            objects
-          };
+          }, []).reduce((acc, obj) => {
+            if (!acc.find(o => o._id === obj._id)) {
+              acc.push(obj);
+            }
+            return acc;
+          }, []);
         });
     });
 }
