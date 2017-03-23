@@ -130,11 +130,6 @@ function TopNSeries(props) {
       { body }
     </div>
   );
-<<<<<<< 28021f815fc9edd57862360d03e37607825390f8
-=======
-
-
->>>>>>> Changing Top N to support multiple series
 }
 
 TopNSeries.propTypes = {
