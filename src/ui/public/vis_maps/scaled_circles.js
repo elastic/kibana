@@ -6,21 +6,29 @@ import { EventEmitter } from 'events';
 
 export default class ScaledCircles extends EventEmitter {
 
-  constructor(featureCollection, options, targetZoom) {
+  constructor(featureCollection, options, targetZoom, kibanaMap) {
     super();
     this._geohashGeoJson = featureCollection;
     this._zoom = targetZoom;
+
     this._valueFormatter = options.valueFormatter;
     this._tooltipFormatter = options.tooltipFormatter;
+    this._map = options.map;
+
     this._legendColors = null;
     this._legendQuantizer = null;
 
     this._popups = [];
+    const self = this;
     this._leafletLayer = L.geoJson(null, {
       pointToLayer: this.getMarkerFunction(),
       style: this.getStyleFunction(),
       onEachFeature: (feature, layer) => {
         this._bindPopup(feature, layer);
+      },
+      filter: (feature) => {
+        const bucketRectBounds = _.get(feature, 'properties.rectangle');
+        return kibanaMap.isInside(bucketRectBounds);
       }
     });
     this._leafletLayer.addData(this._geohashGeoJson);

@@ -21,6 +21,8 @@ export default class KibanaMapLayer extends EventEmitter {
   appendLegendContents() {
   }
 
+  mapDragged() {
+  }
 
   movePointer(event) {
   }

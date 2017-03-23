@@ -104,7 +104,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         return;
       }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel());
+      this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
