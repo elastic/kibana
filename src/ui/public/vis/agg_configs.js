@@ -155,9 +155,10 @@ export default function AggConfigsFactory(Private) {
     });
 
 
+    //the geohash aggregation should request the centroid-metric by default
     let shouldAddGeocentroid = false;
     let centroidField = null;
-    aggregations.forEach(function (config) {
+    aggregations.forEach((config) => {
       if (config.type.name === 'geohash_grid' && config.params.useGeocentroid === true) {
         shouldAddGeocentroid = true;
         centroidField = config.getField();
@@ -165,7 +166,6 @@ export default function AggConfigsFactory(Private) {
     });
 
     if (shouldAddGeocentroid) {
-      const geocentroid = AggConfig.aggTypes.find(aggType => aggType.name === 'geo_centroid');
       const geocentroidMetric = new AggConfig(this.vis, {
         type: 'geo_centroid',
         enabled:true,

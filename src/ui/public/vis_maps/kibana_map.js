@@ -100,6 +100,7 @@ class KibanaMap extends EventEmitter {
     });
     this._leafletMap.on('zoomend', e =>this.emit('zoomend'));
     this._leafletMap.on('moveend', e => this.emit('moveend'));
+    this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.mapDragged('dragend', e)));
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
     this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
@@ -166,7 +167,8 @@ class KibanaMap extends EventEmitter {
     return this._layers.slice();
   }
 
-  addLayer(layer) {
+
+  addLayer(kibanaLayer) {
 
 
     this.emit('layers:invalidate');
@@ -183,12 +185,12 @@ class KibanaMap extends EventEmitter {
       popup.openOn(this._leafletMap);
     };
 
-    layer.on('showTooltip', onshowTooltip);
-    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: layer });
+    kibanaLayer.on('showTooltip', onshowTooltip);
+    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: kibanaLayer });
 
     const onHideTooltip = () => this._leafletMap.closePopup();
-    layer.on('hideTooltip', onHideTooltip);
-    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: layer });
+    kibanaLayer.on('hideTooltip', onHideTooltip);
+    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: kibanaLayer });
 
 
     const onStyleChanged = () => {
@@ -196,11 +198,11 @@ class KibanaMap extends EventEmitter {
         this._leafletLegendControl.updateContents();
       }
     };
-    layer.on('styleChanged', onStyleChanged);
-    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: layer });
+    kibanaLayer.on('styleChanged', onStyleChanged);
+    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: kibanaLayer });
 
-    this._layers.push(layer);
-    layer.addToLeafletMap(this._leafletMap);
+    this._layers.push(kibanaLayer);
+    kibanaLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
   }
 
@@ -403,6 +405,11 @@ class KibanaMap extends EventEmitter {
     this._leafletBaseLayer.bringToBack();
     this.resize();
 
+  }
+
+  isInside(bucketRectBounds) {
+    const mapBounds = this._leafletMap.getBounds();
+    return mapBounds.intersects(bucketRectBounds);
   }
 
   fitToData() {
