@@ -74,11 +74,11 @@ module.directive('vislibSeries', function () {
 
       $scope.changeValueAxis = (index) => {
         const series = $scope.vis.params.seriesParams[index];
-        $scope.updateAxisTitle();
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;
         }
+        $scope.updateAxisTitle();
       };
     }
   };
