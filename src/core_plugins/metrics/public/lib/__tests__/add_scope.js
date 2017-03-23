@@ -35,7 +35,7 @@ describe('addScope()', () => {
 
   it('calls $scope.$watchCollection on each scoped item', () => {
     const WrappedComponent = addScope(Component, $scope, ['testOne', 'testTwo']);
-    const wrapper = shallow(<WrappedComponent/>);
+    shallow(<WrappedComponent/>);
     expect(watchCollectionStub.calledTwice).to.equal(true);
     expect(watchCollectionStub.firstCall.args[0]).to.equal('testOne');
     expect(watchCollectionStub.secondCall.args[0]).to.equal('testTwo');
