@@ -217,6 +217,11 @@ class KibanaMap extends EventEmitter {
       this._layers.splice(index, 1);
       layer.removeFromLeafletMap(this._leafletMap);
     }
+    this._listeners.forEach(listener => {
+      if (listener.layer === layer) {
+        listener.layer.removeListener(listener.name, listener.handle);
+      }
+    });
   }
 
   destroy() {
