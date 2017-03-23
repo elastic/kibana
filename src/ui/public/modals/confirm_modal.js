@@ -6,6 +6,11 @@ import { ModalOverlay } from './modal_overlay';
 
 const module = uiModules.get('kibana');
 
+export const ConfirmationButtonTypes = {
+  CONFIRM: 'Confirm',
+  CANCEL: 'Cancel'
+};
+
 /**
  * @typedef {Object} ConfirmModalOptions
  * @property {String} confirmButtonText
@@ -31,7 +36,8 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     const defaultOptions = {
       onCancel: noop,
       cancelButtonText: 'Cancel',
-      showClose: false
+      showClose: false,
+      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
     };
 
     if (customOptions.showClose === true && !customOptions.title) {
@@ -77,7 +83,15 @@ module.factory('confirmModal', function ($rootScope, $compile) {
         }
       });
 
-      modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+      switch (options.defaultFocusedButton) {
+        case ConfirmationButtonTypes.CONFIRM:
+          modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+          break;
+        case ConfirmationButtonTypes.CANCEL:
+          modalInstance.find('[data-test-subj=confirmModalCancelButton]').focus();
+          break;
+        default:
+      }
     }
 
     if (modalPopover) {

@@ -19,7 +19,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(Private, $rootScope, $location, config) {
+export default function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
@@ -173,6 +173,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
    * @returns {void}
    */
   State.prototype.reset = function () {
+    kbnUrl.removeParam(this.getQueryParamName());
     // apply diff to _attributes from defaults, this is side effecting so
     // it will change the state in place.
     const diffResults = applyDiff(this, this._defaults);

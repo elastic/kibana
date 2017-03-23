@@ -20,6 +20,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         title: 'Shared-Item Visualization AreaChart',
         description: 'AreaChart'
       };
+
       return PageObjects.visualize.clickVisualizationByName('Shared-Item Visualization AreaChart')
         .then (() => PageObjects.common.try(function () {
           return PageObjects.common.getSharedItemTitleAndDescription()

@@ -5,7 +5,6 @@ import {
 } from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
 import { bdd } from '../../../support';
-
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('dashboard tab', function describeIndexTests() {
@@ -81,42 +80,47 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         });
     });
   });
+});
 
-  bdd.it('filters when a pie chart slice is clicked', async function () {
-    let descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
+bdd.describe('filters', async function () {
+  bdd.it('are not selected by default', async function () {
+    const descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
     expect(descriptions.length).to.equal(0);
+  });
 
+  bdd.it('are added when a pie chart slice is clicked', async function () {
     await PageObjects.dashboard.filterOnPieSlice();
-    descriptions = await PageObjects.dashboard.getFilterDescriptions();
+    const descriptions = await PageObjects.dashboard.getFilterDescriptions();
     expect(descriptions.length).to.equal(1);
   });
+});
 
-  bdd.it('retains dark theme in state', async function () {
-    await PageObjects.dashboard.useDarkTheme(true);
-    await PageObjects.header.clickVisualize();
-    await PageObjects.header.clickDashboard();
-    const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
-    expect(isDarkThemeOn).to.equal(true);
-  });
+bdd.it('retains dark theme in state', async function () {
+  await PageObjects.dashboard.clickEdit();
+  await PageObjects.dashboard.useDarkTheme(true);
+  await PageObjects.header.clickVisualize();
+  await PageObjects.header.clickDashboard();
+  const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
+  expect(isDarkThemeOn).to.equal(true);
+});
 
-  bdd.it('should have shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
-    const visualizations = PageObjects.dashboard.getTestVisualizations();
-    return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
-      .then(function (count) {
-        PageObjects.common.log('shared-items-count = ' + count);
-        expect(count).to.eql(visualizations.length);
-      });
-  });
-
-  bdd.it('should have panels with expected shared-item title and description', function checkTitles() {
-    const visualizations = PageObjects.dashboard.getTestVisualizations();
-    return PageObjects.common.tryForTime(10000, function () {
-      return PageObjects.dashboard.getPanelSharedItemData()
-        .then(function (data) {
-          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
-          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
-        });
+bdd.it('should have shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
+  const visualizations = PageObjects.dashboard.getTestVisualizations();
+  return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
+    .then(function (count) {
+      PageObjects.common.log('shared-items-count = ' + count);
+      expect(count).to.eql(visualizations.length);
     });
+});
+
+bdd.it('should have panels with expected shared-item title and description', function checkTitles() {
+  const visualizations = PageObjects.dashboard.getTestVisualizations();
+  return PageObjects.common.tryForTime(10000, function () {
+    return PageObjects.dashboard.getPanelSharedItemData()
+      .then(function (data) {
+        expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
+        expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+      });
   });
 
   bdd.it('add new visualization link', async function checkTitles() {
