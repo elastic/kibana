@@ -1,9 +1,7 @@
 import React, {
   PropTypes,
 } from 'react';
-
 import classNames from 'classnames';
-import keyMirror from 'keymirror';
 
 import { KuiButtonIcon } from './button_icon/button_icon';
 
@@ -13,63 +11,38 @@ const BUTTON_TYPES = [
   'danger',
   'primary',
 ];
+const ICON_POSITIONS = [
+  'left',
+  'right',
+];
+const defaultIconPosition = ICON_POSITIONS[0];
 
-const commonPropTypes = {
-  type: PropTypes.oneOf(BUTTON_TYPES),
-  'data-test-subj': PropTypes.string,
-  isDisabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  data: PropTypes.any,
-  className: PropTypes.string,
+const buttonTypeToClassNameMap = {
+  basic: 'kuiButton--basic',
+  hollow: 'kuiButton--hollow',
+  danger: 'kuiButton--danger',
+  primary: 'kuiButton--primary',
 };
 
-// KuiSubmitButton is an `input` element, which is a void element and can't contain children. But
-// the regular KuiButton and KuiLink button are non-void elements, so they can contain children.
-// These propTypes will only apply to these components.
-const nonVoidPropTypes = {
-  icon: PropTypes.node,
-  iconPosition: PropTypes.oneOf([
-    'left',
-    'right',
-  ]),
-  children: PropTypes.node,
-  isLoading: PropTypes.bool,
-};
-
-const nonVoidDefaultProps = {
-  iconPosition: 'left',
-};
-
-const getIcon = props => (
-  props.isLoading
-    ? <KuiButtonIcon type="loading" />
-    : props.icon
-);
-
-const getClassName = (props, icon) => {
-  const typeToClassNameMap = {
-    basic: 'kuiButton--basic',
-    hollow: 'kuiButton--hollow',
-    danger: 'kuiButton--danger',
-    primary: 'kuiButton--primary',
-  };
-
-  return classNames('kuiButton', props.className, {
-    [typeToClassNameMap[props.type]]: props.type,
-    'kuiButton--iconText': icon,
+const getClassName = ({ className, type, icon }) =>
+  classNames('kuiButton', className, buttonTypeToClassNameMap[type], {
+    'kuiButton--iconText': icon != null,
   });
-};
 
-const getChildren = (props, icon) => {
-  // We need to wrap the text so that the icon's :first-child etc. seudo-selectors get applied
+const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
+  const iconOrLoading = isLoading
+    ? <KuiButtonIcon type="loading" />
+    : icon;
+
+  // We need to wrap the children so that the icon's :first-child etc. pseudo-selectors get applied
   // correctly.
-  const wrappedChildren = props.children ? <span>{props.children}</span> : undefined;
+  const wrappedChildren = children ? <span>{children}</span> : undefined;
 
-  switch(props.iconPosition) {
+  switch(iconPosition) {
     case 'left':
       return (
         <span>
-          {icon}
+          {iconOrLoading}
           {wrappedChildren}
         </span>
       );
@@ -78,89 +51,106 @@ const getChildren = (props, icon) => {
       return (
         <span>
           {wrappedChildren}
-          {icon}
+          {iconOrLoading}
         </span>
       );
   }
 };
 
-const getOnClick = props => (
-  // onClick is optional, so don't even call it if it's not passed in, or if we're disabled.
-  props.onClick && !props.isDisabled
-    ? () => props.onClick(props.data)
-    : () => {}
-);
-
-const getCommonProps = (props, icon) => ({
-  'data-test-subj': props['data-test-subj'],
-  className: getClassName(props, icon),
-  onClick: getOnClick(props),
-  disabled: props.isDisabled,
-});
-
-const KuiButton = props => {
-  const icon = getIcon(props);
-  const children = getChildren(props, icon);
-  const commonProps = getCommonProps(props, icon);
-
+const KuiButton = ({
+  isLoading,
+  iconPosition = defaultIconPosition,
+  className,
+  type,
+  icon,
+  onClick,
+  children,
+  ...rest
+}) => {
   return (
-    <button {...commonProps}>
-      {children}
+    <button
+      className={getClassName({ className, type, icon })}
+      onClick={onClick}
+      { ...rest }
+    >
+      <ContentWithIcon
+        icon={icon}
+        iconPosition={iconPosition}
+        isLoading={ isLoading }
+      >
+        { children }
+      </ContentWithIcon>
     </button>
   );
 };
 
 KuiButton.propTypes = {
-  ...nonVoidPropTypes,
-  ...commonPropTypes,
+  icon: PropTypes.node,
+  iconPosition: PropTypes.oneOf(ICON_POSITIONS),
+  children: PropTypes.node,
+  isLoading: PropTypes.bool,
+  type: PropTypes.oneOf(BUTTON_TYPES),
+  onClick: PropTypes.func,
+  className: PropTypes.string,
 };
 
-KuiButton.defaultProps = {
-  ...nonVoidDefaultProps,
-};
-
-const KuiLinkButton = props => {
-  const icon = getIcon(props);
-  const children = getChildren(props, icon);
-  const commonProps = getCommonProps(props, icon);
-
+const KuiLinkButton = ({
+  isLoading,
+  icon,
+  iconPosition = defaultIconPosition,
+  className,
+  type,
+  children,
+  ...rest
+}) => {
   return (
     <a
-      href={props.href}
-      target={props.target}
-      {...commonProps}
+      className={getClassName({ className, type, icon })}
+      {...rest}
     >
-      {children}
+      <ContentWithIcon
+        icon={icon}
+        iconPosition={iconPosition}
+        isLoading={ isLoading }
+      >
+        {children}
+      </ContentWithIcon>
     </a>
   );
 };
 
 KuiLinkButton.propTypes = {
-  href: PropTypes.string,
-  target: PropTypes.string,
-  ...nonVoidPropTypes,
-  ...commonPropTypes,
+  icon: PropTypes.node,
+  iconPosition: PropTypes.oneOf(ICON_POSITIONS),
+  isLoading: PropTypes.bool,
+  type: PropTypes.oneOf(BUTTON_TYPES),
+  className: PropTypes.string,
+  children: PropTypes.node,
 };
 
-KuiLinkButton.defaultProps = {
-  ...nonVoidDefaultProps,
-};
-
-const KuiSubmitButton = props => {
-  const commonProps = getCommonProps(props);
-
+const KuiSubmitButton = ({
+  className,
+  type,
+  onClick,
+  children,
+  ...rest
+}) => {
   return (
     <input
       type="submit"
-      value={props.children}
-      {...commonProps}
+      value={children}
+      className={getClassName({ className, type })}
+      onClick={onClick}
+      { ...rest }
     />
   );
 };
 
 KuiSubmitButton.propTypes = {
   children: PropTypes.string,
-  ...commonPropTypes,
+  type: PropTypes.oneOf(BUTTON_TYPES),
+  onClick: PropTypes.func,
+  className: PropTypes.string,
 };
 
 export {
