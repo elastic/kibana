@@ -47,7 +47,10 @@ export async function getMetrics({ event, config }) {
       return;
     }
 
-    const cgroup = await cGroupStats();
+    const cgroup = await cGroupStats({
+      cpuPath: config.get('cpu.cgroup.path.override') ? '/' : undefined,
+      cpuAcctPath: config.get('cpuacct.cgroup.path.override') ? '/' : undefined
+    });
 
     if (isObject(cgroup)) {
       return cgroup;

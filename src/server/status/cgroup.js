@@ -17,7 +17,6 @@ const CPUACCT_USAGE_FILE = 'cpuacct.usage';
 const GROUP_CPU = 'cpu';
 const CPU_FS_PERIOD_US_FILE = 'cpu.cfs_period_us';
 const CPU_FS_QUOTA_US_FILE = 'cpu.cfs_quota_us';
-
 const CPU_STATS_FILE = 'cpu.stat';
 
 const readFile = promisify(fs.readFile);
@@ -55,11 +54,11 @@ function readCPUAcctUsage(controlGroup) {
 }
 
 function readCPUFsPeriod(controlGroup) {
-  return fileContentsToInteger(joinPath(PROC_CGROUP_CPUACCT_DIR, controlGroup, CPU_FS_PERIOD_US_FILE));
+  return fileContentsToInteger(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_PERIOD_US_FILE));
 }
 
 function readCPUFsQuota(controlGroup) {
-  return fileContentsToInteger(joinPath(PROC_CGROUP_CPUACCT_DIR, controlGroup, CPU_FS_QUOTA_US_FILE));
+  return fileContentsToInteger(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_QUOTA_US_FILE));
 }
 
 export function readCPUStat(controlGroup) {
@@ -100,22 +99,25 @@ export function readCPUStat(controlGroup) {
   });
 }
 
-export function getAllStats() {
+export function getAllStats(options = {}) {
   return readControlGroups().then(groups => {
+    const cpuPath = options.cpuPath || groups[GROUP_CPU];
+    const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
+
     return Promise.all([
-      readCPUAcctUsage(groups[GROUP_CPUACCT]),
-      readCPUFsPeriod(groups[GROUP_CPU]),
-      readCPUFsQuota(groups[GROUP_CPU]),
-      readCPUStat(groups[GROUP_CPU])
+      readCPUAcctUsage(cpuAcctPath),
+      readCPUFsPeriod(cpuPath),
+      readCPUFsQuota(cpuPath),
+      readCPUStat(cpuPath)
     ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
       const stats = {
         cpuacct: {
-          control_group: groups[GROUP_CPUACCT],
+          control_group: cpuAcctPath,
           usage_nanos: cpuAcctUsage
         },
 
         cpu: {
-          control_group: groups[GROUP_CPU],
+          control_group: cpuPath,
           cfs_period_micros: cpuFsPeriod,
           cfs_quota_micros: cpuFsQuota,
           stat: cpuStat
