@@ -36,7 +36,7 @@ module.exports = {
         },
         'id': {
           'type': 'integer',
-          'index': true
+          'index': true,
         },
         'clientip': {
           'type': 'ip'
@@ -53,13 +53,13 @@ module.exports = {
         'geo': {
           'properties': {
             'srcdest': {
-              type: "keyword"
+              type: 'keyword'
             },
             'dest': {
-              type: "keyword"
+              type: 'keyword'
             },
             'src': {
-              type: "keyword"
+              type: 'keyword'
             },
             'coordinates': {
               'type': 'geo_point'
@@ -72,7 +72,7 @@ module.exports = {
               'type': 'text'
             },
             'char': {
-              type: "keyword"
+              type: 'keyword'
             },
             'user': {
               'properties': {

@@ -102,9 +102,6 @@ module.exports = function (api) {
           },
           analyzer: 'standard',
           search_analyzer: 'standard',
-          include_in_all: {
-            __one_of: [false, true]
-          },
           ignore_above: 10,
           position_increment_gap: 0,
 
