@@ -96,14 +96,17 @@ export const createProxyRoute = ({
           return reply(err);
         }
 
-        if (method.toUpperCase() === 'HEAD') {
-          return reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-            .type('text/plain')
-            .code(esResponse.statusCode);
+        if (method.toUpperCase() !== 'HEAD') {
+          reply(esResponse)
+            .code(esResponse.statusCode)
+            .header('warning', esResponse.headers.warning);
+          return;
         }
 
-        return reply(esResponse)
-          .code(esResponse.statusCode);
+        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+          .code(esResponse.statusCode)
+          .type('text/plain')
+          .header('warning', esResponse.headers.warning);
       });
     }
   }
