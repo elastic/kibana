@@ -310,6 +310,10 @@ export default class DashboardPage {
     }, Promise.resolve());
   }
 
+  clickAddNewVisualizationLink() {
+    return PageObjects.common.clickTestSubject('addNewSavedObjectLink');
+  }
+
   async setTimepickerInDataRange() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
