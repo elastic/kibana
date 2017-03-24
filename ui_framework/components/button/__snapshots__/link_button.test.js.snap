@@ -8,6 +8,58 @@ exports[`KuiLinkButton Baseline is rendered 1`] = `
 </a>
 `;
 
+exports[`KuiLinkButton HTML attributes aria-label is rendered 1`] = `
+<a
+  aria-label="aria label"
+  class="kuiButton"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton HTML attributes className renders the classes 1`] = `
+<a
+  class="kuiButton testClass1 testClass2"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton HTML attributes data-test-subj is rendered 1`] = `
+<a
+  class="kuiButton"
+  data-test-subj="test subject string"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton HTML attributes disabled sets the disabled class 1`] = `
+<a
+  class="kuiButton kuiButton-isDisabled"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton HTML attributes href is rendered 1`] = `
+<a
+  class="kuiButton"
+  href="#"
+>
+  <span />
+</a>
+`;
+
+exports[`KuiLinkButton HTML attributes target is rendered 1`] = `
+<a
+  class="kuiButton"
+  target="_blank"
+>
+  <span />
+</a>
+`;
+
 exports[`KuiLinkButton Props children is rendered 1`] = `
 <a
   class="kuiButton"
@@ -17,40 +69,6 @@ exports[`KuiLinkButton Props children is rendered 1`] = `
       Hello
     </span>
   </span>
-</a>
-`;
-
-exports[`KuiLinkButton Props className renders the classes 1`] = `
-<a
-  class="kuiButton testClass1 testClass2"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton Props data-test-subj is rendered 1`] = `
-<a
-  class="kuiButton"
-  data-test-subj="test subject string"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton Props disabled sets the disabled class 1`] = `
-<a
-  class="kuiButton kuiButton-isDisabled"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton Props href is rendered 1`] = `
-<a
-  class="kuiButton"
-  href="#"
->
-  <span />
 </a>
 `;
 
@@ -111,15 +129,6 @@ exports[`KuiLinkButton Props isLoading renders a spinner 1`] = `
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
-</a>
-`;
-
-exports[`KuiLinkButton Props target is rendered 1`] = `
-<a
-  class="kuiButton"
-  target="_blank"
->
-  <span />
 </a>
 `;
 

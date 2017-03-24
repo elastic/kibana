@@ -8,6 +8,41 @@ exports[`KuiButton Baseline is rendered 1`] = `
 </button>
 `;
 
+exports[`KuiButton HTML attributes aria-label is rendered 1`] = `
+<button
+  aria-label="aria label"
+  class="kuiButton"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton HTML attributes className renders the classes 1`] = `
+<button
+  class="kuiButton testClass1 testClass2"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton HTML attributes data-test-subj is rendered 1`] = `
+<button
+  class="kuiButton"
+  data-test-subj="test subject string"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton HTML attributes disabled sets the disabled attribute and class 1`] = `
+<button
+  class="kuiButton kuiButton-isDisabled"
+  disabled=""
+>
+  <span />
+</button>
+`;
+
 exports[`KuiButton Props children is rendered 1`] = `
 <button
   class="kuiButton"
@@ -17,32 +52,6 @@ exports[`KuiButton Props children is rendered 1`] = `
       Hello
     </span>
   </span>
-</button>
-`;
-
-exports[`KuiButton Props className renders the classes 1`] = `
-<button
-  class="kuiButton testClass1 testClass2"
->
-  <span />
-</button>
-`;
-
-exports[`KuiButton Props data-test-subj is rendered 1`] = `
-<button
-  class="kuiButton"
-  data-test-subj="test subject string"
->
-  <span />
-</button>
-`;
-
-exports[`KuiButton Props disabled sets the disabled attribute and class 1`] = `
-<button
-  class="kuiButton kuiButton-isDisabled"
-  disabled=""
->
-  <span />
 </button>
 `;
 

@@ -19,15 +19,26 @@ describe('KuiButton', () => {
     });
   });
 
-  describe('Props', () => {
-    describe('type', () => {
-      BUTTON_TYPES.forEach(type => {
-        describe(type, () => {
-          test(`renders the ${type} class`, () => {
-            const $button = render(<KuiButton type={ type } />);
-            expect($button).toMatchSnapshot();
-          });
-        });
+  describe('HTML attributes', () => {
+    describe('aria-label', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiButton aria-label="aria label" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('disabled', () => {
+      test('sets the disabled attribute and class', () => {
+        const $button = render(
+          <KuiButton disabled />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
       });
     });
 
@@ -39,6 +50,30 @@ describe('KuiButton', () => {
 
         expect($button)
           .toMatchSnapshot();
+      });
+    });
+
+    describe('className', () => {
+      test('renders the classes', () => {
+        const $button = render(
+          <KuiButton className="testClass1 testClass2" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('Props', () => {
+    describe('type', () => {
+      BUTTON_TYPES.forEach(type => {
+        describe(type, () => {
+          test(`renders the ${type} class`, () => {
+            const $button = render(<KuiButton type={ type } />);
+            expect($button).toMatchSnapshot();
+          });
+        });
       });
     });
 
@@ -117,17 +152,6 @@ describe('KuiButton', () => {
       });
     });
 
-    describe('disabled', () => {
-      test('sets the disabled attribute and class', () => {
-        const $button = render(
-          <KuiButton disabled />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
     describe('isLoading', () => {
       test('renders a spinner', () => {
         const $button = render(
@@ -141,17 +165,6 @@ describe('KuiButton', () => {
       test(`doesn't render the icon prop`, () => {
         const $button = render(
           <KuiButton isLoading icon="Icon" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('className', () => {
-      test('renders the classes', () => {
-        const $button = render(
-          <KuiButton className="testClass1 testClass2" />
         );
 
         expect($button)

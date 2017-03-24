@@ -7,22 +7,22 @@ exports[`KuiSubmitButton Baseline is rendered 1`] = `
 />
 `;
 
-exports[`KuiSubmitButton Props children is rendered as value 1`] = `
+exports[`KuiSubmitButton HTML attributes aria-label is rendered 1`] = `
 <input
+  aria-label="aria label"
   class="kuiButton"
   type="submit"
-  value="Hello"
 />
 `;
 
-exports[`KuiSubmitButton Props className renders the classes 1`] = `
+exports[`KuiSubmitButton HTML attributes className renders the classes 1`] = `
 <input
   class="kuiButton testClass1 testClass2"
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props data-test-subj is rendered 1`] = `
+exports[`KuiSubmitButton HTML attributes data-test-subj is rendered 1`] = `
 <input
   class="kuiButton"
   data-test-subj="test subject string"
@@ -30,11 +30,19 @@ exports[`KuiSubmitButton Props data-test-subj is rendered 1`] = `
 />
 `;
 
-exports[`KuiSubmitButton Props disabled sets the disabled attribute and class 1`] = `
+exports[`KuiSubmitButton HTML attributes disabled sets the disabled attribute and class 1`] = `
 <input
   class="kuiButton kuiButton-isDisabled"
   disabled=""
   type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props children is rendered as value 1`] = `
+<input
+  class="kuiButton"
+  type="submit"
+  value="Hello"
 />
 `;
 

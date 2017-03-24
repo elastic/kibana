@@ -17,6 +17,74 @@ describe('KuiLinkButton', () => {
     });
   });
 
+  describe('HTML attributes', () => {
+    describe('href', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiLinkButton href="#" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('target', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiLinkButton target="_blank" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('aria-label', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiLinkButton aria-label="aria label" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('disabled', () => {
+      test('sets the disabled class', () => {
+        const $button = render(
+          <KuiLinkButton disabled />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('data-test-subj', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiLinkButton data-test-subj="test subject string" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('className', () => {
+      test('renders the classes', () => {
+        const $button = render(
+          <KuiLinkButton className="testClass1 testClass2" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+  });
+
   describe('Props', () => {
     describe('type', () => {
       describe('basic', () => {
@@ -61,17 +129,6 @@ describe('KuiLinkButton', () => {
           expect($button)
             .toMatchSnapshot();
         });
-      });
-    });
-
-    describe('data-test-subj', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiLinkButton data-test-subj="test subject string" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
       });
     });
 
@@ -126,39 +183,6 @@ describe('KuiLinkButton', () => {
       });
     });
 
-    describe('href', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiLinkButton href="#" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('target', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiLinkButton target="_blank" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('disabled', () => {
-      test('sets the disabled class', () => {
-        const $button = render(
-          <KuiLinkButton disabled />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
     describe('isLoading', () => {
       test('renders a spinner', () => {
         const $button = render(
@@ -172,17 +196,6 @@ describe('KuiLinkButton', () => {
       test(`doesn't render the icon prop`, () => {
         const $button = render(
           <KuiLinkButton isLoading icon="Icon" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('className', () => {
-      test('renders the classes', () => {
-        const $button = render(
-          <KuiLinkButton className="testClass1 testClass2" />
         );
 
         expect($button)

@@ -18,6 +18,52 @@ describe('KuiSubmitButton', () => {
     });
   });
 
+  describe('HTML attributes', () => {
+    describe('aria-label', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiSubmitButton aria-label="aria label" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('data-test-subj', () => {
+      test('is rendered', () => {
+        const $button = render(
+          <KuiSubmitButton data-test-subj="test subject string" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('disabled', () => {
+      test('sets the disabled attribute and class', () => {
+        const $button = render(
+          <KuiSubmitButton disabled />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+
+    describe('className', () => {
+      test('renders the classes', () => {
+        const $button = render(
+          <KuiSubmitButton className="testClass1 testClass2" />
+        );
+
+        expect($button)
+          .toMatchSnapshot();
+      });
+    });
+  });
+
   describe('Props', () => {
     describe('type', () => {
       describe('basic', () => {
@@ -65,17 +111,6 @@ describe('KuiSubmitButton', () => {
       });
     });
 
-    describe('data-test-subj', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiSubmitButton data-test-subj="test subject string" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
     describe('children', () => {
       test('is rendered as value', () => {
         const $button = render(
@@ -110,28 +145,6 @@ describe('KuiSubmitButton', () => {
         $button.simulate('click');
 
         sinon.assert.calledOnce(onClickHandler);
-      });
-    });
-
-    describe('disabled', () => {
-      test('sets the disabled attribute and class', () => {
-        const $button = render(
-          <KuiSubmitButton disabled />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('className', () => {
-      test('renders the classes', () => {
-        const $button = render(
-          <KuiSubmitButton className="testClass1 testClass2" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
       });
     });
   });
