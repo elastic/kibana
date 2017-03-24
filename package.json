@@ -215,6 +215,7 @@
     "enzyme-to-json": "1.4.5",
     "eslint": "3.11.1",
     "eslint-plugin-babel": "4.0.0",
+    "eslint-plugin-jest": "19.0.1",
     "eslint-plugin-mocha": "4.7.0",
     "eslint-plugin-react": "6.10.3",
     "event-stream": "3.3.2",
