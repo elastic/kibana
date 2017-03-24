@@ -245,7 +245,7 @@ export default class HeaderPage {
   async isSharedTimefilterEnabled() {
     const element = await this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector(`[shared-timefilter=true]`);
+    .findByCssSelector(`[data-shared-timefilter=true]`);
 
     return new Boolean(element);
   }
