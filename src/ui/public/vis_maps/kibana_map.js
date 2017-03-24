@@ -90,6 +90,8 @@ class KibanaMap extends EventEmitter {
       maxZoom: options.maxZoom
     });
     this._leafletMap.fitWorld();
+    const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
+    this._leafletMap.setMaxBounds(worldBounds);
 
     let previousZoom = this._leafletMap.getZoom();
     this._leafletMap.on('zoomend', () => {
@@ -98,9 +100,9 @@ class KibanaMap extends EventEmitter {
         this.emit('zoomchange');
       }
     });
-    this._leafletMap.on('zoomend', e =>this.emit('zoomend'));
-    this._leafletMap.on('moveend', e => this.emit('moveend'));
-    this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.mapDragged('dragend', e)));
+    this._leafletMap.on('zoomend', () => this.emit('zoomend'));
+    this._leafletMap.on('moveend', () => this.emit('moveend'));
+    this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.updateExtent('dragend', e)));
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
     this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
@@ -371,6 +373,7 @@ class KibanaMap extends EventEmitter {
 
   resize() {
     this._leafletMap.invalidateSize();
+    this._updateExtent();
   }
 
 
@@ -459,6 +462,10 @@ class KibanaMap extends EventEmitter {
       transparent: options.transparent,
       version: options.version
     });
+  }
+
+  _updateExtent() {
+    this._layers.forEach(layer => layer.updateExtent());
   }
 
   _updateDesaturation() {

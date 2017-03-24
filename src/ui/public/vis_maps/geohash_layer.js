@@ -62,7 +62,7 @@ export default class GeohashLayer extends KibanaMapLayer {
     this._geohashMarkers.movePointer(...args);
   }
 
-  mapDragged() {
+  updateExtent() {
     //this removal is required to trigger the bounds filter again
     this._kibanaMap.removeLayer(this);
     this._createGeohashMarkers();

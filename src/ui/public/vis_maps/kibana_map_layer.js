@@ -21,10 +21,10 @@ export default class KibanaMapLayer extends EventEmitter {
   appendLegendContents() {
   }
 
-  mapDragged() {
+  updateExtent() {
   }
 
-  movePointer(event) {
+  movePointer() {
   }
 
   getBounds() {
