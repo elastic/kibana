@@ -1,6 +1,6 @@
 let mappings = require('../../src/mappings');
 
-var { test, module, deepEqual } = QUnit;
+var { test, module, deepEqual } = window.QUnit;
 
 module("Mappings", {
   setup: function () {
@@ -82,7 +82,7 @@ test("Multi fields 1.0 style", function () {
     f("any_name", "string"), f("first_name", "string"), f("last_name", "string"), f("last_name.raw", "string")]);
 });
 
-QUnit.test("Simple fields", function () {
+test("Simple fields", function () {
   mappings.loadMappings({
     "index": {
       "tweet": {
@@ -101,7 +101,7 @@ QUnit.test("Simple fields", function () {
   deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string")]);
 });
 
-QUnit.test("Simple fields - 1.0 style", function () {
+test("Simple fields - 1.0 style", function () {
   mappings.loadMappings({
     "index": {
       "mappings": {
@@ -122,7 +122,7 @@ QUnit.test("Simple fields - 1.0 style", function () {
   deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string")]);
 });
 
-QUnit.test("Nested fields", function () {
+test("Nested fields", function () {
   mappings.loadMappings({
     "index": {
       "tweet": {
