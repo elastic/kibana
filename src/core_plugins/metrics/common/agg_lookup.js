@@ -77,7 +77,6 @@ export function createOptions(type = '_all', siblings = []) {
         disabled
       };
     })
-    .sortBy('label')
     .value();
 }
 
