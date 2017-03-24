@@ -17,7 +17,20 @@ export const GuideNav = props => {
     'is-menu-button-pinned': props.isNavOpen,
   });
 
-  const navItems = props.items.map((item, index) => {
+  const componentNavItems = props.components.map((item, index) => {
+    return (
+      <Link
+        key={index}
+        className="guideNavItem"
+        to={item.path}
+        onClick={props.onClickNavItem}
+      >
+        {item.name}
+      </Link>
+    );
+  });
+
+  const sandboxNavItems = props.sandboxes.map((item, index) => {
     return (
       <Link
         key={index}
@@ -48,7 +61,17 @@ export const GuideNav = props => {
 
       <div className="guideNavItemsContainer">
         <div className="guideNavItems">
-          {navItems}
+          <div className="guideNavSectionTitle">
+            Components
+          </div>
+
+          {componentNavItems}
+
+          <div className="guideNavSectionTitle">
+            Sandboxes
+          </div>
+
+          {sandboxNavItems}
         </div>
       </div>
     </div>
@@ -60,6 +83,7 @@ GuideNav.propTypes = {
   onToggleNav: PropTypes.func,
   onClickNavItem: PropTypes.func,
   version: PropTypes.string,
-  items: PropTypes.array,
+  components: PropTypes.array,
+  sandboxes: PropTypes.array,
 };
 

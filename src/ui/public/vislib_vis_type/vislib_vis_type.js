@@ -5,13 +5,10 @@ import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
 import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import VisSchemasProvider from 'ui/vis/schemas';
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 export default function VislibVisTypeFactory(Private) {
-
-  const VisTypeSchemas = Private(VisSchemasProvider);
   const VisType = Private(VisVisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
@@ -34,7 +31,7 @@ export default function VislibVisTypeFactory(Private) {
     if (params.mode) {
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(params.mode);
       params.seriesParams[0].mode = stacked ? 'stacked' : 'normal';
-      const axisMode = ['stacked', 'overlap'].includes(params.mode) ? 'norlal' : params.mode;
+      const axisMode = ['stacked', 'overlap'].includes(params.mode) ? 'normal' : params.mode;
       params.valueAxes[0].scale.mode = axisMode;
       delete params.mode;
     }

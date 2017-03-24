@@ -43,7 +43,6 @@ export default function AxisFactory(Private) {
 
       const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
       if (stackedMode) {
-        const self = this;
         this.stack = this._stackNegAndPosVals;
       }
     }
@@ -117,7 +116,6 @@ export default function AxisFactory(Private) {
     adjustSize() {
       const config = this.axisConfig;
       const style = config.get('style');
-      const margin = this.visConfig.get('style.margin');
       const chartEl = this.visConfig.get('el');
       const position = config.get('position');
       const axisPadding = 5;
@@ -169,7 +167,7 @@ export default function AxisFactory(Private) {
     }
 
     draw() {
-      let svg;
+      const svgs = [];
       const self = this;
       const config = this.axisConfig;
       const style = config.get('style');
@@ -191,9 +189,11 @@ export default function AxisFactory(Private) {
           const axis = self.getAxis(length);
 
           if (config.get('show')) {
-            svg = div.append('svg')
+            const svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
+
+            svgs.push(svg);
 
             const axisClass = self.axisConfig.isHorizontal() ? 'x' : 'y';
             svg.append('g')
@@ -219,7 +219,7 @@ export default function AxisFactory(Private) {
           self.axisTitle.render(selection);
         }
 
-        if (svg) svg.call(self.adjustSize());
+        svgs.forEach(svg => svg.call(self.adjustSize()));
       };
     }
   }

@@ -7,6 +7,10 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
+import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { DashboardViewMode } from './dashboard_view_mode';
+import { TopNavIds } from './top_nav/top_nav_ids';
+import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
@@ -50,7 +54,7 @@ uiRoutes
     }
   });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, quickRanges, kbnUrl, Private) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, quickRanges, kbnUrl, confirmModal, Private) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
@@ -58,7 +62,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
     restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
-      const queryFilter = Private(FilterBarQueryFilterProvider);
+      const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
 
@@ -67,38 +71,56 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(
-        dash,
-        timefilter,
-        !getAppState.previouslyStored(),
-        quickRanges,
-        AppState);
+      const dashboardState = new DashboardState(dash, AppState);
 
-      dashboardState.updateFilters(queryFilter);
+      // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
+      // normal cross app navigation.
+      if (dashboardState.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+        dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+      }
+
+      // Part of the exposed plugin API - do not remove without careful consideration.
+      this.appStatus = {
+        dirty: !dash.id
+      };
+      dashboardState.stateMonitor.onChange(status => {
+        this.appStatus.dirty = status.dirty || !dash.id;
+      });
+
+      dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
       let pendingVisCount = _.size(dashboardState.getPanels());
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
+      dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = { query: dashboardState.getQuery() };
+      $scope.model = {
+        query: dashboardState.getQuery(),
+        darkTheme: dashboardState.getDarkTheme(),
+        timeRestore: dashboardState.getTimeRestore(),
+        title: dashboardState.getTitle()
+      };
 
       $scope.panels = dashboardState.getPanels();
-      $scope.topNavMenu = getTopNavConfig(kbnUrl);
       $scope.refresh = _.bindKey(courier, 'fetch');
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
+      $scope.dashboardViewMode = dashboardState.getViewMode();
 
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      $scope.getDashTitle = () => {
-        return dashboardState.dashboard.lastSavedTitle || `${dashboardState.dashboard.title} (unsaved)`;
-      };
+      $scope.getDashTitle = () => getDashboardTitle(
+        dashboardState.getTitle(),
+        dashboardState.getViewMode(),
+        dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
+      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
+      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
@@ -110,8 +132,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.filterResults = function () {
-        dashboardState.setQuery($scope.model.query);
-        dashboardState.updateFilters(queryFilter);
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
         $scope.refresh();
       };
 
@@ -119,17 +140,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.addVis = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashbard`);
+        notify.info(`Visualization successfully added to your dashboard`);
       };
 
       $scope.addSearch = function (hit) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashbard`);
-      };
-
-      $scope.showEditHelpText = () => {
-        return !dashboardState.getPanels().length;
+        notify.info(`Search successfully added to your dashboard`);
       };
 
       /**
@@ -145,8 +162,68 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
+      $scope.$watch('model.darkTheme', () => {
+        dashboardState.setDarkTheme($scope.model.darkTheme);
+        updateTheme();
+      });
+      $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
+      $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+
+      $scope.$listen(timefilter, 'fetch', $scope.refresh);
+
+      function updateViewMode(newMode) {
+        $scope.topNavMenu = getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
+        dashboardState.switchViewMode(newMode);
+        $scope.dashboardViewMode = newMode;
+      }
+
+      const onChangeViewMode = (newMode) => {
+        const isPageRefresh = newMode === dashboardState.getViewMode();
+        const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
+
+        if (!willLoseChanges) {
+          updateViewMode(newMode);
+          return;
+        }
+
+        function revertChangesAndExitEditMode() {
+          dashboardState.resetState();
+          const refreshUrl = dash.id ?
+            DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+          const refreshUrlOptions = dash.id ? { id: dash.id } : {};
+          kbnUrl.change(refreshUrl, refreshUrlOptions);
+          // This is only necessary for new dashboards, which will default to Edit mode.
+          updateViewMode(DashboardViewMode.VIEW);
+
+          // We need to do a hard reset of the timepicker. appState will not reload like
+          // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+          // reload will cause it not to sync.
+          if (dashboardState.getIsTimeSavedWithDashboard()) {
+            dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+          }
+        }
+
+        confirmModal(
+          getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
+          {
+            onConfirm: revertChangesAndExitEditMode,
+            onCancel: _.noop,
+            confirmButtonText: 'Yes, lose changes',
+            cancelButtonText: 'No, keep working',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+          }
+        );
+      };
+
+      const navActions = {};
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+
+      updateViewMode(dashboardState.getViewMode());
+
       $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson).then(function (id) {
+        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
           $scope.kbnTopNav.close('save');
           if (id) {
             notify.info(`Saved Dashboard as "${dash.title}"`);
@@ -156,27 +233,19 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
                 { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
+              updateViewMode(DashboardViewMode.VIEW);
             }
           }
         }).catch(notify.fatal);
       };
 
-      $scope.$watchCollection(() => dashboardState.getOptions(), () => dashboardState.saveState());
-      $scope.$watch(() => dashboardState.getOptions().darkTheme, updateTheme);
-
-      $scope.$watch('model.query', function () {
-        dashboardState.setQuery($scope.model.query);
-      });
-
-      $scope.$listen(timefilter, 'fetch', $scope.refresh);
-
       // update root source when filters update
-      $scope.$listen(queryFilter, 'update', function () {
-        dashboardState.updateFilters(queryFilter);
+      $scope.$listen(filterBar, 'update', function () {
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
       });
 
       // update data when filters fire fetch event
-      $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+      $scope.$listen(filterBar, 'fetch', $scope.refresh);
 
       $scope.$on('$destroy', () => {
         dashboardState.destroy();
@@ -186,8 +255,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
 
       function updateTheme() {
-        const useDarkTheme = dashboardState.getOptions().darkTheme;
-        useDarkTheme ? setDarkTheme() : setLightTheme();
+        dashboardState.getDarkTheme() ? setDarkTheme() : setLightTheme();
       }
 
       function setDarkTheme() {
@@ -219,10 +287,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
-      // Setup configurable values for config directive, after objects are initialized
       $scope.opts = {
+        displayName: dash.getDisplayName(),
         dashboard: dash,
-        ui: dashboardState.getOptions(),
         save: $scope.save,
         addVis: $scope.addVis,
         addNewVis,

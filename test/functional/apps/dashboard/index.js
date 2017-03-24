@@ -1,10 +1,5 @@
 
-import {
-  bdd,
-  remote,
-  scenarioManager,
-  defaultTimeout,
-} from '../../../support';
+import { bdd, remote, defaultTimeout } from '../../../support';
 
 bdd.describe('dashboard app', function () {
   this.timeout = defaultTimeout;
@@ -13,6 +8,8 @@ bdd.describe('dashboard app', function () {
     return remote.setWindowSize(1200,800);
   });
 
+  require('./_view_edit');
   require('./_dashboard');
+  require('./_dashboard_save');
   require('./_dashboard_time');
 });

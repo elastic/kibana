@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-export default function DataFactory(Private) {
+export default function DataFactory() {
   /**
    * Provides an API for pulling values off the data
    * and calculating values using the data

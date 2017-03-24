@@ -6,7 +6,6 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import modules from 'ui/modules';
 
-import kibanaLogoUrl from 'ui/images/kibana.svg';
 import 'ui/autoload/all';
 import 'plugins/kibana/discover/index';
 import 'plugins/kibana/visualize/index';
@@ -14,6 +13,7 @@ import 'plugins/kibana/dashboard/index';
 import 'plugins/kibana/management/index';
 import 'plugins/kibana/doc';
 import 'plugins/kibana/dev_tools';
+import 'plugins/kibana/context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';

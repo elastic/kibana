@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import cluster from 'cluster';
-import { resolve } from 'path';
 import { EventEmitter } from 'events';
 
 import { BinderFor, fromRoot } from '../../utils';

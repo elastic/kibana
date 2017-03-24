@@ -70,13 +70,11 @@ export default function HeatmapMarkerFactory(Private) {
 
       function mouseMoveLocation(e) {
         const latlng = e.latlng;
-
-        this.map.closePopup();
-
         // unhighlight all svgs
         d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
 
         if (!this.geoJson.features.length || this._disableTooltips) {
+          this._hidePopup();
           return;
         }
 
@@ -85,7 +83,18 @@ export default function HeatmapMarkerFactory(Private) {
 
         // show tooltip if close enough to event latlng
         if (this._tooltipProximity(latlng, feature)) {
-          this._showTooltip(feature, latlng);
+          if (this.currentFeature !== feature) {
+            this._hidePopup();
+            this.currentFeature = feature;
+            this._showTooltip(feature, latlng);
+          } else {
+            if (this._popup) {
+              this._popup.setLatLng(latlng);
+            }
+          }
+        } else {
+          this._hidePopup();
+          this.currentFeature = null;
         }
       }
     }

@@ -1,5 +1,3 @@
-import { parse as parseUrl } from 'url';
-
 import expect from 'expect.js';
 
 import { modifyUrl } from '../modify_url';

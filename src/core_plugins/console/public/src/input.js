@@ -1,9 +1,8 @@
-let ace = require('ace');
 let $ = require('jquery');
 let ZeroClipboard = require('zeroclip');
-let ext_searchbox = require('ace/ext-searchbox');
+require('ace');
+require('ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');
-let mappings = require('./mappings');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
 let storage = require('./storage');
@@ -56,7 +55,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
    * The original shortcut will now just open the menu and highlight the
    *
    */
-  var zc = (function setupZeroClipboard() {
+  (function setupZeroClipboard() {
     var zc = new ZeroClipboard($copyAsCurlEl); // the ZeroClipboard instance
 
     zc.on('wrongflash noflash', function () {
@@ -89,8 +88,6 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
       $copyAsCurlEl.click();
       input.focus();
     });
-
-    return zc;
   }());
 
   /**
@@ -178,12 +175,9 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
             var warnings = xhr.getResponseHeader("warning");
             if (warnings) {
-              warnings = _.map(warnings.split(", "), function (warning) {
-                  return "#! Deprecation: " + warning;
-              });
-              value = warnings.join("\n") + "\n" + value;
+              var deprecationMessages = utils.extractDeprecationMessages(warnings);
+              value = deprecationMessages.join("\n") + "\n" + value;
             }
-
 
             if (isMultiRequest) {
               value = "# " + req.method + " " + req.url + "\n" + value;

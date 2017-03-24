@@ -3,20 +3,38 @@ import Slugify from '../string/slugify';
 import ActionItemExample
   from '../../views/action_item/action_item_example.jsx';
 
+import BadgeExample
+  from '../../views/badge/badge_example.jsx';
+
 import BarExample
   from '../../views/bar/bar_example.jsx';
 
 import ButtonExample
   from '../../views/button/button_example.jsx';
 
+import CardExample
+  from '../../views/card/card_example.jsx';
+
+import ColumnExample
+  from '../../views/column/column_example.jsx';
+
 import EventExample
   from '../../views/event/event_example.jsx';
+
+import EventsSandbox
+  from '../../views/event/events_sandbox.jsx';
 
 import FormExample
   from '../../views/form/form_example.jsx';
 
+import FormLayoutExample
+  from '../../views/form_layout/form_layout_example.jsx';
+
 import HeaderBarExample
   from '../../views/header_bar/header_bar_example.jsx';
+
+import HeaderBarSandbox
+  from '../../views/header_bar/header_bar_sandbox.jsx';
 
 import IconExample
   from '../../views/icon/icon_example.jsx';
@@ -42,6 +60,9 @@ import MicroButtonExample
 import ModalExample
   from '../../views/modal/modal_example.jsx';
 
+import NoticeSandbox
+  from '../../views/notice/notice_sandbox.jsx';
+
 import PanelExample
   from '../../views/panel/panel_example.jsx';
 
@@ -54,6 +75,9 @@ import TableExample
 import TabsExample
   from '../../views/tabs/tabs_example.jsx';
 
+import ToggleButtonExample
+  from '../../views/toggle_button/toggle_button_example.jsx';
+
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example.jsx';
 
@@ -63,10 +87,16 @@ import TypographyExample
 import VerticalRhythmExample
   from '../../views/vertical_rhythm/vertical_rhythm_example.jsx';
 
+import ViewSandbox
+  from '../../views/view/view_sandbox.jsx';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'ActionItem',
   component: ActionItemExample,
+}, {
+  name: 'Badge',
+  component: BadgeExample,
 }, {
   name: 'Bar',
   component: BarExample,
@@ -74,11 +104,20 @@ const components = [{
   name: 'Button',
   component: ButtonExample,
 }, {
+  name: 'Card',
+  component: CardExample,
+}, {
+  name: 'Column',
+  component: ColumnExample,
+}, {
   name: 'Event',
   component: EventExample,
 }, {
   name: 'Form',
   component: FormExample,
+}, {
+  name: 'FormLayout',
+  component: FormLayoutExample,
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,
@@ -119,6 +158,9 @@ const components = [{
   name: 'Tabs',
   component: TabsExample,
 }, {
+  name: 'ToggleButton',
+  component: ToggleButtonExample,
+}, {
   name: 'ToolBar',
   component: ToolBarExample,
 }, {
@@ -129,10 +171,24 @@ const components = [{
   component: VerticalRhythmExample,
 }];
 
+const sandboxes = [{
+  name: 'Events',
+  component: EventsSandbox,
+}, {
+  name: 'HeaderBar with Table',
+  component: HeaderBarSandbox,
+}, {
+  name: 'Notice',
+  component: NoticeSandbox,
+}, {
+  name: 'View',
+  component: ViewSandbox,
+}];
+
 export default {
   components: Slugify.each(components, 'name', 'path'),
+  sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    const list = this.components;
-    return list.slice(0);
+    return this.components.concat(this.sandboxes);
   },
 };

@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
-export default function ColumnHandler(Private) {
+export default function ColumnHandler() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
-      return seri.aggLabel === seriConfig.data.label;
+      return seri.aggId === seriConfig.data.id;
     }) : null;
 
 
@@ -42,6 +42,7 @@ export default function ColumnHandler(Private) {
   const createSeries = (cfg, series) => {
     return {
       type: 'point_series',
+      addTimeMarker: cfg.addTimeMarker,
       series: _.map(series, (seri) => {
         return createSerieFromParams(cfg, seri);
       })
@@ -104,6 +105,12 @@ export default function ColumnHandler(Private) {
             }
           }
         ];
+      } else {
+        config.valueAxes.forEach(axis => {
+          if (axis.labels) {
+            axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
+          }
+        });
       }
 
       if (!config.categoryAxes) {
@@ -190,7 +197,8 @@ export default function ColumnHandler(Private) {
           inverted: true
         },
         labels: {
-          axisFormatter: val => val
+          filter: false,
+          axisFormatter: data.data.yAxisFormatter
         },
         style: {
           rangePadding: 0,

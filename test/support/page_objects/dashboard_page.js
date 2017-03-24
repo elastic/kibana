@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+
 import {
   scenarioManager,
   esClient,
   elasticDump
 } from '../';
+
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -38,23 +40,58 @@ export default class DashboardPage {
   }
 
   async gotoDashboardLandingPage() {
-    PageObjects.common.debug('Go to dashboard landing page');
+    PageObjects.common.debug('gotoDashboardLandingPage');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      return PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click();
+      await PageObjects.common.try(async () => {
+        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
+        await goToDashboardLink.click();
+        // Once the searchFilter can be found, we know the page finished loading.
+        await PageObjects.common.findTestSubject('searchFilter');
+      });
     }
   }
 
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
+      .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  getIsInViewMode() {
+    PageObjects.common.debug('getIsInViewMode');
+    return PageObjects.common.doesTestSubjectExist('dashboardEditMode');
+  }
+
+  clickCancelOutOfEditMode() {
+    PageObjects.common.debug('Clicking cancel');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
+  }
+
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('newDashboardLink').click();
+    return PageObjects.common.clickTestSubject('newDashboardLink');
   }
 
   clickAddVisualization() {
-    return PageObjects.common.findTestSubject('dashboardAddPanelButton').click();
+    return PageObjects.common.clickTestSubject('dashboardAddPanelButton');
   }
 
   clickOptions() {
-    return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+    return PageObjects.common.clickTestSubject('dashboardOptionsButton');
   }
 
   isOptionsOpen() {
@@ -66,7 +103,7 @@ export default class DashboardPage {
     PageObjects.common.debug('openOptions');
     const isOpen = await this.isOptionsOpen();
     if (!isOpen) {
-      return PageObjects.common.findTestSubject('dashboardOptionsButton').click();
+      return PageObjects.common.clickTestSubject('dashboardOptionsButton');
     }
   }
 
@@ -81,7 +118,7 @@ export default class DashboardPage {
     await this.openOptions();
     const isDarkThemeOn = await this.isDarkThemeOn();
     if (isDarkThemeOn !== on) {
-      return PageObjects.common.findTestSubject('dashboardDarkThemeCheckbox').click();
+      return PageObjects.common.clickTestSubject('dashboardDarkThemeCheckbox');
     }
   }
 
@@ -130,26 +167,19 @@ export default class DashboardPage {
     });
   }
 
-  async saveDashboard(dashName, storeTimeWithDash) {
-    await PageObjects.common.findTestSubject('dashboardSaveButton').click();
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    PageObjects.common.debug('entering new title');
+  async renameDashboard(dashName) {
+    PageObjects.common.debug(`Naming dashboard ` + dashName);
+    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
     await this.findTimeout.findById('dashboardTitle').type(dashName);
+  }
 
-    if (storeTimeWithDash !== undefined) {
-      await this.storeTimeWithDashboard(storeTimeWithDash);
-    }
-
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
-
-    await PageObjects.common.try(() => {
-      PageObjects.common.debug('clicking final Save button for named dashboard');
-      return this.findTimeout.findByCssSelector('.btn-primary').click();
-    });
+  /**
+   *
+   * @param dashName {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async saveDashboard(dashName, saveOptions = {}) {
+    await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
     await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -163,24 +193,68 @@ export default class DashboardPage {
     });
   }
 
+  /**
+   *
+   * @param dashboardTitle {String}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+   */
+  async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    await PageObjects.common.clickTestSubject('dashboardSaveButton');
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    PageObjects.common.debug('entering new title');
+    await this.findTimeout.findById('dashboardTitle').type(dashboardTitle);
+
+    if (saveOptions.storeTimeWithDashboard !== undefined) {
+      await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+    }
+
+    if (saveOptions.saveAsNew !== undefined) {
+      await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+    }
+
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('clicking final Save button for named dashboard');
+      return this.findTimeout.findByCssSelector('.btn-primary').click();
+    });
+  }
+
   clickDashboardByLinkText(dashName) {
     return this.findTimeout
     .findByLinkText(dashName)
     .click();
   }
 
+  async searchForDashboardWithName(dashName) {
+    PageObjects.common.debug(`searchForDashboardWithName: ${dashName}`);
+
+    await this.gotoDashboardLandingPage();
+
+    await PageObjects.common.try(async () => {
+      const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+      await searchFilter.click();
+      // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+      await searchFilter.type(dashName.replace('-',' '));
+    });
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async getDashboardCountWithName(dashName) {
+    PageObjects.common.debug(`getDashboardCountWithName: ${dashName}`);
+
+    await this.searchForDashboardWithName(dashName);
+    const links = await this.findTimeout.findAllByLinkText(dashName);
+    return links.length;
+  }
+
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   async loadSavedDashboard(dashName) {
     PageObjects.common.debug(`Load Saved Dashboard ${dashName}`);
-    const self = this;
-    await this.gotoDashboardLandingPage();
-    const searchBox = await PageObjects.common.findTestSubject('searchFilter');
-    await searchBox.click();
-    await searchBox.type(dashName.replace('-',' '));
 
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.sleep(1000);
+    await this.searchForDashboardWithName(dashName);
     await this.clickDashboardByLinkText(dashName);
     return PageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -274,21 +348,38 @@ export default class DashboardPage {
     }, Promise.resolve());
   }
 
+  clickAddNewVisualizationLink() {
+    return PageObjects.common.clickTestSubject('addNewSavedObjectLink');
+  }
+
   async setTimepickerInDataRange() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
     await PageObjects.header.setAbsoluteRange(fromTime, toTime);
   }
 
-  async storeTimeWithDashboard(on) {
-    PageObjects.common.debug('Storing time with dashboard: ' + on);
+  async setSaveAsNewCheckBox(checked) {
+    PageObjects.common.debug('saveAsNewCheckbox: ' + checked);
+    const saveAsNewCheckbox = await PageObjects.common.findTestSubject('saveAsNewCheckbox');
+    const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
+      PageObjects.common.debug('Flipping save as new checkbox');
+      await saveAsNewCheckbox.click();
+    }
+  }
+
+  async setStoreTimeWithDashboard(checked) {
+    PageObjects.common.debug('Storing time with dashboard: ' + checked);
     const storeTimeCheckbox = await PageObjects.common.findTestSubject('storeTimeWithDashboard');
-    const checked = await storeTimeCheckbox.getProperty('checked');
-    if (checked === true && on === false ||
-      checked === false && on === true) {
+    const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+    if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping store time checkbox');
       await storeTimeCheckbox.click();
     }
+  }
+
+  async getFilters(timeout = defaultFindTimeout) {
+    return PageObjects.common.findAllByCssSelector('.filter-bar > .filter', timeout);
   }
 
   async getFilterDescriptions(timeout = defaultFindTimeout) {
@@ -300,9 +391,24 @@ export default class DashboardPage {
 
   async filterOnPieSlice() {
     PageObjects.common.debug('Filtering on a pie slice');
-    const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
-    PageObjects.common.debug('Slices found:' + slices.length);
-    return slices[0].click();
+    await PageObjects.common.try(async () => {
+      const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
+      PageObjects.common.debug('Slices found:' + slices.length);
+      return slices[0].click();
+    });
+  }
+
+  async toggleExpandPanel() {
+    PageObjects.common.debug('toggleExpandPanel');
+    const expandShown = await PageObjects.common.doesTestSubjectExist('dashboardPanelExpandIcon');
+    if (!expandShown) {
+      const panelElements = await this.findTimeout.findAllByCssSelector('span.panel-title');
+      PageObjects.common.debug('click title');
+      await panelElements[0].click(); // Click to simulate hover.
+    }
+    const expandButton = await PageObjects.common.findTestSubject('dashboardPanelExpandIcon');
+    PageObjects.common.debug('click expand icon');
+    expandButton.click();
   }
 
   getSharedItemsCount() {
@@ -333,5 +439,4 @@ export default class DashboardPage {
       }));
     });
   }
-
 }

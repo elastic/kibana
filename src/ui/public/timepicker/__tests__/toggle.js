@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import uiModules from 'ui/modules';
 import $ from 'jquery';
 
 describe('kbnGlobalTimepicker', function () {

@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -74,10 +71,10 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct chart, take screenshot', function () {
-      const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1200 - 1600',
-        '1200 - 1600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
-        '1200 - 1600', '1200 - 1600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
-        '400 - 800', '1200 - 1600', '1200 - 1600', '400 - 800', '0 - 400', '0 - 400' ];
+      const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
+        '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
+        '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
+        '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
@@ -110,7 +107,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       ];
 
       return PageObjects.visualize.collapseChart()
-      .then(function showData(data) {
+      .then(function showData() {
         return PageObjects.visualize.getDataTableData();
       })
       .then(function showData(data) {

@@ -15,14 +15,7 @@ import {
 
 import getUrl from '../../utils/get_url';
 
-import {
-  config,
-  defaultTryTimeout,
-  defaultFindTimeout,
-  remote,
-  shieldPage,
-  esClient
-} from '../index';
+import { config, defaultFindTimeout, esClient } from '../index';
 
 import PageObjects from './index';
 
@@ -87,7 +80,7 @@ export default class Common {
     return this.remote.get(appUrl);
   }
 
-  navigateToApp(appName, testStatusPage) {
+  navigateToApp(appName) {
     const self = this;
     const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);
@@ -277,7 +270,7 @@ export default class Common {
       .findByCssSelector(selector)
       .then(() => true)
       .catch(() => false);
-    this.remote.setFindTimeout(defaultFindTimeout);
+    await this.remote.setFindTimeout(defaultFindTimeout);
 
     PageObjects.common.debug(`exists? ${exists}`);
     return exists;
@@ -297,6 +290,12 @@ export default class Common {
       .catch(() => false);
     this.remote.setFindTimeout(defaultFindTimeout);
     return exists;
+  }
+
+  async clickTestSubject(selector) {
+    return await Try.try(async () => {
+      await this.findTestSubject(selector).click();
+    });
   }
 
   findTestSubject(selector, timeout = defaultFindTimeout) {
@@ -333,12 +332,43 @@ export default class Common {
 
   async getSharedItemTitleAndDescription() {
     const element = await this.remote
-    .setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('[shared-item]');
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[shared-item]');
 
     return {
       title: await element.getAttribute('data-title'),
       description: await element.getAttribute('data-description')
     };
+  }
+
+  /**
+   * Makes sure the modal overlay is not showing, tries a few times in case it is in the process of hiding.
+   */
+  async ensureModalOverlayHidden() {
+    return PageObjects.common.try(async () => {
+      const shown = await this.doesTestSubjectExist('modalOverlay');
+      if (shown) {
+        throw new Error('Modal overlay is showing');
+      }
+    });
+  }
+
+  async clickConfirmOnModal() {
+    this.debug('Clicking modal confirm');
+    await this.findTestSubject('confirmModalConfirmButton').click();
+    await this.ensureModalOverlayHidden();
+  }
+
+  async clickCancelOnModal() {
+    this.debug('Clicking modal cancel');
+    await this.findTestSubject('confirmModalCancelButton').click();
+    await this.ensureModalOverlayHidden();
+  }
+
+  async isConfirmModalOpen() {
+    let isOpen = true;
+    await this.findTestSubject('confirmModalCancelButton', 2000).catch(() => isOpen = false);
+    await this.remote.setFindTimeout(defaultFindTimeout);
+    return isOpen;
   }
 }

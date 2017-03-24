@@ -3,7 +3,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
 
-export default function AxisScaleFactory(Private) {
+export default function AxisScaleFactory() {
   class AxisScale {
     constructor(axisConfig, visConfig) {
       this.axisConfig = axisConfig;
@@ -126,8 +126,8 @@ export default function AxisScaleFactory(Private) {
         if (this.axisConfig.isOrdinal()) return this.values;
       }
 
-      const min = this.axisConfig.get('scale.min') || this.getYMin();
-      const max = this.axisConfig.get('scale.max') || this.getYMax();
+      const min = this.axisConfig.get('scale.min', this.getYMin());
+      const max = this.axisConfig.get('scale.max', this.getYMax());
       const domain = [min, max];
       if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
       if (this.axisConfig.isLogScale()) return this.logDomain(min, max);

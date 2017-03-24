@@ -1,9 +1,6 @@
 import Bluebird from 'bluebird';
 
 import PageObjects from './';
-import {
-  defaultFindTimeout,
-} from '../';
 
 async function getVisibleTextFromAceEditor(editor) {
   const lines = await editor.findAllByClassName('ace_line_group');
@@ -31,18 +28,15 @@ export default class ConsolePage {
   }
 
   async clickPlay() {
-    const sendRequestButton = await PageObjects.common.findTestSubject('send-request-button');
-    await sendRequestButton.click();
+    await PageObjects.common.clickTestSubject('send-request-button');
   }
 
   async collapseHelp() {
-    const closeButton = await PageObjects.common.findTestSubject('help-close-button');
-    await closeButton.click();
+    await PageObjects.common.clickTestSubject('help-close-button');
   }
 
   async openSettings() {
-    const settingsButton = await PageObjects.common.findTestSubject('consoleSettingsButton');
-    await settingsButton.click();
+    await PageObjects.common.clickTestSubject('consoleSettingsButton');
   }
 
   async setFontSizeSetting(newSize) {
@@ -56,8 +50,7 @@ export default class ConsolePage {
       await fontSizeInput.type(String(newSize));
     });
 
-    const saveButton = await PageObjects.common.findTestSubject('settings-save-button');
-    await saveButton.click();
+    await PageObjects.common.clickTestSubject('settings-save-button');
   }
 
   async getFontSize(editor) {

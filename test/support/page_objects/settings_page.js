@@ -37,13 +37,13 @@ export default class SettingsPage {
   }
 
   async setAdvancedSettings(propertyName, propertyValue) {
-    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-editButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
     await this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + propertyValue + '"]').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
+    await PageObjects.common.clickTestSubject('advancedSetting-' + propertyName + '-saveButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -97,19 +97,16 @@ export default class SettingsPage {
   }
 
   async clickDefaultIndexButton() {
-    await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-success.ng-scope').click();
+    await PageObjects.common.findTestSubject('setDefaultIndexPatternButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async clickDeletePattern() {
-    await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-danger.ng-scope').click();
+    await PageObjects.common.findTestSubject('deleteIndexPatternButton').click();
   }
 
   getIndexPageHeading() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('h1.title.ng-binding.ng-isolate-scope');
+    return PageObjects.common.findTestSubject('indexPatternTitle');
   }
 
   getConfigureHeader() {
@@ -154,17 +151,17 @@ export default class SettingsPage {
 
   getFieldsTabCount() {
     return PageObjects.common.try(() => {
-      return this.remote.setFindTimeout(defaultFindTimeout / 10)
-      .findByCssSelector('a[data-test-subj="tab-indexedFields"] small').getVisibleText()
-      .then((theText) => {
-      // the value has () around it, remove them
-        return theText.replace(/\((.*)\)/, '$1');
-      });
+      return PageObjects.common.findTestSubject('tab-count-indexedFields')
+        .getVisibleText()
+        .then((theText) => {
+        // the value has () around it, remove them
+          return theText.replace(/\((.*)\)/, '$1');
+        });
     });
   }
 
   async getScriptedFieldsTabCount() {
-    const selector = 'a[data-test-subj="tab-scriptedFields"] small';
+    const selector = '[data-test-subj="tab-count-scriptedFields"]';
     return await PageObjects.common.try(async () => {
       const theText = await this.remote.setFindTimeout(defaultFindTimeout / 10)
       .findByCssSelector(selector).getVisibleText();
@@ -203,6 +200,34 @@ export default class SettingsPage {
     return await mapAsync(fieldNameCells, async cell => {
       return (await cell.getVisibleText()).trim();
     });
+  }
+
+  async getFieldTypes() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern indexedFieldType');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
+  }
+
+  async getScriptedFieldLangs() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern scriptedFieldLang');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
+  }
+
+
+  async setFieldTypeFilter(type) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]')
+    .click();
+  }
+
+
+  async setScriptedFieldLanguageFilter(language) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' + language + '"]')
+    .click();
   }
 
   async goToPage(pageNum) {
@@ -255,7 +280,7 @@ export default class SettingsPage {
 
   async setPageSize(size) {
     await this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
+    .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
     .click();
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -291,8 +316,7 @@ export default class SettingsPage {
     });
     await PageObjects.common.try(async () => {
       PageObjects.common.debug('acceptConfirmation');
-      await PageObjects.common.findTestSubject('confirmModalConfirmButton')
-        .click();
+      await PageObjects.common.clickTestSubject('confirmModalConfirmButton');
     });
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();
@@ -305,20 +329,17 @@ export default class SettingsPage {
 
   async clickFieldsTab() {
     PageObjects.common.debug('click Fields tab');
-    await PageObjects.common.findTestSubject('tab-indexFields')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-indexFields');
   }
 
   async clickScriptedFieldsTab() {
     PageObjects.common.debug('click Scripted Fields tab');
-    await PageObjects.common.findTestSubject('tab-scriptedFields')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-scriptedFields');
   }
 
   async clickSourceFiltersTab() {
     PageObjects.common.debug('click Source Filters tab');
-    await PageObjects.common.findTestSubject('tab-sourceFilters')
-    .click();
+    await PageObjects.common.clickTestSubject('tab-sourceFilters');
   }
 
   async addScriptedField(name, language, type, format, popularity, script) {

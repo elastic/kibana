@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
@@ -10,18 +9,23 @@ import routeBasedNotifierProvider from 'ui/route_based_notifier';
 
 export default function TermsAggDefinition(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  const bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
-  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev', '!derivative'];
+  const aggFilter = [
+    '!top_hits', '!percentiles', '!median', '!std_dev',
+    '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+    '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
+  ];
+
   const orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
       title: 'Order Agg',
+      hideCustomLabel: true,
       aggFilter: aggFilter
     }
   ])).all[0];

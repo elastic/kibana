@@ -1,11 +1,10 @@
 let ace = require('ace');
-let es = require('../../src/es');
 import { initializeInput } from '../../src/input';
 let editor_input1 = require('raw!./editor_input1.txt');
 let utils = require('../../src/utils');
 
 var aceRange = ace.require("ace/range");
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { module, asyncTest, deepEqual, equal, start } = QUnit;
 
 let input;
 

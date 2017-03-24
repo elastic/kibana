@@ -8,8 +8,11 @@ export default class ManagementSection {
    * @param {object} options
    * @param {number|null} options.order
    * @param {string|null} options.display - defaults to id
-   * @param {string|null} options.url
+   * @param {string|null} options.url - defaults to ''
    * @param {string|null} options.info
+   * @param {boolean|null} options.visible - defaults to true
+   * @param {boolean|null} options.disabled - defaults to false
+   * @param {string|null} options.tooltip - defaults to ''
    * @returns {ManagementSection}
    */
 
@@ -20,8 +23,16 @@ export default class ManagementSection {
       index: ['id'],
       order: ['order']
     });
+    this.visible = true;
+    this.disabled = false;
+    this.tooltip = '';
+    this.url = '';
 
     assign(this, options);
+  }
+
+  get visibleItems() {
+    return this.items.inOrder.filter(item => item.visible);
   }
 
   /**
@@ -72,6 +83,33 @@ export default class ManagementSection {
    */
 
   getSection(id) {
-    return this.items.byId[id];
+    if (!id) {
+      return;
+    }
+
+    const sectionPath = id.split('/');
+    return sectionPath.reduce((currentSection, nextSection) => {
+      if (!currentSection) {
+        return;
+      }
+
+      return currentSection.items.byId[nextSection];
+    }, this);
+  }
+
+  hide() {
+    this.visible = false;
+  }
+
+  show() {
+    this.visible = true;
+  }
+
+  disable() {
+    this.disabled = true;
+  }
+
+  enable() {
+    this.disabled = false;
   }
 }

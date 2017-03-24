@@ -4,7 +4,7 @@
 * Licensed under the MIT license.
 */
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 function sum(data, fn) {
   return _.reduce(data, function (sum, d) {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 import DocViewsProvider from 'ui/registry/doc_views';
@@ -17,7 +16,7 @@ uiModules.get('kibana')
       filter: '=?',
       columns: '=?'
     },
-    template: function ($el, $attr) {
+    template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
       $el.append($viewer);
       const $tabs = $('<ul class="nav nav-tabs">');

@@ -1,8 +1,7 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const Promise = require('bluebird');
-
-const ScenarioManager = require('../scenario_manager');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import Promise from 'bluebird';
+import ScenarioManager from '../scenario_manager';
 
 describe('scenario manager', function () {
   const manager = new ScenarioManager('http://localhost:9200');

@@ -32,23 +32,20 @@ kbn-management-app {
 }
 
 kbn-management-landing {
-  .management-panel-product {
+  .management-panel {
     margin-bottom: 10px;
 
-    .panel-body {
-      padding-bottom: 30px;
-      position: relative;
-      border-left: 1px solid #E4E4E3;
-      border-right: 1px solid #E4E4E3;
-      border-bottom: 1px solid #E4E4E3;
-    }
   }
 
-  .management-link {
+  .management-panel__body {
+    padding-bottom: 30px;
+  }
+
+  .management-panel__link {
     font-size: 17px;
     line-height: 32px;
 
-    &.is-management-link-disabled {
+    &.management-panel__link--disabled {
       opacity: 0.5;
       cursor: default;
 
@@ -56,11 +53,6 @@ kbn-management-landing {
         color: @kibanaBlue2;
       }
     }
-  }
-
-  .panel-heading-icon {
-    font-size: 0.9em;
-    padding: 5px;
   }
 
   .management-section-info {
@@ -72,13 +64,43 @@ kbn-management-landing {
   }
 
   .management-section-info-expanded {
-    .panel-heading-icon {
-      color: @black;
-    }
-
     .management-section-info {
       display: block;
     }
+  }
+
+  /**
+   * 1. Set icon size.
+   * 2. Hack the panel title to move to the left a bit.
+   */
+  .management-panel__heading-icon {
+    width: 20px; /* 1 */
+    height: 20px; /* 1 */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain; /* 1 */
+    margin-right: -3px; /* 2 */
+  }
+
+  .management-panel__heading-icon--elasticsearch {
+    background-image: url("~ui/icons/elasticsearch-gray.svg");
+  }
+
+  .management-panel__heading-icon--kibana {
+    background-image: url("~ui/icons/kibana-gray.svg");
+  }
+
+  .management-panel__heading-icon--beats {
+    background-image: url("~ui/icons/beats-gray.svg");
+  }
+
+  .management-panel__heading-icon--logstash {
+    background-image: url("~ui/icons/logstash-gray.svg");
+  }
+
+  .management-panel__heading-icon--secondary {
+    font-size: 0.9em;
+    padding: 5px;
   }
 }
 
@@ -183,23 +205,11 @@ kbn-management-objects-view {
       display: inline;
     }
   }
-
-  .index-pattern-name {
-    display: flex;
-    align-items: center;
-
-    .title {
-      flex: 1 1 auto;
-    }
-
-    .controls {
-      flex: 4 0 auto;
-    }
-  }
 }
 
 kbn-management-indices {
   .fields {
+    display: block;
     table {
       .table-striped()
     }

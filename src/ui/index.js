@@ -66,6 +66,7 @@ export default async (kbnServer, server, config) => {
 
   async function getKibanaPayload({ app, request, includeUserProvidedConfig }) {
     const uiSettings = server.uiSettings();
+    const translations = await uiI18n.getTranslationsForRequest(request);
 
     return {
       app: app,
@@ -76,6 +77,7 @@ export default async (kbnServer, server, config) => {
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
+      translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided(request)

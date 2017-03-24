@@ -110,8 +110,8 @@ describe('Promise service', function () {
       const p2 = new Promise(resolve => setTimeout(resolve, 5000));
       await Promise.race([p1, p2]);
       const time = Date.now() - start;
-      expect(time).to.be.lessThan(1000);
-      expect(time).to.be.greaterThan(100);
+      expect(time).to.not.be.lessThan(100);
+      expect(time).to.not.be.greaterThan(2000);
     });
     it('allows non-promises in the array', async () => {
       expect(await Promise.race([1,2,3])).to.be(1);
@@ -119,7 +119,7 @@ describe('Promise service', function () {
     context('argument is undefined', () => {
       it('rejects the promise', async () => {
         const football = {};
-        expect(await Promise.race().catch(e => football)).to.be(football);
+        expect(await Promise.race().catch(() => football)).to.be(football);
       });
     });
     context('argument is a string', () => {
@@ -130,7 +130,7 @@ describe('Promise service', function () {
     context('argument is a non-iterable object', () => {
       it('reject the promise', async () => {
         const football = {};
-        expect(await Promise.race({}).catch(e => football)).to.be(football);
+        expect(await Promise.race({}).catch(() => football)).to.be(football);
       });
     });
     context('argument is a generator', () => {

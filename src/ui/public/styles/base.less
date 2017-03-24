@@ -551,56 +551,6 @@ fieldset {
   }
 }
 
-.panel-product {
-  margin-bottom: 10px;
-
-  .panel-heading {
-    background-color: @kibanaBlue3;
-    border-radius: 0;
-    color: @white;
-    font-size: 17px;
-    padding: 7px 10px;
-  }
-
-  .panel-heading--clickable {
-    cursor: pointer;
-  }
-
-  .panel-heading-elasticsearch,
-  .panel-heading-kibana,
-  .panel-heading-beats,
-  .panel-heading-logstash {
-    background-position: 4px 7px;
-    background-repeat: no-repeat;
-    background-size: 26px 26px;
-    padding-left: 32px;
-  }
-
-  .panel-heading-elasticsearch {
-    background-color: @product-elasticsearch;
-    background-image: url("~ui/icons/elasticsearch.svg");
-  }
-
-  .panel-heading-kibana {
-    background-color: @product-kibana;
-    background-image: url("~ui/icons/kibana.svg");
-  }
-
-  .panel-heading-beats {
-    background-color: @product-beats;
-    background-image: url("~ui/icons/beats.svg");
-  }
-
-  .panel-heading-logstash {
-    background-color: @product-logstash;
-    background-image: url("~ui/icons/logstash.svg");
-  }
-
-  .panel-body {
-    padding: 10px;
-  }
-}
-
 // TODO: Extract these styles into the UI Framework.
 
 .page-row {
@@ -611,128 +561,6 @@ fieldset {
 .page-row-text {
   color: @kibanaGray2;
   font-size: 14px;
-}
-
-.kuiView {
-  background-color: #FFFFFF;
-  flex: 1 1 auto;
-}
-
-.kuiViewContent {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  width: 100%;
-}
-
-.kuiViewContent--constrainedWidth {
-  width: 100%;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.kuiViewContentItem {
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.kuiNotice {
-  padding: 40px 60px 48px;
-  margin: 20px;
-  background-color: white;
-}
-
-.kuiNotice__header {
-  margin-bottom: 18px;
-}
-
-/**
- * 1. Override h1 styles.
- */
-.kuiNoticeTitle {
-  font-size: 22px;
-  margin-bottom: 12px;
-  margin-top: 0; // 1
-}
-
-.kuiNoticeText {
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.kuiCard {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-  .kuiCard__description {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 18px 0;
-  }
-
-    .kuiCard__descriptionTitle {
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      text-align: center;
-      max-width: ~"calc(100% - 48px)";
-    }
-
-    .kuiCard__descriptionText {
-      font-size: 14px;
-      max-width: ~"calc(100% - 48px)";
-    }
-
-  .kuiCard__footer {
-    text-align: center;
-    font-size: 14px;
-    padding: 0 15px 20px;
-  }
-
-.kuiCard--fixedWidth {
-  max-width: 120px;
-}
-
-.kuiCardGroup {
-  display: flex;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 18px;
-}
-
-  .kuiCardGroup__card {
-    flex: 1 1 0%;
-    border: none;
-    border-radius: 0;
-
-    & + & {
-      border-left: 1px solid #E0E0E0;
-    }
-  }
-
-  .kuiCardGroup__cardDescription {
-    flex: 1 1 auto;
-  }
-
-.kuiBadge {
-  display: inline-block;
-  margin-left: 0.5em;
-  padding: 0.1em 0.7em;
-  vertical-align: middle;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.kuiBadge--default {
-  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .kuiFormSection {
@@ -820,7 +648,6 @@ fieldset {
 
 /**
  * Utility class.
- * TODO: Move to UI Framework.
  */
 .fullWidth {
   width: 100% !important;
@@ -828,7 +655,6 @@ fieldset {
 
 /**
  * Utility class.
- * TODO: Move to UI Framework.
  */
 .noPadding {
   padding: 0 !important;
@@ -845,47 +671,6 @@ fieldset {
   .flexGroup__filler {
     flex: 1 1 auto;
   }
-
-.kuiColumn + .kuiColumn {
-  padding-left: 10px;
-}
-
-/**
- * 1. Use inline-block instead of flexbox so that content doesn't overflow.
- * 2. Content can be aligned by offsetting from the top.
- */
-// $numColumns: 12;
-// @for $i from 1 through $numColumns {
-//   .kiuColumn--#{$i} {
-//     display: inline-block; /* 1 */
-//     vertical-align: top; /* 2 */
-//     width: $i / $numColumns * 100%;
-//   }
-// }
-
-.makeKuiColumns(12);
-
-.makeKuiColumns(@n, @i: 1) when (@i =< @n) {
-  .kuiColumn--@{i} {
-    display: inline-block; /* 1 */
-    vertical-align: top; /* 2 */
-    width: (@i * 100% / @n);
-  }
-  .makeKuiColumns(@n, (@i + 1));
-}
-
-/**
- * 1. Override Bootstrap styles.
- */
-.kuiLocalDropdownCloseButton {
-  color: #2d2d2d !important; /* 1 */
-
-  .theme-dark & {
-    color: #cecece !important; /* 1 */
-  }
-}
-
-// TODO: Extract these styles into the UI Framework.
 
 .kuiFormSection {
   margin-bottom: 16px;
@@ -1076,6 +861,5 @@ fieldset {
 .kuiSideBarOptionsLink__text {
   margin-left: 2px;
 }
-
 
 @import "~dragula/dist/dragula.css";

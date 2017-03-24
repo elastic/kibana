@@ -17,15 +17,18 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should have the correct shared-item title and description', function () {
       const expected = {
-        title: 'Visualization AreaChart',
+        title: 'Shared-Item Visualization AreaChart',
         description: 'AreaChart'
       };
-      return PageObjects.visualize.clickVisualizationByName('Visualization AreaChart')
-        .then(() => PageObjects.common.getSharedItemTitleAndDescription())
-        .then(({ title, description }) => {
-          expect(title).to.eql(expected.title);
-          expect(description).to.eql(expected.description);
-        });
+
+      return PageObjects.visualize.clickVisualizationByName('Shared-Item Visualization AreaChart')
+        .then (() => PageObjects.common.try(function () {
+          return PageObjects.common.getSharedItemTitleAndDescription()
+            .then(({ title, description }) => {
+              expect(title).to.eql(expected.title);
+              expect(description).to.eql(expected.description);
+            });
+        }));
     });
   });
 });

@@ -1,4 +1,4 @@
-var { assign, memoize } = require('lodash');
+var { memoize } = require('lodash');
 let moment = require('moment');
 
 var history = require('../history');

@@ -67,7 +67,8 @@ export default function PointSeriesVisType(Private) {
           type: 'area',
           mode: 'stacked',
           data: {
-            label: 'Count'
+            label: 'Count',
+            id: '1'
           },
           drawLinesBetweenPoints: true,
           showCircles: true,
@@ -88,7 +89,16 @@ export default function PointSeriesVisType(Private) {
         setYExtents: false
       },
       positions: ['top', 'left', 'right', 'bottom'],
-      chartTypes: ['line', 'area', 'histogram'],
+      chartTypes: [{
+        value: 'line',
+        text: 'line'
+      }, {
+        value: 'area',
+        text: 'area'
+      }, {
+        value: 'histogram',
+        text: 'bar'
+      }],
       axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
       scaleTypes: ['linear', 'log', 'square root'],
       chartModes: ['normal', 'stacked'],

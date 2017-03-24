@@ -8,10 +8,6 @@ $tableCellPadding: 7px 8px 8px;
   font-weight: 400;
   text-align: left;
   max-width: 20px; /* 1 */
-
-  &:last-child {
-    padding-right: 16px;
-  }
 }
 
 /**
@@ -23,6 +19,18 @@ $tableCellPadding: 7px 8px 8px;
   border: $tableBorder;
   border-collapse: collapse;
   background-color: #FFFFFF;
+}
+
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto; /* 1 */
+
+  .kuiTableHeaderCell,
+  .kuiTableRowCell {
+    max-width: none; /* 1 */
+  }
 }
 
 .kuiTableHeaderCell {
@@ -70,6 +78,14 @@ $tableCellPadding: 7px 8px 8px;
   @include tableCell;
   color: $fontColor;
   border-top: $tableRowBorder;
+}
+
+/**
+ * 1. We don't want to create too strong a disconnect between the original row and the row
+ *    that contains its expanded details.
+ */
+.kuiTableRowCell--expanded {
+  border-top-color: #f0f0f0; /* 1 */
 }
 
   /**

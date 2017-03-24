@@ -34,6 +34,10 @@ module.exports = {
       pathname: kibanaURL,
       hash: '/discover',
     },
+    context: {
+      pathname: kibanaURL,
+      hash: '/context',
+    },
     visualize: {
       pathname: kibanaURL,
       hash: '/visualize',

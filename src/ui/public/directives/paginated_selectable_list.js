@@ -8,7 +8,7 @@ function throwError(message) {
   throw new Error(message);
 }
 
-module.directive('paginatedSelectableList', function (kbnUrl) {
+module.directive('paginatedSelectableList', function () {
 
   return {
     restrict: 'E',
@@ -20,7 +20,7 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
       userOnSelect: '=?'
     },
     template: paginatedSelectableListTemplate,
-    controller: function ($scope, $element, $filter) {
+    controller: function ($scope) {
       // Should specify either user-make-url or user-on-select
       if (!$scope.userMakeUrl && !$scope.userOnSelect) {
         throwError('paginatedSelectableList directive expects a makeUrl or onSelect function');

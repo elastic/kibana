@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggConfigFactory(Private, fieldTypeFilter) {
+export default function AggConfigFactory(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -210,6 +210,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     configDsl[this.type.dslName || this.type.name] = output.params;
 
     // if the config requires subAggs, write them to the dsl as well
+    if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {

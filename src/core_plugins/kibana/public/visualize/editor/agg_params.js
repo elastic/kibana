@@ -1,5 +1,3 @@
-import IndexedArray from 'ui/indexed_array';
-import _ from 'lodash';
 import $ from 'jquery';
 import aggSelectHtml from 'plugins/kibana/visualize/editor/agg_select.html';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
@@ -11,12 +9,8 @@ import aggParamsTemplate from 'plugins/kibana/visualize/editor/agg_params.html';
 
 uiModules
 .get('app/visualize')
-.directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
+.directive('visEditorAggParams', function ($compile, $parse, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
-
-  const notify = new Notifier({
-    location: 'visAggGroup'
-  });
 
   return {
     restrict: 'E',
@@ -83,6 +77,9 @@ uiModules
         type.params.forEach(function (param, i) {
           let aggParam;
           let fields;
+          if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+            return;
+          }
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
             fields = $aggParamEditorsScope.indexedFields;

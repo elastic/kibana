@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
@@ -9,12 +8,12 @@ import uiModules from 'ui/modules';
 import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
 
 uiRoutes
-.when('/management/kibana/index/', {
+.when('/management/kibana/index', {
   template: createTemplate
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
+.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
@@ -29,7 +28,7 @@ uiModules.get('apps/management')
     sampleCount: 5,
     nameIntervalOptions: intervals,
 
-    fetchFieldsError: 'Loading'
+    fetchFieldsError: $translate.instant('KIBANA-LOADING')
   };
 
   index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
@@ -88,7 +87,7 @@ uiModules.get('apps/management')
     })
     .catch(function (err) {
       if (err instanceof IndexPatternMissingIndices) {
-        notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+        notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
       }
       else notify.fatal(err);
     });
@@ -192,12 +191,12 @@ uiModules.get('apps/management')
         return;
       }
 
-      patternErrors.push('Pattern does not match any existing indices');
+      patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
       const radius = Math.round(index.sampleCount / 2);
       const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
 
       if (_.uniq(samples).length !== samples.length) {
-        patternErrors.push('Invalid pattern, interval does not create unique index names');
+        patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
       } else {
         index.samples = samples;
       }
@@ -214,12 +213,12 @@ uiModules.get('apps/management')
 
     // we don't have enough info to continue
     if (!index.name) {
-      fetchFieldsError = 'Set an index name first';
+      fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
       return;
     }
 
     if (useIndexList && !index.nameInterval) {
-      fetchFieldsError = 'Select the interval at which your indices are populated.';
+      fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
       return;
     }
 
@@ -231,7 +230,7 @@ uiModules.get('apps/management')
       .catch(function (err) {
         // TODO: we should probably display a message of some kind
         if (err instanceof IndexPatternMissingIndices) {
-          fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
+          fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
           return [];
         }
 
@@ -287,7 +286,7 @@ uiModules.get('apps/management')
     index.patternErrors = [];
     index.samples = null;
     index.existing = null;
-    index.fetchFieldsError = 'Loading';
+    index.fetchFieldsError = $translate.instant('KIBANA-LOADING');
   }
 
   function getPatternDefault(interval) {

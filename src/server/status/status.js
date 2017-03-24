@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import states from './states';
 import { EventEmitter } from 'events';
 

@@ -59,13 +59,12 @@ export default function (chrome, internals) {
         }
 
         return path.substr(1, length)
-          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
           .split('/');
       };
 
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
-      const check = (event) => {
+      const check = () => {
         if ($location.path() === '/error/url-overflow') return;
 
         try {

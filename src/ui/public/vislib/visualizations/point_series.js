@@ -105,19 +105,21 @@ export default function PointSeriesFactory(Private) {
       // outside of them so we will use these values rather than ordered.min/max
       const oneUnit = (ordered.units || _.identity)(1);
 
+      const drawInverted = isHorizontal || xAxis.axisConfig.get('scale.inverted', false);
+      const size = isHorizontal ? width : height;
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
       const leftEndzone = {
-        x: isHorizontal ? 0 : Math.max(xScale(ordered.min), 0),
-        w: isHorizontal ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
+        x: drawInverted ? 0 : Math.max(xScale(ordered.min), 0),
+        w: drawInverted ? Math.max(xScale(ordered.min), 0) : height - Math.max(xScale(ordered.min), 0)
       };
 
       const expandLastBucket = xAxis.axisConfig.get('scale.expandLastBucket');
       const rightLastVal = expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
       const rightStart = rightLastVal + oneUnit;
       const rightEndzone = {
-        x: isHorizontal ? xScale(rightStart) : 0,
-        w: isHorizontal ? Math.max(width - xScale(rightStart), 0) : xScale(rightStart)
+        x: drawInverted ? xScale(rightStart) : 0,
+        w: drawInverted ? Math.max(size - xScale(rightStart), 0) : xScale(rightStart)
       };
 
       this.endzones = svg.selectAll('.layer')
@@ -147,8 +149,8 @@ export default function PointSeriesFactory(Private) {
         const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        const min = isHorizontal ? leftEndzone.w : rightEndzone.w;
-        const max = isHorizontal ? rightEndzone.x : leftEndzone.x;
+        const min = drawInverted ? leftEndzone.w : rightEndzone.w;
+        const max = drawInverted ? rightEndzone.x : leftEndzone.x;
 
         // bounds of the cursor to consider
         let xLeft = isHorizontal ? mouseChartXCoord : mouseChartYCoord;
@@ -196,7 +198,6 @@ export default function PointSeriesFactory(Private) {
     draw() {
       const self = this;
       const $elem = $(this.chartEl);
-      const margin = this.handler.visConfig.get('style.margin');
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
       const xScale = this.handler.categoryAxes[0].getScale();

@@ -1,12 +1,9 @@
 import Joi from 'joi';
-import { get } from 'lodash';
-import { randomBytes, constants as cryptoConstants } from 'crypto';
+import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
-
-import pkg from '../../../src/utils/package_json';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -151,7 +148,11 @@ module.exports = () => Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
   tilemap: Joi.object({
-    manifestServiceUrl: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
+      otherwise: Joi.string().default('https://tiles.elastic.co/v2/manifest')
+    }),
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),
