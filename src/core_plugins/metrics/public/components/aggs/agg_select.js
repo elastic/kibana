@@ -61,15 +61,30 @@ class AggSelectOption extends Component {
   }
 
   render() {
-    const { label, heading } = this.props.option;
+    const { label, heading, pipeline } = this.props.option;
     const style = {
-      fontWeight: heading ? 'bold' : 'normal',
       paddingLeft: heading ? 0 : 10
     };
-    let className = this.props.className;
-    if (heading) className = 'Select-option vis_editor__agg_select-heading';
+    if (heading) {
+      let note;
+      if (pipeline) {
+        note = (<span className="vis_editor__agg_select-note">(requires child aggregation)</span>);
+      }
+      return (
+        <div className="Select-option vis_editor__agg_select-heading"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseDown={this.handleMouseDown}
+          onMouseMove={this.handleMouseMove}
+          title={label}>
+          <span className="Select-value-label" style={style}>
+            <strong>{label}</strong>
+            {note}
+          </span>
+        </div>
+      );
+    }
     return (
-      <div className={className}
+      <div className={this.props.className}
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
@@ -107,14 +122,15 @@ function AggSelect(props) {
     options = [
       { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
       ...metricAggs,
-      { label: 'Parent Pipeline Aggregations (requires child aggregation)', value: null, heading: true, disabled: true },
+      { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
       ...pipelineAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
-      { label: 'Sibling Pipeline Aggregations (requires child aggregation)', value: null, heading: true, disabled: true },
+      { label: 'Sibling Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
       ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
     ];
   }
 
   const handleChange = (value) => {
+    if (value.disabled) return;
     if (value.value) props.onChange(value);
   };
 
