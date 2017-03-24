@@ -3,7 +3,7 @@
 exports[`KuiButton Baseline HTML attributes are rendered 1`] = `
 <button
   aria-label="aria label"
-  class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
+  class="kuiButton testClass1 testClass2"
   data-test-subj="test subject string"
   disabled=""
 >
@@ -73,6 +73,7 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 >
   <span>
     <span
+      aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
@@ -85,6 +86,7 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
 >
   <span>
     <span
+      aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>

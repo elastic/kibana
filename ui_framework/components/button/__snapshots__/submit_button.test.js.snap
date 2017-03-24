@@ -3,7 +3,7 @@
 exports[`KuiSubmitButton Baseline HTML attributes are rendered 1`] = `
 <input
   aria-label="aria label"
-  class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
+  class="kuiButton testClass1 testClass2"
   data-test-subj="test subject string"
   disabled=""
   type="submit"

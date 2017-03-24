@@ -26,10 +26,9 @@ const buttonTypeToClassNameMap = {
   primary: 'kuiButton--primary',
 };
 
-const getClassName = ({ className, type, hasIcon = false, isDisabled }) =>
+const getClassName = ({ className, type, hasIcon = false }) =>
   classNames('kuiButton', className, buttonTypeToClassNameMap[type], {
     'kuiButton--iconText': hasIcon,
-    'kuiButton-isDisabled': isDisabled,
   });
 
 const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
@@ -44,7 +43,7 @@ const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
   switch(iconPosition) {
     case 'left':
       return (
-        <span>
+        <span className="kuiButton__inner">
           {iconOrLoading}
           {wrappedChildren}
         </span>
@@ -52,7 +51,7 @@ const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
 
     case 'right':
       return (
-        <span>
+        <span className="kuiButton__inner">
           {wrappedChildren}
           {iconOrLoading}
         </span>
@@ -64,7 +63,6 @@ const KuiButton = ({
   isLoading,
   iconPosition = DEFAULT_ICON_POSITION,
   className,
-  disabled,
   type,
   icon,
   children,
@@ -76,9 +74,7 @@ const KuiButton = ({
         className,
         type,
         hasIcon: icon || isLoading,
-        isDisabled: disabled,
       })}
-      disabled={disabled}
       { ...rest }
     >
       <ContentWithIcon
@@ -117,14 +113,15 @@ const KuiLinkButton = ({
     }
   };
 
+  const classes = classNames(getClassName({
+    className,
+    type,
+    hasIcon: icon || isLoading,
+  }), { 'kuiButton-isDisabled': disabled });
+
   return (
     <a
-      className={getClassName({
-        className,
-        type,
-        hasIcon: icon || isLoading,
-        isDisabled: disabled,
-      })}
+      className={classes}
       onClick={onClick}
       {...rest}
     >
@@ -150,7 +147,6 @@ KuiLinkButton.propTypes = {
 
 const KuiSubmitButton = ({
   className,
-  disabled,
   type,
   children,
   ...rest
@@ -160,8 +156,7 @@ const KuiSubmitButton = ({
     <input
       type="submit"
       value={children}
-      className={getClassName({ className, type, isDisabled: disabled })}
-      disabled={disabled}
+      className={getClassName({ className, type })}
       { ...rest }
     />
   );

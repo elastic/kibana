@@ -74,6 +74,7 @@ exports[`KuiLinkButton Props isLoading doesn't render the icon prop 1`] = `
 >
   <span>
     <span
+      aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
@@ -86,6 +87,7 @@ exports[`KuiLinkButton Props isLoading renders a spinner 1`] = `
 >
   <span>
     <span
+      aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>

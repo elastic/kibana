@@ -25,8 +25,11 @@ const KuiButtonIcon = props => {
     [typeToClassNameMap[props.type]]: props.type,
   });
 
+  // Purely decorative icons should be hidden from screen readers. Button icons are purely
+  // decorate since assisted users will want to click on the button itself, not the icon within.
+  // (https://www.w3.org/WAI/GL/wiki/Using_aria-hidden%3Dtrue_on_an_icon_font_that_AT_should_ignore)
   return (
-    <span className={iconClasses} />
+    <span aria-hidden="true" className={iconClasses} />
   );
 };
 
