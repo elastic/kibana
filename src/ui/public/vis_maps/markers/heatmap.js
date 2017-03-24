@@ -20,8 +20,6 @@ export default class Heatmap extends EventEmitter {
     const points = dataToHeatArray(max, options.heatNormalizeData, featureCollection);
     this._leafletLayer = L.heatLayer(points, options);
     this._tooltipFormatter = options.tooltipFormatter;
-
-
     this._zoom = zoom;
     this._disableTooltips = false;
     this._getLatLng = _.memoize(function (feature) {

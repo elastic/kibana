@@ -41,7 +41,7 @@ export default class GeohashLayer extends KibanaMapLayer {
           maxZoom: parseFloat(this._geohashOptions.heatmap.heatMaxZoom),
           minOpaxity: parseFloat(this._geohashOptions.heatmap.heatMinOpacity),
           heatNormalizeData: parseFloat(this._geohashOptions.heatmap.heatNormalizeData),
-          tooltipFormatter: parseFloat(this._geohashOptions.tooltipFormatter)
+          tooltipFormatter: this._geohashOptions.tooltipFormatter
         }, this._zoom, this._kibanaMap);
         break;
       default:
