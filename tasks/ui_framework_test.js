@@ -1,36 +1,37 @@
-const jest = require('jest');
-const path = require('path');
+const platform = require('os').platform();
+const config = require('./utils/ui_framework_test_config');
 
-const rootDir = 'ui_framework';
-const resolve = relativePath => path.resolve(__dirname, '..', '', relativePath);
+module.exports = function (grunt) {
+  grunt.registerTask('uiFramework:test', function () {
+    const done = this.async();
+    Promise.all([uiFrameworkTest()]).then(done);
+  });
 
-const config = {
-  rootDir,
-  collectCoverage: true,
-  collectCoverageFrom: [
-    'components/**/*.js',
-    // Seems to be a bug with jest or micromatch, in which the above glob doesn't match subsequent
-    // levels of directories, making this glob necessary.
-    'components/**/**/*.js',
-    '!components/index.js',
-    '!components/**/*/index.js',
-  ],
-  coverageDirectory: '<rootDir>/jest/report',
-  coverageReporters: ['html'],
-  moduleFileExtensions: ['jsx', 'js', 'json'],
-  moduleNameMapper: {
-    '^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)$': resolve('config/jest/FileStub.js'),
-    '^.+\\.css$': resolve('config/jest/CSSStub.js'),
-    '^.+\\.scss$': resolve('config/jest/CSSStub.js')
-  },
-  testPathIgnorePatterns: ['<rootDir>/(dist|doc_site|jest)/'],
-  testEnvironment: 'node',
-  testRegex: '.*\.test\.(js|jsx)$',
-  snapshotSerializers: ['<rootDir>/../node_modules/enzyme-to-json/serializer']
+  function uiFrameworkTest() {
+    const serverCmd = {
+      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\jest.cmd' : './node_modules/.bin/jest',
+      args: [
+        '--env=jsdom',
+        `--config=${JSON.stringify(config)}`,
+      ],
+      opts: { stdio: 'inherit' }
+    };
+
+    return new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const message = result.stderr || result.stdout;
+
+          grunt.log.error(message);
+
+          return reject();
+        }
+
+        grunt.log.writeln(result);
+
+        resolve();
+      });
+
+    });
+  }
 };
-
-const argv = process.argv.slice(2);
-
-argv.push('--config', JSON.stringify(config));
-
-jest.run(argv);

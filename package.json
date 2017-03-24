@@ -64,7 +64,8 @@
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:test": "node tasks/ui_framework_test --env=jsdom"
+    "uiFramework:dev": "node tasks/utils/ui_framework_test --env=jsdom --watch",
+    "uiFramework:coverage": "node tasks/utils/ui_framework_test --env=jsdom --coverage"
   },
   "repository": {
     "type": "git",

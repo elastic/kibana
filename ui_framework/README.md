@@ -78,6 +78,13 @@ content.
 You can check how well the components have been covered
 by the tests by viewing the generated report at `ui_framework/jest/report/index.html`.
 
+#### React component development tips
+
+You can run `npm run uiFramework:dev` to watch your files and automatically run the tests when you
+make changes. Under this command, the tests will run faster than under `uiFramework:test` because
+they'll only test the files you've changed -- the code coverage report won't be re-genereated,
+however.
+
 ## Principles
 
 ### Logically-grouped components
