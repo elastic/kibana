@@ -44,7 +44,7 @@ export default function (chrome, internals) {
         $compileProvider.debugInfoEnabled(false);
       }
     }])
-    .run(($location, $rootScope, Private) => {
+    .run(($location, $rootScope, Private, config) => {
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
       };
@@ -65,6 +65,8 @@ export default function (chrome, internals) {
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
       const check = () => {
+        // disable long url checks when storing state in session storage
+        if (config.get('state:storeInSessionStorage')) return;
         if ($location.path() === '/error/url-overflow') return;
 
         try {
