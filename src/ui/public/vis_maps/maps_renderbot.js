@@ -58,10 +58,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
 
+      this._kibanaMap.persistUiStateForVisualization(this.vis);
+      this._kibanaMap.useUiStateFromVisualization(this.vis);
+
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
-
-      this._kibanaMap.persistUiStateForVisualization(this.vis);
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
