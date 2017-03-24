@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import React from 'react';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
@@ -132,7 +134,7 @@ describe('KuiButton', () => {
       test(`isn't called upon instantiation`, () => {
         const onClickHandler = sinon.stub();
 
-        const $button = shallow(
+        shallow(
           <KuiButton onClick={onClickHandler} />
         );
 

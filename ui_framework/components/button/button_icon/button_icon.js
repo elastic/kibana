@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 
 import classNames from 'classnames';
-import keyMirror from 'keymirror';
 
 const ICON_TYPES = [
   'create',
