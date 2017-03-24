@@ -148,37 +148,16 @@ export default function AggConfigsFactory(Private) {
   };
 
   AggConfigs.prototype.getRequestAggs = function () {
+    //collect all the aggregations
+    const aggregations = this.reduce((requestValuesAggs, agg) => {
+      const aggs = agg.getRequestAggs();
+      return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+    }, []);
 
-
-    const aggregations = _.sortBy(this, function (agg) {
+    //move metrics to the end
+    return _.sortBy(aggregations, function (agg) {
       return agg.schema.group === 'metrics' ? 1 : 0;
     });
-
-
-    //the geohash aggregation should request the centroid-metric by default
-    let shouldAddGeocentroid = false;
-    let centroidField = null;
-    aggregations.forEach((config) => {
-      if (config.type.name === 'geohash_grid' && config.params.useGeocentroid === true) {
-        shouldAddGeocentroid = true;
-        centroidField = config.getField();
-      }
-    });
-
-    if (shouldAddGeocentroid) {
-      const geocentroidMetric = new AggConfig(this.vis, {
-        type: 'geo_centroid',
-        enabled:true,
-        params: {
-          field: centroidField
-        },
-        schema: 'metric'
-      });
-
-      aggregations.push(geocentroidMetric);
-    }
-    return aggregations;
-
   };
 
   /**

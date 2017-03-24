@@ -1,10 +1,13 @@
 import _ from 'lodash';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import VisAggConfigProvider from 'ui/vis/agg_config';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
 import { geohashColumns } from 'ui/utils/decode_geo_hash';
 
 export default function GeoHashAggDefinition(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const AggConfig = Private(VisAggConfigProvider);
+
   const defaultPrecision = 2;
   const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
   /**
@@ -84,6 +87,23 @@ export default function GeoHashAggDefinition(Private, config) {
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
       }
-    ]
+    ],
+    getRequestAggs: function (agg) {
+      if (!agg.params.useGeocentroid) {
+        return agg;
+      }
+
+      /**
+       * By default, add the geo_centroid aggregation
+       */
+      return [agg, new AggConfig(agg.vis, {
+        type: 'geo_centroid',
+        enabled:true,
+        params: {
+          field: agg.getField()
+        },
+        schema: 'metric'
+      })];
+    }
   });
 }
