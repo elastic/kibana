@@ -3,7 +3,7 @@ let utils = require('../../src/utils');
 let collapsingTests = require('raw!./utils_string_collapsing.txt');
 let expandingTests = require('raw!./utils_string_expanding.txt');
 
-var { test, module, deepEqual } = QUnit;
+var { test, module, deepEqual } = window.QUnit;
 
 module("Utils class");
 
