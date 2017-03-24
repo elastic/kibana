@@ -6,7 +6,7 @@ export default function AggTypeMetricGeoCentroidProvider(Private) {
   return new MetricAggType({
     name: 'geo_centroid',
     title: 'Geo Centroid',
-    makeLabel: function (aggConfig) {
+    makeLabel: function () {
       return 'Geo Centroid';
     },
     params: [
