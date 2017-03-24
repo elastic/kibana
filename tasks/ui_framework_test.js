@@ -1,8 +1,8 @@
-const jest = require(`jest`);
-const path = require(`path`);
+const jest = require('jest');
+const path = require('path');
 
-const rootDir = `ui_framework`;
-const resolve = relativePath => path.resolve(__dirname, `..`, ``, relativePath);
+const rootDir = 'ui_framework';
+const resolve = relativePath => path.resolve(__dirname, '..', '', relativePath);
 
 const config = {
   rootDir,
@@ -31,6 +31,6 @@ const config = {
 
 const argv = process.argv.slice(2);
 
-argv.push(`--config`, JSON.stringify(config));
+argv.push('--config', JSON.stringify(config));
 
 jest.run(argv);
