@@ -1,10 +1,9 @@
 import L from 'leaflet';
-import { EventEmitter } from 'events';
 import ScaledCircles from './scaled_circles';
 
 export default class GeohashGrid extends ScaledCircles {
   getMarkerFunction() {
-    return function (feature, latlng) {
+    return function (feature) {
       const geohashRect = feature.properties.rectangle;
       // get bounds from northEast[3] and southWest[1]
       // corners in geohash rectangle

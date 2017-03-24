@@ -45,7 +45,7 @@ export default class Heatmap extends EventEmitter {
     return this._leafletLayer;
   }
 
-  appendLegendContents(jqueryDiv) {
+  appendLegendContents() {
   }
 
 

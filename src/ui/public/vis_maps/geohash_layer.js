@@ -1,9 +1,9 @@
 import KibanaMapLayer from './kibana_map_layer';
 import _ from 'lodash';
-import Heatmap from './heatmap';
-import ScaledCircles from './scaled_circles';
-import ShadedCircles from './shaded_circles';
-import GeohashGrid from './geohash_grid';
+import Heatmap from './markers/heatmap';
+import ScaledCircles from './markers/scaled_circles';
+import ShadedCircles from './markers/shaded_circles';
+import GeohashGrid from './markers/geohash_grid';
 
 export default class GeohashLayer extends KibanaMapLayer {
 

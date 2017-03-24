@@ -19,7 +19,6 @@ export default class ScaledCircles extends EventEmitter {
     this._legendQuantizer = null;
 
     this._popups = [];
-    const self = this;
     this._leafletLayer = L.geoJson(null, {
       pointToLayer: this.getMarkerFunction(),
       style: this.getStyleFunction(),
@@ -51,7 +50,7 @@ export default class ScaledCircles extends EventEmitter {
   }
 
 
-  movePointer(event) {
+  movePointer() {
   }
 
   getLabel() {
