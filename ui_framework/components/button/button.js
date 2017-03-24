@@ -11,11 +11,13 @@ const BUTTON_TYPES = [
   'danger',
   'primary',
 ];
+
 const ICON_POSITIONS = [
   'left',
   'right',
 ];
-const defaultIconPosition = ICON_POSITIONS[0];
+
+const DEFAULT_ICON_POSITION = 'left';
 
 const buttonTypeToClassNameMap = {
   basic: 'kuiButton--basic',
@@ -24,9 +26,10 @@ const buttonTypeToClassNameMap = {
   primary: 'kuiButton--primary',
 };
 
-const getClassName = ({ className, type, icon }) =>
+const getClassName = ({ className, type, hasIcon = false, isDisabled }) =>
   classNames('kuiButton', className, buttonTypeToClassNameMap[type], {
-    'kuiButton--iconText': icon != null,
+    'kuiButton--iconText': hasIcon,
+    'kuiButton-isDisabled': isDisabled,
   });
 
 const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
@@ -59,8 +62,9 @@ const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
 
 const KuiButton = ({
   isLoading,
-  iconPosition = defaultIconPosition,
+  iconPosition = DEFAULT_ICON_POSITION,
   className,
+  disabled,
   type,
   icon,
   children,
@@ -68,15 +72,21 @@ const KuiButton = ({
 }) => {
   return (
     <button
-      className={getClassName({ className, type, icon })}
+      className={getClassName({
+        className,
+        type,
+        hasIcon: icon || isLoading,
+        isDisabled: disabled,
+      })}
+      disabled={disabled}
       { ...rest }
     >
       <ContentWithIcon
         icon={icon}
         iconPosition={iconPosition}
-        isLoading={ isLoading }
+        isLoading={isLoading}
       >
-        { children }
+        {children}
       </ContentWithIcon>
     </button>
   );
@@ -94,15 +104,28 @@ KuiButton.propTypes = {
 const KuiLinkButton = ({
   isLoading,
   icon,
-  iconPosition = defaultIconPosition,
+  iconPosition = DEFAULT_ICON_POSITION,
   className,
+  disabled,
   type,
   children,
   ...rest
 }) => {
+  const onClick = e => {
+    if (disabled) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <a
-      className={getClassName({ className, type, icon })}
+      className={getClassName({
+        className,
+        type,
+        hasIcon: icon || isLoading,
+        isDisabled: disabled,
+      })}
+      onClick={onClick}
       {...rest}
     >
       <ContentWithIcon
@@ -127,15 +150,18 @@ KuiLinkButton.propTypes = {
 
 const KuiSubmitButton = ({
   className,
+  disabled,
   type,
   children,
   ...rest
 }) => {
+  // NOTE: The `input` element is a void element and can't contain children.
   return (
     <input
       type="submit"
       value={children}
-      className={getClassName({ className, type })}
+      className={getClassName({ className, type, isDisabled: disabled })}
+      disabled={disabled}
       { ...rest }
     />
   );

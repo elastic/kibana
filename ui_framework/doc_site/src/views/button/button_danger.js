@@ -14,7 +14,7 @@ export default () => (
 
     <KuiButton
       type="danger"
-      isDisabled
+      disabled
     >
       Danger button, disabled
     </KuiButton>

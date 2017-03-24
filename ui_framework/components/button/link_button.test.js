@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  shallow,
-  render,
-} from 'enzyme';
-import sinon from 'sinon';
+import { render } from 'enzyme';
 
 import {
   KuiLinkButton,
@@ -12,7 +8,7 @@ import {
 describe('KuiLinkButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $button = shallow(
+      const $button = render(
         <KuiLinkButton />
       );
 
@@ -70,7 +66,7 @@ describe('KuiLinkButton', () => {
 
     describe('data-test-subj', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton data-test-subj="test subject string" />
         );
 
@@ -81,7 +77,7 @@ describe('KuiLinkButton', () => {
 
     describe('icon', () => {
       test('is rendered with children', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton icon="Icon">
             Hello
           </KuiLinkButton>
@@ -92,7 +88,7 @@ describe('KuiLinkButton', () => {
       });
 
       test('is rendered without children', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton icon="Icon" />
         );
 
@@ -103,7 +99,7 @@ describe('KuiLinkButton', () => {
 
     describe('iconPosition', () => {
       test('moves the icon to the right', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton
             icon="Icon"
             iconPosition="right"
@@ -119,7 +115,7 @@ describe('KuiLinkButton', () => {
 
     describe('children', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton>
             Hello
           </KuiLinkButton>
@@ -132,7 +128,7 @@ describe('KuiLinkButton', () => {
 
     describe('href', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton href="#" />
         );
 
@@ -143,7 +139,7 @@ describe('KuiLinkButton', () => {
 
     describe('target', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton target="_blank" />
         );
 
@@ -152,69 +148,20 @@ describe('KuiLinkButton', () => {
       });
     });
 
-    describe('onClick', () => {
-      test(`isn't called upon instantiation`, () => {
-        const onClickHandler = sinon.stub();
-
-        const $button = shallow(
-          <KuiLinkButton onClick={onClickHandler} />
-        );
-
-        sinon.assert.notCalled(onClickHandler);
-      });
-
-      test('is called when the button is clicked', () => {
-        const onClickHandler = sinon.stub();
-
-        const $button = shallow(
-          <KuiLinkButton onClick={onClickHandler} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.calledOnce(onClickHandler);
-      });
-
-      test('receives the data prop', () => {
-        const onClickHandler = sinon.stub();
-        const data = 'data';
-
-        const $button = shallow(
-          <KuiLinkButton onClick={onClickHandler} data={data} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.calledWith(onClickHandler, data);
-      });
-    });
-
-    describe('isDisabled', () => {
-      test('sets the disabled attribute', () => {
-        const $button = shallow(
-          <KuiLinkButton isDisabled />
+    describe('disabled', () => {
+      test('sets the disabled class', () => {
+        const $button = render(
+          <KuiLinkButton disabled />
         );
 
         expect($button)
           .toMatchSnapshot();
       });
-
-      test(`prevents onClick from being called`, () => {
-        const onClickHandler = sinon.stub();
-
-        const $button = shallow(
-          <KuiLinkButton isDisabled onClick={onClickHandler} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.notCalled(onClickHandler);
-      });
     });
 
     describe('isLoading', () => {
       test('renders a spinner', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton isLoading />
         );
 
@@ -223,7 +170,7 @@ describe('KuiLinkButton', () => {
       });
 
       test(`doesn't render the icon prop`, () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton isLoading icon="Icon" />
         );
 
@@ -234,7 +181,7 @@ describe('KuiLinkButton', () => {
 
     describe('className', () => {
       test('renders the classes', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiLinkButton className="testClass1 testClass2" />
         );
 

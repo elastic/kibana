@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  shallow,
-  render,
-} from 'enzyme';
+import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
 
 import {
@@ -13,7 +10,7 @@ import {
 describe('KuiButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $button = shallow(
+      const $button = render(
         <KuiButton />
       );
 
@@ -36,7 +33,7 @@ describe('KuiButton', () => {
 
     describe('data-test-subj', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton data-test-subj="test subject string" />
         );
 
@@ -47,7 +44,7 @@ describe('KuiButton', () => {
 
     describe('icon', () => {
       test('is rendered with children', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton icon="Icon">
             Hello
           </KuiButton>
@@ -58,7 +55,7 @@ describe('KuiButton', () => {
       });
 
       test('is rendered without children', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton icon="Icon" />
         );
 
@@ -69,7 +66,7 @@ describe('KuiButton', () => {
 
     describe('iconPosition', () => {
       test('moves the icon to the right', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton
             icon="Icon"
             iconPosition="right"
@@ -85,7 +82,7 @@ describe('KuiButton', () => {
 
     describe('children', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton>
             Hello
           </KuiButton>
@@ -118,47 +115,22 @@ describe('KuiButton', () => {
 
         sinon.assert.calledOnce(onClickHandler);
       });
-
-      test('receives the data prop', () => {
-        const onClickHandler = sinon.stub();
-        const data = 'data';
-
-        const $button = shallow(
-          <KuiButton onClick={onClickHandler} data={data} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.calledWith(onClickHandler, data);
-      });
     });
 
-    describe('isDisabled', () => {
-      test('sets the disabled attribute', () => {
-        const $button = shallow(
-          <KuiButton isDisabled />
+    describe('disabled', () => {
+      test('sets the disabled attribute and class', () => {
+        const $button = render(
+          <KuiButton disabled />
         );
 
         expect($button)
           .toMatchSnapshot();
       });
-
-      test(`prevents onClick from being called`, () => {
-        const onClickHandler = sinon.stub();
-
-        const $button = shallow(
-          <KuiButton isDisabled onClick={onClickHandler} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.notCalled(onClickHandler);
-      });
     });
 
     describe('isLoading', () => {
       test('renders a spinner', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton isLoading />
         );
 
@@ -167,7 +139,7 @@ describe('KuiButton', () => {
       });
 
       test(`doesn't render the icon prop`, () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton isLoading icon="Icon" />
         );
 
@@ -178,7 +150,7 @@ describe('KuiButton', () => {
 
     describe('className', () => {
       test('renders the classes', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiButton className="testClass1 testClass2" />
         );
 

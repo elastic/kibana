@@ -1,8 +1,10 @@
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
- * 2. Disable for Angular.
- * 3. Safari won't respect :enabled:active on links.
+ * 2. Safari won't respect :enabled:active on links.
+ * 3. disabled isn't a valid attribute for links, so we also need to use this class.
+ * 4. Links can be focused when they're "disabled", so at least make them look like they're not
+ *    focused.
  */
 .kuiButton {
   display: inline-block; /* 1 */
@@ -16,17 +18,21 @@
   border: none;
   border-radius: $buttonBorderRadius;
 
+  &.kuiButton-isDisabled, /* 3 */
   &:disabled {
     cursor: default;
-    pointer-events: none; /* 2 */
   }
 
-  &:active { /* 3 */
+  &:active:not(.kuiButton-isDisabled) { /* 2 */
     transform: translateY(1px);
   }
 
   &:focus {
-    @include focus;
+    outline: none; /* 4 */
+  }
+
+  &:focus:not(.kuiButton-isDisabled) {
+    @include focus; /* 4 */
   }
 }
 
@@ -53,16 +59,17 @@
   background-color: #F2F2F2;
 
   // Goes before hover, so that hover can override it.
-  &:focus {
+  &:focus:not(.kuiButton-isDisabled) {
     color: #5a5a5a !important; /* 1 */
   }
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
+  &:hover:not(.kuiButton-isDisabled), /* 2 */
+  &:active:not(.kuiButton-isDisabled) { /* 2 */
     color: #ffffff !important; /* 1 */
     background-color: #9B9B9B !important;
   }
 
+  &.kuiButton-isDisabled,
   &:disabled {
     color: #9B9B9B;
   }
@@ -76,17 +83,18 @@
   color: #FFFFFF;
   background-color: #6EADC1;
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
+  &:hover:not(.kuiButton-isDisabled), /* 2 */
+  &:active:not(.kuiButton-isDisabled) { /* 2 */
     color: #FFFFFF !important; /* 1 */
     background-color: #006E8A;
   }
 
+  &.kuiButton-isDisabled,
   &:disabled {
     background-color: #B6D6E0;
   }
 
-  &:focus {
+  &:focus:not(.kuiButton-isDisabled) {
     color: #FFFFFF !important; /* 1 */
   }
 }
@@ -99,17 +107,18 @@
   color: #FFFFFF;
   background-color: #D76051;
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
+  &:hover:not(.kuiButton-isDisabled), /* 2 */
+  &:active:not(.kuiButton-isDisabled) { /* 2 */
     color: #FFFFFF !important; /* 1 */
     background-color: #A52E1F;
   }
 
+  &.kuiButton-isDisabled,
   &:disabled {
     background-color: #efc0ba;
   }
 
-  &:focus {
+  &:focus:not(.kuiButton-isDisabled) {
     @include focus($focusDangerColor);
     color: #FFFFFF !important; /* 1 */
   }
@@ -124,12 +133,13 @@
   color: $linkColor !important; /* 2 */
   background-color: transparent;
 
-  &:hover, /* 3 */
-  &:active { /* 3 */
+  &:hover:not(.kuiButton-isDisabled), /* 3 */
+  &:active:not(.kuiButton-isDisabled) { /* 3 */
     color: $linkHoverColor !important; /* 1 */
     text-decoration: underline;
   }
 
+  &.kuiButton-isDisabled,
   &:disabled {
     color: #dddddd !important; /* 1 */
   }

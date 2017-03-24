@@ -2,8 +2,7 @@
 
 exports[`KuiButton Baseline is rendered 1`] = `
 <button
-  className="kuiButton"
-  onClick={[Function]}
+  class="kuiButton"
 >
   <span />
 </button>
@@ -11,8 +10,7 @@ exports[`KuiButton Baseline is rendered 1`] = `
 
 exports[`KuiButton Props children is rendered 1`] = `
 <button
-  className="kuiButton"
-  onClick={[Function]}
+  class="kuiButton"
 >
   <span>
     <span>
@@ -24,8 +22,7 @@ exports[`KuiButton Props children is rendered 1`] = `
 
 exports[`KuiButton Props className renders the classes 1`] = `
 <button
-  className="kuiButton testClass1 testClass2"
-  onClick={[Function]}
+  class="kuiButton testClass1 testClass2"
 >
   <span />
 </button>
@@ -33,9 +30,17 @@ exports[`KuiButton Props className renders the classes 1`] = `
 
 exports[`KuiButton Props data-test-subj is rendered 1`] = `
 <button
-  className="kuiButton"
+  class="kuiButton"
   data-test-subj="test subject string"
-  onClick={[Function]}
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props disabled sets the disabled attribute and class 1`] = `
+<button
+  class="kuiButton kuiButton-isDisabled"
+  disabled=""
 >
   <span />
 </button>
@@ -43,8 +48,7 @@ exports[`KuiButton Props data-test-subj is rendered 1`] = `
 
 exports[`KuiButton Props icon is rendered with children 1`] = `
 <button
-  className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  class="kuiButton kuiButton--iconText"
 >
   <span>
     Icon
@@ -57,8 +61,7 @@ exports[`KuiButton Props icon is rendered with children 1`] = `
 
 exports[`KuiButton Props icon is rendered without children 1`] = `
 <button
-  className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  class="kuiButton kuiButton--iconText"
 >
   <span>
     Icon
@@ -68,8 +71,7 @@ exports[`KuiButton Props icon is rendered without children 1`] = `
 
 exports[`KuiButton Props iconPosition moves the icon to the right 1`] = `
 <button
-  className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  class="kuiButton kuiButton--iconText"
 >
   <span>
     <span>
@@ -80,24 +82,13 @@ exports[`KuiButton Props iconPosition moves the icon to the right 1`] = `
 </button>
 `;
 
-exports[`KuiButton Props isDisabled sets the disabled attribute 1`] = `
-<button
-  className="kuiButton"
-  disabled={true}
-  onClick={[Function]}
->
-  <span />
-</button>
-`;
-
 exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 <button
-  className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  class="kuiButton kuiButton--iconText"
 >
   <span>
-    <KuiButtonIcon
-      type="loading"
+    <span
+      class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
 </button>
@@ -105,12 +96,11 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 
 exports[`KuiButton Props isLoading renders a spinner 1`] = `
 <button
-  className="kuiButton kuiButton--iconText"
-  onClick={[Function]}
+  class="kuiButton kuiButton--iconText"
 >
   <span>
-    <KuiButtonIcon
-      type="loading"
+    <span
+      class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
 </button>

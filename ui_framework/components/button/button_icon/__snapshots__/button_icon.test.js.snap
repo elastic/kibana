@@ -2,13 +2,13 @@
 
 exports[`KuiButtonIcon Baseline is rendered 1`] = `
 <span
-  className="kuiButton__icon kuiIcon"
+  class="kuiButton__icon kuiIcon"
 />
 `;
 
 exports[`KuiButtonIcon Props className renders the classes 1`] = `
 <span
-  className="kuiButton__icon kuiIcon testClass1 testClass2"
+  class="kuiButton__icon kuiIcon testClass1 testClass2"
 />
 `;
 

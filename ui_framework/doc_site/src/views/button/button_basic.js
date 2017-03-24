@@ -17,7 +17,8 @@ export default () => (
 
     <KuiButton
       type="basic"
-      isDisabled
+      onClick={() => window.alert('Button clicked')}
+      disabled
     >
       Basic button, disabled
     </KuiButton>

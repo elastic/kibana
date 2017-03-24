@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from 'enzyme';
 import sinon from 'sinon';
 
 import { KuiButtonGroup } from './button_group';
@@ -7,7 +7,7 @@ import { KuiButtonGroup } from './button_group';
 describe('KuiButtonGroup', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $buttonGroup = shallow(
+      const $buttonGroup = render(
         <KuiButtonGroup />
       );
 
@@ -19,7 +19,7 @@ describe('KuiButtonGroup', () => {
   describe('Props', () => {
     describe('children', () => {
       test('is rendered', () => {
-        const $buttonGroup = shallow(
+        const $buttonGroup = render(
           <KuiButtonGroup>
             Hello
           </KuiButtonGroup>
@@ -32,7 +32,7 @@ describe('KuiButtonGroup', () => {
 
     describe('isUnited', () => {
       test('renders the united class', () => {
-        const $buttonGroup = shallow(
+        const $buttonGroup = render(
           <KuiButtonGroup isUnited />
         );
 

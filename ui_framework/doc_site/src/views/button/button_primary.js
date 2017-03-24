@@ -14,7 +14,7 @@ export default () => (
 
     <KuiButton
       type="primary"
-      isDisabled
+      disabled
     >
       Primary button, disabled
     </KuiButton>

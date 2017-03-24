@@ -12,7 +12,7 @@ export default () => (
 
     <KuiButton
       type="basic"
-      isDisabled
+      disabled
     >
       Basic button, disabled
     </KuiButton>
@@ -23,7 +23,7 @@ export default () => (
 
     <KuiButton
       type="primary"
-      isDisabled
+      disabled
     >
       Primary button, disabled
     </KuiButton>
@@ -34,7 +34,7 @@ export default () => (
 
     <KuiButton
       type="danger"
-      isDisabled
+      disabled
     >
       Danger button, disabled
     </KuiButton>

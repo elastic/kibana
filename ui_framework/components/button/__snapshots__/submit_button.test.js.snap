@@ -2,16 +2,14 @@
 
 exports[`KuiSubmitButton Baseline is rendered 1`] = `
 <input
-  className="kuiButton"
-  onClick={[Function]}
+  class="kuiButton"
   type="submit"
 />
 `;
 
 exports[`KuiSubmitButton Props children is rendered as value 1`] = `
 <input
-  className="kuiButton"
-  onClick={[Function]}
+  class="kuiButton"
   type="submit"
   value="Hello"
 />
@@ -19,26 +17,23 @@ exports[`KuiSubmitButton Props children is rendered as value 1`] = `
 
 exports[`KuiSubmitButton Props className renders the classes 1`] = `
 <input
-  className="kuiButton testClass1 testClass2"
-  onClick={[Function]}
+  class="kuiButton testClass1 testClass2"
   type="submit"
 />
 `;
 
 exports[`KuiSubmitButton Props data-test-subj is rendered 1`] = `
 <input
-  className="kuiButton"
+  class="kuiButton"
   data-test-subj="test subject string"
-  onClick={[Function]}
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props isDisabled sets the disabled attribute 1`] = `
+exports[`KuiSubmitButton Props disabled sets the disabled attribute and class 1`] = `
 <input
-  className="kuiButton"
-  disabled={true}
-  onClick={[Function]}
+  class="kuiButton kuiButton-isDisabled"
+  disabled=""
   type="submit"
 />
 `;

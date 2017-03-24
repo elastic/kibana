@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  shallow,
-  render,
-} from 'enzyme';
+import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
 
 import {
@@ -12,7 +9,7 @@ import {
 describe('KuiSubmitButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $button = shallow(
+      const $button = render(
         <KuiSubmitButton />
       );
 
@@ -70,7 +67,7 @@ describe('KuiSubmitButton', () => {
 
     describe('data-test-subj', () => {
       test('is rendered', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiSubmitButton data-test-subj="test subject string" />
         );
 
@@ -81,7 +78,7 @@ describe('KuiSubmitButton', () => {
 
     describe('children', () => {
       test('is rendered as value', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiSubmitButton>
             Hello
           </KuiSubmitButton>
@@ -114,47 +111,22 @@ describe('KuiSubmitButton', () => {
 
         sinon.assert.calledOnce(onClickHandler);
       });
-
-      test('receives the data prop', () => {
-        const onClickHandler = sinon.stub();
-        const data = 'data';
-
-        const $button = shallow(
-          <KuiSubmitButton onClick={onClickHandler} data={data} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.calledWith(onClickHandler, data);
-      });
     });
 
-    describe('isDisabled', () => {
-      test('sets the disabled attribute', () => {
-        const $button = shallow(
-          <KuiSubmitButton isDisabled />
+    describe('disabled', () => {
+      test('sets the disabled attribute and class', () => {
+        const $button = render(
+          <KuiSubmitButton disabled />
         );
 
         expect($button)
           .toMatchSnapshot();
       });
-
-      test(`prevents onClick from being called`, () => {
-        const onClickHandler = sinon.stub();
-
-        const $button = shallow(
-          <KuiSubmitButton isDisabled onClick={onClickHandler} />
-        );
-
-        $button.simulate('click');
-
-        sinon.assert.notCalled(onClickHandler);
-      });
     });
 
     describe('className', () => {
       test('renders the classes', () => {
-        const $button = shallow(
+        const $button = render(
           <KuiSubmitButton className="testClass1 testClass2" />
         );
 

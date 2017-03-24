@@ -2,13 +2,13 @@
 
 exports[`KuiButtonGroup Baseline is rendered 1`] = `
 <div
-  className="kuiButtonGroup"
+  class="kuiButtonGroup"
 />
 `;
 
 exports[`KuiButtonGroup Props children is rendered 1`] = `
 <div
-  className="kuiButtonGroup"
+  class="kuiButtonGroup"
 >
   Hello
 </div>
@@ -16,6 +16,6 @@ exports[`KuiButtonGroup Props children is rendered 1`] = `
 
 exports[`KuiButtonGroup Props isUnited renders the united class 1`] = `
 <div
-  className="kuiButtonGroup kuiButtonGroup--united"
+  class="kuiButtonGroup kuiButtonGroup--united"
 />
 `;

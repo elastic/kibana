@@ -14,7 +14,7 @@ export default () => (
 
     <KuiButton
       type="hollow"
-      isDisabled
+      disabled
     >
       Hollow button, disabled
     </KuiButton>

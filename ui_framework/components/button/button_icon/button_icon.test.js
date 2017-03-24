@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  shallow,
   render,
 } from 'enzyme';
 import sinon from 'sinon';
@@ -13,7 +12,7 @@ import {
 describe('KuiButtonIcon', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $buttonIcon = shallow(
+      const $buttonIcon = render(
         <KuiButtonIcon />
       );
 
@@ -36,7 +35,7 @@ describe('KuiButtonIcon', () => {
 
     describe('className', () => {
       test('renders the classes', () => {
-        const $buttonIcon = shallow(
+        const $buttonIcon = render(
           <KuiButtonIcon className="testClass1 testClass2" />
         );
 
