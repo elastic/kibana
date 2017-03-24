@@ -18,6 +18,20 @@ describe('KuiSubmitButton', () => {
       expect($button)
         .toMatchSnapshot();
     });
+
+    test('HTML attributes are rendered', () => {
+      const $button = render(
+        <KuiSubmitButton
+          aria-label="aria label"
+          className="testClass1 testClass2"
+          data-test-subj="test subject string"
+          disabled
+        />
+      );
+
+      expect($button)
+        .toMatchSnapshot();
+    });
   });
 
   describe('HTML attributes', () => {

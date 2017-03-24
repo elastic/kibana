@@ -1,60 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`KuiLinkButton Baseline HTML attributes are rendered (and disabled renders a class) 1`] = `
+<a
+  aria-label="aria label"
+  class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
+  data-test-subj="test subject string"
+  href="#"
+  target="_blank"
+>
+  <span />
+</a>
+`;
+
 exports[`KuiLinkButton Baseline is rendered 1`] = `
 <a
   class="kuiButton"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes aria-label is rendered 1`] = `
-<a
-  aria-label="aria label"
-  class="kuiButton"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes className renders the classes 1`] = `
-<a
-  class="kuiButton testClass1 testClass2"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes data-test-subj is rendered 1`] = `
-<a
-  class="kuiButton"
-  data-test-subj="test subject string"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes disabled sets the disabled class 1`] = `
-<a
-  class="kuiButton kuiButton-isDisabled"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes href is rendered 1`] = `
-<a
-  class="kuiButton"
-  href="#"
->
-  <span />
-</a>
-`;
-
-exports[`KuiLinkButton HTML attributes target is rendered 1`] = `
-<a
-  class="kuiButton"
-  target="_blank"
 >
   <span />
 </a>

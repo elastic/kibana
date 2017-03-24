@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`KuiSubmitButton Baseline HTML attributes are rendered 1`] = `
+<input
+  aria-label="aria label"
+  class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
+  data-test-subj="test subject string"
+  disabled=""
+  type="submit"
+/>
+`;
+
 exports[`KuiSubmitButton Baseline is rendered 1`] = `
 <input
   class="kuiButton"

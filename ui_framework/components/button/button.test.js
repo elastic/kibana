@@ -19,51 +19,19 @@ describe('KuiButton', () => {
       expect($button)
         .toMatchSnapshot();
     });
-  });
 
-  describe('HTML attributes', () => {
-    describe('aria-label', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiButton aria-label="aria label" />
-        );
+    test('HTML attributes are rendered', () => {
+      const $button = render(
+        <KuiButton
+          aria-label="aria label"
+          className="testClass1 testClass2"
+          data-test-subj="test subject string"
+          disabled
+        />
+      );
 
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('disabled', () => {
-      test('sets the disabled attribute and class', () => {
-        const $button = render(
-          <KuiButton disabled />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('data-test-subj', () => {
-      test('is rendered', () => {
-        const $button = render(
-          <KuiButton data-test-subj="test subject string" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('className', () => {
-      test('renders the classes', () => {
-        const $button = render(
-          <KuiButton className="testClass1 testClass2" />
-        );
-
-        expect($button)
-          .toMatchSnapshot();
-      });
+      expect($button)
+        .toMatchSnapshot();
     });
   });
 
