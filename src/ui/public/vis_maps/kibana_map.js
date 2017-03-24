@@ -181,16 +181,30 @@ class KibanaMap extends EventEmitter {
         return;
       }
 
-      const popup = L.popup({ autoPan: false });
-      popup.setLatLng(event.position);
-      popup.setContent(event.content);
-      popup.openOn(this._leafletMap);
+      if (!this._popup) {
+        this._popup = L.popup({ autoPan: false });
+        this._popup.setLatLng(event.position);
+        this._popup.setContent(event.content);
+        this._popup.openOn(this._leafletMap);
+      } else {
+        if (!this._popup.getLatLng().equals(event.position)) {
+          this._popup.setLatLng(event.position);
+        }
+        if (this._popup.getContent() !== event.content) {
+          this._popup.setContent(event.content);
+        }
+      }
+
+
     };
 
     kibanaLayer.on('showTooltip', onshowTooltip);
     this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: kibanaLayer });
 
-    const onHideTooltip = () => this._leafletMap.closePopup();
+    const onHideTooltip = () => {
+      this._leafletMap.closePopup();
+      this._popup = null;
+    };
     kibanaLayer.on('hideTooltip', onHideTooltip);
     this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: kibanaLayer });
 

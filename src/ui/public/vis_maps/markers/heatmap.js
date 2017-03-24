@@ -32,6 +32,7 @@ export default class Heatmap extends EventEmitter {
       return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
     });
 
+    this._currentFeature = null;
     this._addTooltips();
   }
 
@@ -65,26 +66,24 @@ export default class Heatmap extends EventEmitter {
 
     const mouseMoveLocation = (e) => {
 
-      const latlng = e.latlng;
-      this.emit('hideTooltip');
 
-      // unhighlight all svgs
-      // d3.selectAll('path.geohash', this.chartEl).classed('geohash-hover', false);
 
       if (!this._geojsonFeatureCollection.features.length || this._disableTooltips) {
+        this.emit('hideTooltip');
         return;
       }
 
-      const feature = this._nearestFeature(latlng);
-      if (this._tooltipProximity(latlng, feature)) {
+      const feature = this._nearestFeature(e.latlng);
+      if (this._tooltipProximity(e.latlng, feature)) {
         const content = this._tooltipFormatter(feature);
         if (!content) {
           return;
         }
         this.emit('showTooltip', {
           content: content,
-          position: latlng
+          position: e.latlng
         });
+      } else { this.emit('hideTooltip');
       }
     };
 
