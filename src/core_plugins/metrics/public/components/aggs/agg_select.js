@@ -107,9 +107,9 @@ function AggSelect(props) {
     options = [
       { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
       ...metricAggs,
-      { label: 'Parent Pipeline Aggregations', value: null, heading: true, disabled: true },
+      { label: 'Parent Pipeline Aggregations (requires child aggregation)', value: null, heading: true, disabled: true },
       ...pipelineAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
-      { label: 'Sibling Pipeline Aggregations', value: null, heading: true, disabled: true },
+      { label: 'Sibling Pipeline Aggregations (requires child aggregation)', value: null, heading: true, disabled: true },
       ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
     ];
   }
