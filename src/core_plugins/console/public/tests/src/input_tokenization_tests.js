@@ -4,7 +4,7 @@ import { initializeInput } from '../../src/input';
 let input;
 
 var token_iterator = ace.require("ace/token_iterator");
-var { module, asyncTest, deepEqual, start } = QUnit;
+var { module, asyncTest, deepEqual, start } = window.QUnit;
 
 
 module("Input Tokenization", {
