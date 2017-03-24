@@ -1,6 +1,5 @@
 import KibanaMapLayer from './kibana_map_layer';
 import _ from 'lodash';
-import { EventEmitter } from 'events';
 import Heatmap from './heatmap';
 import ScaledCircles from './scaled_circles';
 import ShadedCircles from './shaded_circles';
@@ -37,12 +36,12 @@ export default class GeohashLayer extends KibanaMapLayer {
         break;
       case 'Heatmap':
         this._geohashMarkers = new Heatmap(this._geohashGeoJson, {
-          radius: +this._geohashOptions.heatmap.heatRadius,
-          blur: +this._geohashOptions.heatmap.heatBlur,
-          maxZoom: +this._geohashOptions.heatmap.heatMaxZoom,
-          minOpaxity: +this._geohashOptions.heatmap.heatMinOpacity,
-          heatNormalizeData: this._geohashOptions.heatmap.heatNormalizeData,
-          tooltipFormatter: this._geohashOptions.tooltipFormatter
+          radius: parseFloat(this._geohashOptions.heatmap.heatRadius),
+          blur: parseFloat(this._geohashOptions.heatmap.heatBlur),
+          maxZoom: parseFloat(this._geohashOptions.heatmap.heatMaxZoom),
+          minOpaxity: parseFloat(this._geohashOptions.heatmap.heatMinOpacity),
+          heatNormalizeData: parseFloat(this._geohashOptions.heatmap.heatNormalizeData),
+          tooltipFormatter: parseFloat(this._geohashOptions.tooltipFormatter)
         }, this._zoom, this._kibanaMap);
         break;
       default:
