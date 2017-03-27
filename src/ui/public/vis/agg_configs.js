@@ -153,7 +153,6 @@ export default function AggConfigsFactory(Private) {
       const aggs = agg.getRequestAggs();
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
-
     //move metrics to the end
     return _.sortBy(aggregations, function (agg) {
       return agg.schema.group === 'metrics' ? 1 : 0;

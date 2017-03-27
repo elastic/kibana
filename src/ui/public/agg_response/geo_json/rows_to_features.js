@@ -55,8 +55,7 @@ function convertRowsToFeatures(table, geoI, metricI, centroidI) {
         value: unwrap(row[metricI]),
         aggConfigResult: getAcr(row[metricI]),
         center: centerLatLng,
-        rectangle: rectangle,
-        centroid: centroid
+        rectangle: rectangle
       }
     });
   }, []);
