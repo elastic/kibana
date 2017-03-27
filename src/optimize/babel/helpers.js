@@ -19,6 +19,7 @@ exports.nodePresets = [
     }
   ],
   require.resolve('babel-preset-stage-1'),
+  require.resolve('babel-preset-react'),
 ];
 
 exports.webpackPresets = [

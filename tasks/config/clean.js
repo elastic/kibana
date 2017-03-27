@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function () {
   return {
     build: 'build',
     target: 'target',

@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import {
   bdd,
   remote,
-  scenarioManager,
   esClient
 } from '../../../support';
 

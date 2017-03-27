@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

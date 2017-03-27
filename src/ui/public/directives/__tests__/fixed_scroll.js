@@ -4,7 +4,6 @@ import ngMock from 'ng_mock';
 import 'ui/fixed_scroll';
 import $ from 'jquery';
 import sinon from 'auto-release-sinon';
-import Promise from 'bluebird';
 
 describe('FixedScroll directive', function () {
 

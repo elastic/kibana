@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { fromNode } from 'bluebird';
-import npm from 'npm';
 import npmLicense from 'license-checker';
 
 export default function licenses(grunt) {
@@ -8,7 +7,6 @@ export default function licenses(grunt) {
     const config = this.options();
     const done = this.async();
 
-    const result = [];
     const options = {
       start: process.cwd(),
       production: true,
@@ -16,7 +14,7 @@ export default function licenses(grunt) {
     };
 
     const packages = await fromNode(cb => {
-      npmLicense.init(options, (result, error) => {
+      npmLicense.init(options, result => {
         cb(undefined, result);
       });
     });
@@ -58,7 +56,6 @@ export default function licenses(grunt) {
     });
 
     if (Object.keys(invalidPackages).length) {
-      const util = require('util');
       const execSync = require('child_process').execSync;
       const names = Object.keys(invalidPackages);
 

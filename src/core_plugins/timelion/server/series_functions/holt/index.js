@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const Chainable = require('../../lib/classes/chainable');
-const ses = require('./lib/ses');
-const des = require('./lib/des');
-const tes = require('./lib/tes');
-const toMilliseconds = require('../../lib/to_milliseconds');
+import _ from 'lodash';
+import Chainable from '../../lib/classes/chainable';
+import ses from './lib/ses';
+import des from './lib/des';
+import tes from './lib/tes';
+import toMilliseconds from '../../lib/to_milliseconds';
 
 module.exports = new Chainable('holt', {
   args: [

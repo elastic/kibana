@@ -9,7 +9,6 @@ import IndicesEditSectionsProvider from 'plugins/kibana/management/sections/indi
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
-import IngestProvider from 'ui/ingest';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId', {
@@ -42,11 +41,9 @@ uiRoutes
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
-
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
-  const ingest = Private(IngestProvider);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -55,7 +52,27 @@ uiModules.get('apps/management')
 
   $scope.$watch('indexPattern.fields', function () {
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+    $scope.refreshFilters();
   });
+
+  $scope.refreshFilters = function () {
+    const indexedFieldTypes = [];
+    const scriptedFieldLanguages = [];
+    $scope.indexPattern.fields.forEach(field => {
+      if (field.scripted) {
+        scriptedFieldLanguages.push(field.lang);
+      } else {
+        indexedFieldTypes.push(field.type);
+      }
+    });
+
+    $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
+    $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
+  };
+
+  $scope.changeFilter = function (filter, val) {
+    $scope[filter] = val || ''; // null causes filter to check for null explicitly
+  };
 
   $scope.changeTab = function (obj) {
     $state.tab = obj.index;
@@ -67,7 +84,8 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.conflictFields = _.filter($scope.indexPattern.fields, { type: 'conflict' });
+    $scope.conflictFields = $scope.indexPattern.fields
+      .filter(field => field.type === 'conflict');
   });
 
   $scope.refreshFields = function () {

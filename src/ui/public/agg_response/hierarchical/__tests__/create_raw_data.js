@@ -6,10 +6,8 @@ import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_lis
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
-import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-let AggConfigs;
 let Vis;
 let indexPattern;
 
@@ -22,7 +20,6 @@ describe('buildHierarchicalData()', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
-      AggConfigs = Private(VisAggConfigsProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     }));
 
@@ -37,7 +34,7 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
         ]
       });
-      const buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
+      arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);

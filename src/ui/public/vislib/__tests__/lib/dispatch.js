@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import d3 from 'd3';
 import ngMock from 'ng_mock';
@@ -6,7 +5,6 @@ import expect from 'expect.js';
 
 // Data
 import data from 'fixtures/vislib/mock_data/date_histogram/_series';
-import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
 

@@ -3,13 +3,18 @@ import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from '../lib/flot';
 import eventBus from '../lib/events';
-import ResizeAware from 'simianhacker-react-resize-aware';
+import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
 import colors from '../lib/colors';
 
 class FlotChart extends Component {
 
-  shouldComponentUpdate(props, state) {
+  constructor(props) {
+    super(props);
+    this.handleResize = this.handleResize.bind(this);
+  }
+
+  shouldComponentUpdate(props) {
     if (!this.plot) return true;
     if (props.reversed !== this.props.reversed) {
       return true;
@@ -42,7 +47,6 @@ class FlotChart extends Component {
       eventBus.off('thorPlotover', this.handleThorPlotover);
       eventBus.off('thorPlotleave', this.handleThorPlotleave);
     }
-    findDOMNode(this.resize).removeEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
@@ -55,12 +59,12 @@ class FlotChart extends Component {
         return show.some(id => _.startsWith(id, metric.id));
       };
     }
-    return (metric) => true;
+    return () => true;
   }
 
   componentWillReceiveProps(newProps) {
     if (this.plot) {
-      const { series, markings } = newProps;
+      const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
       this.plot.setData(this.calculateData(series, newProps.show));
@@ -82,7 +86,6 @@ class FlotChart extends Component {
   }
 
   calculateData(data, show) {
-    const series = [];
     return _(data)
       .filter(this.filterByShow(show))
       .map((set) => {
@@ -96,7 +99,7 @@ class FlotChart extends Component {
       }).reverse().value();
   }
 
-  handleDraw(plot, canvasContext) {
+  handleDraw(plot) {
     if (this.props.onDraw) this.props.onDraw(plot);
   }
 
@@ -105,7 +108,6 @@ class FlotChart extends Component {
 
     const lineColor = this.props.reversed ? colors.lineColorReversed : colors.lineColor;
     const textColor = this.props.reversed ? colors.textColorReversed : colors.textColor;
-    const valueColor = this.props.reversed ? colors.valueColorReversed : colors.valueColor;
 
     const opts = {
       legend: { show: false },
@@ -148,30 +150,28 @@ class FlotChart extends Component {
     return _.assign(opts, this.props.options);
   }
 
+  handleResize() {
+    const resize = findDOMNode(this.resize);
+    if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
+      if (!this.plot) return;
+      this.plot.resize();
+      this.plot.setupGrid();
+      this.plot.draw();
+      this.handleDraw(this.plot);
+    }
+  }
+
   renderChart() {
     const resize = findDOMNode(this.resize);
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       const { series } = this.props;
-      const parent = $(this.target.parentElement);
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(this.target, data, this.getOptions());
       this.handleDraw(this.plot);
 
-      this.handleResize = (e) => {
-        const resize = findDOMNode(this.resize);
-        if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
-          if (!this.plot) return;
-          this.plot.resize();
-          this.plot.setupGrid();
-          this.plot.draw();
-          this.handleDraw(this.plot);
-        }
-      };
-
       _.defer(() => this.handleResize());
-      findDOMNode(this.resize).addEventListener('resize', this.handleResize);
 
 
       this.handleMouseOver = (...args) => {
@@ -196,7 +196,7 @@ class FlotChart extends Component {
         };
 
         this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
-        this.handlePlotleave = (e) => eventBus.trigger('thorPlotleave');
+        this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = (e) =>  {
           this.plot.clearCrosshair();
           if (this.props.plothover) this.props.plothover(e);
@@ -212,7 +212,7 @@ class FlotChart extends Component {
         $(this.target).bind('plothover', this.props.plothover);
       }
 
-      $(this.target).on('mouseleave', (e) => {
+      $(this.target).on('mouseleave', () => {
         eventBus.trigger('thorPlotleave');
       });
 
@@ -235,9 +235,12 @@ class FlotChart extends Component {
       flex: '1 0 auto',
     };
     return (
-      <ResizeAware ref={(el) => this.resize = el} style={style}>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        style={style}>
         <div ref={(el) => this.target = el} style={style}/>
-      </ResizeAware>);
+      </Resize>);
   }
 
 }
@@ -258,4 +261,3 @@ FlotChart.propTypes = {
 };
 
 export default FlotChart;
-

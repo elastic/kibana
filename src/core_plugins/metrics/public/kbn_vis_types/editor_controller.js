@@ -1,7 +1,6 @@
 import modules from 'ui/modules';
 import '../services/executor';
 import 'plugins/timelion/directives/refresh_hack';
-import $ from 'jquery';
 import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
 import _ from 'lodash';
@@ -51,15 +50,9 @@ app.controller('MetricsEditorController', (
     }
   }
 
-  $scope.$watchCollection('model', (newValue, oldValue) => {
+  $scope.$watchCollection('model', newValue => {
     angular.copy(newValue, $scope.vis._editableVis.params);
-    // When the content of the model changes we need to stage the changes to
-    // the Editable visualization. Normally this is done through clicking the
-    // play which triggers `stageEditableVis` in kibana/public/visualize/editor/editor.js
-    // but because we are auto running everything that doesn't work with our worflow
-    // plus it's covered up by the Thor editor UI.
-    const visAppScope = angular.element($('visualize-app')).scope();
-    visAppScope.stageEditableVis();
+    $scope.stageEditableVis();
     debouncedFetch();
 
     const patternsToFetch = [];

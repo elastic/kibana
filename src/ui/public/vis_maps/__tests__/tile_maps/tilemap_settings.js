@@ -4,7 +4,6 @@ import url from 'url';
 
 describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
   let tilemapSettings;
-  let tilemapsConfig;
   let loadSettings;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
@@ -26,7 +25,6 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
 
   beforeEach(ngMock.inject(function ($injector, $rootScope) {
     tilemapSettings = $injector.get('tilemapSettings');
-    tilemapsConfig = $injector.get('tilemapsConfig');
 
     loadSettings = () => {
       tilemapSettings.loadSettings();
@@ -60,5 +58,4 @@ describe('tilemaptest - TileMapSettingsTests-deprecated', function () {
     });
 
   });
-
 });

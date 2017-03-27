@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import $ from 'jquery';
 import uiModules from 'ui/modules';
 import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
 
@@ -13,7 +11,8 @@ uiModules
       vis: '=',
       savedVis: '=',
       uiState: '=',
-      editor: '='
+      editor: '=',
+      stageEditableVis: '='
     },
     link: function ($scope, $el) {
       const $optionContainer = $el.find('.visualization-options');

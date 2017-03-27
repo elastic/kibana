@@ -3,9 +3,8 @@ import expect from 'expect.js';
 
 import {
   bdd,
-  scenarioManager,
+  esArchiver,
   esClient,
-  elasticDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -20,10 +19,10 @@ bdd.describe('discover app', function describeIndexTests() {
     // delete .kibana index and update configDoc
     await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
     PageObjects.common.debug('load kibana index with default index pattern');
-    await elasticDump.elasticLoad('discover','.kibana');
+    await esArchiver.load('discover');
 
     // and load a set of makelogs data
-    await scenarioManager.loadIfEmpty('logstashFunctional');
+    await esArchiver.loadIfNeeded('logstash_functional');
     PageObjects.common.debug('discover');
     await PageObjects.common.navigateToApp('discover');
     PageObjects.common.debug('setAbsoluteRange');
@@ -32,7 +31,6 @@ bdd.describe('discover app', function describeIndexTests() {
 
   bdd.describe('query', function () {
     const queryName1 = 'Query # 1';
-    const queryDescription1 = 'Query # 1 Description';
 
     bdd.it('should show correct time range string by timepicker', async function () {
       const actualTimeString = await PageObjects.discover.getTimespanText();
@@ -192,7 +190,6 @@ bdd.describe('discover app', function describeIndexTests() {
         }
       });
     }
-
   });
 
   bdd.describe('query #2, which has an empty time range', function () {

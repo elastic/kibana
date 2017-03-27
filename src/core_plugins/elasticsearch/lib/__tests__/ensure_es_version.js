@@ -12,8 +12,6 @@ describe('plugins/elasticsearch', () => {
     const KIBANA_VERSION = '5.1.0';
 
     let server;
-    let plugin;
-    let callWithInternalUser;
 
     beforeEach(function () {
       server = {
@@ -53,14 +51,12 @@ describe('plugins/elasticsearch', () => {
 
       const cluster = server.plugins.elasticsearch.getCluster('admin');
       cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
-      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
       const cluster = server.plugins.elasticsearch.getCluster('admin');
       cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
-      callWithInternalUser = cluster.callWithInternalUser;
     }
 
     it('returns true with single a node that matches', async () => {

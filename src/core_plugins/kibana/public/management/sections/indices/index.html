@@ -6,9 +6,10 @@
           ng-if="editingId"
           href="#/management/kibana/index"
           class="btn btn-primary btn-xs"
-          aria-label="Add New">
-          <span class="sr-only">Add New</span>
-          <i aria-hidden="true" class="fa fa-plus"></i> Add New
+          aria-label="{{ 'KIBANA-ADD_NEW' | translate }}">
+          <span class="sr-only" translate="KIBANA-ADD_NEW"></span>
+          <i aria-hidden="true" class="fa fa-plus"></i>
+          <span class="sr-only" translate="KIBANA-ADD_NEW"></span>
         </a>
       </h5>
     </div>
@@ -17,7 +18,8 @@
         ng-if="!defaultIndex"
         class="sidebar-item">
         <div class="sidebar-item-title full-title">
-            <span class="label label-warning">Warning</span> No default index pattern. You must select or create one to continue.
+            <span class="label label-warning" translate="KIBANA-WARNING"></span>
+            <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
         </div>
       </li>
       <li

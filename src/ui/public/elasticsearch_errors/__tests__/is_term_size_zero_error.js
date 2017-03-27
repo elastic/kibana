@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import isTermSizeZeroError from '../is_term_size_zero_error';
 

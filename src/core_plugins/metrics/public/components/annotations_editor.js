@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
-import IndexPattern from './index_pattern';
 import collectionActions from './lib/collection_actions';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
@@ -34,8 +33,7 @@ class AnnotationsEditor extends Component {
     };
   }
 
-  renderRow(row, i, items) {
-    const { fields } = this.props;
+  renderRow(row) {
     const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
     const model = { ...defaults, ...row };
     const handleChange = (part) => {

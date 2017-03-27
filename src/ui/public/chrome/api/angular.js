@@ -64,7 +64,7 @@ export default function (chrome, internals) {
 
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
-      const check = (event) => {
+      const check = () => {
         if ($location.path() === '/error/url-overflow') return;
 
         try {

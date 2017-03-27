@@ -1,5 +1,4 @@
-import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
+import React, { PropTypes } from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from '../../series_config';
@@ -76,9 +75,9 @@ function GaugeSeries(props) {
       <div className="vis_editor__series-row">
         <div className="kbnTabs sm">
           <div className={metricsClassName}
-            onClick={e => props.switchTab('metrics')}>Metrics</div>
+            onClick={() => props.switchTab('metrics')}>Metrics</div>
           <div className={optionsClassname}
-            onClick={e => props.switchTab('options')}>Options</div>
+            onClick={() => props.switchTab('options')}>Options</div>
         </div>
         {seriesBody}
       </div>
