@@ -19,7 +19,9 @@ export default class SettingsPage {
   }
 
   async clickLinkText(text) {
-    await this.remote.findDisplayedByLinkText(text).click();
+    await PageObjects.common.try(async () => {
+      await this.remote.findDisplayedByLinkText(text).click();
+    });
   }
 
   async clickKibanaSettings() {
