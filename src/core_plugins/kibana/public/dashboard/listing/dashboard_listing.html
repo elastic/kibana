@@ -40,7 +40,7 @@
           class="kuiButton kuiButton--danger"
           ng-click="listingController.deleteSelectedItems()"
           aria-label="Delete selected objects"
-          ng-if="listingController.getSelectedItemsCount() > 0"
+          ng-if="listingController.getSelectedItemsCount() > 0 && !listingController.hideWriteControls"
           tooltip="Delete selected dashboards"
           tooltip-append-to-body="true"
         >
@@ -53,7 +53,7 @@
           href="{{listingController.getCreateDashboardHref()}}"
           aria-label="Create new dashboard"
           data-test-subj="newDashboardLink"
-          ng-if="listingController.getSelectedItemsCount() === 0"
+          ng-if="listingController.getSelectedItemsCount() === 0 && !listingController.hideWriteControls"
           tooltip="Create new dashboard"
           tooltip-append-to-body="true"
         >

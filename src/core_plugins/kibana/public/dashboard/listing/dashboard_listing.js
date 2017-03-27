@@ -4,6 +4,8 @@ import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { SortableProperties } from 'ui_framework/services';
 
+import { getHideWriteControls } from '../dashboard_config';
+
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
@@ -61,6 +63,8 @@ export function DashboardListingController($injector, $scope) {
   this.filter = '';
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
+
+  this.hideWriteControls = getHideWriteControls();
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();
