@@ -1,5 +1,9 @@
 
-import { bdd, defaultTimeout, elasticDump, scenarioManager } from '../../../support';
+import {
+  bdd,
+  defaultTimeout,
+  esArchiver,
+} from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -8,13 +12,13 @@ bdd.describe('context app', function () {
 
   bdd.before(async function () {
     await PageObjects.remote.setWindowSize(1200,800);
-    await scenarioManager.loadIfEmpty('logstashFunctional');
-    await elasticDump.elasticLoad('visualize','.kibana');
+    await esArchiver.loadIfNeeded('logstash_functional');
+    await esArchiver.load('visualize');
     await PageObjects.common.navigateToApp('discover');
   });
 
   bdd.after(function unloadMakelogs() {
-    return scenarioManager.unload('logstashFunctional');
+    return esArchiver.unload('logstash_functional');
   });
 
   require('./_discover_navigation');

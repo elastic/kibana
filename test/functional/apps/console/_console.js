@@ -18,7 +18,7 @@ GET _search
 bdd.describe('console app', function describeIndexTests() {
   bdd.before(function () {
     PageObjects.common.debug('navigateTo console');
-    return PageObjects.common.navigateToApp('console', false);
+    return PageObjects.common.navigateToApp('console');
   });
 
   bdd.it('should show the default request', function () {
