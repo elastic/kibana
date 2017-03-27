@@ -8,7 +8,7 @@ describe('Geohash Agg', function () {
 
     const paramWriter = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
       return function BucketMock(geohashProvider) {
-        return geohashProvider.params[4];
+        return geohashProvider.params[5];
       };
     }, {
       get: function () {
