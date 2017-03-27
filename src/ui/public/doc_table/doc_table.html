@@ -3,6 +3,10 @@
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
+    <div ng-if="hits.length === sampleSize" class="doc-table-warning">
+      These are the first {{sampleSize}} documents matching
+      your search, refine your search to see others.
+    </div>
     <table class="kbn-table table" ng-if="indexPattern">
       <thead
         kbn-table-header
@@ -23,12 +27,6 @@
         ></tr>
       </tbody>
     </table>
-    <div ng-if="hits.length === sampleSize && page.last" class="discover-table-footer">
-      <center>
-        These are the first {{sampleSize}} documents matching
-        your search, refine your search to see others.
-      </center>
-    </div>
   </paginate>
 
   <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
