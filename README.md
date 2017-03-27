@@ -1,6 +1,6 @@
 # Kibana 6.0.0-alpha1
 
-Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's
+Kibana  is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's
 an open source ([Apache Licensed](LICENSE.md)),
 browser-based analytics and search dashboard for Elasticsearch.
 
