@@ -1,11 +1,12 @@
 define(function (require) {
   const expect = require('intern/dojo/node!expect.js');
+  const { client, emptyKibana } = require('intern/dojo/node!../lib/es');
 
-  return function (bdd, scenarioManager, request) {
+  return function (bdd, request) {
     bdd.describe('field_capabilities API', function postIngest() {
 
       bdd.before(function () {
-        return scenarioManager.client.create({
+        return client.create({
           index: 'foo-1',
           type: 'bar',
           id: '1',
@@ -14,7 +15,7 @@ define(function (require) {
           }
         })
         .then(function () {
-          return scenarioManager.client.create({
+          return client.create({
             index: 'foo-2',
             type: 'bar',
             id: '2',
@@ -24,16 +25,15 @@ define(function (require) {
           });
         })
         .then(function () {
-          return scenarioManager.client.indices.refresh({
+          return client.indices.refresh({
             index: ['foo-1', 'foo-2']
           });
         });
       });
 
       bdd.after(function () {
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          scenarioManager.client.indices.delete({
+        return emptyKibana.setup().then(function () {
+          return client.indices.delete({
             index: 'foo*'
           });
         });

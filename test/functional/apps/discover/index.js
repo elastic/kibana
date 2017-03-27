@@ -1,5 +1,9 @@
 
-import { bdd, scenarioManager, defaultTimeout } from '../../../support';
+import {
+  bdd,
+  esArchiver,
+  defaultTimeout,
+} from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -11,7 +15,7 @@ bdd.describe('discover app', function () {
   });
 
   bdd.after(function unloadMakelogs() {
-    return scenarioManager.unload('logstashFunctional');
+    return esArchiver.unload('logstash_functional');
   });
 
   require('./_discover');
