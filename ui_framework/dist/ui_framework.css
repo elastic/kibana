@@ -1258,10 +1258,14 @@ body {
   color: #5a5a5a;
   border-bottom: 2px solid transparent;
   text-decoration: none;
-  cursor: pointer; }
-  .kuiLocalTab:hover, .kuiLocalTab:active {
+  cursor: pointer;
+  /**
+     * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
+     *    a regular cursor instead of setting pointer-events: none.
+     */ }
+  .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
     color: #000000; }
-    .theme-dark .kuiLocalTab:hover, .theme-dark .kuiLocalTab:active {
+    .theme-dark .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .theme-dark .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
       color: #ffffff; }
   .kuiLocalTab.kuiLocalTab-isSelected {
     color: #000000;
@@ -1270,6 +1274,10 @@ body {
     .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
       color: #ffffff;
       border-bottom-color: #ffffff; }
+  .kuiLocalTab.kuiLocalTab-isDisabled {
+    opacity: 0.5;
+    cursor: default;
+    /* 1 */ }
   .kuiLocalTab + .kuiLocalTab {
     margin-left: 15px; }
   .theme-dark .kuiLocalTab {

@@ -204,6 +204,34 @@ export default class SettingsPage {
     });
   }
 
+  async getFieldTypes() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern indexedFieldType');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
+  }
+
+  async getScriptedFieldLangs() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern scriptedFieldLang');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
+  }
+
+
+  async setFieldTypeFilter(type) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]')
+    .click();
+  }
+
+
+  async setScriptedFieldLanguageFilter(language) {
+    await this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' + language + '"]')
+    .click();
+  }
+
   async goToPage(pageNum) {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +

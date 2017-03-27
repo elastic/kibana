@@ -52,7 +52,27 @@ uiModules.get('apps/management')
 
   $scope.$watch('indexPattern.fields', function () {
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+    $scope.refreshFilters();
   });
+
+  $scope.refreshFilters = function () {
+    const indexedFieldTypes = [];
+    const scriptedFieldLanguages = [];
+    $scope.indexPattern.fields.forEach(field => {
+      if (field.scripted) {
+        scriptedFieldLanguages.push(field.lang);
+      } else {
+        indexedFieldTypes.push(field.type);
+      }
+    });
+
+    $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
+    $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
+  };
+
+  $scope.changeFilter = function (filter, val) {
+    $scope[filter] = val || ''; // null causes filter to check for null explicitly
+  };
 
   $scope.changeTab = function (obj) {
     $state.tab = obj.index;

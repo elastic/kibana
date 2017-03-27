@@ -1,7 +1,11 @@
 import React, { PropTypes } from 'react';
+import ColorPicker from '../../color_picker';
+import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
+import Tooltip from '../../tooltip';
+import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
 
 function TopNSeries(props) {
@@ -9,11 +13,20 @@ function TopNSeries(props) {
     panel,
     model,
     fields,
+    onAdd,
+    onChange,
+    onDelete,
+    disableDelete,
+    disableAdd,
     selectedTab,
     visible
   } = props;
 
+  const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
+
+  let caretClassName = 'fa fa-caret-down';
+  if (!visible) caretClassName = 'fa fa-caret-right';
 
   let body = null;
   if (visible) {
@@ -69,12 +82,51 @@ function TopNSeries(props) {
     );
   }
 
+  const colorPicker = (
+    <ColorPicker
+      disableTrash={true}
+      onChange={props.onChange}
+      name="color"
+      value={model.color}/>
+  );
+
+  let dragHandle;
+  if (!props.disableDelete) {
+    dragHandle = (
+      <Tooltip text="Sort">
+        <div className="vis_editor__sort thor__button-outlined-default sm">
+          <i className="fa fa-sort"></i>
+        </div>
+      </Tooltip>
+    );
+  }
+
   return (
     <div
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
       onTouchStart={props.onTouchStart}>
+      <div className="vis_editor__container">
+        <div className="vis_editor__series-details">
+          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          { colorPicker }
+          <div className="vis_editor__row vis_editor__row_item">
+            <input
+              className="vis_editor__input-grows"
+              onChange={handleChange('label')}
+              placeholder='Label'
+              value={model.label}/>
+          </div>
+          { dragHandle }
+          <AddDeleteButtons
+            onDelete={onDelete}
+            onClone={props.onClone}
+            onAdd={onAdd}
+            disableDelete={disableDelete}
+            disableAdd={disableAdd}/>
+        </div>
+      </div>
       { body }
     </div>
   );
