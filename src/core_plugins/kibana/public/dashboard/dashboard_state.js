@@ -8,6 +8,7 @@ import moment from 'moment';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { getHideWriteControls } from './dashboard_config';
 
 function getStateDefaults(dashboard) {
   return {
@@ -19,7 +20,7 @@ function getStateDefaults(dashboard) {
     uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
     query: FilterUtils.getQueryFilterForDashboard(dashboard),
     filters: FilterUtils.getFilterBarsForDashboard(dashboard),
-    viewMode: dashboard.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
+    viewMode: dashboard.id || getHideWriteControls() ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
   };
 }
 
@@ -223,7 +224,7 @@ export class DashboardState {
    * @returns {DashboardViewMode}
    */
   getViewMode() {
-    return this.appState.viewMode;
+    return getHideWriteControls() ? DashboardViewMode.VIEW : this.appState.viewMode;
   }
 
   /**
