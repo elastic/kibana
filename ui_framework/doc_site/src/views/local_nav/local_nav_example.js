@@ -135,7 +135,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        By using <GuideCode>contenteditable</GuideCode>, you can support multi-line queries.
+        By using <GuideCode>contenteditable</GuideCode>, you can support multi-line queries. You&rsquo;ll
+        have to supply your own logic for switching between single-line and multi-line input values.
       </GuideText>
 
       <GuideDemo
