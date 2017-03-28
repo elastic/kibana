@@ -1915,6 +1915,32 @@ body {
     /* 1 */ }
 
 /**
+ * 1. When it expands, the search input should lie on top of the content.
+ * 2. Expand as the user enters text.
+ * 3. Prevent the search input from running off the bottom of the screen and becoming inaccessible.
+ */
+.kuiLocalSearchInput--expandable {
+  height: 30px;
+  word-break: break-all;
+  line-height: 1.5;
+  overflow: hidden; }
+  .kuiLocalSearchInput--expandable:focus {
+    z-index: 1;
+    /* 1 */
+    height: auto;
+    /* 2 */
+    max-height: calc(100vh - 200px);
+    /* 3 */
+    overflow: auto;
+    /* 3 */
+    box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25);
+    /* 1 */ }
+  .kuiLocalSearchInput--expandable p {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit; }
+
+/**
  * 1. Override inherited styles.
  */
 .kuiLocalSearchButton {
