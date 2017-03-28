@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 export function createWreckResponseStub(response) {
   return (...args) => {
     const resp = new Readable({
-      read(n) {
+      read() {
         if (response) {
           this.push(response);
         }

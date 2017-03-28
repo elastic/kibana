@@ -1,7 +1,3 @@
-import { createServer, ClientRequest, Agent } from 'http';
-import { Readable } from 'stream';
-import { stringify as formatQueryString } from 'querystring';
-
 import sinon from 'sinon';
 import Wreck from 'wreck';
 import expect from 'expect.js';
@@ -71,14 +67,14 @@ describe('Console Proxy Route', () => {
       });
       context('starts with a slash', () => {
         it('combines well with the base url', async () => {
-          const { statusCode } = await request('GET', '/index/type/id');
+          await request('GET', '/index/type/id');
           sinon.assert.calledOnce(Wreck.request);
           expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id');
         });
       });
       context(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
-          const { statusCode } = await request('GET', 'index/type/id');
+          await request('GET', 'index/type/id');
           sinon.assert.calledOnce(Wreck.request);
           expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id');
         });

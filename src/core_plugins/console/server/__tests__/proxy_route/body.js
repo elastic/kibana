@@ -1,7 +1,3 @@
-import { createServer, ClientRequest, Agent } from 'http';
-import { Readable } from 'stream';
-import { stringify as formatQueryString } from 'querystring';
-
 import sinon from 'sinon';
 import Wreck from 'wreck';
 import expect from 'expect.js';

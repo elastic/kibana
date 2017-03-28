@@ -1,6 +1,4 @@
-import { createServer, ClientRequest, Agent, request } from 'http';
-import { Readable } from 'stream';
-import { stringify as formatQueryString } from 'querystring';
+import { request } from 'http';
 
 import sinon from 'sinon';
 import Wreck from 'wreck';
@@ -21,7 +19,7 @@ describe('Console Proxy Route', () => {
 
     sandbox.stub(Wreck, 'request', createWreckResponseStub());
 
-    setup = (remoteAddress) => {
+    setup = () => {
       const server = new Server();
 
       server.connection({ port: 0 });

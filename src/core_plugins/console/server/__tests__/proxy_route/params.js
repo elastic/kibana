@@ -1,5 +1,4 @@
-import { createServer, ClientRequest, Agent } from 'http';
-import { Readable } from 'stream';
+import { Agent } from 'http';
 
 import sinon from 'sinon';
 import Wreck from 'wreck';
