@@ -6,12 +6,14 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { format as formatUrl } from 'url';
 
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
-import { createLog } from './lib';
+import { createToolingLog } from '../utils';
+import { readConfigFile } from '../functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');
 
@@ -20,6 +22,7 @@ cmd
   .option('--es-url [url]', 'url for elasticsearch')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
+  .option('--config [path]', 'path to a functional test config file to use for default values')
   .on('--help', () => {
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
@@ -49,8 +52,15 @@ if (missingCommand) {
 
 async function execute(operation, ...args) {
   try {
-    const log = createLog(cmd.verbose ? 'debug' : 'info');
+    const log = createToolingLog(cmd.verbose ? 'debug' : 'info');
     log.pipe(process.stdout);
+
+    if (cmd.config) {
+      // load default values from the specified config file
+      const config = await readConfigFile(log, resolve(cmd.config));
+      if (!cmd.esUrl) cmd.esUrl = formatUrl(config.get('servers.elasticsearch'));
+      if (!cmd.dir) cmd.dir = config.get('esArchiver.directory');
+    }
 
     // log and count all validation errors
     let errorCount = 0;
@@ -61,10 +71,10 @@ async function execute(operation, ...args) {
 
     if (!operation) error('Missing or invalid command');
     if (!cmd.esUrl) {
-      error('You must specify either --es-url flag');
+      error('You must specify either --es-url or --config flags');
     }
     if (!cmd.dir) {
-      error('You must specify either --dir flag');
+      error('You must specify either --dir or --config flags');
     }
 
     // if there was a validation error display the help
@@ -84,7 +94,7 @@ async function execute(operation, ...args) {
       const esArchiver = new EsArchiver({
         log,
         client,
-        dataDir: resolve(cmd.dir)
+        dataDir: resolve(cmd.dir),
       });
       await esArchiver[operation](...args);
     } finally {

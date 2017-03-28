@@ -1,43 +1,40 @@
+export default function ({ getService, loadTestFile }) {
+  const config = getService('config');
+  const remote = getService('remote');
+  const log = getService('log');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-import {
-  bdd,
-  remote,
-  defaultTimeout,
-  esArchiver,
-  esClient,
- } from '../../../support';
+  describe('visualize app', function () {
+    this.timeout(config.get('timeouts.test'));
 
-import PageObjects from '../../../support/page_objects';
+    before(function () {
+      remote.setWindowSize(1280,800);
 
-bdd.describe('visualize app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(function () {
-    remote.setWindowSize(1280,800);
-
-    PageObjects.common.debug('Starting visualize before method');
-    const logstash = esArchiver.loadIfNeeded('logstash_functional');
-    // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
-    .then(function loadkibanaIndexPattern() {
-      PageObjects.common.debug('load kibana index with default index pattern');
-      return esArchiver.load('visualize');
-    })
-    // wait for the logstash data load to finish if it hasn't already
-    .then(function () {
-      return logstash;
+      log.debug('Starting visualize before method');
+      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      // delete .kibana index and update configDoc
+      return kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
+      .then(function loadkibanaIndexPattern() {
+        log.debug('load kibana index with default index pattern');
+        return esArchiver.load('visualize');
+      })
+      // wait for the logstash data load to finish if it hasn't already
+      .then(function () {
+        return logstash;
+      });
     });
-  });
 
-  require('./_chart_types');
-  require('./_area_chart');
-  require('./_line_chart');
-  require('./_data_table');
-  require('./_metric_chart');
-  require('./_pie_chart');
-  require('./_tile_map');
-  require('./_vertical_bar_chart');
-  require('./_heatmap_chart');
-  require('./_point_series_options');
-  require('./_shared_item');
-});
+    loadTestFile(require.resolve('./_chart_types'));
+    loadTestFile(require.resolve('./_area_chart'));
+    loadTestFile(require.resolve('./_line_chart'));
+    loadTestFile(require.resolve('./_data_table'));
+    loadTestFile(require.resolve('./_metric_chart'));
+    loadTestFile(require.resolve('./_pie_chart'));
+    loadTestFile(require.resolve('./_tile_map'));
+    loadTestFile(require.resolve('./_vertical_bar_chart'));
+    loadTestFile(require.resolve('./_heatmap_chart'));
+    loadTestFile(require.resolve('./_point_series_options'));
+    loadTestFile(require.resolve('./_shared_item'));
+  });
+}

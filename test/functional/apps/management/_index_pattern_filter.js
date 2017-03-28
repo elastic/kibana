@@ -1,57 +1,55 @@
-
 import expect from 'expect.js';
 
-import {
-  bdd,
-  esClient
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['settings']);
 
-import PageObjects from '../../../support/page_objects';
-
-bdd.describe('index pattern filter', function describeIndexTests() {
-  bdd.before(function () {
-    // delete .kibana index and then wait for Kibana to re-create it
-    return esClient.deleteAndUpdateConfigDoc()
-    .then(function () {
-      return PageObjects.settings.navigateTo();
-    })
-    .then(function () {
-      return PageObjects.settings.clickKibanaIndicies();
-    });
-  });
-
-  bdd.beforeEach(function () {
-    return PageObjects.settings.createIndexPattern();
-  });
-
-  bdd.afterEach(function () {
-    return PageObjects.settings.removeIndexPattern();
-  });
-
-  bdd.it('should filter indexed fields', async function () {
-    await PageObjects.settings.navigateTo();
-    await PageObjects.settings.clickKibanaIndicies();
-    await PageObjects.settings.getFieldTypes();
-
-
-    await PageObjects.settings.setFieldTypeFilter('string');
-
-    await PageObjects.common.try(async function() {
-      const fieldTypes = await PageObjects.settings.getFieldTypes();
-      expect(fieldTypes.length).to.be.above(0);
-      for (const fieldType of fieldTypes) {
-        expect(fieldType).to.be('string');
-      }
+  describe('index pattern filter', function describeIndexTests() {
+    before(function () {
+      // delete .kibana index and then wait for Kibana to re-create it
+      return kibanaServer.uiSettings.replace({})
+      .then(function () {
+        return PageObjects.settings.navigateTo();
+      })
+      .then(function () {
+        return PageObjects.settings.clickKibanaIndicies();
+      });
     });
 
-    await PageObjects.settings.setFieldTypeFilter('number');
+    beforeEach(function () {
+      return PageObjects.settings.createIndexPattern();
+    });
 
-    await PageObjects.common.try(async function() {
-      const fieldTypes = await PageObjects.settings.getFieldTypes();
-      expect(fieldTypes.length).to.be.above(0);
-      for (const fieldType of fieldTypes) {
-        expect(fieldType).to.be('number');
-      }
+    afterEach(function () {
+      return PageObjects.settings.removeIndexPattern();
+    });
+
+    it('should filter indexed fields', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.getFieldTypes();
+
+
+      await PageObjects.settings.setFieldTypeFilter('string');
+
+      await retry.try(async function() {
+        const fieldTypes = await PageObjects.settings.getFieldTypes();
+        expect(fieldTypes.length).to.be.above(0);
+        for (const fieldType of fieldTypes) {
+          expect(fieldType).to.be('string');
+        }
+      });
+
+      await PageObjects.settings.setFieldTypeFilter('number');
+
+      await retry.try(async function() {
+        const fieldTypes = await PageObjects.settings.getFieldTypes();
+        expect(fieldTypes.length).to.be.above(0);
+        for (const fieldType of fieldTypes) {
+          expect(fieldType).to.be('number');
+        }
+      });
     });
   });
-});
+}
