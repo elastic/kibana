@@ -7,7 +7,9 @@ exports[`KuiButton Baseline HTML attributes are rendered 1`] = `
   data-test-subj="test subject string"
   disabled=""
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;
 
@@ -15,7 +17,9 @@ exports[`KuiButton Baseline is rendered 1`] = `
 <button
   class="kuiButton"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;
 
@@ -23,7 +27,9 @@ exports[`KuiButton Props children is rendered 1`] = `
 <button
   class="kuiButton"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span>
       Hello
     </span>
@@ -35,7 +41,9 @@ exports[`KuiButton Props icon is rendered with children 1`] = `
 <button
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     Icon
     <span>
       Hello
@@ -48,7 +56,9 @@ exports[`KuiButton Props icon is rendered without children 1`] = `
 <button
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     Icon
   </span>
 </button>
@@ -58,7 +68,9 @@ exports[`KuiButton Props iconPosition moves the icon to the right 1`] = `
 <button
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span>
       Hello
     </span>
@@ -71,7 +83,9 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 <button
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span
       aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
@@ -84,7 +98,9 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
 <button
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span
       aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
@@ -97,7 +113,9 @@ exports[`KuiButton Props type basic renders the basic class 1`] = `
 <button
   class="kuiButton kuiButton--basic"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;
 
@@ -105,7 +123,9 @@ exports[`KuiButton Props type danger renders the danger class 1`] = `
 <button
   class="kuiButton kuiButton--danger"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;
 
@@ -113,7 +133,9 @@ exports[`KuiButton Props type hollow renders the hollow class 1`] = `
 <button
   class="kuiButton kuiButton--hollow"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;
 
@@ -121,6 +143,8 @@ exports[`KuiButton Props type primary renders the primary class 1`] = `
 <button
   class="kuiButton kuiButton--primary"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </button>
 `;

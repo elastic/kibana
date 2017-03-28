@@ -8,7 +8,9 @@ exports[`KuiLinkButton Baseline HTML attributes are rendered (and disabled rende
   href="#"
   target="_blank"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;
 
@@ -16,7 +18,9 @@ exports[`KuiLinkButton Baseline is rendered 1`] = `
 <a
   class="kuiButton"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;
 
@@ -24,7 +28,9 @@ exports[`KuiLinkButton Props children is rendered 1`] = `
 <a
   class="kuiButton"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span>
       Hello
     </span>
@@ -36,7 +42,9 @@ exports[`KuiLinkButton Props icon is rendered with children 1`] = `
 <a
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     Icon
     <span>
       Hello
@@ -49,7 +57,9 @@ exports[`KuiLinkButton Props icon is rendered without children 1`] = `
 <a
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     Icon
   </span>
 </a>
@@ -59,7 +69,9 @@ exports[`KuiLinkButton Props iconPosition moves the icon to the right 1`] = `
 <a
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span>
       Hello
     </span>
@@ -72,7 +84,9 @@ exports[`KuiLinkButton Props isLoading doesn't render the icon prop 1`] = `
 <a
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span
       aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
@@ -85,7 +99,9 @@ exports[`KuiLinkButton Props isLoading renders a spinner 1`] = `
 <a
   class="kuiButton kuiButton--iconText"
 >
-  <span>
+  <span
+    class="kuiButton__inner"
+  >
     <span
       aria-hidden="true"
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
@@ -98,7 +114,9 @@ exports[`KuiLinkButton Props type basic renders the basic class 1`] = `
 <a
   class="kuiButton kuiButton--basic"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;
 
@@ -106,7 +124,9 @@ exports[`KuiLinkButton Props type danger renders the danger class 1`] = `
 <a
   class="kuiButton kuiButton--danger"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;
 
@@ -114,7 +134,9 @@ exports[`KuiLinkButton Props type hollow renders the hollow class 1`] = `
 <a
   class="kuiButton kuiButton--hollow"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;
 
@@ -122,6 +144,8 @@ exports[`KuiLinkButton Props type primary renders the primary class 1`] = `
 <a
   class="kuiButton kuiButton--primary"
 >
-  <span />
+  <span
+    class="kuiButton__inner"
+  />
 </a>
 `;

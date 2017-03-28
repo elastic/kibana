@@ -75,7 +75,7 @@ const KuiButton = ({
         type,
         hasIcon: icon || isLoading,
       })}
-      { ...rest }
+      {...rest}
     >
       <ContentWithIcon
         icon={icon}
@@ -128,7 +128,7 @@ const KuiLinkButton = ({
       <ContentWithIcon
         icon={icon}
         iconPosition={iconPosition}
-        isLoading={ isLoading }
+        isLoading={isLoading}
       >
         {children}
       </ContentWithIcon>
@@ -157,7 +157,7 @@ const KuiSubmitButton = ({
       type="submit"
       value={children}
       className={getClassName({ className, type })}
-      { ...rest }
+      {...rest}
     />
   );
 };

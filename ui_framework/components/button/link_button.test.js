@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'enzyme';
 
 import {
+  BUTTON_TYPES,
   KuiLinkButton,
 } from './button';
 
@@ -35,47 +36,12 @@ describe('KuiLinkButton', () => {
 
   describe('Props', () => {
     describe('type', () => {
-      describe('basic', () => {
-        test('renders the basic class', () => {
-          const $button = render(
-            <KuiLinkButton type="basic" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('hollow', () => {
-        test('renders the hollow class', () => {
-          const $button = render(
-            <KuiLinkButton type="hollow" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('danger', () => {
-        test('renders the danger class', () => {
-          const $button = render(
-            <KuiLinkButton type="danger" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('primary', () => {
-        test('renders the primary class', () => {
-          const $button = render(
-            <KuiLinkButton type="primary" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
+      BUTTON_TYPES.forEach(type => {
+        describe(type, () => {
+          test(`renders the ${type} class`, () => {
+            const $button = render(<KuiLinkButton type={type} />);
+            expect($button).toMatchSnapshot();
+          });
         });
       });
     });

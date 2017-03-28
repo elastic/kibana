@@ -38,7 +38,7 @@ describe('KuiButton', () => {
       BUTTON_TYPES.forEach(type => {
         describe(type, () => {
           test(`renders the ${type} class`, () => {
-            const $button = render(<KuiButton type={ type } />);
+            const $button = render(<KuiButton type={type} />);
             expect($button).toMatchSnapshot();
           });
         });

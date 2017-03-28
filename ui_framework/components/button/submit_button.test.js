@@ -3,6 +3,7 @@ import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
 
 import {
+  BUTTON_TYPES,
   KuiSubmitButton,
 } from './button';
 
@@ -34,47 +35,12 @@ describe('KuiSubmitButton', () => {
 
   describe('Props', () => {
     describe('type', () => {
-      describe('basic', () => {
-        test('renders the basic class', () => {
-          const $button = render(
-            <KuiSubmitButton type="basic" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('hollow', () => {
-        test('renders the hollow class', () => {
-          const $button = render(
-            <KuiSubmitButton type="hollow" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('danger', () => {
-        test('renders the danger class', () => {
-          const $button = render(
-            <KuiSubmitButton type="danger" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
-        });
-      });
-
-      describe('primary', () => {
-        test('renders the primary class', () => {
-          const $button = render(
-            <KuiSubmitButton type="primary" />
-          );
-
-          expect($button)
-            .toMatchSnapshot();
+      BUTTON_TYPES.forEach(type => {
+        describe(type, () => {
+          test(`renders the ${type} class`, () => {
+            const $button = render(<KuiSubmitButton type={type} />);
+            expect($button).toMatchSnapshot();
+          });
         });
       });
     });
