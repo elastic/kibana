@@ -331,7 +331,6 @@ module.exports = function (editor) {
       case "url.part":
       case "url.param":
       case "url.value":
-        insertingRelativeToToken = 0;
         context.rangeToReplace = new AceRange(
           pos.row, anchorToken.start, pos.row,
           context.updatedForToken.start + context.updatedForToken.value.length
@@ -340,7 +339,6 @@ module.exports = function (editor) {
         break;
       default:
         if (replacingTerm && context.updatedForToken.value == replacingTerm) {
-          insertingRelativeToToken = 0;
           context.rangeToReplace = new AceRange(
             pos.row, anchorToken.start, pos.row,
             context.updatedForToken.start + context.updatedForToken.value.length
