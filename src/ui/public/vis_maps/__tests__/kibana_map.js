@@ -23,7 +23,7 @@ describe('kibana_map tests', function () {
   }
 
 
-  describe('should use the latest state before notifying (when modifying options multiple times)', function () {
+  describe('KibanaMap', function () {
 
     beforeEach(async function () {
       setupDOM();
@@ -38,11 +38,33 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    it('instantiation', function () {
-      //should fit to the world on startup
+    it('should instantiate with world in view', function () {
+      expect(kibanaMap.isReady()).to.equal(true);
       const bounds = kibanaMap.getBounds();
       expect(bounds.bottom_right.lon).to.equal(180);
       expect(bounds.top_left.lon).to.equal(-180);
+      expect(kibanaMap.getCenter().lon).to.equal(0);
+      expect(kibanaMap.getCenter().lat).to.equal(0);
+      expect(kibanaMap.getZoomLevel()).to.equal(1);
+    });
+
+    it('should resize to fit container', function () {
+
+
+      kibanaMap.setZoomLevel(2);
+      expect(kibanaMap.getCenter().lon).to.equal(0);
+      expect(kibanaMap.getCenter().lat).to.equal(0);
+
+      domNode.style.width = '1024px';
+      domNode.style.height = '1024px';
+      kibanaMap.resize();
+
+      expect(kibanaMap.getCenter().lon).to.equal(0);
+      expect(kibanaMap.getCenter().lat).to.equal(0);
+      const bounds = kibanaMap.getBounds();
+      expect(bounds.bottom_right.lon).to.equal(180);
+      expect(bounds.top_left.lon).to.equal(-180);
+
     });
 
   });
