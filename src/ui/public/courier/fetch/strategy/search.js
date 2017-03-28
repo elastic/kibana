@@ -29,7 +29,10 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           if (!indexToListMapping[indexList.id]) {
             indexToListMapping[indexList.id] = indexList.toIndexList(timeBounds.min, timeBounds.max);
           }
-          return indexToListMapping[indexList.id];
+          return indexToListMapping[indexList.id].then(indexList => {
+            // Make sure the index list in the cache can't be subsequently updated.
+            return _.clone(indexList);
+          });
         })
         .then(function (indexList) {
           let body = fetchParams.body || {};
