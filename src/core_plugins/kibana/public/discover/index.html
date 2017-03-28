@@ -96,6 +96,7 @@
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       ng-blur="toggleInterval()"
+                      data-test-subj="discoverIntervalSelect"
                       >
                     </select>
                     <span ng-show="bucketInterval.scaled">
