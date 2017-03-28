@@ -23,6 +23,7 @@ module.factory('SavedDashboard', function (courier, config) {
         title: 'New Dashboard',
         hits: 0,
         description: '',
+        roles: [],
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
           darkTheme: config.get('dashboard:defaultDarkTheme')
@@ -49,6 +50,7 @@ module.factory('SavedDashboard', function (courier, config) {
     title: 'text',
     hits: 'integer',
     description: 'text',
+    roles: 'keyword',
     panelsJSON: 'text',
     optionsJSON: 'text',
     uiStateJSON: 'text',
