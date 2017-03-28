@@ -16,5 +16,10 @@ module.exports = {
       '!src/**/public/**',
       '!**/_*.js'
     ]
+  },
+  api: {
+    src: [
+      'test/unit/**/*.js'
+    ]
   }
 };
