@@ -1,9 +1,7 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
@@ -33,7 +31,6 @@ class PercentileRankAgg extends Component {
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>

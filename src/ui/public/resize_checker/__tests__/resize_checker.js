@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { delay, fromNode } from 'bluebird';
+import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
@@ -121,7 +121,7 @@ describe('Resize Checker', () => {
       const { createChecker, createEl, createListener } = setup();
 
       const checker = createChecker(createEl());
-      const listener = createListener();
+      createListener();
 
       checker.destroy();
       expect(!checker._observer).to.be(true);

@@ -1,4 +1,3 @@
-import angular from 'angular';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 

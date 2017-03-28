@@ -19,7 +19,7 @@ class ColorPicker extends Component {
   }
 
   handleChange(color) {
-    const { rgb, hex } = color;
+    const { rgb } = color;
     const part = {};
     part[this.props.name] = `rgba(${rgb.r},${rgb.g},${rgb.b},${rgb.a})`;
     if (this.props.onChange) this.props.onChange(part);
@@ -87,7 +87,7 @@ class ColorPicker extends Component {
 
 ColorPicker.propTypes = {
   name: PropTypes.string.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disableTrash: PropTypes.bool,
   onChange: PropTypes.func
 };

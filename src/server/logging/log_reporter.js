@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import { Squeeze } from 'good-squeeze';
 import { createWriteStream as writeStr } from 'fs';
 

@@ -9,8 +9,6 @@ import Registry from 'ui/registry/_registry';
 import 'ui/doc_viewer';
 
 describe('docViewer', function () {
-  let $rootScope;
-  let $compile;
   let stubRegistry;
   let $elem;
   let init;
@@ -32,10 +30,7 @@ describe('docViewer', function () {
     });
 
     // Create the scope
-    ngMock.inject(function ($injector) {
-      $rootScope = $injector.get('$rootScope');
-      $compile = $injector.get('$compile');
-    });
+    ngMock.inject(function () {});
   });
 
   beforeEach(function () {

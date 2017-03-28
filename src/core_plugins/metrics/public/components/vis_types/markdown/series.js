@@ -1,12 +1,8 @@
-import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
-import ColorPicker from '../../color_picker';
+import React, { PropTypes } from 'react';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from '../../series_config';
 import Sortable from 'react-anything-sortable';
-import Tooltip from '../../tooltip';
 import Split from '../../split';
-import calculateLabel from '../../../../common/calculate_label';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 
@@ -77,9 +73,9 @@ function MarkdownSeries(props) {
       <div className="vis_editor__series-row">
         <div className="kbnTabs sm">
           <div className={metricsClassName}
-            onClick={e => props.switchTab('metrics')}>Metrics</div>
+            onClick={() => props.switchTab('metrics')}>Metrics</div>
           <div className={optionsClassname}
-            onClick={e => props.switchTab('options')}>Options</div>
+            onClick={() => props.switchTab('options')}>Options</div>
         </div>
         {seriesBody}
       </div>
@@ -108,6 +104,9 @@ function MarkdownSeries(props) {
               value={model.var_name}/>
           </div>
           <AddDeleteButtons
+            addTooltip="Add Series"
+            deleteTooltip="Delete Series"
+            cloneTooltip="Clone Series"
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}

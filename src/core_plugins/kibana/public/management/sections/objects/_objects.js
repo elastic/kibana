@@ -7,8 +7,6 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 
-const MAX_SIZE = Math.pow(2, 31) - 1;
-
 uiRoutes
 .when('/management/kibana/objects', {
   template: objectIndexHTML
@@ -56,8 +54,7 @@ uiModules.get('apps/management')
 
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
-          let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = find($scope.services, { title: $state.tab });
+          if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -180,7 +177,7 @@ uiModules.get('apps/management')
           );
         })
           .then((overwriteAll) => {
-            return Promise.map(docs, (doc) => {
+            function importDocument(doc) {
               const { service } = find($scope.services, { type: doc._type }) || {};
 
               if (!service) {
@@ -206,11 +203,34 @@ uiModules.get('apps/management')
                       err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                       notify.error(err);
                     });
-                })
-                .then(refreshIndex)
-                .then(refreshData)
-                .catch(notify.error);
-            });
+                });
+            }
+
+            function groupByType(docs) {
+              const defaultDocTypes = {
+                searches: [],
+                other: [],
+              };
+
+              return docs.reduce((types, doc) => {
+                switch (doc._type) {
+                  case 'search':
+                    types.searches.push(doc);
+                    break;
+                  default:
+                    types.other.push(doc);
+                }
+                return types;
+              }, defaultDocTypes);
+            }
+
+            const docTypes = groupByType(docs);
+
+            return Promise.map(docTypes.searches, importDocument)
+              .then(() => Promise.map(docTypes.other, importDocument))
+              .then(refreshIndex)
+              .then(refreshData)
+              .catch(notify.error);
           });
       };
 

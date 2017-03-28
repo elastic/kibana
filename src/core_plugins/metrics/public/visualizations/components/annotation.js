@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import moment from 'moment';
-import reactcss from 'reactcss';
 class Annotation extends Component {
 
   constructor(props) {

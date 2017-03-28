@@ -181,7 +181,7 @@
   };
 })(this);// https://github.com/kriskowal/es5-shim
 
-define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   exports.inherits = function (ctor, superCtor) {
@@ -208,7 +208,7 @@ define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, expo
   };
 
 });
-define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'ace/lib/lang'], function (require, exports, module) {
+define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'ace/lib/lang'], function (require, exports) {
   "use strict";
 
   var Document = require("../document").Document;
@@ -258,7 +258,7 @@ define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'a
 });
 
 define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter',
-  'ace/range', 'ace/anchor'], function (require, exports, module) {
+  'ace/range', 'ace/anchor'], function (require, exports) {
   "use strict";
 
   var oop = require("./lib/oop");
@@ -616,7 +616,7 @@ define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib
   exports.Document = Document;
 });
 
-define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   var EventEmitter = {};
@@ -701,7 +701,6 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
     var disabled = handlers._disabled_[eventName];
 
     if (handlers[eventName] == callback) {
-      var old = handlers[eventName];
       if (disabled)
         this.setDefaultHandler(eventName, disabled.pop());
     } else if (disabled) {
@@ -746,7 +745,7 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
 
 });
 
-define('ace/range', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/range', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   var comparePoints = function (p1, p2) {
@@ -987,7 +986,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
   exports.Range = Range;
 });
 
-define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports, module) {
+define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports) {
   "use strict";
 
   var oop = require("./lib/oop");
@@ -1134,7 +1133,7 @@ define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/e
 
 });
 
-define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exports, module) {
+define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exports) {
   "use strict";
 
   exports.stringReverse = function (string) {
@@ -1318,7 +1317,7 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
 });
 
 
-define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], function (require, exports, module) {
+define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], function () {
   "use strict";
 
   var at,     // The index of the current character
@@ -1642,7 +1641,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     request = function () {
       white();
-      var meth = method();
+      method();
       strictWhite();
       url();
       strictWhite(); // advance to one new line
@@ -1738,7 +1737,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
 
 define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror',
-  'sense_editor/mode/worker_parser'], function (require, exports, module) {
+  'sense_editor/mode/worker_parser'], function (require, exports) {
   "use strict";
 
 
@@ -1811,4 +1810,3 @@ define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oo
   }).call(SenseWorker.prototype);
 
 });
-

@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import AggRow from './agg_row';
@@ -10,7 +9,7 @@ import createNumberHandler from '../lib/create_number_handler';
 class SerialDiffAgg extends Component {
 
   render() {
-    const { siblings, panel } = this.props;
+    const { siblings } = this.props;
     const defaults = { lag: '' };
     const model = { ...defaults, ...this.props.model };
 
@@ -29,7 +28,6 @@ class SerialDiffAgg extends Component {
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>

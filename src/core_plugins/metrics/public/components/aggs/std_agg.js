@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
@@ -29,7 +28,6 @@ function StandardAgg(props) {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           siblings={props.siblings}
-          panelType={panel.type}
           value={model.type}
           onChange={handleSelectChange('type')}/>
       </div>

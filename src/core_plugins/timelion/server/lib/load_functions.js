@@ -1,12 +1,11 @@
-const _ = require('lodash');
-const glob = require('glob');
-const path = require('path');
-const processFunctionDefinition = require('./process_function_definition');
+import _ from 'lodash';
+import glob from 'glob';
+import path from 'path';
+import processFunctionDefinition from './process_function_definition';
 
 module.exports = function (directory) {
 
   function getTuple(directory, name) {
-    const func = require('../' + directory + '/' + name);
     return [name, require('../' + directory + '/' + name)];
   }
 
@@ -24,7 +23,7 @@ module.exports = function (directory) {
   .map(function (file) {
     const parts = file.split('/');
     const name = parts[parts.length - 2];
-    return getTuple(directory, parts[parts.length - 2]);
+    return getTuple(directory, name);
   }).value();
 
   const functions = _.zipObject(files.concat(directories));

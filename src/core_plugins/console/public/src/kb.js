@@ -1,7 +1,6 @@
 let $ = require('jquery');
 let _ = require('lodash');
 let mappings = require('./mappings');
-let es = require('./es');
 let Api = require('./kb/api');
 let autocomplete_engine = require('./autocomplete/engine');
 
@@ -134,46 +133,38 @@ IdAutocompleteComponent.prototype = _.create(
 
 var parametrizedComponentFactories = {
 
-  'index': function (name, parent, endpoint) {
+  'index': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, false);
   },
-  'indices': function (name, parent, endpoint) {
+  'indices': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, true);
   },
-  'type': function (name, parent, endpoint) {
+  'type': function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, false);
   },
-  'types': function (name, parent, endpoint) {
+  'types': function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, true);
   },
-  'id': function (name, parent, endpoint) {
+  'id': function (name, parent) {
     return new IdAutocompleteComponent(name, parent);
   },
-  'ids': function (name, parent, endpoint) {
+  'ids': function (name, parent) {
     return new IdAutocompleteComponent(name, parent, true);
   },
-  'fields': function (name, parent, endpoint) {
+  'fields': function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
   },
-  'field': function (name, parent, endpoint) {
+  'field': function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  'nodes': function (name, parent, endpoint) {
+  'nodes': function (name, parent) {
     return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
       "master:true", "master:false"], parent)
   },
-  'node': function (name, parent, endpoint) {
+  'node': function (name, parent) {
     return new autocomplete_engine.ListComponent(name, [], parent, false)
   }
 };
-
-
-function expandAliases(indices) {
-  if (indices && indices.length > 0) {
-    indices = mappings.expandAliases(indices);
-  }
-  return indices;
-}
 
 function getUnmatchedEndpointComponents() {
   return ACTIVE_API.getUnmatchedEndpointComponents();
@@ -224,7 +215,7 @@ function setActiveApi(api) {
         dataType: "json", // disable automatic guessing
       }
     ).then(
-      function (data, textStatus, jqXHR) {
+      function (data) {
         setActiveApi(loadApisFromJson(data));
       },
       function (jqXHR) {

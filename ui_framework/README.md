@@ -37,9 +37,9 @@ If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupl
 ### Document the component with examples
 
 1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the component.
-2. Create a `{component name}_example.jsx` file inside the directory. You'll use this file to define the different examples for your component.
+2. Create a `{component name}_example.js` file inside the directory. You'll use this file to define the different examples for your component.
 3. Add the route to this file in `ui_framework/doc_site/src/services/routes/Routes.js`.
-4. In the `.jsx` file you created, define examples which demonstrate the component. An example consists of a title, an optional description, an HTML file and an optional JavaScript file. It might help to refer to other examples to see how they're structured.
+4. In the `{component name}_example.js` file you created, define examples which demonstrate the component. An example consists of a title, an optional description, an HTML file and an optional JavaScript file. It might help to refer to other examples to see how they're structured.
 
 The complexity of the component should determine how many examples you need to create, and how complex they should be. In general, your examples should demonstrate:
 

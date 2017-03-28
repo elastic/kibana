@@ -30,7 +30,7 @@ export default function fetchService(Private, Promise) {
     return fetchTheseSoon(requestQueue.getStartable(strategy));
   };
 
-  function fetchASource(source, strategy) {
+  function fetchASource(source) {
     const defer = Promise.defer();
 
     fetchTheseSoon([

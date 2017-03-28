@@ -90,7 +90,7 @@ class BaseOptimizer {
       return ExtractTextPlugin.extract(makeLoaderString(loaders));
     };
 
-    return {
+    const config = {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.bundles.toWebpackEntries(),
@@ -163,6 +163,19 @@ class BaseOptimizer {
         }, {})
       }
     };
+
+    // In the test env we need to add react-addons (and a few other bits) for the
+    // enzyme tests to work.
+    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
+    if (this.env.context.env === 'development') {
+      config.externals = {
+        'react/lib/ExecutionEnvironment': true,
+        'react/addons': true,
+        'react/lib/ReactContext': true,
+      };
+    }
+
+    return config;
   }
 
   pluginsForEnv(env) {
