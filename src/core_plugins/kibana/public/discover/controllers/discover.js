@@ -233,7 +233,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         timefilter.enabled = !!timefield;
       });
 
-      $scope.$watch('state.interval', function (interval, oldInterval) {
+      $scope.$watch('state.interval', function () {
         $scope.fetch();
       });
 
