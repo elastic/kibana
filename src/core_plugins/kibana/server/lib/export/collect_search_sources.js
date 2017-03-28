@@ -1,4 +1,5 @@
 import collectIndexPatterns from './collect_index_patterns';
+export const deps = { collectIndexPatterns };
 export default function collectSearchSources(req, panels) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const config = req.server.config();
@@ -24,7 +25,7 @@ export default function collectSearchSources(req, panels) {
   };
 
   return callWithRequest(req, 'mget', params).then(resp => resp.docs).then(savedSearches => {
-    return collectIndexPatterns(req, savedSearches)
+    return deps.collectIndexPatterns(req, savedSearches)
       .then(resp => {
         return savedSearches.concat(resp);
       });

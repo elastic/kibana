@@ -1,5 +1,11 @@
 import collectIndexPatterns from './collect_index_patterns';
 import collectSearchSources from './collect_search_sources';
+
+export const deps = {
+  collectSearchSources,
+  collectIndexPatterns
+};
+
 export default function collectPanels(req, dashboard) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const config = req.server.config();
@@ -15,8 +21,8 @@ export default function collectPanels(req, dashboard) {
     .then(resp => {
       const panelData = resp.docs;
       return Promise.all([
-        collectIndexPatterns(req, panelData),
-        collectSearchSources(req, panelData)
+        deps.collectIndexPatterns(req, panelData),
+        deps.collectSearchSources(req, panelData)
       ]).then(results => {
         return panelData
           .concat(results[0])
