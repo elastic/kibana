@@ -90,10 +90,10 @@
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
     </div>
-    <div class="filter-link">
+    <div class="filter-link" ng-if="showFilterPin()">
       <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
     </div>
-    <div class="filter-link">
+    <div class="filter-link" ng-if="showFilterPin()">
       <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
     </div>
     <div class="filter-link">
