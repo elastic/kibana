@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FilterBarLibMapGeoBoundingBoxProvider from 'ui/filter_bar/lib/map_geo_bounding_box';

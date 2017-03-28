@@ -107,6 +107,28 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
       });
     });
 
+    describe('addPathEvents method', function () {
+      let path;
+      let d3selectedPath;
+      let onMouseOver;
+
+      beforeEach(ngMock.inject(function () {
+        vis.handler.charts.forEach(function (chart) {
+          path = $(chart.chartEl).find('path')[0];
+          d3selectedPath = d3.select(path)[0][0];
+
+          // d3 instance of click and hover
+          onMouseOver = (!!d3selectedPath.__onmouseover);
+        });
+      }));
+
+      it('should attach a hover event', function () {
+        vis.handler.charts.forEach(function () {
+          expect(onMouseOver).to.be(true);
+        });
+      });
+    });
+
     describe('addCircleEvents method', function () {
       let circle;
       let brush;

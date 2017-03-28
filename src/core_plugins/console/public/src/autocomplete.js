@@ -1,12 +1,10 @@
-let history = require('./history');
 let kb = require('./kb');
-let mappings = require('./mappings');
-let ace = require('ace');
 let utils = require('./utils');
 let autocomplete_engine = require('./autocomplete/engine');
 let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
 let _ = require('lodash');
-let ext_lang_tools = require('ace/ext-language_tools');
+let ace = require('ace');
+require('ace/ext-language_tools');
 
 var AceRange = ace.require('ace/range').Range;
 
@@ -79,17 +77,6 @@ module.exports = function (editor) {
       }
       return _.defaults(t, { meta: meta, template: template });
     });
-  }
-
-  function termToFilterRegex(term, prefix, suffix) {
-    if (!prefix) {
-      prefix = "";
-    }
-    if (!suffix) {
-      suffix = "";
-    }
-
-    return new RegExp(prefix + term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + suffix, 'i');
   }
 
   function applyTerm(term) {
@@ -318,7 +305,6 @@ module.exports = function (editor) {
     //   - Nice token, broken before: {, "bla"
 
     var session = editor.getSession();
-    var insertingRelativeToToken;
 
     context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
     if (!context.updatedForToken) {
@@ -345,7 +331,6 @@ module.exports = function (editor) {
       case "url.part":
       case "url.param":
       case "url.value":
-        insertingRelativeToToken = 0;
         context.rangeToReplace = new AceRange(
           pos.row, anchorToken.start, pos.row,
           context.updatedForToken.start + context.updatedForToken.value.length
@@ -354,7 +339,6 @@ module.exports = function (editor) {
         break;
       default:
         if (replacingTerm && context.updatedForToken.value == replacingTerm) {
-          insertingRelativeToToken = 0;
           context.rangeToReplace = new AceRange(
             pos.row, anchorToken.start, pos.row,
             context.updatedForToken.start + context.updatedForToken.value.length
@@ -507,10 +491,12 @@ module.exports = function (editor) {
     context.suffixToAdd = "";
   }
 
-  function addMethodAutoCompleteSetToContext(context, pos) {
-    context.autoCompleteSet = _.map(["GET", "PUT", "POST", "DELETE", "HEAD"], function (m, i) {
-      return { name: m, score: -i, meta: "method" }
-    })
+  function addMethodAutoCompleteSetToContext(context) {
+    context.autoCompleteSet = ["GET", "PUT", "POST", "DELETE", "HEAD"].map((m, i) => ({
+      name: m,
+      score: -i,
+      meta: 'method'
+    }));
   }
 
   function addPathAutoCompleteSetToContext(context, pos) {
@@ -595,7 +581,7 @@ module.exports = function (editor) {
   function getCurrentMethodAndTokenPaths(pos) {
     var tokenIter = editor.iterForPosition(pos.row, pos.column);
     var startPos = pos;
-    var bodyTokenPath = [], last_var = "", first_scope = true, ret = {};
+    var bodyTokenPath = [], ret = {};
 
     var STATES = {
       looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
@@ -883,7 +869,7 @@ module.exports = function (editor) {
     editor.execCommand("startAutocomplete");
   }, 100);
 
-  function editorChangeListener(e) {
+  function editorChangeListener() {
     var cursor = editor.selection.lead;
     if (editor.__ace.completer && editor.__ace.completer.activated) {
       return;
@@ -966,8 +952,7 @@ module.exports = function (editor) {
   // Hook into Ace
 
   // disable standard context based autocompletion.
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports,
-                                                                                            module) {
+  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports) {
     exports.getCompletions = function (editor, session, pos, prefix, callback) {
       callback(null, []);
     }

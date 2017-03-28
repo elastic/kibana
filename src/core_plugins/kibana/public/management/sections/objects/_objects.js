@@ -7,8 +7,6 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 
-const MAX_SIZE = Math.pow(2, 31) - 1;
-
 uiRoutes
 .when('/management/kibana/objects', {
   template: objectIndexHTML
@@ -56,8 +54,7 @@ uiModules.get('apps/management')
 
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
-          let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = find($scope.services, { title: $state.tab });
+          if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -169,30 +166,72 @@ uiModules.get('apps/management')
           notify.error('The file could not be processed.');
         }
 
-        return Promise.map(docs, (doc) => {
-          const { service } = find($scope.services, { type: doc._type }) || {};
-
-          if (!service) {
-            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-            const reason = `Invalid type: "${doc._type}"`;
-
-            notify.warning(`${msg}, ${reason}`, {
-              lifetime: 0,
-            });
-
-            return;
-          }
-
-          return service.get().then(function (obj) {
-            obj.id = doc._id;
-            return obj.applyESResp(doc).then(function () {
-              return obj.save({ confirmOverwrite : true });
-            });
-          });
+        return new Promise((resolve) => {
+          confirmModal(
+            `If any of the objects already exist, do you want to automatically overwrite them?`, {
+              confirmButtonText: `Yes, overwrite all`,
+              cancelButtonText: `No, prompt me for each one`,
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            }
+          );
         })
-        .then(refreshIndex)
-        .then(refreshData)
-        .catch(notify.error);
+          .then((overwriteAll) => {
+            function importDocument(doc) {
+              const { service } = find($scope.services, { type: doc._type }) || {};
+
+              if (!service) {
+                const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+                const reason = `Invalid type: "${doc._type}"`;
+
+                notify.warning(`${msg}, ${reason}`, {
+                  lifetime: 0,
+                });
+
+                return;
+              }
+
+              return service.get()
+                .then(function (obj) {
+                  obj.id = doc._id;
+                  return obj.applyESResp(doc)
+                    .then(() => {
+                      return obj.save({ confirmOverwrite : !overwriteAll });
+                    })
+                    .catch((err) => {
+                      // swallow errors here so that the remaining promise chain executes
+                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                      notify.error(err);
+                    });
+                });
+            }
+
+            function groupByType(docs) {
+              const defaultDocTypes = {
+                searches: [],
+                other: [],
+              };
+
+              return docs.reduce((types, doc) => {
+                switch (doc._type) {
+                  case 'search':
+                    types.searches.push(doc);
+                    break;
+                  default:
+                    types.other.push(doc);
+                }
+                return types;
+              }, defaultDocTypes);
+            }
+
+            const docTypes = groupByType(docs);
+
+            return Promise.map(docTypes.searches, importDocument)
+              .then(() => Promise.map(docTypes.other, importDocument))
+              .then(refreshIndex)
+              .then(refreshData)
+              .catch(notify.error);
+          });
       };
 
       function refreshIndex() {

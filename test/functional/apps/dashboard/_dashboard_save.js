@@ -52,6 +52,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
     async function() {
       await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
       await PageObjects.header.isGlobalLoadingIndicatorHidden();
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
       const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
@@ -60,6 +61,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
   );
 
   bdd.it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function() {
+    await PageObjects.dashboard.clickEdit();
     await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
@@ -76,6 +78,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
   });
 
   bdd.it('Warns when case is different', async function() {
+    await PageObjects.dashboard.clickEdit();
     await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();

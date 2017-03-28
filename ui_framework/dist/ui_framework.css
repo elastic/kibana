@@ -45,6 +45,19 @@ body {
       -ms-flex-pack: justify;
           justify-content: space-between; }
 
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase; }
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1); }
+
 .kuiBar {
   display: -webkit-box;
   display: -webkit-flex;
@@ -159,7 +172,7 @@ body {
     /* 2 */
     color: #ffffff !important;
     /* 1 */
-    background-color: #9B9B9B; }
+    background-color: #9B9B9B !important; }
   .kuiButton--basic:disabled {
     color: #9B9B9B; }
 
@@ -255,6 +268,178 @@ body {
 .kuiButtonGroup--united .kuiButton + .kuiButton {
   margin-left: 2px; }
 
+.kuiCard {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  line-height: 1.5; }
+
+.kuiCard__description {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  padding: 18px 0; }
+
+.kuiCard__descriptionTitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  max-width: calc(100% - 48px); }
+
+.kuiCard__descriptionText {
+  font-size: 14px;
+  max-width: calc(100% - 48px); }
+
+.kuiCard__footer {
+  text-align: center;
+  font-size: 14px;
+  padding: 0 15px 20px; }
+
+.kuiCardGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px; }
+
+.kuiCardGroup__card {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%;
+  border: none;
+  border-radius: 0; }
+  .kuiCardGroup__card + .kuiCardGroup__card {
+    border-left: 1px solid #E0E0E0; }
+
+.kuiCardGroup__cardDescription {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+
+/**
+ * 1. If we use margins instead, columns get pushed to the next line.
+ */
+.kuiColumn + .kuiColumn {
+  padding-left: 10px;
+  /* 1 */ }
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+.kuiColumn--1 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 8.33333%; }
+
+.kuiColumn--2 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 16.66667%; }
+
+.kuiColumn--3 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 25%; }
+
+.kuiColumn--4 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 33.33333%; }
+
+.kuiColumn--5 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 41.66667%; }
+
+.kuiColumn--6 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 50%; }
+
+.kuiColumn--7 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 58.33333%; }
+
+.kuiColumn--8 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 66.66667%; }
+
+.kuiColumn--9 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 75%; }
+
+.kuiColumn--10 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 83.33333%; }
+
+.kuiColumn--11 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 91.66667%; }
+
+.kuiColumn--12 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 100%; }
+
 .kuiEvent {
   display: -webkit-box;
   display: -webkit-flex;
@@ -336,6 +521,56 @@ body {
     /* 3 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
+    cursor: not-allowed; }
+
+.kuiSearchInput {
+  display: inline-block;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.5; }
+
+.kuiSearchInput__icon {
+  position: absolute;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
+  color: #ACACAC; }
+
+/**
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
+   */
+.kuiSearchInput__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-left: 28px;
+  /* 1 */
+  width: 100%;
+  /* 2 */ }
+  .kuiSearchInput__input:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiSearchInput__input:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSearchInput__input:disabled {
+    opacity: 0.4;
     cursor: not-allowed; }
 
 /**
@@ -454,6 +689,23 @@ body {
   .kuiTextInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+
+.kuiFieldGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiFieldGroupSection + .kuiFieldGroupSection {
+  margin-left: 10px; }
+
+.kuiFieldGroupSection--wide {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+  .kuiFieldGroupSection--wide > * {
+    width: 100%; }
 
 .kuiHeaderBar {
   display: -webkit-box;
@@ -700,6 +952,9 @@ body {
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
 
+/**
+ * 1. Override Bootstrap styles.
+ */
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -711,13 +966,15 @@ body {
   top: 1px;
   right: 5px;
   font-size: 16px;
-  color: #2d2d2d;
+  color: #2d2d2d !important;
+  /* 1 */
   cursor: pointer;
   opacity: 0.35; }
   .kuiLocalDropdownCloseButton:hover {
     opacity: 1; }
   .theme-dark .kuiLocalDropdownCloseButton {
-    color: #cecece; }
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiLocalDropdownPanels {
   display: -webkit-box;
@@ -1001,10 +1258,14 @@ body {
   color: #5a5a5a;
   border-bottom: 2px solid transparent;
   text-decoration: none;
-  cursor: pointer; }
-  .kuiLocalTab:hover, .kuiLocalTab:active {
+  cursor: pointer;
+  /**
+     * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
+     *    a regular cursor instead of setting pointer-events: none.
+     */ }
+  .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
     color: #000000; }
-    .theme-dark .kuiLocalTab:hover, .theme-dark .kuiLocalTab:active {
+    .theme-dark .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .theme-dark .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
       color: #ffffff; }
   .kuiLocalTab.kuiLocalTab-isSelected {
     color: #000000;
@@ -1013,6 +1274,10 @@ body {
     .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
       color: #ffffff;
       border-bottom-color: #ffffff; }
+  .kuiLocalTab.kuiLocalTab-isDisabled {
+    opacity: 0.5;
+    cursor: default;
+    /* 1 */ }
   .kuiLocalTab + .kuiLocalTab {
     margin-left: 15px; }
   .theme-dark .kuiLocalTab {
@@ -1252,6 +1517,28 @@ body {
   font-size: 18px;
   color: #9fa3a7;
   line-height: 1.5; }
+
+.kuiNotice {
+  padding: 40px 60px 48px;
+  margin: 20px;
+  background-color: white;
+  line-height: 1.5; }
+
+.kuiNotice__header {
+  margin-bottom: 18px; }
+
+/**
+ * 1. Override h1 styles.
+ */
+.kuiNoticeTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+  margin-top: 0 !important;
+  /* 1 */ }
+
+.kuiNoticeText {
+  font-size: 14px;
+  margin-bottom: 12px; }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }

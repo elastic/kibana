@@ -3,9 +3,8 @@ import expect from 'expect.js';
 
 import {
   bdd,
-  scenarioManager,
+  esArchiver,
   esClient,
-  elasticDump
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -33,11 +32,11 @@ bdd.describe('shared links', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('discover','.kibana');
+      return esArchiver.load('discover');
     })
     // and load a set of makelogs data
     .then(function loadIfEmptyMakelogs() {
-      return scenarioManager.loadIfEmpty('logstashFunctional');
+      return esArchiver.loadIfNeeded('logstash_functional');
     })
     .then(function () {
       PageObjects.common.debug('discover');

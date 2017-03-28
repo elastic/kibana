@@ -1,4 +1,4 @@
-const { execFileSync } = require('child_process');
+import { execFileSync } from 'child_process';
 
 function exec(cmd, args, opts) {
   console.log(' >', cmd, args.join(' '));

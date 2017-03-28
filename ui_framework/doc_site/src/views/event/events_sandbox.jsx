@@ -21,6 +21,7 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: html,
       }]}
+      title={props.route.name}
     />
   </GuideSandbox>
 );

@@ -1,10 +1,7 @@
 var $ = require('jquery');
 
-let curl = require('./curl');
 let history = require('./history');
 let mappings = require('./mappings');
-let es = require('./es');
-let _ = require('lodash');
 
 export default function init(input, output, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
@@ -51,7 +48,7 @@ export default function init(input, output, sourceLocation = 'stored') {
     var timer;
     var saveDelay = 500;
 
-    input.getSession().on("change", function onChange(e) {
+    input.getSession().on("change", function onChange() {
       if (timer) {
         timer = clearTimeout(timer);
       }

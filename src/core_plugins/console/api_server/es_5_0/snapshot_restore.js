@@ -56,30 +56,6 @@ module.exports = function (api) {
     ]
   });
 
-
-  function getRepositoryType(context, editor) {
-    var iter = editor.iterForCurrentLoc();
-    // for now just iterate back to the first "type" key
-    var t = iter.getCurrentToken();
-    var type;
-    while (t && t.type.indexOf("url") < 0) {
-      if (t.type === 'variable' && t.value === '"type"') {
-        t = editor.parser.nextNonEmptyToken(iter);
-        if (!t || t.type !== "punctuation.colon") {
-          // weird place to be in, but safe choice..
-          break;
-        }
-        t = editor.parser.nextNonEmptyToken(iter);
-        if (t && t.type === "string") {
-          type = t.value.replace(/"/g, '');
-        }
-        break;
-      }
-      t = editor.parser.prevNonEmptyToken(iter);
-    }
-    return type;
-  }
-
   api.addEndpointDescription('put_repository', {
     methods: ['PUT'],
     patterns: [

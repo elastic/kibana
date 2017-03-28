@@ -8,7 +8,7 @@ module.directive('kbnInfiniteScroll', function () {
     scope: {
       more: '='
     },
-    link: function ($scope, $element, attrs) {
+    link: function ($scope, $element) {
       const $window = $(window);
       let checkTimer;
 
@@ -22,7 +22,7 @@ module.directive('kbnInfiniteScroll', function () {
 
         if (remaining <= winHeight * 0.50) {
           $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-            const more = $scope.more();
+            $scope.more();
           });
         }
       }

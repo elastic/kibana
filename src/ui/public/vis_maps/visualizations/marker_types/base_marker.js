@@ -58,7 +58,7 @@ export default function MarkerFactory() {
         const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
         $div.append($title);
 
-        _.each(self._legendColors, function (color, i) {
+        _.each(self._legendColors, function (color) {
           const labelText = self._legendQuantizer
           .invertExtent(color)
           .map(self._valueFormatter)
@@ -234,8 +234,8 @@ export default function MarkerFactory() {
     }
 
     _createTooltip(content, latLng) {
-      L.popup({ autoPan: false })
-      .setLatLng(latLng)
+      this._popup = L.popup({ autoPan: false });
+      this._popup.setLatLng(latLng)
       .setContent(content)
       .openOn(this.map);
     }
@@ -249,6 +249,7 @@ export default function MarkerFactory() {
     _hidePopup() {
       if (!this.map) return;
 
+      this._popup = null;
       this.map.closePopup();
     }
 

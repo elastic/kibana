@@ -1,9 +1,15 @@
+import angular from 'angular';
 import { noop } from 'lodash';
 import uiModules from 'ui/modules';
 import template from './confirm_modal.html';
 import { ModalOverlay } from './modal_overlay';
 
 const module = uiModules.get('kibana');
+
+export const ConfirmationButtonTypes = {
+  CONFIRM: 'Confirm',
+  CANCEL: 'Cancel'
+};
 
 /**
  * @typedef {Object} ConfirmModalOptions
@@ -20,6 +26,7 @@ const module = uiModules.get('kibana');
 
 module.factory('confirmModal', function ($rootScope, $compile) {
   let modalPopover;
+  const confirmQueue = [];
 
   /**
    * @param {String} message - the message to show in the body of the confirmation dialog.
@@ -29,7 +36,8 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     const defaultOptions = {
       onCancel: noop,
       cancelButtonText: 'Cancel',
-      showClose: false
+      showClose: false,
+      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
     };
 
     if (customOptions.showClose === true && !customOptions.title) {
@@ -45,11 +53,6 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     // Special handling for onClose - if no specific callback was supplied, default to the
     // onCancel callback.
     options.onClose = customOptions.onClose || options.onCancel;
-
-    if (modalPopover) {
-      throw new Error('You\'ve called confirmModal but there\'s already a modal open. ' +
-        'You can only have one modal open at a time.');
-    }
 
     const confirmScope = $rootScope.$new();
 
@@ -71,14 +74,41 @@ module.factory('confirmModal', function ($rootScope, $compile) {
       options.onClose();
     };
 
-    const modalInstance = $compile(template)(confirmScope);
-    modalPopover = new ModalOverlay(modalInstance);
-    modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+    function showModal(confirmScope) {
+      const modalInstance = $compile(template)(confirmScope);
+      modalPopover = new ModalOverlay(modalInstance);
+      angular.element(document.body).on('keydown', (event) => {
+        if (event.keyCode === 27) {
+          confirmScope.onCancel();
+        }
+      });
+
+      switch (options.defaultFocusedButton) {
+        case ConfirmationButtonTypes.CONFIRM:
+          modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+          break;
+        case ConfirmationButtonTypes.CANCEL:
+          modalInstance.find('[data-test-subj=confirmModalCancelButton]').focus();
+          break;
+        default:
+      }
+    }
+
+    if (modalPopover) {
+      confirmQueue.unshift(confirmScope);
+    } else {
+      showModal(confirmScope);
+    }
 
     function destroy() {
       modalPopover.destroy();
       modalPopover = undefined;
+      angular.element(document.body).off('keydown');
       confirmScope.$destroy();
+
+      if (confirmQueue.length > 0) {
+        showModal(confirmQueue.pop());
+      }
     }
   };
 });

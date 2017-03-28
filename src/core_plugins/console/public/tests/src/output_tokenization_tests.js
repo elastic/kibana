@@ -5,7 +5,7 @@ import { initializeOutput } from '../../src/output';
 let output;
 
 var token_iterator = ace.require("ace/token_iterator");
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { module, asyncTest, deepEqual, start } = window.QUnit;
 
 
 module("Output Tokenization", {
@@ -76,5 +76,3 @@ token_test(
   '# GET url\n' +
   '{ "f": """raw""" }'
 );
-
-

@@ -1,10 +1,11 @@
 import { initializeInput } from '../../src/input';
+import _ from 'lodash';
 let input;
 let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let $ = require('jquery');
 
-var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
+var { module, ok, asyncTest, deepEqual, equal, start } = window.QUnit;
 
 module("Integration", {
   setup: function () {

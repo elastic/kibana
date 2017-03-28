@@ -16,7 +16,6 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
   let vis;
   let AggConfig;
   let Schemas;
-  let $scope;
   let $elem;
   let compile;
   let rootScope;
