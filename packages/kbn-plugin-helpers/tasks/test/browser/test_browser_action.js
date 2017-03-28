@@ -1,4 +1,5 @@
 var execFileSync = require('child_process').execFileSync;
+var winCmd = require('../../../lib/win_cmd');
 
 module.exports = function testBrowserAction(plugin, run, options) {
   options = options || {};
@@ -13,7 +14,7 @@ module.exports = function testBrowserAction(plugin, run, options) {
     kbnServerArgs.push('--kbnServer.tests_bundle.pluginId=' + plugin.id);
   }
 
-  var cmd = 'npm';
+  var cmd = winCmd('npm');
   var task = (options.dev) ? 'test:dev' : 'test:browser';
   var args = ['run', task, '--'].concat(kbnServerArgs);
   execFileSync(cmd, args, {

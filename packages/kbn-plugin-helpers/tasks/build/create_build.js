@@ -8,6 +8,7 @@ var rename = require('gulp-rename');
 
 var rewritePackageJson = require('./rewrite_package_json');
 var gitInfo = require('./git_info');
+var winCmd = require('../../lib/win_cmd');
 
 module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
   var buildSource = plugin.root;
@@ -34,6 +35,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
     })
     .then(function () {
       // install packages in build
+      var cmd = winCmd('npm');
       var options = {
         cwd: buildRoot,
         stdio: ['ignore', 'ignore', 'pipe'],
@@ -41,11 +43,12 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
       try {
         // use yarn if yarn lockfile is found in the build
+        cmd = winCmd('yarn');
         statSync(join(buildRoot, 'yarn.lock'));
-        execFileSync('yarn', ['install', '--production'], options);
+        execFileSync(cmd, ['install', '--production'], options);
       } catch (e) {
         // use npm if there is no yarn lockfile in the build
-        execFileSync('npm', ['install', '--production', '--no-bin-links'], options);
+        execFileSync(cmd, ['install', '--production', '--no-bin-links'], options);
       }
     });
 };

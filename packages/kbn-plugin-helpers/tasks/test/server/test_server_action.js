@@ -1,6 +1,7 @@
 var resolve = require('path').resolve;
 var delimiter = require('path').delimiter;
 var execFileSync = require('child_process').execFileSync;
+var winCmd = require('../../../lib/win_cmd');
 
 module.exports = function (plugin, run, options) {
   options = options || {};
@@ -13,7 +14,8 @@ module.exports = function (plugin, run, options) {
     testPaths = options.files;
   }
 
-  var cmd = 'mocha';
+  var fullCmd = resolve(plugin.kibanaRoot, 'node_modules', '.bin', 'mocha');
+  var cmd = winCmd(fullCmd);
   var args = ['--require', mochaSetupJs].concat(testPaths);
   var path = `${kibanaBins}${delimiter}${process.env.PATH}`;
 
