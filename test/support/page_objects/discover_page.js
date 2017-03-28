@@ -132,7 +132,12 @@ export default class DiscoverPage {
 
   getChartInterval() {
     return PageObjects.common.findTestSubject('discoverIntervalSelect')
-    .getVisibleText();
+    .getProperty('value')
+    .then(selectedValue => {
+      return this.findTimeout
+      .findByCssSelector('option[value="' + selectedValue + '"]')
+      .getVisibleText();
+    });
   }
 
   setChartInterval(interval) {
