@@ -25,7 +25,7 @@ describe('kibana_map tests', function () {
   }
 
 
-  describe('KibanaMap', function () {
+  describe('KibanaMap - basics', function () {
 
     beforeEach(async function () {
       setupDOM();
@@ -71,18 +71,70 @@ describe('kibana_map tests', function () {
   });
 
 
-  // describe('with loaded settings', function () {
-  //
-  //   beforeEach(async function () {
-  //     await tilemapSettings.loadSettings();
-  //   });
-  //
-  //
-  //   it('should do this right', function () {
-  //     console.log('gargh!');
-  //   });
-  //
-  // });
+  describe('KibanaMap - baseLayer', function () {
+
+    beforeEach(async function () {
+      setupDOM();
+      kibanaMap = new KibanaMap(domNode, {
+        minZoom: 1,
+        maxZoom: 10
+      });
+    });
+
+    afterEach(function () {
+      kibanaMap.destroy();
+      teardownDOM();
+    });
+
+
+    it('TMS', async function () {
+
+      const options = {
+        'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+        'minZoom': 0,
+        'maxZoom': 12,
+        'attribution': '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
+      };
+
+
+      return new Promise(function (resolve) {
+        kibanaMap.on('baseLayer:loaded', () => {
+          resolve();
+        });
+        kibanaMap.setBaseLayer({
+          baseLayerType: 'tms',
+          options: options
+        });
+      });
+    });
+
+    it('WMS', async function () {
+
+      const options = {
+        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+        version: '1.3.0',
+        layers: '0',
+        format: 'image/png',
+        transparent: true,
+        attribution: 'Maps provided by USGS',
+        styles: '',
+        minZoom: 1,
+        maxZoom: 18
+      };
+
+
+      return new Promise(function (resolve) {
+        kibanaMap.on('baseLayer:loaded', () => {
+          resolve();
+        });
+        kibanaMap.setBaseLayer({
+          baseLayerType: 'wms',
+          options: options
+        });
+      });
+    });
+
+  });
 
 
 });

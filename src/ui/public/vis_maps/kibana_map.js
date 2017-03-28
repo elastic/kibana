@@ -460,7 +460,7 @@ class KibanaMap extends EventEmitter {
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      subdomains: options.subdomains,
+      subdomains: options.subdomains || [],
       attribution: options.attribution
     });
   }
