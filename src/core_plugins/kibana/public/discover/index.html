@@ -90,20 +90,23 @@
 
                   &mdash;
 
-                  <span class="results-interval" ng-hide="showInterval">
-                    <a
-                      ng-click="toggleInterval()">
-                      {{ intervalName }}
-                    </a>
-                  </span>
-
-                  <span ng-show="showInterval" class="results-interval form-inline">
+                  <span class="results-interval form-inline">
                     <select
                       class="form-control"
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                      ng-blur="toggleInterval()"
+                      data-test-subj="discoverIntervalSelect"
                       >
                     </select>
+                    <span ng-show="bucketInterval.scaled">
+                      <kbn-info
+                        placement="right"
+                        class="kuiIcon--info"
+                        info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
+                      </kbn-info>
+                      Scaled to {{ bucketInterval.description }}
+                    </span>
                   </span>
                 </center>
 

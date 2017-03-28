@@ -83,10 +83,10 @@ bdd.describe('discover app', function describeIndexTests() {
       expect(actualTimeString).to.be(expectedTimeString);
     });
 
-    bdd.it('should show correct initial chart interval of 3 hours', async function () {
+    bdd.it('should show correct initial chart interval of Auto', async function () {
       const actualInterval = await PageObjects.discover.getChartInterval();
 
-      const expectedInterval = 'by 3 hours';
+      const expectedInterval = 'Auto';
       expect(actualInterval).to.be(expectedInterval);
     });
 
@@ -156,8 +156,8 @@ bdd.describe('discover app', function describeIndexTests() {
       await verifyChartData(expectedBarChartData);
     });
 
-    bdd.it('should show Auto chart interval of 3 hours', async function () {
-      const expectedChartInterval = 'by 3 hours';
+    bdd.it('should show Auto chart interval', async function () {
+      const expectedChartInterval = 'Auto';
 
       const actualInterval = await PageObjects.discover.getChartInterval();
       expect(actualInterval).to.be(expectedChartInterval);
