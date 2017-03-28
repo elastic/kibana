@@ -1771,11 +1771,20 @@ body {
           align-items: flex-start;
   /* 1 */ }
 
+/**
+ * 1. If we're using an expandable input, make sure that it doesn't force sibling elements to expand
+ *    with it.
+ */
 .kuiLocalSearch {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  /* 1 */
   width: 100%; }
 
 .kuiLocalSearchInput {
@@ -1913,6 +1922,40 @@ body {
   .theme-dark .kuiLocalSearchSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
+
+/**
+ * 1. When it expands, the search input should lie on top of the content.
+ * 2. Expand as the user enters text.
+ * 3. Cap the height so that we can offer auto-completion suggestions below the input.
+ * 4. When the input is collapsed, we want text input to be truncated with an ellipsis.
+ */
+.kuiLocalSearchInput--expandable {
+  height: 30px;
+  line-height: 1.5;
+  word-break: break-all;
+  /* 4 */
+  white-space: nowrap;
+  /* 4 */
+  overflow: hidden;
+  /* 4 */
+  text-overflow: ellipsis;
+  /* 4 */ }
+  .kuiLocalSearchInput--expandable:focus {
+    z-index: 1;
+    /* 1 */
+    height: auto;
+    /* 2 */
+    max-height: 180px;
+    /* 3 */
+    white-space: normal;
+    overflow: auto;
+    /* 3 */
+    box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25);
+    /* 1 */ }
+  .kuiLocalSearchInput--expandable p {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit; }
 
 /**
  * 1. Override inherited styles.

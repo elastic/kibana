@@ -1,5 +1,10 @@
+/**
+ * 1. If we're using an expandable input, make sure that it doesn't force sibling elements to expand
+ *    with it.
+ */
 .kuiLocalSearch {
   display: flex;
+  align-items: flex-start; /* 1 */
   width: 100%;
 }
 
@@ -50,6 +55,36 @@
   border-color: $localSearchBackgroundColor;
   border-left-color: $globalFormControlBorderColor;
   border-radius: 0;
+}
+
+/**
+ * 1. When it expands, the search input should lie on top of the content.
+ * 2. Expand as the user enters text.
+ * 3. Cap the height so that we can offer auto-completion suggestions below the input.
+ * 4. When the input is collapsed, we want text input to be truncated with an ellipsis.
+ */
+.kuiLocalSearchInput--expandable {
+  height: $localSearchHeight;
+  line-height: $globalLineHeight;
+  word-break: break-all; /* 4 */
+  white-space: nowrap; /* 4 */
+  overflow: hidden; /* 4 */
+  text-overflow: ellipsis; /* 4 */
+
+  &:focus {
+    z-index: 1; /* 1 */
+    height: auto; /* 2 */
+    max-height: 180px; /* 3 */
+    white-space: normal;
+    overflow: auto; /* 3 */
+    box-shadow: 0 5px 22px rgba(#000000, 0.25); /* 1 */
+  }
+
+  p {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+  }
 }
 
 /**
