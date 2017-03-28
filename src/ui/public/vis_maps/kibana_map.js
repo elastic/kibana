@@ -222,11 +222,6 @@ class KibanaMap extends EventEmitter {
     this.emit('layers:update');
   }
 
-
-  isReady() {
-    return this._layers.every(layer => layer.isReady());
-  }
-
   removeLayer(layer) {
     const index = this._layers.indexOf(layer);
     if (index >= 0) {

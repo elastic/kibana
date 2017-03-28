@@ -1,7 +1,5 @@
 import expect from 'expect.js';
 import KibanaMap from 'ui/vis_maps/kibana_map';
-// import KibanaMapLayer from 'ui/vis_maps/kibana_map_layer';
-// import tilemapSettings from 'ui/vis_maps/lib/tilemap_settings';
 
 describe('kibana_map tests', function () {
 
@@ -41,7 +39,6 @@ describe('kibana_map tests', function () {
     });
 
     it('should instantiate with world in view', function () {
-      expect(kibanaMap.isReady()).to.equal(true);
       const bounds = kibanaMap.getBounds();
       expect(bounds.bottom_right.lon).to.equal(180);
       expect(bounds.top_left.lon).to.equal(-180);
@@ -111,7 +108,7 @@ describe('kibana_map tests', function () {
     it('WMS', async function () {
 
       const options = {
-        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/ MapServer/WMSServer',
         version: '1.3.0',
         layers: '0',
         format: 'image/png',
