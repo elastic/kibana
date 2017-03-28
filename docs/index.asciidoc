@@ -4,10 +4,10 @@
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-:release-state:  unreleased
+:release-state:  released
 :version:        5.3.0
 :major-version:  5.x
-:branch:         5.x
+:branch:         5.3
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
