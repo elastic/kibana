@@ -44,10 +44,9 @@ module.directive('vislibSeries', function () {
         });
 
         // update labels for existing params or create new one
-        $scope.vis.params.seriesParams = metrics.map((agg, i) => {
-          const params = $scope.vis.params.seriesParams[i];
+        $scope.vis.params.seriesParams = metrics.map(agg => {
+          const params = $scope.vis.params.seriesParams.find(param => param.data.id === agg.id);
           if (params) {
-            params.data.id = agg.id;
             params.data.label = agg.makeLabel();
             return params;
           } else {
@@ -74,11 +73,11 @@ module.directive('vislibSeries', function () {
 
       $scope.changeValueAxis = (index) => {
         const series = $scope.vis.params.seriesParams[index];
-        $scope.updateAxisTitle();
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;
         }
+        $scope.updateAxisTitle();
       };
     }
   };

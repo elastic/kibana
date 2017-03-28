@@ -15,7 +15,12 @@ import {
 
 import getUrl from '../../utils/get_url';
 
-import { config, defaultFindTimeout, esClient } from '../index';
+import {
+  config,
+  defaultFindTimeout,
+  defaultTryTimeout,
+  esClient
+} from '../index';
 
 import PageObjects from './index';
 
@@ -163,22 +168,30 @@ export default class Common {
       });
     }
 
-    return navigateTo(appUrl)
-    .then(function (currentUrl) {
-      let lastUrl = currentUrl;
-      return self.try(function () {
-        // give the app time to update the URL
-        return self.sleep(501)
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (currentUrl) {
-          self.debug('in navigateTo url = ' + currentUrl);
-          if (lastUrl !== currentUrl) {
-            lastUrl = currentUrl;
-            throw new Error('URL changed, waiting for it to settle');
-          }
+    return self.tryForTime(defaultTryTimeout * 3, () => {
+      return navigateTo(appUrl)
+      .then(function (currentUrl) {
+        let lastUrl = currentUrl;
+        return self.try(function () {
+          // give the app time to update the URL
+          return self.sleep(501)
+          .then(function () {
+            return self.remote.getCurrentUrl();
+          })
+          .then(function (currentUrl) {
+            self.debug('in navigateTo url = ' + currentUrl);
+            if (lastUrl !== currentUrl) {
+              lastUrl = currentUrl;
+              throw new Error('URL changed, waiting for it to settle');
+            }
+          });
         });
+      })
+      .then(async () => {
+        if (appName === 'status_page') return;
+        if (await self.doesTestSubjectExist('statusPageContainer')) {
+          throw new Error('Navigation ended up at the status page.');
+        }
       });
     });
   }
