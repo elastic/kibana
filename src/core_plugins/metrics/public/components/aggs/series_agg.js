@@ -6,10 +6,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 
 function SeriesAgg(props) {
-  const {
-    model,
-    panel
-  } = props;
+  const { model } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -37,7 +34,6 @@ function SeriesAgg(props) {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           siblings={props.siblings}
-          panelType={panel.type}
           value={model.type}
           onChange={handleSelectChange('type')}/>
       </div>
