@@ -1,5 +1,7 @@
 import expect from 'expect.js';
 import KibanaMap from 'ui/vis_maps/kibana_map';
+// import KibanaMapLayer from 'ui/vis_maps/kibana_map_layer';
+// import tilemapSettings from 'ui/vis_maps/lib/tilemap_settings';
 
 describe('kibana_map tests', function () {
 
@@ -50,7 +52,6 @@ describe('kibana_map tests', function () {
 
     it('should resize to fit container', function () {
 
-
       kibanaMap.setZoomLevel(2);
       expect(kibanaMap.getCenter().lon).to.equal(0);
       expect(kibanaMap.getCenter().lat).to.equal(0);
@@ -68,6 +69,20 @@ describe('kibana_map tests', function () {
     });
 
   });
+
+
+  // describe('with loaded settings', function () {
+  //
+  //   beforeEach(async function () {
+  //     await tilemapSettings.loadSettings();
+  //   });
+  //
+  //
+  //   it('should do this right', function () {
+  //     console.log('gargh!');
+  //   });
+  //
+  // });
 
 
 });
