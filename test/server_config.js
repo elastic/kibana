@@ -28,7 +28,7 @@ module.exports = {
   },
   apps: {
     status_page: {
-      pathname: 'status'
+      pathname: '/status'
     },
     discover: {
       pathname: kibanaURL,

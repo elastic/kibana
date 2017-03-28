@@ -13,6 +13,7 @@ module.exports = function () {
         '!src/cli/cluster/**',
         '!src/ui_framework/doc_site/**',
         '!src/es_archiver/**',
+        '!src/functional_test_runner/**',
         'bin/**',
         'ui_framework/dist/**',
         'webpackShims/**',

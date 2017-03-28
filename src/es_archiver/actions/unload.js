@@ -9,7 +9,7 @@ import {
   isGzip,
   createStats,
   prioritizeMappings,
-  getArchiveFiles,
+  readDirectory,
   createParseArchiveStreams,
   createFilterRecordsStream,
   createDeleteIndexStream
@@ -19,7 +19,7 @@ export async function unloadAction({ name, client, dataDir, log }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
 
-  const files = prioritizeMappings(await getArchiveFiles(inputDir));
+  const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
     log.info('[%s] Unloading indices from %j', name, filename);
 

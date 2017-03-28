@@ -3,16 +3,6 @@ import _, { keys } from 'lodash';
 import visualRegression from '../utilities/visual_regression';
 
 module.exports = function (grunt) {
-  grunt.registerTask('test:visualRegression', [
-    'intern:visualRegression:takeScreenshots',
-    'test:visualRegression:buildGallery'
-  ]);
-
-  grunt.registerTask('test:visualRegression:takeScreenshots', [
-    'clean:screenshots',
-    'intern:visualRegression'
-  ]);
-
   grunt.registerTask(
     'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
@@ -67,11 +57,9 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
-    'run:chromeDriver',
     'clean:screenshots',
-    'intern:dev',
+    'functionalTestRunner',
     'esvm_shutdown:ui',
-    'stop:chromeDriver',
     'stop:testUIServer'
   ]);
 
@@ -84,14 +72,13 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui:runner', [
     'checkPlugins',
     'clean:screenshots',
-    'run:devChromeDriver',
-    'intern:dev'
+    'functionalTestRunner'
   ]);
 
   grunt.registerTask('test:api', [
     'esvm:ui',
     'run:apiTestServer',
-    'intern:api',
+    'simplemocha:api',
     'esvm_shutdown:ui',
     'stop:apiTestServer'
   ]);
@@ -102,7 +89,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:api:runner', [
-    'intern:api'
+    'simplemocha:api'
   ]);
 
   grunt.registerTask('test', subTask => {
