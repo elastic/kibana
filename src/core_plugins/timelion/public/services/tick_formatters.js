@@ -59,6 +59,9 @@ define(function () {
       'currency': function (val, axis) {
         return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
       },
+      'percent': function (val) {
+        return val * 100 + '%';
+      },
       'custom': function (val, axis) {
         const formattedVal = baseTickFormatter(val, axis);
         const prefix = axis.options.units.prefix;
