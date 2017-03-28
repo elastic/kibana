@@ -108,9 +108,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     return interval.val !== 'custom';
   };
 
-  $scope.toggleInterval = function () {
-    $scope.showInterval = !$scope.showInterval;
-  };
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Search',
@@ -236,10 +233,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         timefilter.enabled = !!timefield;
       });
 
-      $scope.$watch('state.interval', function (interval, oldInterval) {
-        if (interval !== oldInterval && interval === 'auto') {
-          $scope.showInterval = false;
-        }
+      $scope.$watch('state.interval', function () {
         $scope.fetch();
       });
 
@@ -250,9 +244,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         const buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
         if (buckets && buckets.length === 1) {
-          $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
-        } else {
-          $scope.intervalName = 'auto';
+          $scope.bucketInterval = buckets[0].buckets.getInterval();
         }
       });
 
