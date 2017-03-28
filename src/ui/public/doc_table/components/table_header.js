@@ -12,6 +12,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       columns: '=',
       sorting: '=',
       indexPattern: '=',
+      restrictEditing: '=?'
     },
     template: headerHtml,
     controller: function ($scope) {

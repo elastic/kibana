@@ -23,6 +23,7 @@ uiModules.get('kibana')
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      restrictEditing: '=?'
     },
     link: function ($scope) {
       const notify = new Notifier();
