@@ -45,7 +45,7 @@ export function readControlGroups() {
 
 function fileContentsToInteger(path) {
   return readFile(path).then(data => {
-    return parseInt(data.toString());
+    return parseInt(data.toString(), 10);
   });
 }
 
@@ -75,15 +75,15 @@ export function readCPUStat(controlGroup) {
 
         switch(fields[0]) {
           case 'nr_periods':
-            stat.number_of_elapsed_periods = parseInt(fields[1]);
+            stat.number_of_elapsed_periods = parseInt(fields[1], 10);
             break;
 
           case 'nr_throttled':
-            stat.number_of_times_throttled = parseInt(fields[1]);
+            stat.number_of_times_throttled = parseInt(fields[1], 10);
             break;
 
           case 'throttled_time':
-            stat.time_throttled_nanos = parseInt(fields[1]);
+            stat.time_throttled_nanos = parseInt(fields[1], 10);
             break;
         }
       });
