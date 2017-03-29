@@ -143,7 +143,6 @@ module.exports = () => Joi.object({
     }),
     profile: Joi.boolean().default(false)
   }).default(),
-
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false),
     v6ApiFormat: Joi.boolean().default(false)
@@ -157,7 +156,7 @@ module.exports = () => Joi.object({
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),
-      minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
+      minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
       maxZoom: Joi.number().default(10),
       tileSize: Joi.number(),
       subdomains: Joi.array().items(Joi.string()).single(),
