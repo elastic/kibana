@@ -1,3 +1,5 @@
+$buttonHeight: 30px;
+
 /**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
@@ -69,6 +71,7 @@
   font-size: $fontSize;
   font-weight: 400;
   line-height: $lineHeight;
+  height: $buttonHeight;
   text-decoration: none;
   border: none;
   border-radius: $buttonBorderRadius;
