@@ -207,7 +207,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     }
 
     _doRenderComplete() {
-
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
         return;
       }
