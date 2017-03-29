@@ -4,6 +4,7 @@ import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
+import reactcss from 'reactcss';
 
 class Timeseries extends Component {
 
@@ -108,13 +109,16 @@ class Timeseries extends Component {
     if (this.props.reversed) {
       className += ' reversed';
     }
-    const style = {};
-    if (this.props.legendPosition === 'bottom') {
-      style.flexDirection = 'column';
-    }
+    const styles = reactcss({
+      bottomLegend: {
+        content: {
+          flexDirection: 'column'
+        }
+      }
+    })({ bottomLegend: this.props.legendPosition === 'bottom' });
     return (
       <div className={className}>
-        <div style={style} className="rhythm_chart__content">
+        <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
               crosshair={this.props.crosshair}

@@ -228,19 +228,16 @@ class FlotChart extends Component {
   }
 
   render() {
-    const style = {
-      position: 'relative',
-      display: 'flex',
-      rowDirection: 'column',
-      flex: '1 0 auto',
-    };
     return (
       <Resize
         onResize={this.handleResize}
         ref={(el) => this.resize = el}
-        style={style}>
-        <div ref={(el) => this.target = el} style={style}/>
-      </Resize>);
+        className="rhythm_chart__timeseries-container">
+        <div
+          ref={(el) => this.target = el}
+          className="rhythm_chart__timeseries-container" />
+      </Resize>
+    );
   }
 
 }

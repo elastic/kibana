@@ -72,9 +72,20 @@ class GaugeVis extends Component {
           top: this.state.top,
           left: this.state.left,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
+        },
+        innerLine: {
+          strokeWidth: this.props.innerLine
+        },
+        gaugeLine: {
+          strokeWidth: this.props.gaugeLine
+        }
+      },
+      half: {
+        svg: {
+          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         }
       }
-    }, this.props);
+    }, { half: type === 'half' });
 
     const props = {
       circle: {
@@ -99,7 +110,6 @@ class GaugeVis extends Component {
     };
 
     if (type === 'half') {
-      styles.svg.transform = `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`;
       props.circle.transform = 'rotate(-197.8 60 60)';
       props.circleBackground.transform = 'rotate(162 60 60)';
     }
@@ -112,8 +122,8 @@ class GaugeVis extends Component {
     if (type === 'half') {
       svg = (
         <svg width={120.72} height={78.72}>
-          <circle {...props.circleBackground} style={{ strokeWidth: this.props.innerLine }}/>
-          <circle {...props.circle} style={{ strokeWidth: this.props.gaugeLine }}/>
+          <circle {...props.circleBackground} style={styles.innerLine}/>
+          <circle {...props.circle} style={styles.gaugeLine}/>
         </svg>
       );
     } else {
