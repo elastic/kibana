@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiButtonGroup Baseline is rendered 1`] = `
+<div
+  class="kuiButtonGroup"
+/>
+`;
+
+exports[`KuiButtonGroup Props children is rendered 1`] = `
+<div
+  class="kuiButtonGroup"
+>
+  Hello
+</div>
+`;
+
+exports[`KuiButtonGroup Props isUnited renders the united class 1`] = `
+<div
+  class="kuiButtonGroup kuiButtonGroup--united"
+/>
+`;

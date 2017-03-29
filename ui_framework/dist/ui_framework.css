@@ -119,8 +119,10 @@ body {
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
- * 2. Disable for Angular.
- * 3. Safari won't respect :enabled:active on links.
+ * 2. Safari won't respect :enabled:active on links.
+ * 3. disabled isn't a valid attribute for links, so we also need to use this class.
+ * 4. Links can be focused when they're "disabled", so at least make them look like they're not
+ *    focused.
  */
 .kuiButton {
   display: inline-block;
@@ -136,27 +138,29 @@ body {
   text-decoration: none;
   border: none;
   border-radius: 4px; }
-  .kuiButton:disabled {
-    cursor: default;
-    pointer-events: none;
-    /* 2 */ }
-  .kuiButton:active {
-    /* 3 */
+  .kuiButton.kuiButton-isDisabled, .kuiButton:disabled {
+    cursor: default; }
+  .kuiButton:active:not(.kuiButton-isDisabled) {
+    /* 2 */
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
   .kuiButton:focus {
+    outline: none;
+    /* 4 */ }
+  .kuiButton:focus:not(.kuiButton-isDisabled) {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
-    /* 3 */ }
+    /* 3 */
+    /* 4 */ }
 
-.kuiButton--iconText .kuiButton__icon:first-child {
-  margin-right: 4px; }
+.kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 8px; }
 
-.kuiButton--iconText .kuiButton__icon:last-child {
-  margin-left: 4px; }
+.kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 8px; }
 
 /**
  * 1. Override Bootstrap.
@@ -165,15 +169,15 @@ body {
 .kuiButton--basic {
   color: #5a5a5a;
   background-color: #F2F2F2; }
-  .kuiButton--basic:focus {
+  .kuiButton--basic:focus:not(.kuiButton-isDisabled) {
     color: #5a5a5a !important;
     /* 1 */ }
-  .kuiButton--basic:hover, .kuiButton--basic:active {
+  .kuiButton--basic:hover:not(.kuiButton-isDisabled), .kuiButton--basic:active:not(.kuiButton-isDisabled) {
     /* 2 */
     color: #ffffff !important;
     /* 1 */
     background-color: #9B9B9B !important; }
-  .kuiButton--basic:disabled {
+  .kuiButton--basic.kuiButton-isDisabled, .kuiButton--basic:disabled {
     color: #9B9B9B; }
 
 /**
@@ -183,14 +187,14 @@ body {
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1; }
-  .kuiButton--primary:hover, .kuiButton--primary:active {
+  .kuiButton--primary:hover:not(.kuiButton-isDisabled), .kuiButton--primary:active:not(.kuiButton-isDisabled) {
     /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #006E8A; }
-  .kuiButton--primary:disabled {
+  .kuiButton--primary.kuiButton-isDisabled, .kuiButton--primary:disabled {
     background-color: #B6D6E0; }
-  .kuiButton--primary:focus {
+  .kuiButton--primary:focus:not(.kuiButton-isDisabled) {
     color: #FFFFFF !important;
     /* 1 */ }
 
@@ -201,14 +205,14 @@ body {
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051; }
-  .kuiButton--danger:hover, .kuiButton--danger:active {
+  .kuiButton--danger:hover:not(.kuiButton-isDisabled), .kuiButton--danger:active:not(.kuiButton-isDisabled) {
     /* 2 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #A52E1F; }
-  .kuiButton--danger:disabled {
+  .kuiButton--danger.kuiButton-isDisabled, .kuiButton--danger:disabled {
     background-color: #efc0ba; }
-  .kuiButton--danger:focus {
+  .kuiButton--danger:focus:not(.kuiButton-isDisabled) {
     z-index: 1;
     /* 1 */
     outline: none !important;
@@ -227,12 +231,12 @@ body {
   color: #3CAED2 !important;
   /* 2 */
   background-color: transparent; }
-  .kuiButton--hollow:hover, .kuiButton--hollow:active {
+  .kuiButton--hollow:hover:not(.kuiButton-isDisabled), .kuiButton--hollow:active:not(.kuiButton-isDisabled) {
     /* 3 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
-  .kuiButton--hollow:disabled {
+  .kuiButton--hollow.kuiButton-isDisabled, .kuiButton--hollow:disabled {
     color: #dddddd !important;
     /* 1 */ }
 
