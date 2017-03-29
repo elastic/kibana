@@ -18,12 +18,21 @@
   </div>
 </div>
 
-<div class="vis-option-item">
+<div class="vis-option-item indented">
   <label>
     <input type="checkbox"
     name="autoPrecision"
     ng-model="agg.params.autoPrecision">
     Change precision on map zoom
+  </label>
+</div>
+
+<div class="vis-option-item indented">
+  <label>
+    <input type="checkbox"
+           name="useGeocentroid"
+           ng-model="agg.params.useGeocentroid">
+    Place markers off grid (use geocentroid)
   </label>
 </div>
 
