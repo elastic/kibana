@@ -10,6 +10,7 @@ import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import compareFilters from './lib/compare_filters';
 import uiModules from 'ui/modules';
+import chrome from 'ui/chrome';
 const module = uiModules.get('kibana');
 
 
@@ -44,6 +45,10 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
+
+      // Don't show filter "pinnability" when in embedded mode, as it doesn't make sense in that context
+      // as there will be no cross app navigation for which the filter should persist.
+      $scope.showFilterPin = () => chrome.getVisible();
 
       $scope.aceLoaded = function (editor) {
         editor.$blockScrolling = Infinity;
