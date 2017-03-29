@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiButton Baseline HTML attributes are rendered 1`] = `
+<button
+  aria-label="aria label"
+  class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
+  data-test-subj="test subject string"
+  disabled=""
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Baseline is rendered 1`] = `
+<button
+  class="kuiButton"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props children is rendered 1`] = `
+<button
+  class="kuiButton"
+>
+  <span>
+    <span>
+      Hello
+    </span>
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props icon is rendered with children 1`] = `
+<button
+  class="kuiButton kuiButton--iconText"
+>
+  <span>
+    Icon
+    <span>
+      Hello
+    </span>
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props icon is rendered without children 1`] = `
+<button
+  class="kuiButton kuiButton--iconText"
+>
+  <span>
+    Icon
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props iconPosition moves the icon to the right 1`] = `
+<button
+  class="kuiButton kuiButton--iconText"
+>
+  <span>
+    <span>
+      Hello
+    </span>
+    Icon
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
+<button
+  class="kuiButton kuiButton--iconText"
+>
+  <span>
+    <span
+      class="kuiButton__icon kuiIcon fa-spinner fa-spin"
+    />
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props isLoading renders a spinner 1`] = `
+<button
+  class="kuiButton kuiButton--iconText"
+>
+  <span>
+    <span
+      class="kuiButton__icon kuiIcon fa-spinner fa-spin"
+    />
+  </span>
+</button>
+`;
+
+exports[`KuiButton Props type basic renders the basic class 1`] = `
+<button
+  class="kuiButton kuiButton--basic"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props type danger renders the danger class 1`] = `
+<button
+  class="kuiButton kuiButton--danger"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props type hollow renders the hollow class 1`] = `
+<button
+  class="kuiButton kuiButton--hollow"
+>
+  <span />
+</button>
+`;
+
+exports[`KuiButton Props type primary renders the primary class 1`] = `
+<button
+  class="kuiButton kuiButton--primary"
+>
+  <span />
+</button>
+`;

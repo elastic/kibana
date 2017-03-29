@@ -15,16 +15,21 @@ export class GuideDemo extends Component {
   }
 
   update() {
-    // Inject HTML
+    // We'll just render the children if we have them.
+    if (this.props.children) {
+      return;
+    }
+
+    // Inject HTML.
     this.content.innerHTML = this.props.html;
 
-    // Inject JS
+    // Inject JS.
     const js = document.createElement('script');
     js.type = 'text/javascript';
     js.innerHTML = this.props.js;
     this.content.appendChild(js);
 
-    // Inject CSS
+    // Inject CSS.
     const css = document.createElement('style');
     css.innerHTML = this.props.css;
     this.content.appendChild(css);
@@ -38,12 +43,14 @@ export class GuideDemo extends Component {
 
     return (
       <div className={classes} ref={c => (this.content = c)}>
+        {this.props.children}
       </div>
     );
   }
 }
 
 GuideDemo.propTypes = {
+  children: PropTypes.node,
   js: PropTypes.string.isRequired,
   html: PropTypes.string.isRequired,
   css: PropTypes.string.isRequired,
