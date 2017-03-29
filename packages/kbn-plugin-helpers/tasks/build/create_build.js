@@ -35,7 +35,6 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
     })
     .then(function () {
       // install packages in build
-      var cmd = winCmd('npm');
       var options = {
         cwd: buildRoot,
         stdio: ['ignore', 'ignore', 'pipe'],
@@ -43,12 +42,11 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
       try {
         // use yarn if yarn lockfile is found in the build
-        cmd = winCmd('yarn');
         statSync(join(buildRoot, 'yarn.lock'));
-        execFileSync(cmd, ['install', '--production'], options);
+        execFileSync(winCmd('yarn'), ['install', '--production'], options);
       } catch (e) {
         // use npm if there is no yarn lockfile in the build
-        execFileSync(cmd, ['install', '--production', '--no-bin-links'], options);
+        execFileSync(winCmd('npm'), ['install', '--production', '--no-bin-links'], options);
       }
     });
 };
