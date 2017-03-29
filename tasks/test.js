@@ -51,11 +51,11 @@ module.exports = function (grunt) {
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
-    'uiFramework:test',
     'test:server',
     'test:ui',
     'test:browser',
-    'test:api'
+    'test:api',
+    'test:jest'
   ]);
 
   grunt.registerTask('test:dev', [

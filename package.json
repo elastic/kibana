@@ -48,6 +48,8 @@
     "test:ui:runner": "grunt test:ui:runner",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
+    "test:jest": "node scripts/jest --watch",
+    "test:jest-coverage": "node scripts/jest --coverage",
     "test:visualRegression": "grunt test:visualRegression",
     "checkLicenses": "grunt licenses",
     "build": "grunt build",
@@ -63,9 +65,7 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:dev": "node tasks/utils/ui_framework_test --env=jsdom --watch",
-    "uiFramework:coverage": "node tasks/utils/ui_framework_test --env=jsdom --coverage"
+    "uiFramework:start": "grunt uiFramework:start"
   },
   "repository": {
     "type": "git",
@@ -97,7 +97,7 @@
     "autoprefixer-loader": "2.0.0",
     "babel-cli": "6.18.0",
     "babel-core": "6.21.0",
-    "babel-jest": "18.0.0",
+    "babel-jest": "19.0.0",
     "babel-loader": "6.2.10",
     "babel-plugin-add-module-exports": "0.2.1",
     "babel-polyfill": "6.20.0",
