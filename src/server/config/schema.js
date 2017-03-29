@@ -181,6 +181,17 @@ module.exports = () => Joi.object({
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
   }).default(),
+  vectormap: Joi.object({
+    layers: Joi.array().items(Joi.object({
+      url: Joi.string(),
+      type: Joi.string(),
+      name: Joi.string(),
+      fields: Joi.array().items(Joi.object({
+        name: Joi.string(),
+        description: Joi.string()
+      }))
+    }))
+  }),
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they
     // require the elasticsearch plugin in order to function we need to turn
