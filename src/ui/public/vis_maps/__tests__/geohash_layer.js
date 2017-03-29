@@ -482,26 +482,6 @@ describe('kibana_map tests', function () {
       });
     });
 
-    it('heatmap', function () {
-
-      const options = {
-        'mapType': 'Heatmap',
-        'heatmap': {
-          'heatBlur': 15,
-          'heatMaxZoom': 0,
-          'heatMinOpacity': 0.1,
-          'heatNormalizeData': true,
-          'heatRadius': 25
-        }
-      };
-
-      const geohashLayer = new GeohashLayer(sampleData, options, kibanaMap.getZoomLevel(), kibanaMap);
-      kibanaMap.addLayer(geohashLayer);
-
-      expect(domNode.querySelectorAll('.leaflet-heatmap-layer')[0].nodeName).to.equal('CANVAS');
-
-    });
-
 
   });
 
