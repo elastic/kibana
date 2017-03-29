@@ -12,7 +12,7 @@
 <div class="filter-bar" ng-show="filters.length">
   <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
-      <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
+      <span ng-if="filter.$state.store === 'globalState' && showFilterPin()"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>
       <span ng-if="!filter.meta.alias">{{ filter.meta.key }}:</span>
       <span ng-if="!filter.meta.alias">"{{ filter.meta.value }}"</span>
@@ -22,7 +22,7 @@
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
       </a>
-      <a class="action filter-pin" ng-click="pinFilter(filter)" data-test-subj="pinFilter-{{ filter.meta.key }}">
+      <a class="action filter-pin" ng-if="showFilterPin()" ng-click="pinFilter(filter)" data-test-subj="pinFilter-{{ filter.meta.key }}">
         <i ng-show="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></i>
         <i ng-hide="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></i>
       </a>
@@ -90,10 +90,10 @@
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
     </div>
-    <div class="filter-link">
+    <div class="filter-link" ng-if="showFilterPin()">
       <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
     </div>
-    <div class="filter-link">
+    <div class="filter-link" ng-if="showFilterPin()">
       <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
     </div>
     <div class="filter-link">
