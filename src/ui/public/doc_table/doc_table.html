@@ -1,11 +1,29 @@
 <div
   class="doc-table-container"
   ng-if="hits.length"
-  ng-class="{ loading: searchSource.activeFetchCount > 0 }">
-  <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
-    <div ng-if="hits.length === sampleSize" class="doc-table-warning">
-      These are the first {{sampleSize}} documents matching
-      your search, refine your search to see others.
+  ng-class="{ loading: searchSource.activeFetchCount > 0 }"
+>
+  <div ng-if="!infiniteScroll">
+    <div class="kuiBar">
+      <div class="kuiBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-buttons
+          has-previous-page="pager.hasPreviousPage"
+          has-next-page="pager.hasNextPage"
+          on-page-next="onPageNext"
+          on-page-previous="onPagePrevious"
+        ></tool-bar-pager-buttons>
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
+      </div>
+      <div class="kuiBarSection">
+        <div ng-if="shouldShowLimitedResultsWarning()">
+          *Your search results are limited to {{sampleSize}} documents. Refine your search to see others.
+        </div>
+      </div>
     </div>
     <table class="kbn-table table" ng-if="indexPattern">
       <thead
@@ -16,7 +34,7 @@
         on-change-sort-order="onChangeSortOrder"
       ></thead>
       <tbody>
-        <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
+        <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
           columns="columns"
           sorting="sorting"
@@ -27,7 +45,29 @@
         ></tr>
       </tbody>
     </table>
-  </paginate>
+    <!-- ToolBarFooter -->
+    <div class="kuilBar">
+      <div class="kuiBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-buttons
+          has-previous-page="pager.hasPreviousPage"
+          has-next-page="pager.hasNextPage"
+          on-page-next="onPageNext"
+          on-page-previous="onPagePrevious"
+        ></tool-bar-pager-buttons>
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
+      </div>
+      <div class="kuiBarSection">
+        <div ng-if="shouldShowLimitedResultsWarning()">
+          *Your search results are limited to {{sampleSize}} documents. Refine your search to see others.
+        </div>
+      </div>
+    </div>
+  </div>
 
   <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
     <thead
