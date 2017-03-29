@@ -117,10 +117,22 @@ body {
     /* 1 */ }
 
 /**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
- * 2. Disable for Angular.
- * 3. Safari won't respect :enabled:active on links.
+ * 2. Links can be focused when they're "disabled" (since we're just faking this with a class), but
+ *    at least make them look like they're not focused.
  */
 .kuiButton {
   display: inline-block;
@@ -137,14 +149,28 @@ body {
   border: none;
   border-radius: 4px; }
   .kuiButton:disabled {
-    cursor: default;
-    pointer-events: none;
-    /* 2 */ }
-  .kuiButton:active {
-    /* 3 */
+    cursor: default; }
+  a.kuiButton.kuiButton-isDisabled {
+    cursor: default; }
+  .kuiButton:enabled:active {
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
+  a.kuiButton:not(.kuiButton-isDisabled):active {
+    /* 1 */
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
   .kuiButton:focus {
+    outline: none;
+    /* 2 */ }
+  .kuiButton:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  a.kuiButton:not(.kuiButton-isDisabled):focus {
+    /* 1 */
     z-index: 1;
     /* 1 */
     outline: none !important;
@@ -152,89 +178,175 @@ body {
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
     /* 3 */ }
 
-.kuiButton--iconText .kuiButton__icon:first-child {
-  margin-right: 4px; }
+/**
+   * 1. Solves whitespace problems introduced by inline elements.
+   */
+.kuiButton__inner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  /* 1 */ }
 
-.kuiButton--iconText .kuiButton__icon:last-child {
-  margin-left: 4px; }
+.kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 8px; }
+
+.kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 8px; }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--basic {
   color: #5a5a5a;
   background-color: #F2F2F2; }
-  .kuiButton--basic:focus {
-    color: #5a5a5a !important;
-    /* 1 */ }
-  .kuiButton--basic:hover, .kuiButton--basic:active {
-    /* 2 */
+  .kuiButton--basic:not(a):enabled:focus {
+    color: #5a5a5a; }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #5a5a5a; }
+  .kuiButton--basic:enabled:hover {
     color: #ffffff !important;
     /* 1 */
-    background-color: #9B9B9B !important; }
+    background-color: #9B9B9B !important;
+    /* 1 */ }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #9B9B9B !important;
+    /* 1 */ }
+  .kuiButton--basic:enabled:active {
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #9B9B9B !important;
+    /* 1 */ }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #9B9B9B !important;
+    /* 1 */ }
   .kuiButton--basic:disabled {
+    color: #9B9B9B; }
+  a.kuiButton--basic.kuiButton-isDisabled {
     color: #9B9B9B; }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--primary {
   color: #FFFFFF;
   background-color: #6EADC1; }
-  .kuiButton--primary:hover, .kuiButton--primary:active {
-    /* 2 */
+  .kuiButton--primary:not(a):enabled:focus {
+    color: #FFFFFF; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #FFFFFF; }
+  .kuiButton--primary:enabled:hover {
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #006E8A; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #006E8A; }
+  .kuiButton--primary:enabled:active {
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #006E8A; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):active {
+    /* 1 */
     color: #FFFFFF !important;
     /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:disabled {
     background-color: #B6D6E0; }
-  .kuiButton--primary:focus {
-    color: #FFFFFF !important;
-    /* 1 */ }
+  a.kuiButton--primary.kuiButton-isDisabled {
+    background-color: #B6D6E0; }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--danger {
   color: #FFFFFF;
   background-color: #D76051; }
-  .kuiButton--danger:hover, .kuiButton--danger:active {
-    /* 2 */
-    color: #FFFFFF !important;
-    /* 1 */
-    background-color: #A52E1F; }
-  .kuiButton--danger:disabled {
-    background-color: #efc0ba; }
-  .kuiButton--danger:focus {
+  .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
+    color: #FFFFFF; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */
+    color: #FFFFFF; }
+  .kuiButton--danger:enabled:hover {
     color: #FFFFFF !important;
-    /* 1 */ }
+    /* 1 */
+    background-color: #A52E1F; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #A52E1F; }
+  .kuiButton--danger:enabled:active {
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #A52E1F; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #A52E1F; }
+  .kuiButton--danger:disabled {
+    background-color: #efc0ba; }
+  a.kuiButton--danger.kuiButton-isDisabled {
+    background-color: #efc0ba; }
 
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
- * 3. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--hollow {
   color: #3CAED2 !important;
   /* 2 */
   background-color: transparent; }
-  .kuiButton--hollow:hover, .kuiButton--hollow:active {
-    /* 3 */
+  .kuiButton--hollow:enabled:hover {
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+  a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+  .kuiButton--hollow:enabled:active {
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+  a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+    /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
   .kuiButton--hollow:disabled {
-    color: #dddddd !important;
-    /* 1 */ }
+    color: #dddddd; }
+  a.kuiButton--hollow.kuiButton-isDisabled {
+    color: #dddddd; }
 
 .kuiButtonGroup {
   display: -webkit-box;

@@ -9,6 +9,8 @@ export default grunt => ({
       'scripts',
       'tasks',
       'test',
+      'ui_framework/components',
+      'ui_framework/doc_site',
       'utilities',
     ],
   },

@@ -1,5 +1,5 @@
 export function getIsCodeViewerOpen(state) {
-  return state.codeViewer.isOpen
+  return state.codeViewer.isOpen;
 }
 
 export function getSections(state) {

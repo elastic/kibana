@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiButtonIcon Baseline is rendered 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon"
+/>
+`;
+
+exports[`KuiButtonIcon Props className renders the classes 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon testClass1 testClass2"
+/>
+`;
+
+exports[`KuiButtonIcon Props type create renders the create class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-plus"
+/>
+`;
+
+exports[`KuiButtonIcon Props type delete renders the delete class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-trash"
+/>
+`;
+
+exports[`KuiButtonIcon Props type loading renders the loading class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-spinner fa-spin"
+/>
+`;
+
+exports[`KuiButtonIcon Props type next renders the next class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-chevron-right"
+/>
+`;
+
+exports[`KuiButtonIcon Props type previous renders the previous class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-chevron-left"
+/>
+`;
