@@ -1917,7 +1917,7 @@ body {
 /**
  * 1. When it expands, the search input should lie on top of the content.
  * 2. Expand as the user enters text.
- * 3. Prevent the search input from running off the bottom of the screen and becoming inaccessible.
+ * 3. Cap the height so that we can offer auto-completion suggestions below the input.
  * 4. When the input is collapsed, we want text input to be truncated with an ellipsis.
  */
 .kuiLocalSearchInput--expandable {
@@ -1936,7 +1936,7 @@ body {
     /* 1 */
     height: auto;
     /* 2 */
-    max-height: calc(100vh - 200px);
+    max-height: 180px;
     /* 3 */
     white-space: normal;
     overflow: auto;
