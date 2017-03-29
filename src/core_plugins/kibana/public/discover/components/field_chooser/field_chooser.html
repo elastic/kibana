@@ -9,7 +9,7 @@
       <ui-select-match>
         {{$select.selected}}
       </ui-select-match>
-      <ui-select-choices repeat="id in indexPatternList | filter:$select.search">
+      <ui-select-choices repeat="id in indexPatternList | filter:$select.search | orderBy">
         <div ng-bind-html="id"></div>
       </ui-select-choices>
     </ui-select>

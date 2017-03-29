@@ -101,7 +101,8 @@ describe('discover field chooser directives', function () {
 
   describe('Index list', function () {
     it('should be in alphabetical order', function (done) {
-      expect($elem.find('li.sidebar-item-title').text()).to.be('abc');
+      $elem.find('.ui-select-toggle').click();
+      expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
       done();
     });
   });
