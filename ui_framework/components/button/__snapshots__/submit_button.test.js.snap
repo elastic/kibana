@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiSubmitButton Baseline HTML attributes are rendered 1`] = `
+<input
+  aria-label="aria label"
+  class="kuiButton testClass1 testClass2"
+  data-test-subj="test subject string"
+  disabled=""
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Baseline is rendered 1`] = `
+<input
+  class="kuiButton"
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props children is rendered as value 1`] = `
+<input
+  class="kuiButton"
+  type="submit"
+  value="Hello"
+/>
+`;
+
+exports[`KuiSubmitButton Props type basic renders the basic class 1`] = `
+<input
+  class="kuiButton kuiButton--basic"
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props type danger renders the danger class 1`] = `
+<input
+  class="kuiButton kuiButton--danger"
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props type hollow renders the hollow class 1`] = `
+<input
+  class="kuiButton kuiButton--hollow"
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props type primary renders the primary class 1`] = `
+<input
+  class="kuiButton kuiButton--primary"
+  type="submit"
+/>
+`;

@@ -13,16 +13,20 @@
           class="kuiButton kuiButton--basic kuiButton--iconText"
           href="{{ link }}"
         >
-          <span class="kuiButton__icon kuiIcon fa-eye"></span>
-          View {{ title }}
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-eye"></span>
+            <span>View {{ title }}</span>
+          </span>
         </a>
 
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText"
           ng-click="delete()"
         >
-          <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
-          Delete {{ title }}
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
+            <span>Delete {{ title }}</span>
+          </span>
         </button>
       </div>
     </div>

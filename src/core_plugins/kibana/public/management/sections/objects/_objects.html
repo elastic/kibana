@@ -13,8 +13,10 @@
           class="kuiButton kuiButton--basic kuiButton--iconText"
           ng-click="exportAll()"
         >
-          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
-          Export Everything
+          <span class="kuiButton__inner">
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
+            <span>Export Everything</span>
+          </span>
         </button>
 
         <file-upload
@@ -25,8 +27,10 @@
             class="kuiButton kuiButton--basic kuiButton--iconText"
             data-import-saved-objects-button
           >
-            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
-            Import
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
+              <span>Import</span>
+            </span>
           </button>
         </file-upload>
       </div>
@@ -84,8 +88,10 @@
             aria-label="Delete selected objects"
             ng-disabled="selectedItems.length == 0"
           >
-            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
-            Delete
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
+              <span>Delete</span>
+            </span>
           </button>
 
           <!-- Bulk export button -->
@@ -95,8 +101,10 @@
             aria-label="Export selected objects"
             ng-disabled="selectedItems.length == 0"
           >
-            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
-            Export
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
+              <span>Export</span>
+            </span>
           </button>
         </div>
 
