@@ -224,7 +224,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
      */
     async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
-      await testSubjects.click('dashboardSaveButton');
+      await testSubjects.click('dashboardSaveMenuItem');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 

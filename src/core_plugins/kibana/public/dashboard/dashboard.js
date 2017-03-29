@@ -8,7 +8,7 @@ import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { getDashboardTitle, getUnsavedChangesWarningMessage, DASHBOARD_TITLE_CLONE_SUFFIX } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -238,12 +238,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         );
       };
 
-      const navActions = {};
-      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
-      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
-
-      updateViewMode(dashboardState.getViewMode());
-
       $scope.save = function () {
         return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
           $scope.kbnTopNav.close('save');
@@ -256,8 +250,28 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
               updateViewMode(DashboardViewMode.VIEW);
             }
           }
+          return id;
         }).catch(notify.fatal);
       };
+
+      const navActions = {};
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.CLONE] = () => {
+        dashboardState.savedDashboard.copyOnSave = true;
+        const currentTitle = $scope.model.title;
+        dashboardState.setTitle(currentTitle + DASHBOARD_TITLE_CLONE_SUFFIX);
+        $scope.save().then(id => {
+          // If the save wasn't successful, put the original title back.
+          if (!id) {
+            $scope.model.title = currentTitle;
+            // There is a watch on $scope.model.title that *should* call this automatically but
+            // angular is failing to trigger it, so do so manually here.
+            dashboardState.setTitle(currentTitle);
+          }
+        });
+      };
+      updateViewMode(dashboardState.getViewMode());
 
       // update root source when filters update
       $scope.$listen(filterBar, 'update', function () {
