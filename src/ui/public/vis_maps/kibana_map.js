@@ -420,6 +420,9 @@ class KibanaMap extends EventEmitter {
     this._leafletBaseLayer = baseLayer;
     this._leafletBaseLayer.addTo(this._leafletMap);
     this._leafletBaseLayer.bringToBack();
+    if (settings.options.minZoom > this._leafletMap.getZoom()) {
+      this._leafletMap.setZoom(settings.options.minZoom);
+    }
     this.resize();
 
   }

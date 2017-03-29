@@ -26,7 +26,7 @@ describe('kibana_map tests', function () {
   }
 
 
-  describe('GeohashGridLayer - basics', function () {
+  describe('GeohashGridLayer', function () {
 
     beforeEach(async function () {
       setupDOM();
@@ -45,28 +45,6 @@ describe('kibana_map tests', function () {
       kibanaMap.destroy();
       teardownDOM();
     });
-
-    it('create and verify', function () {
-
-      const options = {
-        'mapType': 'Scaled Circle Markers',
-        'heatmap': {
-          'heatBlur': 15,
-          'heatMaxZoom': 0,
-          'heatMinOpacity': 0.1,
-          'heatNormalizeData': true,
-          'heatRadius': 25
-        }
-      };
-
-      const geohashLayer = new GeohashLayer(sampleData, options, kibanaMap.getZoomLevel(), kibanaMap);
-      kibanaMap.addLayer(geohashLayer);
-
-      const markers = domNode.querySelectorAll('path.leaflet-clickable');
-      expect(markers.length).to.equal(32);
-
-    });
-
 
     [
       {
@@ -503,6 +481,28 @@ describe('kibana_map tests', function () {
         }
       });
     });
+
+    it('heatmap', function () {
+
+      const options = {
+        'mapType': 'Heatmap',
+        'heatmap': {
+          'heatBlur': 15,
+          'heatMaxZoom': 0,
+          'heatMinOpacity': 0.1,
+          'heatNormalizeData': true,
+          'heatRadius': 25
+        }
+      };
+
+      const geohashLayer = new GeohashLayer(sampleData, options, kibanaMap.getZoomLevel(), kibanaMap);
+      kibanaMap.addLayer(geohashLayer);
+
+      expect(domNode.querySelectorAll('.leaflet-heatmap-layer')[0].nodeName).to.equal('CANVAS');
+
+    });
+
+
   });
 
 });
