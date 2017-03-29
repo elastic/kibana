@@ -36,7 +36,6 @@ bdd.describe('visualize app', function () {
   require('./_data_table');
   require('./_metric_chart');
   require('./_pie_chart');
-  require('./_tile_map');
   require('./_vertical_bar_chart');
   require('./_heatmap_chart');
   require('./_point_series_options');
