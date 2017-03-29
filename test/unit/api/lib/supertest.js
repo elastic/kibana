@@ -7,6 +7,6 @@ import serverConfig from '../../../server_config';
 export const supertest = supertestAsPromised(
   formatUrl({
     ...serverConfig.servers.kibana,
-    pathname: '/api'
+    pathname: '/api',
   })
 );

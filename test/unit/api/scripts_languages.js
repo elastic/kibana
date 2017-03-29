@@ -6,18 +6,18 @@ describe('Script Languages API', function getLanguages() {
   before(() => emptyKibana.setup());
   after(() => emptyKibana.teardown());
 
-  it('should return 200 with an array of languages', function () {
+  it('should return 200 with an array of languages', () => {
     return supertest.get('/kibana/scripts/languages')
     .expect(200)
-    .then(function (response) {
+    .then((response) => {
       expect(response.body).to.be.an('array');
     });
   });
 
-  it('should only return langs enabled for inline scripting', function () {
+  it('should only return langs enabled for inline scripting', () => {
     return supertest.get('/kibana/scripts/languages')
     .expect(200)
-    .then(function (response) {
+    .then((response) => {
       expect(response.body).to.contain('expression');
       expect(response.body).to.contain('painless');
 

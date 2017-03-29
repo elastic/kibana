@@ -1,6 +1,6 @@
-const { Client } = require('elasticsearch');
-const serverConfig = require('../../../server_config');
-const pkg = require('../../../../package.json');
+import { Client } from 'elasticsearch';
+import serverConfig from '../../../server_config';
+import pkg from '../../../../package.json';
 
 export const client = new Client({
   host: serverConfig.servers.elasticsearch
