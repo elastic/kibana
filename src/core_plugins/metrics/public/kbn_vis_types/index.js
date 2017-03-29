@@ -17,7 +17,7 @@ export default function MetricsVisProvider(Private) {
     name: 'metrics',
     title: 'Time Series Visual Builder',
     icon: 'fa-area-chart',
-    description: `Create a time series based visualization for metrics. Perfect
+    description: `Experimental Feature: Create a time series based visualization for metrics. Perfect
         for creating visualizations for time series based metrics using the
         powerful pipeline aggs Elasticsearch feature`,
     template: require('./vis.html'),

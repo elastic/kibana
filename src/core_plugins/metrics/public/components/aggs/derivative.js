@@ -9,7 +9,7 @@ import createTextHandler from '../lib/create_text_handler';
 class DerivativeAgg extends Component {
 
   render() {
-    const { siblings, panel } = this.props;
+    const { siblings } = this.props;
 
     const defaults = { unit: '' };
     const model = { ...defaults, ...this.props.model };
@@ -29,7 +29,6 @@ class DerivativeAgg extends Component {
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>

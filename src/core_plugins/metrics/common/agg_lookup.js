@@ -63,15 +63,21 @@ export function isBasicAgg(item) {
   return _.includes(Object.keys(byType.basic), item.type);
 }
 
-export function createOptions(type = '_all') {
+export function createOptions(type = '_all', siblings = []) {
   let aggs = byType[type];
   if (!aggs)  aggs = byType._all;
+  let enablePipelines = siblings.some(isBasicAgg);
+  if (siblings.length <= 1) enablePipelines = false;
   return _(aggs)
     .map((label, value) => {
-      const disabled = false;
-      return { label, value, disabled };
+      const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
+      return {
+        label: disabled ? `${label} (use the "+" button to add this pipeline agg)` : label,
+        value,
+        disabled
+      };
     })
-    .sortBy('label')
     .value();
 }
+
 export default lookup;

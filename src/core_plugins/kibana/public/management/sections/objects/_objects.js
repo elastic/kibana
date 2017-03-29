@@ -177,7 +177,7 @@ uiModules.get('apps/management')
           );
         })
           .then((overwriteAll) => {
-            return Promise.map(docs, (doc) => {
+            function importDocument(doc) {
               const { service } = find($scope.services, { type: doc._type }) || {};
 
               if (!service) {
@@ -203,11 +203,34 @@ uiModules.get('apps/management')
                       err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                       notify.error(err);
                     });
-                })
-                .then(refreshIndex)
-                .then(refreshData)
-                .catch(notify.error);
-            });
+                });
+            }
+
+            function groupByType(docs) {
+              const defaultDocTypes = {
+                searches: [],
+                other: [],
+              };
+
+              return docs.reduce((types, doc) => {
+                switch (doc._type) {
+                  case 'search':
+                    types.searches.push(doc);
+                    break;
+                  default:
+                    types.other.push(doc);
+                }
+                return types;
+              }, defaultDocTypes);
+            }
+
+            const docTypes = groupByType(docs);
+
+            return Promise.map(docTypes.searches, importDocument)
+              .then(() => Promise.map(docTypes.other, importDocument))
+              .then(refreshIndex)
+              .then(refreshData)
+              .catch(notify.error);
           });
       };
 

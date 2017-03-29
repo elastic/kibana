@@ -145,7 +145,6 @@ class PercentileAgg extends Component {
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
                 siblings={this.props.siblings}
-                panelType={panel.type}
                 value={model.type}
                 onChange={handleSelectChange('type')}/>
             </div>

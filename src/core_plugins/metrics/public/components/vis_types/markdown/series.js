@@ -104,6 +104,9 @@ function MarkdownSeries(props) {
               value={model.var_name}/>
           </div>
           <AddDeleteButtons
+            addTooltip="Add Series"
+            deleteTooltip="Delete Series"
+            cloneTooltip="Clone Series"
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
