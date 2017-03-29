@@ -2,11 +2,41 @@ import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
+import HttpProxyAgent from 'http-proxy-agent';
+import URL from 'url';
+
+function getProxyAgent(sourceUrl) {
+  const httpProxy = process.env.HTTP_PROXY;
+  // we have a proxy detected, lets use it
+  if (httpProxy && httpProxy !== '') {
+    // get the hostname of the sourceUrl
+    const hostname = URL.parse(sourceUrl).hostname;
+    const noProxy = process.env.NO_PROXY || '';
+
+    // proxy if the hostname is not in noProxy
+    const shouldProxy = (noProxy.indexOf(hostname) === -1);
+
+    if (shouldProxy) {
+      return new HttpProxyAgent(httpProxy);
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.
   return fn(cb => {
-    const req = Wreck.request('GET', sourceUrl, { timeout, redirects: maxRedirects }, (err, resp) => {
+    const reqOptions = { timeout, redirects: maxRedirects };
+    const proxyAgent = getProxyAgent(sourceUrl);
+
+    if (proxyAgent) {
+      reqOptions.agent = proxyAgent;
+    }
+
+    const req = Wreck.request('GET', sourceUrl, reqOptions, (err, resp) => {
       if (err) {
         if (err.code === 'ECONNREFUSED') {
           err = new Error('ENOTFOUND');
