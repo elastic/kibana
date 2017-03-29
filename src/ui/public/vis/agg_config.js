@@ -260,6 +260,11 @@ export default function AggConfigFactory(Private) {
     );
   };
 
+  AggConfig.prototype.getRequestAggs = function () {
+    if (!this.type) return;
+    return this.type.getRequestAggs(this) || [this];
+  };
+
   AggConfig.prototype.getResponseAggs = function () {
     if (!this.type) return;
     return this.type.getResponseAggs(this) || [this];
