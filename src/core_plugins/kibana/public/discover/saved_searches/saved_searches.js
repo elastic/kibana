@@ -21,6 +21,7 @@ module.service('savedSearches', function (Promise, config, kbnIndex, esAdmin, cr
     noun: 'Saved Search',
     nouns: 'saved searches'
   };
+
   savedSearchLoader.urlFor = function (id) {
     return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };

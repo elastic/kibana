@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import engine from './engine';
+const _ = require('lodash');
+const engine = require('./engine');
 
 function CompilingContext(endpoint_id, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;

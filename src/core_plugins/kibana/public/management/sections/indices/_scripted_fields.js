@@ -4,8 +4,6 @@ import controlsHtml from 'plugins/kibana/management/sections/indices/_field_cont
 import dateScripts from 'plugins/kibana/management/sections/indices/_date_scripts';
 import uiModules from 'ui/modules';
 import scriptedFieldsTemplate from 'plugins/kibana/management/sections/indices/_scripted_fields.html';
-import { getSupportedScriptingLangs } from 'ui/scripting_langs';
-import { scriptedFields as docLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
 .directive('scriptedFields', function (kbnUrl, Notifier, $filter, confirmModal) {
@@ -23,7 +21,6 @@ uiModules.get('apps/management')
       const fieldCreatorPath = '/management/kibana/indices/{{ indexPattern }}/scriptedField';
       const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
-      $scope.docLinks = docLinks;
       $scope.perPage = 25;
       $scope.columns = [
         { title: 'name' },
@@ -112,12 +109,6 @@ uiModules.get('apps/management')
           onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
         };
         confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
-      };
-
-      $scope.getDeprecatedLanguagesInUse = function () {
-        const fields = $scope.indexPattern.getScriptedFields();
-        const langsInUse = _.uniq(_.map(fields, 'lang'));
-        return _.difference(langsInUse, getSupportedScriptingLangs());
       };
     }
   };

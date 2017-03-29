@@ -8,7 +8,7 @@ set -e
 if [ -n "$WORKSPACE" ]; then
   cd "$WORKSPACE"
 else
-  echo 'Unable to find the $WORKSPACE environment variable, is this jenkins?'
+  echo "Unable to find the $WORKSPACE environment variable, is this jenkins?"
   exit 1
 fi
 

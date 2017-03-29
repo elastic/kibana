@@ -36,6 +36,5 @@ export default function DocRequestProvider(Private) {
     }
   }
 
-
   return AbstractDocRequest;
 }

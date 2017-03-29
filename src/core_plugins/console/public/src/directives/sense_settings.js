@@ -1,4 +1,3 @@
-import * as settings from '../settings';
 require('ui/directives/input_focus');
 
 require('ui/modules')
@@ -9,6 +8,8 @@ require('ui/modules')
     template: require('./settings.html'),
     controllerAs: 'settings',
     controller: function ($scope, $element) {
+      const settings = require('../settings');
+
       this.vals = settings.getCurrentSettings();
       this.apply = () => {
         this.vals = settings.updateSettings(this.vals);

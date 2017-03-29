@@ -1,0 +1,1 @@
+export { createLog } from './log';

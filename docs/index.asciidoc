@@ -5,9 +5,9 @@
 release-state can be: released | prerelease | unreleased
 //////////
 :release-state:  unreleased
-:version:        5.4.0
-:major-version:  5.x
-:branch:         5.x
+:version:        6.0.0-alpha1
+:major-version:  6.x
+:branch:         master
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
@@ -42,5 +42,3 @@ include::management.asciidoc[]
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
-
-include::release-notes.asciidoc[]

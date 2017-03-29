@@ -15,7 +15,6 @@ import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';
 
 export default function VisFactory(Notifier, Private) {
-
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(RegistryVisTypesProvider);
   const AggConfigs = Private(VisAggConfigsProvider);

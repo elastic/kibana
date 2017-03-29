@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggConfigFactory(Private, fieldTypeFilter) {
+export default function AggConfigFactory(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -152,13 +152,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     const fieldOptions = this.getFieldOptions();
 
     if (fieldOptions) {
-      const prevField = fieldOptions.byName[this.fieldName()] || null;
-      let filters = fieldOptions.filterFieldTypes;
-      if (_.isFunction(fieldOptions.filterFieldTypes)) {
-        filters = fieldOptions.filterFieldTypes.bind(this, this.vis);
-      }
-      const fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, filters);
-      field = _.contains(fieldOpts, prevField) ? prevField : null;
+      field = fieldOptions.byName[this.fieldName()] || null;
     }
 
     return this.fillDefaults({ row: this.params.row, field: field });

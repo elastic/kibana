@@ -26,7 +26,7 @@ window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
-    esApiVersion: '5.x',
+    esApiVersion: 'master',
     esRequestTimeout: '300000',
     tilemapsConfig: {
       deprecated: {

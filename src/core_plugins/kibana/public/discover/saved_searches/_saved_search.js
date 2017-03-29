@@ -31,11 +31,11 @@ module.factory('SavedSearch', function (courier) {
   SavedSearch.type = 'search';
 
   SavedSearch.mapping = {
-    title: 'string',
-    description: 'string',
+    title: 'text',
+    description: 'text',
     hits: 'integer',
-    columns: 'string',
-    sort: 'string',
+    columns: 'keyword',
+    sort: 'keyword',
     version: 'integer'
   };
 

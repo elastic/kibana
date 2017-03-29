@@ -8,7 +8,7 @@ let utils = require('../utils');
 let es = require('../es');
 import chrome from 'ui/chrome';
 
-import smartResize from '../smart_resize';
+const smartResize = require('../smart_resize');
 
 function createInstance($el) {
   var aceEditor = ace.edit($el[0]);

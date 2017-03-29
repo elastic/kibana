@@ -8,7 +8,6 @@ import { bdd } from '../../../support';
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('dashboard tab', function describeIndexTests() {
-
   bdd.before(async function () {
     return PageObjects.dashboard.initTests();
   });
@@ -65,7 +64,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     const titles = PageObjects.dashboard.getTestVisualizationNames();
     const visObjects = [
       { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[0] },
-      { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
+      {  dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
       { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[2] },
       { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[3] },
       { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[4] },
@@ -79,9 +78,6 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
           expect(panelTitles).to.eql(visObjects);
         });
-    })
-    .then(function () {
-      PageObjects.common.saveScreenshot('Dashboard-has-visualizations');
     });
   });
 });

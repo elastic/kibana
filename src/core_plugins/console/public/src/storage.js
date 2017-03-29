@@ -1,4 +1,4 @@
-import { transform, keys, startsWith } from 'lodash';
+const { transform, keys, startsWith } = require('lodash');
 
 class Storage {
   constructor(engine, prefix) {

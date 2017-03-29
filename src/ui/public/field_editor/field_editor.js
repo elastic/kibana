@@ -9,14 +9,14 @@ import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
-import { GetEnabledScriptingLangsProvider, getSupportedScriptingLangs } from '../scripting_langs';
+import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce, confirmModal) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
-  const getEnabledScriptingLangs = Private(GetEnabledScriptingLangsProvider);
+  const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
 
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
@@ -37,8 +37,8 @@ uiModules
       const notify = new Notifier({ location: 'Field Editor' });
 
       self.docLinks = docLinks;
-      getEnabledScriptingLangs().then((langs) => {
-        self.scriptingLangs = langs;
+      getScriptingLangs().then((langs) => {
+        self.scriptingLangs = _.intersection(langs, ['expression', 'painless']);
         if (!_.includes(self.scriptingLangs, self.field.lang)) {
           self.field.lang = undefined;
         }
@@ -96,10 +96,6 @@ uiModules
           `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
           confirmModalOptions
         );
-      };
-
-      self.isSupportedLang = function (lang) {
-        return _.contains(getSupportedScriptingLangs(), lang);
       };
 
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {
@@ -171,6 +167,13 @@ uiModules
       function getFieldFormatType() {
         if (self.selectedFormatId) return fieldFormats.getType(self.selectedFormatId);
         else return fieldFormats.getDefaultType(self.field.type);
+      }
+
+      function getScriptingLangs() {
+        return getEnabledScriptingLanguages()
+        .then((enabledLanguages) => {
+          return _.intersection(enabledLanguages, getSupportedScriptingLanguages());
+        });
       }
 
       function initDefaultFormat() {

@@ -100,10 +100,10 @@ These guidelines will help you get your Pull Request into shape so that a code r
 
 ### Setting Up Your Development Environment
 
-Clone the `kibana` repo and change directory into it
+Fork, then clone the `kibana` repo and change directory into it
 
 ```bash
-git clone https://github.com/elastic/kibana.git kibana
+git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
@@ -146,7 +146,7 @@ Now you can point your web browser to https://localhost:5601 and start using Kib
 
 #### Customizing `config/kibana.dev.yml`
 
-The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
+The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/current/settings.html).
 
 #### Potential Optimization Pitfalls
 
@@ -262,7 +262,7 @@ npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnSe
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
-* Run Kibana with `npm start -- --no-ssl --host=computer.local` (subtituting your computer name).
+* Run Kibana with `npm start -- --no-ssl --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 
 #### Running Browser Automation Tests

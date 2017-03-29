@@ -168,9 +168,10 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
         .index(kbnIndex)
         .type(esType)
         .id(this.id);
+
       // check that the mapping for this esType is defined
       return mappingSetup.isDefined(esType)
-        .then((defined) => {
+        .then(function (defined) {
           // if it is already defined skip this step
           if (defined) return true;
 
@@ -178,7 +179,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
             properties: {
               // setup the searchSource mapping, even if it is not used but this type yet
               searchSourceJSON: {
-                type: 'string'
+                type: 'text'
               }
             }
           };

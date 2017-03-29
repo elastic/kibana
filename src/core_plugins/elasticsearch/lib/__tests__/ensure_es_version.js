@@ -3,7 +3,6 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import url from 'url';
-import SetupError from '../setup_error';
 
 import serverConfig from '../../../../../test/server_config';
 import { ensureEsVersion } from '../ensure_es_version';
@@ -17,10 +16,6 @@ describe('plugins/elasticsearch', () => {
     beforeEach(function () {
       server = {
         log: sinon.stub(),
-        // This is required or else we get a SetupError.
-        config: () => ({
-          get: sinon.stub(),
-        }),
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }),
@@ -82,7 +77,7 @@ describe('plugins/elasticsearch', () => {
       try {
         await ensureEsVersion(server, KIBANA_VERSION);
       } catch (e) {
-        expect(e).to.be.a(SetupError);
+        expect(e).to.be.a(Error);
       }
     });
 
@@ -95,7 +90,7 @@ describe('plugins/elasticsearch', () => {
       try {
         await ensureEsVersion(server, KIBANA_VERSION);
       } catch (e) {
-        expect(e).to.be.a(SetupError);
+        expect(e).to.be.a(Error);
       }
     });
 

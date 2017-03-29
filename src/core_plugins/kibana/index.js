@@ -9,6 +9,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
+import handleEsError from './server/lib/handle_es_error';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -52,6 +53,7 @@ module.exports = function (kibana) {
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
+
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
             tilemapsConfig: {
@@ -137,7 +139,9 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+
       server.expose('systemApi', systemApi);
+      server.expose('handleEsError', handleEsError);
     }
   });
 };

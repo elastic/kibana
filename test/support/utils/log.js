@@ -12,6 +12,14 @@ class Log {
     console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
   }
 
+  info(...args) {
+    this.log('INFO', util.format(...args));
+  }
+
+  error(...args) {
+    this.log('ERROR', util.format(...args));
+  }
+
   debug(...args) {
     if (config.debug) this.log(...args);
   }

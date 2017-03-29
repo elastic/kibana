@@ -1,4 +1,4 @@
-import ResizeCheckerProvider from 'ui/vislib/lib/resize_checker'
+import { ResizeCheckerProvider } from 'ui/resize_checker'
 
 export function useResizeCheckerProvider(Private) {
   const ResizeChecker = Private(ResizeCheckerProvider);

@@ -2,7 +2,7 @@ import _ from 'lodash';
 let ace = require('ace');
 let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');
-import smartResize from './smart_resize';
+const smartResize = require('./smart_resize');
 
 let output;
 export function initializeOutput($el) {

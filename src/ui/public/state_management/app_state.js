@@ -11,7 +11,6 @@
 import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
-
 import 'ui/persisted_state';
 
 const urlParam = '_a';
