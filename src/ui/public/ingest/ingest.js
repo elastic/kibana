@@ -1,13 +1,10 @@
-import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
+import { keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 
 export default function IngestProvider($rootScope, $http, config, $q, Private, indexPatterns) {
-
   const ingestAPIPrefix = chrome.addBasePath('/api/kibana/ingest');
-  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
 
   this.save = function (indexPattern) {
     if (_.isEmpty(indexPattern)) {
@@ -63,5 +60,4 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
       headers: { 'Content-Type': undefined }
     });
   };
-
 }

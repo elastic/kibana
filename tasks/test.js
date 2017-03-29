@@ -1,6 +1,6 @@
 import _, { keys } from 'lodash';
 
-const visualRegression = require('../utilities/visual_regression');
+import visualRegression from '../utilities/visual_regression';
 
 module.exports = function (grunt) {
   grunt.registerTask('test:visualRegression', [

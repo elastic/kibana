@@ -1,5 +1,5 @@
 import { constant, once, compact, flatten } from 'lodash';
-import { promisify, resolve, fromNode } from 'bluebird';
+import { resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import Config from './config/config';
@@ -85,7 +85,9 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server, config } = this;
+    const {
+      server
+    } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));

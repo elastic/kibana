@@ -120,7 +120,7 @@ module.exports = function (kibana) {
       }
     },
 
-    init: function (server, options) {
+    init: function (server) {
       // uuid
       manageUuid(server);
       // routes

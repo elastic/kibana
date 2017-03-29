@@ -4,12 +4,7 @@ import {
   DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
 } from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
-import {
-  bdd,
-  scenarioManager,
-  esClient,
-  elasticDump
-} from '../../../support';
+import { bdd, scenarioManager, esClient, elasticDump } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

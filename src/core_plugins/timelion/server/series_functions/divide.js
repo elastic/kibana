@@ -1,6 +1,5 @@
-const reduce = require('../lib/reduce.js');
-
-const Chainable = require('../lib/classes/chainable');
+import reduce from '../lib/reduce.js';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('divide', {
   args: [
     {

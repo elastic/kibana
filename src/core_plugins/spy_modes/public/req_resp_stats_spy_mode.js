@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import reqRespStatsHTML from 'plugins/spy_modes/req_resp_stats_spy_mode.html';
 
-const linkReqRespStats = function ($scope, config) {
+const linkReqRespStats = function ($scope) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
   $scope.$watchMulti([
     'req',

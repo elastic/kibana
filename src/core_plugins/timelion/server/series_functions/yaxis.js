@@ -1,6 +1,6 @@
-const alter = require('../lib/alter.js');
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
 
-const Chainable = require('../lib/classes/chainable');
 module.exports = new Chainable('yaxis', {
   args: [
     {

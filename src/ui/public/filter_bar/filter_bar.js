@@ -26,7 +26,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
     restrict: 'E',
     template: template,
     scope: {},
-    link: function ($scope, $el, attrs) {
+    link: function ($scope) {
       // bind query filter actions to the scope
       [
         'addFilters',

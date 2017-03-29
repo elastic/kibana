@@ -1,10 +1,5 @@
 
-import {
-  bdd,
-  remote,
-  scenarioManager,
-  defaultTimeout
-} from '../../../support';
+import { bdd, scenarioManager, defaultTimeout } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

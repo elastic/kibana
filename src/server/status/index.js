@@ -1,7 +1,5 @@
-import _ from 'lodash';
 import ServerStatus from './server_status';
 import wrapAuthConfig from './wrap_auth_config';
-import { join } from 'path';
 
 export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);

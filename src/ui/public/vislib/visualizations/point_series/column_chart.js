@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import errors from 'ui/errors';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 export default function ColumnChartFactory(Private) {
@@ -91,7 +90,6 @@ export default function ColumnChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
-      const height = yScale.range()[0];
       const yMin = yScale.domain()[0];
       const groupSpacingPercentage = 0.15;
       const groupCount = this.getGroupedCount();
@@ -156,7 +154,6 @@ export default function ColumnChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const groupCount = this.getGroupedCount();
       const groupNum = this.getGroupedNum(this.chartData);
-      const height = yScale.range()[0];
       const groupSpacingPercentage = 0.15;
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();

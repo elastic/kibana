@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
 
-export default function ColumnHandler(Private) {
+export default function ColumnHandler() {
 
   const createSeries = (cfg, series) => {
     const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);

@@ -1,18 +1,12 @@
 
-const _ = require('lodash');
-const glob = require('glob');
-const Promise = require('bluebird');
-
-const parseSheet = require('./lib/parse_sheet.js');
-const parseDateMath = require('../lib/date_math.js');
-const calculateInterval = require('../../public/lib/calculate_interval.js');
-
-const repositionArguments = require('./lib/reposition_arguments.js');
-const indexArguments = require('./lib/index_arguments.js');
-const validateTime = require('./lib/validate_time.js');
-
-const loadFunctions = require('../lib/load_functions.js');
-const fitFunctions  = loadFunctions('fit_functions');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import parseSheet from './lib/parse_sheet.js';
+import parseDateMath from '../lib/date_math.js';
+import calculateInterval from '../../public/lib/calculate_interval.js';
+import repositionArguments from './lib/reposition_arguments.js';
+import indexArguments from './lib/index_arguments.js';
+import validateTime from './lib/validate_time.js';
 
 module.exports = function (tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
@@ -20,10 +14,6 @@ module.exports = function (tlConfig) {
   let queryCache = {};
   const stats = {};
   let sheet;
-
-  function getQueryCacheKey(query) {
-    return JSON.stringify(_.omit(query, 'label'));
-  }
 
   function throwWithCell(cell, exception) {
     throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);

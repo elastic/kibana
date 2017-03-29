@@ -3,11 +3,9 @@ import {
   Log,
 } from './';
 
+import url from 'url';
+
 export default (function () {
-  const util = require('util');
-  const path = require('path');
-  const url = require('url');
-  const resolve = require('path').resolve;
   const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {
@@ -52,7 +50,7 @@ export default (function () {
       dumper.on('error', function (error)   { Log.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
       const promise = new Promise(function (resolve, reject) {
-        dumper.dump(function (error, totalWrites) {
+        dumper.dump(function (error) {
           if (error) {
             Log.debug('THERE WAS AN ERROR :-(');
             reject(Error(error));

@@ -2,7 +2,6 @@
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
-import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
 import { transformDeprecations } from '../config/transform_deprecations';
 import { createTransform } from '../../deprecation';
@@ -47,7 +46,6 @@ module.exports = class Plugins extends Collection {
     this[pluginApis].add(api);
 
     const output = [].concat(require(path)(api) || []);
-    const config = this.kbnServer.config;
 
     if (!output.length) return;
 

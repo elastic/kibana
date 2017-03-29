@@ -1,4 +1,4 @@
-import { filter, find, remove } from 'lodash';
+import { find } from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Notifier from '../../notify/notifier';

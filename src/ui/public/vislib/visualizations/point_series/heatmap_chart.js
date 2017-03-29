@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 import getColor from 'ui/vislib/components/color/heatmap_color';
@@ -98,7 +96,6 @@ export default function HeatmapChartFactory(Private) {
       const xScale = this.getCategoryAxis().getScale();
       const yScale = this.handler.valueAxes[1].getScale();
       const zScale = this.getValueAxis().getScale();
-      const ordered = this.handler.data.get('ordered');
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();

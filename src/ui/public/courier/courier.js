@@ -1,6 +1,5 @@
 import _ from 'lodash';
 
-import errors from 'ui/errors';
 import 'ui/es';
 import 'ui/promises';
 import 'ui/index_patterns';
@@ -11,7 +10,6 @@ import DocSourceProvider from './data_source/doc_source';
 import SearchSourceProvider from './data_source/search_source';
 import SearchStrategyProvider from './fetch/strategy/search';
 import RequestQueueProvider from './_request_queue';
-import ErrorHandlersProvider from './_error_handlers';
 import FetchProvider from './fetch';
 import DocDataLooperProvider from './looper/doc_data';
 import DocAdminLooperProvider from './looper/doc_admin';
@@ -31,7 +29,6 @@ uiModules.get('kibana/courier')
     const searchStrategy = Private(SearchStrategyProvider);
 
     const requestQueue = Private(RequestQueueProvider);
-    const errorHandlers = Private(ErrorHandlersProvider);
 
     const fetch = Private(FetchProvider);
     const docDataLooper = self.docLooper = Private(DocDataLooperProvider);
@@ -47,8 +44,6 @@ uiModules.get('kibana/courier')
 
     self.DocSource = DocSource;
     self.SearchSource = SearchSource;
-
-    const HastyRefresh = errors.HastyRefresh;
 
     /**
      * update the time between automatic search requests

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function unzipPairs(timeValObject) {
   const paired = _.chain(timeValObject).pairs().map(function (point) {

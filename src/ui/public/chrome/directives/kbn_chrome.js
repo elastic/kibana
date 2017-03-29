@@ -13,9 +13,9 @@ export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', $rootScope => {
+  .directive('kbnChrome', () => {
     return {
-      template($el) {
+      template() {
         const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 

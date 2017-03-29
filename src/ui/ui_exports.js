@@ -52,7 +52,6 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, specs) => {
-          const id = plugin.id;
           for (const spec of [].concat(specs || [])) {
 
             const app = this.apps.new(_.defaults({}, spec, {
@@ -71,8 +70,8 @@ class UiExports {
 
       case 'link':
       case 'links':
-        return (plugin, spec) => {
-          for (const spec of [].concat(spec || [])) {
+        return (plugin, specs) => {
+          for (const spec of [].concat(specs || [])) {
             this.navLinks.new(spec);
           }
         };

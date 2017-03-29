@@ -37,7 +37,6 @@ export default class SettingsPage {
   }
 
   async setAdvancedSettings(propertyName, propertyValue) {
-    const self = this;
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
@@ -154,7 +153,6 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    const selector = 'a[data-test-subj="tab-indexedFields"] small';
     return PageObjects.common.try(() => {
       return this.remote.setFindTimeout(defaultFindTimeout / 10)
       .findByCssSelector('a[data-test-subj="tab-indexedFields"] small').getVisibleText()

@@ -1,8 +1,3 @@
-/**
- * Tests functionality in ui/public/courier/saved_object/saved_object.js
- */
-
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
@@ -271,7 +266,7 @@ describe('Saved Object', function () {
           });
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save()
-            .then((id) => {
+            .then(() => {
               expect(savedObject.isSaving).to.be(false);
             });
         });
