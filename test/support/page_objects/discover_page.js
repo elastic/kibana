@@ -131,38 +131,19 @@ export default class DiscoverPage {
   }
 
   getChartInterval() {
-    return this.findTimeout
-    .findByCssSelector('a[ng-click="toggleInterval()"]')
-    .getVisibleText()
-    .then(intervalText => {
-      if (intervalText.length > 0) {
-        return intervalText;
-      } else {
-        return this.findTimeout
-        .findByCssSelector('select[ng-model="state.interval"]')
-        .getProperty('value') // this gets 'string:d' for Daily
-        .then(selectedValue => {
-          return this.findTimeout
-          .findByCssSelector('option[value="' + selectedValue + '"]')
-          .getVisibleText();
-        });
-      }
+    return PageObjects.common.findTestSubject('discoverIntervalSelect')
+    .getProperty('value')
+    .then(selectedValue => {
+      return this.findTimeout
+      .findByCssSelector('option[value="' + selectedValue + '"]')
+      .getVisibleText();
     });
   }
 
   setChartInterval(interval) {
     return this.remote.setFindTimeout(5000)
-    .findByCssSelector('a[ng-click="toggleInterval()"]')
+    .findByCssSelector('option[label="' + interval + '"]')
     .click()
-    .catch(() => {
-      // in some cases we have the link above, but after we've made a
-      // selection we just have a select list.
-    })
-    .then(() => {
-      return this.findTimeout
-      .findByCssSelector('option[label="' + interval + '"]')
-      .click();
-    })
     .then(() => {
       return PageObjects.header.waitUntilLoadingHasFinished();
     });
