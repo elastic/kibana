@@ -21,8 +21,6 @@ class CalculationVars extends Component {
   }
 
   renderRow(row, i, items) {
-    const defaults = { name: '' };
-    const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
     return  (

@@ -116,7 +116,6 @@ export default function AxisConfigFactory() {
         // override axisFormatter (to replicate current behaviour)
         if (this.isPercentage()) {
           this._values.labels.axisFormatter = d3.format('%');
-          this._values.scale.defaultYExtents = true;
         }
 
         if (this.isLogScale()) {

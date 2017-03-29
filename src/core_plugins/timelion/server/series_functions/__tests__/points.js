@@ -1,10 +1,10 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-const _ = require('lodash');
-const assert = require('chai');
+import _ from 'lodash';
+import assert from 'chai';
 const expect = assert.expect;
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, () => {
 

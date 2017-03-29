@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -11,7 +10,6 @@ import VislibComponentsColorColorPaletteProvider from 'ui/vis/components/color/c
 describe('Vislib Color Module Test Suite', function () {
   let seedColors;
   let mappedColors;
-  let config;
 
   describe('Color (main)', function () {
     let previousConfig;

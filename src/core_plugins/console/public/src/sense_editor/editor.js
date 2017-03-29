@@ -10,10 +10,6 @@ import chrome from 'ui/chrome';
 
 const smartResize = require('../smart_resize');
 
-function isInt(x) {
-  return !isNaN(parseInt(x, 10));
-}
-
 function createInstance($el) {
   var aceEditor = ace.edit($el[0]);
 
@@ -562,11 +558,11 @@ function SenseEditor($el) {
     });
   };
 
-  editor.getSession().on('tokenizerUpdate', function (e) {
+  editor.getSession().on('tokenizerUpdate', function () {
     editor.highlightCurrentRequestsAndUpdateActionBar();
   });
 
-  editor.getSession().selection.on('changeCursor', function (e) {
+  editor.getSession().selection.on('changeCursor', function () {
     editor.highlightCurrentRequestsAndUpdateActionBar();
   });
 

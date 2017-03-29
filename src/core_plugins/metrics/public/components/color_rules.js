@@ -18,12 +18,13 @@ class ColorRules extends Component {
       const part = {};
       part[name] = cast(_.get(e, 'value', _.get(e, 'target.value')));
       if (part[name] === 'undefined') part[name] = undefined;
+      if (part[name] === NaN) part[name] = undefined;
       handleChange(_.assign({}, item, part));
     };
   }
 
   renderRow(row, i, items) {
-    const defaults = { value: '' };
+    const defaults = { value: 0 };
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
@@ -66,7 +67,7 @@ class ColorRules extends Component {
         </div>
         <input
           className="color_rules__input"
-          type="text"
+          type="number"
           value={model.value}
           onChange={this.handleChange(model, 'value', Number)}/>
         <div className="color_rules__control">

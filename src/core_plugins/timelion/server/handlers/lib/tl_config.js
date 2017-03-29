@@ -1,6 +1,5 @@
-const _ = require('lodash');
-
-const buildTarget = require('../../lib/build_target.js');
+import _ from 'lodash';
+import buildTarget from '../../lib/build_target.js';
 
 module.exports = function (setup) {
   let targetSeries;

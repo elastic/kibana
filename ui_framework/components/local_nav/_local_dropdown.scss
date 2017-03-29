@@ -9,6 +9,9 @@
   }
 }
 
+/**
+ * 1. Override Bootstrap styles.
+ */
 .kuiLocalDropdownCloseButton {
   appearance: none;
   background-color: transparent;
@@ -18,7 +21,7 @@
   top: 1px;
   right: 5px;
   font-size: 16px;
-  color: $localNavTextColor;
+  color: $localNavTextColor !important; /* 1 */
   cursor: pointer;
   opacity: 0.35;
 
@@ -27,7 +30,7 @@
   }
 
   @include darkTheme {
-    color: $localNavTextColor--darkTheme;
+    color: $localNavTextColor--darkTheme !important; /* 1 */
   }
 }
 

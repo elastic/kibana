@@ -3,7 +3,7 @@ const filter = metric => metric.type === 'filter_ratio';
 import bucketTransform from '../../helpers/bucket_transform';
 import _ from 'lodash';
 export default function ratios(req, panel, series) {
-  return next => doc => {
+  return () => doc => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach(metric => {
         _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`, {

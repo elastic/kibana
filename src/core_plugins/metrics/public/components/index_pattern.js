@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';

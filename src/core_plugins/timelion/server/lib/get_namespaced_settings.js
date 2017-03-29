@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const configFile = require('../../timelion.json');
+import _ from 'lodash';
+import configFile from '../../timelion.json';
 
 module.exports = function () {
   function flattenWith(dot, nestedObj, flattenArrays) {

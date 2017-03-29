@@ -10,7 +10,7 @@ uiRoutes
   controller: ContextAppRouteController,
   controllerAs: 'contextAppRoute',
   resolve: {
-    indexPattern: function ($route, courier, savedSearches) {
+    indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPattern);
     },
   },

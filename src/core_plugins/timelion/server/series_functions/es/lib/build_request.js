@@ -1,5 +1,5 @@
-const  _ = require('lodash');
-const createDateAgg = require('./create_date_agg');
+import _ from 'lodash';
+import createDateAgg from './create_date_agg';
 
 module.exports =  function buildRequest(config, tlConfig) {
 
@@ -28,7 +28,7 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function (clause, i) {
+  _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       aggCursor[clause[0]] = {

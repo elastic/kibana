@@ -3,20 +3,16 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import AggResponseIndexProvider from 'ui/agg_response/index';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
 describe('renderbot#buildChartData', function () {
-
   let buildChartData;
   let aggResponse;
-  let TableGroup;
   let Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Table = Private(AggResponseTabifyTableProvider);
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     aggResponse = Private(AggResponseIndexProvider);
     buildChartData = Private(VislibVisTypeBuildChartDataProvider);
   }));
@@ -72,7 +68,6 @@ describe('renderbot#buildChartData', function () {
     });
 
     it('converts table groups into rows/columns wrappers for charts', function () {
-      const chart = { hits: 1, rows: [], columns: [] };
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
       const tables = [new Table(), new Table(), new Table(), new Table()];
@@ -86,7 +81,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
 
-      const tabify = sinon.stub(aggResponse, 'tabify').returns({
+      sinon.stub(aggResponse, 'tabify').returns({
         tables: [
           {
             aggConfig: { params: { row: true } },

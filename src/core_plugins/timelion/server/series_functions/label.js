@@ -1,7 +1,5 @@
-const alter = require('../lib/alter.js');
-const util = require('util');
-
-const Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('label', {
   args: [
     {

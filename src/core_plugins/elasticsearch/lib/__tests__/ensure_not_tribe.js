@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import { noop } from 'lodash';
 import sinon from 'sinon';
 
 import { ensureNotTribe } from '../ensure_not_tribe';

@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import _ from 'lodash';
 import VislibLibDispatchProvider from '../lib/dispatch';
 import TooltipProvider from 'ui/vis/components/tooltip';
 export default function ChartBaseClass(Private) {

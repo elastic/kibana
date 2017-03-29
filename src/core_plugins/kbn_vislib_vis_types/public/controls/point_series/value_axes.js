@@ -48,9 +48,9 @@ module.directive('vislibValueAxes', function () {
 
       $scope.getSeries = function (axis) {
         const isFirst = $scope.vis.params.valueAxes[0] === axis;
-        const series = _.filter($scope.vis.params.seriesParams, series => {
-          return series.valueAxis === axis.id || (isFirst && !series.valueAxis);
-        });
+        const series = $scope.vis.params.seriesParams.filter(series =>
+          (series.valueAxis === axis.id || (isFirst && !series.valueAxis))
+        );
         return series.map(series => series.data.label).join(', ');
       };
 

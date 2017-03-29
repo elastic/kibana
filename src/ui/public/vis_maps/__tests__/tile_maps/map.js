@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -53,14 +52,13 @@ describe('tilemaptest - TileMap Map Tests', function () {
   }
 
   describe('instantiation', function () {
-    let map;
     let createStub;
 
     beforeEach(loadTileMapSettings);
 
     beforeEach(async function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
+      new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should create the map', function () {
@@ -121,8 +119,6 @@ describe('tilemaptest - TileMap Map Tests', function () {
   });
 
   describe('attachEvents', function () {
-    let map;
-
     beforeEach(loadTileMapSettings);
 
     beforeEach(function () {
@@ -131,7 +127,7 @@ describe('tilemaptest - TileMap Map Tests', function () {
         this.map = leafletMocks.map;
         this._attachEvents();
       });
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
+      new TileMapMap($mockMapEl, geoJsonData, {});
     });
 
     it('should attach interaction events', function () {

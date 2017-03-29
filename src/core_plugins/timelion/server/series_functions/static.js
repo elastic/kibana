@@ -1,8 +1,6 @@
-const _ = require('lodash');
-const fetch = require('node-fetch');
-const moment = require('moment');
-const Datasource = require('../lib/classes/datasource');
-const Promise = require('bluebird');
+import _ from 'lodash';
+import Datasource from '../lib/classes/datasource';
+import Promise from 'bluebird';
 
 
 module.exports = new Datasource ('static', {

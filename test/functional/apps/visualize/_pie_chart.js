@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -87,7 +84,6 @@ bdd.describe('visualize app', function describeIndexTests() {
 
       return PageObjects.visualize.getPieChartData()
       .then(function (pieData) {
-        const barHeightTolerance = 1;
         PageObjects.common.debug('pieData.length = ' + pieData.length);
         PageObjects.common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);

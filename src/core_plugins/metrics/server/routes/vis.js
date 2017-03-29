@@ -1,5 +1,4 @@
 import getVisData from '../lib/get_vis_data';
-import _ from 'lodash';
 import Boom from 'boom';
 export default (server) => {
 

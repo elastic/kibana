@@ -1,6 +1,6 @@
-const alter = require('../lib/alter.js');
-const Chainable = require('../lib/classes/chainable');
-const _ = require('lodash');
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
+import _ from 'lodash';
 
 function unflatten(data) {
   if (Object(data) !== data || _.isArray(data)) return data;

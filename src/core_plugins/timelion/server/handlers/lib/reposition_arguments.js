@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Applies to unresolved arguments in the AST
 module.exports = function repositionArguments(functionDef, unorderedArgs) {

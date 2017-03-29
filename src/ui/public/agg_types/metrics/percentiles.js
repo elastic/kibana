@@ -1,16 +1,13 @@
-import _ from 'lodash';
 import ordinalSuffix from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import getPercentileValue from './percentiles_get_value';
 
 export default function AggTypeMetricPercentilesProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   // required by the percentiles editor
 

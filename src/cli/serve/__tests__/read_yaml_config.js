@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 import { join, relative, resolve } from 'path';
 import readYamlConfig from '../read_yaml_config';
-import sinon from 'auto-release-sinon';
 
 function fixture(name) {
   return resolve(__dirname, 'fixtures', name);
@@ -11,7 +10,7 @@ describe('cli/serve/read_yaml_config', function () {
   it('reads a single config file', function () {
     const config = readYamlConfig(fixture('one.yml'));
 
-    expect(readYamlConfig(fixture('one.yml'))).to.eql({
+    expect(config).to.eql({
       foo: 1,
       bar: true,
     });

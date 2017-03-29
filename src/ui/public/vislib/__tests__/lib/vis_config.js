@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';

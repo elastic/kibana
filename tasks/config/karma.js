@@ -1,4 +1,4 @@
-import { times, zipObject } from 'lodash';
+import { times } from 'lodash';
 
 const TOTAL_CI_SHARDS = 4;
 

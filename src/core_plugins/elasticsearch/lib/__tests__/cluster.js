@@ -2,8 +2,7 @@ import expect from 'expect.js';
 import { Cluster } from '../cluster';
 import sinon from 'sinon';
 import { errors as esErrors } from 'elasticsearch';
-import { set, partial, cloneDeep } from 'lodash';
-import Boom from 'boom';
+import { set, partial } from 'lodash';
 
 describe('plugins/elasticsearch', function () {
   describe('cluster', function () {

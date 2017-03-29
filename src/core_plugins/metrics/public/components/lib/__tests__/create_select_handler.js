@@ -3,10 +3,8 @@ import { expect } from 'chai';
 import createSelectHandler from '../create_select_handler';
 
 describe('createSelectHandler()', () => {
-
   let handleChange;
   let changeHandler;
-  let event;
 
   beforeEach(() => {
     handleChange = sinon.spy();
@@ -21,6 +19,5 @@ describe('createSelectHandler()', () => {
       test: 'foo'
     });
   });
-
 });
 

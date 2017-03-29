@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
+import _ from 'lodash';
+import Promise from 'bluebird';
 
 
 /**

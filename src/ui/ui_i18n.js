@@ -38,11 +38,11 @@ export class UiI18n {
    *  do with the uiExports defined by each plugin.
    *
    *  This consumer will allow plugins to define export with the
-   *  "language" type like so:
+   *  "translations" type like so:
    *
    *    new kibana.Plugin({
    *      uiExports: {
-   *        languages: [
+   *        translations: [
    *          resolve(__dirname, './translations/es.json'),
    *        ],
    *      },

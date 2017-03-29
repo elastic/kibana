@@ -2,7 +2,6 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import timeShift from '../time_shift';
 import stdMetric from '../std_metric';
-import moment from 'moment';
 
 describe('timeShift(resp, panel, series)', () => {
   let panel;

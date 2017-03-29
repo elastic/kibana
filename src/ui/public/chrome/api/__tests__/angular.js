@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import kbnAngular from '../angular';
 import { noop } from 'lodash';
 

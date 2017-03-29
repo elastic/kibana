@@ -1,4 +1,3 @@
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
 export default function () {
 

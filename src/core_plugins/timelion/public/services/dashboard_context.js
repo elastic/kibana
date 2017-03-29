@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 require('ui/state_management/app_state');
 
 

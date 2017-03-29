@@ -1,7 +1,6 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
 import 'plugins/kibana/discover/index';
 
 

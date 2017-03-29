@@ -6,6 +6,7 @@ export default grunt => ({
       'bin',
       'config',
       'src',
+      'scripts',
       'tasks',
       'test',
       'utilities',

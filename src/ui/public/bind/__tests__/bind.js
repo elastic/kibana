@@ -1,4 +1,3 @@
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 describe('$scope.$bind', function () {
@@ -33,8 +32,6 @@ describe('$scope.$bind', function () {
   });
 
   it('sets up a binding from the child to the parent scope', function () {
-    const stub = sinon.stub();
-
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
     expect($scope.localVal).to.be('foo');

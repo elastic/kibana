@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

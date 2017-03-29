@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import _ from 'lodash';
 import keyMap from 'ui/utils/key_map';
 import uiModules from 'ui/modules';
 

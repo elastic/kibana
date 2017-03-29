@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 function WorkQueue() {
   const q = this;
 

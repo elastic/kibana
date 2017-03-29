@@ -1,5 +1,5 @@
 import { defaults, omit, trimLeft, trimRight } from 'lodash';
-import { parse as parseUrl, format as formatUrl, resolve } from 'url';
+import { parse as parseUrl, format as formatUrl } from 'url';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 

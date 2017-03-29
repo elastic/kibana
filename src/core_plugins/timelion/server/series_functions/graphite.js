@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const fetch = require('node-fetch');
-const moment = require('moment');
-const Datasource = require('../lib/classes/datasource');
+import _ from 'lodash';
+import fetch from 'node-fetch';
+import moment from 'moment';
+import Datasource from '../lib/classes/datasource';
 
 
 module.exports = new Datasource ('graphite', {

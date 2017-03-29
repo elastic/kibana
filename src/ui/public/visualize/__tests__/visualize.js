@@ -1,16 +1,11 @@
 import $ from 'jquery';
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 describe('visualize directive', function () {
-
   let $rootScope;
-  let TableGroup;
   let $compile;
   let $scope;
   let $el;
@@ -24,7 +19,6 @@ describe('visualize directive', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     searchSource = Private(FixturesStubbedSearchSourceProvider);

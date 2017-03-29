@@ -106,7 +106,7 @@ module.exports = function ({ Plugin }) {
       }
     },
 
-    init(server, options) {
+    init(server) {
       const kibanaIndex = server.config().get('kibana.index');
       const clusters = createClusters(server);
 

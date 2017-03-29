@@ -4,7 +4,6 @@ import exec from '../utils/exec';
 
 export default (grunt) => {
   const { config } = grunt;
-  const exec = require('../utils/exec');
   const targetDir = config.get('target');
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');

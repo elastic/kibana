@@ -8,7 +8,6 @@ import VislibVisProvider from 'ui/vislib/vis';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 import 'ui/persisted_state';
-import AggResponseIndexProvider from 'ui/agg_response/index';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 describe('renderbot', function exportWrapper() {
@@ -17,7 +16,6 @@ describe('renderbot', function exportWrapper() {
   let Renderbot;
   let VislibRenderbot;
   let persistedState;
-  let normalizeChartData;
   const mockVisType = {
     name: 'test'
   };
@@ -31,7 +29,6 @@ describe('renderbot', function exportWrapper() {
       Renderbot = Private(VisRenderbotProvider);
       VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
       persistedState = new ($injector.get('PersistedState'))();
-      normalizeChartData = Private(AggResponseIndexProvider);
     });
   }
 
@@ -122,7 +119,6 @@ describe('renderbot', function exportWrapper() {
 
     const vis = { type: mockVisType, isHierarchical: _.constant(false) };
     const $el = $('<div>testing</div>');
-    const stubs = {};
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));

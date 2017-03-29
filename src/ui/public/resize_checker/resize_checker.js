@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import ResizeObserver from 'resize-observer-polyfill';
-import { uniqueId, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 
 import EventsProvider from 'ui/events';
 

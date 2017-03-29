@@ -1,12 +1,10 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function des(points, alpha, beta) {
   let level;
   let prevLevel;
   let trend;
   let prevTrend;
-  let value;
-  let origin;
   let unknownCount = 0;
 
   if (points.length < 2) {
@@ -39,5 +37,4 @@ module.exports = function des(points, alpha, beta) {
   }, []);
 
   return smoothedPoints;
-
 };

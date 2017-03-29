@@ -8,7 +8,6 @@ describe('fancy forms', function () {
   let $compile;
   let $rootScope;
   let ngForm;
-  let ngModel;
 
   function generateEl() {
     return $('<form>').html(
@@ -28,7 +27,6 @@ describe('fancy forms', function () {
     $scope.$apply();
 
     ngForm = $el.controller('form');
-    ngModel = $el.find('input').controller('ngModel');
   }));
 
   describe('ngFormController', function () {

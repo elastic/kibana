@@ -1,7 +1,6 @@
-import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
 function SplitByEverything(props) {
   const { onChange, model } = props;

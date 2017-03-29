@@ -17,7 +17,7 @@ async function listPackages(settings) {
     .map(file => file.replace(/\\/g, '/'))
     .map(file => file.match(regExp))
     .compact()
-    .map(([ file, _, folder ]) => ({ file, folder }))
+    .map(([ file, , folder ]) => ({ file, folder }))
     .uniq()
     .value();
 }

@@ -1,13 +1,10 @@
 
-import expect from 'expect.js';
-
 import {
   bdd,
   remote,
   defaultTimeout,
-  scenarioManager,
+  esArchiver,
   esClient,
-  elasticDump
  } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
@@ -19,12 +16,12 @@ bdd.describe('visualize app', function () {
     remote.setWindowSize(1280,800);
 
     PageObjects.common.debug('Starting visualize before method');
-    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = esArchiver.loadIfNeeded('logstash_functional');
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     .then(function loadkibanaIndexPattern() {
       PageObjects.common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize','.kibana');
+      return esArchiver.load('visualize');
     })
     // wait for the logstash data load to finish if it hasn't already
     .then(function () {

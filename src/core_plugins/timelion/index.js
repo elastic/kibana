@@ -1,6 +1,4 @@
 
-const path = require('path');
-
 module.exports = function (kibana) {
   let mainFile = 'plugins/timelion/app';
 
@@ -22,7 +20,7 @@ module.exports = function (kibana) {
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: mainFile,
-        injectVars: function (server, options) {
+        injectVars: function (server) {
           const config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),

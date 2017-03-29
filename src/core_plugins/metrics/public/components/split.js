@@ -1,11 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import Select from 'react-select';
-import _ from 'lodash';
-import FieldSelect from './aggs/field_select';
-import MetricSelect from './aggs/metric_select';
-import calculateLabel from '../../common/calculate_label';
-import createTextHandler from './lib/create_text_handler';
-import createSelectHandler from './lib/create_select_handler';
 import uuid from 'node-uuid';
 
 import SplitByTerms from './splits/terms';

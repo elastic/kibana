@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
 import AggRow from './agg_row';
 import MetricSelect from './metric_select';
 import AggSelect from './agg_select';
@@ -11,7 +10,7 @@ import createTextHandler from '../lib/create_text_handler';
 class StandardSiblingAgg extends Component {
 
   render() {
-    const { siblings, panel } = this.props;
+    const { siblings } = this.props;
     const defaults = { sigma: '' };
     const model = { ...defaults, ...this.props.model };
 
@@ -60,7 +59,6 @@ class StandardSiblingAgg extends Component {
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
-            panelType={panel.type}
             value={model.type}
             onChange={handleSelectChange('type')}/>
         </div>

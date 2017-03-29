@@ -2,18 +2,13 @@ import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
-import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  let PieChart;
   let Chart;
-  let Data;
   let persistedState;
   let Vis;
-  const chartData = {};
   let vis;
   let el;
   let myChart;
@@ -86,9 +81,7 @@ describe('Vislib _chart Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     Vis = Private(VislibVisProvider);
-    Data = Private(VislibLibDataProvider);
     persistedState = new ($injector.get('PersistedState'))();
-    PieChart = Private(VislibVisualizationsPieChartProvider);
     Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
@@ -128,5 +121,4 @@ describe('Vislib _chart Test Suite', function () {
       myChart.render();
     }).to.throwError();
   });
-
 });

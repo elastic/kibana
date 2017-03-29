@@ -17,10 +17,8 @@ import getUrl from '../../utils/get_url';
 
 import {
   config,
-  defaultTryTimeout,
   defaultFindTimeout,
-  remote,
-  shieldPage,
+  defaultTryTimeout,
   esClient
 } from '../index';
 
@@ -87,7 +85,7 @@ export default class Common {
     return this.remote.get(appUrl);
   }
 
-  navigateToApp(appName, testStatusPage) {
+  navigateToApp(appName) {
     const self = this;
     const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);
@@ -170,22 +168,30 @@ export default class Common {
       });
     }
 
-    return navigateTo(appUrl)
-    .then(function (currentUrl) {
-      let lastUrl = currentUrl;
-      return self.try(function () {
-        // give the app time to update the URL
-        return self.sleep(501)
-        .then(function () {
-          return self.remote.getCurrentUrl();
-        })
-        .then(function (currentUrl) {
-          self.debug('in navigateTo url = ' + currentUrl);
-          if (lastUrl !== currentUrl) {
-            lastUrl = currentUrl;
-            throw new Error('URL changed, waiting for it to settle');
-          }
+    return self.tryForTime(defaultTryTimeout * 3, () => {
+      return navigateTo(appUrl)
+      .then(function (currentUrl) {
+        let lastUrl = currentUrl;
+        return self.try(function () {
+          // give the app time to update the URL
+          return self.sleep(501)
+          .then(function () {
+            return self.remote.getCurrentUrl();
+          })
+          .then(function (currentUrl) {
+            self.debug('in navigateTo url = ' + currentUrl);
+            if (lastUrl !== currentUrl) {
+              lastUrl = currentUrl;
+              throw new Error('URL changed, waiting for it to settle');
+            }
+          });
         });
+      })
+      .then(async () => {
+        if (appName === 'status_page') return;
+        if (await self.doesTestSubjectExist('statusPageContainer')) {
+          throw new Error('Navigation ended up at the status page.');
+        }
       });
     });
   }
@@ -348,14 +354,28 @@ export default class Common {
     };
   }
 
+  /**
+   * Makes sure the modal overlay is not showing, tries a few times in case it is in the process of hiding.
+   */
+  async ensureModalOverlayHidden() {
+    return PageObjects.common.try(async () => {
+      const shown = await this.doesTestSubjectExist('modalOverlay');
+      if (shown) {
+        throw new Error('Modal overlay is showing');
+      }
+    });
+  }
+
   async clickConfirmOnModal() {
     this.debug('Clicking modal confirm');
     await this.findTestSubject('confirmModalConfirmButton').click();
+    await this.ensureModalOverlayHidden();
   }
 
   async clickCancelOnModal() {
     this.debug('Clicking modal cancel');
     await this.findTestSubject('confirmModalCancelButton').click();
+    await this.ensureModalOverlayHidden();
   }
 
   async isConfirmModalOpen() {

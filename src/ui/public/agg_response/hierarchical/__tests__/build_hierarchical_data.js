@@ -5,13 +5,11 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
-import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 let Vis;
 let Notifier;
-let AggConfigs;
 let indexPattern;
 let buildHierarchicalData;
 
@@ -24,7 +22,6 @@ describe('buildHierarchicalData', function () {
     sinon.stub(Notifier.prototype, 'error');
 
     Vis = Private(VisProvider);
-    AggConfigs = Private(VisAggConfigsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
   }));
@@ -35,7 +32,6 @@ describe('buildHierarchicalData', function () {
     let results;
 
     beforeEach(function () {
-      const id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -44,7 +40,6 @@ describe('buildHierarchicalData', function () {
       });
       vis.aggs[0].id = 'agg_1';
       results = buildHierarchicalData(vis, fixtures.metricOnly);
-
     });
 
     it('should set the slices with one child to a consistent label', function () {

@@ -1,6 +1,5 @@
-import { PassThrough, Writable, Duplex } from 'stream';
+import { Writable, Duplex } from 'stream';
 
-import Bluebird from 'bluebird';
 import expect from 'expect.js';
 
 import {

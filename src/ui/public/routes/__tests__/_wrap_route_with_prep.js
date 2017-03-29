@@ -2,10 +2,7 @@ import RouteManager from 'ui/routes/route_manager';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import wrapRouteWithPrep from 'ui/routes/wrap_route_with_prep';
-import Promise from 'bluebird';
 import _ from 'lodash';
-import { stub } from 'auto-release-sinon';
 import 'ui/private';
 
 
@@ -29,12 +26,10 @@ describe('wrapRouteWithPrep fn', function () {
       let setupComplete = false;
       let userWorkComplete = false;
       let route;
-      let Private;
       let Promise;
       let $injector;
 
       ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
-        Private = _Private_;
         Promise = _Promise_;
         $injector = _$injector_;
       });
@@ -42,7 +37,7 @@ describe('wrapRouteWithPrep fn', function () {
 
       routes
       .addSetupWork(function () {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
           setTimeout(function () {
             setupComplete = true;
             resolve();

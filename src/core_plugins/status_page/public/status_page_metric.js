@@ -1,9 +1,4 @@
-import _ from 'lodash';
-import moment from 'moment';
-import numeral from 'numeral';
-
 import formatNumber from './lib/format_number';
-import readStatData from './lib/read_stat_data';
 import uiModules from 'ui/modules';
 import statusPageMetricTemplate from 'plugins/status_page/status_page_metric.html';
 

@@ -22,7 +22,6 @@ rules:
   no-nested-ternary: off
   no-proto: off
   no-sequences: off
-  no-undef: off
   no-use-before-define: off
   one-var: off
   quotes: off

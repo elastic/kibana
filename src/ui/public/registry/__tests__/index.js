@@ -1,11 +1,8 @@
-import _ from 'lodash';
-import sinon from 'auto-release-sinon';
 import registry from 'ui/registry/_registry';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 describe('Registry', function () {
   let Private;
-  let IndexedArray;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -43,7 +40,6 @@ describe('Registry', function () {
 
   describe('spec', function () {
     it('executes with the module list as "this", and can override it', function () {
-      const i = 0;
       let self;
 
       const reg = registry({
@@ -72,18 +68,18 @@ describe('Registry', function () {
   describe('spec.constructor', function () {
     it('executes before the modules are returned', function () {
       let i = 0;
+
       const reg = registry({
         constructor: function () {
           i = i + 1;
         }
       });
 
-      const modules = Private(reg);
+      Private(reg);
       expect(i).to.be(1);
     });
 
     it('executes with the module list as "this", and can override it', function () {
-      const i = 0;
       let self;
 
       const reg = registry({

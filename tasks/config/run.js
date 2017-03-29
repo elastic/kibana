@@ -1,12 +1,12 @@
+import { format } from 'url';
+import { resolve } from 'path';
+import chromedriver from 'chromedriver';
 module.exports = function (grunt) {
   const platform = require('os').platform();
-  const { format } = require('url');
-  const { resolve } = require('path');
   const root = p => resolve(__dirname, '../../', p);
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   const uiConfig = require(root('test/server_config'));
-  const chromedriver = require('chromedriver');
 
   const stdDevArgs = [
     '--env.name=development',
@@ -181,5 +181,4 @@ module.exports = function (grunt) {
       ]
     }
   };
-
 };

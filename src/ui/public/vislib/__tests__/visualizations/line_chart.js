@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -25,7 +24,7 @@ const dataTypes = [
 ];
 
 describe('Vislib Line Chart', function () {
-  dataTypes.forEach(function (type, i) {
+  dataTypes.forEach(function (type) {
     const name = type[0];
     const data = type[1];
 

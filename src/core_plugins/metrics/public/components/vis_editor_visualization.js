@@ -14,11 +14,11 @@ class VisEditorVisualization extends Component {
     this.handleMouseDown = this.handleMouseDown.bind(this);
   }
 
-  handleMouseDown(e) {
+  handleMouseDown() {
     this.setState({ dragging: true });
   }
 
-  handleMouseUp(e) {
+  handleMouseUp() {
     this.setState({ dragging: false });
   }
 

@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -13,10 +12,8 @@ import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('Filter Bar Directive', function () {
   let $rootScope;
   let $compile;
-  let $timeout;
   let Promise;
   let appState;
-  let queryFilter;
   let mapFilter;
   let $el;
   let $scope;
@@ -36,10 +33,9 @@ describe('Filter Bar Directive', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
     });
 
-    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      $timeout = _$timeout_;
       Promise = $injector.get('Promise');
       mapFilter = Private(FilterBarLibMapFilterProvider);
 

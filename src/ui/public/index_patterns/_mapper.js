@@ -3,14 +3,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
 import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
-
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
-  const intervals = Private(IndexPatternsIntervalsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
   const LocalCache = Private(IndexPatternsLocalCacheProvider);

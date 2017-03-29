@@ -1,16 +1,11 @@
 /* eslint max-len:0 */
 import React, { Component, PropTypes } from 'react';
 import tickFormatter from './lib/tick_formatter';
-import moment from 'moment';
-import calculateLabel from '../../common/calculate_label';
 import convertSeriesToVars from './lib/convert_series_to_vars';
 import AceEditor from 'react-ace';
 import _ from 'lodash';
-import brace from 'brace';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
-import { getLastValue } from 'plugins/metrics/visualizations';
-import numeral from 'numeral';
 
 class MarkdownEditor extends Component {
 
@@ -29,7 +24,7 @@ class MarkdownEditor extends Component {
   }
 
   handleVarClick(snippet) {
-    return (e) => {
+    return () => {
       if (this.ace) this.ace.insert(snippet);
     };
   }

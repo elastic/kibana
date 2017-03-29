@@ -1,6 +1,5 @@
 import createAgent from './create_agent';
 import mapUri from './map_uri';
-import { resolve } from 'url';
 import { assign } from 'lodash';
 
 function createProxy(server, method, path, config) {

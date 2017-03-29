@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import faker from 'faker';
 import _ from 'lodash';
-import MockState from 'fixtures/mock_state';
 import AppStateProvider from 'ui/state_management/app_state';
 import 'ui/url';
 

@@ -1,7 +1,5 @@
 import React, { PropTypes } from 'react';
-import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { getLastValue } from 'plugins/metrics/visualizations';
 import color from 'color';
 import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';

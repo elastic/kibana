@@ -1,6 +1,6 @@
-const loadFunctions = require('./load_functions.js');
+import loadFunctions from './load_functions.js';
 const functions  = loadFunctions('series_functions/');
-const _ = require('lodash');
+import _ from 'lodash';
 
 
 module.exports = (function () {

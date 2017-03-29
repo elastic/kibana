@@ -1,4 +1,4 @@
-const moment = require('moment');
+import moment from 'moment';
 
 // usually reverse = false on the request, true on the response
 module.exports = function offsetTime(milliseconds, offset, reverse) {

@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 

@@ -3,8 +3,7 @@ import expect from 'expect.js';
 
 import {
   bdd,
-  scenarioManager,
-  esClient
+  esClient,
 } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';

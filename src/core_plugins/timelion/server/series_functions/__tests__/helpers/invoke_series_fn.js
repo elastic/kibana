@@ -1,6 +1,7 @@
 // invokes a series_function with the specified arguments
-const _ = require('lodash');
-const indexArguments = require('../../../handlers/lib/index_arguments');
+import _ from 'lodash';
+
+import indexArguments from '../../../handlers/lib/index_arguments';
 
 module.exports = function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
   const tlConfig = _.merge(require('../fixtures/tlConfig')(), tlConfigOverrides);

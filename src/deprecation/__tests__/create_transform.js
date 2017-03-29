@@ -1,6 +1,5 @@
 import createTransform from '../create_transform';
 import expect from 'expect.js';
-import { noop } from 'lodash';
 import sinon from 'sinon';
 
 describe('deprecation', function () {

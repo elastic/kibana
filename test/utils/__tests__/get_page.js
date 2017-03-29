@@ -1,5 +1,5 @@
-const expect = require('expect.js');
-const getUrl = require('../get_url');
+import expect from 'expect.js';
+import getUrl from '../get_url';
 
 describe('getUrl', function () {
   it('should convert to a url', function () {

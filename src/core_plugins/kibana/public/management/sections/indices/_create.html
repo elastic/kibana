@@ -2,20 +2,16 @@
   <kbn-management-indices>
     <div ng-controller="managementIndicesCreate" class="kbn-management-indices-create">
       <div class="page-header">
-        <h1>Configure an index pattern</h1>
-        In order to use Kibana you must configure at least one index pattern. Index patterns are
-        used to identify the Elasticsearch index to run search and analytics against. They are also
-        used to configure fields.
+        <h1 translate="KIBANA-CONFIGURE_INDEX_PATTERN"></h1>
+        <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"></p>
       </div>
       <div>
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
           <div class="form-group">
-            <label>
-              Index name or pattern
-            </label>
-            <p class="help-block" ng-if="!index.nameIsPattern">Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*</p>
-            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern">Patterns allow you to define dynamic index names. Static text in an index name is denoted using brackets. Example: [logstash-]YYYY.MM.DD. Please note that weeks are setup to use ISO weeks which start on Monday. &mdash;
-              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/">Date Format Documentation</a></small></p>
+            <label translate="KIBANA-INDEX_NAME_OR_PATTERN"></label>
+            <p class="help-block" ng-if="!index.nameIsPattern" translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"></p>
+            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
+              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate="KIBANA-DATE_FORMAT_DOCS"></a></small></p>
             <input
               ng-model="index.name"
               ng-attr-placeholder="{{index.defaultName}}"
@@ -27,9 +23,10 @@
               type="text"
               class="form-control">
               <small ng-show="index.nameInterval.name == 'weeks'">
-                <strong>Note: </strong>
-                I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
-                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
+                <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
+                <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
+                <span translate="KIBANA-SEE"></span>
+                <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
               </small>
             </div>
 
@@ -38,18 +35,18 @@
               <input
                 ng-model="index.isTimeBased"
                 type="checkbox">
-              Index contains time-based events
+              <span translate="KIBANA-CONTAINS_TIME_BASED_EVENTS"></span>
             </label>
           </div>
 
           <div class="form-group" ng-if="index.isTimeBased">
             <label>
-              Time-field name
+              <span translate="KIBANA-TIME_FIELD_NAME"></span>
               &nbsp;
-              <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
+              <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
               &nbsp;
               <small>
-                <a ng-click="refreshFieldList();"> refresh fields</a>
+                <a ng-click="refreshFieldList();" translate="KIBANA-REFRESH_FIELDS"></a>
               </small>
             </label>
             <select
@@ -65,58 +62,50 @@
           <div class="form-group" ng-if="canExpandIndices()">
             <label>
               <input ng-model="index.notExpandable" type="checkbox">
-              Do not expand index pattern when searching <small>(Not recommended)</small>
+                <span translate="KIBANA-NOT_EXPAND_INDEX_PATTERN"></span>
+                <small translate="KIBANA-NOT_RECOMMENDED"></small>
             </label>
 
             <div ng-if="index.notExpandable" class="alert alert-info">
-              This index pattern will be queried directly rather than being
-              expanded into more performant searches against individual indices.
+              <span translate="KIBANA-NOT_EXPANDABLE"></span>
 
-              Elasticsearch will receive a query against <em>{{index.name}}</em>
-              and will have to search through all matching indices regardless
-              of whether they have data that matches the current time range.
+              <span translate="KIBANA-ES_QUERY"></span>
+              <em translate="KIBANA-INDEX_NAME_VAR" translate-values="{ indexName: '{{index.name}}' }"></em>
+              <span translate="KIBANA-SEARCH_ALL_DATA"></span>
             </div>
 
-            <p class="help-block">
-              By default, searches against any time-based index pattern that
-              contains a wildcard will automatically be expanded to query only
-              the indices that contain data within the currently selected time
-              range.
-            </p>
+            <p class="help-block" translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"></p>
 
             <p class="help-block">
-              Searching against the index pattern <em>logstash-*</em> will
-              actually query elasticsearch for the specific matching indices
-              (e.g. <em>logstash-2015.12.21</em>) that fall within the current
-              time range.
+              <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
+              <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
+              <span translate="KIBANA-ACTUALLY_QUERY"></span>
+              <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
+              <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
             </p>
           </div>
 
           <div class="form-group time-and-pattern">
             <label ng-if="index.isTimeBased">
               <input ng-model="index.nameIsPattern" type="checkbox">
-              Use event times to create index names <small>[DEPRECATED]</small>
+              <span translate="KIBANA-INDEX_NAME_CREATED_BY_EVENT_TIMES"></span>
+              <small translate="KIBANA-DEPRECATED"></small>
             </label>
           </div>
 
           <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
             <div class="alert alert-warning">
-              <h4>Time-interval based index patterns are deprecated!</h4>
-              <p>
-                We <strong>strongly recommend</strong> using wildcard pattern names instead of
-                time-interval based index patterns.
               </p>
+              <h4 translate="KIBANA-ALERT_INDEX_PATTERN_DEPRECATED"></h4>
               <p>
-                Kibana is now smart enough to automatically determine which
-                indices to search against within the current time range for
-                wildcard index patterns. This means that wildcard
-                index patterns now get the same performance optimizations when
-                searching within a time range as time-interval patterns.
+                <span translate="KIBANA-WE"></span>
+                <strong translate="KIBANA-STRONGLY_RECOMMEND"></strong>
+                <span translate="KIBANA-WILD_CARD_PATTERN"></span>
               </p>
             </div>
             <label>
-              Index pattern interval&nbsp;
-              <kbn-info info="The interval at which index names rotate."></kbn-info>
+              <span translate="KIBANA-INDEX_PATTERN_INTERVAL"></span>&nbsp;
+              <kbn-info info="{{ 'KIBANA-INTERVAL_INDEX_NAMES_ROTATE' | translate }}"></kbn-info>
             </label>
             <select
               required
@@ -132,17 +121,17 @@
             </div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              Attempted to match the following indices and aliases:
+              <span translate="KIBANA-SAMPLE_ALERT"></span>
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
               <button type="button" ng-click="moreSamples(true)" class="btn btn-default">
-                Expand Search
+                <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
 
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              Pattern matches {{index.existing.matchPercent}} of existing indices and aliases
+              <span translate="KIBANA-EXISTING_MATCH_PERCENT" translate-values="{ indexExistingMatchPercent: '{{index.existing.matchPercent}}' }"></span>
               <ul>
                 <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -151,12 +140,12 @@
                 ng-click="moreSamples()"
                 type="button"
                 class="btn btn-default">
-                Expand Search
+                <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
 
             <div class="alert alert-info" ng-if="index.existing.failures.length">
-              Indices and aliases that were found, but did not match the pattern:
+              <span translate="KIBANA-NON_MATCHING_INDICES_AND_ALIASES"></span>
               <ul>
                 <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -164,7 +153,7 @@
                 ng-if="index.sampleCount < index.existing.matches.length"
                 ng-click="moreSamples()"
                 class="alert-link">
-                more
+                <span translate="KIBANA-MORE"></span>
               </a>
             </div>
           </section>
@@ -175,8 +164,9 @@
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
             class="btn">
-            <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
-            <span ng-show="form.name.$error.indexNameInput">Invalid index name pattern.</span>
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="index.fetchFieldsError">{{index.fetchFieldsError}}</span>
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="!index.fetchFieldsError" translate="KIBANA-CREATE"></span>
+            <span ng-show="form.name.$error.indexNameInput" translate="KIBANA-INVALID_INDEX_PATTERN"></span>
           </button>
         </form>
       </div>

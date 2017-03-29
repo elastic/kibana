@@ -1,7 +1,6 @@
-const alter = require('../lib/alter.js');
-const _ = require('lodash');
-const Chainable = require('../lib/classes/chainable');
-const argType = require('../handlers/lib/arg_type.js');
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 
 module.exports = new Chainable('trim', {
   args: [

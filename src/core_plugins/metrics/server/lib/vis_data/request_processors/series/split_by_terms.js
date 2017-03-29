@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
@@ -11,8 +10,12 @@ export default function splitByTerm(req, panel, series) {
   return next => doc => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const { timeField, interval } = getIntervalAndTimefield(panel, series);
-      const { bucketSize, intervalString } = getBucketSize(req, interval);
-      const { from, to }  = getTimerange(req);
+      const {
+        bucketSize
+      } = getBucketSize(req, interval);
+      const {
+        to
+      }  = getTimerange(req);
 
       _.set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
       _.set(doc, `aggs.${series.id}.terms.size`, series.terms_size);

@@ -1,4 +1,4 @@
-const { promisify } = require('bluebird');
+import { promisify } from 'bluebird';
 const readdir = promisify(require('fs').readdir);
 const exec = promisify(require('child_process').exec);
 const platform = require('os').platform();

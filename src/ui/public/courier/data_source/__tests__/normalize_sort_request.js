@@ -78,7 +78,6 @@ describe('SearchSource#normalizeSortRequest', function () {
   it('should use script based sorting only on sortable types', function () {
     const fieldName = 'script murmur3';
     const direction = 'asc';
-    const indexField = indexPattern.fields.byName[fieldName];
 
     const sortState = {};
     sortState[fieldName] = direction;

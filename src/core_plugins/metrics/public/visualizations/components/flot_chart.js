@@ -14,7 +14,7 @@ class FlotChart extends Component {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  shouldComponentUpdate(props, state) {
+  shouldComponentUpdate(props) {
     if (!this.plot) return true;
     if (props.reversed !== this.props.reversed) {
       return true;
@@ -59,12 +59,12 @@ class FlotChart extends Component {
         return show.some(id => _.startsWith(id, metric.id));
       };
     }
-    return (metric) => true;
+    return () => true;
   }
 
   componentWillReceiveProps(newProps) {
     if (this.plot) {
-      const { series, markings } = newProps;
+      const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
       this.plot.setData(this.calculateData(series, newProps.show));
@@ -86,7 +86,6 @@ class FlotChart extends Component {
   }
 
   calculateData(data, show) {
-    const series = [];
     return _(data)
       .filter(this.filterByShow(show))
       .map((set) => {
@@ -100,7 +99,7 @@ class FlotChart extends Component {
       }).reverse().value();
   }
 
-  handleDraw(plot, canvasContext) {
+  handleDraw(plot) {
     if (this.props.onDraw) this.props.onDraw(plot);
   }
 
@@ -109,7 +108,6 @@ class FlotChart extends Component {
 
     const lineColor = this.props.reversed ? colors.lineColorReversed : colors.lineColor;
     const textColor = this.props.reversed ? colors.textColorReversed : colors.textColor;
-    const valueColor = this.props.reversed ? colors.valueColorReversed : colors.valueColor;
 
     const opts = {
       legend: { show: false },
@@ -168,7 +166,6 @@ class FlotChart extends Component {
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       const { series } = this.props;
-      const parent = $(this.target.parentElement);
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(this.target, data, this.getOptions());
@@ -199,7 +196,7 @@ class FlotChart extends Component {
         };
 
         this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
-        this.handlePlotleave = (e) => eventBus.trigger('thorPlotleave');
+        this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = (e) =>  {
           this.plot.clearCrosshair();
           if (this.props.plothover) this.props.plothover(e);
@@ -215,7 +212,7 @@ class FlotChart extends Component {
         $(this.target).bind('plothover', this.props.plothover);
       }
 
-      $(this.target).on('mouseleave', (e) => {
+      $(this.target).on('mouseleave', () => {
         eventBus.trigger('thorPlotleave');
       });
 
@@ -264,4 +261,3 @@ FlotChart.propTypes = {
 };
 
 export default FlotChart;
-

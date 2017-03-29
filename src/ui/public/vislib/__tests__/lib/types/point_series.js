@@ -1,5 +1,3 @@
-import d3 from 'd3';
-import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
@@ -8,7 +6,6 @@ import VislibLibVisPointSeriesTypeConfigProvider from 'ui/vislib/lib/types/point
 describe('Point Series Config Type Class Test Suite', function () {
   let pointSeriesConfig;
   let parsedConfig;
-  let el;
   const histogramConfig = {
     type: 'histogram',
     addLegend: true,
@@ -73,7 +70,7 @@ describe('Point Series Config Type Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     pointSeriesConfig = Private(VislibLibVisPointSeriesTypeConfigProvider);
   }));
 
@@ -114,5 +111,4 @@ describe('Point Series Config Type Class Test Suite', function () {
       expect(parsedConfig.valueAxes.length).to.equal(2);
     });
   });
-
 });

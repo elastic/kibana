@@ -1,11 +1,12 @@
-const _ = require('lodash');
-const fetch = require('node-fetch');
-const moment = require('moment');
+import _ from 'lodash';
+import fetch from 'node-fetch';
+import moment from 'moment';
 fetch.Promise = require('bluebird');
+
 //var parseDateMath = require('../utils/date_math.js');
 
 
-const Datasource = require('../lib/classes/datasource');
+import Datasource from '../lib/classes/datasource';
 
 
 module.exports = new Datasource ('quandl', {

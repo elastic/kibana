@@ -11,7 +11,7 @@ function compatibleWithKibana(kbnServer, plugin) {
   return versionSatisfies(pluginKibanaVersion, kibanaVersion);
 }
 
-export default async function (kbnServer, server, config) {
+export default async function(kbnServer, server) {
   //because a plugin pack can contain more than one actual plugin, (for example x-pack)
   //we make sure that the warning messages are unique
   const warningMessages = new Set();

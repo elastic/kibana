@@ -1,8 +1,6 @@
-import Boom from 'boom';
-
 import BaseOptimizer from '../base_optimizer';
 import WeirdControlFlow from './weird_control_flow';
-import { once, pick, size } from 'lodash';
+import { once } from 'lodash';
 import { join } from 'path';
 
 module.exports = class LazyOptimizer extends BaseOptimizer {

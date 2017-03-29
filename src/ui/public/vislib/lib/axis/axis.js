@@ -43,7 +43,6 @@ export default function AxisFactory(Private) {
 
       const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
       if (stackedMode) {
-        const self = this;
         this.stack = this._stackNegAndPosVals;
       }
     }
@@ -117,7 +116,6 @@ export default function AxisFactory(Private) {
     adjustSize() {
       const config = this.axisConfig;
       const style = config.get('style');
-      const margin = this.visConfig.get('style.margin');
       const chartEl = this.visConfig.get('el');
       const position = config.get('position');
       const axisPadding = 5;

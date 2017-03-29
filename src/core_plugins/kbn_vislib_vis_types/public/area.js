@@ -67,7 +67,8 @@ export default function PointSeriesVisType(Private) {
           type: 'area',
           mode: 'stacked',
           data: {
-            label: 'Count'
+            label: 'Count',
+            id: '1'
           },
           drawLinesBetweenPoints: true,
           showCircles: true,

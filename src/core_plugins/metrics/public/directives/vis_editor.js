@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import modules from 'ui/modules';
@@ -10,7 +9,7 @@ const app = modules.get('apps/metrics/directives');
 app.directive('metricsVisEditor', (timefilter) => {
   return {
     restrict: 'E',
-    link: ($scope, $el, $attrs) => {
+    link: ($scope, $el) => {
       const addToState = ['embedded', 'fields', 'visData'];
       const Component = addScope(VisEditor, $scope, addToState);
       const handleBrush = createBrushHandler($scope, timefilter);

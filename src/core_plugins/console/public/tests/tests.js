@@ -2,12 +2,10 @@ require('ace');
 
 const module = require('ui/modules').get('app/sense');
 
-module.run(function (Private, $rootScope) {
-  module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    // mock the resize checker
-  };
+// mock the resize checker
+module.run(function () {
+  module.setupResizeCheckerForRootEditors = () => {};
 });
-
 
 require('ui/chrome')
   .setRootTemplate(require('./index.html'))

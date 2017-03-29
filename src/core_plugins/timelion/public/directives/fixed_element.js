@@ -1,11 +1,10 @@
-const _ = require('lodash');
-const $ = require('jquery');
+import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
-app.directive('fixedElementRoot', function ($timeout) {
+app.directive('fixedElementRoot', function () {
   return {
     restrict: 'A',
-    link: function ($scope, $elem, attrs) {
+    link: function ($scope, $elem) {
       let fixedAt;
       $(window).bind('scroll', function () {
         const fixed = $('[fixed-element]', $elem);

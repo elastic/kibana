@@ -13,7 +13,7 @@ export default (obj = {}) => {
     chart_type: 'line',
     line_width: 1,
     point_size: 1,
-    fill: 0,
+    fill: 0.5,
     stacked: 'none'
   }, obj);
 };

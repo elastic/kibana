@@ -2,7 +2,7 @@
   Single exponential smoothing. Assuming even interval
 */
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function ses(points, alpha) {
   let origin;

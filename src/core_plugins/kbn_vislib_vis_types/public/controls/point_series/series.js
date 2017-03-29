@@ -9,7 +9,7 @@ module.directive('vislibSeries', function () {
     template: vislibSeriesTemplate,
     replace: true,
     link: function ($scope) {
-      function makeSerie(label) {
+      function makeSerie(id, label) {
         const last = $scope.series[$scope.series.length - 1];
         return {
           show: true,
@@ -19,6 +19,7 @@ module.directive('vislibSeries', function () {
           showCircles: true,
           interpolate: 'linear',
           data: {
+            id: id,
             label: label
           },
           valueAxis: $scope.vis.params.valueAxes[0].id
@@ -43,13 +44,13 @@ module.directive('vislibSeries', function () {
         });
 
         // update labels for existing params or create new one
-        $scope.vis.params.seriesParams = metrics.map((agg, i) => {
-          const params = $scope.vis.params.seriesParams[i];
+        $scope.vis.params.seriesParams = metrics.map(agg => {
+          const params = $scope.vis.params.seriesParams.find(param => param.data.id === agg.id);
           if (params) {
             params.data.label = agg.makeLabel();
             return params;
           } else {
-            const series = makeSerie(agg.makeLabel());
+            const series = makeSerie(agg.id, agg.makeLabel());
             return series;
           }
         });
@@ -72,11 +73,11 @@ module.directive('vislibSeries', function () {
 
       $scope.changeValueAxis = (index) => {
         const series = $scope.vis.params.seriesParams[index];
-        $scope.updateAxisTitle();
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;
         }
+        $scope.updateAxisTitle();
       };
     }
   };

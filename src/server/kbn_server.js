@@ -1,5 +1,5 @@
 import { constant, once, compact, flatten } from 'lodash';
-import { promisify, resolve, fromNode } from 'bluebird';
+import { resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import Config from './config/config';
@@ -8,7 +8,6 @@ import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import loggingMixin from './logging';
-import deprecationWarningsMixin from './config/deprecation_warnings';
 import warningsMixin from './warnings';
 import statusMixin from './status';
 import pidMixin from './pid';
@@ -97,7 +96,9 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server, config } = this;
+    const {
+      server
+    } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));

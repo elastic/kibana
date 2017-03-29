@@ -1,4 +1,3 @@
-const camelCase = require('lodash').camelCase;
 require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {

@@ -6,16 +6,7 @@ define(function (require) {
 
   const _ = require('lodash');
   const module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-  module.controller('TimelionVisController', function (
-    $scope,
-    $element,
-    Private,
-    Notifier,
-    $http,
-    $rootScope,
-    timefilter,
-    getAppState
-  ) {
+  module.controller('TimelionVisController', function ($scope, $element, Private, Notifier, $http, $rootScope, timefilter) {
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
     const timezone = Private(require('plugins/timelion/services/timezone'))();
     const dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));

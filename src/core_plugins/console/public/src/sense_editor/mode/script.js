@@ -1,13 +1,13 @@
-let ace = require('ace');
 let acequire = require('acequire');
-let mode_json = require('ace/mode-json');
+require('ace');
+require('ace/mode-json');
 
 var oop = acequire("ace/lib/oop");
 var TextMode = acequire("ace/mode/text").Mode;
 var MatchingBraceOutdent = acequire("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
 var CstyleBehaviour = acequire("ace/mode/behaviour/cstyle").CstyleBehaviour;
 var CStyleFoldMode = acequire("ace/mode/folding/cstyle").FoldMode;
-var AceTokenizer = acequire("ace/tokenizer").Tokenizer;
+acequire("ace/tokenizer")
 
 var ScriptHighlightRules = require("./script_highlight_rules").ScriptHighlightRules;
 

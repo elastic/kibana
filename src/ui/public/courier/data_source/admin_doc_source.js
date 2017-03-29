@@ -1,9 +1,3 @@
-/**
- * @name AdminDocSource
- */
-
-import _ from 'lodash';
-
 import AbstractDocSourceProvider from './_abstract_doc_source';
 import DocStrategyProvider from '../fetch/strategy/doc_admin';
 import DocRequestProvider from '../fetch/request/doc_admin';

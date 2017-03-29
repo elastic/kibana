@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import npm from 'npm';
 import npmLicense from 'license-checker';
 import glob from 'glob';
 import path from 'path';

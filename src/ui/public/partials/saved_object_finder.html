@@ -20,7 +20,7 @@
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
       <div class="finder-manage-object col-md-2" ng-if="onAddNew">
-        <a class="small" ng-click="onAddNew()">
+        <a class="small" ng-click="onAddNew()" data-test-subj="addNewSavedObjectLink">
           Add new {{finder.properties.noun}}
         </a>
       </div>

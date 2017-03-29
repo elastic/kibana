@@ -2,7 +2,6 @@ import _ from 'lodash';
 import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
-import { inherits } from 'util';
 import { Deprecations } from '../../deprecation';
 
 const extendInitFns = Symbol('extend plugin initialization');

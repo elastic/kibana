@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import KbnFormController from 'ui/fancy_forms/kbn_form_controller';
 import uiModules from 'ui/modules';
 
@@ -20,7 +19,7 @@ uiModules
         // replace the controller with one that will setup the actual controller
         directive.controller = function stub() {
           const allDeps = _.toArray(arguments);
-          return chain.reduce(function (controller, link, i) {
+          return chain.reduce(function (controller, link) {
             const deps = allDeps.splice(0, link.deps.length);
             return link.fn.apply(controller, deps) || controller;
           }, this);

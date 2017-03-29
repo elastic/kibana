@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import { expect } from 'chai';
 import getIntervalAndTimefield from '../get_interval_and_timefield';
 

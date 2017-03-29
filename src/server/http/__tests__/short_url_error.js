@@ -1,4 +1,3 @@
-import Boom from 'boom';
 import expect from 'expect.js';
 import _ from 'lodash';
 import { handleShortUrlError } from '../short_url_error';

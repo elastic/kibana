@@ -1,5 +1,5 @@
-const Promise = require('bluebird');
-const _ = require('lodash');
+import Promise from 'bluebird';
+import _ from 'lodash';
 
 /* @param {Array} args
  * - args[0] must be a seriesList

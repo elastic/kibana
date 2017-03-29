@@ -5,16 +5,17 @@ import ngMock from 'ng_mock';
 
 let debounce;
 let $timeout;
-let $timeoutSpy;
 
 function init() {
   ngMock.module('kibana');
 
   ngMock.inject(function ($injector, _$timeout_) {
     $timeout = _$timeout_;
-    $timeoutSpy = sinon.spy($timeout);
 
     debounce = $injector.get('debounce');
+
+    // ensure there is a clean slate before testing deferred tasks
+    $timeout.flush();
   });
 }
 

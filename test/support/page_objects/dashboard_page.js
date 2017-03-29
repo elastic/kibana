@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+
 import {
-  scenarioManager,
+  esArchiver,
   esClient,
-  elasticDump
 } from '../';
+
 import PageObjects from './';
 
 export default class DashboardPage {
@@ -16,11 +17,11 @@ export default class DashboardPage {
   }
 
   async initTests() {
-    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = esArchiver.loadIfNeeded('logstash_functional');
     await esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
 
     PageObjects.common.debug('load kibana index with visualizations');
-    await elasticDump.elasticLoad('dashboard','.kibana');
+    await esArchiver.load('dashboard');
 
     await PageObjects.common.navigateToApp('dashboard');
 
@@ -45,9 +46,39 @@ export default class DashboardPage {
         const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
         await goToDashboardLink.click();
         // Once the searchFilter can be found, we know the page finished loading.
-        const searchFilter = await PageObjects.common.findTestSubject('searchFilter');
+        await PageObjects.common.findTestSubject('searchFilter');
       });
     }
+  }
+
+  async getQuery() {
+    const queryObject = await PageObjects.common.findTestSubject('dashboardQuery');
+    return queryObject.getProperty('value');
+  }
+
+  appendQuery(query) {
+    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+  }
+
+  clickFilterButton() {
+    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
+      .click();
+  }
+
+  clickEdit() {
+    PageObjects.common.debug('Clicking edit');
+    return PageObjects.common.findTestSubject('dashboardEditMode')
+      .click();
+  }
+
+  getIsInViewMode() {
+    PageObjects.common.debug('getIsInViewMode');
+    return PageObjects.common.doesTestSubjectExist('dashboardEditMode');
+  }
+
+  clickCancelOutOfEditMode() {
+    PageObjects.common.debug('Clicking cancel');
+    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
   }
 
   clickNewDashboard() {
@@ -133,6 +164,12 @@ export default class DashboardPage {
     .then(() => {
       return this.clickAddVisualization();
     });
+  }
+
+  async renameDashboard(dashName) {
+    PageObjects.common.debug(`Naming dashboard ` + dashName);
+    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
+    await this.findTimeout.findById('dashboardTitle').type(dashName);
   }
 
   /**
@@ -310,6 +347,10 @@ export default class DashboardPage {
     }, Promise.resolve());
   }
 
+  clickAddNewVisualizationLink() {
+    return PageObjects.common.clickTestSubject('addNewSavedObjectLink');
+  }
+
   async setTimepickerInDataRange() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
@@ -336,6 +377,10 @@ export default class DashboardPage {
     }
   }
 
+  async getFilters(timeout = defaultFindTimeout) {
+    return PageObjects.common.findAllByCssSelector('.filter-bar > .filter', timeout);
+  }
+
   async getFilterDescriptions(timeout = defaultFindTimeout) {
     const filters = await PageObjects.common.findAllByCssSelector(
       '.filter-bar > .filter > .filter-description',
@@ -345,9 +390,24 @@ export default class DashboardPage {
 
   async filterOnPieSlice() {
     PageObjects.common.debug('Filtering on a pie slice');
-    const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
-    PageObjects.common.debug('Slices found:' + slices.length);
-    return slices[0].click();
+    await PageObjects.common.try(async () => {
+      const slices = await PageObjects.common.findAllByCssSelector('svg > g > path.slice');
+      PageObjects.common.debug('Slices found:' + slices.length);
+      return slices[0].click();
+    });
+  }
+
+  async toggleExpandPanel() {
+    PageObjects.common.debug('toggleExpandPanel');
+    const expandShown = await PageObjects.common.doesTestSubjectExist('dashboardPanelExpandIcon');
+    if (!expandShown) {
+      const panelElements = await this.findTimeout.findAllByCssSelector('span.panel-title');
+      PageObjects.common.debug('click title');
+      await panelElements[0].click(); // Click to simulate hover.
+    }
+    const expandButton = await PageObjects.common.findTestSubject('dashboardPanelExpandIcon');
+    PageObjects.common.debug('click expand icon');
+    expandButton.click();
   }
 
   getSharedItemsCount() {
@@ -378,5 +438,4 @@ export default class DashboardPage {
       }));
     });
   }
-
 }

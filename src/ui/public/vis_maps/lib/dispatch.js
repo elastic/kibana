@@ -284,22 +284,6 @@ export default function DispatchClass(Private, config) {
     }
   }
 
-  /**
-   * Determine if d3.Scale is quantitative
-   *
-   * @param element {d3.Scale}
-   * @method isQuantitativeScale
-   * @returns {boolean}
-   */
-  function isQuantitativeScale(scale) {
-    //Invert is a method that only exists on quantitative scales
-    if (scale.invert) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   function validBrushClick(event) {
     return event.button === 0;
   }

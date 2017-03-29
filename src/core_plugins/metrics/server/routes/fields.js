@@ -7,7 +7,7 @@ export default (server) => {
     handler: (req, reply) => {
       return getFields(req)
         .then(reply)
-        .catch(err => reply([]));
+        .catch(() => reply([]));
     }
   });
 

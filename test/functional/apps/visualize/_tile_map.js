@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -228,7 +225,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function () {
         return PageObjects.visualize.clickMapZoomIn();
       })
-      .then(function (message) {
+      .then(function () {
         return PageObjects.visualize.saveVisualization(vizName1);
       })
       .then(function (message) {

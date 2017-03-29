@@ -1,9 +1,7 @@
-import $ from 'jquery';
-
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import UiModules from 'ui/modules';
 
-export default function (chrome, internals) {
+export default function () {
 
   UiModules
   .get('kibana')

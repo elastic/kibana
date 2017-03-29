@@ -5,7 +5,6 @@ import IndexPattern from '../index_pattern';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import DataFormatPicker from '../data_format_picker';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 
@@ -127,11 +126,11 @@ class TimeseriesPanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={e => this.switchTab('data')}>Data</div>
+            onClick={() => this.switchTab('data')}>Data</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={e => this.switchTab('options')}>Panel Options</div>
+            onClick={() => this.switchTab('options')}>Panel Options</div>
           <div className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
-            onClick={e => this.switchTab('annotations')}>Annotations</div>
+            onClick={() => this.switchTab('annotations')}>Annotations</div>
         </div>
         {view}
       </div>

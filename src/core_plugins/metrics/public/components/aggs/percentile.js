@@ -4,13 +4,11 @@ import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import collectionActions from '../lib/collection_actions';
-import calculateSiblings from '../lib/calculate_siblings';
 import AddDeleteButtons from '../add_delete_buttons';
 import Select from 'react-select';
 import uuid from 'node-uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import createNumberHandler from '../lib/create_number_handler';
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
@@ -132,7 +130,6 @@ class PercentileAgg extends Component {
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const handleNumberChange = createNumberHandler(handleChange);
     const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
 
     return (
@@ -148,7 +145,6 @@ class PercentileAgg extends Component {
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
                 siblings={this.props.siblings}
-                panelType={panel.type}
                 value={model.type}
                 onChange={handleSelectChange('type')}/>
             </div>

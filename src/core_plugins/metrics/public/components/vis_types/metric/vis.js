@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import { Metric, getLastValue } from 'plugins/metrics/visualizations';
-import { findDOMNode } from 'react-dom';
 import color from 'color';
 
 

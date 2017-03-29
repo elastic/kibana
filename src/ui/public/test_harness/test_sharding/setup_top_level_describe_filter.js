@@ -65,7 +65,6 @@ export function setupTopLevelDescribeFilter(test) {
    *  @type {Number}
    */
   let describeCallDepth = 0;
-  const ignoredCalls = [];
 
   const describeInterceptor = function (describeName, describeBody) {
     const context = this;

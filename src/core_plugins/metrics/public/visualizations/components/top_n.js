@@ -5,7 +5,7 @@ import getLastValue from '../lib/get_last_value';
 class TopN extends Component {
 
   handleClick(item) {
-    return (e) => {
+    return () => {
       if (this.props.onClick) {
         this.props.onClick(item);
       }

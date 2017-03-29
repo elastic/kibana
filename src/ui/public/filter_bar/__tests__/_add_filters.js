@@ -5,10 +5,6 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('add filters', function () {
-  const storeNames = {
-    app: 'appState',
-    global: 'globalState'
-  };
   let filters;
   let queryFilter;
   let $rootScope;

@@ -1,10 +1,8 @@
+import readline from 'readline';
+import url from 'url';
+import fs from 'fs';
+import path from 'path';
 module.exports = function (grunt) {
-  const readline = require('readline');
-  const url = require('url');
-  const fs = require('fs');
-  const path = require('path');
-  const _ = require('lodash');
-
   // build, then zip and upload to s3
   grunt.registerTask('release', [
     '_release:confirmUpload',
@@ -43,7 +41,6 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('_release:complete', function () {
-    const { sha, version } = grunt.config.get('build');
     const config = grunt.config.get('aws_s3.staging.files');
 
     grunt.log.ok('Builds uploaded');

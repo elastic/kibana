@@ -3,7 +3,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
 
-export default function AxisScaleFactory(Private) {
+export default function AxisScaleFactory() {
   class AxisScale {
     constructor(axisConfig, visConfig) {
       this.axisConfig = axisConfig;

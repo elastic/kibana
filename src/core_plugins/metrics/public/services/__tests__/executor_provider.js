@@ -5,11 +5,9 @@ import EventEmitter from 'events';
 import Promise from 'bluebird';
 
 describe('$executor service', () => {
-
   let executor;
   let timefilter;
   let $timeout;
-  let execute;
   let onSpy;
   let offSpy;
 
@@ -98,5 +96,4 @@ describe('$executor service', () => {
     });
     executor.start();
   });
-
 });

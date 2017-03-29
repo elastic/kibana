@@ -359,7 +359,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
-
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -371,7 +370,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     const sort = $state.sort;
     const timeField = $scope.indexPattern.timeFieldName;
-    const totalSize = $scope.size || $scope.opts.sampleSize;
 
     /**
      * Basically an emum.

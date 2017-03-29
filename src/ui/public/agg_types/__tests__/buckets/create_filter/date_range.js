@@ -1,15 +1,12 @@
 
-import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/create_filter/date_range';
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
-    let AggConfig;
     let indexPattern;
     let Vis;
     let createFilter;
@@ -17,7 +14,6 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
-      AggConfig = Private(VisAggConfigProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
     }));

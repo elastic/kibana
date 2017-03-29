@@ -68,7 +68,7 @@ describe('ui/utils/diff_object', function () {
     const obj = { 'message': 'foo' };
     const target = { obj: obj, message: 'foo' };
     const source = { obj: _.cloneDeep(obj), message: 'test' };
-    const results = diff(target, source);
+    diff(target, source);
     expect(target.obj).to.be(obj);
   });
 

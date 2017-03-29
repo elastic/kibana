@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="19px" height="24px" viewBox="0 0 19 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-kibana</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="UI-KIT" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="QuickSummary" transform="translate(-205.000000, -3553.000000)" fill="#5A5A5A">
+            <g id="Basic-Panel" transform="translate(150.000000, 3540.000000)">
+                <g id="Header-bar">
+                    <g id="icon-kibana" transform="translate(55.000000, 13.000000)">
+                        <path d="M0.346058824,8.98337647 C0.229941176,8.98337647 0.115588235,8.99008235 0.000176470588,8.9922 L0.000176470588,22.2469059 L9.15158824,11.2259647 C6.53558824,9.79796471 3.537,8.98337647 0.346058824,8.98337647" id="Fill-7"></path>
+                        <path d="M10.0774588,11.7682941 L-7.05882353e-05,23.9038235 L-7.05882353e-05,24.0001765 L18.4492235,24.0001765 C17.4846353,18.8440588 14.3720471,14.4478235 10.0774588,11.7682941" id="Fill-4"></path>
+                        <path d="M0.105494118,7.92988235 C0.185611765,7.92705882 0.265376471,7.92458824 0.3462,7.92458824 C3.59572941,7.92458824 6.81596471,8.74482353 9.65890588,10.2963529 L9.84102353,10.3955294 L18.4732588,0 L-3.52941177e-05,0 L-3.52941177e-05,7.93305882 L0.105494118,7.92988235 Z" id="Fill-1"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

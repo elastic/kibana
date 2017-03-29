@@ -1,7 +1,6 @@
 let ace = require('ace');
-let acequire = require('acequire');
-let mode_json = require('ace/mode-json');
-let output_highlighting_rules = require('./output_highlight_rules');
+require('ace/mode-json');
+require('./output_highlight_rules');
 
 
 var oop = ace.require("ace/lib/oop");
@@ -10,7 +9,7 @@ var HighlightRules = require("./output_highlight_rules").OutputJsonHighlightRule
 var MatchingBraceOutdent = ace.require("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
 var CstyleBehaviour = ace.require("ace/mode/behaviour/cstyle").CstyleBehaviour;
 var CStyleFoldMode = ace.require("ace/mode/folding/cstyle").FoldMode;
-var WorkerClient = ace.require("ace/worker/worker_client").WorkerClient;
+ace.require("ace/worker/worker_client");
 var AceTokenizer = ace.require("ace/tokenizer").Tokenizer;
 
 var Mode = function () {
@@ -22,7 +21,7 @@ var Mode = function () {
 oop.inherits(Mode, JSONMode);
 
 (function () {
-  this.createWorker = function (session) {
+  this.createWorker = function () {
     return null;
   };
 

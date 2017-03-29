@@ -18,10 +18,10 @@
         </span>
         <a
           ng-if="sectionName"
-          ng-repeat="item in section.items.inOrder"
+          ng-repeat="item in section.visibleItems"
           class="kuiLocalTab"
-          ng-class="{ 'kuiLocalTab-isSelected': item.active, 'kuiLocalTab-disabled': !item.url }"
-          kbn-href="{{::item.url}}"
+          ng-class="{ 'kuiLocalTab-isSelected': item.active, 'kuiLocalTab-isDisabled': !item.active && (item.disabled || !item.url) }"
+          kbn-href="{{::item.disabled ? '' : item.url}}"
           data-test-subj="{{::item.name}}"
           tooltip="{{::item.tooltip}}"
           tooltip-placement="bottom"

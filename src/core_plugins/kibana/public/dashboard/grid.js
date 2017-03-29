@@ -4,8 +4,8 @@ import Binder from 'ui/binder';
 import chrome from 'ui/chrome';
 import 'gridster';
 import uiModules from 'ui/modules';
+import { DashboardViewMode } from 'plugins/kibana/dashboard/dashboard_view_mode';
 import { PanelUtils } from 'plugins/kibana/dashboard/panel/panel_utils';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 const app = uiModules.get('app/dashboard');
 
@@ -13,6 +13,11 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
   return {
     restrict: 'E',
     scope: {
+      /**
+       * What view mode the dashboard is currently in - edit or view only.
+       * @type {DashboardViewMode}
+       */
+      dashboardViewMode: '=',
       /**
        * Used to create a child persisted state for the panel from parent state.
        * @type {function} - Returns a {PersistedState} child uiState for this scope.
@@ -106,13 +111,26 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
           }
         }).data('gridster');
 
+        function setResizeCapability() {
+          if ($scope.dashboardViewMode === DashboardViewMode.VIEW) {
+            gridster.disable_resize();
+          } else {
+            gridster.enable_resize();
+          }
+        }
+
         // This is necessary to enable text selection within gridster elements
         // http://stackoverflow.com/questions/21561027/text-not-selectable-from-editable-div-which-is-draggable
         binder.jqOn($el, 'mousedown', function () {
           gridster.disable().disable_resize();
         });
         binder.jqOn($el, 'mouseup', function enableResize() {
-          gridster.enable().enable_resize();
+          gridster.enable();
+          setResizeCapability();
+        });
+
+        $scope.$watch('dashboardViewMode', () => {
+          setResizeCapability();
         });
 
         $scope.$watchCollection('panels', function (panels) {
@@ -173,6 +191,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   panel="findPanelByPanelIndex(${panel.panelIndex}, panels)"
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
+                  dashboard-view-mode="dashboardViewMode"
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"

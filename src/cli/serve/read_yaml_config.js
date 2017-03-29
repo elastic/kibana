@@ -3,8 +3,6 @@ import { readFileSync as read } from 'fs';
 import { safeLoad } from 'js-yaml';
 
 
-import { fromRoot } from '../../utils';
-
 export function merge(sources) {
   return transform(sources, (merged, source) => {
     forOwn(source, function apply(val, key) {

@@ -1,8 +1,6 @@
 import crypto from 'crypto';
 import { chain } from 'lodash';
 
-const constants = crypto.constants;
-
 const protocolMap = {
   TLSv1: crypto.constants.SSL_OP_NO_TLSv1,
   'TLSv1.1': crypto.constants.SSL_OP_NO_TLSv1_1,

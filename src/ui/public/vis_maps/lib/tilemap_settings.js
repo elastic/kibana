@@ -1,7 +1,6 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
-import url from 'url';
 import uiRoutes from 'ui/routes';
 import { modifyUrl } from 'ui/url';
 

@@ -6,7 +6,6 @@ import _ from 'lodash';
 import L from 'leaflet';
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
-import $ from 'jquery';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vis_maps/visualizations/marker_types/base_marker';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vis_maps/visualizations/marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vis_maps/visualizations/marker_types/scaled_circles';
@@ -15,8 +14,6 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vis_maps/visualiz
 const defaultSWCoords = [13.496, -143.789];
 const defaultNECoords = [55.526, -57.919];
 const bounds = {};
-let MarkerType;
-let map;
 
 angular.module('MarkerFactory', ['kibana']);
 
@@ -116,7 +113,6 @@ describe('tilemaptest - Marker Tests', function () {
 
         // should always get the same color back
         _.times(5, function () {
-          const num = _.random(0, 100);
           const randColor = markerLayer._legendQuantizer(0);
           expect(randColor).to.equal(color);
         });
@@ -137,7 +133,7 @@ describe('tilemaptest - Marker Tests', function () {
 
       it('should use the legendQuantizer', function () {
         const spy = sinon.spy(markerLayer, '_legendQuantizer');
-        const style = markerLayer.applyShadingStyle(100);
+        markerLayer.applyShadingStyle(100);
         expect(spy.callCount).to.equal(1);
       });
     });
@@ -148,7 +144,7 @@ describe('tilemaptest - Marker Tests', function () {
 
         markerLayer = createMarker(MarkerClass, null, Function.prototype);//create marker with tooltip
         markerLayer._attr.addTooltip = true;
-        const stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
+        const stub = sinon.stub(markerLayer, '_tooltipFormatter', function () {
           return;
         });
         markerLayer._showTooltip(sample);
@@ -163,7 +159,7 @@ describe('tilemaptest - Marker Tests', function () {
 
       beforeEach(function () {
         addToSpy = sinon.spy();
-        leafletControlStub = sinon.stub(L, 'control', function (options) {
+        leafletControlStub = sinon.stub(L, 'control', function () {
           return {
             addTo: addToSpy
           };
@@ -231,7 +227,6 @@ describe('tilemaptest - Marker Tests', function () {
     describe('radiusScale method', function () {
       const valueArray = [10, 20, 30, 40, 50, 60];
       const max = _.max(valueArray);
-      const prev = -1;
 
       it('should return 0 for value of 0', function () {
         expect(markerLayer._radiusScale(0)).to.equal(0);

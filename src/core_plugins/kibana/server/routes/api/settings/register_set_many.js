@@ -5,7 +5,6 @@ export default function registerSet(server) {
     path: '/api/kibana/settings',
     method: 'POST',
     handler: function (req, reply) {
-      const { key } = req.params;
       const { changes } = req.payload;
       const uiSettings = server.uiSettings();
       uiSettings

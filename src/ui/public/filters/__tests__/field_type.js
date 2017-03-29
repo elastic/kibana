@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
@@ -9,7 +8,7 @@ let filter;
 
 let types;
 
-const init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 

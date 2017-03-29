@@ -1,11 +1,10 @@
-const _ = require('lodash');
-const moment = require('moment');
+import _ from 'lodash';
 
 // Upsampling and downsampling of non-cummulative sets
 // Good: average, min, max
 // Bad: sum, count
 module.exports = function (dataTuples, targetTuples) {
-  return _.map(targetTuples, function (bucket, h) {
+  return _.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
     while (i < dataTuples.length - 1 &&

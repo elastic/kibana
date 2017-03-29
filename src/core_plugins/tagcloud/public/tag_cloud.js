@@ -240,12 +240,12 @@ class TagCloud extends EventEmitter {
           resolve(true);
         }
       };
-      exitTransition.each(_ => exits++);
+      exitTransition.each(() => exits++);
       exitTransition.each('end', () => {
         exits--;
         resolveWhenDone();
       });
-      movingTags.each(_ => moves++);
+      movingTags.each(() => moves++);
       movingTags.each('end', () => {
         moves--;
         resolveWhenDone();

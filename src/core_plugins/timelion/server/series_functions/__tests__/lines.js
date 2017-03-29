@@ -1,9 +1,8 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-const _ = require('lodash');
 const expect = require('chai').expect;
-const invoke = require('./helpers/invoke_series_fn.js');
+import invoke from './helpers/invoke_series_fn.js';
 
 describe(filename, () => {
 

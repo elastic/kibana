@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const processFunctionDefinition = require('./server/lib/process_function_definition');
+import _ from 'lodash';
+import processFunctionDefinition from './server/lib/process_function_definition';
 
 module.exports = function (server) {
   //var config = server.config();

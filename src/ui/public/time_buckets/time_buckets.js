@@ -1,14 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
 import parseInterval from 'ui/utils/parse_interval';
 import TimeBucketsCalcAutoIntervalProvider from 'ui/time_buckets/calc_auto_interval';
 import TimeBucketsCalcEsIntervalProvider from 'ui/time_buckets/calc_es_interval';
 export default function IntervalHelperProvider(Private, timefilter, config) {
-
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
-  const tzOffset = moment().format('Z');
 
   function isValidMoment(m) {
     return m && ('isValid' in m) && m.isValid();
@@ -329,11 +326,10 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
       const resource = resources[breakers[prop]];
       const setup = resource.setup;
       const changes = resource.changes;
-      const deps = resource.deps;
       const fn = self[prop];
 
       return {
-        value: function cacheBreaker(input) {
+        value: function cacheBreaker() {
           const prev = setup.call(self);
           const ret = fn.apply(self, arguments);
 

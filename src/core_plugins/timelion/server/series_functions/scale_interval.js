@@ -1,8 +1,7 @@
-const alter = require('../lib/alter.js');
-const toMS = require('../lib/to_milliseconds.js');
-
-const _ = require('lodash');
-const Chainable = require('../lib/classes/chainable');
+import alter from '../lib/alter.js';
+import toMS from '../lib/to_milliseconds.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 module.exports = new Chainable('scale_interval', {
   args: [
     {

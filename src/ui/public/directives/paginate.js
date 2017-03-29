@@ -2,8 +2,6 @@ import _ from 'lodash';
 import uiModules from 'ui/modules';
 import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
 
-const PER_PAGE_DEFAULT = 10;
-
 uiModules.get('kibana')
 .directive('paginate', function ($parse, $compile) {
   return {
@@ -63,7 +61,6 @@ uiModules.get('kibana')
           self.otherWidthGetter
         ], function (vals, oldVals) {
           const intChanges = vals[0] !== oldVals[0];
-          const extChanges = vals[1] !== oldVals[1];
 
           if (intChanges) {
             if (!setPerPage(self.perPage)) {

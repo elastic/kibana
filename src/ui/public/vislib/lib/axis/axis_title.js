@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import $ from 'jquery';
-export default function AxisTitleFactory(Private) {
+export default function AxisTitleFactory() {
 
   class AxisTitle {
     constructor(axisConfig) {

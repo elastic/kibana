@@ -1,13 +1,10 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import SearchStrategyProvider from '../search';
 
 describe('ui/courier/fetch/strategy/search', () => {
-
-  let Promise;
   let $rootScope;
   let search;
   let reqsFetchParams;
@@ -15,7 +12,6 @@ describe('ui/courier/fetch/strategy/search', () => {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject((Private, $injector) => {
-    Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
     search = Private(SearchStrategyProvider);
     reqsFetchParams = [

@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 var utils = {};
 
 utils.textFromRequest = function (request) {

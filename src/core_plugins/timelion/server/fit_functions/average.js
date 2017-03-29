@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Upsampling and down sampling of non-cummulative sets
 // Good: min, max, average
@@ -27,7 +27,7 @@ module.exports = function (dataTuples, targetTuples) {
 
     dataTuplesQueue.splice(0, i);
 
-    const sum = _.reduce(avgSet, function (sum, num) { return sum + num; }, 0);
+    const sum = avgSet.reduce((sum, num) => sum + num, 0);
 
     return avgSet.length ? (sum / avgSet.length) : NaN;
   });

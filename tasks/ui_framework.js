@@ -1,8 +1,8 @@
-const sass = require('node-sass');
-const postcss = require('postcss');
-const postcssConfig = require('../src/optimize/postcss.config');
-const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+import sass from 'node-sass';
+import postcss from 'postcss';
+import postcssConfig from '../src/optimize/postcss.config';
+import chokidar from 'chokidar';
+import debounce from 'lodash/function/debounce';
 const platform = require('os').platform();
 
 module.exports = function (grunt) {
@@ -66,7 +66,7 @@ module.exports = function (grunt) {
   function uiFrameworkWatch() {
     const debouncedCompile = debounce(uiFrameworkCompile, 400, { leading: true });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(() => {
       debouncedCompile();
 
       chokidar.watch('ui_framework/components', { ignoreInitial: true }).on('all', (event, path) => {

@@ -3,7 +3,6 @@ import _ from 'lodash';
 import uuid from 'node-uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
-import Select from 'react-select';
 
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
@@ -21,7 +20,7 @@ class CalculationAgg extends Component {
   }
 
   render() {
-    const { panel, siblings } = this.props;
+    const { siblings } = this.props;
 
     const defaults = { script: '' };
     const model = { ...defaults, ...this.props.model };
@@ -42,7 +41,6 @@ class CalculationAgg extends Component {
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
               siblings={this.props.siblings}
-              panelType={panel.type}
               value={model.type}
               onChange={handleSelectChange('type')}/>
             <div className="vis_editor__variables">

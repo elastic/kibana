@@ -16,21 +16,14 @@ describe('kibana cli', function () {
       };
 
       describe('cleanPrevious', function () {
-        let cleaner;
         let errorStub;
         let logger;
-        let progress;
-        let request;
 
         beforeEach(function () {
           errorStub = sinon.stub();
           logger = new Logger(settings);
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
-          request = {
-            abort: sinon.stub(),
-            emit: sinon.stub()
-          };
         });
 
         afterEach(function () {
@@ -50,7 +43,7 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function (data) {
+          .then(function () {
             expect(errorStub.called).to.be(false);
           });
         });
@@ -76,7 +69,7 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function (data) {
+          .then(function () {
             expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
           });
         });
@@ -101,19 +94,14 @@ describe('kibana cli', function () {
 
           return cleanPrevious(settings, logger)
           .catch(errorStub)
-          .then(function (data) {
+          .then(function () {
             expect(errorStub.called).to.be(false);
           });
         });
-
       });
 
       describe('cleanArtifacts', function () {
-        let logger;
-
-        beforeEach(function () {
-          logger = new Logger(settings);
-        });
+        beforeEach(function () {});
 
         afterEach(function () {
           rimraf.sync.restore();
@@ -133,7 +121,6 @@ describe('kibana cli', function () {
 
           expect(cleanArtifacts).withArgs(settings).to.not.throwError();
         });
-
       });
 
     });

@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const url = require('url');
+import _ from 'lodash';
+import url from 'url';
 
 /**
 * Converts a config and a pathname to a url

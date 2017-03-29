@@ -1,5 +1,3 @@
-import semver from 'semver';
-
 export function versionSatisfies(cleanActual, cleanExpected) {
   try {
     return (cleanActual === cleanExpected);

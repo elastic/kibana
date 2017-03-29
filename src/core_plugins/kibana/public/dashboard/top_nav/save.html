@@ -2,12 +2,12 @@
   role="form"
   ng-submit="opts.save()"
 >
-  <div class="kuiLocalDropdownTitle">Save {{opts.dashboard.getDisplayName()}}</div>
+  <div class="kuiLocalDropdownTitle">Save {{opts.displayName}}</div>
   <input
     class="kuiLocalDropdownInput"
     id="dashboardTitle"
     type="text"
-    ng-model="opts.dashboard.title"
+    ng-model="model.title"
     placeholder="Dashboard title"
     input-focus="select"
   >
@@ -18,16 +18,16 @@
     <label>
       <input
         type="checkbox"
-        ng-model="opts.dashboard.timeRestore"
-        ng-checked="opts.dashboard.timeRestore"
+        ng-model="model.timeRestore"
+        ng-checked="model.timeRestore"
         data-test-subj="storeTimeWithDashboard"
       >
-      Store time with {{opts.dashboard.getDisplayName()}}
+      Store time with {{opts.displayName}}
       <kbn-info placement="bottom" info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
     </label>
   </div>
 
-  <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">
+  <button type="submit" ng-disabled="!model.title" class="btn btn-primary" aria-label="Save dashboard">
     Save
   </button>
 </form>

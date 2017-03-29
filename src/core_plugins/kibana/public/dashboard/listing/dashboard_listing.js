@@ -1,13 +1,11 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
 
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
-  const kbnUrl = $injector.get('kbnUrl');
   const Notifier = $injector.get('Notifier');
   const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');

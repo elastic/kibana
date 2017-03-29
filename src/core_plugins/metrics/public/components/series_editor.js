@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import reIdSeries from './lib/re_id_series';
-import _ from 'lodash';
 import Series from './series';
 import {
   handleAdd,
@@ -22,7 +21,7 @@ class SeriesEditor extends Component {
     handleAdd.call(null, this.props, () => newSeries);
   }
 
-  renderRow(row, index) {
+  renderRow(row) {
     const { props } = this;
     const { fields, model, name, limit, colorPicker } = props;
     return (

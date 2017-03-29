@@ -66,8 +66,10 @@ export default function PointSeriesVisType(Private) {
           type: 'histogram',
           mode: 'normal',
           data: {
-            label: 'Count'
+            label: 'Count',
+            id: '1'
           },
+          valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           showCircles: true
         }],

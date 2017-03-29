@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import dragula from 'dragula';
 import uiModules from 'ui/modules';
 
@@ -21,7 +20,7 @@ uiModules
 
       this.getList = () => $parse($attrs.draggableContainer)($scope);
     },
-    link($scope, $el, attr) {
+    link($scope, $el) {
       const drake = dragula({
         containers: $el.toArray(),
         moves(el, source, handle) {

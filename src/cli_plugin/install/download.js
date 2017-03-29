@@ -7,7 +7,7 @@ function _isWindows() {
   return /^win/.test(process.platform);
 }
 
-export function _getFilePath(filePath, sourceUrl) {
+export function _getFilePath(filePath) {
   const decodedPath = decodeURI(filePath);
   const prefixedDrive = /^\/[a-zA-Z]:/.test(decodedPath);
   if (_isWindows() && prefixedDrive) {

@@ -1,8 +1,6 @@
 import expect from 'expect.js';
 import mapUri from '../map_uri';
-import { get, defaults } from 'lodash';
-import sinon from 'sinon';
-import url from 'url';
+import { defaults } from 'lodash';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/map_uri', function () {
@@ -101,7 +99,7 @@ describe('plugins/elasticsearch', function () {
     it('strips the /elasticsearch prefix from the path', () => {
       request.path = '/elasticsearch/es/path';
 
-      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('http://localhost:9200/es/path');
       });
@@ -111,7 +109,7 @@ describe('plugins/elasticsearch', function () {
       request.path = '/elasticsearch/index/type';
       const settings = { url: 'https://localhost:9200/base-path' };
 
-      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('https://localhost:9200/base-path/index/type');
       });
@@ -122,7 +120,7 @@ describe('plugins/elasticsearch', function () {
       request.query = { foo: 'bar' };
       const settings = { url: 'https://localhost:9200/?base=query' };
 
-      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(settings), '/elasticsearch')(request, function (err, upstreamUri) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('https://localhost:9200/*?foo=bar&base=query');
       });
@@ -132,7 +130,7 @@ describe('plugins/elasticsearch', function () {
       request.path = '/elasticsearch/*';
       request.query = { _: Date.now() };
 
-      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri, upstreamHeaders) {
+      mapUri(stubCluster(), '/elasticsearch')(request, function (err, upstreamUri) {
         expect(err).to.be(null);
         expect(upstreamUri).to.be('http://localhost:9200/*');
       });

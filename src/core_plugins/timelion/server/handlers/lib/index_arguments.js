@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Only applies to already resolved arguments
 module.exports = function indexArguments(functionDef, orderedArgs) {

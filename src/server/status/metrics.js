@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import Samples from './samples';
 import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
 
 export function collectMetrics(kbnServer, server, config) {

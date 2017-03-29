@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import $ from 'jquery';
 import uiModules from 'ui/modules';
 import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
 

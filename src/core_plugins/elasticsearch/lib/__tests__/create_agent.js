@@ -2,7 +2,6 @@ import expect from 'expect.js';
 import createAgent from '../create_agent';
 import https from 'https';
 import http from 'http';
-import { set } from 'lodash';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_agent', function () {

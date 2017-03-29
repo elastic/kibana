@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 function checkMetric(metric, fields) {
@@ -27,7 +26,7 @@ function extendStats(bucket) {
   return body;
 }
 
-function extendStatsBucket(bucket, metrics, bucketSize) {
+function extendStatsBucket(bucket, metrics) {
   const bucketsPath = 'timeseries > ' + getBucketsPath(bucket.field, metrics);
   const body = { extended_stats_bucket: { buckets_path: bucketsPath } };
   if (bucket.sigma) body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
@@ -35,7 +34,7 @@ function extendStatsBucket(bucket, metrics, bucketSize) {
 }
 
 export default {
-  count: (bucket) => {
+  count: () => {
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
@@ -95,7 +94,6 @@ export default {
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       derivative: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -108,9 +106,8 @@ export default {
     return body;
   },
 
-  serial_diff: (bucket, metrics, bucketSize) => {
+  serial_diff: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       serial_diff: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -125,7 +122,6 @@ export default {
 
   cumulative_sum: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     return {
       cumulative_sum: {
         buckets_path: getBucketsPath(bucket.field, metrics)
@@ -135,7 +131,6 @@ export default {
 
   moving_average: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const metric = _.find(metrics, { id: bucket.field });
     const body = {
       moving_avg: {
         buckets_path: getBucketsPath(bucket.field, metrics),
@@ -155,7 +150,6 @@ export default {
     const body = {
       bucket_script: {
         buckets_path: bucket.variables.reduce((acc, row) => {
-          const metric = _.find(metrics, { id: row.field });
           acc[row.name] = getBucketsPath(row.field, metrics);
           return acc;
         }, {}),
