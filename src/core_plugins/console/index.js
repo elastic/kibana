@@ -1,11 +1,14 @@
-import Joi from 'joi';
 import Boom from 'boom';
 import apiServer from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
 import { has } from 'lodash';
-import { ProxyConfigCollection } from './server/proxy_config_collection';
-import { getElasticsearchProxyConfig } from './server/elasticsearch_proxy_config';
+
+import {
+  ProxyConfigCollection,
+  getElasticsearchProxyConfig,
+  createProxyRoute
+} from './server';
 
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
@@ -66,91 +69,35 @@ export default function (kibana) {
     },
 
     init: function (server, options) {
-      const filters = options.proxyFilter.map(str => new RegExp(str));
-
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
+      const config = server.config();
+      const { filterHeaders } = server.plugins.elasticsearch;
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
-      const proxyRouteConfig = {
-        validate: {
-          query: Joi.object().keys({
-            uri: Joi.string()
-          }).unknown(true),
-        },
+      const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
-        pre: [
-          function filterUri(req, reply) {
-            const { uri } = req.query;
+      server.route(createProxyRoute({
+        baseUrl: config.get('elasticsearch.url'),
+        pathFilters: proxyPathFilters,
+        getConfigForReq(req, uri) {
+          const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
+          const headers = filterHeaders(req.headers, whitelist);
 
-            if (!filters.some(re => re.test(uri))) {
-              const err = Boom.forbidden();
-              err.output.payload = `Error connecting to '${uri}':\n\nUnable to send requests to that url.`;
-              err.output.headers['content-type'] = 'text/plain';
-              reply(err);
-            } else {
-              reply();
-            }
-          }
-        ],
-
-        handler(req, reply) {
-          let baseUri = server.config().get('elasticsearch.url');
-          let { uri:path } = req.query;
-
-          baseUri = baseUri.replace(/\/+$/, '');
-          path = path.replace(/^\/+/, '');
-          const uri = baseUri + '/' + path;
-
-          const requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
-          const filterHeaders = server.plugins.elasticsearch.filterHeaders;
-
-          let additionalConfig;
-          if (server.config().get('console.proxyConfig')) {
-            additionalConfig = proxyConfigCollection.configForUri(uri);
-          } else {
-            additionalConfig = getElasticsearchProxyConfig(server);
+          if (config.has('console.proxyConfig')) {
+            return {
+              ...proxyConfigCollection.configForUri(uri),
+              headers,
+            };
           }
 
-          reply.proxy({
-            mapUri: function (request, done) {
-              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
-            },
-            xforward: true,
-            onResponse(err, res, request, reply) {
-              if (err != null) {
-                reply(`Error connecting to '${uri}':\n\n${err.message}`).type('text/plain').statusCode = 502;
-              } else {
-                reply(null, res);
-              }
-            },
-
-            ...additionalConfig
-          });
+          return {
+            ...getElasticsearchProxyConfig(server),
+            headers,
+          };
         }
-      };
-
-      server.route({
-        path: '/api/console/proxy',
-        method: '*',
-        config: {
-          ...proxyRouteConfig,
-
-          payload: {
-            output: 'stream',
-            parse: false
-          }
-        }
-      });
-
-      server.route({
-        path: '/api/console/proxy',
-        method: 'GET',
-        config: {
-          ...proxyRouteConfig
-        }
-      });
+      }));
 
       server.route({
         path: '/api/console/api_server',
