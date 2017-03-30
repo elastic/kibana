@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+  roots: ['<rootDir>/ui_framework/'],
   collectCoverageFrom: [
     'ui_framework/components/**/*.js',
     // Seems to be a bug with jest or micromatch, in which the above glob
@@ -16,7 +17,7 @@ module.exports = {
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
   testEnvironment: 'node',
-  testRegex: '(ui_framework)/.*\.test\.(js|jsx)?$',
+  testMatch: ['**/*.test.js?(x)'],
   transform: {
     '^.+\\.(js|jsx)$': path.resolve(__dirname, './babelTransform.js')
   },
