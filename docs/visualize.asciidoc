@@ -54,7 +54,7 @@ from the saved search.
 
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
-  
+
 * *Metric Aggregations*:
 
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
@@ -135,6 +135,8 @@ include::visualize/metric.asciidoc[]
 include::visualize/pie.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
+
+include::visualize/time-series-visual-builder.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
 
