@@ -38,8 +38,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      const exists = await PageObjects.common.doesCssSelectorExist('a[href="#/dashboard"]');
-      return !exists;
+      const exists = await testSubjects.exists('dashboardLandingPage');
+      return exists;
     }
 
     async gotoDashboardLandingPage() {
