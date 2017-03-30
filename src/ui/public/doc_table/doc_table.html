@@ -10,17 +10,17 @@
           {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
           has-next-page="pager.hasNextPage"
           on-page-next="onPageNext"
           on-page-previous="onPagePrevious"
         ></tool-bar-pager-buttons>
-        <tool-bar-pager-text
-          start-item="pager.startItem"
-          end-item="pager.endItem"
-          total-items="totalHitCount"
-        ></tool-bar-pager-text>
       </div>
     </div>
     <table class="kbn-table table" ng-if="indexPattern">
@@ -50,17 +50,17 @@
           {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
           has-next-page="pager.hasNextPage"
           on-page-next="onPageNext"
           on-page-previous="onPagePrevious"
         ></tool-bar-pager-buttons>
-        <tool-bar-pager-text
-          start-item="pager.startItem"
-          end-item="pager.endItem"
-          total-items="totalHitCount"
-        ></tool-bar-pager-text>
       </div>
     </div>
   </div>
