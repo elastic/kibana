@@ -6,6 +6,9 @@
   <div ng-if="!infiniteScroll">
     <div class="kuiBar">
       <div class="kuiBarSection">
+        <div ng-if="shouldShowLimitedResultsWarning()" class="docTablePagerInfoMessage">
+          {{ limitedResultsWarning }}
+        </div>
         <!-- Pagination -->
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
@@ -18,11 +21,6 @@
           end-item="pager.endItem"
           total-items="totalHitCount"
         ></tool-bar-pager-text>
-      </div>
-      <div class="kuiBarSection">
-        <div ng-if="shouldShowLimitedResultsWarning()">
-          *Your search results are limited to {{sampleSize}} documents. Refine your search to see others.
-        </div>
       </div>
     </div>
     <table class="kbn-table table" ng-if="indexPattern">
@@ -48,6 +46,9 @@
     <!-- ToolBarFooter -->
     <div class="kuilBar">
       <div class="kuiBarSection">
+        <div ng-if="shouldShowLimitedResultsWarning()" class="docTablePagerInfoMessage">
+          {{ limitedResultsWarning }}
+        </div>
         <!-- Pagination -->
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
@@ -60,11 +61,6 @@
           end-item="pager.endItem"
           total-items="totalHitCount"
         ></tool-bar-pager-text>
-      </div>
-      <div class="kuiBarSection">
-        <div ng-if="shouldShowLimitedResultsWarning()">
-          *Your search results are limited to {{sampleSize}} documents. Refine your search to see others.
-        </div>
       </div>
     </div>
   </div>

@@ -8,6 +8,8 @@ import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
 import uiModules from 'ui/modules';
 
+import { getLimitedSearchResultsMessage } from './doc_table_strings';
+
 uiModules.get('kibana')
 .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter) {
   return {
@@ -50,7 +52,7 @@ uiModules.get('kibana')
         };
       }());
 
-      $scope.sampleSize = config.get('discover:sampleSize');
+      $scope.limitedResultsWarning = getLimitedSearchResultsMessage(config.get('discover:sampleSize'));
 
       $scope.addRows = function () {
         $scope.limit += 50;
