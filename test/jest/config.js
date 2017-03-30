@@ -13,11 +13,10 @@ module.exports = {
   coverageReporters: ['html'],
   moduleFileExtensions: ['jsx', 'js', 'json'],
   testPathIgnorePatterns: [
-    '<rootDir>[/\\\\](bin|config|docs|maps|node_modules|optimize|scripts|src|style_guides|tasks|test|utilities|webpackShims)[/\\\\]',
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
   testEnvironment: 'node',
-  testRegex: '.*\.test\.(js|jsx)?$',
+  testRegex: '(ui_framework)/.*\.test\.(js|jsx)?$',
   transform: {
     '^.+\\.(js|jsx)$': path.resolve(__dirname, './babelTransform.js')
   },
