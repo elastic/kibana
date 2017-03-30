@@ -100,6 +100,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('save auto exits out of edit mode', async function () {
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard(dashboardName);
       const isViewMode = await PageObjects.dashboard.getIsInViewMode();
 
