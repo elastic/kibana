@@ -72,7 +72,6 @@ uiModules.get('kibana/courier')
      * individual errors are routed to their respective requests.
      */
     self.fetch = function () {
-      $rootScope.$broadcast('fetch');
       fetch.fetchQueued(searchStrategy).then(function () {
         searchLooper.restart();
       });
