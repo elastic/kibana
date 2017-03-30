@@ -40,14 +40,15 @@ out an open PR:
 
 ### Snapshot Builds
 
-For the daring, snapshot builds are available. These builds are created after each commit to the master branch, and therefore are not something you should run in production.
+For the daring, snapshot builds are available. These builds are created nightly and have undergone no formal QA, so they should never be run in production.
 
 | platform |  |
 | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-x86_64.rpm) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-i686.rpm) |
-| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.3.1-SNAPSHOT-windows-x86.zip) |
+| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux x64 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-x86_64.rpm) |
+| Linux x86 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-linux-x86.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-i386.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-i686.rpm) |
+| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-windows-x86.zip) |
+
 
 ## Documentation
 
