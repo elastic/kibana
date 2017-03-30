@@ -15,13 +15,24 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
   <div class="kuiViewContentItem">
     <!-- Header -->
-    <h1 class="kuiTitle kuiVerticalRhythm">
+    <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
       Select visualization type
     </h1>
 
+    <!-- Search -->
+    <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth">
+      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <input
+        class="kuiSearchInput__input"
+        type="text"
+        placeholder="Search visualization types..."
+        ng-model="searchTerm"
+      >
+    </div>
+
     <div
-      class="kuiVerticalRhythm"
-      ng-repeat="category in sortedVisTypeCategories"
+      class="kuiVerticalRhythm kuiVerticalRhythm--medium"
+      ng-repeat="category in filteredVisTypeCategories"
     >
 
       <!-- Title for each category -->

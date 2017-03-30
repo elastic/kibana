@@ -54,6 +54,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   const visTypes = Private(RegistryVisTypesProvider);
+
   const categoryToVisTypesMap = {};
 
   visTypes.forEach(visType => {
@@ -74,7 +75,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     );
   });
 
-  $scope.sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
+  const sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
     const labelA = a.label.toUpperCase();
     const labelB = b.label.toUpperCase();
 
@@ -91,6 +92,30 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     }
 
     return 0;
+  });
+
+  function getVisTypeCategories() {
+    const filteredVisTypeCategories = sortedVisTypeCategories.map(category => {
+      const filteredVisTypes = category.list.filter(visType => {
+        const title = visType.shortTitle || visType.title;
+        return title.toLowerCase().includes($scope.searchTerm.toLowerCase().trim());
+      });
+
+      return {
+        label: category.label,
+        list: filteredVisTypes,
+      };
+    });
+
+    return filteredVisTypeCategories.filter(category => category.list.length);
+  }
+
+  $scope.searchTerm = '';
+
+  $scope.filteredVisTypeCategories = [];
+
+  $scope.$watch('searchTerm', () => {
+    $scope.filteredVisTypeCategories = getVisTypeCategories();
   });
 
   $scope.getVisTypeLabel = type => {
@@ -117,7 +142,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     // Tooltips should appear on the bottom by default, unless they're on the last row. This is a
     // cheap workaround to automatically positioning the tooltip so that it won't disappear off
     // the edge of the screen.
-    if (index === $scope.sortedVisTypeCategories.length - 1) {
+    if (index === $scope.filteredVisTypeCategories.length - 1) {
       return 'top';
     }
 
