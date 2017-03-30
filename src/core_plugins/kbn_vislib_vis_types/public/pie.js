@@ -9,9 +9,12 @@ export default function HistogramVisType(Private) {
   return new VislibVisType({
     name: 'pie',
     title: 'Pie chart',
+    shortTitle: 'Pie',
     icon: 'fa-pie-chart',
     description: 'Pie charts are ideal for displaying the parts of some whole. For example, sales percentages by department.' +
-     'Pro Tip: Pie charts are best used sparingly, and with no more than 7 slices per pie.',
+      'Pro Tip: Pie charts are best used sparingly, and with no more than 7 slices per pie.',
+    shortDescription: 'Compare parts of a whole',
+    category: 'basic',
     params: {
       defaults: {
         addTooltip: true,

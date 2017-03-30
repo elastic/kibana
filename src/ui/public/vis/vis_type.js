@@ -8,10 +8,14 @@ export default function VisTypeFactory(Private) {
 
     this.name = opts.name;
     this.title = opts.title;
+    this.shortTitle = opts.shortTitle;
     this.responseConverter = opts.responseConverter;
     this.hierarchicalData = opts.hierarchicalData || false;
     this.icon = opts.icon;
     this.description = opts.description;
+    this.shortDescription = opts.shortDescription;
+    this.category = opts.category;
+    this.isExperimental = opts.isExperimental;
     this.schemas = opts.schemas || new VisTypeSchemas();
     this.params = opts.params || {};
     this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified

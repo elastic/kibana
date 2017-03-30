@@ -13,35 +13,49 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
-  <!-- Header -->
   <div class="kuiViewContentItem">
+    <!-- Header -->
     <h1 class="kuiTitle kuiVerticalRhythm">
       Select visualization type
     </h1>
 
-    <div class="kuiVerticalRhythm">
-      <a
-        class="wizard-type"
-        ng-repeat="type in visTypes.inTitleOrder"
-        ng-href="{{ visTypeUrl(type) }}"
-      >
-        <div class="wizard-type-heading">
-          <span
-            aria-hidden="true"
-            class="wizard-type-heading-icon fa fa-fw"
-            ng-class="type.icon"
-          ></span>
+    <div
+      class="kuiVerticalRhythm"
+      ng-repeat="category in sortedVisTypeCategories"
+    >
 
-          <h4
-            data-test-subj="visualizeWizardChartTypeTitle"
-            class="wizard-type-heading-text"
-          >
-            {{type.title}}
-          </h4>
-        </div>
+      <!-- Title for each category -->
+      <h2 class="kuiSubTitle kuiVerticalRhythm">
+        {{ category.label }}
+      </h2>
 
-        <p class="wizard-type-description">{{type.description}}</p>
-      </a>
+      <!-- Gallery of buttons for each vis type -->
+      <div class="kuiGallery kuiVerticalRhythm">
+        <a
+          class="kuiGalleryButton"
+          ng-repeat="type in category.list"
+          ng-href="{{ visTypeUrl(type) }}"
+          tooltip="{{ getVisTypeTooltip(type) }}"
+          tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
+        >
+          <div class="kuiGalleryButton__image">
+            <span
+              aria-hidden="true"
+              class="kuiIcon visualizeWizardVisTypeIcon"
+              ng-class="type.icon"
+            ></span>
+          </div>
+
+          <div class="kuiGalleryButton__label">
+            {{ getVisTypeLabel(type) }}
+          </div>
+
+          <div
+            class="kuiGalleryButton__icon kuiIcon fa-flask"
+            ng-if="type.isExperimental"
+          ></div>
+        </a>
+      </div>
     </div>
   </div>
 </div>

@@ -2,6 +2,9 @@ import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
+import './wizard.less';
+
+import _ from 'lodash';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
@@ -9,6 +12,24 @@ import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
+
+const visTypeCategories = {
+  BASIC: 'basic',
+  DATA: 'data',
+  GRAPHIC: 'graphic',
+  MAP: 'map',
+  OTHER: 'other',
+  TIME: 'time',
+};
+
+const visTypeCategoryToHumanReadableMap = {
+  basic: 'Basic Charts',
+  data: 'Data',
+  graphic: 'Graphic',
+  map: 'Maps',
+  other: 'Other',
+  time: 'Time Series',
+};
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -32,7 +53,76 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
-  $scope.visTypes = Private(RegistryVisTypesProvider);
+  const visTypes = Private(RegistryVisTypesProvider);
+  const categoryToVisTypesMap = {};
+
+  visTypes.forEach(visType => {
+    const category = visType.category || visTypeCategories.OTHER;
+
+    if (!categoryToVisTypesMap[category]) {
+      categoryToVisTypesMap[category] = {
+        label: visTypeCategoryToHumanReadableMap[category],
+        list: [],
+      };
+    }
+
+    categoryToVisTypesMap[category].list.push(visType);
+
+    categoryToVisTypesMap[category].list = _.sortBy(
+      categoryToVisTypesMap[category].list,
+      type => type.shortTitle || type.title
+    );
+  });
+
+  $scope.sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
+    const labelA = a.label.toUpperCase();
+    const labelB = b.label.toUpperCase();
+
+    // Put "other" category at the end of the list.
+    if (labelA === 'OTHER') return 1;
+    if (labelB === 'OTHER') return -1;
+
+    if (labelA < labelB) {
+      return -1;
+    }
+
+    if (labelA > labelB) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  $scope.getVisTypeLabel = type => {
+    if (type.shortTitle) {
+      return type.shortTitle;
+    }
+
+    // Preserve BWC in case we're missing a short label.
+    return type.title;
+  };
+
+  $scope.getVisTypeTooltip = type => {
+    const prefix = type.isExperimental ? '(Experimental)' : '';
+
+    if (type.shortDescription) {
+      return `${prefix} ${type.shortDescription}`;
+    }
+
+    // Preserve BWC in case we're missing a short tooltip.
+    return `${prefix} ${type.description}`;
+  };
+
+  $scope.getVisTypeTooltipPosition = index => {
+    // Tooltips should appear on the bottom by default, unless they're on the last row. This is a
+    // cheap workaround to automatically positioning the tooltip so that it won't disappear off
+    // the edge of the screen.
+    if (index === $scope.sortedVisTypeCategories.length - 1) {
+      return 'top';
+    }
+
+    return 'bottom';
+  };
 
   $scope.visTypeUrl = function (visType) {
     const baseUrl =

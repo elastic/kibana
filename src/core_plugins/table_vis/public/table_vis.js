@@ -30,10 +30,12 @@ function TableVisTypeProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'table',
-    title: 'Data table',
+    title: 'Data Table',
     icon: 'fa-table',
     description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
       'aggregation. Tip, a data table is available from many other charts by clicking the grey bar at the bottom of the chart.',
+    shortDescription: 'Display values in a table',
+    category: 'data',
     template: tableVisTemplate,
     params: {
       defaults: {

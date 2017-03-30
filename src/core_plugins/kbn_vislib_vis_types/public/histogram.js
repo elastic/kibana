@@ -9,9 +9,14 @@ export default function PointSeriesVisType(Private) {
   return new VislibVisType({
     name: 'histogram',
     title: 'Vertical bar chart',
+    shortTitle: 'Vertical Bar',
     icon: 'fa-bar-chart',
-    description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
-    'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.',
+    description:
+      `The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped,
+      'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.
+      shortDescription: 'Assign a continuous variable to each axis`,
+    shortDescription: 'Assign a continuous variable to each axis',
+    category: 'basic',
     params: {
       defaults: {
         grid: {

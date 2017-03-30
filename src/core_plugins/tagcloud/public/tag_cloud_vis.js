@@ -12,11 +12,13 @@ visTypes.register(function TagCloudProvider(Private) {
 
   return new TemplateVisType({
     name: 'tagcloud',
-    title: 'Tag cloud',
+    title: 'Tag Cloud',
     implementsRenderComplete: true,
     description: 'A tag cloud visualization is a visual representation of text data, ' +
-    'typically used to visualize individual words. The font size of a word corresponds ' +
-    'with its importance.',
+      'typically used to visualize individual words. The font size of a word corresponds ' +
+      'with its importance.',
+    shortDescription: 'A group of words, sized according to their importance',
+    category: 'graphic',
     icon: 'fa-cloud',
     template: tagCloudTemplate,
     params: {

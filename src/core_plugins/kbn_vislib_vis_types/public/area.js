@@ -9,11 +9,14 @@ export default function PointSeriesVisType(Private) {
   return new VislibVisType({
     name: 'area',
     title: 'Area chart',
+    shortTitle: 'Area',
     icon: 'fa-area-chart',
     description: 'Great for stacked timelines in which the total of all series is more important ' +
-    'than comparing any two or more series. Less useful for assessing the relative change of ' +
-    'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
-    'effect on the series above it.',
+      'than comparing any two or more series. Less useful for assessing the relative change of ' +
+      'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
+      'effect on the series above it.',
+    shortDescription: 'Emphasize the quantity beneath a line chart',
+    category: 'basic',
     params: {
       defaults: {
         grid: {
