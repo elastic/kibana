@@ -8,8 +8,6 @@ import AggTypesParamTypesStringProvider from 'ui/agg_types/param_types/string';
 import AggTypesParamTypesRawJsonProvider from 'ui/agg_types/param_types/raw_json';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 export default function AggParamsFactory(Private) {
-
-
   const paramTypeMap = {
     field: Private(AggTypesParamTypesFieldProvider),
     optioned: Private(AggTypesParamTypesOptionedProvider),

@@ -10,7 +10,7 @@ import createNumberHandler from '../lib/create_number_handler';
 
 class MovingAverageAgg extends Component {
   render() {
-    const { panel, siblings } = this.props;
+    const { siblings } = this.props;
     const defaults = {
       settings: '',
       minimize: 0,
@@ -46,7 +46,6 @@ class MovingAverageAgg extends Component {
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
                 siblings={this.props.siblings}
-                panelType={panel.type}
                 value={model.type}
                 onChange={handleSelectChange('type')}/>
             </div>

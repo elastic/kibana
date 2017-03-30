@@ -34,6 +34,8 @@ function AggRow(props) {
         {props.children}
         { dragHandle }
         <AddDeleteButtons
+          addTooltip="Add Metric"
+          deleteTooltip="Delete Metric"
           onAdd={props.onAdd}
           onDelete={props.onDelete}
           disableDelete={props.disableDelete}/>

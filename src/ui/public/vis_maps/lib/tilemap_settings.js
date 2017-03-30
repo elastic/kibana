@@ -1,22 +1,11 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
-import uiRoutes from 'ui/routes';
 import { modifyUrl } from 'ui/url';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
   sanitize: true // Sanitize HTML tags
-});
-
-/**
- * Reloads the setting for each route,
- * This is to ensure, that if the license changed during the lifecycle of the application,
- * we get an update.
- * tilemapSettings itself will take care that the manifest-service is not queried when not necessary.
- */
-uiRoutes.afterSetupWork(function (tilemapSettings) {
-  return tilemapSettings.loadSettings();
 });
 
 uiModules.get('kibana')
@@ -188,6 +177,10 @@ uiModules.get('kibana')
           maxZoom: this._tmsOptions.maxZoom
         };
 
+      }
+
+      isInitialized() {
+        return this._settingsInitialized;
       }
 
 

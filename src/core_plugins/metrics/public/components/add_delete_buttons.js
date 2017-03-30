@@ -7,7 +7,7 @@ function AddDeleteButtons(props) {
       return null;
     }
     return (
-      <Tooltip text="Delete">
+      <Tooltip text={props.deleteTooltip}>
         <a className="thor__button-outlined-danger sm" onClick={ props.onDelete }>
           <i className="fa fa-trash-o"></i>
         </a>
@@ -19,7 +19,7 @@ function AddDeleteButtons(props) {
       return null;
     }
     return (
-      <Tooltip text="Add">
+      <Tooltip text={props.addTooltip}>
         <a className="thor__button-outlined-default sm" onClick={ props.onAdd }>
           <i className="fa fa-plus"></i>
         </a>
@@ -31,7 +31,7 @@ function AddDeleteButtons(props) {
   let clone;
   if (props.onClone && !props.disableAdd) {
     clone = (
-      <Tooltip text="Clone">
+      <Tooltip text={props.cloneTooltip}>
         <a className="thor__button-outlined-default sm" onClick={ props.onClone }>
           <i className="fa fa-files-o"></i>
         </a>
@@ -47,7 +47,16 @@ function AddDeleteButtons(props) {
   );
 }
 
+AddDeleteButtons.defaultProps = {
+  addTooltip: 'Add',
+  deleteTooltip: 'Delete',
+  cloneTooltip: 'Clone'
+};
+
 AddDeleteButtons.propTypes = {
+  addTooltip: PropTypes.string,
+  deleteTooltip: PropTypes.string,
+  cloneTooltip: PropTypes.string,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
   onClone: PropTypes.func,

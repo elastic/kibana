@@ -10,7 +10,8 @@ function unwrap(val) {
   return getAcr(val) ? val.value : val;
 }
 
-function convertRowsToFeatures(table, geoI, metricI) {
+function convertRowsToFeatures(table, geoI, metricI, centroidI) {
+
   return _.transform(table.rows, function (features, row) {
     const geohash = unwrap(row[geoI]);
     if (!geohash) return;
@@ -22,6 +23,16 @@ function convertRowsToFeatures(table, geoI, metricI) {
       location.latitude[2],
       location.longitude[2]
     ];
+
+    //courtsey of @JacobBrandt: https://github.com/elastic/kibana/pull/9676/files#diff-c7c9f237e673ff486654f6cc6caa89f6
+    let point = centerLatLng;
+    const centroid = unwrap(row[centroidI]);
+    if (centroid) {
+      point = [
+        centroid.lat,
+        centroid.lon
+      ];
+    }
 
     // order is nw, ne, se, sw
     const rectangle = [
@@ -37,7 +48,7 @@ function convertRowsToFeatures(table, geoI, metricI) {
       type: 'Feature',
       geometry: {
         type: 'Point',
-        coordinates: centerLatLng.slice(0).reverse()
+        coordinates: point.slice(0).reverse()
       },
       properties: {
         geohash: geohash,
