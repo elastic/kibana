@@ -10,7 +10,7 @@
         {{$select.selected}}
       </ui-select-match>
       <ui-select-choices repeat="id in indexPatternList | filter:$select.search | orderBy">
-        <div ng-bind-html="id"></div>
+        <div ng-bind-html="id | highlight: $select.search"></div>
       </ui-select-choices>
     </ui-select>
   </div>
