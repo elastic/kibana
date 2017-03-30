@@ -49,7 +49,6 @@ For the daring, snapshot builds are available. These builds are created nightly 
 | Linux x86 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-linux-x86.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-i386.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-i686.rpm) |
 | Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-5.3.1-SNAPSHOT-windows-x86.zip) |
 
-
 ## Documentation
 
 Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
