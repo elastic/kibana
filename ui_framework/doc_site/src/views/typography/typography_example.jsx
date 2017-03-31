@@ -16,6 +16,7 @@ import {
 const titleHtml = require('./title.html');
 const subTitleHtml = require('./sub_title.html');
 const textHtml = require('./text.html');
+const subduedHtml = require('./subdued_type.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -64,6 +65,22 @@ export default props => (
 
       <GuideDemo
         html={textHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Subdued type"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: subduedHtml,
+      }]}
+    >
+      <GuideText>
+        You can drop type a half-step down in the type hierarchy.
+      </GuideText>
+
+      <GuideDemo
+        html={subduedHtml}
       />
     </GuideSection>
   </GuidePage>
