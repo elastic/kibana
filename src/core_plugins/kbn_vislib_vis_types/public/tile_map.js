@@ -15,10 +15,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
     name: 'tile_map',
     title: 'Tile Map',
     icon: 'fa-map-marker',
-    description:
-      `Your source for geographic maps. Requires an elasticsearch geo_point field. More specifically, a field
-      that is mapped as type:geo_point with latitude and longitude coordinates.`,
-    shortDescription: 'Plot latitude and longitude coordinates on a map',
+    description: 'Plot latitude and longitude coordinates on a map',
     category: VisType.CATEGORY.MAP,
     params: {
       defaults: {

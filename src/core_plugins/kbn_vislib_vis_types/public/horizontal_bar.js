@@ -10,11 +10,9 @@ export default function PointSeriesVisType(Private) {
 
   return new VislibVisType({
     name: 'horizontal_bar',
-    title: 'Horizontal bar chart',
-    shortTitle: 'Horizontal Bar',
+    title: 'Horizontal Bar',
     icon: 'fa-bars',
-    description: 'Like histogram chart but with horizontal bars.',
-    shortDescription: 'Assign a continuous variable to each axis',
+    description: 'Assign a continuous variable to each axis',
     category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {

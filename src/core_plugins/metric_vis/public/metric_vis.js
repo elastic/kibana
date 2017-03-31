@@ -23,10 +23,7 @@ function MetricVisProvider(Private) {
   return new TemplateVisType({
     name: 'metric',
     title: 'Metric',
-    description:
-      `One big number for all of your one big number needs. Perfect for showing
-      a count of hits, or the exact average of a numeric field.`,
-    shortDescription: 'Display a single number',
+    description: 'Display a calculation as a single number',
     category: VisType.CATEGORY.DATA,
     icon: 'fa-calculator',
     template: metricVisTemplate,

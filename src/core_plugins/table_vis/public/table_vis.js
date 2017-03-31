@@ -34,11 +34,7 @@ function TableVisTypeProvider(Private) {
     name: 'table',
     title: 'Data Table',
     icon: 'fa-table',
-    description:
-      `The data table provides a detailed breakdown, in tabular format, of the results of a composed
-      aggregation. Tip, a data table is available from many other charts by clicking the grey bar at
-      the bottom of the chart.`,
-    shortDescription: 'Display values in a table',
+    description: 'Display values in a table',
     category: VisType.CATEGORY.DATA,
     template: tableVisTemplate,
     params: {

@@ -11,13 +11,9 @@ export default function HeatmapVisType(Private) {
 
   return new VislibVisType({
     name: 'heatmap',
-    title: 'Heatmap chart',
-    shortTitle: 'Heat Map',
+    title: 'Heat Map',
     icon: 'fa-barcode',
-    description:
-      `A heat map is a graphical representation of data
-      where the individual values contained in a matrix are represented as colors.`,
-    shortDescription: 'Shade cells within a matrix',
+    description: 'Shade cells within a matrix',
     category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {

@@ -17,14 +17,9 @@ export default function MetricsVisProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'metrics',
-    title: 'Time Series Visual Builder',
-    shortTitle: 'Visual Builder',
+    title: 'Visual Builder',
     icon: 'fa-area-chart',
-    description:
-      `Create a time series based visualization for metrics. Perfect
-      for creating visualizations for time series based metrics using the
-      powerful pipeline aggs Elasticsearch feature`,
-    shortDescription: 'Build time-series using a visual pipeline interface',
+    description: 'Build time-series using a visual pipeline interface',
     category: VisType.CATEGORY.TIME,
     isExperimental: true,
     template: require('./vis.html'),

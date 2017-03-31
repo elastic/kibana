@@ -21,11 +21,7 @@ define(function (require) {
       name: 'timelion',
       title: 'Timelion',
       icon: 'fa-clock-o',
-      description:
-        `Create timeseries charts using the timelion expression language.
-        Perfect for computing and combining timeseries sets with functions such as derivatives and
-        moving averages`,
-      shortDescription: 'Build time-series using functional expressions',
+      description: 'Build time-series using functional expressions',
       category: VisType.CATEGORY.TIME,
       template: require('plugins/timelion/vis/timelion_vis.html'),
       params: {

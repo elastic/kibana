@@ -45,7 +45,7 @@
         <a
           class="kuiGalleryButton"
           ng-repeat="type in category.list"
-          ng-href="{{ visTypeUrl(type) }}"
+          ng-href="{{ getVisTypeUrl(type) }}"
           tooltip="{{ getVisTypeTooltip(type) }}"
           tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
         >
@@ -61,7 +61,7 @@
             lass="kuiGalleryButton__label"
             data-test-subj="visualizeWizardChartTypeTitle"
           >
-            {{ getVisTypeLabel(type) }}
+            {{ type.title }}
           </div>
 
           <div

@@ -31,6 +31,8 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
 });
 
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
+  timefilter.enabled = false;
+
   const VisType = Private(VisVisTypeProvider);
 
   const visTypeCategoryToHumanReadableMap = {
@@ -42,8 +44,6 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     [VisType.CATEGORY.TIME]: 'Time Series',
   };
 
-  timefilter.enabled = false;
-
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
@@ -52,23 +52,27 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const categoryToVisTypesMap = {};
 
   visTypes.forEach(visType => {
-    const category = visType.category;
+    const categoryName = visType.category;
 
-    if (!categoryToVisTypesMap[category]) {
-      categoryToVisTypesMap[category] = {
-        label: visTypeCategoryToHumanReadableMap[category],
+    // Create category object if it doesn't exist yet.
+    if (!categoryToVisTypesMap[categoryName]) {
+      categoryToVisTypesMap[categoryName] = {
+        label: visTypeCategoryToHumanReadableMap[categoryName],
         list: [],
       };
     }
 
-    categoryToVisTypesMap[category].list.push(visType);
+    const categoryVisTypes = categoryToVisTypesMap[categoryName];
 
-    categoryToVisTypesMap[category].list = _.sortBy(
-      categoryToVisTypesMap[category].list,
-      type => type.shortTitle || type.title
+    // Add the visType to the list and sort them by their title.
+    // categoryVisTypes.list.push(visType);
+    categoryVisTypes.list = _.sortBy(
+      categoryVisTypes.list.concat(visType),
+      type => type.title
     );
   });
 
+  // Sort the categories alphabetically.
   const sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
     const other = VisType.CATEGORY.OTHER.toLowerCase();
 
@@ -80,53 +84,35 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     if (labelB === other) return -1;
 
     if (labelA < labelB) return -1;
-
     if (labelA > labelB) return 1;
-
     return 0;
   });
-
-  function getVisTypeCategories() {
-    const filteredVisTypeCategories = sortedVisTypeCategories.map(category => {
-      const filteredVisTypes = category.list.filter(visType => {
-        const title = visType.shortTitle || visType.title;
-        return title.toLowerCase().includes($scope.searchTerm.toLowerCase().trim());
-      });
-
-      return {
-        label: category.label,
-        list: filteredVisTypes,
-      };
-    });
-
-    return filteredVisTypeCategories.filter(category => category.list.length);
-  }
 
   $scope.searchTerm = '';
 
   $scope.filteredVisTypeCategories = [];
 
   $scope.$watch('searchTerm', () => {
+    function getVisTypeCategories() {
+      const filteredVisTypeCategories = sortedVisTypeCategories.map(category => {
+        const filteredVisTypes = category.list.filter(visType => {
+          return visType.title.toLowerCase().includes($scope.searchTerm.toLowerCase().trim());
+        });
+
+        return {
+          label: category.label,
+          list: filteredVisTypes,
+        };
+      });
+
+      return filteredVisTypeCategories.filter(category => category.list.length);
+    }
+
     $scope.filteredVisTypeCategories = getVisTypeCategories();
   });
 
-  $scope.getVisTypeLabel = type => {
-    if (type.shortTitle) {
-      return type.shortTitle;
-    }
-
-    // Preserve BWC in case we're missing a short label.
-    return type.title;
-  };
-
   $scope.getVisTypeTooltip = type => {
     const prefix = type.isExperimental ? '(Experimental)' : '';
-
-    if (type.shortDescription) {
-      return `${prefix} ${type.shortDescription}`;
-    }
-
-    // Preserve BWC in case we're missing a short tooltip.
     return `${prefix} ${type.description}`;
   };
 
@@ -141,7 +127,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     return 'bottom';
   };
 
-  $scope.visTypeUrl = function (visType) {
+  $scope.getVisTypeUrl = function (visType) {
     const baseUrl =
       visType.requiresSearch
       ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`

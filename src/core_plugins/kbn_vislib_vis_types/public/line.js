@@ -10,13 +10,9 @@ export default function PointSeriesVisType(Private) {
 
   return new VislibVisType({
     name: 'line',
-    title: 'Line chart',
-    shortTitle: 'Line',
+    title: 'Line',
     icon: 'fa-line-chart',
-    description:
-      `Often the best chart for high density time series. Great for comparing one series to another.
-      Be careful with sparse sets as the connection between points can be misleading.`,
-    shortDescription: 'Emphasize trends',
+    description: 'Emphasize trends',
     category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
