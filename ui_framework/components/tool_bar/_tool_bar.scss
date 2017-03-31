@@ -1,11 +1,8 @@
 .kuiToolBar {
   @include bar;
-  @include buttonOnStandoutBackground;
-  @include selectOnStandoutBackground;
 
   padding: $toolBarPadding;
   height: $toolBarHeight;
-  background-color: $globalBorderColor;
 }
 
 .kuiToolBarSection {

@@ -2241,56 +2241,7 @@ body {
   min-height: 30px;
   /* 1 */
   padding: 10px;
-  height: 50px;
-  background-color: #E4E4E4; }
-  .kuiToolBar .kuiButton:not(a):enabled:focus {
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
-    /* 3 */ }
-  a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
-    /* 1 */
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
-    /* 3 */ }
-  .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
-    /* 3 */ }
-  a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
-    /* 1 */
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
-    /* 3 */ }
-  .kuiToolBar .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF; }
-    .kuiToolBar .kuiButton--basic:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
-    a.kuiToolBar .kuiButton--basic.kuiButton-isDisabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
-  .kuiToolBar .kuiSelect {
-    border-color: #ffffff; }
-    .kuiToolBar .kuiSelect:not(a):enabled:focus {
-      outline: none;
-      border-color: #6EADC1; }
-    a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {
-      /* 1 */
-      outline: none;
-      border-color: #6EADC1; }
+  height: 50px; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -2447,10 +2398,32 @@ body {
   color: #ACACAC; }
 
 /**
-   * 1. Fix inherited styles (possibly from Bootstrap).
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
    */
 .kuiToolBarSearchBox__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-left: 28px;
+  /* 1 */
   width: 100%;
+  /* 2 */
   min-width: 200px;
   padding: 4px 12px 5px 28px;
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
@@ -2462,8 +2435,24 @@ body {
   border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
+  .theme-dark .kuiToolBarSearchBox__input {
+    color: #cecece; }
+  .kuiToolBarSearchBox__input:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiToolBarSearchBox__input:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiToolBarSearchBox__input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiToolBarSearchBox__input {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiToolBarSearchBox__input:focus {
+      outline: none;
+      border-color: #6EADC1; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
     border-color: #6EADC1; }
