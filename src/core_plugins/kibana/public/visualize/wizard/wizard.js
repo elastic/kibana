@@ -94,9 +94,17 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   $scope.$watch('searchTerm', () => {
     function getVisTypeCategories() {
+      const normalizedSearchTerm = $scope.searchTerm.toLowerCase().trim();
+
       const filteredVisTypeCategories = sortedVisTypeCategories.map(category => {
+        // Include entire category if the category matches the search term.
+        if (category.label.toLowerCase().includes(normalizedSearchTerm)) {
+          return category;
+        }
+
+        // Otherwise, return just the vis types in the category which match.
         const filteredVisTypes = category.list.filter(visType => {
-          return visType.title.toLowerCase().includes($scope.searchTerm.toLowerCase().trim());
+          return visType.title.toLowerCase().includes(normalizedSearchTerm);
         });
 
         return {
