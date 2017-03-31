@@ -102,17 +102,7 @@ uiModules
           $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
           $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();
         } else if ($scope.panel.type === savedSearches.type) {
-          // This causes changes to a saved search to be hidden, but also allows
-          // the user to locally modify and save changes to a saved search only in a dashboard.
-          // See https://github.com/elastic/kibana/issues/9523 for more details.
-          $scope.panel.columns = $scope.panel.columns || $scope.savedObj.columns;
           $scope.panel.sort = $scope.panel.sort || $scope.savedObj.sort;
-
-          // If the user updates the sort direction or columns in a saved search, we want to save that
-          // to the ui state so the share url will show our temporary modifications.
-          $scope.$watchCollection('panel.columns', function () {
-            $scope.saveState();
-          });
 
           $scope.$watchCollection('panel.sort', function () {
             $scope.saveState();
