@@ -19,7 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
-import { MigrateSearchSourceProvider } from '../data_source/migration/migrateSearchSource';
+import { MigrateSearchSourceProvider } from '../data_source/migration/migrate_search_source';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
