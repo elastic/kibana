@@ -8,7 +8,7 @@ import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 
-export default function EventsProvider(Private, Promise) {
+export function EventsProvider(Private, Promise) {
   const notify = new Notifier({ location: 'EventEmitter' });
 
   _.class(Events).inherits(SimpleEmitter);

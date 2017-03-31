@@ -1,4 +1,4 @@
-import AggResponseIndexProvider from 'ui/agg_response/index';
+import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
 
 export default function VislibVisBuildChartData(Private) {
