@@ -17,7 +17,7 @@ visTypes.register(function TagCloudProvider(Private) {
     title: 'Tag Cloud',
     implementsRenderComplete: true,
     description: 'A group of words, sized according to their importance',
-    category: VisType.CATEGORY.GRAPHIC,
+    category: VisType.CATEGORY.OTHER,
     icon: 'fa-cloud',
     template: tagCloudTemplate,
     params: {

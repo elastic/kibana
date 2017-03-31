@@ -23,7 +23,7 @@ function MarkdownVisProvider(Private) {
     title: 'Markdown',
     icon: 'fa-code',
     description: 'Create a document using markdown syntax',
-    category: VisType.CATEGORY.GRAPHIC,
+    category: VisType.CATEGORY.OTHER,
     template: markdownVisTemplate,
     params: {
       editor: markdownVisParamsTemplate
