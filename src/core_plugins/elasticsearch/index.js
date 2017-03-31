@@ -114,7 +114,13 @@ module.exports = function ({ Plugin }) {
 
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
-      server.expose('registerMappings', assignMappings);
+      server.expose('registerMappings', mappings => {
+        try {
+          assignMappings(mappings);
+        } catch(e) {
+          this.status.red(e.message);
+        }
+      });
 
       createDataCluster(server);
       createAdminCluster(server);
