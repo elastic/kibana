@@ -37,6 +37,20 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.equal(true);
     });
 
+    // Panel expand should also be shown in view mode, but only on mouse hover.
+    it('panel expand control shown in edit mode', async function () {
+      await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+      const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
+      expect(expandExists).to.equal(true);
+    });
+
+    it('save auto exits out of edit mode', async function () {
+      await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName);
+      const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+      expect(isViewMode).to.equal(true);
+    });
+
     describe('panel edit controls', function () {
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -93,24 +107,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // Panel expand should also be shown in view mode, but only on mouse hover.
-    it('panel expand control shown in edit mode', async function () {
-      const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
-      expect(expandExists).to.equal(true);
-    });
-
-    it('save auto exits out of edit mode', async function () {
-      await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.saveDashboard(dashboardName);
-      const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-
-      expect(isViewMode).to.equal(true);
-    });
-
     describe('shows lose changes warning', async function () {
       describe('and loses changes on confirmation', function () {
+        beforeEach(async function () {
+          await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        });
+
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.dashboard.clickEdit();
           const originalFromTime = '2015-09-19 06:31:44.000';
           const originalToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
@@ -131,8 +134,6 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when the query is edited and applied', async function () {
-          await PageObjects.dashboard.clickEdit();
-
           const originalQuery = await PageObjects.dashboard.getQuery();
           await PageObjects.dashboard.appendQuery('extra stuff');
           await PageObjects.dashboard.clickFilterButton();
@@ -147,7 +148,6 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a filter is deleted', async function () {
-          await PageObjects.dashboard.clickEdit();
           await PageObjects.dashboard.setTimepickerInDataRange();
           await PageObjects.dashboard.filterOnPieSlice();
           await PageObjects.dashboard.saveDashboard(dashboardName);
@@ -180,9 +180,6 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a new vis is added', async function () {
-          await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-          await PageObjects.dashboard.clickEdit();
-
           await PageObjects.dashboard.clickAddVisualization();
           await PageObjects.dashboard.clickAddNewVisualizationLink();
           await PageObjects.visualize.clickAreaChart();
@@ -200,9 +197,6 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when an existing vis is added', async function () {
-          await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-          await PageObjects.dashboard.clickEdit();
-
           await PageObjects.dashboard.addVisualization('new viz panel');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -217,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('and preserves edits on cancel', function () {
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
           const newFromTime = '2015-09-19 06:31:44.000';
           const newToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
@@ -242,7 +236,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('Does not show lose changes warning', async function () {
       it('when time changed is not stored with dashboard', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange('2013-10-19 06:31:44.000', '2013-12-19 06:31:44.000');
@@ -253,7 +247,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('when a dashboard has a filter and remains unchanged', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         await PageObjects.dashboard.saveDashboard(dashboardName);
@@ -266,7 +260,7 @@ export default function ({ getService, getPageObjects }) {
 
       // See https://github.com/elastic/kibana/issues/10110 - this is intentional.
       it('when the query is edited but not applied', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await PageObjects.dashboard.getQuery();
         await PageObjects.dashboard.appendQuery('extra stuff');

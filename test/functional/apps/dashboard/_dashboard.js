@@ -8,7 +8,7 @@ import {
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
@@ -95,6 +95,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('retains dark theme in state', async function () {
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.useDarkTheme(true);
       await PageObjects.header.clickVisualize();
       await PageObjects.header.clickDashboard();
@@ -135,33 +136,23 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('retains dark theme in state', async function () {
-      await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.useDarkTheme(true);
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-      const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
-      expect(isDarkThemeOn).to.equal(true);
-    });
-
     it('should have shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
       const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
+      return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
       .then(function (count) {
-        PageObjects.common.log('shared-items-count = ' + count);
+        log.info('shared-items-count = ' + count);
         expect(count).to.eql(visualizations.length);
       });
     });
 
     it('should have panels with expected data-shared-item title and description', function checkTitles() {
       const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return PageObjects.common.tryForTime(10000, function () {
+      return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelSharedItemData()
         .then(function (data) {
           expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
           expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
         });
->>>>>>> 3509324... [functional_test_runner] replace functional testing tools with custom/pluggable solution
       });
     });
 
@@ -173,9 +164,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualization('visualization from add new link');
 
       const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return PageObjects.common.tryForTime(10000, async function () {
+      return retry.tryForTime(10000, async function () {
         const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-        PageObjects.common.log('visualization titles = ' + panelTitles.map(item => item.title));
+        log.info('visualization titles = ' + panelTitles.map(item => item.title));
         PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
         expect(panelTitles.length).to.eql(visualizations.length + 1);
       });

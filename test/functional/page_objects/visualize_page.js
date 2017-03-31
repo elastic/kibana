@@ -26,7 +26,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return remote
       .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Line')
-        .click();
+      .click();
     }
 
     clickMarkdownWidget() {
@@ -38,9 +38,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     clickAddMetric() {
       return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[group-name="metrics"] .vis-editor-agg-add .vis-editor-agg-wide-btn div.btn')
-        .click();
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[group-name="metrics"] .vis-editor-agg-add .vis-editor-agg-wide-btn div.btn')
+      .click();
     }
 
     clickMetric() {
@@ -73,9 +73,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     clickHeatmapChart() {
       return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Heat Map')
-        .click();
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Heat Map')
+      .click();
     }
 
     getChartTypeCount() {
@@ -335,19 +335,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
       return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[href="#/visualize"]')
-        .click();
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('[href="#/visualize"]')
+      .click();
     }
 
     filterVisByName(vizName) {
       return remote
-        .findByCssSelector('input[name="filter"]')
-        .click()
-        // can't uses dashes in saved visualizations when filtering
-        // or extended character sets
-        // https://github.com/elastic/kibana/issues/6300
-        .type(vizName.replace('-',' '));
+      .findByCssSelector('input[name="filter"]')
+      .click()
+      // can't uses dashes in saved visualizations when filtering
+      // or extended character sets
+      // https://github.com/elastic/kibana/issues/6300
+      .type(vizName.replace('-',' '));
     }
 
     clickVisualizationByName(vizName) {
@@ -590,22 +590,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     getHeatmapData() {
       // 1). get the maximim chart Y-Axis marker value
       return remote
-        .setFindTimeout(defaultFindTimeout * 2)
-        // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-        .findAllByCssSelector('svg > g > g.series rect') // rect
-        .then(function (chartTypes) {
-          log.debug('rects=' + chartTypes);
-          function getChartType(chart) {
-            return chart
-              .getAttribute('data-label');
-          }
-          const getChartTypesPromises = chartTypes.map(getChartType);
-          return Promise.all(getChartTypesPromises);
-        })
-        .then(function (labels) {
-          log.debug('labels=' + labels);
-          return labels;
-        });
+      .setFindTimeout(defaultFindTimeout * 2)
+      // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+      .findAllByCssSelector('svg > g > g.series rect') // rect
+      .then(function (chartTypes) {
+        log.debug('rects=' + chartTypes);
+        function getChartType(chart) {
+          return chart
+          .getAttribute('data-label');
+        }
+        const getChartTypesPromises = chartTypes.map(getChartType);
+        return Promise.all(getChartTypesPromises);
+      })
+      .then(function (labels) {
+        log.debug('labels=' + labels);
+        return labels;
+      });
     }
 
     getPieChartData() {

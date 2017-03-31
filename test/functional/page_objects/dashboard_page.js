@@ -32,6 +32,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return logstash;
     }
 
+    async gotoDashboardEditMode(dashboardName) {
+      await this.gotoDashboardLandingPage();
+      await this.clickDashboardByLinkText(dashboardName);
+      await this.clickEdit();
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
@@ -66,13 +72,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     clickFilterButton() {
       return testSubjects.find('dashboardQueryFilterButton')
-        .click();
+      .click();
     }
 
     clickEdit() {
       log.debug('Clicking edit');
       return testSubjects.find('dashboardEditMode')
-        .click();
+      .click();
     }
 
     getIsInViewMode() {
@@ -91,6 +97,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     clickAddVisualization() {
       return testSubjects.click('dashboardAddPanelButton');
+    }
+
+    clickAddNewVisualizationLink() {
+      return testSubjects.click('addNewSavedObjectLink');
     }
 
     clickOptions() {

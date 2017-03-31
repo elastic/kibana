@@ -224,7 +224,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      */
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
-        const shown = await this.doesTestSubjectExist('modalOverlay');
+        const shown = await testSubjects.exists('modalOverlay');
         if (shown) {
           throw new Error('Modal overlay is showing');
         }
