@@ -3,7 +3,7 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
-import errors from 'ui/errors';
+import { DuplicateField } from 'ui/errors';
 import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
@@ -255,7 +255,7 @@ describe('index pattern', function () {
       expect(function () {
         indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       }).to.throwError(function (e) {
-        expect(e).to.be.a(errors.DuplicateField);
+        expect(e).to.be.a(DuplicateField);
       });
     });
   });

@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
+import { NoResults } from 'ui/errors';
 import Binder from 'ui/binder';
 import VislibLibLayoutLayoutProvider from './layout/layout';
 import VislibLibChartTitleProvider from './chart_title';
@@ -104,7 +104,7 @@ export default function HandlerBaseClass(Private) {
       const dataType = this.data.type;
 
       if (!dataType) {
-        throw new errors.NoResults();
+        throw new NoResults();
       }
     }
 

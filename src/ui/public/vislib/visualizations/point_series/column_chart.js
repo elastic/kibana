@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
+import { ContainerTooSmall } from 'ui/errors';
 import VislibVisualizationsPointSeriesProvider from './_point_series';
 export default function ColumnChartFactory(Private) {
 
@@ -187,7 +187,7 @@ export default function ColumnChartFactory(Private) {
 
       function widthFunc() {
         if (barWidth < minWidth) {
-          throw new errors.ContainerTooSmall();
+          throw new ContainerTooSmall();
         }
 
         if (isTimeScale) {
