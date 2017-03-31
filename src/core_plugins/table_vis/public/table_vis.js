@@ -3,6 +3,7 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
@@ -20,6 +21,7 @@ visTypesRegistry.register(TableVisTypeProvider);
 
 // define the TableVisType
 function TableVisTypeProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -32,10 +34,12 @@ function TableVisTypeProvider(Private) {
     name: 'table',
     title: 'Data Table',
     icon: 'fa-table',
-    description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
-      'aggregation. Tip, a data table is available from many other charts by clicking the grey bar at the bottom of the chart.',
+    description:
+      `The data table provides a detailed breakdown, in tabular format, of the results of a composed
+      aggregation. Tip, a data table is available from many other charts by clicking the grey bar at
+      the bottom of the chart.`,
     shortDescription: 'Display values in a table',
-    category: 'data',
+    category: VisType.CATEGORY.DATA,
     template: tableVisTemplate,
     params: {
       defaults: {

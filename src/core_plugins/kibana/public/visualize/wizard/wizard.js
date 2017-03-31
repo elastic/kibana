@@ -5,6 +5,7 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
 import _ from 'lodash';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
@@ -12,24 +13,6 @@ import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
-
-const visTypeCategories = {
-  BASIC: 'basic',
-  DATA: 'data',
-  GRAPHIC: 'graphic',
-  MAP: 'map',
-  OTHER: 'other',
-  TIME: 'time',
-};
-
-const visTypeCategoryToHumanReadableMap = {
-  basic: 'Basic Charts',
-  data: 'Data',
-  graphic: 'Graphic',
-  map: 'Maps',
-  other: 'Other',
-  time: 'Time Series',
-};
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -48,6 +31,17 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
 });
 
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
+  const VisType = Private(VisVisTypeProvider);
+
+  const visTypeCategoryToHumanReadableMap = {
+    [VisType.CATEGORY.BASIC]: 'Basic Charts',
+    [VisType.CATEGORY.DATA]: 'Data',
+    [VisType.CATEGORY.GRAPHIC]: 'Graphic',
+    [VisType.CATEGORY.MAP]: 'Maps',
+    [VisType.CATEGORY.OTHER]: 'Other',
+    [VisType.CATEGORY.TIME]: 'Time Series',
+  };
+
   timefilter.enabled = false;
 
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -58,7 +52,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const categoryToVisTypesMap = {};
 
   visTypes.forEach(visType => {
-    const category = visType.category || visTypeCategories.OTHER;
+    const category = visType.category;
 
     if (!categoryToVisTypesMap[category]) {
       categoryToVisTypesMap[category] = {
@@ -76,20 +70,18 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   });
 
   const sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
-    const labelA = a.label.toUpperCase();
-    const labelB = b.label.toUpperCase();
+    const other = VisType.CATEGORY.OTHER.toLowerCase();
 
     // Put "other" category at the end of the list.
-    if (labelA === 'OTHER') return 1;
-    if (labelB === 'OTHER') return -1;
+    const labelA = a.label.toLowerCase();
+    if (labelA === other) return 1;
 
-    if (labelA < labelB) {
-      return -1;
-    }
+    const labelB = b.label.toLowerCase();
+    if (labelB === other) return -1;
 
-    if (labelA > labelB) {
-      return 1;
-    }
+    if (labelA < labelB) return -1;
+
+    if (labelA > labelB) return 1;
 
     return 0;
   });

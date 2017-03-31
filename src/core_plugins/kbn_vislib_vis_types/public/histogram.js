@@ -1,8 +1,10 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -16,7 +18,7 @@ export default function PointSeriesVisType(Private) {
       'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.
       shortDescription: 'Assign a continuous variable to each axis`,
     shortDescription: 'Assign a continuous variable to each axis',
-    category: 'basic',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {

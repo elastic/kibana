@@ -4,11 +4,13 @@ import '../visualizations/less/main.less';
 import 'react-select/dist/react-select.css';
 import '../less/main.less';
 
-  // register the provider with the visTypes registry so that other know it exists
+import VisVisTypeProvider from 'ui/vis/vis_type';
+// register the provider with the visTypes registry so that other know it exists
 import visTypes from 'ui/registry/vis_types';
 visTypes.register(MetricsVisProvider);
 
 export default function MetricsVisProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(require('ui/template_vis_type'));
 
   // return the visType object, which kibana will use to display and configure new
@@ -18,11 +20,12 @@ export default function MetricsVisProvider(Private) {
     title: 'Time Series Visual Builder',
     shortTitle: 'Visual Builder',
     icon: 'fa-area-chart',
-    description: `Create a time series based visualization for metrics. Perfect
+    description:
+      `Create a time series based visualization for metrics. Perfect
       for creating visualizations for time series based metrics using the
       powerful pipeline aggs Elasticsearch feature`,
     shortDescription: 'Build time-series using a visual pipeline interface',
-    category: 'time',
+    category: VisType.CATEGORY.TIME,
     isExperimental: true,
     template: require('./vis.html'),
     fullEditor: true,

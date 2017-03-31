@@ -1,8 +1,10 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -11,10 +13,11 @@ export default function PointSeriesVisType(Private) {
     title: 'Line chart',
     shortTitle: 'Line',
     icon: 'fa-line-chart',
-    description: 'Often the best chart for high density time series. Great for comparing one series to another. ' +
-      'Be careful with sparse sets as the connection between points can be misleading.',
+    description:
+      `Often the best chart for high density time series. Great for comparing one series to another.
+      Be careful with sparse sets as the connection between points can be misleading.`,
     shortDescription: 'Emphasize trends',
-    category: 'basic',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {

@@ -1,10 +1,12 @@
 import supports from 'ui/utils/supports';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
+  const VisType = Private(VisVisTypeProvider);
   const MapsVisType = Private(MapsVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonGeoJsonProvider);
@@ -13,10 +15,11 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
     name: 'tile_map',
     title: 'Tile Map',
     icon: 'fa-map-marker',
-    description: 'Your source for geographic maps. Requires an elasticsearch geo_point field. More specifically, a field ' +
-      'that is mapped as type:geo_point with latitude and longitude coordinates.',
+    description:
+      `Your source for geographic maps. Requires an elasticsearch geo_point field. More specifically, a field
+      that is mapped as type:geo_point with latitude and longitude coordinates.`,
     shortDescription: 'Plot latitude and longitude coordinates on a map',
-    category: 'map',
+    category: VisType.CATEGORY.MAP,
     params: {
       defaults: {
         mapType: 'Scaled Circle Markers',

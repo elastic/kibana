@@ -1,8 +1,10 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -11,12 +13,13 @@ export default function PointSeriesVisType(Private) {
     title: 'Area chart',
     shortTitle: 'Area',
     icon: 'fa-area-chart',
-    description: 'Great for stacked timelines in which the total of all series is more important ' +
-      'than comparing any two or more series. Less useful for assessing the relative change of ' +
-      'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
-      'effect on the series above it.',
+    description:
+      `Great for stacked timelines in which the total of all series is more important
+      than comparing any two or more series. Less useful for assessing the relative change of
+      unrelated data points as changes in a series lower down the stack will have a difficult to gauge
+      effect on the series above it.`,
     shortDescription: 'Emphasize the quantity beneath a line chart',
-    category: 'basic',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {

@@ -1,8 +1,10 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -13,7 +15,7 @@ export default function PointSeriesVisType(Private) {
     icon: 'fa-bars',
     description: 'Like histogram chart but with horizontal bars.',
     shortDescription: 'Assign a continuous variable to each axis',
-    category: 'basic',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {
