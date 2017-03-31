@@ -1,24 +1,33 @@
-import buildRangeFilter from 'ui/filter_manager/lib/range';
+import Promise from 'bluebird';
+import { migrateRangeFilter } from './migrateFilters';
 import _ from 'lodash';
 
-export function MigrateSearchSourceProvider() {
+export function MigrateSearchSourceProvider(indexPatterns) {
 
   return function (searchSource) {
-    // TODO Figure out how to convert ALL filters, not just "own". Does this get called for every search source already?
-    //      if so maybe we don't have to do anything special
+    return Promise.map(searchSource.getOwn('filter'), (filter) => {
+      const indexPatternId = _.get(filter, 'meta.index');
 
-    const indexPattern = searchSource.getOwn('index');
+      if (indexPatternId) {
+        const indexPattern = indexPatterns.get(filter.meta.index);
 
-    _.map(searchSource.getOwn('filter'), (filter) => {
-      if (filter.range) {
-        const fieldName = Object.keys(filter.range)[0];
-        const params = filter.range[fieldName];
-
-        _.set(filter, 'meta.field', fieldName);
-        _.set(filter, 'meta.type', 'range');
-        _.set(filter, 'meta.params', params);
+        return Promise.resolve(indexPattern)
+          .then((indexPattern) => {
+            if (filter.range) {
+              return migrateRangeFilter(filter, indexPattern);
+            }
+            else {
+              return filter;
+            }
+          });
       }
-      else return filter;
+      else {
+        return filter;
+      }
+    }
+    )
+    .then((migratedFilters) => {
+      searchSource.set('filter', migratedFilters);
     });
   };
 
