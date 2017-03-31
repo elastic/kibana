@@ -6,7 +6,7 @@ import 'angular-ui-select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
+import { fieldCalculator } from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import uiModules from 'ui/modules';
 import fieldChooserTemplate from 'plugins/kibana/discover/components/field_chooser/field_chooser.html';
