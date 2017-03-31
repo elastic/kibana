@@ -1,11 +1,9 @@
 let $ = require('jquery');
-let ZeroClipboard = require('zeroclip');
 require('ace');
 require('ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
-let storage = require('./storage');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
@@ -48,46 +46,32 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   /**
    * COPY AS CURL
-   *
-   * Since the copy functionality is powered by a flash movie (via ZeroClipboard)
-   * the only way to trigger the copy is with a litteral mouseclick from the user.
-   *
-   * The original shortcut will now just open the menu and highlight the
-   *
    */
-  (function setupZeroClipboard() {
-    var zc = new ZeroClipboard($copyAsCurlEl); // the ZeroClipboard instance
-
-    zc.on('wrongflash noflash', function () {
-      if (!storage.get('flash_warning_shown')) {
-        alert('Console needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
-        storage.set('flash_warning_shown', 'true');
+  (function setupClipboard() {
+      function copyText(text) {
+        var node = $(`<textarea style="height:1px"></textarea`)
+        .val(text)
+        .appendTo(document.body)
+        .select();
+        document.execCommand('copy');
+        node.remove()
       }
-      $copyAsCurlEl.hide();
-    });
 
-    zc.on('ready', function () {
-      function setupCopyButton(cb) {
-        cb = typeof cb === 'function' ? cb : $.noop;
-        $copyAsCurlEl.css('visibility', 'hidden');
-        input.getRequestsAsCURL(function (curl) {
-          $copyAsCurlEl.attr('data-clipboard-text', curl);
-          $copyAsCurlEl.css('visibility', 'visible');
-          cb();
-        });
+      if (!document.queryCommandSupported('copy')) {
+        $copyAsCurlEl.hide();
+        return;
       }
+
+      $copyAsCurlEl.click(() => {
+        copyText($copyAsCurlEl.attr('data-clipboard-text'))
+      });
 
       input.$actions.on('mouseenter', function () {
-        if (!$(this).hasClass('open')) {
-          setupCopyButton();
-        }
+        if ($(this).hasClass('open')) return;
+        input.getRequestsAsCURL(text => {
+          $copyAsCurlEl.attr('data-clipboard-text', text);
+        });
       });
-    });
-
-    zc.on('complete', function () {
-      $copyAsCurlEl.click();
-      input.focus();
-    });
   }());
 
   /**

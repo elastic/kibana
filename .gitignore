@@ -36,4 +36,5 @@ selenium
 *.swo
 *.out
 ui_framework/doc_site/build/*.js*
+ui_framework/jest/report
 yarn.lock

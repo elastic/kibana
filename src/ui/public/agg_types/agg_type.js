@@ -112,6 +112,17 @@ export default function AggTypeFactory(Private) {
 
     /**
      * Designed for multi-value metric aggs, this method can return a
+     * set of AggConfigs that should replace this aggConfig in requests
+     *
+     * @method getRequestAggs
+     * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
+     *                                         that should replace this one,
+     *                                         or undefined
+     */
+    this.getRequestAggs = config.getRequestAggs || _.noop;
+
+    /**
+     * Designed for multi-value metric aggs, this method can return a
      * set of AggConfigs that should replace this aggConfig in result sets
      * that walk the AggConfig set.
      *

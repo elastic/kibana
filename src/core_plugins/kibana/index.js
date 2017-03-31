@@ -62,7 +62,7 @@ module.exports = function (kibana) {
                 config: tilemapConfig,
               },
               manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
-            },
+            }
           };
         },
       },

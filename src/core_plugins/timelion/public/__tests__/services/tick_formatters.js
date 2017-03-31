@@ -91,7 +91,7 @@ describe('Tick Formatters', function () {
       expect(currencyFormatter).to.be.a('function');
     });
 
-    it('formats with $ by defalt', function () {
+    it('formats with $ by default', function () {
       const axis = {
         options: {
           units: {}
@@ -110,6 +110,26 @@ describe('Tick Formatters', function () {
       };
 
       expect(currencyFormatter(10.2, axis)).to.equal('CN¥10.20');
+    });
+  });
+
+  describe('Percent mode', function () {
+    let percentFormatter;
+    beforeEach(function () {
+      percentFormatter = tickFormatters.percent;
+    });
+
+    it('is a function', function () {
+      expect(percentFormatter).to.be.a('function');
+    });
+
+    it('formats with %', function () {
+      const axis = {
+        options: {
+          units: {}
+        }
+      };
+      expect(percentFormatter(0.1234, axis)).to.equal('12.34%');
     });
   });
 
