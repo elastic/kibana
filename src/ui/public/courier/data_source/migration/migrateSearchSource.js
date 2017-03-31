@@ -5,6 +5,8 @@ import _ from 'lodash';
 export function MigrateSearchSourceProvider(indexPatterns) {
 
   return function (searchSource) {
+    if (!searchSource) return;
+
     return Promise.map(searchSource.getOwn('filter') || [], (filter) => {
       const indexPatternId = _.get(filter, 'meta.index');
 
