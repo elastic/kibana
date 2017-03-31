@@ -1,7 +1,10 @@
 import { VisSchemasProvider } from './schemas';
+AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
+
 
 export function VisVisTypeProvider(Private) {
   const VisTypeSchemas = Private(VisSchemasProvider);
+  const pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
 
   class VisType {
     constructor(opts) {
@@ -9,7 +12,7 @@ export function VisVisTypeProvider(Private) {
 
       this.name = opts.name;
       this.title = opts.title;
-      this.responseConverter = opts.responseConverter;
+      this.responseConverter = opts.responseConverter || pointSeries;;
       this.hierarchicalData = opts.hierarchicalData || false;
       this.icon = opts.icon;
       this.image = opts.image;
@@ -22,6 +25,8 @@ export function VisVisTypeProvider(Private) {
       this.requiresTimePicker = !!opts.requiresTimePicker;
       this.fullEditor = opts.fullEditor == null ? false : opts.fullEditor;
       this.implementsRenderComplete = opts.implementsRenderComplete || false;
+
+      this.listeners = opts.listeners || {};
 
       if (!this.params.optionTabs) {
         this.params.optionTabs = [
