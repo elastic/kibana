@@ -23,7 +23,7 @@ app.directive('discoverField', function ($compile) {
     },
     link: function ($scope, $elem) {
       let detailsElem;
-      let detailScope = null;
+      let detailScope;
 
 
       const init = function () {
