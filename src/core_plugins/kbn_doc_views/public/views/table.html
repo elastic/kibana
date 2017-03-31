@@ -21,11 +21,10 @@
           <i class="fa fa-search-plus text-muted"></i>
           <i class="fa fa-search-minus text-muted"></i>
         </span>
-        <span ng-if="columns">
+        <span ng-if="canToggleColumns()">
           <i
             class="fa fa-columns"
             ng-click="toggleColumn(field)"
-            ng-if="canToggleColumn()"
             tooltip-append-to-body="1"
             tooltip="Toggle column in table"
           ></i>

@@ -23,7 +23,7 @@ docViewsRegistry.register(function () {
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
         $scope.fields = _.keys($scope.flattened).sort();
 
-        $scope.canToggleColumn = function canToggleColumn() {
+        $scope.canToggleColumns = function canToggleColumn() {
           return (
             _.isFunction($scope.onAddColumn)
             && _.isFunction($scope.onRemoveColumn)
