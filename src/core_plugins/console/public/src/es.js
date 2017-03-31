@@ -1,4 +1,6 @@
-let $ = require('jquery');
+import { stringify as formatQueryString } from 'querystring'
+
+import $ from 'jquery';
 
 let esVersion = [];
 
@@ -34,13 +36,13 @@ module.exports.send = function (method, path, data) {
   }
 
   var options = {
-    url: '../api/console/proxy?uri=' + encodeURIComponent(path),
-    data: method == "GET" ? null : data,
+    url: '../api/console/proxy?' + formatQueryString({ path, method }),
+    data,
     contentType,
     cache: false,
     crossDomain: true,
-    type: method,
-    dataType: "text", // disable automatic guessing
+    type: 'POST',
+    dataType: 'text', // disable automatic guessing
   };
 
 
