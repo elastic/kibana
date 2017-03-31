@@ -153,7 +153,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
-      function getVizualizeUrl(field) {
+      function getVisualizeUrl(field) {
         if (!$scope.state) {return '';}
 
         let agg = {};
@@ -213,7 +213,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         if (_.isUndefined(field.details) || recompute) {
           field.details = Object.assign(
             {
-              visualizeUrl: field.visualizable ? getVizualizeUrl(field) : null,
+              visualizeUrl: field.visualizable ? getVisualizeUrl(field) : null,
             },
             fieldCalculator.getFieldValueCounts({
               hits: $scope.hits,
