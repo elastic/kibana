@@ -27,7 +27,10 @@ describe('Filter Bar Directive', function () {
         { meta: { index: 'logstash-*' }, missing: { field: '_type' } }
       ],
       { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } },
-      { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } },
+      {
+        meta: { index: 'logstash-*', field: 'bytes', type: 'range', params: { lt: 2048, gt: 1024 } },
+        range: { bytes: { lt: 2048, gt: 1024 } }
+      },
       { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } }
     ];
 
