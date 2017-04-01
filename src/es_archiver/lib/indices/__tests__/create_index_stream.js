@@ -22,7 +22,7 @@ import {
 const chance = new Chance();
 
 describe('esArchiver: createCreateIndexStream()', () => {
-  context('defaults', () => {
+  describe('defaults', () => {
     it('deletes existing indices, creates all', async () => {
       const client = createStubClient(['existing-index']);
       const stats = createStubStats();
@@ -103,7 +103,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
   });
 
-  context('skipExisting = true', () => {
+  describe('skipExisting = true', () => {
     it('ignores preexisting indexes', async () => {
       const client = createStubClient(['existing-index']);
       const stats = createStubStats();

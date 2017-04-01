@@ -13,7 +13,7 @@ describe('Binder class', function () {
     $scope = $rootScope.$new();
   }));
 
-  context('Constructing with a $scope', function () {
+  describe('Constructing with a $scope', function () {
     it('accepts a $scope and listens for $destroy', function () {
       sinon.stub($scope, '$on');
       new Binder($scope);

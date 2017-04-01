@@ -116,24 +116,24 @@ describe('Promise service', function () {
     it('allows non-promises in the array', async () => {
       expect(await Promise.race([1,2,3])).to.be(1);
     });
-    context('argument is undefined', () => {
+    describe('argument is undefined', () => {
       it('rejects the promise', async () => {
         const football = {};
         expect(await Promise.race().catch(() => football)).to.be(football);
       });
     });
-    context('argument is a string', () => {
+    describe('argument is a string', () => {
       it(`resolves with the first character`, async () => {
         expect(await Promise.race('abc')).to.be('a');
       });
     });
-    context('argument is a non-iterable object', () => {
+    describe('argument is a non-iterable object', () => {
       it('reject the promise', async () => {
         const football = {};
         expect(await Promise.race({}).catch(() => football)).to.be(football);
       });
     });
-    context('argument is a generator', () => {
+    describe('argument is a generator', () => {
       it('resolves with the first resolved value', async () => {
         function *gen() {
           yield new Promise(resolve => setTimeout(resolve, 100, 1));
