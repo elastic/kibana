@@ -3,7 +3,6 @@ const config = require('./config/jest');
 
 const argv = process.argv.slice(2);
 
-argv.push('--env=jsdom');
 argv.push('--config', JSON.stringify(config));
 
 jest.run(argv);

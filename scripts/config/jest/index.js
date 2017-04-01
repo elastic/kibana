@@ -16,7 +16,6 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
-  testEnvironment: 'node',
   transform: {
     '^.+\\.(js|jsx)$': path.resolve(__dirname, './babelTransform.js')
   },
