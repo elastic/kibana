@@ -17,7 +17,6 @@ module.exports = {
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
   testEnvironment: 'node',
-  testMatch: ['**/*.test.js?(x)'],
   transform: {
     '^.+\\.(js|jsx)$': path.resolve(__dirname, './babelTransform.js')
   },
