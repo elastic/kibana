@@ -51,6 +51,11 @@ uiModules.get('kibana')
           };
         };
       }());
+      const limitTo = $filter('limitTo');
+      const calculateItemsOnPage = () => {
+        $scope.pager.setTotalItems($scope.hits.length);
+        $scope.pageOfItems = limitTo($scope.hits, $scope.pager.pageSize, $scope.pager.startIndex);
+      };
 
       $scope.limitedResultsWarning = getLimitedSearchResultsMessage(config.get('discover:sampleSize'));
 
@@ -109,19 +114,13 @@ uiModules.get('kibana')
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
           $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
-          calculateItemsOnPage();  // eslint-disable-line no-use-before-define
+          calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
 
         $scope.searchSource.onError(notify.error).catch(notify.fatal);
       }));
-
-      const limitTo = $filter('limitTo');
-      const calculateItemsOnPage = () => {
-        $scope.pager.setTotalItems($scope.hits.length);
-        $scope.pageOfItems = limitTo($scope.hits, $scope.pager.pageSize, $scope.pager.startIndex);
-      };
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {

@@ -4,9 +4,11 @@
   ng-class="{ loading: searchSource.activeFetchCount > 0 }"
 >
   <div ng-if="!infiniteScroll">
-    <div class="kuiBar">
+    <div class="kuilBar docTableBar">
       <div class="kuiBarSection">
-        <div ng-if="shouldShowLimitedResultsWarning()" class="docTablePagerInfoMessage">
+        <div
+          ng-if="shouldShowLimitedResultsWarning()"
+          class="kuiToolBarText kuiSubduedText">
           {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
@@ -44,9 +46,11 @@
       </tbody>
     </table>
     <!-- ToolBarFooter -->
-    <div class="kuilBar">
+    <div class="kuilBar docTableBar">
       <div class="kuiBarSection">
-        <div ng-if="shouldShowLimitedResultsWarning()" class="docTablePagerInfoMessage">
+        <div
+          ng-if="shouldShowLimitedResultsWarning()"
+          class="kuiToolBarText kuiSubduedText">
           {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->

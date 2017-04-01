@@ -1,5 +1,9 @@
 @import (reference) "~ui/styles/variables";
 
+.docTableBar {
+  margin: 5px 5px 0;
+}
+
 /**
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
@@ -7,16 +11,6 @@ doc-table {
   overflow: auto;
   flex: 1 1 100%;
   flex-direction: column; /* 1 */
-
-  .docTablePagerInfoMessage {
-    color: @kibanaGray3;
-  }
-
-  .doc-table-warning {
-    background-color: @doc-table-warning-bg;
-    padding: 5px 10px;
-    text-align: center;
-  }
 
   /**
    * 1. Allow user to scroll table when its constrained by a fixed container height.
