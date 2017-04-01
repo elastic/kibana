@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import angular from 'angular';
 
 const canStack = (function () {
@@ -7,209 +6,211 @@ const canStack = (function () {
 }());
 
 // abstract error class
-export function KbnError(msg, constructor) {
-  this.message = msg;
+export class KbnError extends Error {
+  constructor(msg, constructor) {
+    super(msg);
+    this.message = msg;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, constructor || KbnError);
+    } else if (canStack) {
+      this.stack = (new Error()).stack;
+    } else {
+      this.stack = '';
+    }
+  }
 
-  Error.call(this, this.message);
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, constructor || KbnError);
-  } else if (canStack) {
-    this.stack = (new Error()).stack;
-  } else {
-    this.stack = '';
+  /**
+   * If the error permits, propagate the error to be rendered on screen
+   */
+  displayToScreen() {
+    throw this;
   }
 }
-_.class(KbnError).inherits(Error);
-
-/**
- * If the error permits, propagate the error to be rendered on screen
- */
-KbnError.prototype.displayToScreen = function () {
-  throw this;
-};
-
-/**
- * HastyRefresh error class
- */
-export function HastyRefresh() {
-  KbnError.call(this,
-    'Courier attempted to start a query before the previous had finished.',
-    HastyRefresh);
-}
-_.class(HastyRefresh).inherits(KbnError);
 
 /**
  * SearchTimeout error class
  */
-export function SearchTimeout() {
-  KbnError.call(this,
-    'All or part of your request has timed out. The data shown may be incomplete.',
-    SearchTimeout);
+export class SearchTimeout extends KbnError {
+  constructor() {
+    super('All or part of your request has timed out. The data shown may be incomplete.',
+          SearchTimeout);
+  }
 }
-_.class(SearchTimeout).inherits(KbnError);
 
 /**
  * Request Failure - When an entire mutli request fails
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
-export function RequestFailure(err, resp) {
-  err = err || false;
+export class RequestFailure extends KbnError {
+  constructor(err, resp) {
+    err = err || false;
+    super('Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
+          RequestFailure);
 
-  KbnError.call(this,
-    'Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
-    RequestFailure);
-
-  this.origError = err;
-  this.resp = resp;
+    this.origError = err;
+    this.resp = resp;
+  }
 }
-_.class(RequestFailure).inherits(KbnError);
 
 /**
  * FetchFailure Error - when there is an error getting a doc or search within
  *  a multi-response response body
  * @param {Object} resp - The response from es.
  */
-export function FetchFailure(resp) {
-  KbnError.call(this,
-    'Failed to get the doc: ' + angular.toJson(resp),
-    FetchFailure);
+export class FetchFailure extends KbnError {
+  constructor(resp) {
+    super(
+      'Failed to get the doc: ' + angular.toJson(resp),
+      FetchFailure);
 
-  this.resp = resp;
+    this.resp = resp;
+  }
 }
-_.class(FetchFailure).inherits(KbnError);
 
 /**
  * ShardFailure Error - when one or more shards fail
  * @param {Object} resp - The response from es.
  */
-export function ShardFailure(resp) {
-  KbnError.call(this, resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
-    ShardFailure);
+export class ShardFailure extends KbnError {
+  constructor(resp) {
+    super(
+      resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+      ShardFailure);
 
-  this.resp = resp;
+    this.resp = resp;
+  }
 }
-_.class(ShardFailure).inherits(KbnError);
-
 
 /**
  * A doc was re-indexed but it was out of date.
  * @param {Object} resp - The response from es (one of the multi-response responses).
  */
-export function VersionConflict(resp) {
-  KbnError.call(this,
-    'Failed to store document changes do to a version conflict.',
-    VersionConflict);
+export class VersionConflict extends KbnError {
+  constructor(resp) {
+    super(
+      'Failed to store document changes do to a version conflict.',
+      VersionConflict);
 
-  this.resp = resp;
+    this.resp = resp;
+  }
 }
-_.class(VersionConflict).inherits(KbnError);
-
 
 /**
  * there was a conflict storing a doc
  * @param {String} field - the fields which contains the conflict
  */
-export function MappingConflict(field) {
-  KbnError.call(this,
-    'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
-    MappingConflict);
+export class MappingConflict extends KbnError {
+  constructor(field) {
+    super(
+      'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
+      MappingConflict);
+  }
 }
-_.class(MappingConflict).inherits(KbnError);
 
 /**
  * a field mapping was using a restricted fields name
  * @param {String} field - the fields which contains the conflict
  */
-export function RestrictedMapping(field, index) {
-  let msg = field + ' is a restricted field name';
-  if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
+export class RestrictedMapping extends KbnError {
+  constructor(field, index) {
+    let msg = field + ' is a restricted field name';
+    if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
 
-  KbnError.call(this, msg, RestrictedMapping);
+    super(msg, RestrictedMapping);
+  }
 }
-_.class(RestrictedMapping).inherits(KbnError);
 
 /**
  * a non-critical cache write to elasticseach failed
  */
-export function CacheWriteFailure() {
-  KbnError.call(this,
-    'A Elasticsearch cache write has failed.',
-    CacheWriteFailure);
+export class CacheWriteFailure extends KbnError {
+  constructor() {
+    super(
+      'A Elasticsearch cache write has failed.',
+      CacheWriteFailure);
+  }
 }
-_.class(CacheWriteFailure).inherits(KbnError);
 
 /**
  * when a field mapping is requested for an unknown field
  * @param {String} name - the field name
  */
-export function FieldNotFoundInCache(name) {
-  KbnError.call(this,
-    'The ' + name + ' field was not found in the cached mappings',
-    FieldNotFoundInCache);
+export class FieldNotFoundInCache extends KbnError {
+  constructor(name) {
+    super(
+      'The ' + name + ' field was not found in the cached mappings',
+      FieldNotFoundInCache);
+  }
 }
-_.class(FieldNotFoundInCache).inherits(KbnError);
 
 /**
  * when a mapping already exists for a field the user is attempting to add
  * @param {String} name - the field name
  */
-export function DuplicateField(name) {
-  KbnError.call(this,
-    'The "' + name + '" field already exists in this mapping',
-    DuplicateField);
+export class DuplicateField extends KbnError {
+  constructor(name) {
+    super(
+      'The "' + name + '" field already exists in this mapping',
+      DuplicateField);
+  }
 }
-_.class(DuplicateField).inherits(KbnError);
 
 /**
  * A saved object was not found
  */
-export function SavedObjectNotFound(type, id) {
-  this.savedObjectType = type;
-  this.savedObjectId = id;
-  const idMsg = id ? ' (id: ' + id + ')' : '';
-  KbnError.call(this,
-    'Could not locate that ' + type + idMsg,
-    SavedObjectNotFound);
+export class SavedObjectNotFound extends KbnError {
+  constructor(type, id) {
+    const idMsg = id ? ' (id: ' + id + ')' : '';
+    super(
+      'Could not locate that ' + type + idMsg,
+      SavedObjectNotFound);
+
+    this.savedObjectType = type;
+    this.savedObjectId = id;
+  }
 }
-_.class(SavedObjectNotFound).inherits(KbnError);
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-export function IndexPatternMissingIndices() {
-  KbnError.call(this,
-    'IndexPattern\'s configured pattern does not match any indices',
-    IndexPatternMissingIndices);
+export class IndexPatternMissingIndices extends KbnError {
+  constructor() {
+    super(
+      'IndexPattern\'s configured pattern does not match any indices',
+      IndexPatternMissingIndices);
+  }
 }
-_.class(IndexPatternMissingIndices).inherits(KbnError);
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-export function NoDefinedIndexPatterns() {
-  KbnError.call(this,
-    'Define at least one index pattern to continue',
-    NoDefinedIndexPatterns);
+export class NoDefinedIndexPatterns extends KbnError {
+  constructor() {
+    super(
+      'Define at least one index pattern to continue',
+      NoDefinedIndexPatterns);
+  }
 }
-_.class(NoDefinedIndexPatterns).inherits(KbnError);
 
 /**
  * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
  */
-export function NoDefaultIndexPattern() {
-  KbnError.call(this,
-    'Please specify a default index pattern',
-    NoDefaultIndexPattern);
+export class NoDefaultIndexPattern extends KbnError {
+  constructor() {
+    super(
+      'Please specify a default index pattern',
+      NoDefaultIndexPattern);
+  }
 }
-_.class(NoDefaultIndexPattern).inherits(KbnError);
 
-export function PersistedStateError() {
-  KbnError.call(this,
-    'Error with the persisted state',
-    PersistedStateError);
+export class PersistedStateError extends KbnError {
+  constructor() {
+    super(
+      'Error with the persisted state',
+      PersistedStateError);
+  }
 }
-_.class(PersistedStateError).inherits(KbnError);
 
 /**
  * UI Errors
