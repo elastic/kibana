@@ -4,13 +4,10 @@ module.exports = {
   roots: ['<rootDir>/ui_framework/'],
   collectCoverageFrom: [
     'ui_framework/components/**/*.js',
-    // Seems to be a bug with jest or micromatch, in which the above glob
-    // doesn't match subsequent levels of directories, making this glob necessary.
-    'ui_framework/components/**/**/*.js',
     '!ui_framework/components/index.js',
     '!ui_framework/components/**/*/index.js',
   ],
-  coverageDirectory: '<rootDir>/target/test_coverage',
+  coverageDirectory: '<rootDir>/test/coverage',
   coverageReporters: ['html'],
   moduleFileExtensions: ['jsx', 'js', 'json'],
   testPathIgnorePatterns: [
