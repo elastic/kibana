@@ -136,7 +136,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       function getRelativeString(key) {
-        if (_.get($scope, `relative.${key}.count`) === 0) return 'now';
+        if (_.get($scope, `relative.${key}.count`) === 0 && key === 'to') return 'now';
         let result = 'now-' + _.get($scope, `relative.${key}.count`);
         result += _.get($scope, `relative.${key}.unit`);
         result += (_.get($scope, `relative.${key}.round`) ? '/' + _.get($scope, `relative.${key}.unit`) : '');

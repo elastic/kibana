@@ -192,7 +192,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a disabled "to" field that contains "Now"', function (done) {
-      expect($elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]').val()).to.be('Now');
+      expect($elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]').text()).to.be('Now');
       done();
     });
 
