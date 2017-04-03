@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
@@ -16,11 +17,11 @@ export default function ({ getService, getPageObjects }) {
 
     before(function () {
       baseUrl = PageObjects.common.getHostPort();
-      PageObjects.common.debug('baseUrl = ' + baseUrl);
+      log.debug('baseUrl = ' + baseUrl);
       // browsers don't show the ':port' if it's 80 or 443 so we have to
       // remove that part so we can get a match in the tests.
       baseUrl = baseUrl.replace(':80','').replace(':443','');
-      PageObjects.common.debug('New baseUrl = ' + baseUrl);
+      log.debug('New baseUrl = ' + baseUrl);
 
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -31,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       })
       .then(function loadkibanaIndexPattern() {
-        PageObjects.common.debug('load kibana index with default index pattern');
+        log.debug('load kibana index with default index pattern');
         return esArchiver.load('discover');
       })
       // and load a set of makelogs data
@@ -39,11 +40,11 @@ export default function ({ getService, getPageObjects }) {
         return esArchiver.loadIfNeeded('logstash_functional');
       })
       .then(function () {
-        PageObjects.common.debug('discover');
+        log.debug('discover');
         return PageObjects.common.navigateToApp('discover');
       })
       .then(function () {
-        PageObjects.common.debug('setAbsoluteRange');
+        log.debug('setAbsoluteRange');
         return PageObjects.header.setAbsoluteRange(fromTime, toTime);
       })
       .then(function () {

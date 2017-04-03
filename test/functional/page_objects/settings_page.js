@@ -196,7 +196,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldNames() {
-      const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern indexedFieldName');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });

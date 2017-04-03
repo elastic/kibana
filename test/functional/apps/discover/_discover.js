@@ -4,6 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
+  const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
@@ -124,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartInterval = 'Daily';
         const expectedBarChartData = [ 4757, 4614, 4633 ];
 
-        await this.remote.goBack();
+        await remote.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be(expectedChartInterval);

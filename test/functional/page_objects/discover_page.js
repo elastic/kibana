@@ -127,7 +127,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     getChartInterval() {
-      return PageObjects.common.findTestSubject('discoverIntervalSelect')
+      return testSubjects.find('discoverIntervalSelect')
        .getProperty('value')
        .then(selectedValue => {
          return this.findTimeout
@@ -276,7 +276,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
-      // findTestSubject doesn't handle spaces in the data-test-subj value
+      // testSubjects.find doesn't handle spaces in the data-test-subj value
       return getRemote()
       .findByCssSelector('i[data-test-subj="plus-' + field + '-' + value + '"]')
       .click();
@@ -284,7 +284,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
-      // findTestSubject doesn't handle spaces in the data-test-subj value
+      // testSubjects.find doesn't handle spaces in the data-test-subj value
       return getRemote()
       .findByCssSelector('i[data-test-subj="minus-' + field + '-' + value + '"]')
       .click();

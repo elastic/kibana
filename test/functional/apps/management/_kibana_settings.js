@@ -3,7 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
-  const PageObjects = getPageObjects(['settings']);
+  const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
