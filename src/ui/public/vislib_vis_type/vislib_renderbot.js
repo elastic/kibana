@@ -51,8 +51,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
     return AngularPromise.delay(1).then(() => {
-      this.vislibVis.render(this.chartData, this.uiState);
-      this.refreshLegend++;
+      this._createVis();
     });
   };
 
@@ -66,16 +65,6 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
     });
 
     vislibVis.destroy();
-  };
-
-  VislibRenderbot.prototype.updateParams = function () {
-    const self = this;
-
-    // get full vislib params object
-    const newParams = self._getVislibParams();
-
-    // if there's been a change, replace the vis
-    if (!_.isEqual(newParams, self.vislibParams)) self._createVis();
   };
 
   return VislibRenderbot;

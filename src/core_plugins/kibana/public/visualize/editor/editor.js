@@ -67,7 +67,7 @@ uiModules
   };
 });
 
-function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -188,15 +188,19 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    vis.api = {
+      timeFilter: timefilter,
+      queryFilter: queryFilter,
+      events: {
+        filter: filterBarClickHandler($state),
+        brush: brushEvent($state),
+      }
+    };
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
-    $scope.$on('$destroy', () => stateMonitor.destroy());
-
-    editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
-    editableVis.listeners.brush = vis.listeners.brush = brushEvent($state);
 
     // track state of editable vis vs. "actual" vis
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -233,49 +237,8 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      searchSource.set('filter', queryFilter.getFilters());
       $state.save();
     });
-
-    // fetch data when filters fire fetch event
-    $scope.$listen(queryFilter, 'fetch', $scope.fetch);
-
-
-    $scope.$listen($state, 'fetch_with_changes', function (keys) {
-      if (_.contains(keys, 'linked') && $state.linked === true) {
-        // abort and reload route
-        $route.reload();
-        return;
-      }
-
-      if (_.contains(keys, 'vis')) {
-        $state.vis.listeners = _.defaults($state.vis.listeners || {}, vis.listeners);
-
-        // only update when we need to, otherwise colors change and we
-        // risk loosing an in-progress result
-        vis.setState($state.vis);
-        editableVis.setState($state.vis);
-      }
-
-      // we use state to track query, must write before we fetch
-      if ($state.query && !$state.linked) {
-        searchSource.set('query', $state.query);
-      } else {
-        searchSource.set('query', null);
-      }
-
-      if (_.isEqual(keys, ['filters'])) {
-        // updates will happen in filter watcher if needed
-        return;
-      }
-
-      $scope.fetch();
-    });
-
-    // Without this manual emission, we'd miss filters and queries that were on the $state initially
-    $state.emit('fetch_with_changes');
-
-    $scope.$listen(timefilter, 'fetch', _.bindKey($scope, 'fetch'));
 
     $scope.$on('ready:vis', function () {
       $scope.$emit('application.load');
@@ -283,19 +246,13 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     $scope.$on('$destroy', function () {
       savedVis.destroy();
+      stateMonitor.destroy();
     });
-  }
 
-  $scope.fetch = function () {
-    // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
-    $rootScope.$broadcast('fetch');
-    $state.save();
-    searchSource.set('filter', queryFilter.getFilters());
-    if (!$state.linked) searchSource.set('query', $state.query);
-    if ($scope.vis.type.requiresSearch) {
-      courier.fetch();
-    }
-  };
+    $scope.fetch = function () {
+      $state.save();
+    };
+  }
 
   /**
    * Called when the user clicks "Save" button.
@@ -356,23 +313,14 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
   function transferVisState(fromVis, toVis, stage) {
     return function () {
-
-      //verify this before we copy the "new" state
-      const isAggregationsChanged = !fromVis.aggs.jsonDataEquals(toVis.aggs);
-
       const view = fromVis.getEnabledState();
+      const viewTo = toVis.getEnabledState();
+      view.listeners = viewTo.listeners;
       const full = fromVis.getState();
       toVis.setState(view);
       editableVis.dirty = false;
       $state.vis = full;
-
-      /**
-       * Only fetch (full ES round trip), if the play-button has been pressed (ie. 'stage' variable) and if there
-       * has been changes in the Data-tab.
-       */
-      if (stage && isAggregationsChanged) {
-        $scope.fetch();
-      } else {
+      if (stage) {
         $state.save();
       }
     };
