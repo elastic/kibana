@@ -7,7 +7,7 @@ export default function (Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = {};
 
-  filterManager.add = function (field, values, operation, index) {
+  filterManager.add = function (field, values, operation, index, fieldPrefix) {
     values = _.isArray(values) ? values : [values];
     const fieldName = _.isObject(field) ? field.name : field;
     const filters = _.flatten([queryFilter.getAppFilters()]);
@@ -44,15 +44,38 @@ export default function (Private) {
 
       switch (fieldName) {
         case '_exists_':
-          filter = {
-            meta: {
-              negate: negate,
-              index: index
-            },
-            exists: {
-              field: value
-            }
-          };
+          if (fieldPrefix !== undefined) {
+            filter = {
+              meta: {
+                negate: negate,
+                index: index
+              },
+              query: {
+                nested: {
+                  path: fieldPrefix,
+                  query: {
+                    bool: {
+                      must: [{
+                        exists: {
+                          field: value
+                        }
+                      }]
+                    }
+                  }
+                }
+              }
+            };
+          } else {
+            filter = {
+              meta: {
+                negate: negate,
+                index: index
+              },
+              exists: {
+                field: value
+              }
+            };
+          }
           break;
         default:
           if (field.scripted) {
@@ -69,8 +92,13 @@ export default function (Private) {
               }
             };
           } else {
-            filter = { meta: { negate: negate, index: index }, query: { match: {} } };
-            filter.query.match[fieldName] = { query: value, type: 'phrase' };
+            if (fieldPrefix !== undefined) {
+              filter = { meta: { negate: negate, index: index }, query: { nested: { path: fieldPrefix, query : { match: {} } } } };
+              filter.query.nested.query.match[fieldName] = { query: value, type: 'phrase' };
+            } else {
+              filter = { meta: { negate: negate, index: index }, query: { match: {} } };
+              filter.query.match[fieldName] = { query: value, type: 'phrase' };
+            }
           }
 
           break;

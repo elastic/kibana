@@ -14,7 +14,7 @@ export default function FlattenHitProvider(config) {
 
     // recursively merge _source
     const fields = indexPattern.fields.byName;
-    (function flatten(obj, keyPrefix) {
+    (function flatten(obj, keyPrefix, prefixStore) {
       keyPrefix = keyPrefix ? keyPrefix + '.' : '';
       _.forOwn(obj, function (val, key) {
         key = keyPrefix + key;
@@ -33,8 +33,20 @@ export default function FlattenHitProvider(config) {
         const hasValidMapping = fields[key] && fields[key].type !== 'conflict';
         const isValue = !_.isPlainObject(val);
 
+        if (hasValidMapping === undefined && val && val.constructor === Array) {
+          const pArr = [];
+          _.forEach(val, function (item) {
+            const pStore = {};
+            flatten(item, key, pStore);
+            pArr.push(pStore);
+          });
+          val = pArr;
+        }
+
         if (hasValidMapping || isValue) {
-          if (!flat[key]) {
+          if (prefixStore) {
+            prefixStore[key] = val;
+          } else if (!flat[key]) {
             flat[key] = val;
           } else if (_.isArray(flat[key])) {
             flat[key].push(val);
@@ -44,7 +56,7 @@ export default function FlattenHitProvider(config) {
           return;
         }
 
-        flatten(val, key);
+        flatten(val, key, prefixStore);
       });
     }(hit._source));
 
