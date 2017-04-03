@@ -82,52 +82,30 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <!-- Custom, full-screen editing UI. -->
-  <div
-    ng-if="vis.type.fullEditor"
-    class="vis-editor-content"
-  >
-    <vis-editor-vis-options
-      vis="vis"
-      saved-vis="savedVis"
-      editor="vis.type.params.editor"
-      ui-state="uiState"
-      stage-editable-vis="stageEditableVis"
-      class="vis-editor-full-options"
-    ></vis-editor-vis-options>
-  </div>
+  <div class="vis-editor-content">
 
-  <!-- Traditional sidebar-and-visualization editor. -->
-  <div
-    ng-if="!vis.type.fullEditor"
-    class="vis-editor-content"
-  >
-    <!-- Sidebar -->
-    <div
-      class="collapsible-sidebar"
-      ng-if="chrome.getVisible()"
-    >
-      <vis-editor-sidebar
-        vis="editableVis"
-        class="vis-editor-sidebar"
-      ></vis-editor-sidebar>
+    <vis-editor-vis-options ng-if="vis.type.fullEditor"
+                            vis="vis"
+                            saved-vis="savedVis"
+                            editor="vis.type.params.editor"
+                            ui-state="uiState"
+                            stage-editable-vis="stageEditableVis"
+                            class="vis-editor-full-options"></vis-editor-vis-options>
+
+    <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
+      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
     </div>
 
-    <!-- Visualization -->
-    <div
-      class="vis-editor-canvas"
-      ng-class="{ embedded: !chrome.getVisible() }"
-    >
+    <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
       <visualize
-        vis="vis"
+        saved-vis="savedVis"
+        ui-state="uiState"
+        app-state="state"
         data-shared-item
         data-title="{{savedVis.lastSavedTitle}}"
         data-description="{{savedVis.description}}"
         render-counter
-        ui-state="uiState"
-        show-spy-panel="chrome.getVisible()"
-        editable-vis="editableVis"
-        search-source="savedVis.searchSource">
+        show-spy-panel="chrome.getVisible()">
       </visualize>
     </div>
   </div>

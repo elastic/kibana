@@ -3,6 +3,7 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import 'angular-sanitize';
 
@@ -12,7 +13,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
+.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout, courier) {
   const notify = new Notifier({
     location: 'Visualize'
   });
@@ -22,11 +23,9 @@ uiModules
     require: '?renderCounter',
     scope : {
       showSpyPanel: '=?',
-      vis: '=',
-      uiState: '=?',
-      searchSource: '=?',
-      editableVis: '=?',
-      esResp: '=?',
+      savedVis: '=',
+      appState: '=',
+      uiState: '=?'
     },
     template: visualizeTemplate,
     link: function ($scope, $el, attr, renderCounter) {
@@ -43,6 +42,15 @@ uiModules
         };
       }
 
+      $scope.vis = $scope.savedVis.vis;
+
+      const visualizeApi = $scope.savedVis.vis.api;
+      const searchSource = $scope.savedVis.searchSource;
+
+      // BWC
+      $scope.vis.listeners.click = visualizeApi.events.filter;
+      $scope.vis.listeners.brush = visualizeApi.events.brush;
+
       const getVisEl = getter('[data-visualize-chart]');
       const getVisContainer = getter('[data-visualize-chart-container]');
       const getSpyContainer = getter('[data-spy-content-container]');
@@ -50,7 +58,7 @@ uiModules
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
         const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-        const isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+        const isZeroHits = false; //_.get($scope,'esResp.hits.total') === 0;
         const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
         return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
@@ -92,27 +100,6 @@ uiModules
         }, 0);
       };
 
-      // we need to wait for some watchers to fire at least once
-      // before we are "ready", this manages that
-      const prereq = (function () {
-        const fns = [];
-
-        return function register(fn) {
-          fns.push(fn);
-
-          return function () {
-            fn.apply(this, arguments);
-
-            if (fns.length) {
-              _.pull(fns, fn);
-              if (!fns.length) {
-                $scope.$root.$broadcast('ready:vis');
-              }
-            }
-          };
-        };
-      }());
-
       const loadingDelay = config.get('visualization:loadingDelay');
       $scope.loadingStyle = {
         '-webkit-transition-delay': loadingDelay,
@@ -136,73 +123,52 @@ uiModules
         updateSpy();
       });
 
-      function updateVisAggs() {
-        const enabledState = $scope.editableVis.getEnabledState();
-        const shouldUpdate = enabledState.aggs.length !== $scope.vis.aggs.length;
+      const stateMonitor = stateMonitorFactory.create($scope.appState);
+      $scope.renderbot = $scope.vis.type.createRenderbot($scope.vis, getVisEl(), $scope.uiState);
 
-        if (shouldUpdate) {
-          $scope.vis.setState(enabledState);
-          $scope.editableVis.dirty = false;
-        }
-      }
+      if (_.get($scope, 'savedVis.vis.type.requiresSearch')) {
+        $scope.savedVis.searchSource.onResults().then(function onResults(resp) {
+          $scope.esResp = resp;
+          $scope.renderbot.render(resp);
+          return searchSource.onResults().then(onResults);
+        }).catch(notify.fatal);
+        $scope.savedVis.searchSource.onError(e => {
+          $el.trigger('renderComplete');
+          if (isTermSizeZeroError(e)) {
+            return notify.error(
+              `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+              `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
+              `the error.`
+            );
+          }
 
-      $scope.$watch('vis', prereq(function (vis, oldVis) {
-        const $visEl = getVisEl();
-        if (!$visEl) return;
+          notify.error(e);
+        }).catch(notify.fatal);
 
-        if (!attr.editableVis) {
-          $scope.editableVis = vis;
-        }
+        $scope.fetch = function () {
+          searchSource.set('filter', visualizeApi.queryFilter.getFilters());
+          if (!$scope.appState.linked) searchSource.set('query', $scope.appState.query);
 
-        if (oldVis) $scope.renderbot = null;
-        if (vis) {
-          $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
-        }
-      }));
+          courier.fetch();
+        };
 
-      $scope.$watchCollection('vis.params', prereq(function () {
-        updateVisAggs();
-        if ($scope.renderbot) $scope.renderbot.updateParams();
-      }));
-
-      if (_.get($scope, 'vis.type.requiresSearch')) {
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          if (!searchSource || attr.esResp) return;
-
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
-
-            $scope.esResp = resp;
-
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
-
-          searchSource.onError(e => {
-            $el.trigger('renderComplete');
-            if (isTermSizeZeroError(e)) {
-              return notify.error(
-                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-                `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-                `the error.`
-              );
+        let currentAggJson = JSON.stringify($scope.appState.vis.aggs);
+        stateMonitor.onChange((status, type, keys) => {
+          if (keys[0] === 'query') $scope.fetch();
+          if (keys[0] === 'vis') {
+            const isAggregationsChanged = JSON.stringify($scope.appState.vis.aggs) !== currentAggJson;
+            if (isAggregationsChanged) $scope.fetch();
+            else {
+              $scope.renderbot.render($scope.esResp);
             }
+            currentAggJson = JSON.stringify($scope.appState.vis.aggs);
+          }
+        });
+        $scope.$listen(visualizeApi.queryFilter, 'fetch', $scope.fetch);
+        $scope.$listen(visualizeApi.timeFilter, 'fetch', $scope.fetch);
 
-            notify.error(e);
-          }).catch(notify.fatal);
-        }));
+        $scope.fetch();
       }
-
-      $scope.$watch('esResp', prereq(function (resp) {
-        if (!resp) return;
-        $scope.renderbot.render(resp);
-      }));
-
-      $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {
-        if (oldRenderbot && newRenderbot !== oldRenderbot) {
-          oldRenderbot.destroy();
-        }
-      });
 
       $scope.$on('$destroy', function () {
         if ($scope.renderbot) {
