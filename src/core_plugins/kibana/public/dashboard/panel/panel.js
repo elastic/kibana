@@ -114,9 +114,10 @@ uiModules
             $scope.saveState();
           });
 
-          $scope.$watchCollection('panel.sort', function () {
+          $scope.setSortOrder = function setSortOrder(columnName, direction) {
+            $scope.panel.sort = [columnName, direction];
             $scope.saveState();
-          });
+          };
         }
 
         $scope.filter = function (field, value, operator) {
