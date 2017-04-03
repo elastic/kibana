@@ -8,8 +8,9 @@
         kbn-table-header
         columns="columns"
         index-pattern="indexPattern"
-        sorting="sorting">
-      </thead>
+        sort-order="sorting"
+        on-change-sort-order="onChangeSortOrder"
+      ></thead>
       <tbody>
         <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
@@ -17,7 +18,9 @@
           sorting="sorting"
           index-pattern="indexPattern"
           filter="filter"
-          class="discover-table-row"></tr>
+          class="discover-table-row"
+          on-change-sort-order="onChangeSortOrder"
+        ></tr>
       </tbody>
     </table>
   </paginate>
@@ -27,8 +30,9 @@
       kbn-table-header
       columns="columns"
       index-pattern="indexPattern"
-      sorting="sorting">
-    </thead>
+      sort-order="sorting"
+      on-change-sort-order="onChangeSortOrder"
+    ></thead>
     <tbody>
       <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
         kbn-table-row="row"
@@ -39,6 +43,7 @@
         class="discover-table-row"
         ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+        on-change-sort-order="onChangeSortOrder"
       ></tr>
     </tbody>
   </table>
