@@ -52,6 +52,7 @@ rules:
   no-path-concat: off
   no-proto: error
   no-redeclare: error
+  no-restricted-globals: [ error, context ]
   no-return-assign: off
   no-script-url: error
   no-sequences: error
