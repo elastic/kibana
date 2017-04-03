@@ -4,6 +4,7 @@ import expect from 'expect.js';
 import Promise from 'bluebird';
 
 import createKibanaIndex from '../create_kibana_index';
+import { KibanaMappings } from '../kibana_index_mappings';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {
@@ -22,7 +23,9 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('kibana.index').returns(config.kibana.index);
       config = function () { return { get: get }; };
 
-      _.set(server, 'plugins.elasticsearch', {});
+      _.set(server, 'plugins.elasticsearch', {
+        mappings: new KibanaMappings()
+      });
       _.set(server, 'config', config);
 
       callWithInternalUser = sinon.stub();
