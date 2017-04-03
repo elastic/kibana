@@ -14,7 +14,9 @@ uiModules.get('kibana')
       hit: '=',
       indexPattern: '=',
       filter: '=?',
-      columns: '=?'
+      columns: '=?',
+      onAddColumn: '=?',
+      onRemoveColumn: '=?',
     },
     template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
@@ -28,7 +30,14 @@ uiModules.get('kibana')
             <a ng-click="mode='${view.name}'">${view.title}</a>
           </li>`);
         $tabs.append($tab);
-        const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns"';
+        const $viewAttrs = `
+          hit="hit"
+          index-pattern="indexPattern"
+          filter="filter"
+          columns="columns"
+          on-add-column="onAddColumn"
+          on-remove-column="onRemoveColumn"
+        `;
         const $ext = $(`<render-directive ${$viewAttrs} ng-if="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
           </render-directive>`);
         $ext.html(view.directive.template);

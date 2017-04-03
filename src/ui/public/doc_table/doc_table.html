@@ -10,6 +10,8 @@
         index-pattern="indexPattern"
         sort-order="sorting"
         on-change-sort-order="onChangeSortOrder"
+        on-move-column="onMoveColumn"
+        on-remove-column="onRemoveColumn"
       ></thead>
       <tbody>
         <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
@@ -19,7 +21,9 @@
           index-pattern="indexPattern"
           filter="filter"
           class="discover-table-row"
+          on-add-column="onAddColumn"
           on-change-sort-order="onChangeSortOrder"
+          on-remove-column="onRemoveColumn"
         ></tr>
       </tbody>
     </table>
@@ -32,6 +36,8 @@
       index-pattern="indexPattern"
       sort-order="sorting"
       on-change-sort-order="onChangeSortOrder"
+      on-move-column="onMoveColumn"
+      on-remove-column="onRemoveColumn"
     ></thead>
     <tbody>
       <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
@@ -43,7 +49,9 @@
         class="discover-table-row"
         ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+        on-add-column="onAddColumn"
         on-change-sort-order="onChangeSortOrder"
+        on-remove-column="onRemoveColumn"
       ></tr>
     </tbody>
   </table>
