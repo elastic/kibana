@@ -7,7 +7,7 @@ module.exports = {
     '!ui_framework/components/index.js',
     '!ui_framework/components/**/*/index.js',
   ],
-  coverageDirectory: '<rootDir>/test/coverage',
+  coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: ['html'],
   moduleFileExtensions: ['jsx', 'js', 'json'],
   testPathIgnorePatterns: [

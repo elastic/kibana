@@ -18,7 +18,6 @@ target
 /test/screenshots/failure
 /test/screenshots/session
 /test/screenshots/visual_regression_gallery.html
-/test/coverage
 /html_docs
 /esvm
 .htpasswd
