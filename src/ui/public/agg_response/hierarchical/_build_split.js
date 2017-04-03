@@ -1,8 +1,8 @@
-import collectKeys from 'ui/agg_response/hierarchical/_collect_keys';
-import AggResponseHierarchicalTransformAggregationProvider from 'ui/agg_response/hierarchical/_transform_aggregation';
+import { collectKeys } from 'ui/agg_response/hierarchical/_collect_keys';
+import { HierarchicalTransformAggregationProvider } from 'ui/agg_response/hierarchical/_transform_aggregation';
 
-export default function AggResponseHierarchicalBuildSplitProvider(Private) {
-  const transformer = Private(AggResponseHierarchicalTransformAggregationProvider);
+export function AggResponseHierarchicalBuildSplitProvider(Private) {
+  const transformer = Private(HierarchicalTransformAggregationProvider);
   return function (agg, metric, aggData) {
     // Ceate the split structure
     const split = { label: '', slices: { children: [] } };
