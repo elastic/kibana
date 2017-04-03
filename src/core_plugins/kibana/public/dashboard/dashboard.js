@@ -105,7 +105,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       $scope.panels = dashboardState.getPanels();
-      $scope.refresh = _.bindKey(courier, 'fetch');
+      $scope.refresh = (...args) => {
+        $rootScope.$broadcast('fetch');
+        courier.fetch(...args);
+      };
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
