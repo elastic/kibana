@@ -8,6 +8,10 @@ import $ from 'jquery';
 import 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
+
+const SORTABLE_FIELDS = ['bytes', '@timestamp'];
+const UNSORTABLE_FIELDS = ['request_body'];
+
 describe('Doc Table', function () {
 
   let $parentScope;
@@ -89,16 +93,24 @@ describe('Doc Table', function () {
 
   describe('kbnTableHeader', function () {
 
-    const $elem = angular.element(
-      '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort"></thead>'
-    );
+    const $elem = angular.element(`
+      <thead
+        kbn-table-header
+        columns="columns"
+        index-pattern="indexPattern"
+        sort-order="sortOrder"
+        on-change-sort-order="onChangeSortOrder"
+      ></thead>
+    `);
 
     beforeEach(function () {
       init($elem, {
         columns: [],
-        sorting: [],
+        sortOrder: [],
+        onChangeSortOrder: sinon.stub(),
       });
     });
+
     afterEach(function () {
       destroy();
     });
@@ -107,57 +119,76 @@ describe('Doc Table', function () {
       columnTests('th', $elem);
     });
 
-
-    describe('sorting', function () {
-      it('should have a sort function that sets the elements of the sort array', function (done) {
-        expect($scope.sort).to.be.a(Function);
-        done();
+    describe('cycleSortOrder function', function () {
+      it('should exist', function () {
+        expect($scope.cycleSortOrder).to.be.a(Function);
       });
 
-      it('should have a headClasser function that determines the css classes of the sort icons', function (done) {
+      it('should call onChangeSortOrder with ascending order for a sortable field without sort order', function () {
+        $scope.sortOrder = [];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with ascending order for a sortable field already sorted by in descending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with ascending order for a sortable field when already sorted by an different field', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[1], 'asc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with descending order for a sortable field already sorted by in ascending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'desc']);
+      });
+
+      it('should not call onChangeSortOrder for an unsortable field', function () {
+        $scope.sortOrder = [];
+        $scope.cycleSortOrder(UNSORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(0);
+      });
+
+      it('should not try to call onChangeSortOrder when it is not defined', function () {
+        $scope.onChangeSortOrder = undefined;
+        expect(() => $scope.cycleSortOrder(SORTABLE_FIELDS[0])).to.not.throwException();
+      });
+    });
+
+    describe('headerClass function', function () {
+      it('should exist', function () {
         expect($scope.headerClass).to.be.a(Function);
-        done();
       });
 
-      it('should sort asc by default, then by desc if already sorting', function (done) {
-        const fields = ['bytes', '@timestamp'];
-
-        // Should not be sorted at first
-        expect($scope.sorting).to.eql(undefined);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'asc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'desc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-down');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'asc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[1]);
-        expect($scope.sorting).to.eql([fields[1], 'asc']);
-        expect($scope.headerClass(fields[1])).to.contain('fa-sort-up');
-
-        // Should show the default sort for any other fields[0]
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        done();
+      it('should return list including table-header-sortchange for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('table-header-sortchange');
       });
 
-      it('should NOT sort unindexed fields', function (done) {
-        $scope.sort('request_body');
-        expect($scope.sorting).to.be(undefined);
-        done();
+      it('should return undefined for an unsortable field', function () {
+        expect($scope.headerClass(UNSORTABLE_FIELDS[0])).to.be(undefined);
       });
 
-      it('should NOT sort geo_point fields', function (done) {
-        $scope.sort('point');
-        expect($scope.sorting).to.be(undefined);
-        done();
+      it('should return list including fa-sort-up for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
+      });
+
+      it('should return list including fa-sort-up for a sortable field currently sorted by in ascending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
+      });
+
+      it('should return list including fa-sort-down for a sortable field currently sorted by in descending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-down');
       });
     });
 

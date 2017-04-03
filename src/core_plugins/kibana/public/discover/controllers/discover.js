@@ -475,6 +475,10 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .set('filter', queryFilter.getFilters());
   });
 
+  $scope.setSortOrder = function setSortOrder(columnName, direction) {
+    $scope.state.sort = [columnName, direction];
+  };
+
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
