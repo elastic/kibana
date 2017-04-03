@@ -22,44 +22,49 @@ import {
   InvalidLogScaleValues,
   StackedBarChartConfig,
   NotEnoughData,
-  NoResults
+  NoResults,
+  KbnError
 } from 'ui/errors';
 
 describe('ui/errors', () => {
   const errors = [
-    ['SearchTimeout', new SearchTimeout()],
-    ['RequestFailure', new RequestFailure('an error', { })],
-    ['FetchFailure', new FetchFailure({ })],
-    ['ShardFailure', new ShardFailure({ '_shards' : 5 })],
-    ['VersionConflict', new VersionConflict({ })],
-    ['MappingConflict', new MappingConflict({ })],
-    ['RestrictedMapping', new RestrictedMapping('field', 'indexPattern')],
-    ['CacheWriteFailure', new CacheWriteFailure()],
-    ['FieldNotFoundInCache', new FieldNotFoundInCache('aname')],
-    ['DuplicateField', new DuplicateField('dupfield')],
-    ['SavedObjectNotFound', new SavedObjectNotFound('dashboard', '123')],
-    ['IndexPatternMissingIndices', new IndexPatternMissingIndices()],
-    ['NoDefinedIndexPatterns', new NoDefinedIndexPatterns()],
-    ['NoDefaultIndexPattern', new NoDefaultIndexPattern()],
-    ['PersistedStateError', new PersistedStateError()],
-    ['VislibError', new VislibError('err')],
-    ['ContainerTooSmall', new ContainerTooSmall()],
-    ['InvalidWiggleSelection', new InvalidWiggleSelection()],
-    ['PieContainsAllZeros', new PieContainsAllZeros()],
-    ['InvalidLogScaleValues', new InvalidLogScaleValues()],
-    ['StackedBarChartConfig', new StackedBarChartConfig('err')],
-    ['NotEnoughData', new NotEnoughData('nodata')],
-    ['NoResults', new NoResults()]
+    new SearchTimeout(),
+    new RequestFailure('an error', { }),
+    new FetchFailure({ }),
+    new ShardFailure({ '_shards' : 5 }),
+    new VersionConflict({ }),
+    new MappingConflict({ }),
+    new RestrictedMapping('field', 'indexPattern'),
+    new CacheWriteFailure(),
+    new FieldNotFoundInCache('aname'),
+    new DuplicateField('dupfield'),
+    new SavedObjectNotFound('dashboard', '123'),
+    new IndexPatternMissingIndices(),
+    new NoDefinedIndexPatterns(),
+    new NoDefaultIndexPattern(),
+    new PersistedStateError(),
+    new VislibError('err'),
+    new ContainerTooSmall(),
+    new InvalidWiggleSelection(),
+    new PieContainsAllZeros(),
+    new InvalidLogScaleValues(),
+    new StackedBarChartConfig('err'),
+    new NotEnoughData('nodata'),
+    new NoResults()
   ];
 
   errors.forEach(error => {
-    const className = error[0];
+    const className = error.constructor.name;
     it(`${className} has a message`, () => {
-      expect(error[1].message).to.not.be.empty();
+      expect(error.message).to.not.be.empty();
     });
 
-    it(`${className}  has a stack trace`, () => {
-      expect(error[1].stack).to.not.be.empty();
+    it(`${className} has a stack trace`, () => {
+      expect(error.stack).to.not.be.empty();
+    });
+
+    it (`${className} is an instance of KbnError`, () => {
+      expect(error instanceof KbnError).to.be(true);
     });
   });
 });

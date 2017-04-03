@@ -1,4 +1,5 @@
 import angular from 'angular';
+import _ from 'lodash';
 
 const canStack = (function () {
   const err = new Error();
@@ -6,9 +7,8 @@ const canStack = (function () {
 }());
 
 // abstract error class
-export class KbnError extends Error {
+export class KbnError {
   constructor(msg, constructor) {
-    super(msg);
     this.message = msg;
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, constructor || KbnError);
@@ -26,6 +26,11 @@ export class KbnError extends Error {
     throw this;
   }
 }
+// Note, you can't extend the built in Error class:
+// http://stackoverflow.com/questions/33870684/why-doesnt-instanceof-work-on-instances-of-error-subclasses-under-babel-node
+// Hence we are inheriting from it this way, instead of using extends Error, and this will then preserve
+// instanceof checks.
+_.class(KbnError).inherits(Error);
 
 /**
  * SearchTimeout error class
