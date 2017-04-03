@@ -23,6 +23,7 @@ uiModules.get('kibana')
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      onChangeSortOrder: '=?',
     },
     link: function ($scope) {
       const notify = new Notifier();
