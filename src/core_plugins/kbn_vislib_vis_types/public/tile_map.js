@@ -4,6 +4,7 @@ import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
+import image from './images/icon-tilemap.svg';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
   const VisType = Private(VisVisTypeProvider);
@@ -14,7 +15,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
   return new MapsVisType({
     name: 'tile_map',
     title: 'Tile Map',
-    icon: 'fa-map-marker',
+    image,
     description: 'Plot latitude and longitude coordinates on a map',
     category: VisType.CATEGORY.MAP,
     params: {

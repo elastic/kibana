@@ -12,6 +12,7 @@ export default function VisTypeFactory(Private) {
       this.responseConverter = opts.responseConverter;
       this.hierarchicalData = opts.hierarchicalData || false;
       this.icon = opts.icon;
+      this.image = opts.image;
       this.description = opts.description;
       this.category = opts.category || VisType.CATEGORY.OTHER;
       this.isExperimental = opts.isExperimental;

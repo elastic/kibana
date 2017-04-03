@@ -6,6 +6,7 @@ import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/templat
 import VisSchemasProvider from 'ui/vis/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import visTypes from 'ui/registry/vis_types';
+import image from './images/icon-tagcloud.svg';
 
 visTypes.register(function TagCloudProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
@@ -15,10 +16,10 @@ visTypes.register(function TagCloudProvider(Private) {
   return new TemplateVisType({
     name: 'tagcloud',
     title: 'Tag Cloud',
+    image,
     implementsRenderComplete: true,
     description: 'A group of words, sized according to their importance',
     category: VisType.CATEGORY.OTHER,
-    icon: 'fa-cloud',
     template: tagCloudTemplate,
     params: {
       defaults: {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="46px" viewBox="0 0 60 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-area</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-756.000000, -222.000000)" fill="#000000">
+            <g id="charts" transform="translate(75.000000, 148.000000)">
+                <g id="area" transform="translate(641.000000, 43.000000)">
+                    <g id="icon-area" transform="translate(40.000000, 31.000000)">
+                        <polygon id="" points="44.5384615 11.6666667 51 35 9 35 9 20 20.3076923 5 34.8461538 20"></polygon>
+                        <polygon id="xy-axis" fill-rule="nonzero" points="4 0 0 0 0 45.0116263 60.0000011 45.0116263 60.0000011 41.0116263 4 41.0116263"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

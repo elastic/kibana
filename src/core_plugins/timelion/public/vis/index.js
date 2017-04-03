@@ -1,4 +1,5 @@
 import VisVisTypeProvider from 'ui/vis/vis_type';
+import image from '../images/icon-timelion.svg';
 
 define(function (require) {
   // we also need to load the controller and used by the template
@@ -20,7 +21,7 @@ define(function (require) {
     return new TemplateVisType({
       name: 'timelion',
       title: 'Timelion',
-      icon: 'fa-clock-o',
+      image,
       description: 'Build time-series using functional expressions',
       category: VisType.CATEGORY.TIME,
       template: require('plugins/timelion/vis/timelion_vis.html'),

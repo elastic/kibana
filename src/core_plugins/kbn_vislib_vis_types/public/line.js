@@ -2,6 +2,7 @@ import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
+import image from './images/icon-line.svg';
 
 export default function PointSeriesVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
@@ -11,7 +12,7 @@ export default function PointSeriesVisType(Private) {
   return new VislibVisType({
     name: 'line',
     title: 'Line',
-    icon: 'fa-line-chart',
+    image,
     description: 'Emphasize trends',
     category: VisType.CATEGORY.BASIC,
     params: {

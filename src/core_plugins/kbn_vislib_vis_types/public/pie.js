@@ -2,6 +2,7 @@ import VisVisTypeProvider from 'ui/vis/vis_type';
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
+import image from './images/icon-pie.svg';
 
 export default function HistogramVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
@@ -11,7 +12,7 @@ export default function HistogramVisType(Private) {
   return new VislibVisType({
     name: 'pie',
     title: 'Pie',
-    icon: 'fa-pie-chart',
+    image,
     description: 'Compare parts of a whole',
     category: VisType.CATEGORY.BASIC,
     params: {

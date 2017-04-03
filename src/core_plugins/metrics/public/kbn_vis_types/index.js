@@ -3,6 +3,7 @@ import './editor_controller';
 import '../visualizations/less/main.less';
 import 'react-select/dist/react-select.css';
 import '../less/main.less';
+import image from '../images/icon-visualbuilder.svg';
 
 import VisVisTypeProvider from 'ui/vis/vis_type';
 // register the provider with the visTypes registry so that other know it exists
@@ -18,7 +19,7 @@ export default function MetricsVisProvider(Private) {
   return new TemplateVisType({
     name: 'metrics',
     title: 'Visual Builder',
-    icon: 'fa-area-chart',
+    image,
     description: 'Build time-series using a visual pipeline interface',
     category: VisType.CATEGORY.TIME,
     isExperimental: true,

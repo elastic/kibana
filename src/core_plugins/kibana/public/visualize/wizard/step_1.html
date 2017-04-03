@@ -50,7 +50,15 @@
           tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
         >
           <div class="kuiGalleryButton__image">
+            <img
+              ng-if="type.image"
+              aria-hidden="true"
+              ng-src="{{ type.image }}"
+            />
+
+            <!-- If there's no image, default to an icon, for BWC. -->
             <span
+              ng-if="!type.image"
               aria-hidden="true"
               class="kuiIcon visualizeWizardVisTypeIcon"
               ng-class="type.icon"

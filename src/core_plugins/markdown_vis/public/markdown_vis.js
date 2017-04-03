@@ -5,6 +5,7 @@ import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/templat
 import markdownVisTemplate from 'plugins/markdown_vis/markdown_vis.html';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
 import visTypesRegistry from 'ui/registry/vis_types';
+import image from './images/icon-markdown.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -21,7 +22,7 @@ function MarkdownVisProvider(Private) {
   return new TemplateVisType({
     name: 'markdown',
     title: 'Markdown',
-    icon: 'fa-code',
+    image,
     description: 'Create a document using markdown syntax',
     category: VisType.CATEGORY.OTHER,
     template: markdownVisTemplate,

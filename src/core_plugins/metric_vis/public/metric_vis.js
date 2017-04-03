@@ -6,6 +6,7 @@ import VisSchemasProvider from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
 import visTypesRegistry from 'ui/registry/vis_types';
+import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -23,9 +24,9 @@ function MetricVisProvider(Private) {
   return new TemplateVisType({
     name: 'metric',
     title: 'Metric',
+    image,
     description: 'Display a calculation as a single number',
     category: VisType.CATEGORY.DATA,
-    icon: 'fa-calculator',
     template: metricVisTemplate,
     params: {
       defaults: {

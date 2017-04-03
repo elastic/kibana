@@ -8,6 +8,7 @@ import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/templat
 import VisSchemasProvider from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import visTypesRegistry from 'ui/registry/vis_types';
+import image from './images/icon-table.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -33,7 +34,7 @@ function TableVisTypeProvider(Private) {
   return new TemplateVisType({
     name: 'table',
     title: 'Data Table',
-    icon: 'fa-table',
+    image,
     description: 'Display values in a table',
     category: VisType.CATEGORY.DATA,
     template: tableVisTemplate,
