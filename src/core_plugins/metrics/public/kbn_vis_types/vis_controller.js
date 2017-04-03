@@ -1,5 +1,4 @@
 import modules from 'ui/modules';
-import 'plugins/timelion/directives/refresh_hack';
 import 'ui/state_management/app_state';
 import '../directives/visualization';
 const app = modules.get('kibana/metrics_vis');

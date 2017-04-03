@@ -66,7 +66,7 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -279,6 +279,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }
 
   $scope.fetch = function () {
+    // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
+    $rootScope.$broadcast('fetch');
     $state.save();
     searchSource.set('filter', queryFilter.getFilters());
     if (!$state.linked) searchSource.set('query', $state.query);
