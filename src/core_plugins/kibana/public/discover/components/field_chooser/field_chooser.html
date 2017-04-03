@@ -24,7 +24,14 @@
     <h5>Selected Fields</h5>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
-    <discover-field ng-repeat="field in fields.raw|filter:{display:true}">
+    <discover-field
+      ng-repeat="field in fields.raw|filter:{display:true}"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 
@@ -108,7 +115,13 @@
       <h6>Popular</h6>
     </li>
     <discover-field
-      ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 
@@ -116,7 +129,13 @@
     ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
     class="list-unstyled discover-unpopular-fields">
     <discover-field
-      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered">
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 

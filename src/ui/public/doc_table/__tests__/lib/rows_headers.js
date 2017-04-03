@@ -100,6 +100,8 @@ describe('Doc Table', function () {
         index-pattern="indexPattern"
         sort-order="sortOrder"
         on-change-sort-order="onChangeSortOrder"
+        on-move-column="moveColumn"
+        on-remove-column="removeColumn"
       ></thead>
     `);
 
@@ -108,6 +110,8 @@ describe('Doc Table', function () {
         columns: [],
         sortOrder: [],
         onChangeSortOrder: sinon.stub(),
+        moveColumn: sinon.spy(),
+        removeColumn: sinon.spy(),
       });
     });
 
@@ -199,34 +203,25 @@ describe('Doc Table', function () {
       });
 
       it('should move columns to the right', function () {
-
-        $scope.moveRight('bytes');
-        expect($scope.columns[1]).to.be('bytes');
-
-        $scope.moveRight('bytes');
-        expect($scope.columns[2]).to.be('bytes');
+        $scope.moveColumnRight('bytes');
+        expect($scope.onMoveColumn.callCount).to.be(1);
+        expect($scope.onMoveColumn.firstCall.args).to.eql(['bytes', 1]);
       });
 
       it('shouldnt move the last column to the right', function () {
-        expect($scope.columns[3]).to.be('point');
-
-        $scope.moveRight('point');
-        expect($scope.columns[3]).to.be('point');
+        $scope.moveColumnRight('point');
+        expect($scope.onMoveColumn.callCount).to.be(0);
       });
 
       it('should move columns to the left', function () {
-        $scope.moveLeft('@timestamp');
-        expect($scope.columns[1]).to.be('@timestamp');
-
-        $scope.moveLeft('request_body');
-        expect($scope.columns[1]).to.be('request_body');
+        $scope.moveColumnLeft('@timestamp');
+        expect($scope.onMoveColumn.callCount).to.be(1);
+        expect($scope.onMoveColumn.firstCall.args).to.eql(['@timestamp', 1]);
       });
 
       it('shouldnt move the first column to the left', function () {
-        expect($scope.columns[0]).to.be('bytes');
-
-        $scope.moveLeft('bytes');
-        expect($scope.columns[0]).to.be('bytes');
+        $scope.moveColumnLeft('bytes');
+        expect($scope.onMoveColumn.callCount).to.be(0);
       });
     });
   });

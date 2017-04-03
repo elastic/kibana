@@ -21,11 +21,13 @@
           <i class="fa fa-search-plus text-muted"></i>
           <i class="fa fa-search-minus text-muted"></i>
         </span>
-        <span ng-if="columns">
-          <i ng-click="toggleColumn(field)"
-            tooltip="Toggle column in table"
+        <span ng-if="canToggleColumns()">
+          <i
+            class="fa fa-columns"
+            ng-click="toggleColumn(field)"
             tooltip-append-to-body="1"
-            class="fa fa-columns"></i>
+            tooltip="Toggle column in table"
+          ></i>
         </span>
         <span ng-if="!indexPattern.metaFields.includes(field)">
           <i ng-click="filter('_exists_', field, '+')"
