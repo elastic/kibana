@@ -57,18 +57,18 @@ export default class DashboardPage {
   }
 
   appendQuery(query) {
-    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+    PageObjects.common.debug('Appending query');
+    return PageObjects.common.try(() => PageObjects.common.findTestSubject('dashboardQuery').type(query));
   }
 
   clickFilterButton() {
-    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
-      .click();
+    PageObjects.common.debug('Clicking filter button');
+    return PageObjects.common.clickTestSubject('dashboardQueryFilterButton');
   }
 
   clickEdit() {
     PageObjects.common.debug('Clicking edit');
-    return PageObjects.common.findTestSubject('dashboardEditMode')
-      .click();
+    return PageObjects.common.clickTestSubject('dashboardEditMode');
   }
 
   getIsInViewMode() {
@@ -78,7 +78,7 @@ export default class DashboardPage {
 
   clickCancelOutOfEditMode() {
     PageObjects.common.debug('Clicking cancel');
-    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
+    return PageObjects.common.clickTestSubject('dashboardViewOnlyMode');
   }
 
   clickNewDashboard() {
@@ -122,23 +122,21 @@ export default class DashboardPage {
   }
 
   filterVizNames(vizName) {
-    return this.findTimeout
-    .findByCssSelector('input[placeholder="Visualizations Filter..."]')
-    .click()
-    .pressKeys(vizName);
+    return PageObjects.common.try(() => this.findTimeout
+      .findByCssSelector('input[placeholder="Visualizations Filter..."]')
+      .click()
+      .pressKeys(vizName));
   }
 
   clickVizNameLink(vizName) {
-    return this.findTimeout
-    .findByPartialLinkText(vizName)
-    .click();
+    return PageObjects.common.try(() => this.findTimeout.findByPartialLinkText(vizName).click());
   }
 
   closeAddVizualizationPanel() {
     PageObjects.common.debug('closeAddVizualizationPanel');
-    return this.findTimeout
-    .findByCssSelector('i.fa fa-chevron-up')
-    .click();
+    return PageObjects.common.try(() => this.findTimeout
+      .findByCssSelector('i.fa fa-chevron-up')
+      .click());
   }
 
   addVisualization(vizName) {
@@ -168,7 +166,7 @@ export default class DashboardPage {
 
   async renameDashboard(dashName) {
     PageObjects.common.debug(`Naming dashboard ` + dashName);
-    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
+    await PageObjects.common.clickTestSubject('dashboardRenameButton');
     await this.findTimeout.findById('dashboardTitle').type(dashName);
   }
 
@@ -362,7 +360,7 @@ export default class DashboardPage {
     const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
     if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping save as new checkbox');
-      await saveAsNewCheckbox.click();
+      await PageObjects.common.try(() => saveAsNewCheckbox.click());
     }
   }
 
@@ -372,7 +370,7 @@ export default class DashboardPage {
     const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
     if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping store time checkbox');
-      await storeTimeCheckbox.click();
+      await PageObjects.common.try(() => storeTimeCheckbox.click());
     }
   }
 
@@ -402,11 +400,11 @@ export default class DashboardPage {
     if (!expandShown) {
       const panelElements = await this.findTimeout.findAllByCssSelector('span.panel-title');
       PageObjects.common.debug('click title');
-      await panelElements[0].click(); // Click to simulate hover.
+      await PageObjects.common.try(() => panelElements[0].click()); // Click to simulate hover.
     }
     const expandButton = await PageObjects.common.findTestSubject('dashboardPanelExpandIcon');
     PageObjects.common.debug('click expand icon');
-    expandButton.click();
+    await PageObjects.common.try(() => expandButton.click());
   }
 
   getSharedItemsCount() {
