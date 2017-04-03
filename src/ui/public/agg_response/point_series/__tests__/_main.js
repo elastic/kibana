@@ -4,7 +4,7 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
-import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
 
