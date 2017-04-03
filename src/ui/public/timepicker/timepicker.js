@@ -115,6 +115,16 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.absolute.to = moment();
       };
 
+      $scope.setRelativeToNow = function (key) {
+        $scope.relative[key].count = 0;
+      };
+
+      $scope.checkRelative = function () {
+        const from = dateMath.parse(getRelativeString('from'));
+        const to = dateMath.parse(getRelativeString('to'));
+        return to.isBefore(from);
+      };
+
       $scope.formatRelative = function (key) {
         const relativeString = getRelativeString(key);
         const parsed = dateMath.parse(relativeString);

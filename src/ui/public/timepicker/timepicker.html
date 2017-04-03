@@ -41,6 +41,7 @@
                   <label>
                     From:
                     <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
+                    <a class="label label-default" ng-click="setRelativeToNow('from')">Set To Now</a>
                     <span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
                   </label>
                   <br>
@@ -79,6 +80,7 @@
                   <label>
                     To:
                     <span ng-show="relative.to.preview">{{relative.to.preview}}</span>
+                    <a class="label label-default" ng-click="setRelativeToNow('to')">Set To Now</a>
                     <span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
                   </label>
                   <br>
@@ -117,9 +119,10 @@
                   <label>&nbsp;</label>
                   <br>
                   <div class="form-group">
-                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!(relative.from.preview && relative.to.preview)">
+                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()">
                       Go
                     </button>
+                    <span class="small" ng-show="checkRelative()"><strong>From</strong> must occur before <strong>To</strong></span>
                   </div>
                 </div>
               </form>
