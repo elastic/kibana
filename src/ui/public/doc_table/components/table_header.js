@@ -13,6 +13,8 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       sortOrder: '=',
       indexPattern: '=',
       onChangeSortOrder: '=?',
+      onRemoveColumn: '=?',
+      onMoveColumn: '=?',
     },
     template: headerHtml,
     controller: function ($scope) {
@@ -29,8 +31,25 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         return 'Sort by ' + shortDotsFilter(column);
       };
 
-      $scope.canRemove = function (name) {
-        return (name !== '_source' || $scope.columns.length !== 1);
+      $scope.canMoveColumnLeft = function canMoveColumn(columnName) {
+        return (
+          _.isFunction($scope.onMoveColumn)
+          && $scope.columns.indexOf(columnName) > 0
+        );
+      };
+
+      $scope.canMoveColumnRight = function canMoveColumn(columnName) {
+        return (
+          _.isFunction($scope.onMoveColumn)
+          && $scope.columns.indexOf(columnName) < $scope.columns.length - 1
+        );
+      };
+
+      $scope.canRemoveColumn = function canRemoveColumn(columnName) {
+        return (
+          _.isFunction($scope.onRemoveColumn)
+          && (columnName !== '_source' || $scope.columns.length > 1)
+        );
       };
 
       $scope.headerClass = function (column) {
@@ -43,22 +62,24 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
       };
 
-      $scope.moveLeft = function (column) {
-        let index = _.indexOf($scope.columns, column);
-        if (index === 0) return;
+      $scope.moveColumnLeft = function moveLeft(columnName) {
+        const newIndex = $scope.columns.indexOf(columnName) - 1;
 
-        _.move($scope.columns, index, --index);
+        if (newIndex < 0) {
+          return;
+        }
+
+        $scope.onMoveColumn(columnName, newIndex);
       };
 
-      $scope.moveRight = function (column) {
-        let index = _.indexOf($scope.columns, column);
-        if (index === $scope.columns.length - 1) return;
+      $scope.moveColumnRight = function moveRight(columnName) {
+        const newIndex = $scope.columns.indexOf(columnName) + 1;
 
-        _.move($scope.columns, index, ++index);
-      };
+        if (newIndex >= $scope.columns.length) {
+          return;
+        }
 
-      $scope.toggleColumn = function (fieldName) {
-        _.toggleInOut($scope.columns, fieldName);
+        $scope.onMoveColumn(columnName, newIndex);
       };
 
       $scope.cycleSortOrder = function cycleSortOrder(columnName) {

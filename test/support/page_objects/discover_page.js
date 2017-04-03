@@ -261,8 +261,7 @@ export default class DiscoverPage {
   }
 
   clickFieldListItem(field) {
-    return this.findTimeout
-    .findByCssSelector('li[attr-field="' + field + '"]').click();
+    return PageObjects.common.clickTestSubject(`field-${field}`);
   }
 
   async clickFieldListItemAdd(field) {
@@ -296,6 +295,7 @@ export default class DiscoverPage {
   async removeAllFilters() {
     await PageObjects.common.clickTestSubject('showFilterActions');
     await PageObjects.common.clickTestSubject('removeAllFilters');
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
 
