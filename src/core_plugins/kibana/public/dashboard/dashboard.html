@@ -7,12 +7,14 @@
       <div
         data-transclude-slot="topLeftCorner"
       >
-        <!-- Breadcrumbs. -->
-        <bread-crumbs
-          page-title="getDashTitle()"
-          use-links="true"
-          omit-current-page="true"
-        ></bread-crumbs>
+        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
+          <div class="kuiLocalBreadcrumb">
+            <a class=kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+          </div>
+          <div class="kuiLocalBreadcrumb">
+            {{ getDashTitle() }}
+          </div>
+        </div>
       </div>
 
       <!-- Search. -->

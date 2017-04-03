@@ -15,8 +15,17 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true
   })
+  .when('/dashboard', {
+    // For BWC, preserve unsaved dashboard links prior to v5.3
+    redirectTo: DashboardConstants.CREATE_NEW_DASHBOARD_URL
+  })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
     controller: DashboardListingController,
     controllerAs: 'listingController'
+  })
+  .when('/dashboard/:id', {
+    // For BWC, preserve unsaved dashboard links prior to v5.3
+    redirectTo: `${DashboardConstants.DASHBOARD_EDIT_PATH}/:id`
   });
+

@@ -31,7 +31,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 uiRoutes
-  .when('/dashboard/create', {
+  .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, courier) {
@@ -42,7 +42,7 @@ uiRoutes
       }
     }
   })
-  .when('/dashboard/:id', {
+  .when(`${DashboardConstants.DASHBOARD_EDIT_PATH}/:id`, {
     template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
@@ -113,6 +113,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
+      $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
@@ -193,7 +194,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         function revertChangesAndExitEditMode() {
           dashboardState.resetState();
           const refreshUrl = dash.id ?
-            DashboardConstants.EXISTING_DASHBOARD_URL : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+            `${DashboardConstants.DASHBOARD_EDIT_PATH}/{{id}}` : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
           const refreshUrlOptions = dash.id ? { id: dash.id } : {};
           kbnUrl.change(refreshUrl, refreshUrlOptions);
           // This is only necessary for new dashboards, which will default to Edit mode.
@@ -232,7 +233,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
             notify.info(`Saved Dashboard as "${dash.title}"`);
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(
-                `${DashboardConstants.EXISTING_DASHBOARD_URL}`,
+                `${DashboardConstants.DASHBOARD_EDIT_PATH}/{{id}}`,
                 { id: dash.id });
             } else {
               docTitle.change(dash.lastSavedTitle);
