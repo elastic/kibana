@@ -4,7 +4,7 @@ import mappings from './mappings.json';
 
 module.exports = function (server) {
   //var config = server.config();
-  server.plugins.elasticsearch.registerMappings(mappings);
+  server.plugins.elasticsearch.mappings.register(mappings);
   require('./server/routes/run.js')(server);
   require('./server/routes/functions.js')(server);
   require('./server/routes/validate_es.js')(server);

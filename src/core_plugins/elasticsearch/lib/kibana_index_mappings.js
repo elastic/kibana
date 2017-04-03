@@ -1,24 +1,36 @@
-const currentMappings = {
-  '_default_': {
-    'dynamic': 'strict'
-  },
-  config: {
-    dynamic: true,
-    properties: {
-      buildNum: {
-        type: 'keyword'
+import _ from 'lodash';
+
+class KibanaMappings {
+  constructor(plugin) {
+    this._plugin = plugin;
+    this._defaultMappings = {
+      '_default_': {
+        'dynamic': 'strict'
+      },
+      config: {
+        dynamic: true,
+        properties: {
+          buildNum: {
+            type: 'keyword'
+          }
+        }
+      },
+    };
+    this._currentMappings = _.cloneDeep(this._defaultMappings);
+  }
+
+  getCombined = () => {
+    return this._currentMappings;
+  }
+
+  register = (newMappings) => {
+    Object.keys(this._currentMappings).forEach(key => {
+      if (newMappings.hasOwnProperty(key)) {
+        this._plugin.status.red(`Mappings for ${key} have already been defined`);
       }
-    }
-  },
-};
-
-export function assignMappings(newMappings) {
-  Object.keys(currentMappings).forEach(function (key) {
-    if (newMappings.hasOwnProperty(key)) throw new Error(`Mappings for ${key} have already been defined`);
-  });
-  Object.assign(currentMappings, newMappings);
+    });
+    Object.assign(this._currentMappings, newMappings);
+  }
 }
 
-export function getMappings() {
-  return currentMappings;
-}
+export { KibanaMappings };

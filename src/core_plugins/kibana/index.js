@@ -150,7 +150,7 @@ module.exports = function (kibana) {
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
 
-      server.plugins.elasticsearch.registerMappings(mappings);
+      server.plugins.elasticsearch.mappings.register(mappings);
     }
   });
 };

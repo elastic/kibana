@@ -1,10 +1,9 @@
 import upgrade from './upgrade_config';
-import { getMappings } from './kibana_index_mappings';
 
 module.exports = function (server) {
   const config = server.config();
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-
+  const { getCombined } = server.plugins.elasticsearch.mappings;
   const options =  {
     index: config.get('kibana.index'),
     type: 'config',
@@ -14,7 +13,7 @@ module.exports = function (server) {
         {
           buildNum: {
             order: 'desc',
-            unmapped_type: getMappings().config.properties.buildNum.type
+            unmapped_type: getCombined().config.properties.buildNum.type
           }
         }
       ]
