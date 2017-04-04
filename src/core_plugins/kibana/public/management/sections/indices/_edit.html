@@ -14,11 +14,9 @@
       ></kbn-management-index-header>
 
       <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
-        <kbn-tooltip text="Index pattern is time-based">
-          <span class="label label-info">
-            <i class="fa fa-clock-o"></i> Field: {{indexPattern.timeFieldName}}
-          </span>
-        </kbn-tooltip>
+        <span class="label label-success">
+          <i class="fa fa-clock-o"></i> Configured time field: {{indexPattern.timeFieldName}}
+        </span>
       </p>
 
       <p class="kuiText kuiVerticalRhythm">
