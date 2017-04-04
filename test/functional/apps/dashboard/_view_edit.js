@@ -38,17 +38,21 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // Panel expand should also be shown in view mode, but only on mouse hover.
-    it('panel expand control shown in edit mode', async function () {
-      await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-      const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
-      expect(expandExists).to.equal(true);
+    describe('panel expand control', function () {
+      it('shown in edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
+        expect(expandExists).to.equal(true);
+      });
     });
 
-    it('save auto exits out of edit mode', async function () {
-      await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-      await PageObjects.dashboard.saveDashboard(dashboardName);
-      const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-      expect(isViewMode).to.equal(true);
+    describe('save', function () {
+      it('auto exits out of edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await PageObjects.dashboard.saveDashboard(dashboardName);
+        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        expect(isViewMode).to.equal(true);
+      });
     });
 
     describe('panel edit controls', function () {

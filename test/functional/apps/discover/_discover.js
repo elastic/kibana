@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
         await verifyChartData(expectedBarChartData);
       });
 
-      it('should show Auto chart interval of Auto', async function () {
+      it('should show Auto chart interval', async function () {
         const expectedChartInterval = 'Auto';
 
         const actualInterval = await PageObjects.discover.getChartInterval();

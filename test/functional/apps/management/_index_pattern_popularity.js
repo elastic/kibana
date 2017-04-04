@@ -27,80 +27,53 @@ export default function ({ getService, getPageObjects }) {
 
       // set the page size to All again, https://github.com/elastic/kibana/issues/5030
       // TODO: remove this after issue #5030 is closed
-      function fix5030() {
-        return PageObjects.settings.setPageSize('All')
-        .then(function () {
-          return PageObjects.common.sleep(1000);
-        });
+      async function fix5030() {
+        await PageObjects.settings.setPageSize('All');
+        await PageObjects.common.sleep(1000);
       }
 
-      beforeEach(function () {
+      beforeEach(async function () {
         // increase Popularity of geo.coordinates
-        return PageObjects.settings.setPageSize('All')
-        .then(function () {
-          return PageObjects.common.sleep(1000);
-        })
-        .then(function openControlsByName() {
-          log.debug('Starting openControlsByName (' + fieldName + ')');
-          return PageObjects.settings.openControlsByName(fieldName);
-        })
-        .then(function increasePopularity() {
-          log.debug('increasePopularity');
-          return PageObjects.settings.increasePopularity();
-        });
+        await PageObjects.settings.setPageSize('All');
+        await PageObjects.common.sleep(1000);
+        log.debug('Starting openControlsByName (' + fieldName + ')');
+        await PageObjects.settings.openControlsByName(fieldName);
+        log.debug('increasePopularity');
+        await PageObjects.settings.increasePopularity();
       });
 
-      afterEach(function () {
+      afterEach(async function () {
         // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
-        return PageObjects.settings.controlChangeCancel();
+        await PageObjects.settings.controlChangeCancel();
       });
 
-      it('should update the popularity input', function () {
-        return PageObjects.settings.getPopularity()
-        .then(function (popularity) {
-          log.debug('popularity = ' + popularity);
-          expect(popularity).to.be('1');
-          PageObjects.common.saveScreenshot('Settings-indices-result-popularity-updated');
-        });
+      it('should update the popularity input', async function () {
+        const popularity = await PageObjects.settings.getPopularity();
+        log.debug('popularity = ' + popularity);
+        expect(popularity).to.be('1');
+        PageObjects.common.saveScreenshot('Settings-indices-result-popularity-updated');
       });
 
-      it('should be reset on cancel', function () {
+      it('should be reset on cancel', async function () {
         // Cancel saving the popularity change
-        return PageObjects.settings.controlChangeCancel()
-        .then(function () {
-          return fix5030();
-        })
-        .then(function openControlsByName() {
-          return PageObjects.settings.openControlsByName(fieldName);
-        })
-        // check that its 0 (previous increase was cancelled)
-        .then(function getPopularity() {
-          return PageObjects.settings.getPopularity();
-        })
-        .then(function (popularity) {
-          log.debug('popularity = ' + popularity);
-          expect(popularity).to.be('0');
-        });
+        await PageObjects.settings.controlChangeCancel();
+        await fix5030();
+        await PageObjects.settings.openControlsByName(fieldName);
+        // check that it is 0 (previous increase was cancelled
+        const popularity = await PageObjects.settings.getPopularity();
+        log.debug('popularity = ' + popularity);
+        expect(popularity).to.be('0');
       });
 
-      it('can be saved', function () {
+      it('can be saved', async function () {
         // Saving the popularity change
-        return PageObjects.settings.controlChangeSave()
-        .then(function () {
-          return fix5030();
-        })
-        .then(function openControlsByName() {
-          return PageObjects.settings.openControlsByName(fieldName);
-        })
-        // check that its 0 (previous increase was cancelled)
-        .then(function getPopularity() {
-          return PageObjects.settings.getPopularity();
-        })
-        .then(function (popularity) {
-          log.debug('popularity = ' + popularity);
-          expect(popularity).to.be('1');
-          PageObjects.common.saveScreenshot('Settings-indices-result-popularity-saved');
-        });
+        await PageObjects.settings.controlChangeSave();
+        await fix5030();
+        await PageObjects.settings.openControlsByName(fieldName);
+        const popularity = await PageObjects.settings.getPopularity();
+        log.debug('popularity = ' + popularity);
+        expect(popularity).to.be('1');
+        PageObjects.common.saveScreenshot('Settings-indices-result-popularity-saved');
       });
     }); // end 'change popularity'
   }); // end index result popularity

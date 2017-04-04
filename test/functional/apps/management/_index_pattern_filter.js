@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndicies();
       await PageObjects.settings.getFieldTypes();
 
-
       await PageObjects.settings.setFieldTypeFilter('string');
 
       await retry.try(async function() {
