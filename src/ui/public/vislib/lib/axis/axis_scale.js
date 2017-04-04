@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import moment from 'moment';
-import errors from 'ui/errors';
+import { InvalidLogScaleValues } from 'ui/errors';
 
 export default function AxisScaleFactory() {
   class AxisScale {
@@ -148,7 +148,7 @@ export default function AxisScaleFactory() {
     }
 
     throwLogScaleValuesError() {
-      throw new errors.InvalidLogScaleValues();
+      throw new InvalidLogScaleValues();
     }
 
     logDomain(min, max) {

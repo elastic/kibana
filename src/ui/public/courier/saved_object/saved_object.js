@@ -12,7 +12,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import errors from 'ui/errors';
+import { SavedObjectNotFound } from 'ui/errors';
 import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
@@ -211,7 +211,7 @@ export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
 
-      if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(esType, this.id);
+      if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
