@@ -148,4 +148,8 @@ export function DashboardListingController($injector, $scope) {
   this.getUrlForItem = function getUrlForItem(item) {
     return `#${DashboardConstants.DASHBOARD_EDIT_PATH}/${item.id}`;
   };
+
+  this.getCreateDashboardHref = function getCreateDashboardHref() {
+    return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+  };
 }
