@@ -6,7 +6,7 @@ import AxisTitleProvider from './axis_title';
 import AxisLabelsProvider from './axis_labels';
 import AxisScaleProvider from './axis_scale';
 import AxisConfigProvider from './axis_config';
-import errors from 'ui/errors';
+import { VislibError } from 'ui/errors';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
@@ -162,7 +162,7 @@ export default function AxisFactory(Private) {
 
     validate() {
       if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
-        throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
+        throw new VislibError(`Can't mix percentage mode with log scale.`);
       }
     }
 

@@ -1,229 +1,226 @@
-import _ from 'lodash';
 import angular from 'angular';
+import _ from 'lodash';
 
 const canStack = (function () {
   const err = new Error();
   return !!err.stack;
 }());
 
-const errors = {};
-
 // abstract error class
-function KbnError(msg, constructor) {
-  this.message = msg;
+export class KbnError {
+  constructor(msg, constructor) {
+    this.message = msg;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, constructor || KbnError);
+    } else if (canStack) {
+      this.stack = (new Error()).stack;
+    } else {
+      this.stack = '';
+    }
+  }
 
-  Error.call(this, this.message);
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, constructor || KbnError);
-  } else if (canStack) {
-    this.stack = (new Error()).stack;
-  } else {
-    this.stack = '';
+  /**
+   * If the error permits, propagate the error to be rendered on screen
+   */
+  displayToScreen() {
+    throw this;
   }
 }
-errors.KbnError = KbnError;
+// Note, you can't extend the built in Error class:
+// http://stackoverflow.com/questions/33870684/why-doesnt-instanceof-work-on-instances-of-error-subclasses-under-babel-node
+// Hence we are inheriting from it this way, instead of using extends Error, and this will then preserve
+// instanceof checks.
 _.class(KbnError).inherits(Error);
-
-/**
- * If the error permits, propagate the error to be rendered on screen
- * @param handler the handlers that can render the error message to the screen.
- */
-KbnError.prototype.displayToScreen = function () {
-  throw this;
-};
-
-/**
- * HastyRefresh error class
- * @param {String} [msg] - An error message that will probably end up in a log.
- */
-errors.HastyRefresh = function HastyRefresh() {
-  KbnError.call(this,
-    'Courier attempted to start a query before the previous had finished.',
-    errors.HastyRefresh);
-};
-_.class(errors.HastyRefresh).inherits(KbnError);
 
 /**
  * SearchTimeout error class
  */
-errors.SearchTimeout = function SearchTimeout() {
-  KbnError.call(this,
-    'All or part of your request has timed out. The data shown may be incomplete.',
-    errors.SearchTimeout);
-};
-_.class(errors.SearchTimeout).inherits(KbnError);
+export class SearchTimeout extends KbnError {
+  constructor() {
+    super('All or part of your request has timed out. The data shown may be incomplete.',
+          SearchTimeout);
+  }
+}
 
 /**
  * Request Failure - When an entire mutli request fails
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
-errors.RequestFailure = function RequestFailure(err, resp) {
-  err = err || false;
+export class RequestFailure extends KbnError {
+  constructor(err, resp) {
+    err = err || false;
+    super('Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
+          RequestFailure);
 
-  KbnError.call(this,
-    'Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
-    errors.RequestFailure);
-
-  this.origError = err;
-  this.resp = resp;
-};
-_.class(errors.RequestFailure).inherits(KbnError);
+    this.origError = err;
+    this.resp = resp;
+  }
+}
 
 /**
  * FetchFailure Error - when there is an error getting a doc or search within
  *  a multi-response response body
- * @param {String} [msg] - An error message that will probably end up in a log.
+ * @param {Object} resp - The response from es.
  */
-errors.FetchFailure = function FetchFailure(resp) {
-  KbnError.call(this,
-    'Failed to get the doc: ' + angular.toJson(resp),
-    errors.FetchFailure);
+export class FetchFailure extends KbnError {
+  constructor(resp) {
+    super(
+      'Failed to get the doc: ' + angular.toJson(resp),
+      FetchFailure);
 
-  this.resp = resp;
-};
-_.class(errors.FetchFailure).inherits(KbnError);
+    this.resp = resp;
+  }
+}
 
 /**
  * ShardFailure Error - when one or more shards fail
- * @param {String} [msg] - An error message that will probably end up in a log.
+ * @param {Object} resp - The response from es.
  */
-errors.ShardFailure = function ShardFailure(resp) {
-  KbnError.call(this, resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
-    errors.ShardFailure);
+export class ShardFailure extends KbnError {
+  constructor(resp) {
+    super(
+      resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+      ShardFailure);
 
-  this.resp = resp;
-};
-_.class(errors.ShardFailure).inherits(KbnError);
-
+    this.resp = resp;
+  }
+}
 
 /**
  * A doc was re-indexed but it was out of date.
  * @param {Object} resp - The response from es (one of the multi-response responses).
  */
-errors.VersionConflict = function VersionConflict(resp) {
-  KbnError.call(this,
-    'Failed to store document changes do to a version conflict.',
-    errors.VersionConflict);
+export class VersionConflict extends KbnError {
+  constructor(resp) {
+    super(
+      'Failed to store document changes do to a version conflict.',
+      VersionConflict);
 
-  this.resp = resp;
-};
-_.class(errors.VersionConflict).inherits(KbnError);
-
+    this.resp = resp;
+  }
+}
 
 /**
  * there was a conflict storing a doc
  * @param {String} field - the fields which contains the conflict
  */
-errors.MappingConflict = function MappingConflict(field) {
-  KbnError.call(this,
-    'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
-    errors.MappingConflict);
-};
-_.class(errors.MappingConflict).inherits(KbnError);
+export class MappingConflict extends KbnError {
+  constructor(field) {
+    super(
+      'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
+      MappingConflict);
+  }
+}
 
 /**
  * a field mapping was using a restricted fields name
  * @param {String} field - the fields which contains the conflict
  */
-errors.RestrictedMapping = function RestrictedMapping(field, index) {
-  let msg = field + ' is a restricted field name';
-  if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
+export class RestrictedMapping extends KbnError {
+  constructor(field, index) {
+    let msg = field + ' is a restricted field name';
+    if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
 
-  KbnError.call(this, msg, errors.RestrictedMapping);
-};
-_.class(errors.RestrictedMapping).inherits(KbnError);
+    super(msg, RestrictedMapping);
+  }
+}
 
 /**
  * a non-critical cache write to elasticseach failed
  */
-errors.CacheWriteFailure = function CacheWriteFailure() {
-  KbnError.call(this,
-    'A Elasticsearch cache write has failed.',
-    errors.CacheWriteFailure);
-};
-_.class(errors.CacheWriteFailure).inherits(KbnError);
+export class CacheWriteFailure extends KbnError {
+  constructor() {
+    super(
+      'A Elasticsearch cache write has failed.',
+      CacheWriteFailure);
+  }
+}
 
 /**
  * when a field mapping is requested for an unknown field
  * @param {String} name - the field name
  */
-errors.FieldNotFoundInCache = function FieldNotFoundInCache(name) {
-  KbnError.call(this,
-    'The ' + name + ' field was not found in the cached mappings',
-    errors.FieldNotFoundInCache);
-};
-_.class(errors.FieldNotFoundInCache).inherits(KbnError);
+export class FieldNotFoundInCache extends KbnError {
+  constructor(name) {
+    super(
+      'The ' + name + ' field was not found in the cached mappings',
+      FieldNotFoundInCache);
+  }
+}
 
 /**
  * when a mapping already exists for a field the user is attempting to add
  * @param {String} name - the field name
  */
-errors.DuplicateField = function DuplicateField(name) {
-  KbnError.call(this,
-    'The "' + name + '" field already exists in this mapping',
-    errors.DuplicateField);
-};
-_.class(errors.DuplicateField).inherits(KbnError);
+export class DuplicateField extends KbnError {
+  constructor(name) {
+    super(
+      'The "' + name + '" field already exists in this mapping',
+      DuplicateField);
+  }
+}
 
 /**
  * A saved object was not found
- * @param {String} field - the fields which contains the conflict
  */
-errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
-  this.savedObjectType = type;
-  this.savedObjectId = id;
-  const idMsg = id ? ' (id: ' + id + ')' : '';
-  KbnError.call(this,
-    'Could not locate that ' + type + idMsg,
-    errors.SavedObjectNotFound);
-};
-_.class(errors.SavedObjectNotFound).inherits(KbnError);
+export class SavedObjectNotFound extends KbnError {
+  constructor(type, id) {
+    const idMsg = id ? ' (id: ' + id + ')' : '';
+    super(
+      'Could not locate that ' + type + idMsg,
+      SavedObjectNotFound);
+
+    this.savedObjectType = type;
+    this.savedObjectId = id;
+  }
+}
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-errors.IndexPatternMissingIndices = function IndexPatternMissingIndices() {
-  KbnError.call(this,
-    'IndexPattern\'s configured pattern does not match any indices',
-    errors.IndexPatternMissingIndices);
-};
-_.class(errors.IndexPatternMissingIndices).inherits(KbnError);
+export class IndexPatternMissingIndices extends KbnError {
+  constructor() {
+    super(
+      'IndexPattern\'s configured pattern does not match any indices',
+      IndexPatternMissingIndices);
+  }
+}
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-errors.NoDefinedIndexPatterns = function NoDefinedIndexPatterns() {
-  KbnError.call(this,
-    'Define at least one index pattern to continue',
-    errors.NoDefinedIndexPatterns);
-};
-_.class(errors.NoDefinedIndexPatterns).inherits(KbnError);
-
+export class NoDefinedIndexPatterns extends KbnError {
+  constructor() {
+    super(
+      'Define at least one index pattern to continue',
+      NoDefinedIndexPatterns);
+  }
+}
 
 /**
  * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
  */
-errors.NoDefaultIndexPattern = function NoDefaultIndexPattern() {
-  KbnError.call(this,
-    'Please specify a default index pattern',
-    errors.NoDefaultIndexPattern);
-};
-_.class(errors.NoDefaultIndexPattern).inherits(KbnError);
+export class NoDefaultIndexPattern extends KbnError {
+  constructor() {
+    super(
+      'Please specify a default index pattern',
+      NoDefaultIndexPattern);
+  }
+}
 
-
-errors.PersistedStateError = function PersistedStateError() {
-  KbnError.call(this,
-  'This container is too small to render the visualization',
-  errors.ContainerTooSmall);
-};
-_.class(errors.PersistedStateError).inherits(KbnError);
-
+export class PersistedStateError extends KbnError {
+  constructor() {
+    super(
+      'Error with the persisted state',
+      PersistedStateError);
+  }
+}
 
 /**
  * UI Errors
  */
-errors.VislibError = class VislibError extends KbnError {
+export class VislibError extends KbnError {
   constructor(message) {
     super(message);
   }
@@ -231,62 +228,51 @@ errors.VislibError = class VislibError extends KbnError {
   displayToScreen(handler) {
     handler.error(this.message);
   }
-};
+}
 
-
-errors.ContainerTooSmall = class ContainerTooSmall extends errors.VislibError {
+export class ContainerTooSmall extends VislibError {
   constructor() {
     super('This container is too small to render the visualization');
   }
-};
+}
 
-errors.InvalidWiggleSelection = class InvalidWiggleSelection extends errors.VislibError {
+export class InvalidWiggleSelection extends VislibError {
   constructor() {
     super('In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.');
   }
-};
+}
 
-
-errors.PieContainsAllZeros = class PieContainsAllZeros extends errors.VislibError {
+export class PieContainsAllZeros extends VislibError {
   constructor() {
     super('No results displayed because all values equal 0.');
   }
-};
+}
 
-
-errors.InvalidLogScaleValues = class InvalidLogScaleValues extends errors.VislibError {
+export class InvalidLogScaleValues extends VislibError {
   constructor() {
     super('Values less than 1 cannot be displayed on a log scale');
   }
-};
+}
 
-
-errors.StackedBarChartConfig = class StackedBarChartConfig extends errors.VislibError {
+export class StackedBarChartConfig extends VislibError {
   constructor(message) {
     super(message);
   }
-};
+}
 
 /**
  * error thrown when user tries to render an chart with less
  * than the required number of data points
  * @param {String} message - the message to provide with the error
  */
-errors.NotEnoughData = class NotEnoughData extends errors.VislibError {
+export class NotEnoughData extends VislibError {
   constructor(message) {
     super(message);
   }
-};
+}
 
-errors.NoResults = class NoResults extends errors.VislibError {
+export class NoResults extends VislibError {
   constructor() {
     super('No results found');
   }
-};
-
-
-
-
-
-
-export default errors;
+}
