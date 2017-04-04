@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
+import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
 
 describe('Geohash Agg', function () {
 
