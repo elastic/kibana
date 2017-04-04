@@ -11,7 +11,7 @@ describe('Color Format', function () {
     ColorFormat = fieldFormats.getType('color');
   }));
 
-  context('field is a number', () => {
+  describe('field is a number', () => {
     it('should add colors if the value is in range', function () {
       const colorer = new ColorFormat({
         fieldType: 'number',
@@ -40,7 +40,7 @@ describe('Color Format', function () {
     });
   });
 
-  context('field is a string', () => {
+  describe('field is a string', () => {
     it('should add colors if the regex matches', function () {
       const colorer = new ColorFormat({
         fieldType: 'string',

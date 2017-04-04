@@ -26,7 +26,7 @@ describe('plugins/elasticsearch', function () {
         return compact([basePath, path]).join('.');
       };
 
-      context(getKey('ssl.verificationMode'), function () {
+      describe(getKey('ssl.verificationMode'), function () {
         let settings;
         let sslSettings;
 
