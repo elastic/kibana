@@ -71,11 +71,11 @@ $tableCellPadding: 7px 8px 8px;
   }
 }
 
-.kuiTableRow--isDeleted {
+.kuiTableRow-isDeleted {
   background: lighten($errorColor, 35%);
 }
 
-.kuiTableRow--isNew {
+.kuiTableRow-isNew {
   background: lighten($successColor, 70%);
 }
 

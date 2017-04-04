@@ -1894,10 +1894,10 @@ body {
   .kuiTableRow:hover .kuiTableRowHoverReveal {
     display: inline-block; }
 
-.kuiTableRow--isDeleted {
+.kuiTableRow-isDeleted {
   background: #f9e5e3; }
 
-.kuiTableRow--isNew {
+.kuiTableRow-isNew {
   background: #f1fee1; }
 
 .kuiTableRowHoverReveal {
