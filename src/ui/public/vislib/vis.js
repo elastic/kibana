@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import Binder from 'ui/binder';
-import errors from 'ui/errors';
+import { KbnError } from 'ui/errors';
 import EventsProvider from 'ui/events';
 import './styles/main.less';
 import VislibLibResizeCheckerProvider from './lib/resize_checker';
@@ -110,7 +110,7 @@ export default function VisFactory(Private) {
         this.handler[method]();
       } catch (error) {
 
-        if (error instanceof errors.KbnError) {
+        if (error instanceof KbnError) {
           error.displayToScreen(this.handler);
         } else {
           throw error;

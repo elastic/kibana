@@ -221,9 +221,8 @@ export default class DashboardPage {
   }
 
   clickDashboardByLinkText(dashName) {
-    return this.findTimeout
-    .findByLinkText(dashName)
-    .click();
+    PageObjects.common.debug('clickDashboardByLinkText: ' + dashName);
+    return PageObjects.common.try(() => this.findTimeout.findByLinkText(dashName).click());
   }
 
   async searchForDashboardWithName(dashName) {

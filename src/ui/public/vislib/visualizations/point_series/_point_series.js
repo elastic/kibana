@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
+import { InvalidLogScaleValues, NotEnoughData } from 'ui/errors';
 
 export default function PointSeriesProvider() {
 
@@ -17,7 +17,7 @@ export default function PointSeriesProvider() {
     validateDataCompliesWithScalingMethod(data) {
       const invalidLogScale = data.values && data.values.some(d => d.y < 1);
       if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
-        throw new errors.InvalidLogScaleValues();
+        throw new InvalidLogScaleValues();
       }
     }
 
@@ -96,7 +96,7 @@ export default function PointSeriesProvider() {
       const notEnoughData = this.chartData.values.length < 2;
 
       if (notEnoughData) {
-        throw new errors.NotEnoughData(message);
+        throw new NotEnoughData(message);
       }
     }
   }
