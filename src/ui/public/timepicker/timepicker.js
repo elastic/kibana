@@ -121,13 +121,13 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       $scope.checkRelative = function () {
         const from = dateMath.parse(getRelativeString('from'));
-        const to = dateMath.parse(getRelativeString('to'));
+        const to = dateMath.parse(getRelativeString('to', true));
         return to.isBefore(from);
       };
 
       $scope.formatRelative = function (key) {
         const relativeString = getRelativeString(key);
-        const parsed = dateMath.parse(relativeString);
+        const parsed = dateMath.parse(relativeString, key === 'to');
         let preview;
         if (relativeString === 'now') {
           preview = 'Now';
