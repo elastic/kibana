@@ -69,15 +69,16 @@ $tableCellPadding: 7px 8px 8px;
       display: inline-block;
     }
   }
+
+  &.kuiTableRow-isNew {
+    background: lighten($successColor, 70%);
+  }
+
+  &.kuiTableRow-isBeingDeleted {
+    background: lighten($errorColor, 35%);
+  }
 }
 
-.kuiTableRow-isBeingDeleted {
-  background: lighten($errorColor, 35%);
-}
-
-.kuiTableRow-isNew {
-  background: lighten($successColor, 70%);
-}
 
 .kuiTableRowHoverReveal {
   display: none;
