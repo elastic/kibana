@@ -30,7 +30,7 @@ describe('ui/modals/confirm_modal_promise', function () {
     }
   });
 
-  context('before timeout completes', function () {
+  describe('before timeout completes', function () {
     it('returned promise is not resolved', function () {
       const callback = sinon.spy();
       promise.then(callback, callback);
@@ -39,7 +39,7 @@ describe('ui/modals/confirm_modal_promise', function () {
     });
   });
 
-  context('after timeout completes', function () {
+  describe('after timeout completes', function () {
     it('confirmation dialogue is loaded to dom with message', function () {
       $rootScope.$digest();
       const confirmModalElement = angular.element(document.body).find('[data-test-subj=confirmModal]');
@@ -50,7 +50,7 @@ describe('ui/modals/confirm_modal_promise', function () {
       expect(htmlString.indexOf(message)).to.be.greaterThan(0);
     });
 
-    context('when confirmed', function () {
+    describe('when confirmed', function () {
       it('promise is fulfilled with true', function () {
         const confirmCallback = sinon.spy();
         const cancelCallback = sinon.spy();
@@ -66,7 +66,7 @@ describe('ui/modals/confirm_modal_promise', function () {
       });
     });
 
-    context('when canceled', function () {
+    describe('when canceled', function () {
       it('promise is rejected with false', function () {
         const confirmCallback = sinon.spy();
         const cancelCallback = sinon.spy();
@@ -82,7 +82,7 @@ describe('ui/modals/confirm_modal_promise', function () {
       });
     });
 
-    context('error is thrown', function () {
+    describe('error is thrown', function () {
       it('when no confirm button text is used', function () {
         try {
           confirmModalPromise(message);

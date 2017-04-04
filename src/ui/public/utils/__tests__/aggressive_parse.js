@@ -37,7 +37,7 @@ describe('aggressiveParse', () => {
       expect(_.has(result, 'another.level.$deep')).to.be(false);
     });
 
-    context('with arity of 2', () => {
+    describe('with arity of 2', () => {
       beforeEach(() => {
         result = aggressiveParse.toJson(object, jsonFn);
         result = JSON.parse(result);
@@ -56,7 +56,7 @@ describe('aggressiveParse', () => {
       });
     });
 
-    context('with arity of 3', () => {
+    describe('with arity of 3', () => {
       beforeEach(() => {
         result = aggressiveParse.toJson({ foo: 'bar' }, undefined, 2);
       });

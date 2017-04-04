@@ -420,13 +420,13 @@ describe('Notifier', function () {
   }
 
   function testVersionInfo(fnName) {
-    context('when version is configured', function () {
+    describe('when version is configured', function () {
       it('adds version to notification', function () {
         const notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
-    context('when build number is configured', function () {
+    describe('when build number is configured', function () {
       it('adds buildNum to notification', function () {
         const notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);

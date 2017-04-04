@@ -231,7 +231,7 @@ describe('State Management', function () {
       expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify(obj));
     });
 
-    context('error handling', () => {
+    describe('error handling', () => {
       it('notifies the user when a hash value does not map to a stored value', () => {
         const { state, notifier } = setup({ storeInHash: true });
         const search = $location.search();
