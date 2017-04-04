@@ -123,7 +123,8 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.checkRelative = function () {
         const from = dateMath.parse(getRelativeString('from'));
         const to = dateMath.parse(getRelativeString('to', true));
-        return to.isBefore(from);
+        if (to && from) return to.isBefore(from);
+        return true;
       };
 
       $scope.formatRelative = function (key) {
@@ -147,10 +148,16 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       function getRelativeString(key) {
-        if (_.get($scope, `relative.${key}.count`) === 0 && key === 'to') return 'now';
-        let result = 'now-' + _.get($scope, `relative.${key}.count`);
-        result += _.get($scope, `relative.${key}.unit`);
-        result += (_.get($scope, `relative.${key}.round`) ? '/' + _.get($scope, `relative.${key}.unit`) : '');
+        const count = _.get($scope, `relative.${key}.count`);
+        const round = _.get($scope, `relative.${key}.round`);
+        const matches = _.get($scope, `relative.${key}.unit`).match(/([smhdwMy])(\+)?/);
+        let unit;
+        let operator = '-';
+        if (matches && matches[1]) unit = matches[1];
+        if (matches && matches[2]) operator = matches[2];
+        if (count === 0 && key === 'to') return 'now';
+        let result = `now${operator}${count}${unit}`;
+        result += (round ? '/' + unit : '');
         return result;
       }
 

@@ -5,26 +5,23 @@ import { relativeOptions } from './relative_options';
 
 export function parseRelativeString(part) {
   const results = {};
-  const parts = part.toString().split('-');
-  let relativeParts = [];
+  const matches = _.isString(part) && part.match(/now(([\-\+])([0-9]+)([smhdwMy])(\/[smhdwMy])?)?/);
 
-  if (parts[0] === 'now' && !parts[1]) {
+  if (matches && !matches[1]) {
     return { count: 0, unit: 's', round: false };
   }
 
-  if (parts[0] === 'now' && parts[1]) {
-    relativeParts = parts[1].match(/([0-9]+)([smhdwMy]).*/);
-  }
-
-  if (relativeParts[1] && relativeParts[2]) {
-    results.count = parseInt(relativeParts[1], 10);
-    results.unit = relativeParts[2];
-    results.round = (part.toString().split('/')[1]) ? true : false;
+  if (matches && matches[3] && matches[4]) {
+    results.count = parseInt(matches[3], 10);
+    results.unit = matches[4];
+    if (matches[2] === '+') results.unit += '+';
+    results.round = matches[5] ? true : false;
     return results;
 
   } else {
     const duration = moment.duration(moment().diff(dateMath.parse(part)));
-    const units = _.pluck(_.clone(relativeOptions).reverse(), 'value');
+    const units = _.pluck(_.clone(relativeOptions).reverse(), 'value')
+      .filter(s => /^[smhdwMy]$/.test(s));
     for (let i = 0; i < units.length; i++) {
       const as = duration.as(units[i]);
       if (as > 1) {

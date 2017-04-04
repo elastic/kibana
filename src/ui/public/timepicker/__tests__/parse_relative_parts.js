@@ -38,6 +38,21 @@ describe('parseRelativeParts(from, to, relativeOptions)', () => {
     });
   });
 
+  it('should parse now-2h to now+10m/m', () => {
+    expect(parseRelativeParts('now-2h', 'now+10m/m')).to.eql({
+      from: {
+        count: 2,
+        unit: 'h',
+        round: false
+      },
+      to: {
+        count: 10,
+        unit: 'm+',
+        round: true
+      }
+    });
+  });
+
   it('should parse 3 months ago to now', () => {
     expect(parseRelativeParts(moment().subtract(3, 'M'), moment())).to.eql({
       from: {
