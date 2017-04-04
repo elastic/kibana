@@ -7,7 +7,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
   const getRemote = () => (
     getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
+    .setFindTimeout(config.get('timeouts.find'))
   );
 
   class DiscoverPage {
@@ -128,12 +128,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     getChartInterval() {
       return testSubjects.find('discoverIntervalSelect')
-       .getProperty('value')
-       .then(selectedValue => {
-         return this.findTimeout
-         .findByCssSelector('option[value="' + selectedValue + '"]')
-         .getVisibleText();
-       });
+      .getProperty('value')
+      .then(selectedValue => {
+        return getRemote()
+        .findByCssSelector('option[value="' + selectedValue + '"]')
+        .getVisibleText();
+      });
     }
 
     setChartInterval(interval) {

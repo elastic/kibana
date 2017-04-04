@@ -33,16 +33,16 @@ export function TestSubjectsProvider({ getService }) {
       log.debug('in findTestSubject: ' + testSubjSelector(selector));
       let originalFindTimeout = null;
       return remote
-        .getFindTimeout()
-        .then((findTimeout) => originalFindTimeout = findTimeout)
-        .setFindTimeout(timeout)
-        .findDisplayedByCssSelector(testSubjSelector(selector))
-        .then(
-          (result) => remote.setFindTimeout(originalFindTimeout)
-            .finally(() => result),
-          (error) => remote.setFindTimeout(originalFindTimeout)
-            .finally(() => { throw error; }),
-        );
+      .getFindTimeout()
+      .then((findTimeout) => originalFindTimeout = findTimeout)
+      .setFindTimeout(timeout)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(
+        (result) => remote.setFindTimeout(originalFindTimeout)
+          .finally(() => result),
+        (error) => remote.setFindTimeout(originalFindTimeout)
+          .finally(() => { throw error; }),
+      );
     }
 
     async findAll(selector) {
