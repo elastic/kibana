@@ -65,7 +65,7 @@ describe('Vislib Color Module Test Suite', function () {
       }).to.throwError();
     });
 
-    context('when array is not composed of numbers, strings, or undefined values', function () {
+    describe('when array is not composed of numbers, strings, or undefined values', function () {
       it('should throw an error', function () {
         expect(function () {
           getColors(arrayOfObjects);
@@ -81,7 +81,7 @@ describe('Vislib Color Module Test Suite', function () {
       });
     });
 
-    context('when input is an array of strings, numbers, or undefined values', function () {
+    describe('when input is an array of strings, numbers, or undefined values', function () {
       it('should not throw an error', function () {
         expect(function () {
           getColors(arr);

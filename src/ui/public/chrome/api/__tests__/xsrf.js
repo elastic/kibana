@@ -17,14 +17,14 @@ describe('chrome xsrf apis', function () {
     });
   });
 
-  context('jQuery support', function () {
+  describe('jQuery support', function () {
     it('adds a global jQuery prefilter', function () {
       stub($, 'ajaxPrefilter');
       xsrfChromeApi({}, { version });
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
-    context('jQuery prefilter', function () {
+    describe('jQuery prefilter', function () {
       let prefilter;
 
       beforeEach(function () {
@@ -51,7 +51,7 @@ describe('chrome xsrf apis', function () {
       });
     });
 
-    context('Angular support', function () {
+    describe('Angular support', function () {
 
       let $http;
       let $httpBackend;
