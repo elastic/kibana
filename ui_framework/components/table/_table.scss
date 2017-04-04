@@ -71,7 +71,7 @@ $tableCellPadding: 7px 8px 8px;
   }
 }
 
-.kuiTableRow-isDeleted {
+.kuiTableRow-isBeingDeleted {
   background: lighten($errorColor, 35%);
 }
 
