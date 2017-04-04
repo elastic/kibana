@@ -38,6 +38,7 @@ export class GuideDemo extends Component {
   render() {
     const classes = classNames('guideDemo', {
       'guideDemo--fullScreen': this.props.isFullScreen,
+      'guideDemo--darkTheme': this.props.isDarkTheme,
       'theme-dark': this.props.isDarkTheme,
     });
 
