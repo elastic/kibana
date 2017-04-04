@@ -24,11 +24,11 @@ bdd.describe('visualize app', function describeIndexTests() {
         'Vertical Bar',
         'Data Table',
         'Metric',
-        'Markdown',
-        'Tag Cloud',
         'Tile Map',
         'Timelion',
-        'Visual Builder'
+        'Visual Builder',
+        'Markdown',
+        'Tag Cloud',
       ];
 
       // find all the chart types and make sure there all there
