@@ -33,7 +33,7 @@ describe('Console Proxy Route', () => {
 
   describe('params', () => {
     describe('pathFilters', () => {
-      context('no matches', () => {
+      describe('no matches', () => {
         it('rejects with 403', async () => {
           const { server } = setup();
           server.route(createProxyRoute({
@@ -51,7 +51,7 @@ describe('Console Proxy Route', () => {
           expect(statusCode).to.be(403);
         });
       });
-      context('one match', () => {
+      describe('one match', () => {
         it('allows the request', async () => {
           const { server } = setup();
           server.route(createProxyRoute({
@@ -70,7 +70,7 @@ describe('Console Proxy Route', () => {
           sinon.assert.calledOnce(Wreck.request);
         });
       });
-      context('all match', () => {
+      describe('all match', () => {
         it('allows the request', async () => {
           const { server } = setup();
           server.route(createProxyRoute({
@@ -147,14 +147,14 @@ describe('Console Proxy Route', () => {
     });
 
     describe('baseUrl', () => {
-      context('default', () => {
+      describe('default', () => {
         it('ensures that the path starts with a /');
       });
-      context('url ends with a slash', () => {
+      describe('url ends with a slash', () => {
         it('combines clean with paths that start with a slash');
         it(`combines clean with paths that don't start with a slash`);
       });
-      context(`url doesn't end with a slash`, () => {
+      describe(`url doesn't end with a slash`, () => {
         it('combines clean with paths that start with a slash');
         it(`combines clean with paths that don't start with a slash`);
       });

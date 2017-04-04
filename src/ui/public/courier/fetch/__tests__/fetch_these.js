@@ -36,7 +36,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
     requests = [ request ];
   }));
 
-  context('when request has not started', () => {
+  describe('when request has not started', () => {
     beforeEach(() => requests.forEach(req => req.started = false));
 
     it('starts request', () => {
@@ -63,7 +63,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
     });
   });
 
-  context('when request has already started', () => {
+  describe('when request has already started', () => {
     it('continues request', () => {
       fetchThese(requests);
       expect(request.start.called).to.be(false);
