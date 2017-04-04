@@ -117,6 +117,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       $scope.setRelativeToNow = function (key) {
         $scope.relative[key].count = 0;
+        $scope.relative[key].round = false;
       };
 
       $scope.checkRelative = function () {
