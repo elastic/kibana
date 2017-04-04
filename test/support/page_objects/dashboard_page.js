@@ -33,9 +33,14 @@ export default class DashboardPage {
    * @returns {Promise<boolean>}
    */
   async onDashboardLandingPage() {
-    PageObjects.common.debug(`onDashboardLandingPage`);
+    PageObjects.common.debug('onDashboardLandingPage');
     const exists = await PageObjects.common.doesCssSelectorExist('a[href="#/dashboard"]');
     return !exists;
+  }
+
+  async clickDashboardBreadcrumbLink() {
+    PageObjects.common.debug('clickDashboardBreadcrumbLink');
+    return PageObjects.common.try(() => PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click());
   }
 
   async gotoDashboardLandingPage() {
@@ -43,8 +48,7 @@ export default class DashboardPage {
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
       await PageObjects.common.try(async () => {
-        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
-        await goToDashboardLink.click();
+        await this.clickDashboardBreadcrumbLink();
         // Once the searchFilter can be found, we know the page finished loading.
         await PageObjects.common.findTestSubject('searchFilter');
       });
@@ -139,29 +143,22 @@ export default class DashboardPage {
       .click());
   }
 
-  addVisualization(vizName) {
-    return this.clickAddVisualization()
-    .then(() => {
-      PageObjects.common.debug('filter visualization (' + vizName + ')');
-      return this.filterVizNames(vizName);
-    })
+  async addVisualization(vizName) {
+    await this.clickAddVisualization();
+    PageObjects.common.debug('filter visualization (' + vizName + ')');
+    await this.filterVizNames(vizName);
     // this second wait is usually enough to avoid the
     // 'stale element reference: element is not attached to the page document'
     // on the next step
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(() => {
-      // but wrap in a try loop since it can still happen
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('click visualization (' + vizName + ')');
-        return this.clickVizNameLink(vizName);
-      });
-    })
-    // this second click of 'Add' collapses the Add Visualization pane
-    .then(() => {
-      return this.clickAddVisualization();
+    await PageObjects.common.sleep(1000);
+    // but wrap in a try loop since it can still happen
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('click visualization (' + vizName + ')');
+      return this.clickVizNameLink(vizName);
     });
+    await PageObjects.header.clickToastOK();
+    // this second click of 'Add' collapses the Add Visualization pane
+    await this.clickAddVisualization();
   }
 
   async renameDashboard(dashName) {

@@ -13,6 +13,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
   bdd.it('warns on duplicate name for new dashboard', async function() {
     await PageObjects.dashboard.clickNewDashboard();
     await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.header.clickToastOK();
 
     let isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
     expect(isConfirmOpen).to.equal(false);
@@ -38,6 +39,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
     await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
     await PageObjects.common.clickConfirmOnModal();
+    await PageObjects.header.clickToastOK();
 
     // This is important since saving a new dashboard will cause a refresh of the page.  We have to
     // wait till it finishes reloading or it might reload the url after simulating the
@@ -54,6 +56,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
       await PageObjects.header.isGlobalLoadingIndicatorHidden();
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.header.clickToastOK();
 
       const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isConfirmOpen).to.equal(false);
@@ -72,6 +75,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
 
   bdd.it('Does not warn when only the prefix matches', async function() {
     await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
+    await PageObjects.header.clickToastOK();
 
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
     expect(isConfirmOpen).to.equal(false);
@@ -85,5 +89,10 @@ bdd.describe('dashboard save', function describeIndexTests() {
     expect(isConfirmOpen).to.equal(true);
 
     await PageObjects.common.clickCancelOnModal();
+  });
+
+  // To avoid load errors in subsequent tests that refresh the index.
+  bdd.it('Finish each test on the landing page', async () => {
+    await PageObjects.dashboard.gotoDashboardLandingPage();
   });
 });

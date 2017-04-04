@@ -36,6 +36,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
   bdd.it('should save and load dashboard', async function saveAndLoadDashboard() {
     const dashboardName = 'Dashboard Test 1';
     await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.header.clickToastOK();
     await PageObjects.dashboard.gotoDashboardLandingPage();
 
     await PageObjects.common.try(function () {
@@ -80,47 +81,47 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         });
     });
   });
-});
 
-bdd.describe('filters', async function () {
-  bdd.it('are not selected by default', async function () {
-    const descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
-    expect(descriptions.length).to.equal(0);
-  });
-
-  bdd.it('are added when a pie chart slice is clicked', async function () {
-    await PageObjects.dashboard.filterOnPieSlice();
-    const descriptions = await PageObjects.dashboard.getFilterDescriptions();
-    expect(descriptions.length).to.equal(1);
-  });
-});
-
-bdd.it('retains dark theme in state', async function () {
-  await PageObjects.dashboard.clickEdit();
-  await PageObjects.dashboard.useDarkTheme(true);
-  await PageObjects.header.clickVisualize();
-  await PageObjects.header.clickDashboard();
-  const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
-  expect(isDarkThemeOn).to.equal(true);
-});
-
-bdd.it('should have data-shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
-  const visualizations = PageObjects.dashboard.getTestVisualizations();
-  return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
-    .then(function (count) {
-      PageObjects.common.log('data-shared-items-count = ' + count);
-      expect(count).to.eql(visualizations.length);
+  bdd.describe('filters', async function () {
+    bdd.it('are not selected by default', async function () {
+      const descriptions = await PageObjects.dashboard.getFilterDescriptions(1000);
+      expect(descriptions.length).to.equal(0);
     });
-});
 
-bdd.it('should have panels with expected data-shared-item title and description', function checkTitles() {
-  const visualizations = PageObjects.dashboard.getTestVisualizations();
-  return PageObjects.common.tryForTime(10000, function () {
-    return PageObjects.dashboard.getPanelSharedItemData()
-      .then(function (data) {
-        expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
-        expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+    bdd.it('are added when a pie chart slice is clicked', async function () {
+      await PageObjects.dashboard.filterOnPieSlice();
+      const descriptions = await PageObjects.dashboard.getFilterDescriptions();
+      expect(descriptions.length).to.equal(1);
+    });
+  });
+
+  bdd.it('retains dark theme in state', async function () {
+    await PageObjects.dashboard.clickEdit();
+    await PageObjects.dashboard.useDarkTheme(true);
+    await PageObjects.header.clickVisualize();
+    await PageObjects.header.clickDashboard();
+    const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
+    expect(isDarkThemeOn).to.equal(true);
+  });
+
+  bdd.it('should have data-shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
+      .then(function (count) {
+        PageObjects.common.log('data-shared-items-count = ' + count);
+        expect(count).to.eql(visualizations.length);
       });
+  });
+
+  bdd.it('should have panels with expected data-shared-item title and description', function checkTitles() {
+    const visualizations = PageObjects.dashboard.getTestVisualizations();
+    return PageObjects.common.tryForTime(10000, function () {
+      return PageObjects.dashboard.getPanelSharedItemData()
+        .then(function (data) {
+          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
+          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+        });
+    });
   });
 
   bdd.it('add new visualization link', async function checkTitles() {
@@ -129,6 +130,8 @@ bdd.it('should have panels with expected data-shared-item title and description'
     await PageObjects.visualize.clickAreaChart();
     await PageObjects.visualize.clickNewSearch();
     await PageObjects.visualize.saveVisualization('visualization from add new link');
+    await PageObjects.header.clickToastOK();
+    await PageObjects.header.clickToastOK();
 
     const visualizations = PageObjects.dashboard.getTestVisualizations();
     return PageObjects.common.tryForTime(10000, async function () {
@@ -137,5 +140,10 @@ bdd.it('should have panels with expected data-shared-item title and description'
       PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
       expect(panelTitles.length).to.eql(visualizations.length + 1);
     });
+  });
+
+  // To avoid load errors in subsequent tests that refresh the index.
+  bdd.it('Finish each test on the landing page', async () => {
+    await PageObjects.dashboard.gotoDashboardLandingPage();
   });
 });

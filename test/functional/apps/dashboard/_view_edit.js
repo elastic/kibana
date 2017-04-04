@@ -27,6 +27,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
     await PageObjects.dashboard.clickNewDashboard();
     await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
     await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.header.clickToastOK();
   });
 
   bdd.it('existing dashboard opens in view mode', async function () {
@@ -66,6 +67,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
     bdd.describe('on an expanded panel', function () {
       bdd.it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
         await PageObjects.dashboard.toggleExpandPanel();
 
         const editLinkExists = await PageObjects.common.doesTestSubjectExist('dashboardPanelEditLink');
@@ -101,6 +103,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
 
   bdd.it('save auto exits out of edit mode', async function () {
     await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.header.clickToastOK();
     const isViewMode = await PageObjects.dashboard.getIsInViewMode();
 
     expect(isViewMode).to.equal(true);
@@ -114,6 +117,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         const originalToTime = '2015-09-19 06:31:44.000';
         await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
 
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
@@ -150,6 +154,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
 
         // This may seem like a pointless line but there was a bug that only arose when the dashboard
         // was loaded initially
@@ -187,6 +192,8 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualization('new viz panel');
+        await PageObjects.header.clickToastOK();
+        await PageObjects.header.clickToastOK();
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -221,12 +228,14 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
         const newToTime = '2015-09-19 06:31:44.000';
         await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
+        await PageObjects.header.clickToastOK();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.clickCancelOnModal();
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -243,6 +252,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
     bdd.it('when time changed is not stored with dashboard', async function () {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+      await PageObjects.header.clickToastOK();
       await PageObjects.dashboard.clickEdit();
       await PageObjects.header.setAbsoluteRange('2013-10-19 06:31:44.000', '2013-12-19 06:31:44.000');
       await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -256,6 +266,7 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.filterOnPieSlice();
       await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.header.clickToastOK();
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -279,5 +290,10 @@ bdd.describe('dashboard view edit mode', function viewEditModeTests() {
       const query = await PageObjects.dashboard.getQuery();
       expect(query).to.equal(originalQuery);
     });
+  });
+
+  // To avoid load errors in subsequent tests that refresh the index.
+  bdd.it('Finish each test on the landing page', async () => {
+    await PageObjects.dashboard.gotoDashboardLandingPage();
   });
 });
