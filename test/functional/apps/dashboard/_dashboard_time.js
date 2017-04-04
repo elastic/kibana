@@ -74,13 +74,15 @@ export default function ({ getPageObjects }) {
     // when it's opened. However, if the user then changes the time, navigates to visualize, then navigates
     // back to dashboard, the overridden time should be preserved. The time is *only* reset on open, not
     // during navigation or page refreshes.
-    it('preserves time changes during navigation', async function () {
-      await PageObjects.header.setQuickTime('Today');
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
+    describe('time changes', function () {
+      it('preserved during navigation', async function () {
+        await PageObjects.header.setQuickTime('Today');
+        await PageObjects.header.clickVisualize();
+        await PageObjects.header.clickDashboard();
 
-      const prettyPrint = await PageObjects.header.getPrettyDuration();
-      expect(prettyPrint).to.equal('Today');
+        const prettyPrint = await PageObjects.header.getPrettyDuration();
+        expect(prettyPrint).to.equal('Today');
+      });
     });
   });
 }

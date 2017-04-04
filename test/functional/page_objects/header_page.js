@@ -46,7 +46,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     clickQuickButton() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByLinkText('Quick').click();
+      .findByLinkText('Quick').click();
     }
 
     isTimepickerOpen() {
@@ -64,37 +64,18 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    clickQuickButton() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByLinkText('Quick').click();
-    }
-
     async getFromTime() {
       await this.ensureTimePickerIsOpen();
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model=\'absolute.from\']')
-        .getProperty('value');
+      .findByCssSelector('input[ng-model=\'absolute.from\']')
+      .getProperty('value');
     }
 
     async getToTime() {
       await this.ensureTimePickerIsOpen();
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model=\'absolute.to\']')
-        .getProperty('value');
-    }
-
-    async getFromTime() {
-      await this.ensureTimePickerIsOpen();
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model=\'absolute.from\']')
-        .getProperty('value');
-    }
-
-    async getToTime() {
-      await this.ensureTimePickerIsOpen();
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model=\'absolute.to\']')
-        .getProperty('value');
+      .findByCssSelector('input[ng-model=\'absolute.to\']')
+      .getProperty('value');
     }
 
     setFromTime(timeString) {
@@ -119,29 +100,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       .then(function () {
         return self.waitUntilLoadingHasFinished();
       });
-    }
-
-    setAbsoluteRange(fromTime, toTime) {
-      log.debug('clickTimepicker');
-      return this.clickTimepicker()
-        .then(() => {
-          log.debug('--Clicking Absolute button');
-          return this.clickAbsoluteButton();
-        })
-        .then(() => {
-          log.debug('--Setting From Time : ' + fromTime);
-          return this.setFromTime(fromTime);
-        })
-        .then(() => {
-          log.debug('--Setting To Time : ' + toTime);
-          return this.setToTime(toTime);
-        })
-        .then(() => {
-          return this.clickGoButton();
-        })
-        .then(() => {
-          return this.waitUntilLoadingHasFinished();
-        });
     }
 
     async ensureTimePickerIsOpen() {
@@ -172,10 +130,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.clickQuickButton();
       await remote.setFindTimeout(defaultFindTimeout)
         .findByLinkText(quickTime).click();
-    }
-
-    async getPrettyDuration() {
-      return await PageObjects.common.findTestSubject('globalTimepickerRange').getVisibleText();
     }
 
     getToastMessage() {
@@ -215,23 +169,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     isGlobalLoadingIndicatorHidden() {
       return remote.setFindTimeout(defaultFindTimeout * 10)
       .findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
-    }
-
-    async ensureTimePickerIsOpen() {
-      const isOpen = await this.isTimepickerOpen();
-      log.debug(`time picker open: ${isOpen}`);
-      if (!isOpen) {
-        log.debug('--Opening time picker');
-        await this.clickTimepicker();
-      }
-    }
-
-    async setQuickTime(quickTime) {
-      await this.ensureTimePickerIsOpen();
-      log.debug('--Clicking Quick button');
-      await this.clickQuickButton();
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByLinkText(quickTime).click();
     }
 
     async getPrettyDuration() {
