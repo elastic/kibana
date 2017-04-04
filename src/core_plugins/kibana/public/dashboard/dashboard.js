@@ -37,7 +37,7 @@ uiRoutes
       dash: function (savedDashboards, courier) {
         return savedDashboards.get()
           .catch(courier.redirectWhenMissing({
-            'dashboard': '/dashboard'
+            'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
     }
@@ -48,7 +48,7 @@ uiRoutes
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
           .catch(courier.redirectWhenMissing({
-            'dashboard' : '/dashboard'
+            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
           }));
       }
     }
