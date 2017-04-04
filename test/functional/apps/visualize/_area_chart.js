@@ -106,40 +106,12 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct chart, take screenshot', function () {
-      const xAxisLabels = [
-        '2015-09-19 17:00',
-        '2015-09-20 17:00',
-        '2015-09-21 17:00',
-        '2015-09-22 17:00',
+      const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
+        '2015-09-22 00:00', '2015-09-23 00:00'
       ];
-
       const yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
-      const expectedAreaChartData = [
-        6,
-        62,
-        352,
-        999,
-        1519,
-        1170,
-        525,
-        117,
-        18,
-        69,
-        316,
-        933,
-        1479,
-        1202,
-        499,
-        93,
-        20,
-        58,
-        294,
-        958,
-        1507,
-        1145,
-        532,
-        118,
-        13,
+      const expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
+        683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
       ];
 
       return PageObjects.common.try(function tryingForTime() {
