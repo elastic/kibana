@@ -184,7 +184,7 @@ export class IndexPatternMissingIndices extends KbnError {
     const defaultMessage = 'IndexPattern\'s configured pattern does not match any indices';
 
     super(
-      message.length ? `No matching indices found: ${message}` : defaultMessage,
+      (message && message.length) ? `No matching indices found: ${message}` : defaultMessage,
       IndexPatternMissingIndices);
   }
 }
