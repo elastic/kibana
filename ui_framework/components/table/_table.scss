@@ -63,11 +63,20 @@ $tableCellPadding: 7px 8px 8px;
 }
 
 .kuiTableRow {
+  transition: background $globalAnimSlightResistance $globalAnimSpeedSlow;
   &:hover {
     .kuiTableRowHoverReveal {
       display: inline-block;
     }
   }
+}
+
+.kuiTableRow--isDeleted {
+  background: lighten($errorColor, 35%);
+}
+
+.kuiTableRow--isNew {
+  background: lighten($successColor, 70%);
 }
 
 .kuiTableRowHoverReveal {
