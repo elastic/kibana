@@ -1,12 +1,8 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideCode,
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
