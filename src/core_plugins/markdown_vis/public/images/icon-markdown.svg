@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="45px" viewBox="0 0 80 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-markdown</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-585.000000, -652.000000)" fill-rule="nonzero" fill="#000000">
+            <g id="other" transform="translate(555.000000, 576.000000)">
+                <g id="markdown" transform="translate(0.000000, 44.000000)">
+                    <g id="icon-markdown" transform="translate(30.000000, 32.000000)">
+                        <path d="M4.05063291,41.3265306 L75.9493671,41.3265306 L75.9493671,3.67346939 L4.05063291,3.67346939 L4.05063291,41.3265306 Z M80,0 L80,45 L0,45 L0,0 L80,0 Z" id="box"></path>
+                        <path d="M13,34.7189721 L13,10 L20.2213278,10 L27.4426555,19.0878574 L34.6639833,10 L41.885311,10 L41.885311,34.7189721 L34.6639833,34.7189721 L34.6639833,20.5419146 L27.4426555,29.629772 L20.2213278,20.5419146 L20.2213278,34.7189721 L13,34.7189721 Z M58.1332985,34.7189721 L47.3013069,22.7230004 L54.5226346,22.7230004 L54.5226346,10 L61.7439624,10 L61.7439624,22.7230004 L68.9652902,22.7230004 L58.1332985,34.7189721 Z" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

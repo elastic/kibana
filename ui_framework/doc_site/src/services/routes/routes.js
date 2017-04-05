@@ -30,6 +30,9 @@ import FormExample
 import FormLayoutExample
   from '../../views/form_layout/form_layout_example';
 
+import GalleryExample
+  from '../../views/gallery/gallery_example';
+
 import HeaderBarExample
   from '../../views/header_bar/header_bar_example';
 
@@ -118,6 +121,9 @@ const components = [{
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
+}, {
+  name: 'Gallery',
+  component: GalleryExample,
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,

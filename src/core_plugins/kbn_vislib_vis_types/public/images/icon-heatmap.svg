@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="45px" viewBox="0 0 60 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-915.000000, -222.000000)" fill="#000000">
+            <g id="charts" transform="translate(75.000000, 148.000000)">
+                <g id="icon-heatmap" transform="translate(801.000000, 43.000000)">
+                    <g id="Group-2" transform="translate(39.000000, 31.000000)">
+                        <polygon id="xy-axis-" points="60.0000715 41.2500492 60.0000715 45.0000536 0 45.0000536 0 0 3.75000447 0 3.75000447 41.2500492"></polygon>
+                        <rect id="1" x="10" y="4" width="10" height="8"></rect>
+                        <rect id="2" x="27" y="6" width="6" height="4"></rect>
+                        <rect id="3" x="41" y="4" width="8" height="7"></rect>
+                        <rect id="4" x="11" y="17" width="8" height="6"></rect>
+                        <rect id="5" x="25" y="16" width="10" height="8"></rect>
+                        <rect id="6" x="42" y="18" width="6" height="4"></rect>
+                        <rect id="7" x="10" y="28" width="10" height="8"></rect>
+                        <rect id="8" x="26" y="29" width="8" height="6"></rect>
+                        <rect id="9" x="40" y="28" width="10" height="8"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
