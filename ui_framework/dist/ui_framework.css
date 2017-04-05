@@ -1968,8 +1968,15 @@ body {
 .kuiTableSortIcon {
   pointer-events: none; }
 
-.kuiTableRow:hover .kuiTableRowHoverReveal {
-  display: inline-block; }
+.kuiTableRow {
+  -webkit-transition: background cubic-bezier(0.694, 0.0482, 0.335, 1) 350ms;
+  transition: background cubic-bezier(0.694, 0.0482, 0.335, 1) 350ms; }
+  .kuiTableRow:hover .kuiTableRowHoverReveal {
+    display: inline-block; }
+  .kuiTableRow.kuiTableRow-isNew {
+    background: #f1fee1; }
+  .kuiTableRow.kuiTableRow-isBeingDeleted {
+    background: #f9e5e3; }
 
 .kuiTableRowHoverReveal {
   display: none; }
