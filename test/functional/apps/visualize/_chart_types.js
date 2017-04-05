@@ -16,9 +16,21 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('chart types', function indexPatternCreation() {
     bdd.it('should show the correct chart types', function () {
       const expectedChartTypes = [
-        'Area chart', 'Data table', 'Heatmap chart', 'Horizontal bar chart', 'Line chart', 'Markdown widget',
-        'Metric', 'Pie chart', 'Tag cloud', 'Tile map', 'Time Series Visual Builder', 'Timelion', 'Vertical bar chart'
+        'Area',
+        'Heat Map',
+        'Horizontal Bar',
+        'Line',
+        'Pie',
+        'Vertical Bar',
+        'Data Table',
+        'Metric',
+        'Tile Map',
+        'Timelion',
+        'Visual Builder',
+        'Markdown',
+        'Tag Cloud',
       ];
+
       // find all the chart types and make sure there all there
       return PageObjects.visualize.getChartTypes()
         .then(function testChartTypes(chartTypes) {

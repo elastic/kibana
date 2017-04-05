@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="48px" viewBox="0 0 60 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-596.000000, -436.000000)">
+            <g id="time-series" transform="translate(555.000000, 361.000000)">
+                <g id="visual-builder" transform="translate(0.000000, 44.000000)">
+                    <g id="Group-2" transform="translate(38.000000, 31.000000)">
+                        <rect id="x-axis" fill="#000000" x="3" y="44" width="60" height="4"></rect>
+                        <g id="icon-1">
+                            <polygon id="Path-3" fill="#000000" points="3 37 18 39.3791667 35 37 51 33.06875 63 37 63 6.323e-13 50 5.36079545 33 6.39791667 17 1.00208333 3 6.86041667"></polygon>
+                            <polygon id="Rectangle" fill="#F6F6F6" points="23 14 36.2 14 45 18.8 45 26 23 26"></polygon>
+                            <rect id="Rectangle-Copy" fill="#F6F6F6" x="31" y="16" width="6" height="23" rx="2"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

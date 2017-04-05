@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="52px" height="51px" viewBox="0 0 52 51" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-pie</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-600.000000, -218.000000)" fill="#000000">
+            <g id="charts" transform="translate(75.000000, 148.000000)">
+                <g id="pie" transform="translate(481.000000, 43.000000)">
+                    <path d="M67.0769231,53.8855843 L83.4831731,70.2918343 C79.3064904,74.5286131 73.4771635,77.1427958 67.0769231,77.1427958 C54.3365385,77.1427958 44,66.8062574 44,54.0658728 C44,41.3254881 54.3365385,30.9889497 67.0769231,30.9889497 L67.0769231,53.8855843 Z M72.6959135,54.0658728 L95.9230769,54.0658728 C95.9230769,60.4661131 93.3088942,66.2954401 89.0721154,70.4721228 L72.6959135,54.0658728 Z M94,50.2197189 L70.9230769,50.2197189 L70.9230769,27.1427958 C83.6634615,27.1427958 94,37.4793343 94,50.2197189 Z" id="icon-pie"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
