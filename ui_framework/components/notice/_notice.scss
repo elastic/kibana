@@ -1,8 +1,8 @@
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
-  background-color: white;
-  line-height: $lineHeight;
+  background-color: $noticeBackgroundColor;
+  line-height: $globalLineHeight;
 }
 
   .kuiNotice__header {
@@ -13,12 +13,12 @@
  * 1. Override h1 styles.
  */
 .kuiNoticeTitle {
-  font-size: 22px;
+  font-size: $noticeTitleFontSize;
   margin-bottom: 12px;
   margin-top: 0 !important; /* 1 */
 }
 
 .kuiNoticeText {
-  font-size: 14px;
+  font-size: $globalFontSize;
   margin-bottom: 12px;
 }

@@ -1,5 +1,5 @@
 .kuiPanel {
-  border: $tableBorder;
+  border: $globalBorderThick;
 }
 
 .kuiPanel--withHeader {
@@ -17,14 +17,14 @@
   @include buttonOnStandoutBackground;
   @include selectOnStandoutBackground;
 
-  padding: $toolBarPadding;
-  height: $toolBarHeight;
-  background-color: $standoutBackgroundColor;
+  padding: $panelPadding;
+  height: $panelHeight;
+  background-color: $globalBorderColor;
 }
 
   .kuiPanelHeader__title {
-    font-size: $titleFontSize;
-    line-height: $lineHeight;
+    font-size: $globalTitleFontSize;
+    line-height: $globalLineHeight;
   }
 
 /**
@@ -40,5 +40,5 @@
 }
 
 .kuiPanelBody {
-  padding: $toolBarPadding;
+  padding: $panelPadding;
 }
