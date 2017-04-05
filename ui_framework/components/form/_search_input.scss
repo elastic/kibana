@@ -1,8 +1,10 @@
+$searchInputTextColor: #ACACAC;
+
 .kuiSearchInput {
   display: inline-block;
   position: relative;
-  font-size: $fontSize;
-  line-height: $lineHeight;
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
 }
 
   .kuiSearchInput__icon {
@@ -10,7 +12,7 @@
     top: 0.5em;
     left: 0.7em;
     font-size: 1em;
-    color: #ACACAC;
+    color: $searchInputTextColor;
   }
 
   /**

@@ -90,7 +90,7 @@
   }
 
   .kuiLocalDropdownHeader__action {
-    color: $linkColor;
+    color: $globalLinkColor;
     font-size: 12px;
     text-decoration: none;
     cursor: pointer;
@@ -101,15 +101,15 @@
 
     &:hover,
     &:active {
-      color: $linkColor-isHover;
+      color: $globalLinkColor-isHover;
     }
 
     @include darkTheme {
-      color: $linkColor--darkTheme;
+      color: $globalLinkColor--darkTheme;
 
       &:hover,
       &:active {
-        color: $linkColor-isHover--darkTheme;
+        color: $globalLinkColor-isHover--darkTheme;
       }
     }
   }
@@ -120,15 +120,15 @@
   margin-bottom: 12px;
   padding: 5px 15px;
   font-size: 14px;
-  color: $inputTextColor;
-  background-color: $inputBackgroundColor;
-  border: 2px solid $inputBorderColor;
+  color: $globalInputTextColor;
+  background-color: $globalInputBackgroundColor;
+  border: 2px solid $globalInputBorderColor;
   border-radius: 4px;
 
   @include darkTheme {
-    color: $inputTextColor--darkTheme;
-    background-color: $inputBackgroundColor--darkTheme;
-    border-color: $inputBorderColor--darkTheme;
+    color: $globalInputTextColor--darkTheme;
+    background-color: $globalInputBackgroundColor--darkTheme;
+    border-color: $globalInputBorderColor--darkTheme;
   }
 }
 
@@ -145,7 +145,7 @@
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
-  color: $textColor;
+  color: $globalTextColor;
   background-color: $localNavBackgroundColor;
 
   @include darkTheme {
