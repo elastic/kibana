@@ -1,5 +1,5 @@
 const jest = require('jest');
-const config = require('./config/jest');
+const config = require('../src/jest/config');
 
 const argv = process.argv.slice(2);
 
