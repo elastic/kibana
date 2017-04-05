@@ -29,6 +29,7 @@ module.exports = function (grunt) {
     'licenses',
     'test:server',
     'test:browser-ci',
+    'test:jest',
     'test:api',
     '_build:verifyTranslations',
   ]);
