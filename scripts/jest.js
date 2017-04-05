@@ -1,8 +1,2 @@
-const jest = require('jest');
-const config = require('../src/jest/config');
+require('../src/jest/cli');
 
-const argv = process.argv.slice(2);
-
-argv.push('--config', JSON.stringify(config));
-
-jest.run(argv);
