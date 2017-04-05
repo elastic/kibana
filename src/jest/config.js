@@ -1,6 +1,6 @@
-const path = require('path');
+import { resolve } from 'path';
 
-module.exports = {
+export const config = {
   roots: ['<rootDir>/ui_framework/'],
   collectCoverageFrom: [
     'ui_framework/components/**/*.js',
@@ -14,7 +14,7 @@ module.exports = {
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
   transform: {
-    '^.+\\.(js|jsx)$': path.resolve(__dirname, './babelTransform.js')
+    '^.+\\.(js|jsx)$': resolve(__dirname, './babelTransform.js')
   },
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$'],
   snapshotSerializers: ['<rootDir>/node_modules/enzyme-to-json/serializer']
