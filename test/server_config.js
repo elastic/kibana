@@ -43,7 +43,7 @@ module.exports = {
     },
     dashboard: {
       pathname: kibanaURL,
-      hash: '/dashboard/list',
+      hash: '/dashboards',
     },
     settings: {
       pathname: kibanaURL,

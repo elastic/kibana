@@ -86,7 +86,7 @@ module.exports = function (kibana) {
           id: 'kibana:dashboard',
           title: 'Dashboard',
           order: -1001,
-          url: `${kbnBaseUrl}#/dashboard/list`,
+          url: `${kbnBaseUrl}#/dashboards`,
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',

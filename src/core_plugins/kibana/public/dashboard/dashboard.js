@@ -15,7 +15,7 @@ import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
-import { DashboardConstants } from './dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
@@ -42,7 +42,7 @@ uiRoutes
       }
     }
   })
-  .when(`${DashboardConstants.DASHBOARD_EDIT_PATH}/:id`, {
+  .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
@@ -193,10 +193,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         function revertChangesAndExitEditMode() {
           dashboardState.resetState();
-          const refreshUrl = dash.id ?
-            `${DashboardConstants.DASHBOARD_EDIT_PATH}/{{id}}` : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
-          const refreshUrlOptions = dash.id ? { id: dash.id } : {};
-          kbnUrl.change(refreshUrl, refreshUrlOptions);
+          kbnUrl.change(dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
@@ -232,9 +229,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
           if (id) {
             notify.info(`Saved Dashboard as "${dash.title}"`);
             if (dash.id !== $routeParams.id) {
-              kbnUrl.change(
-                `${DashboardConstants.DASHBOARD_EDIT_PATH}/{{id}}`,
-                { id: dash.id });
+              kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
               docTitle.change(dash.lastSavedTitle);
               updateViewMode(DashboardViewMode.VIEW);
