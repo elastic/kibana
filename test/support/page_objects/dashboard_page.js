@@ -33,9 +33,14 @@ export default class DashboardPage {
    * @returns {Promise<boolean>}
    */
   async onDashboardLandingPage() {
-    PageObjects.common.debug(`onDashboardLandingPage`);
+    PageObjects.common.debug('onDashboardLandingPage');
     const exists = await PageObjects.common.doesCssSelectorExist('a[href="#/dashboard"]');
     return !exists;
+  }
+
+  async clickDashboardBreadcrumbLink() {
+    PageObjects.common.debug('clickDashboardBreadcrumbLink');
+    return PageObjects.common.try(() => PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click());
   }
 
   async gotoDashboardLandingPage() {
@@ -43,8 +48,7 @@ export default class DashboardPage {
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
       await PageObjects.common.try(async () => {
-        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
-        await goToDashboardLink.click();
+        await this.clickDashboardBreadcrumbLink();
         // Once the searchFilter can be found, we know the page finished loading.
         await PageObjects.common.findTestSubject('searchFilter');
       });
@@ -57,18 +61,18 @@ export default class DashboardPage {
   }
 
   appendQuery(query) {
-    return PageObjects.common.findTestSubject('dashboardQuery').type(query);
+    PageObjects.common.debug('Appending query');
+    return PageObjects.common.try(() => PageObjects.common.findTestSubject('dashboardQuery').type(query));
   }
 
   clickFilterButton() {
-    return PageObjects.common.findTestSubject('dashboardQueryFilterButton')
-      .click();
+    PageObjects.common.debug('Clicking filter button');
+    return PageObjects.common.clickTestSubject('dashboardQueryFilterButton');
   }
 
   clickEdit() {
     PageObjects.common.debug('Clicking edit');
-    return PageObjects.common.findTestSubject('dashboardEditMode')
-      .click();
+    return PageObjects.common.clickTestSubject('dashboardEditMode');
   }
 
   getIsInViewMode() {
@@ -78,7 +82,7 @@ export default class DashboardPage {
 
   clickCancelOutOfEditMode() {
     PageObjects.common.debug('Clicking cancel');
-    return PageObjects.common.findTestSubject('dashboardViewOnlyMode').click();
+    return PageObjects.common.clickTestSubject('dashboardViewOnlyMode');
   }
 
   clickNewDashboard() {
@@ -122,53 +126,44 @@ export default class DashboardPage {
   }
 
   filterVizNames(vizName) {
-    return this.findTimeout
-    .findByCssSelector('input[placeholder="Visualizations Filter..."]')
-    .click()
-    .pressKeys(vizName);
+    return PageObjects.common.try(() => this.findTimeout
+      .findByCssSelector('input[placeholder="Visualizations Filter..."]')
+      .click()
+      .pressKeys(vizName));
   }
 
   clickVizNameLink(vizName) {
-    return this.findTimeout
-    .findByPartialLinkText(vizName)
-    .click();
+    return PageObjects.common.try(() => this.findTimeout.findByPartialLinkText(vizName).click());
   }
 
   closeAddVizualizationPanel() {
     PageObjects.common.debug('closeAddVizualizationPanel');
-    return this.findTimeout
-    .findByCssSelector('i.fa fa-chevron-up')
-    .click();
+    return PageObjects.common.try(() => this.findTimeout
+      .findByCssSelector('i.fa fa-chevron-up')
+      .click());
   }
 
-  addVisualization(vizName) {
-    return this.clickAddVisualization()
-    .then(() => {
-      PageObjects.common.debug('filter visualization (' + vizName + ')');
-      return this.filterVizNames(vizName);
-    })
+  async addVisualization(vizName) {
+    await this.clickAddVisualization();
+    PageObjects.common.debug('filter visualization (' + vizName + ')');
+    await this.filterVizNames(vizName);
     // this second wait is usually enough to avoid the
     // 'stale element reference: element is not attached to the page document'
     // on the next step
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
-    .then(() => {
-      // but wrap in a try loop since it can still happen
-      return PageObjects.common.try(() => {
-        PageObjects.common.debug('click visualization (' + vizName + ')');
-        return this.clickVizNameLink(vizName);
-      });
-    })
-    // this second click of 'Add' collapses the Add Visualization pane
-    .then(() => {
-      return this.clickAddVisualization();
+    await PageObjects.common.sleep(1000);
+    // but wrap in a try loop since it can still happen
+    await PageObjects.common.try(() => {
+      PageObjects.common.debug('click visualization (' + vizName + ')');
+      return this.clickVizNameLink(vizName);
     });
+    await PageObjects.header.clickToastOK();
+    // this second click of 'Add' collapses the Add Visualization pane
+    await this.clickAddVisualization();
   }
 
   async renameDashboard(dashName) {
     PageObjects.common.debug(`Naming dashboard ` + dashName);
-    await PageObjects.common.findTestSubject('dashboardRenameButton').click();
+    await PageObjects.common.clickTestSubject('dashboardRenameButton');
     await this.findTimeout.findById('dashboardTitle').type(dashName);
   }
 
@@ -362,7 +357,7 @@ export default class DashboardPage {
     const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
     if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping save as new checkbox');
-      await saveAsNewCheckbox.click();
+      await PageObjects.common.try(() => saveAsNewCheckbox.click());
     }
   }
 
@@ -372,7 +367,7 @@ export default class DashboardPage {
     const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
     if (isAlreadyChecked !== checked) {
       PageObjects.common.debug('Flipping store time checkbox');
-      await storeTimeCheckbox.click();
+      await PageObjects.common.try(() => storeTimeCheckbox.click());
     }
   }
 
@@ -402,11 +397,11 @@ export default class DashboardPage {
     if (!expandShown) {
       const panelElements = await this.findTimeout.findAllByCssSelector('span.panel-title');
       PageObjects.common.debug('click title');
-      await panelElements[0].click(); // Click to simulate hover.
+      await PageObjects.common.try(() => panelElements[0].click()); // Click to simulate hover.
     }
     const expandButton = await PageObjects.common.findTestSubject('dashboardPanelExpandIcon');
     PageObjects.common.debug('click expand icon');
-    expandButton.click();
+    await PageObjects.common.try(() => expandButton.click());
   }
 
   getSharedItemsCount() {

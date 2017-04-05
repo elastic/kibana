@@ -22,6 +22,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
       await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+      await PageObjects.header.clickToastOK();
     });
 
     bdd.it('Does not set the time picker on open', async function () {
@@ -41,6 +42,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.header.setQuickTime('Today');
       await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+      await PageObjects.header.clickToastOK();
     });
 
     bdd.it('sets quick time on open', async function () {
@@ -56,6 +58,7 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+      await PageObjects.header.clickToastOK();
     });
 
     bdd.it('sets absolute time on open', async function () {
@@ -83,4 +86,8 @@ bdd.describe('dashboard time', function dashboardSaveWithTime() {
     });
   });
 
+  // To avoid load errors in subsequent tests that refresh the index.
+  bdd.it('Finish each test on the landing page', async () => {
+    await PageObjects.dashboard.gotoDashboardLandingPage();
+  });
 });

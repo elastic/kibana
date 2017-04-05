@@ -49,8 +49,8 @@ export default class HeaderPage {
   }
 
   clickQuickButton() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText('Quick').click();
+    return PageObjects.common.try(
+      () => this.remote.setFindTimeout(defaultFindTimeout).findByLinkText('Quick').click());
   }
 
   isTimepickerOpen() {
@@ -60,77 +60,90 @@ export default class HeaderPage {
     .catch(() => false);
   }
 
-  async clickAbsoluteButton() {
-    await PageObjects.common.try(async () => {
-      await this.remote.setFindTimeout(defaultFindTimeout);
-      const absoluteButton = await this.remote.findByLinkText('Absolute');
-      await absoluteButton.click();
+  isAbsoluteSectionShowing() {
+    PageObjects.common.debug('isAbsoluteSectionShowing');
+    return PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
+  }
+
+  async showAbsoluteSection() {
+    PageObjects.common.debug('showAbsoluteSection');
+    const isAbsoluteSectionShowing = await this.isAbsoluteSectionShowing();
+    if (!isAbsoluteSectionShowing) {
+      await PageObjects.common.try(async() => {
+        await this.remote.setFindTimeout(defaultFindTimeout);
+        const absoluteButton = await this.remote.findByLinkText('Absolute');
+        await absoluteButton.click();
+        // Check to make sure one of the elements on the absolute section is showing.
+        await this.getFromTime();
+      });
+    }
+  }
+
+  async getFromTime() {
+    PageObjects.common.debug('getFromTime');
+    return PageObjects.common.try(async () => {
+      await this.ensureTimePickerIsOpen();
+      await this.showAbsoluteSection();
+      return this.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[ng-model=\'absolute.from\']')
+        .getProperty('value');
     });
   }
 
-  clickQuickButton() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText('Quick').click();
-  }
-
-  async getFromTime() {
-    await this.ensureTimePickerIsOpen();
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model=\'absolute.from\']')
-      .getProperty('value');
-  }
-
   async getToTime() {
-    await this.ensureTimePickerIsOpen();
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model=\'absolute.to\']')
-      .getProperty('value');
-  }
-
-  async getFromTime() {
-    await this.ensureTimePickerIsOpen();
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model=\'absolute.from\']')
-      .getProperty('value');
-  }
-
-  async getToTime() {
-    await this.ensureTimePickerIsOpen();
-    return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model=\'absolute.to\']')
-      .getProperty('value');
+    PageObjects.common.debug('getToTime');
+    return PageObjects.common.try(async () => {
+      await this.ensureTimePickerIsOpen();
+      await this.showAbsoluteSection();
+      return this.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[ng-model=\'absolute.to\']')
+        .getProperty('value');
+    });
   }
 
   setFromTime(timeString) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('input[ng-model=\'absolute.from\']')
-    .clearValue()
-    .type(timeString);
+    PageObjects.common.debug(`setFromTime: ${timeString}`);
+    return PageObjects.common.try(async () => {
+      await this.ensureTimePickerIsOpen();
+      await this.showAbsoluteSection();
+      return this.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[ng-model=\'absolute.from\']')
+        .clearValue()
+        .type(timeString);
+    });
   }
 
   setToTime(timeString) {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('input[ng-model=\'absolute.to\']')
-    .clearValue()
-    .type(timeString);
+    PageObjects.common.debug(`setToTime: ${timeString}`);
+    return PageObjects.common.try(async () => {
+      await this.ensureTimePickerIsOpen();
+      await this.showAbsoluteSection();
+      return this.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[ng-model=\'absolute.to\']')
+        .clearValue()
+        .type(timeString);
+    });
   }
 
   clickGoButton() {
-    const self = this;
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByClassName('kbn-timepicker-go')
-    .click()
-    .then(function () {
-      return self.waitUntilLoadingHasFinished();
+    PageObjects.common.debug('clickGoButton');
+    return PageObjects.common.try(async () => {
+      const self = this;
+      return this.remote.setFindTimeout(defaultFindTimeout)
+        .findByClassName('kbn-timepicker-go')
+        .click()
+        .then(function () {
+          return self.waitUntilLoadingHasFinished();
+        });
     });
   }
 
   setAbsoluteRange(fromTime, toTime) {
-    PageObjects.common.debug('clickTimepicker');
+    PageObjects.common.debug(`setAbsoluteRange: ${fromTime} to ${toTime}`);
     return this.clickTimepicker()
       .then(() => {
         PageObjects.common.debug('--Clicking Absolute button');
-        return this.clickAbsoluteButton();
+        return this.showAbsoluteSection();
       })
       .then(() => {
         PageObjects.common.debug('--Setting From Time : ' + fromTime);
@@ -150,7 +163,7 @@ export default class HeaderPage {
 
   async ensureTimePickerIsOpen() {
     const isOpen = await PageObjects.header.isTimepickerOpen();
-    PageObjects.common.debug(`time picker open: ${isOpen}`);
+    PageObjects.common.debug(`ensureTimePickerIsOpen: ${isOpen}`);
     if (!isOpen) {
       PageObjects.common.debug('--Opening time picker');
       await PageObjects.header.clickTimepicker();
@@ -160,11 +173,8 @@ export default class HeaderPage {
   async setAbsoluteRange(fromTime, toTime) {
     PageObjects.common.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.ensureTimePickerIsOpen();
-    PageObjects.common.debug('--Clicking Absolute button');
-    await this.clickAbsoluteButton();
-    PageObjects.common.debug('--Setting From Time : ' + fromTime);
+    await this.showAbsoluteSection();
     await this.setFromTime(fromTime);
-    PageObjects.common.debug('--Setting To Time : ' + toTime);
     await this.setToTime(toTime);
     await this.clickGoButton();
     await this.isGlobalLoadingIndicatorHidden();
@@ -194,9 +204,12 @@ export default class HeaderPage {
   }
 
   clickToastOK() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button[ng-if="notif.accept"]')
-    .click();
+    PageObjects.common.debug('clickToastOK');
+    return PageObjects.common.try(async () => (
+       this.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('button[ng-if="notif.accept"]')
+        .click()
+    ));
   }
 
   async waitUntilLoadingHasFinished() {
