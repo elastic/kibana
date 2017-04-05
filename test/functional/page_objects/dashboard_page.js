@@ -42,14 +42,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return exists;
     }
 
+    async clickDashboardBreadcrumbLink() {
+      log.debug('clickDashboardBreadcrumbLink');
+      return retry.try(() => PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click());
+    }
+
     async gotoDashboardLandingPage() {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
         await retry.try(async () => {
-          const goToDashboardLink = await find.byCssSelector('a[href="#/dashboard"]');
-          await goToDashboardLink.click();
-          // Once the searchFilter can be found, we know the page finished loading.
+          await this.clickDashboardBreadcrumbLink();
           await testSubjects.find('searchFilter');
         });
       }
@@ -61,18 +64,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     appendQuery(query) {
-      return testSubjects.find('dashboardQuery').type(query);
+      log.debug('Appending query');
+      return retry.try(() => testSubjects.find('dashboardQuery').type(query));
     }
 
     clickFilterButton() {
-      return testSubjects.find('dashboardQueryFilterButton')
-      .click();
+      log.debug('Clicking filter button');
+      return testSubjects.click('dashboardQueryFilterButton');
     }
 
     clickEdit() {
       log.debug('Clicking edit');
-      return testSubjects.find('dashboardEditMode')
-      .click();
+      return testSubjects.click('dashboardEditMode');
     }
 
     getIsInViewMode() {
@@ -130,23 +133,23 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     filterVizNames(vizName) {
-      return getRemote()
+      return retry.try(() => getRemote()
       .findByCssSelector('input[placeholder="Visualizations Filter..."]')
       .click()
-      .pressKeys(vizName);
+      .pressKeys(vizName));
     }
 
     clickVizNameLink(vizName) {
-      return getRemote()
+      return retry.try(() => getRemote()
       .findByPartialLinkText(vizName)
-      .click();
+      .click());
     }
 
     closeAddVizualizationPanel() {
       log.debug('closeAddVizualizationPanel');
-      return getRemote()
+      return retry.try(() => getRemote()
       .findByCssSelector('i.fa fa-chevron-up')
-      .click();
+      .click());
     }
 
     async gotoDashboardEditMode(dashboardName) {
@@ -154,29 +157,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.clickEdit();
     }
 
-    addVisualization(vizName) {
-      return this.clickAddVisualization()
-      .then(() => {
-        log.debug('filter visualization (' + vizName + ')');
-        return this.filterVizNames(vizName);
-      })
+    async addVisualization(vizName) {
+      await this.clickAddVisualization();
+      log.debug('filter visualization (' + vizName + ')');
+      await this.filterVizNames(vizName);
       // this second wait is usually enough to avoid the
       // 'stale element reference: element is not attached to the page document'
       // on the next step
-      .then(() => {
-        return PageObjects.common.sleep(1000);
-      })
-      .then(() => {
+      await PageObjects.common.sleep(1000);
         // but wrap in a try loop since it can still happen
-        return retry.try(() => {
-          log.debug('click visualization (' + vizName + ')');
-          return this.clickVizNameLink(vizName);
-        });
-      })
-      // this second click of 'Add' collapses the Add Visualization pane
-      .then(() => {
-        return this.clickAddVisualization();
+      await retry.try(() => {
+        log.debug('click visualization (' + vizName + ')');
+        return this.clickVizNameLink(vizName);
       });
+      await PageObjects.header.clickToastOK();
+      // this second click of 'Add' collapses the Add Visualization pane
+      await this.clickAddVisualization();
     }
 
     async renameDashboard(dashName) {
@@ -371,7 +367,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
-        await saveAsNewCheckbox.click();
+        await retry.try(() => saveAsNewCheckbox.click());
       }
     }
 
@@ -381,7 +377,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
-        await storeTimeCheckbox.click();
+        await retry.try(() => storeTimeCheckbox.click());
       }
     }
 
@@ -411,11 +407,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (!expandShown) {
         const panelElements = await getRemote().findAllByCssSelector('span.panel-title');
         log.debug('click title');
-        await panelElements[0].click(); // Click to simulate hover.
+        await retry.try(() => panelElements[0].click()); // Click to simulate hover.
       }
       const expandButton = await testSubjects.find('dashboardPanelExpandIcon');
       log.debug('click expand icon');
-      expandButton.click();
+      await retry.try(() => expandButton.click());
     }
 
     getSharedItemsCount() {

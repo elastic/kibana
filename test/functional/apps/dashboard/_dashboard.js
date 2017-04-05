@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }) {
     it('should save and load dashboard', async function saveAndLoadDashboard() {
       const dashboardName = 'Dashboard Test 1';
       await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.header.clickToastOK();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await retry.try(function () {
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
       const titles = PageObjects.dashboard.getTestVisualizationNames();
       const visObjects = [
         { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[0] },
-        {  dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
+        { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
         { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[2] },
         { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[3] },
         { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[4] },
@@ -106,11 +107,11 @@ export default function ({ getService, getPageObjects }) {
       expect(isDarkThemeOn).to.equal(true);
     });
 
-    it('should have shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
+    it('should have data-shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
       const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
       .then(function (count) {
-        log.info('shared-items-count = ' + count);
+        log.info('data-shared-items-count = ' + count);
         expect(count).to.eql(visualizations.length);
       });
     });
@@ -132,6 +133,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAreaChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.saveVisualization('visualization from add new link');
+      await PageObjects.header.clickToastOK();
+      await PageObjects.header.clickToastOK();
 
       const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, async function () {

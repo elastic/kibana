@@ -7,12 +7,17 @@ export default function ({ getPageObjects }) {
     const dashboardName = 'Dashboard Save Test';
 
     before(async function () {
-      return PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.initTests();
+    });
+
+    after(async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
     it('warns on duplicate name for new dashboard', async function() {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.header.clickToastOK();
 
       let isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isConfirmOpen).to.equal(false);
@@ -38,8 +43,9 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
       await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.header.clickToastOK();
 
-      // This is important since saving a new dashboard will cause a refresh of the page.  We have to
+      // This is important since saving a new dashboard will cause a refresh of the page. We have to
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -54,6 +60,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.header.isGlobalLoadingIndicatorHidden();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
 
         const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
         expect(isConfirmOpen).to.equal(false);

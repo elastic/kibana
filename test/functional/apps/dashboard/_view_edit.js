@@ -7,7 +7,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async function () {
-      return PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.initTests();
+    });
+
+    after(async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
     it('create new dashboard opens in edit mode', async function () {
@@ -27,6 +31,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
       await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.header.clickToastOK();
     });
 
     it('existing dashboard opens in view mode', async function () {
@@ -35,24 +40,6 @@ export default function ({ getService, getPageObjects }) {
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
       expect(inViewMode).to.equal(true);
-    });
-
-    // Panel expand should also be shown in view mode, but only on mouse hover.
-    describe('panel expand control', function () {
-      it('shown in edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
-        expect(expandExists).to.equal(true);
-      });
-    });
-
-    describe('save', function () {
-      it('auto exits out of edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName);
-        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-        expect(isViewMode).to.equal(true);
-      });
     });
 
     describe('panel edit controls', function () {
@@ -84,6 +71,7 @@ export default function ({ getService, getPageObjects }) {
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
+          await PageObjects.header.clickToastOK();
           await PageObjects.dashboard.toggleExpandPanel();
 
           const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
@@ -111,6 +99,25 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    // Panel expand should also be shown in view mode, but only on mouse hover.
+    describe('panel expand control', function () {
+      it('shown in edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
+        expect(expandExists).to.equal(true);
+      });
+    });
+
+    describe('save', function () {
+      it('auto exits out of edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
+        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        expect(isViewMode).to.equal(true);
+      });
+    });
+
     describe('shows lose changes warning', async function () {
       describe('and loses changes on confirmation', function () {
         beforeEach(async function () {
@@ -122,6 +129,7 @@ export default function ({ getService, getPageObjects }) {
           const originalToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
           await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.header.clickToastOK();
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
@@ -155,6 +163,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.setTimepickerInDataRange();
           await PageObjects.dashboard.filterOnPieSlice();
           await PageObjects.dashboard.saveDashboard(dashboardName);
+          await PageObjects.header.clickToastOK();
 
           // This may seem like a pointless line but there was a bug that only arose when the dashboard
           // was loaded initially
@@ -189,6 +198,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualization('new viz panel');
+          await PageObjects.header.clickToastOK();
+          await PageObjects.header.clickToastOK();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -220,12 +231,14 @@ export default function ({ getService, getPageObjects }) {
           const newToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
           await PageObjects.dashboard.saveDashboard(dashboardName, true);
+          await PageObjects.header.clickToastOK();
           await PageObjects.dashboard.clickEdit();
           await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           await PageObjects.common.clickCancelOnModal();
           await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.header.clickToastOK();
 
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -242,6 +255,7 @@ export default function ({ getService, getPageObjects }) {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.header.clickToastOK();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange('2013-10-19 06:31:44.000', '2013-12-19 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -255,6 +269,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
