@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { getSections } from '../../store';
-import { GuidePage } from './guide_page.jsx';
+import { GuidePage } from './guide_page';
 
 const mapStateToProps = state => ({
   sections: getSections(state),

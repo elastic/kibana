@@ -1,30 +1,25 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
-  GuideCode,
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
 
-const fieldGroupHtml = require('./field_group.html');
+const linkHtml = require('./link.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="FieldGroup"
+      title="Link"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: fieldGroupHtml,
+        code: linkHtml,
       }]}
     >
       <GuideDemo
-        html={fieldGroupHtml}
+        html={linkHtml}
       />
     </GuideSection>
   </GuidePage>

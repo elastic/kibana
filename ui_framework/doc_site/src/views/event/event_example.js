@@ -1,7 +1,4 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideDemo,
@@ -11,37 +8,40 @@ import {
   GuideText,
 } from '../../components';
 
-const cardHtml = require('./card.html');
-const cardGroupHtml = require('./card_group.html');
+const eventHtml = require('./event.html');
+const eventMenuHtml = require('./event_menu.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Card"
+      title="Event"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: cardHtml,
+        code: eventHtml,
       }]}
     >
       <GuideText>
-        Cards expand to fill their container. To restrict a card's width, define the width of its
-        container.
+        Events can represent updates, logs, notifications, and status changes.
       </GuideText>
 
       <GuideDemo
-        html={cardHtml}
+        html={eventHtml}
       />
     </GuideSection>
 
     <GuideSection
-      title="CardGroup"
+      title="Event Menu"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: cardGroupHtml,
+        code: eventMenuHtml,
       }]}
     >
+      <GuideText>
+        You&rsquo;ll typically want to present them within a Menu.
+      </GuideText>
+
       <GuideDemo
-        html={cardGroupHtml}
+        html={eventMenuHtml}
       />
     </GuideSection>
   </GuidePage>

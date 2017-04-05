@@ -30,7 +30,7 @@ module.exports = {
       test: /\.json$/,
       loader: 'json-loader',
     }, {
-      test: /\.jsx?$/,
+      test: /\.js$/,
       loader: 'babel',
       exclude: /node_modules/,
       query: {

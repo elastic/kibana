@@ -1,36 +1,36 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
   GuideText,
 } from '../../components';
 
-const toggleButtonHtml = require('./toggle_button.html');
-const toggleButtonJs = require('raw!./toggle_button.js');
+const html = require('./tabs.html');
+const js = require('raw!./tabs.js');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="ToggleButton"
+      title="Tabs"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: toggleButtonHtml,
+        code: html,
+      }, {
+        type: GuideSectionTypes.JS,
+        code: js,
       }]}
     >
       <GuideText>
-        You can use this button to reveal and hide content.
+        Wrap any series of components, e.g. Panel, in the VerticalRhythm component to space
+        them apart.
       </GuideText>
 
       <GuideDemo
-        html={toggleButtonHtml}
-        js={toggleButtonJs}
+        html={html}
+        js={js}
       />
     </GuideSection>
   </GuidePage>

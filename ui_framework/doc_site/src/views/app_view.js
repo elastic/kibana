@@ -43,7 +43,7 @@ export class AppView extends Component {
   onToggleNav() {
     this.setState({
       isNavOpen: !this.state.isNavOpen,
-    })
+    });
   }
 
   render() {
