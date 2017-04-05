@@ -7,5 +7,8 @@ export function migrateRangeFilter(filter, indexPattern) {
   const field = indexPattern.fields.byName[fieldName];
   const params = filter.range[fieldName];
 
-  return buildRangeFilter(field, params, indexPattern);
+  const newFilter = buildRangeFilter(field, params, indexPattern);
+  Object.assign(newFilter.meta, filter.meta);
+
+  return newFilter;
 }
