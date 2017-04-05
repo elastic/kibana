@@ -1221,7 +1221,7 @@ body {
           align-items: center;
   height: 100%;
   padding: 0 10px;
-  font-size: 400;
+  font-size: 14px;
   background-color: transparent;
   color: #5a5a5a;
   border: 0;
@@ -1314,7 +1314,7 @@ body {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   padding: 5px 15px;
-  font-size: 400;
+  font-size: 14px;
   color: #2d2d2d;
   background-color: #ffffff;
   border: 2px solid #ffffff;
@@ -1334,7 +1334,7 @@ body {
 .kuiLocalSearchButton {
   width: 43px;
   height: 30px;
-  font-size: 400;
+  font-size: 14px;
   color: #ffffff;
   background-color: #9c9c9c;
   border: 0;
@@ -1407,7 +1407,7 @@ body {
           align-items: center;
   height: 100%;
   padding-left: 10px;
-  font-size: 400;
+  font-size: 14px;
   font-weight: bold; }
 
 .kuiMenu--contained {
@@ -1436,7 +1436,7 @@ body {
   padding: 2px 10px;
   /* 3 */
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.5;
   text-decoration: none;
   border: none;

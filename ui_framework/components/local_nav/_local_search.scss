@@ -7,7 +7,7 @@
 .kuiLocalSearchInput {
   flex: 1 1 100%;
   padding: 5px 15px;
-  font-size: $globalFontWeightRegular;
+  font-size: $globalFontSize;
   color: $localNavTextColor;
   background-color: $localSearchBackgroundColor;
   border: 2px solid $localSearchBackgroundColor;
@@ -34,7 +34,7 @@
 .kuiLocalSearchButton {
   width: 43px;
   height: $localSearchHeight;
-  font-size: $globalFontWeightRegular;
+  font-size: $globalFontSize;
   color: $localSearchButtonTextColor;
   background-color: $localSearchButtonBackgroundColor;
   border: 0;
