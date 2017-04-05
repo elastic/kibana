@@ -333,7 +333,7 @@ export default class Common {
   async getSharedItemTitleAndDescription() {
     const element = await this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[shared-item]');
+      .findByCssSelector('[data-shared-item]');
 
     return {
       title: await element.getAttribute('data-title'),

@@ -227,8 +227,8 @@ bdd.describe('discover app', function describeIndexTests() {
   });
 
 
-  bdd.describe('shared-item', function () {
-    bdd.it('should have correct shared-item title and description', async () => {
+  bdd.describe('data-shared-item', function () {
+    bdd.it('should have correct data-shared-item title and description', async () => {
       const expected = {
         title: 'A Saved Search',
         description: 'A Saved Search Description'
