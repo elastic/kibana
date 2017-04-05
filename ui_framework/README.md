@@ -17,7 +17,7 @@ fully-tested the code is.
 
 ### React components
 
-Here are the components you can import from the Framnework:
+Here are the components you can import from the Framework:
 
 ```javascript
 import {
@@ -87,7 +87,7 @@ by the tests by viewing the generated report at `ui_framework/jest/report/index.
 
 You can run `npm run uiFramework:dev` to watch your files and automatically run the tests when you
 make changes. Under this command, the tests will run faster than under `uiFramework:coverage` because
-they'll only test the files you've changed -- the code coverage report won't be re-genereated,
+they'll only test the files you've changed -- the code coverage report won't be re-generated,
 however.
 
 ## Principles
@@ -96,7 +96,7 @@ however.
 
 If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g.
 Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput,
-TextArea, and CheckBox), then they belong in the same logicaly grouping. In this case, you can create
+TextArea, and CheckBox), then they belong in the same logical grouping. In this case, you can create
 additional SCSS files for these components in the same component directory.
 
 ### Writing CSS
