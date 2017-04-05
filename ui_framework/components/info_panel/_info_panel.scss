@@ -1,3 +1,6 @@
+$infoPanelVerticalRhythm: 8px;
+$infoPanelHeaderTitleWeight: 700;
+
 .kuiInfoPanel {
   padding: 14px 20px 18px;
   line-height: $globalLineHeight;
@@ -49,12 +52,10 @@
   .kuiInfoPanelHeader__title {
     font-size: $globalFontSize;
     line-height: $globalLineHeight;
-    font-weight: 700;
+    font-weight: $infoPanelHeaderTitleWeight;
   }
 
 .kuiInfoPanelBody {
-  $infoPanelVerticalRhythm: 8px;
-
   margin-top: $infoPanelVerticalRhythm;
 
   > * + * {
@@ -62,7 +63,7 @@
   }
 }
 
-  .kuiInfoPanelBody__message {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
-  }
+.kuiInfoPanelBody__message {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+}

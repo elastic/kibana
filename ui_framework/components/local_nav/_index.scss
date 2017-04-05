@@ -14,6 +14,7 @@ $localDropdownFormNoteTextColor: #737373;
 $localTabTextColor: $localNavButtonTextColor;
 $localTabTextColor-isHover: $localNavButtonTextColor-isHover;
 $localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
+$localBreadcrumbLinkColor: #5a5a5a;
 
 // Dark theme colors
 $localNavTextColor--darkTheme: $globalTextColor--darkTheme;
@@ -36,8 +37,9 @@ $localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--dark
 // Spacing
 $localNavSideSpacing: 10px;
 
-// Font size
+// Fonts
 $localNavFontSizeNormal: 14px;
+$localBreadCrumbEmphasizedFontWeight: 700;
 
 @import "local_breadcrumbs";
 @import "local_dropdown";

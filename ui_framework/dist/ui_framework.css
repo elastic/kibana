@@ -593,7 +593,7 @@ body {
 .kuiCheckBox {
   -webkit-appearance: none;
   /* 1 */
-  background-color: #FFFFFF;
+  background-color: #FFF;
   border: 1px solid #BEBEBE;
   border-radius: 4px;
   width: 16px;
@@ -617,7 +617,7 @@ body {
     content: "\F00C";
     font-size: 1em;
     opacity: 0;
-    color: #ffffff;
+    color: #FFF;
     -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {

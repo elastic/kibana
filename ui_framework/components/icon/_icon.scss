@@ -1,3 +1,5 @@
+$iconBasicTextColor: #565656;
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -32,5 +34,5 @@
 }
 
 .kuiIcon--basic {
-  color: #565656;
+  color: $iconBasicTextColor;
 }
