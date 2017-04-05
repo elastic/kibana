@@ -70,7 +70,7 @@
                         ng-checked="relative.from.round"
                         ng-change="formatRelative('from')"
                         type="checkbox">
-                      round to the {{units[relative.from.unit]}}
+                      round to the {{units[relative.from.unit.substring(0,1)]}}
                     </label>
                   </div>
                 </div>
@@ -109,7 +109,7 @@
                         ng-checked="relative.to.round"
                         ng-change="formatRelative('to')"
                         type="checkbox">
-                      round to the {{units[relative.to.unit]}}
+                      round to the {{units[relative.to.unit.substring(0,1)]}}
                     </label>
                   </div>
                 </div>
