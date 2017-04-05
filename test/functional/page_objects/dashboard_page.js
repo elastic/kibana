@@ -420,7 +420,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
-      const attributeName = 'shared-items-count';
+      const attributeName = 'data-shared-items-count';
       return getRemote()
       .findByCssSelector(`[${attributeName}]`)
       .then(function (element) {
@@ -438,7 +438,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       .findAllByCssSelector('li.gs-w')
       .then(function (elements) {
         return Promise.all(elements.map(async element => {
-          const sharedItem = await element.findByCssSelector('[shared-item]');
+          const sharedItem = await element.findByCssSelector('[data-shared-item]');
           return {
             title: await sharedItem.getAttribute('data-title'),
             description: await sharedItem.getAttribute('data-description')

@@ -211,7 +211,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async getSharedItemTitleAndDescription() {
       const element = await remote
         .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[shared-item]');
+        .findByCssSelector('[data-shared-item]');
 
       return {
         title: await element.getAttribute('data-title'),
@@ -245,8 +245,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async isConfirmModalOpen() {
       const isOpen = await testSubjects
-        .find('confirmModalCancelButton', 2000)
-        .then(() => true, () => false);
+      .find('confirmModalCancelButton', 2000)
+      .then(() => true, () => false);
 
       await remote.setFindTimeout(defaultFindTimeout);
       return isOpen;

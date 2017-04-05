@@ -202,6 +202,32 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getFieldTypes() {
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldType');
+      return await mapAsync(fieldNameCells, async cell => {
+        return (await cell.getVisibleText()).trim();
+      });
+    }
+
+    async getScriptedFieldLangs() {
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern scriptedFieldLang');
+      return await mapAsync(fieldNameCells, async cell => {
+        return (await cell.getVisibleText()).trim();
+      });
+    }
+
+    async setFieldTypeFilter(type) {
+      await remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]')
+      .click();
+    }
+
+    async setScriptedFieldLanguageFilter(language) {
+      await remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' + language + '"]')
+      .click();
+    }
+
     async goToPage(pageNum) {
       await remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
