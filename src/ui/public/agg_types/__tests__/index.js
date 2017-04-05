@@ -2,7 +2,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import './agg_type';
 import './agg_params';
-import './bucket_count_between';
 import './buckets/_histogram';
 import './buckets/_geo_hash';
 import './buckets/_range';
