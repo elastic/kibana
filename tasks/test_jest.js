@@ -1,4 +1,4 @@
-const platform = require('os').platform();
+const { resolve } = require('path');
 
 module.exports = function (grunt) {
   grunt.registerTask('test:jest', function () {
@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     const serverCmd = {
       cmd: 'node',
       args: [
-        /^win/.test(platform) ? '.\\scripts\\jest' : './scripts/jest'
+        resolve(__dirname, '../scripts/jest.js')
       ],
       opts: { stdio: 'inherit' }
     };
