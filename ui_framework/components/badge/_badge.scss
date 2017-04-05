@@ -3,8 +3,8 @@
   margin-left: 0.5em;
   padding: 0.1em 0.7em;
   vertical-align: middle;
-  font-size: 11px;
-  line-height: $lineHeight;
+  font-size: $badgeFontSize;
+  line-height: $globalLineHeight;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }

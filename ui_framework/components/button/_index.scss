@@ -1,2 +1,29 @@
+// All buttons
+$buttonHeight: 30px;
+$buttonIconSpacing: 8px;
+$buttonFontWeight: $globalFontWeightRegular;
+
+// Most buttons
+$buttonDefaultTextColor: #FFF;
+
+// Basic
+$buttonBasicTextColor: #5a5a5a;
+$buttonBasicBackgroundColor: #F2F2F2;
+$buttonBasicHoverBackgroundColor: #9B9B9B;
+$buttonBasicDisabledTextColor: #9B9B9B;
+
+// Primary
+$buttonPrimaryBackgroundColor: #6EADC1;
+$buttonPrimaryHoverBackgroundColor: #006E8A;
+$buttonPrimaryDisabledBackgroundColor: #B6D6E0;
+
+// Danger
+$buttonDangerBackgroundColor: #D76051;
+$buttonDangerHoverBackgroundColor: #A52E1F;
+$buttonDangerDisabledBackgroundColor: #efc0ba;
+
+// Hollow
+$buttonHollowDiabledTextColor: #dddddd;
+
 @import "button";
 @import "button_group/button_group";
