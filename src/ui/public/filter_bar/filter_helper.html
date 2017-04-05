@@ -1,79 +1,147 @@
-<div style="position: absolute; top: 31px; right: 43px; width: 50%; z-index: 10; background: white; padding: 10px; border: 1px solid lightgray; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-top: none;">
-  <div class="row" ng-repeat="helper in filterHelper.helpers" style="padding: 0.5em 0">
-    <div class="col-md-3">
-      <ui-select
-        ng-model="helper.field"
-        on-select="filterHelper.refreshSuggestions(helper.field)"
+<div style="position: absolute; top: 32px; right: 0; width: 50%; z-index: 10; background: white; padding: 10px; border: 1px solid lightgray; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-top: none;"
+>
+  <div class="kuiSubTitle kuiVerticalRhythm">
+    Filters
+  </div>
+
+  <table class="kuiTable kuiVerticalRhythm">
+    <thead>
+      <tr>
+        <th class="kuiTableHeaderCell">
+          Field
+        </th>
+
+        <th class="kuiTableHeaderCell">
+          Criteria
+        </th>
+
+        <th class="kuiTableHeaderCell">
+        </th>
+
+        <th class="kuiTableHeaderCell">
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        class="kuiTableRow kuiTableRow--overflow"
+        ng-repeat="helper in filterHelper.helpers"
       >
-        <ui-select-match>
-          {{$select.selected.name}}
-        </ui-select-match>
-        <ui-select-choices repeat="field.name as field in indexPattern.fields | orderBy:'name' | filter:$select.search ">
-          <div ng-bind-html="field.name"></div>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-    <div class="col-md-2">
-      <select
-        class="form-control"
-        ng-model="helper.type"
-        ng-options="type.label for type in filterHelper.filterTypesByField(filterHelper.types, helper.field)"
-      ></select>
-    </div>
-    <div class="col-md-5" ng-if="helper.type.id === 'query.match'">
-      <ui-select ng-model="helper.params.query">
-        <ui-select-match>
-          {{$select.selected}}
-        </ui-select-match>
-        <ui-select-choices
-          repeat="value in filterHelper.suggestions[helper.field] | orderBy:'valueOf()'"
-          refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
-          refresh-delay="0"
-        >
-          <div ng-bind-html="value"></div>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-    <div class="col-md-5" ng-if="helper.type.id === 'query.terms'">
-      <ui-select ng-model="helper.params.terms" multiple>
-        <ui-select-match>
-          {{$item}}
-        </ui-select-match>
-        <ui-select-choices
-          repeat="value in filterHelper.suggestions[helper.field] | orderBy:'valueOf()'"
-          refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
-          refresh-delay="0"
-        >
-          <div ng-bind-html="value"></div>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-    <div class="col-md-2" ng-if="helper.type.id === 'range'">
-        <input ng-model="helper.params.gte" type="number" class="form-control" />
-    </div>
-    <div class="col-md-1" ng-if="helper.type.id === 'range'">and</div>
-    <div class="col-md-2" ng-if="helper.type.id === 'range'">
-        <input ng-model="helper.params.lt" type="number" class="form-control" />
-    </div>
-    <div class="col-md-5" ng-if="helper.type.id === 'exists'"></div>
-    <div class="col-md-2 text-right">
-      <button class="kuiButton kuiButton--default kuiButton--iconText" ng-click="filterHelper.removeHelper(helper)">
-        <span class="kuiButton__icon kuiIcon fa-trash"></span>
-      </button>
-    </div>
-  </div>
-  <div class="row" style="padding: 0.5em 0">
-    <div class="col-md-2">
-      <button class="kuiButton kuiButton--default kuiButton--iconText" ng-click="filterHelper.addHelper()">
-        <span class="kuiButton__icon kuiIcon fa-plus"></span>
-        Add a filter
-      </button>
-    </div>
-      <div class="col-md-10 text-right">
-        <button class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="filterHelper.applyHelpers()">
-          <span class="kuiButton__icon kuiIcon fa-search"></span>
-          Search
-        </button>
-      </div>
-  </div>
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            <ui-select
+              ng-model="helper.field"
+              on-select="filterHelper.refreshSuggestions(helper.field)"
+            >
+              <ui-select-match>
+                {{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="field.name as field in indexPattern.fields | orderBy:'name' | filter:$select.search ">
+                <div ng-bind-html="field.name"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            <select
+              class="kuiSelect"
+              ng-model="helper.type"
+              ng-options="type.label for type in filterHelper.filterTypesByField(filterHelper.types, helper.field)"
+            ></select>
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell" ng-if="helper.type.id === 'query.match'">
+          <div class="kuiTableRowCell__liner">
+            <ui-select ng-model="helper.params.query">
+              <ui-select-match>
+                {{$select.selected}}
+              </ui-select-match>
+              <ui-select-choices
+                repeat="value in filterHelper.suggestions[helper.field] | orderBy:'valueOf()'"
+                refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
+                refresh-delay="0"
+              >
+                <div ng-bind-html="value"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell" ng-if="helper.type.id === 'query.terms'">
+          <div class="kuiTableRowCell__liner">
+            <ui-select ng-model="helper.params.terms" multiple>
+              <ui-select-match>
+                {{$item}}
+              </ui-select-match>
+              <ui-select-choices
+                repeat="value in filterHelper.suggestions[helper.field] | orderBy:'valueOf()'"
+                refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
+                refresh-delay="0"
+              >
+                <div ng-bind-html="value"></div>
+              </ui-select-choices>
+            </ui-select>
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell" ng-if="helper.type.id === 'range'">
+          <div class="kuiTableRowCell__liner">
+              <div class="kuiColumn kuiColumn--4">
+                <input
+                  ng-model="helper.params.gte"
+                  type="number"
+                  class="kuiTextInput fullWidth"
+                />
+              </div><div class="kuiColumn kuiColumn--2">
+                and
+              </div><div class="kuiColumn kuiColumn--4">
+                <input
+                  ng-model="helper.params.lt"
+                  type="number"
+                  class="kuiTextInput fullWidth"
+                />
+              </div>
+          </div>
+        </td>
+
+        <td class="kuiTableRowCell" ng-if="helper.type.id === 'exists'">
+          <div class="kuiTableRowCell__liner"></div>
+        </td>
+
+        <td class="kuiTableRowCell kuiTableRowCell--alignRight">
+          <div class="kuiTableRowCell__liner">
+            <button
+              class="kuiMenuButton kuiMenuButton--danger"
+              ng-click="filterHelper.removeHelper(helper)"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="kuiTableRowCell" colspan="3">
+          <div class="kuiTableRowCell__liner">
+            <button class="kuiButton kuiButton--basic kuiButton--iconText" ng-click="filterHelper.addHelper()">
+              <span class="kuiButton__icon kuiIcon fa-plus"></span>
+              Add a filter
+            </button>
+          </div>
+        </td>
+        <td class="kuiTableRowCell text-right">
+          <div class="kuiTableRowCell__liner">
+            <button class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="filterHelper.applyHelpers()">
+              <span class="kuiButton__icon kuiIcon fa-search"></span>
+              Search
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
