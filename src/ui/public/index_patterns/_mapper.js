@@ -27,13 +27,13 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
      * @returns {Promise}
      * @async
      */
-    self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
+    self.getFieldsForIndexPattern = function (indexPattern, opts) {
       const id = indexPattern.id;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
-      if (!skipIndexPatternCache) {
+      if (!opts.skipIndexPatternCache) {
         return esAdmin.get({
           index: kbnIndex,
           type: 'index-pattern',
@@ -44,7 +44,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
           if (resp.found && resp._source.fields) {
             fieldCache.set(id, JSON.parse(resp._source.fields));
           }
-          return self.getFieldsForIndexPattern(indexPattern, true);
+          return self.getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true });
         });
       }
 
@@ -123,7 +123,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
   function handleMissingIndexPattern(err) {
     if (err.status >= 400) {
       // transform specific error type
-      return Promise.reject(new IndexPatternMissingIndices());
+      return Promise.reject(new IndexPatternMissingIndices(err.message));
     } else {
       // rethrow all others
       throw err;
