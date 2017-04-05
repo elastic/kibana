@@ -7,6 +7,7 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
+import { SavedObjectNotFound } from 'ui/errors';
 import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
@@ -20,6 +21,7 @@ import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
+import notify from 'ui/notify';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -45,8 +47,20 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier) {
-        return savedDashboards.get($route.current.params.id)
+      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
+        const id = $route.current.params.id;
+        return savedDashboards.get(id)
+          .catch((error) => {
+            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+            // See https://github.com/elastic/kibana/issues/10951 for more context.
+            if (error instanceof SavedObjectNotFound && id === 'create') {
+              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
+              notify.error(
+                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
+            } else {
+              throw error;
+            }
+          })
           .catch(courier.redirectWhenMissing({
             'dashboard' : DashboardConstants.LANDING_PAGE_PATH
           }));
