@@ -5,6 +5,8 @@ export fromRoot from './from_root';
 export pkg from './package_json';
 export unset from './unset';
 
+export { encodeQueryComponent } from './encode_query_component';
+
 export {
   createConcatStream,
   createIntersperseStream,

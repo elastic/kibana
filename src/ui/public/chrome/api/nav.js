@@ -1,5 +1,5 @@
 import { parse, format } from 'url';
-import { startsWith, isString } from 'lodash';
+import { isString } from 'lodash';
 
 export default function (chrome, internals) {
   chrome.getNavLinks = function () {
@@ -110,7 +110,7 @@ export default function (chrome, internals) {
     const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
     for (const link of internals.nav) {
-      link.active = startsWith(url, link.url);
+      link.active = url.startsWith(link.subUrlBase);
       if (link.active) {
         setLastUrl(link, url);
         continue;
@@ -124,11 +124,16 @@ export default function (chrome, internals) {
     }
   };
 
-  internals.nav.forEach(link => {
+  function relativeToAbsolute(url) {
     // convert all link urls to absolute urls
     const a = document.createElement('a');
-    a.setAttribute('href', link.url);
-    link.url = a.href;
+    a.setAttribute('href', url);
+    return a.href;
+  }
+
+  internals.nav.forEach(link => {
+    link.url = relativeToAbsolute(link.url);
+    link.subUrlBase = relativeToAbsolute(link.subUrlBase);
   });
 
   // simulate a possible change in url to initialize the
