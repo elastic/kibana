@@ -13,12 +13,14 @@ import DocTitleProvider from 'ui/doc_title';
 import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
-import { DashboardConstants } from './dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import { FilterUtils } from './filter_utils';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import errors from 'ui/errors';
+import notify from 'ui/notify';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -30,24 +32,37 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 uiRoutes
-  .when('/dashboard/create', {
+  .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, courier) {
         return savedDashboards.get()
           .catch(courier.redirectWhenMissing({
-            'dashboard': '/dashboard'
+            'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
     }
   })
-  .when('/dashboard/:id', {
+  .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier) {
-        return savedDashboards.get($route.current.params.id)
+      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
+        const id = $route.current.params.id;
+        return savedDashboards.get(id)
+          .catch((error) => {
+            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+            // See https://github.com/elastic/kibana/issues/10951 for more context.
+            if (error instanceof errors.SavedObjectNotFound && id === 'create') {
+              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
+              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
+              notify.error(
+                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
+            } else {
+              throw error;
+            }
+          })
           .catch(courier.redirectWhenMissing({
-            'dashboard' : '/dashboard'
+            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
           }));
       }
     }
@@ -99,6 +114,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
       $scope.topNavMenu = getTopNavConfig(kbnUrl);
+      $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -199,6 +215,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         });
         $state.save();
       };
+
 
       $scope.brushEvent = brushEvent;
       $scope.filterBarClickHandler = filterBarClickHandler;

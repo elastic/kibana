@@ -1,8 +1,8 @@
 import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import { DashboardConstants } from '../dashboard_constants';
 import _ from 'lodash';
+import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -147,6 +147,10 @@ export function DashboardListingController($injector, $scope) {
   };
 
   this.getUrlForItem = function getUrlForItem(item) {
-    return `#/dashboard/${item.id}`;
+    return `#${createDashboardEditUrl(item.id)}`;
+  };
+
+  this.getCreateDashboardHref = function getCreateDashboardHref() {
+    return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
   };
 }
