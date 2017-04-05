@@ -100,39 +100,39 @@ export function readCPUStat(controlGroup) {
 }
 
 export function getAllStats(options = {}) {
-  return readControlGroups().then(groups => {
-    const cpuPath = options.cpuPath || groups[GROUP_CPU];
-    const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
+  return new Promise((resolve, reject) => {
+    readControlGroups().then(groups => {
+      const cpuPath = options.cpuPath || groups[GROUP_CPU];
+      const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
 
-    return Promise.all([
-      readCPUAcctUsage(cpuAcctPath),
-      readCPUFsPeriod(cpuPath),
-      readCPUFsQuota(cpuPath),
-      readCPUStat(cpuPath)
-    ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
-      const stats = {
-        cpuacct: {
-          control_group: cpuAcctPath,
-          usage_nanos: cpuAcctUsage
-        },
+      return Promise.all([
+        readCPUAcctUsage(cpuAcctPath),
+        readCPUFsPeriod(cpuPath),
+        readCPUFsQuota(cpuPath),
+        readCPUStat(cpuPath)
+      ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
+        resolve({
+          cpuacct: {
+            control_group: cpuAcctPath,
+            usage_nanos: cpuAcctUsage
+          },
 
-        cpu: {
-          control_group: cpuPath,
-          cfs_period_micros: cpuFsPeriod,
-          cfs_quota_micros: cpuFsQuota,
-          stat: cpuStat
-        }
-      };
+          cpu: {
+            control_group: cpuPath,
+            cfs_period_micros: cpuFsPeriod,
+            cfs_quota_micros: cpuFsQuota,
+            stat: cpuStat
+          }
+        });
+      }).catch(rejectUnlessFileNotFound);
+    }).catch(rejectUnlessFileNotFound);
 
-      return stats;
-    }).catch(throwUnlessFileNotFound);
-  }).catch(throwUnlessFileNotFound);
+    function rejectUnlessFileNotFound(err) {
+      if (err.code === 'ENOENT') {
+        resolve(null);
+      }
 
-  function throwUnlessFileNotFound(err) {
-    if (err.code === 'ENOENT') {
-      return null;
+      reject(err);
     }
-
-    throw err;
-  }
+  });
 }

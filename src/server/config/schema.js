@@ -30,7 +30,7 @@ module.exports = () => Joi.object({
   cpu: Joi.object({
     cgroup: Joi.object({
       path: Joi.object({
-        override: Joi.boolean().default(false)
+        override: Joi.string().default()
       })
     })
   }),
@@ -38,7 +38,7 @@ module.exports = () => Joi.object({
   cpuacct: Joi.object({
     cgroup: Joi.object({
       path: Joi.object({
-        override: Joi.boolean().default(false)
+        override: Joi.string().default()
       })
     })
   }),

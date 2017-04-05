@@ -5,12 +5,12 @@ import { getAllStats as cGroupStats } from './cgroup';
 let cGroupStatsAvailable = true;
 
 export function collectMetrics(kbnServer, server, config) {
-  server.plugins['even-better'].monitor.on('ops', function (event) {
-    getMetrics({ event, config }).then(data => { kbnServer.metrics = data; });
+  server.plugins['even-better'].monitor.on('ops', event => {
+    getMetrics(event, config, server).then(data => { kbnServer.metrics = data; });
   });
 }
 
-export async function getMetrics({ event, config }) {
+export async function getMetrics(event, config, server) {
   const port = config.get('server.port');
   const timestamp = new Date().toISOString();
   const cgroup = await cGroupStatsIfAvailable();
@@ -47,16 +47,20 @@ export async function getMetrics({ event, config }) {
       return;
     }
 
-    const cgroup = await cGroupStats({
-      cpuPath: config.get('cpu.cgroup.path.override') ? '/' : undefined,
-      cpuAcctPath: config.get('cpuacct.cgroup.path.override') ? '/' : undefined
-    });
+    try {
+      const cgroup = await cGroupStats({
+        cpuPath: config.get('cpu.cgroup.path.override'),
+        cpuAcctPath: config.get('cpuacct.cgroup.path.override')
+      });
 
-    if (isObject(cgroup)) {
-      return cgroup;
+      if (isObject(cgroup)) {
+        return cgroup;
+      }
+
+      cGroupStatsAvailable = false;
+    } catch (e) {
+      server.log(['error', 'metrics', 'cgroup'], e);
     }
-
-    cGroupStatsAvailable = false;
   }
 
   if (isObject(cgroup)) {
