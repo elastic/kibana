@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { defaultFindTimeout } from '../';
 
+import {
+  DashboardConstants
+} from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 import {
   esArchiver,
@@ -34,7 +37,7 @@ export default class DashboardPage {
    */
   async onDashboardLandingPage() {
     PageObjects.common.debug(`onDashboardLandingPage`);
-    const exists = await PageObjects.common.doesCssSelectorExist('a[href="#/dashboard"]');
+    const exists = await PageObjects.common.doesCssSelectorExist(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
     return !exists;
   }
 
@@ -43,7 +46,8 @@ export default class DashboardPage {
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
       await PageObjects.common.try(async () => {
-        const goToDashboardLink = await PageObjects.common.findByCssSelector('a[href="#/dashboard"]');
+        const goToDashboardLink =
+          await PageObjects.common.findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
         await goToDashboardLink.click();
         // Once the searchFilter can be found, we know the page finished loading.
         await PageObjects.common.findTestSubject('searchFilter');
