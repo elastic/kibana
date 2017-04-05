@@ -58,6 +58,9 @@ bdd.describe('visualize app', function describeIndexTests() {
 
       return PageObjects.visualize.collapseChart()
         .then(function () {
+          return PageObjects.visualize.clickMapZoomOut();
+        })
+        .then(function () {
           return PageObjects.settings.setPageSize('All');
         })
         .then(function getDataTableData() {
