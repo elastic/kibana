@@ -16,28 +16,28 @@ export default class VisualizePage {
   clickAreaChart() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Area chart')
+    .findByPartialLinkText('Area')
     .click();
   }
 
   clickDataTable() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Data table')
+    .findByPartialLinkText('Data Table')
     .click();
   }
 
   clickLineChart() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Line chart')
+    .findByPartialLinkText('Line')
       .click();
   }
 
   clickMarkdownWidget() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Markdown widget')
+    .findByPartialLinkText('Markdown')
     .click();
   }
 
@@ -58,28 +58,28 @@ export default class VisualizePage {
   clickPieChart() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Pie chart')
+    .findByPartialLinkText('Pie')
     .click();
   }
 
   clickTileMap() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Tile map')
+    .findByPartialLinkText('Tile Map')
     .click();
   }
 
   clickVerticalBarChart() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Vertical bar chart')
+    .findByPartialLinkText('Vertical Bar')
     .click();
   }
 
   clickHeatmapChart() {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Heatmap chart')
+      .findByPartialLinkText('Heat Map')
       .click();
   }
 

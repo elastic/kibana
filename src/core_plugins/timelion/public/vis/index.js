@@ -1,3 +1,6 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
+import image from '../images/icon-timelion.svg';
+
 define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/timelion/vis/timelion_vis_controller');
@@ -10,6 +13,7 @@ define(function (require) {
   require('ui/registry/vis_types').register(TimelionVisProvider);
 
   function TimelionVisProvider(Private) {
+    const VisType = Private(VisVisTypeProvider);
     const TemplateVisType = Private(require('ui/template_vis_type'));
 
     // return the visType object, which kibana will use to display and configure new
@@ -17,9 +21,9 @@ define(function (require) {
     return new TemplateVisType({
       name: 'timelion',
       title: 'Timelion',
-      icon: 'fa-clock-o',
-      description: 'Create timeseries charts using the timelion expression language. ' +
-        'Perfect for computing and combining timeseries sets with functions such as derivatives and moving averages',
+      image,
+      description: 'Build time-series using functional expressions',
+      category: VisType.CATEGORY.TIME,
       template: require('plugins/timelion/vis/timelion_vis.html'),
       params: {
         editor: require('plugins/timelion/vis/timelion_vis_params.html')
