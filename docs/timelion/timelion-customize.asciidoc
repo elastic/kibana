@@ -1,0 +1,49 @@
+[[timelion-customize]]
+== Customize and format visualizations
+
+Timelion has plenty of options for customization. You can personalize every aspect of a chart with the functions available. For this tutorial, we will perform the following modifications.
+
+* Add a title
+* Change a series type
+* Change the color and opacity of a series
+* Modify the legend
+
+In the previous tutorial, we created a Timelion chart with two series. Let’s continue the differentiate the two.
+
+Before making any other modifications to this chart, add a title so other users know what they’re looking at. Add *title('CPU usage over time')* to the original series. Use the following expression:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')
+----------------------------------
+
+image::images/timelion-customize01.png[]
+
+To differentiate the last hour series a bit more, change the chart type to an area chart. Set the fill level to 1 and the width of the border to 0.5 with *.lines(fill=1,width=0.5)* and the following expression:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')
+----------------------------------
+
+image::images/timelion-customize02.png[]
+
+Let’s color these series so that the current hour pops a bit more than the last. We can use standard color names, hexadecimal value or a color schema for grouped series. For this example we will use *.color(gray)* for the last hour and *.color(#1E90FF)* for the current hour. Use the following expression to make the adjustments:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF)
+----------------------------------
+
+image::images/timelion-customize03.png[]
+
+Last but not least, adjust the legend so that it takes up as little space as possible. For this example, we’ll place it in the north west position in the visualization with two columns using *.legend(columns=2, position=nw)* on the original series. Use the following expression to make the adjustments:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) 
+----------------------------------
+
+image::images/timelion-customize04.png[]
+
+Save the entire Timelion sheet as _Metricbeat Example_.

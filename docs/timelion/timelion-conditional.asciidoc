@@ -1,0 +1,42 @@
+[[timelion-conditional]]
+== Using conditional logic and tracking trends
+
+In this tutorial we will show you how to modify a series with conditional logic and create a trend line. This is helpful to easily distinguish outliers in your data and detect trends over time.
+
+For the purposes of this tutorial, we will continue to use our Metricbeat data to add another visualization that monitors our memory consumption. To start, use the following expression to chart the max *system.memory.actual.used.bytes*.
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes')
+----------------------------------
+
+image::images/timelion-conditional01.png[]
+
+Let’s create two thresholds to keep an eye on the amount of memory our machine is using. Our warning threshold will be 12.5GB and our severe threshold will be 15GB. If the maximum amount of memory being utilized exceeds either of these thresholds, we can adjust the series appropriately. In order to do so, we will be using the *if()* function.
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red')
+----------------------------------
+
+image::images/timelion-conditional02.png[]
+
+Now that we have thresholds for our outliers set, let’s smooth out the data to see what the trend really is. We can use the *mvavg()* function to define a number of points to average over and create a moving average series. Use the following expression to create a moving average of the maximum memory consumption:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10)
+----------------------------------
+
+image::images/timelion-conditional03.png[]
+
+Know what time it is? Time to clean up the visualization. With all the styling and formatting knowledge you gained from our {kib-ref}timelion-customize.html[our previous tutorial], use the following expression to update your the visualization:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').label('max memory').title('Memory consumption over time'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11').lines(width=5), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red').lines(width=5), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10).label('mvavg').lines(width=2).color(#5E5E5E).legend(columns=4, position=nw) 
+----------------------------------
+
+image::images/timelion-conditional04.png[]
+
+Save your Timelion sheet and continue on to the next tutorial to add to your dashboard.

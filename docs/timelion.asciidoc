@@ -15,25 +15,25 @@ For example, Timelion enables you to easily get the answers to questions like:
 * What percent of Japan's population came to my site today?
 * What's the 10-day moving average of the S&P 500?
 * What's the cumulative sum of all search requests received in the last 2 years?
+
+
+Ready to experience all that is Timelion? This tutorial shows you how to:
+
+* {kib-ref}timelion-create.html[Create a time series chart with multiple expressions]
+* {kib-ref}timelion-customize.html[Customize the visualization type and formatting options]
+* {kib-ref}timelion-math.html[Use mathematical functions to manipulate your data]
+* {kib-ref}timelion-conditional.html[Track trends and use conditional logic to format outliers]
+* {kib-ref}timelion-save.html[Add Timelion visualizations to a dashboard]
+* {kib-ref}timelion-inline-help.html[Reference inline help]
 --
+include::timelion/timelion-create.asciidoc[]
 
-[[timelion-createviz]]
-== Creating Time Series Visualizations
-To start building time-series visualizations, click **Timelion** in the side
-navigation and run through the tutorial. Documentation for the Timelion
-expression language is built-in. Click **Docs** in the toolbar to view
-the available functions and access the tutorial. As you start to enter
-functions in the query bar, Timelion displays the available arguments:
+include::timelion/timelion-customize.asciidoc[]
 
-image::images/timelion-arg-help.jpg["Timelion inline help"]
+include::timelion/timelion-math.asciidoc[]
 
-To incorporate a Timelion visualization into a Kibana dashboard, save the
-Timelion expression as a Kibana dashboard panel. You can then add it to
-a dashboard like any other visualization.
+include::timelion/timelion-conditional.asciidoc[]
 
-TIP: You can also create time series visualizations right from the Visualize
-app--just select the Timelion visualization type and enter a Timelion
-expression in the expression field.
+include::timelion/timelion-save.asciidoc[]
 
-
-
+include::timelion/timelion-inline-help.asciidoc[]
