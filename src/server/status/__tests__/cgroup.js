@@ -1,28 +1,10 @@
 import expect from 'expect.js';
 import mockFs from 'mock-fs';
+import { cGroups as cGroupsFsStub } from './fs_stubs';
 import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
 
 describe('Control Group', function () {
-  const hierarchy = Math.random().toString(36).substring(7);
-
-  const cGroupContents = [
-    '10:freezer:/',
-    '9:net_cls,net_prio:/',
-    '8:pids:/',
-    '7:blkio:/',
-    '6:memory:/',
-    '5:devices:/user.slice',
-    '4:hugetlb:/',
-    '3:perf_event:/',
-    '2:cpu,cpuacct,cpuset:/' + hierarchy,
-    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope'
-  ].join('\n');
-
-  const cpuStatContents = [
-    'nr_periods 0',
-    'nr_throttled 10',
-    'throttled_time 20'
-  ].join('\n');
+  const fsStub = cGroupsFsStub();
 
   afterEach(() => {
     mockFs.restore();
@@ -30,7 +12,7 @@ describe('Control Group', function () {
 
   describe('readControlGroups', () => {
     it('parses the file', async () => {
-      mockFs({ '/proc/self/cgroup': cGroupContents });
+      mockFs({ '/proc/self/cgroup': fsStub.cGroupContents });
       const cGroup = await readControlGroups();
 
       expect(cGroup).to.eql({
@@ -43,9 +25,9 @@ describe('Control Group', function () {
         devices: '/user.slice',
         hugetlb: '/',
         perf_event: '/',
-        cpu: `/${hierarchy}`,
-        cpuacct: `/${hierarchy}`,
-        cpuset: `/${hierarchy}`,
+        cpu: `/${fsStub.hierarchy}`,
+        cpuacct: `/${fsStub.hierarchy}`,
+        cpuset: `/${fsStub.hierarchy}`,
         'name=systemd': '/user.slice/user-1000.slice/session-2359.scope'
       });
     });
@@ -53,7 +35,7 @@ describe('Control Group', function () {
 
   describe('readCPUStat', () => {
     it('parses the file', async () => {
-      mockFs({ '/sys/fs/cgroup/cpu/fakeGroup/cpu.stat': cpuStatContents });
+      mockFs({ '/sys/fs/cgroup/cpu/fakeGroup/cpu.stat': fsStub.cpuStatContents });
       const cpuStat = await readCPUStat('fakeGroup');
 
       expect(cpuStat).to.eql({
@@ -76,30 +58,21 @@ describe('Control Group', function () {
   });
 
   describe('getAllStats', () => {
-    const cpuAcctDir = `/sys/fs/cgroup/cpuacct/${hierarchy}`;
-    const cpuDir = `/sys/fs/cgroup/cpu/${hierarchy}`;
-    const files = {
-      '/proc/self/cgroup': cGroupContents,
-      [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
-      [`${cpuDir}/cpu.cfs_period_us`]: '100000',
-      [`${cpuDir}/cpu.cfs_quota_us`]: '5000',
-      [`${cpuDir}/cpu.stat`]: cpuStatContents,
-    };
-
     it('can override the cpu group path', async () => {
       mockFs({
-        '/proc/self/cgroup': cGroupContents,
-        [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
+        '/proc/self/cgroup': fsStub.cGroupContents,
+        [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         '/sys/fs/cgroup/cpu/docker/cpu.cfs_period_us': '100000',
         '/sys/fs/cgroup/cpu/docker/cpu.cfs_quota_us': '5000',
-        '/sys/fs/cgroup/cpu/docker/cpu.stat': cpuStatContents,
+        '/sys/fs/cgroup/cpu/docker/cpu.stat': fsStub.cpuStatContents,
       });
 
+      console.log('fsStub.cpuAcctDir', fsStub.cpuAcctDir);
       const stats = await getAllStats({ cpuPath: '/docker' });
 
       expect(stats).to.eql({
         cpuacct: {
-          control_group: `/${hierarchy}`,
+          control_group: `/${fsStub.hierarchy}`,
           usage_nanos: 357753491408,
         },
         cpu: {
@@ -117,11 +90,11 @@ describe('Control Group', function () {
 
     it('can override the cpuacct group path', async () => {
       mockFs({
-        '/proc/self/cgroup': cGroupContents,
+        '/proc/self/cgroup': fsStub.cGroupContents,
         '/sys/fs/cgroup/cpuacct/docker/cpuacct.usage': '357753491408',
-        [`${cpuDir}/cpu.cfs_period_us`]: '100000',
-        [`${cpuDir}/cpu.cfs_quota_us`]: '5000',
-        [`${cpuDir}/cpu.stat`]: cpuStatContents,
+        [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
+        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000',
+        [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents,
       });
 
       const stats = await getAllStats({ cpuAcctPath: '/docker' });
@@ -132,7 +105,7 @@ describe('Control Group', function () {
           usage_nanos: 357753491408,
         },
         cpu: {
-          control_group: `/${hierarchy}`,
+          control_group: `/${fsStub.hierarchy}`,
           cfs_period_micros: 100000,
           cfs_quota_micros: 5000,
           stat: {
@@ -145,16 +118,16 @@ describe('Control Group', function () {
     });
 
     it('extracts control group stats', async () => {
-      mockFs(files);
+      mockFs(fsStub.files);
       const stats = await getAllStats();
 
       expect(stats).to.eql({
         cpuacct: {
-          control_group: `/${hierarchy}`,
+          control_group: `/${fsStub.hierarchy}`,
           usage_nanos: 357753491408,
         },
         cpu: {
-          control_group: `/${hierarchy}`,
+          control_group: `/${fsStub.hierarchy}`,
           cfs_period_micros: 100000,
           cfs_quota_micros: 5000,
           stat: {
@@ -174,8 +147,8 @@ describe('Control Group', function () {
 
     it('returns null if CPU accounting files are missing', async () => {
       mockFs({
-        '/proc/self/cgroup': cGroupContents,
-        [`${cpuDir}/cpu.stat`]: cpuStatContents
+        '/proc/self/cgroup': fsStub.cGroupContents,
+        [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents
       });
       const stats = await getAllStats();
 
@@ -184,10 +157,10 @@ describe('Control Group', function () {
 
     it('returns null if cpuStat file is missing', async () => {
       mockFs({
-        '/proc/self/cgroup': cGroupContents,
-        [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
-        [`${cpuDir}/cpu.cfs_period_us`]: '100000',
-        [`${cpuDir}/cpu.cfs_quota_us`]: '5000'
+        '/proc/self/cgroup': fsStub.cGroupContents,
+        [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
+        [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
+        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000'
       });
       const stats = await getAllStats();
 

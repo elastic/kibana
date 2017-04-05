@@ -29,6 +29,8 @@ export function cGroups(hierarchy) {
     hierarchy,
     cGroupContents,
     cpuStatContents,
+    cpuAcctDir,
+    cpuDir,
     files: {
       '/proc/self/cgroup': cGroupContents,
       [`${cpuAcctDir}/cpuacct.usage`]: '357753491408',
