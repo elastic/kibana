@@ -122,7 +122,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       $scope.checkRelative = function () {
         const from = dateMath.parse(getRelativeString('from'));
-        const to = dateMath.parse(getRelativeString('to', true));
+        const to = dateMath.parse(getRelativeString('to'), true);
         if (to && from) return to.isBefore(from);
         return true;
       };
@@ -155,7 +155,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         let operator = '-';
         if (matches && matches[1]) unit = matches[1];
         if (matches && matches[2]) operator = matches[2];
-        if (count === 0 && key === 'to') return 'now';
+        if (count === 0 && key === 'to' && !round) return 'now';
         let result = `now${operator}${count}${unit}`;
         result += (round ? '/' + unit : '');
         return result;
