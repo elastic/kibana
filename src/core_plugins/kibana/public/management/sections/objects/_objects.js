@@ -164,6 +164,7 @@ uiModules.get('apps/management')
           docs = JSON.parse(fileContents);
         } catch (e) {
           notify.error('The file could not be processed.');
+          return;
         }
 
         return new Promise((resolve) => {
