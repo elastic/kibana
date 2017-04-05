@@ -1,85 +1,82 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
+  GuideCode,
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
   GuideText,
 } from '../../components';
 
-const infoHtml = require('./info_panel_info.html');
-const successHtml = require('./info_panel_success.html');
-const warningHtml = require('./info_panel_warning.html');
-const errorHtml = require('./info_panel_error.html');
+const titleHtml = require('./title.html');
+const subTitleHtml = require('./sub_title.html');
+const textHtml = require('./text.html');
+const subduedHtml = require('./subdued_type.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Info"
+      title="Title"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: infoHtml,
+        code: titleHtml,
       }]}
     >
       <GuideText>
-        Use this InfoPanel to generally inform the user.
+        Works well with an <GuideCode>h1</GuideCode>.
       </GuideText>
 
       <GuideDemo
-        html={infoHtml}
+        html={titleHtml}
       />
     </GuideSection>
 
     <GuideSection
-      title="Success"
+      title="SubTitle"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: successHtml,
+        code: subTitleHtml,
       }]}
     >
       <GuideText>
-        Use this InfoPanel to notify the user of an action successfully completing.
+        Works well with an <GuideCode>h2</GuideCode>.
       </GuideText>
 
       <GuideDemo
-        html={successHtml}
+        html={subTitleHtml}
       />
     </GuideSection>
 
     <GuideSection
-      title="Warning"
+      title="Text"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: warningHtml,
+        code: textHtml,
       }]}
     >
       <GuideText>
-        Use this InfoPanel to warn the user against decisions they might regret.
+        Works well with a <GuideCode>p</GuideCode>.
       </GuideText>
 
       <GuideDemo
-        html={warningHtml}
+        html={textHtml}
       />
     </GuideSection>
 
     <GuideSection
-      title="Error"
+      title="Subdued type"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: errorHtml,
+        code: subduedHtml,
       }]}
     >
       <GuideText>
-        Use this InfoPanel to let the user know something went wrong.
+        You can drop type a half-step down in the type hierarchy.
       </GuideText>
 
       <GuideDemo
-        html={errorHtml}
+        html={subduedHtml}
       />
     </GuideSection>
   </GuidePage>

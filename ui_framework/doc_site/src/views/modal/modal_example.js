@@ -1,15 +1,10 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 const modalHtml = require('./modal.html');

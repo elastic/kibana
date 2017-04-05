@@ -1,30 +1,30 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
   GuideText,
 } from '../../components';
 
-const linkHtml = require('./link.html');
+const defaultHtml = require('./default_badge.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Link"
+      title="Default Badge"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: linkHtml,
+        code: defaultHtml,
       }]}
     >
+      <GuideText>
+        Use the Default Badge to signify a neutral status of a document or object.
+      </GuideText>
+
       <GuideDemo
-        html={linkHtml}
+        html={defaultHtml}
       />
     </GuideSection>
   </GuidePage>

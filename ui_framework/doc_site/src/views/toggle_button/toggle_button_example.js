@@ -1,7 +1,4 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
   GuideDemo,
@@ -11,23 +8,25 @@ import {
   GuideText,
 } from '../../components';
 
-const defaultHtml = require('./default_badge.html');
+const toggleButtonHtml = require('./toggle_button.html');
+const toggleButtonJs = require('raw!./toggle_button.js');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Default Badge"
+      title="ToggleButton"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: defaultHtml,
+        code: toggleButtonHtml,
       }]}
     >
       <GuideText>
-        Use the Default Badge to signify a neutral status of a document or object.
+        You can use this button to reveal and hide content.
       </GuideText>
 
       <GuideDemo
-        html={defaultHtml}
+        html={toggleButtonHtml}
+        js={toggleButtonJs}
       />
     </GuideSection>
   </GuidePage>

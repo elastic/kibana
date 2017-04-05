@@ -1,43 +1,44 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import {
-  GuideCode,
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
+  GuideText,
 } from '../../components';
 
-const menuHtml = require('./menu.html');
-const menuContainedHtml = require('./menu_contained.html');
+const cardHtml = require('./card.html');
+const cardGroupHtml = require('./card_group.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Menu"
+      title="Card"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: menuHtml,
+        code: cardHtml,
       }]}
     >
+      <GuideText>
+        Cards expand to fill their container. To restrict a card's width, define the width of its
+        container.
+      </GuideText>
+
       <GuideDemo
-        html={menuHtml}
+        html={cardHtml}
       />
     </GuideSection>
 
     <GuideSection
-      title="Menu, contained"
+      title="CardGroup"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: menuContainedHtml,
+        code: cardGroupHtml,
       }]}
     >
       <GuideDemo
-        html={menuContainedHtml}
+        html={cardGroupHtml}
       />
     </GuideSection>
   </GuidePage>

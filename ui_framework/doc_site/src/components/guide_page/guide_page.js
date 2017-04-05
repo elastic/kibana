@@ -4,10 +4,6 @@ import React, {
 } from 'react';
 
 import {
-  Slugify,
-} from '../../services';
-
-import {
   GuidePageSideNav,
   GuidePageSideNavItem,
 } from '../';
@@ -21,8 +17,8 @@ export class GuidePage extends Component {
 
   onClickLink(id) {
     // Scroll to element.
-    $('html, body').animate({
-      scrollTop: $(`#${id}`).offset().top - 100
+    $('html, body').animate({ // eslint-disable-line no-undef
+      scrollTop: $(`#${id}`).offset().top - 100 // eslint-disable-line no-undef
     }, 250);
   }
 
