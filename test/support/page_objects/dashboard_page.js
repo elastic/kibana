@@ -1,7 +1,8 @@
+import { defaultFindTimeout } from '../';
 
 import {
-  defaultFindTimeout,
-} from '../';
+  DashboardConstants
+} from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 import PageObjects from './';
 
@@ -14,7 +15,7 @@ export default class DashboardPage {
 
   gotoDashboardLandingPage() {
     return this.findTimeout
-      .findByCssSelector('a[href="#/dashboard"]')
+      .findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`)
       .click();
   }
 
