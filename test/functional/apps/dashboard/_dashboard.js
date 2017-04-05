@@ -104,16 +104,16 @@ bdd.it('retains dark theme in state', async function () {
   expect(isDarkThemeOn).to.equal(true);
 });
 
-bdd.it('should have shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
+bdd.it('should have data-shared-items-count set to the number of visualizations', function  checkSavedItemsCount() {
   const visualizations = PageObjects.dashboard.getTestVisualizations();
   return PageObjects.common.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
     .then(function (count) {
-      PageObjects.common.log('shared-items-count = ' + count);
+      PageObjects.common.log('data-shared-items-count = ' + count);
       expect(count).to.eql(visualizations.length);
     });
 });
 
-bdd.it('should have panels with expected shared-item title and description', function checkTitles() {
+bdd.it('should have panels with expected data-shared-item title and description', function checkTitles() {
   const visualizations = PageObjects.dashboard.getTestVisualizations();
   return PageObjects.common.tryForTime(10000, function () {
     return PageObjects.dashboard.getPanelSharedItemData()

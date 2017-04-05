@@ -13,9 +13,9 @@ bdd.describe('visualize app', function describeIndexTests() {
     return PageObjects.common.navigateToApp('visualize');
   });
 
-  bdd.describe('shared-item', function indexPatternCreation() {
+  bdd.describe('data-shared-item', function indexPatternCreation() {
 
-    bdd.it('should have the correct shared-item title and description', function () {
+    bdd.it('should have the correct data-shared-item title and description', function () {
       const expected = {
         title: 'Shared-Item Visualization AreaChart',
         description: 'AreaChart'
