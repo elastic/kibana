@@ -63,10 +63,13 @@
           columns="state.columns"
           hits="rows"
           field-counts="fieldCounts"
-          filter="filterQuery"
           index-pattern="searchSource.get('index')"
           index-pattern-list="opts.indexPatternList"
-          state="state">
+          state="state"
+          on-add-field="addColumn"
+          on-add-filter="filterQuery"
+          on-remove-field="removeColumn"
+        >
         </disc-field-chooser>
       </div>
 
@@ -133,8 +136,12 @@
                 shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
-                render-counter>
-              </doc-table>
+                render-counter
+                on-add-column="addColumn"
+                on-change-sort-order="setSortOrder"
+                on-move-column="moveColumn"
+                on-remove-column="removeColumn"
+              ></doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 <center>

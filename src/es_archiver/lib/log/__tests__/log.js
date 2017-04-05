@@ -53,27 +53,27 @@ describe('esArchiver: createLog(logLevel, output)', () => {
   });
 
   describe('log level', () => {
-    context('logLevel=silent', () => {
+    describe('logLevel=silent', () => {
       nothingTest('silent', 'debug');
       nothingTest('silent', 'info');
       nothingTest('silent', 'error');
     });
-    context('logLevel=error', () => {
+    describe('logLevel=error', () => {
       nothingTest('error', 'debug');
       nothingTest('error', 'info');
       somethingTest('error', 'error');
     });
-    context('logLevel=info', () => {
+    describe('logLevel=info', () => {
       nothingTest('info', 'debug');
       somethingTest('info', 'info');
       somethingTest('info', 'error');
     });
-    context('logLevel=debug', () => {
+    describe('logLevel=debug', () => {
       somethingTest('debug', 'debug');
       somethingTest('debug', 'info');
       somethingTest('debug', 'error');
     });
-    context('invalid logLevel', () => {
+    describe('invalid logLevel', () => {
       it('throw error', () => {
         // avoid the impossiblity that a valid level is generated
         // by specifying a long length

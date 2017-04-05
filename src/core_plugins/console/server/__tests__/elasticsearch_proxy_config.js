@@ -46,7 +46,7 @@ describe('plugins/console', function () {
       expect(agent).to.be.a(http.Agent);
     });
 
-    context('ssl', function () {
+    describe('ssl', function () {
       beforeEach(function () {
         setElasticsearchConfig('url', 'https://localhost:9200');
       });

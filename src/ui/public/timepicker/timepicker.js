@@ -133,8 +133,8 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.onFilterSelect({ from, to });
       };
 
-      $scope.setToNow = function () {
-        $scope.absolute.to = moment();
+      $scope.setToNow = function (key) {
+        $scope.absolute[key] = moment();
       };
 
       $scope.formatRelative = function () {

@@ -65,6 +65,11 @@
     data-description="{{savedObj.description}}"
     render-counter
     class="panel-content"
-    filter="filter">
+    filter="filter"
+    on-add-column="addColumn"
+    on-change-sort-order="setSortOrder"
+    on-move-column="moveColumn"
+    on-remove-column="removeColumn"
+    >
   </doc-table>
 </div>

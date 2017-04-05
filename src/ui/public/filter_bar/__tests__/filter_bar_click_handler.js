@@ -43,7 +43,7 @@ describe('filterBarClickHandler', function () {
     notify._notifs.splice(0);
   });
 
-  context('on non-filterable fields', function () {
+  describe('on non-filterable fields', function () {
     it('warns about trying to filter on a non-filterable field', function () {
       const { clickHandler, aggConfigResult } = setup();
       expect(notify._notifs).to.have.length(0);

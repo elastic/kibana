@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
@@ -108,15 +109,27 @@ uiModules
           $scope.panel.columns = $scope.panel.columns || $scope.savedObj.columns;
           $scope.panel.sort = $scope.panel.sort || $scope.savedObj.sort;
 
-          // If the user updates the sort direction or columns in a saved search, we want to save that
-          // to the ui state so the share url will show our temporary modifications.
-          $scope.$watchCollection('panel.columns', function () {
+          $scope.setSortOrder = function setSortOrder(columnName, direction) {
+            $scope.panel.sort = [columnName, direction];
             $scope.saveState();
-          });
+          };
 
-          $scope.$watchCollection('panel.sort', function () {
-            $scope.saveState();
-          });
+          $scope.addColumn = function addColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.addColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.removeColumn = function removeColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.removeColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.moveColumn = function moveColumn(columnName, newIndex) {
+            columnActions.moveColumn($scope.panel.columns, columnName, newIndex);
+            $scope.saveState();  // sync to sharing url
+          };
         }
 
         $scope.filter = function (field, value, operator) {

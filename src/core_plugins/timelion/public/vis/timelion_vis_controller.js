@@ -1,7 +1,6 @@
 define(function (require) {
   require('plugins/timelion/directives/chart/chart');
   require('plugins/timelion/directives/interval/interval');
-  require('plugins/timelion/directives/refresh_hack');
   require('ui/state_management/app_state');
 
   const _ = require('lodash');

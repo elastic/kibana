@@ -2,6 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -475,10 +476,28 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .set('filter', queryFilter.getFilters());
   });
 
+  $scope.setSortOrder = function setSortOrder(columnName, direction) {
+    $scope.state.sort = [columnName, direction];
+  };
+
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
     filterManager.add(field, values, operation, $state.index);
+  };
+
+  $scope.addColumn = function addColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.addColumn($scope.state.columns, columnName);
+  };
+
+  $scope.removeColumn = function removeColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.removeColumn($scope.state.columns, columnName);
+  };
+
+  $scope.moveColumn = function moveColumn(columnName, newIndex) {
+    columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
   $scope.toTop = function () {

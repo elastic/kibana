@@ -2308,6 +2308,9 @@ body {
   line-height: 1.5;
   font-size: 14px; }
 
+.kuiSubduedText {
+  color: #9fa3a7 !important; }
+
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
 
