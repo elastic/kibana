@@ -1,13 +1,9 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import React from 'react';
 
 import { renderToHtml } from '../../services';
 
 import {
   GuideDemo,
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,

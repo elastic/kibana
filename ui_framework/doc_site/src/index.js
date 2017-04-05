@@ -16,8 +16,8 @@ import configureStore from './store/configure_store';
 
 // Guide views.
 import AppContainer from './views/app_container';
-import HomeView from './views/home/home_view.jsx';
-import NotFoundView from './views/not_found/not_found_view.jsx';
+import HomeView from './views/home/home_view';
+import NotFoundView from './views/not_found/not_found_view';
 
 import {
   Routes,
@@ -41,7 +41,7 @@ const routes = [{
   component: AppContainer,
   indexRoute: {
     component: HomeView,
-    source: 'views/home/HomeView.jsx',
+    source: 'views/home/HomeView',
   },
   childRoutes,
 }];
