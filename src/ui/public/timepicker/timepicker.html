@@ -41,10 +41,11 @@
                   <label>
                     From:
                     <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
+                    <a class="label label-default" ng-click="setRelativeToNow('from')">Set To Now</a>
                     <span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
                   </label>
                   <br>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <input
                       required
                       ng-model="relative.from.count"
@@ -54,7 +55,7 @@
                       type="number"
                       class="form-control">
                   </div>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <select
                       ng-model="relative.from.unit"
                       ng-options="opt.value as opt.text for opt in relativeOptions"
@@ -72,6 +73,11 @@
                         type="checkbox">
                       round to the {{units[relative.from.unit.substring(0,1)]}}
                     </label>
+                    <div
+                      ng-class="{ 'kbn-timepicker-error': checkRelative() }"
+                      ng-show="checkRelative()">
+                      <strong>From</strong> must occur before <strong>To</strong>
+                    </div>
                   </div>
                 </div>
 
@@ -83,7 +89,7 @@
                     <span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
                   </label>
                   <br>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <input
                       required
                       ng-model="relative.to.count"
@@ -93,7 +99,7 @@
                       type="number"
                       class="form-control">
                   </div>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <select
                       ng-model="relative.to.unit"
                       ng-options="opt.value as opt.text for opt in relativeOptions"
@@ -121,7 +127,6 @@
                     <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()">
                       Go
                     </button>
-                    <span class="small" ng-show="checkRelative()"><strong>From</strong> must occur before <strong>To</strong></span>
                   </div>
                 </div>
               </form>
