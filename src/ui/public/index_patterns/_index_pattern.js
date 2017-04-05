@@ -147,7 +147,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
   function fetchFields(indexPattern) {
     return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
+    .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
@@ -363,7 +363,11 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       return mapper
       .clearCache(this)
       .then(() => fetchFields(this))
-      .then(() => this.save());
+      .then(() => this.save())
+      .catch((err) => {
+        notify.error(err);
+        return Promise.reject(err);
+      });
     }
 
     toJSON() {

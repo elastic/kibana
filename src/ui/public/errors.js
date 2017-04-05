@@ -62,7 +62,7 @@ errors.RequestFailure = function RequestFailure(err, resp) {
   err = err || false;
 
   KbnError.call(this,
-    'Request to Elasticsearch failed: ' + angular.toJson(resp || err.message),
+    `Request to Elasticsearch failed: ${angular.toJson(resp || err.message)}`,
     errors.RequestFailure);
 
   this.origError = err;
@@ -77,7 +77,7 @@ _.class(errors.RequestFailure).inherits(KbnError);
  */
 errors.FetchFailure = function FetchFailure(resp) {
   KbnError.call(this,
-    'Failed to get the doc: ' + angular.toJson(resp),
+    `Failed to get the doc: ${angular.toJson(resp)}`,
     errors.FetchFailure);
 
   this.resp = resp;
@@ -89,7 +89,7 @@ _.class(errors.FetchFailure).inherits(KbnError);
  * @param {String} [msg] - An error message that will probably end up in a log.
  */
 errors.ShardFailure = function ShardFailure(resp) {
-  KbnError.call(this, resp._shards.failed + ' of ' + resp._shards.total + ' shards failed.',
+  KbnError.call(this, `${resp._shards.failed} of ${resp._shards.total} shards failed.`,
     errors.ShardFailure);
 
   this.resp = resp;
@@ -117,7 +117,7 @@ _.class(errors.VersionConflict).inherits(KbnError);
  */
 errors.MappingConflict = function MappingConflict(field) {
   KbnError.call(this,
-    'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
+    `Field "${field}" is defined with at least two different types in indices matching the pattern`,
     errors.MappingConflict);
 };
 _.class(errors.MappingConflict).inherits(KbnError);
@@ -127,8 +127,8 @@ _.class(errors.MappingConflict).inherits(KbnError);
  * @param {String} field - the fields which contains the conflict
  */
 errors.RestrictedMapping = function RestrictedMapping(field, index) {
-  let msg = field + ' is a restricted field name';
-  if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
+  let msg = `"${field}" is a restricted field name`;
+  if (index) msg += `, found it while attempting to fetch mapping for index pattern: ${index}`;
 
   KbnError.call(this, msg, errors.RestrictedMapping);
 };
@@ -150,7 +150,7 @@ _.class(errors.CacheWriteFailure).inherits(KbnError);
  */
 errors.FieldNotFoundInCache = function FieldNotFoundInCache(name) {
   KbnError.call(this,
-    'The ' + name + ' field was not found in the cached mappings',
+    `The "${name}" field was not found in the cached mappings`,
     errors.FieldNotFoundInCache);
 };
 _.class(errors.FieldNotFoundInCache).inherits(KbnError);
@@ -161,7 +161,7 @@ _.class(errors.FieldNotFoundInCache).inherits(KbnError);
  */
 errors.DuplicateField = function DuplicateField(name) {
   KbnError.call(this,
-    'The "' + name + '" field already exists in this mapping',
+    `The field "${name}" already exists in this mapping`,
     errors.DuplicateField);
 };
 _.class(errors.DuplicateField).inherits(KbnError);
@@ -171,21 +171,25 @@ _.class(errors.DuplicateField).inherits(KbnError);
  * @param {String} field - the fields which contains the conflict
  */
 errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
+  const idMsg = id ? ` (id: ${id})` : '';
   this.savedObjectType = type;
   this.savedObjectId = id;
-  const idMsg = id ? ' (id: ' + id + ')' : '';
+
   KbnError.call(this,
-    'Could not locate that ' + type + idMsg,
+    `Could not locate that ${type}${idMsg}`,
     errors.SavedObjectNotFound);
+
 };
 _.class(errors.SavedObjectNotFound).inherits(KbnError);
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-errors.IndexPatternMissingIndices = function IndexPatternMissingIndices(type) {
+errors.IndexPatternMissingIndices = function IndexPatternMissingIndices(message) {
+  const defaultMessage = 'IndexPattern\'s configured pattern does not match any indices';
+
   KbnError.call(this,
-    'IndexPattern\'s configured pattern does not match any indices',
+    (message && message.length) ? `No matching indices found: ${message}` : defaultMessage,
     errors.IndexPatternMissingIndices);
 };
 _.class(errors.IndexPatternMissingIndices).inherits(KbnError);
