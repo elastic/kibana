@@ -1,11 +1,8 @@
-$modalPadding: 10px;
-$modalBorderColor: #6EADC1;
-
 .kuiModal {
   line-height: $globalLineHeight;
-  background-color: #ffffff;
+  background-color: $modalBackgroundColor;
   border: 1px solid $modalBorderColor;
-  border-radius: 4px;
+  border-radius: $globalBorderRadius;
   box-shadow: 0 5px 22px rgba(#000000, 0.25);
 }
 
@@ -23,11 +20,11 @@ $modalBorderColor: #6EADC1;
 
 .kuiModalHeaderCloseButton {
   @include microButton;
-  font-size: 18px;
+  font-size: $globalTitleFontSize;
 }
 
 .kuiModalBody {
-  padding: 20px $modalPadding;
+  padding: $modalPadding * 2 $modalPadding;
 }
 
 .kuiModalBodyText {

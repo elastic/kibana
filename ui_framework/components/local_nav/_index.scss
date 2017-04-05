@@ -15,6 +15,8 @@ $localTabTextColor: $localNavButtonTextColor;
 $localTabTextColor-isHover: $localNavButtonTextColor-isHover;
 $localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
 $localBreadcrumbLinkColor: #5a5a5a;
+$localSearchButtonBackgroundColor: #9c9c9c;
+$localSearchButtonTextColor: #ffffff;
 
 // Dark theme colors
 $localNavTextColor--darkTheme: $globalTextColor--darkTheme;
@@ -33,13 +35,14 @@ $localDropdownWarningBackgroundColor--darkTheme: #636363;
 $localTabTextColor--darkTheme: $localNavButtonTextColor--darkTheme;
 $localTabTextColor-isHover--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
 $localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
+$localSearchButtonBackgroundColor--darkTheme: #777777;
+$localSearchButtonTextColor--darkTheme: #ffffff;
 
 // Spacing
 $localNavSideSpacing: 10px;
+$localSearchHeight: 30px;
 
 // Fonts
-$localNavFontSizeNormal: 14px;
-$localBreadCrumbEmphasizedFontWeight: 700;
 
 @import "local_breadcrumbs";
 @import "local_dropdown";

@@ -3,9 +3,9 @@
  */
 .kuiTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
+  font-weight: $globalFontWeightRegular; /* 1 */
   color: $globalFontColor;
-  font-size: 22px;
+  font-size: $typcographyTitleFontSize;
 }
 
 /**
@@ -13,9 +13,9 @@
  */
 .kuiSubTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
+  font-weight: $globalFontWeightRegular; /* 1 */
   color: $globalFontColor;
-  font-size: 18px;
+  font-size: $globalTitleFontSize;
 }
 
 /**
@@ -23,7 +23,7 @@
  */
 .kuiText {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
+  font-weight: $globalFontWeightRegular; /* 1 */
   color: $globalFontColor;
   line-height: $globalLineHeight;
   font-size: $globalFontSize;

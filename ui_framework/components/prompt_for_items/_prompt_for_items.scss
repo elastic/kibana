@@ -6,7 +6,7 @@
 }
 
   .kuiPromptForItems__message {
-    font-size: 18px;
+    font-size: $globalTitleFontSize;
     color: $globalSubduedTextColor;
     line-height: $globalLineHeight;
   }

@@ -1,11 +1,3 @@
-$localSearchHeight: 30px;
-
-$localSearchButtonBackgroundColor: #9c9c9c;
-$localSearchButtonBackgroundColor--darkTheme: #777777;
-
-$localSearchButtonTextColor: #ffffff;
-$localSearchButtonTextColor--darkTheme: #ffffff;
-
 .kuiLocalSearch {
   display: flex;
   width: 100%;
@@ -15,7 +7,7 @@ $localSearchButtonTextColor--darkTheme: #ffffff;
 .kuiLocalSearchInput {
   flex: 1 1 100%;
   padding: 5px 15px;
-  font-size: $localNavFontSizeNormal;
+  font-size: $globalFontWeightRegular;
   color: $localNavTextColor;
   background-color: $localSearchBackgroundColor;
   border: 2px solid $localSearchBackgroundColor;
@@ -42,7 +34,7 @@ $localSearchButtonTextColor--darkTheme: #ffffff;
 .kuiLocalSearchButton {
   width: 43px;
   height: $localSearchHeight;
-  font-size: $localNavFontSizeNormal;
+  font-size: $globalFontWeightRegular;
   color: $localSearchButtonTextColor;
   background-color: $localSearchButtonBackgroundColor;
   border: 0;

@@ -1,8 +1,6 @@
-$cardGroupBorderColor: #E0E0E0;
-
 .kuiCardGroup {
   display: flex;
-  border: 1px solid $cardGroupBorderColor;
+  border: 1px solid $cardBorderColor;
   border-radius: $globalBorderRadius;
   overflow: hidden;
   margin-bottom: 18px;
@@ -14,7 +12,7 @@ $cardGroupBorderColor: #E0E0E0;
     border-radius: 0;
 
     & + & {
-      border-left: 1px solid $cardGroupBorderColor;
+      border-left: 1px solid $cardBorderColor;
     }
   }
 

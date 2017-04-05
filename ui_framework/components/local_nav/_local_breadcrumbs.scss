@@ -42,7 +42,7 @@
 }
 
 .kuiLocalBreadcrumb__link {
-  font-size: $localNavFontSizeNormal;
+  font-size: $globalFontSize;
   color: $localBreadcrumbLinkColor;
   text-decoration: none;
 
@@ -56,5 +56,5 @@
 }
 
 .kuiLocalBreadcrumb__emphasis {
-  font-weight: $localBreadCrumbEmphasizedFontWeight;
+  font-weight: $globalFontWeightBold;
 }
