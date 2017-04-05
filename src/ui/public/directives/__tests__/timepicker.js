@@ -220,7 +220,7 @@ describe('timepicker directive', function () {
     it('has a dropdown bound to relative.from.unit that contains all of the intervals', function (done) {
       const select = $elem.find('.kbn-timepicker-section select[ng-model="relative.from.unit"]');
       expect(select.length).to.be(1);
-      expect(select.find('option').length).to.be(7);
+      expect(select.find('option').length).to.be(14);
 
       // Check each relative option, make sure it is in the list
       _.each($scope.relativeOptions, function (unit, i) {
