@@ -54,6 +54,7 @@ uiRoutes
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.
             if (error instanceof SavedObjectNotFound && id === 'create') {
+              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
               notify.error(
                 'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
