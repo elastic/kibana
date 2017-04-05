@@ -226,7 +226,9 @@ uiModules.get('apps/management')
     .then(function () {
       const pattern = mockIndexPattern(index);
 
-      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
+      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
+        skipIndexPatternCache: true,
+      })
       .catch(function (err) {
         // TODO: we should probably display a message of some kind
         if (err instanceof IndexPatternMissingIndices) {
