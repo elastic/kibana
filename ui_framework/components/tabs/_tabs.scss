@@ -1,6 +1,6 @@
 .kuiTabs {
   display: flex;
-  border-bottom: $tableBorder;
+  border-bottom: $globalBorderThick;
 }
 
   /**
@@ -15,9 +15,9 @@
     cursor: pointer;
     padding: 10px 30px;
     font-size: 14px;
-    color: $subduedFontColor;
+    color: $globalSubduedTextColor;
     background-color: #ffffff; /* 1 */
-    border: 1px solid $standoutBackgroundColor;
+    border: 1px solid $globalBorderColor;
     border-bottom-width: 2px;
     border-radius: 0; /* 1 */
     margin-bottom: -2px; /* 3 */
@@ -41,19 +41,19 @@
 
     &:focus:not(.kuiTab-isSelected):not(:active) {
       z-index: 1;
-      color: $linkColor;
-      border: 1px solid $selectedBorderColor !important;
+      color: $globalLinkColor;
+      border: 1px solid $globalSelectedBorderColor !important;
       padding-bottom: 11px; /* 4 */
     }
 
     &:hover:not(.kuiTab-isSelected) {
-      color: $linkHoverColor;
+      color: $globalLinkHoverColor;
       background-color: #F2F2F2;
     }
 
     &.kuiTab-isSelected {
       cursor: default;
-      color: $fontColor;
+      color: $globalFontColor;
       border-bottom-color: #FFFFFF;
     }
   }

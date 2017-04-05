@@ -1,9 +1,10 @@
 $modalPadding: 10px;
+$modalBorderColor: #6EADC1;
 
 .kuiModal {
-  line-height: $lineHeight;
+  line-height: $globalLineHeight;
   background-color: #ffffff;
-  border: 1px solid $focusColor;
+  border: 1px solid $modalBorderColor;
   border-radius: 4px;
   box-shadow: 0 5px 22px rgba(#000000, 0.25);
 }
@@ -13,11 +14,11 @@ $modalPadding: 10px;
   justify-content: space-between;
   align-items: center;
   padding: $modalPadding;
-  border-bottom: $tableBorder;
+  border-bottom: $globalBorderThick;
 }
 
   .kuiModalHeader__title {
-    font-size: $titleFontSize;
+    font-size: $globalTitleFontSize;
   }
 
 .kuiModalHeaderCloseButton {

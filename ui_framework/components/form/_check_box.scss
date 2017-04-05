@@ -8,15 +8,15 @@
   -webkit-appearance: none; /* 1 */
   background-color: #FFFFFF;
   border: 1px solid #BEBEBE;
-  border-radius: $buttonBorderRadius;
+  border-radius: $globalBorderRadius;
   width: 16px;
   height: 16px;
-  line-height: $lineHeight !important; /* 2 */
+  line-height: $globalLineHeight !important; /* 2 */
   margin: 0 !important; /* 2 */
-  font: $font !important; /* 2 */
-  font-family: $font !important; /* 2 */
+  font: $globalFontFamily !important; /* 2 */
+  font-family: $globalFontFamily !important; /* 2 */
   font-size: 10px !important; /* 2 */
-  transition: background-color $formTransitionTiming;
+  transition: background-color $globalInputTransitionTiming;
 
   &:before {
     position: relative;
@@ -26,7 +26,7 @@
     font-size: 1em;
     opacity: 0;
     color: #ffffff;
-    transition: opacity $formTransitionTiming;
+    transition: opacity $globalInputTransitionTiming;
   }
 
   &:checked {

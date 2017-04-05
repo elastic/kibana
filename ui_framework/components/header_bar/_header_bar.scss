@@ -1,7 +1,7 @@
 .kuiHeaderBar {
   @include bar;
 
-  border-bottom: $tableBorder;
+  border-bottom: $globalBorderThick;
 }
 
 /**

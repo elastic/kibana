@@ -1,8 +1,8 @@
 .kuiSearchInput {
   display: inline-block;
   position: relative;
-  font-size: $fontSize;
-  line-height: $lineHeight;
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
 }
 
   .kuiSearchInput__icon {

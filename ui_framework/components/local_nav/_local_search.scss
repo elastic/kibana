@@ -1,5 +1,10 @@
-
 $localSearchHeight: 30px;
+
+$localSearchButtonBackgroundColor: #9c9c9c;
+$localSearchButtonBackgroundColor--darkTheme: #777777;
+
+$localSearchButtonTextColor: #ffffff;
+$localSearchButtonTextColor--darkTheme: #ffffff;
 
 .kuiLocalSearch {
   display: flex;
@@ -38,8 +43,8 @@ $localSearchHeight: 30px;
   width: 43px;
   height: $localSearchHeight;
   font-size: $localNavFontSizeNormal;
-  color: $buttonTextColor;
-  background-color: $buttonBackgroundColor;
+  color: $localSearchButtonTextColor;
+  background-color: $localSearchButtonBackgroundColor;
   border: 0;
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
@@ -47,7 +52,7 @@ $localSearchHeight: 30px;
   border-top-right-radius: 4px;
 
   @include darkTheme {
-    color: $buttonTextColor--darkTheme;
-    background-color: $buttonBackgroundColor--darkTheme;
+    color: $localSearchButtonTextColor--darkTheme;
+    background-color: $localSearchButtonBackgroundColor--darkTheme;
   }
 }

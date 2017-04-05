@@ -4,7 +4,7 @@
 .kuiTitle {
   margin: 0; /* 1 */
   font-weight: 400; /* 1 */
-  color: $fontColor;
+  color: $globalFontColor;
   font-size: 22px;
 }
 
@@ -14,7 +14,7 @@
 .kuiSubTitle {
   margin: 0; /* 1 */
   font-weight: 400; /* 1 */
-  color: $fontColor;
+  color: $globalFontColor;
   font-size: 18px;
 }
 
@@ -24,11 +24,11 @@
 .kuiText {
   margin: 0; /* 1 */
   font-weight: 400; /* 1 */
-  color: $fontColor;
-  line-height: $lineHeight;
-  font-size: $fontSize;
+  color: $globalFontColor;
+  line-height: $globalLineHeight;
+  font-size: $globalFontSize;
 }
 
 .kuiSubduedText {
-  color: $subduedFontColor !important;
+  color: $globalSubduedTextColor !important;
 }
