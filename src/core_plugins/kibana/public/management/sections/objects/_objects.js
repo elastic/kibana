@@ -167,6 +167,12 @@ uiModules.get('apps/management')
           return;
         }
 
+        // make sure we have an array, show an error otherwise
+        if (!Array.isArray(docs)) {
+          notify.error('JSON format is invalid and can not be imported.');
+          return;
+        }
+
         return new Promise((resolve) => {
           confirmModal(
             `If any of the objects already exist, do you want to automatically overwrite them?`, {
