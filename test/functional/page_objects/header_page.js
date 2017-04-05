@@ -50,14 +50,17 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isTimepickerOpen() {
       remote.setFindTimeout(2000);
-      await remote.findDisplayedByCssSelector('.kbn-timepicker')
-      .then(() => true)
-      .catch(() => false);
+      try {
+        await remote.findDisplayedByCssSelector('.kbn-timepicker');
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
 
     async isAbsoluteSectionShowing() {
       log.debug('isAbsoluteSectionShowing');
-      await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
+      return await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
     }
 
     async showAbsoluteSection() {
@@ -76,22 +79,22 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async getFromTime() {
       log.debug('getFromTime');
-      await retry.try(async () => {
+      return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
+        return await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
         .getProperty('value');
       });
     }
 
     async getToTime() {
       log.debug('getToTime');
-      await retry.try(async () => {
+      return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
+        return await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
         .getProperty('value');
       });
     }
@@ -161,7 +164,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async getToastMessage() {
       remote.setFindTimeout(defaultFindTimeout);
-      await remote.findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      return await remote.findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
       .getVisibleText();
     }
 
@@ -193,16 +196,16 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isGlobalLoadingIndicatorVisible() {
-      await testSubjects.find('globalLoadingIndicator', defaultFindTimeout / 5);
+      return await testSubjects.find('globalLoadingIndicator', defaultFindTimeout / 5);
     }
 
     async isGlobalLoadingIndicatorHidden() {
       remote.setFindTimeout(defaultFindTimeout * 10);
-      await remote.findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
+      return await remote.findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
     }
 
     async getPrettyDuration() {
-      await testSubjects.find('globalTimepickerRange').getVisibleText();
+      return await testSubjects.find('globalTimepickerRange').getVisibleText();
     }
 
     async isSharedTimefilterEnabled() {
@@ -210,7 +213,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector(`[shared-timefilter=true]`);
 
-      return new Boolean(element);
+      return !!element;
     }
   }
 

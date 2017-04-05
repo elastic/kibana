@@ -44,7 +44,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      return retry.try(() => PageObjects.common.findByCssSelector('a[href="#/dashboard"]').click());
+      await retry.try(() => getRemote().findByCssSelector('a[href="#/dashboard"]').click());
     }
 
     async gotoDashboardLandingPage() {
@@ -60,7 +60,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getQuery() {
       const queryObject = await testSubjects.find('dashboardQuery');
-      return queryObject.getProperty('value');
+      return await queryObject.getProperty('value');
     }
 
     appendQuery(query) {
@@ -382,7 +382,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getFilters(timeout = defaultFindTimeout) {
-      return find.allByCssSelector('.filter-bar > .filter', timeout);
+      return await find.allByCssSelector('.filter-bar > .filter', timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {

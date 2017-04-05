@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      PageObjects.common.saveScreenshot('Dashboard-no-visualizations');
+      await PageObjects.common.saveScreenshot('Dashboard-no-visualizations');
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
-      PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
+      await PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {

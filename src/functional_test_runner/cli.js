@@ -27,7 +27,7 @@ if (!cmd.config) {
   process.exit(1);
 }
 
-let logLevel = 'info';
+let logLevel = 'debug';
 if (cmd.silent) logLevel = 'silent';
 if (cmd.quiet) logLevel = 'error';
 if (cmd.debug) logLevel = 'debug';
