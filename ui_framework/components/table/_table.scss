@@ -1,11 +1,9 @@
-$tableCellPadding: 7px 8px 8px;
-
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
  */
 @mixin tableCell {
-  font-size: $fontSize;
-  font-weight: 400;
+  font-size: $globalFontSize;
+  font-weight: $tableCellFontWeight;
   text-align: left;
   max-width: 20px; /* 1 */
 }
@@ -16,9 +14,9 @@ $tableCellPadding: 7px 8px 8px;
  */
 .kuiTable {
   width: 100%;
-  border: $tableBorder;
+  border: $globalBorderThick;
   border-collapse: collapse;
-  background-color: #FFFFFF;
+  background-color: $tableBackgroundColor;
 }
 
 /**
@@ -36,8 +34,8 @@ $tableCellPadding: 7px 8px 8px;
 .kuiTableHeaderCell {
   @include tableCell;
   padding: $tableCellPadding;
-  line-height: $lineHeight;
-  color: #a7a7a7;
+  line-height: $globalLineHeight;
+  color: $tableHeaderTextColor;
 }
 
 /**
@@ -76,8 +74,8 @@ $tableCellPadding: 7px 8px 8px;
 
 .kuiTableRowCell {
   @include tableCell;
-  color: $fontColor;
-  border-top: $tableRowBorder;
+  color: $globalFontColor;
+  border-top: $globalBorderThin;
 }
 
 /**
@@ -85,7 +83,7 @@ $tableCellPadding: 7px 8px 8px;
  *    that contains its expanded details.
  */
 .kuiTableRowCell--expanded {
-  border-top-color: #f0f0f0; /* 1 */
+  border-top-color: $tableCellExpandedBorderColor; /* 1 */
 }
 
   /**
@@ -98,7 +96,7 @@ $tableCellPadding: 7px 8px 8px;
     overflow: hidden; /* 2 */
     text-overflow: ellipsis; /* 2 */
     padding: $tableCellPadding; /* 2 */
-    line-height: $lineHeight; /* 1 */
+    line-height: $globalLineHeight; /* 1 */
 
     & > * {
       vertical-align: middle; /* 1 */

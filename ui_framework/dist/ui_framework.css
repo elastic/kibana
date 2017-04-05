@@ -212,24 +212,24 @@ body {
     /* 1 */
     color: #5a5a5a; }
   .kuiButton--basic:enabled:hover {
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #9B9B9B !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #9B9B9B !important;
     /* 1 */ }
   .kuiButton--basic:enabled:active {
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #9B9B9B !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #9B9B9B !important;
     /* 1 */ }
@@ -242,29 +242,29 @@ body {
  * 1. Override Bootstrap.
  */
 .kuiButton--primary {
-  color: #FFFFFF;
+  color: #FFF;
   background-color: #6EADC1; }
   .kuiButton--primary:not(a):enabled:focus {
-    color: #FFFFFF; }
+    color: #FFF; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):focus {
     /* 1 */
-    color: #FFFFFF; }
+    color: #FFF; }
   .kuiButton--primary:enabled:hover {
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #006E8A; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:enabled:active {
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #006E8A; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #006E8A; }
   .kuiButton--primary:disabled {
@@ -276,7 +276,7 @@ body {
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: #FFFFFF;
+  color: #FFF;
   background-color: #D76051; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
@@ -285,7 +285,7 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFFFFF; }
+    color: #FFF; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
     z-index: 1;
@@ -294,23 +294,23 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFFFFF; }
+    color: #FFF; }
   .kuiButton--danger:enabled:hover {
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #A52E1F; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #A52E1F; }
   .kuiButton--danger:enabled:active {
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #A52E1F; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
     background-color: #A52E1F; }
   .kuiButton--danger:disabled {
@@ -593,7 +593,7 @@ body {
 .kuiCheckBox {
   -webkit-appearance: none;
   /* 1 */
-  background-color: #FFFFFF;
+  background-color: #FFF;
   border: 1px solid #BEBEBE;
   border-radius: 4px;
   width: 16px;
@@ -617,7 +617,7 @@ body {
     content: "\F00C";
     font-size: 1em;
     opacity: 0;
-    color: #ffffff;
+    color: #FFF;
     -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
@@ -1645,7 +1645,7 @@ body {
 
 .kuiModal {
   line-height: 1.5;
-  background-color: #ffffff;
+  background-color: #FFF;
   border: 1px solid #6EADC1;
   border-radius: 4px;
   box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25); }
@@ -1714,7 +1714,7 @@ body {
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
-  background-color: white;
+  background-color: #FFF;
   line-height: 1.5; }
 
 .kuiNotice__header {
@@ -1926,7 +1926,7 @@ body {
   width: 100%;
   border: 2px solid #E4E4E4;
   border-collapse: collapse;
-  background-color: #FFFFFF; }
+  background-color: #FFF; }
 
 /**
  * 1. Allow contents of cells to determine table's width.
@@ -2041,12 +2041,12 @@ body {
   border-bottom: 2px solid #E4E4E4; }
 
 /**
-   * 1. Override button styles (some of which are from Bootstrap).
-   * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
-   * 3. Move the tab down so that its bottom border covers the container's bottom border.
-   * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
-   *    of padding to make sure the text doesn't shift down.
-   */
+ * 1. Override button styles (some of which are from Bootstrap).
+ * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
+ * 3. Move the tab down so that its bottom border covers the container's bottom border.
+ * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
+ *    of padding to make sure the text doesn't shift down.
+ */
 .kuiTab {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -2056,7 +2056,7 @@ body {
   padding: 10px 30px;
   font-size: 14px;
   color: #9fa3a7;
-  background-color: #ffffff;
+  background-color: #FFF;
   /* 1 */
   border: 1px solid #E4E4E4;
   border-bottom-width: 2px;
@@ -2089,7 +2089,7 @@ body {
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
-    border-bottom-color: #FFFFFF; }
+    border-bottom-color: #FFF; }
 
 /**
  * 1. Allow container to deteermine font-size and line-height.
@@ -2395,7 +2395,7 @@ body {
   margin-top: 10px; }
 
 .kuiView {
-  background-color: #FFFFFF;
+  background-color: #FFF;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;

@@ -12,25 +12,25 @@
 }
 
 .kuiIcon--info {
-  color: $infoColor;
+  color: $globalInfoColor;
 }
 
 .kuiIcon--success {
-  color: $successColor;
+  color: $globalSuccessColor;
 }
 
 .kuiIcon--warning {
-  color: $warningColor;
+  color: $globalWarningColor;
 }
 
 .kuiIcon--error {
-  color: $errorColor;
+  color: $globalDangerColor;
 }
 
 .kuiIcon--inactive {
-  color: $inactiveColor;
+  color: $globalInactiveColor;
 }
 
 .kuiIcon--basic {
-  color: #565656;
+  color: $iconBasicTextColor;
 }
