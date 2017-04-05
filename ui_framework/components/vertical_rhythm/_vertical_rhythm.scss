@@ -1,7 +1,7 @@
-$verticalRhythmMargin: 10px;
+$verticalRhythmSpacing: 10px;
 
 .kuiVerticalRhythm {
   & + & {
-    margin-top: $verticalRhythmMargin;
+    margin-top: $verticalRhythmSpacing;
   }
 }
