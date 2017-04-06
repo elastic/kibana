@@ -293,6 +293,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async removeAllFilters() {
       await testSubjects.click('showFilterActions');
       await testSubjects.click('removeAllFilters');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }
 
