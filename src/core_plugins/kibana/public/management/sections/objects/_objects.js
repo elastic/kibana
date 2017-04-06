@@ -169,7 +169,7 @@ uiModules.get('apps/management')
 
         // make sure we have an array, show an error otherwise
         if (!Array.isArray(docs)) {
-          notify.error('JSON format is invalid and can not be imported.');
+          notify.error('Saved objects file format is invalid and cannot be imported.');
           return;
         }
 
