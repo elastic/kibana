@@ -28,6 +28,7 @@ module.exports = function (grunt) {
     'eslint:source',
     'licenses',
     'test:server',
+    'test:jest',
     'test:browser-ci',
     'test:api',
     '_build:verifyTranslations',
