@@ -1117,22 +1117,17 @@ body {
     .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
       color: #a5a5a5; }
 
-.kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link {
-  color: #2d2d2d;
-  cursor: default; }
-  .kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link:hover {
-    text-decoration: none; }
-  .theme-dark .kuiLocalBreadcrumb:last-child .kuiLocalBreadcrumb__link {
-    color: #cecece; }
-
 .kuiLocalBreadcrumb__link {
   font-size: 14px;
-  color: #5a5a5a;
+  color: #328CAA;
   text-decoration: none; }
   .kuiLocalBreadcrumb__link:hover {
+    color: #328CAA;
     text-decoration: underline; }
   .theme-dark .kuiLocalBreadcrumb__link {
-    color: #dedede; }
+    color: #b7e2ea; }
+    .theme-dark .kuiLocalBreadcrumb__link:hover {
+      color: #def2f6; }
 
 .kuiLocalBreadcrumb__emphasis {
   font-weight: 700; }
