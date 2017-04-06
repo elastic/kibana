@@ -41,6 +41,7 @@ export default function LineChartFactory(Private) {
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+      const lineWidth = this.seriesConfig.lineWidth;
 
       const radii =  this.baseChart.radii;
 
@@ -95,7 +96,8 @@ export default function LineChartFactory(Private) {
           const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
 
-          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+          const base = circleRadius ? Math.sqrt(circleRadius + 2) + lineWidth : lineWidth;
+          return _.min([base, width, height]) + (modifier || 0);
         };
       }
 
