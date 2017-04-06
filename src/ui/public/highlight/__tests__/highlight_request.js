@@ -4,6 +4,7 @@ import getHighlightRequestProvider from '../highlight_request';
 
 describe('getHighlightRequest', () => {
   const queryStringQuery = { query_string: { query: 'foo' } };
+  const queryStringWithDefaultFieldQuery = { query_string: { query: 'foo', default_field: 'bar' } };
   const rangeQuery = { range: { '@timestamp': { gte: 0, lte: 0 } } };
   const boolQueryWithSingleCondition = {
     bool: {
@@ -88,5 +89,14 @@ describe('getHighlightRequest', () => {
     config.set('doc_table:highlight', false);
     request = getHighlightRequest(queryStringQuery);
     expect(request).to.be(undefined);
+  });
+
+  it('should not add the all_fields param with query_string query when default_field is specified', () => {
+    getHighlightRequest = getHighlightRequestProvider(config);
+    const request = getHighlightRequest(queryStringWithDefaultFieldQuery);
+    expect(request.fields['*']).to.have.property('highlight_query');
+    expect(request.fields['*'].highlight_query.query_string).to.have.property('default_field');
+    expect(request.fields['*'].highlight_query.query_string).to.not.have.property('all_fields');
+    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
   });
 });

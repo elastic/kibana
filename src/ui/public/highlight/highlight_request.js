@@ -9,7 +9,7 @@ const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_siz
 function getHighlightQuery(query) {
   const clone = _.cloneDeep(query);
 
-  if (_.has(clone, 'query_string')) {
+  if (_.has(clone, 'query_string') && !_.has(clone, ['query_string', 'default_field'])) {
     clone.query_string.all_fields = true;
   } else if (_.has(clone, 'bool.must')) {
     if (Array.isArray(clone.bool.must)) {
