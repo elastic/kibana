@@ -10,10 +10,12 @@
 You can view interactive documentation by running `npm run uiFramework:start` and then visiting
 `http://localhost:8020/`.
 
-You can run `npm run uiFramework:dev` to watch for changes and run the tests as you code.
+You can run `node scripts/jest --watch` to watch for changes and run the tests as you code.
 
-You can run `npm run uiFramework:coverage` to generate a code coverage report to see how
+You can run `node scripts/jest --coverage` to generate a code coverage report to see how
 fully-tested the code is.
+
+See the documentation in [`scripts/jest.js`](../scripts/jest.js) for more options.
 
 ### React components
 
