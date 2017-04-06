@@ -279,15 +279,27 @@
       padding: @vis-editor-agg-editor-spacing;
     }
 
-  .vis-editor-field-ui-select .ui-select-match .btn {
-    border: 1px solid #ecf0f1;
-    background-color: white;
-    color: black;
-  }
+  /**
+  * 1. Make ui-select input match other inputs.
+  * 2. Show invalid state if the user has interacted with the input without selecting an option.
+  */
+  .vis-editor-field-ui-select {
+    .ui-select-match {
+      .btn {
+        border: 2px solid #ecf0f1; /* 1 */
+        background-color: white; /* 1 */
+        color: black; /* 1 */
+      }
+    }
 
-  .vis-editor-field-ui-select.ng-invalid.ng-dirty .ui-select-match .btn,
-  .vis-editor-field-ui-select.ng-invalid.ng-touched .ui-select-match .btn{
-    border-color: red;
+    &.ng-invalid.ng-dirty,
+    &.ng-invalid.ng-touched {
+      .ui-select-match {
+        .btn {
+          border-color: red; /* 2 */
+        }
+      }
+    }
   }
 
   .vis-editor-canvas {
