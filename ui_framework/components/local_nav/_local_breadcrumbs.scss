@@ -24,21 +24,6 @@
       }
     }
   }
-
-  &:last-child {
-    .kuiLocalBreadcrumb__link {
-      color: $localNavTextColor;
-      cursor: default;
-
-      &:hover {
-        text-decoration: none;
-      }
-
-      @include darkTheme {
-        color: $localNavTextColor--darkTheme;
-      }
-    }
-  }
 }
 
 .kuiLocalBreadcrumb__link {
@@ -47,11 +32,16 @@
   text-decoration: none;
 
   &:hover {
+    color: $localBreadcrumbLinkColor;
     text-decoration: underline;
   }
 
   @include darkTheme {
-    color: $localNavButtonTextColor--darkTheme;
+    color: $globalLinkColor--darkTheme;
+
+    &:hover {
+      color: $globalLinkColor--darkTheme;
+    }
   }
 }
 
