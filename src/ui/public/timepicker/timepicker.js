@@ -149,9 +149,9 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       function getRelativeString(key) {
-        const count = _.get($scope, `relative.${key}.count`);
-        const round = _.get($scope, `relative.${key}.round`);
-        const matches = _.get($scope, `relative.${key}.unit`).match(/([smhdwMy])(\+)?/);
+        const count = _.get($scope, `relative.${key}.count`, 0);
+        const round = _.get($scope, `relative.${key}.round`, false);
+        const matches = _.get($scope, `relative.${key}.unit`, 's').match(/([smhdwMy])(\+)?/);
         let unit;
         let operator = '-';
         if (matches && matches[1]) unit = matches[1];

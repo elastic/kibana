@@ -68,4 +68,38 @@ describe('parseRelativeParts(from, to, relativeOptions)', () => {
     });
   });
 
+  it('should parse 3 months ago to 15 minutes ago', () => {
+    const from = moment().subtract(3, 'M');
+    const to = moment().subtract(15, 'm');
+    expect(parseRelativeParts(from, to)).to.eql({
+      from: {
+        count: 3,
+        unit: 'M',
+        round: false
+      },
+      to: {
+        count: 15,
+        unit: 'm',
+        round: false
+      }
+    });
+  });
+
+  it('should parse 3 months ago to 2 hours from now', () => {
+    const from = moment().subtract(3, 'M');
+    const to = moment().add(2, 'h');
+    expect(parseRelativeParts(from, to)).to.eql({
+      from: {
+        count: 3,
+        unit: 'M',
+        round: false
+      },
+      to: {
+        count: 2,
+        unit: 'h+',
+        round: false
+      }
+    });
+  });
+
 });

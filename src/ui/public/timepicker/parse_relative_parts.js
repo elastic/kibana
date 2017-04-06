@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 
 export function parseRelativeString(part) {
-  const results = {};
+  let results = {};
   const matches = _.isString(part) && part.match(/now(([\-\+])([0-9]+)([smhdwMy])(\/[smhdwMy])?)?/);
 
   if (matches && !matches[1]) {
@@ -19,14 +19,17 @@ export function parseRelativeString(part) {
     return results;
 
   } else {
+    results = { count: 0, unit: 's', round: false };
     const duration = moment.duration(moment().diff(dateMath.parse(part)));
     const units = _.pluck(_.clone(relativeOptions).reverse(), 'value')
       .filter(s => /^[smhdwMy]$/.test(s));
+    let unitOp = '';
     for (let i = 0; i < units.length; i++) {
       const as = duration.as(units[i]);
-      if (as > 1) {
-        results.count = Math.round(as);
-        results.unit = units[i];
+      if (as < 0) unitOp = '+';
+      if (Math.abs(as) > 1) {
+        results.count = Math.round(Math.abs(as));
+        results.unit = units[i] + unitOp;
         results.round = false;
         break;
       }
@@ -40,10 +43,6 @@ export function parseRelativeString(part) {
 export function parseRelativeParts(from, to) {
   const results = {};
   results.from = parseRelativeString(from);
-  if (/now/.test(to)) {
-    results.to = parseRelativeString(to);
-  } else {
-    results.to = parseRelativeString('now');
-  }
+  results.to = parseRelativeString(to);
   if (results.from && results.to) return results;
 }
