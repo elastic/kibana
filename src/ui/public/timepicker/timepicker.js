@@ -156,7 +156,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         let operator = '-';
         if (matches && matches[1]) unit = matches[1];
         if (matches && matches[2]) operator = matches[2];
-        if (count === 0 && key === 'to' && !round) return 'now';
+        if (count === 0 && !round) return 'now';
         let result = `now${operator}${count}${unit}`;
         result += (round ? '/' + unit : '');
         return result;
