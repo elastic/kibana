@@ -6,7 +6,7 @@ import expect from 'expect.js';
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const BASIC_CONFIG = resolve(__dirname, '../fixtures/simple_project/config.js');
 
-context('basic config file with a single app and test', function () {
+describe('basic config file with a single app and test', function () {
   this.timeout(60 * 1000);
 
   it('runs and prints expected output', () => {

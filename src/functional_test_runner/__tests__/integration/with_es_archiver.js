@@ -9,7 +9,7 @@ import { startupEs, startupKibana } from '../lib';
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
-context('single test that uses esArchiver', function () {
+describe('single test that uses esArchiver', function () {
   this.timeout(60 * 1000);
 
   let log;

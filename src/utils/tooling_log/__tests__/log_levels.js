@@ -31,7 +31,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('logLevel=warning', () => {
+  describe('logLevel=warning', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('warning')).to.eql({
         silent: true,
@@ -70,7 +70,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('logLevel=verbose', () => {
+  describe('logLevel=verbose', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('verbose')).to.eql({
         silent: true,
