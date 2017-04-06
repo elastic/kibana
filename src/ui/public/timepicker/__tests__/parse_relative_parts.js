@@ -1,5 +1,5 @@
 import { parseRelativeString, parseRelativeParts } from '../parse_relative_parts';
-import { expect } from 'chai';
+import expect from 'expect.js';
 import moment from 'moment';
 
 describe('parseRelativeParts(from, to, relativeOptions)', () => {

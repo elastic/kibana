@@ -122,10 +122,12 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.checkRelative = function () {
-        const from = dateMath.parse(getRelativeString('from'));
-        const to = dateMath.parse(getRelativeString('to'), true);
-        if (to && from) return to.isBefore(from);
-        return true;
+        if ($scope.relative.from.count != null && $scope.relative.to.count != null) {
+          const from = dateMath.parse(getRelativeString('from'));
+          const to = dateMath.parse(getRelativeString('to'), true);
+          if (to && from) return to.isBefore(from);
+          return true;
+        }
       };
 
       $scope.formatRelative = function (key) {
