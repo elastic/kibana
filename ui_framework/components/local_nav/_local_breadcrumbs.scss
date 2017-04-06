@@ -1,4 +1,3 @@
-
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
  *    a bit.
@@ -10,52 +9,42 @@
   padding-left: $localNavSideSpacing; /* 1 */
 }
 
-  .kuiLocalBreadcrumb {
-    & + & {
-      margin-left: 6px;
+.kuiLocalBreadcrumb {
+  & + & {
+    margin-left: 6px;
 
-      &:before {
-        content: '/';
-        user-select: none;
-        margin-right: 4px;
-        color: $localNavBreadcrumbDelimiterColor;
+    &:before {
+      content: '/';
+      user-select: none;
+      margin-right: 4px;
+      color: $localNavBreadcrumbDelimiterColor;
 
-        @include darkTheme {
-          color: $localNavBreadcrumbDelimiterColor--darkTheme;
-        }
-      }
-    }
-
-    &:last-child {
-      .kuiLocalBreadcrumb__link {
-        color: $localNavTextColor;
-        cursor: default;
-
-        &:hover {
-          text-decoration: none;
-        }
-
-        @include darkTheme {
-          color: $localNavTextColor--darkTheme;
-        }
+      @include darkTheme {
+        color: $localNavBreadcrumbDelimiterColor--darkTheme;
       }
     }
   }
+}
 
-    .kuiLocalBreadcrumb__link {
-      font-size: $localNavFontSizeNormal;
-      color: #5a5a5a;
-      text-decoration: none;
+.kuiLocalBreadcrumb__link {
+  font-size: $localNavFontSizeNormal;
+  color: #328caa;
+  text-decoration: none;
 
-      &:hover {
-        text-decoration: underline;
-      }
+  &:hover {
+    color: #328caa;
+    text-decoration: underline;
+  }
 
-      @include darkTheme {
-        color: $localNavButtonTextColor--darkTheme;
-      }
+  @include darkTheme {
+    color: #b7e2ea;
+
+    &:hover {
+      color: #b7e2ea;
     }
+  }
+}
 
-    .kuiLocalBreadcrumb__emphasis {
-      font-weight: 700;
-    }
+.kuiLocalBreadcrumb__emphasis {
+  font-weight: 700;
+}
