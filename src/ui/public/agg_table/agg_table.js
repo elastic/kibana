@@ -123,7 +123,12 @@ uiModules
 
           if (isFieldNumeric || isFieldDate || $scope.totalFunc === 'count') {
             function sum(tableRows) {
-              return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
+              return _.reduce(tableRows, function (prev, curr) {
+                // some metrics return undefined for some of the values
+                // derivative is an example of this as it returns undefined in the first row
+                if (curr[i].value === undefined) return prev;
+                return prev + curr[i].value;
+              }, 0);
             }
             const formatter = agg.fieldFormatter('html');
 

@@ -110,7 +110,7 @@ data.threeTermBuckets = {
   }
 };
 
-data.oneTermOneHistogramBucketWithTwoMetrics = {
+data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
   hits: { total: 1000, hits: [], max_score: 0 },
   aggregations: {
     agg_3: {
@@ -118,8 +118,6 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
         {
           key: 'png',
           doc_count: 50,
-          agg_1: { value: 412032 },
-          agg_2: { value: 1411862400000 },
           agg_4: {
             buckets: [
               {
@@ -128,6 +126,16 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 1,
                 agg_1: { value: 9283 },
                 agg_2: { value: 1411862400000 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 23
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -135,6 +143,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 2,
                 agg_1: { value: 28349 },
                 agg_2: { value: 1411948800000 },
+                agg_5: { value: 203 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 39
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -142,6 +161,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 3,
                 agg_1: { value: 84330 },
                 agg_2: { value: 1412035200000 },
+                agg_5: { value: 200 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 329
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -149,6 +179,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 4,
                 agg_1: { value: 34992 },
                 agg_2: { value: 1412121600000 },
+                agg_5: { value: 103 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 22
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -156,6 +197,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 5,
                 agg_1: { value: 145432 },
                 agg_2: { value: 1412208000000 },
+                agg_5: { value: 153 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 93
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -163,6 +215,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 35,
                 agg_1: { value: 220943 },
                 agg_2: { value: 1412294400000 },
+                agg_5: { value: 239 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 72
+                      }
+                    }]
+                  }
+                }
               }
             ]
           }
@@ -170,8 +233,6 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
         {
           key: 'css',
           doc_count: 20,
-          agg_1: { value: 412032 },
-          agg_2: { value: 1411862400000 },
           agg_4: {
             buckets: [
               {
@@ -180,6 +241,16 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 1,
                 agg_1: { value: 9283 },
                 agg_2: { value: 1411862400000 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 75
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -187,6 +258,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 2,
                 agg_1: { value: 28349 },
                 agg_2: { value: 1411948800000 },
+                agg_5: { value: 10 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 11
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -194,6 +276,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 3,
                 agg_1: { value: 84330 },
                 agg_2: { value: 1412035200000 },
+                agg_5: { value: 24 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 238
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -201,6 +294,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 4,
                 agg_1: { value: 34992 },
                 agg_2: { value: 1412121600000 },
+                agg_5: { value: 49 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 343
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -208,6 +312,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 5,
                 agg_1: { value: 145432 },
                 agg_2: { value: 1412208000000 },
+                agg_5: { value: 100 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 837
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -215,6 +330,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 5,
                 agg_1: { value: 220943 },
                 agg_2: { value: 1412294400000 },
+                agg_5: { value: 23 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 302
+                      }
+                    }]
+                  }
+                }
               }
             ]
           }
@@ -222,8 +348,6 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
         {
           key: 'html',
           doc_count: 90,
-          agg_1: { value: 412032 },
-          agg_2: { value: 1411862400000 },
           agg_4: {
             buckets: [
               {
@@ -232,6 +356,16 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 10,
                 agg_1: { value: 9283 },
                 agg_2: { value: 1411862400000 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 30
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-29T00:00:00.000Z',
@@ -239,6 +373,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 20,
                 agg_1: { value: 28349 },
                 agg_2: { value: 1411948800000 },
+                agg_5: { value: 1 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 43
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-09-30T00:00:00.000Z',
@@ -246,6 +391,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 30,
                 agg_1: { value: 84330 },
                 agg_2: { value: 1412035200000 },
+                agg_5: { value: 5 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 88
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-01T00:00:00.000Z',
@@ -253,6 +409,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 11,
                 agg_1: { value: 34992 },
                 agg_2: { value: 1412121600000 },
+                agg_5: { value: 10 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 91
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-02T00:00:00.000Z',
@@ -260,6 +427,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 12,
                 agg_1: { value: 145432 },
                 agg_2: { value: 1412208000000 },
+                agg_5: { value: 43 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 534
+                      }
+                    }]
+                  }
+                }
               },
               {
                 key_as_string: '2014-10-03T00:00:00.000Z',
@@ -267,6 +445,17 @@ data.oneTermOneHistogramBucketWithTwoMetrics = {
                 doc_count: 7,
                 agg_1: { value: 220943 },
                 agg_2: { value: 1412294400000 },
+                agg_5: { value: 1 },
+                agg_6: {
+                  hits: {
+                    total: 2,
+                    hits: [{
+                      fields: {
+                        bytes: 553
+                      }
+                    }]
+                  }
+                }
               }
             ]
           }

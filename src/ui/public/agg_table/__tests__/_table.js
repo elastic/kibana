@@ -115,7 +115,9 @@ describe('AggTable Directive', function () {
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
           { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
           { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-          { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } }
+          { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } },
+          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id:'5-orderAgg', type: 'count' } } },
+          { type: 'top_hits', schema: 'metric', params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 } }
         ]
       });
       vis.aggs.forEach(function (agg, i) {
@@ -123,7 +125,7 @@ describe('AggTable Directive', function () {
       });
 
       $scope.table = tabifyAggResponse(vis,
-        fixtures.oneTermOneHistogramBucketWithTwoMetrics,
+        fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
         { canSplit: false, minimalColumns: true, asAggConfigResults: true }
       );
       $scope.showTotal = true;
@@ -138,21 +140,23 @@ describe('AggTable Directive', function () {
       expect($rows.size()).to.be(1);
 
       const $cells = $($rows[0]).find('th');
-      expect($cells.size()).to.be(4);
+      expect($cells.size()).to.be(6);
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 6; i++) {
         expect($($cells[i]).text()).to.be(expected[i]);
       }
     }
     it('as count', function () {
-      totalsRowTest('count', ['', '18', '18', '18']);
+      totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
     });
     it('as min', function () {
       totalsRowTest('min', [
         '',
         'September 27th 2014, 18:00:00.000',
         '9,283',
-        'September 27th 2014, 18:00:00.000'
+        'September 27th 2014, 18:00:00.000',
+        '1',
+        '11'
       ]);
     });
     it('as max', function () {
@@ -160,7 +164,9 @@ describe('AggTable Directive', function () {
         '',
         'October 2nd 2014, 18:00:00.000',
         '220,943',
-        'October 2nd 2014, 18:00:00.000'
+        'October 2nd 2014, 18:00:00.000',
+        '239',
+        '837'
       ]);
     });
     it('as avg', function () {
@@ -168,7 +174,9 @@ describe('AggTable Directive', function () {
         '',
         '',
         '87,221.5',
-        ''
+        '',
+        '64.667',
+        '206.833'
       ]);
     });
     it('as sum', function () {
@@ -176,7 +184,9 @@ describe('AggTable Directive', function () {
         '',
         '',
         '1,569,987',
-        ''
+        '',
+        '1,164',
+        '3,723'
       ]);
     });
   });
