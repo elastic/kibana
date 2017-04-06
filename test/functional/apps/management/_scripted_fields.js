@@ -20,17 +20,17 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
-  before(async function () {
-    await remote.setWindowSize(1200,800);
-    // delete .kibana index and then wait for Kibana to re-create it
-    await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
-    await PageObjects.settings.navigateTo();
-    await PageObjects.settings.clickKibanaIndicies();
-    await PageObjects.settings.createIndexPattern();
-    await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
-  });
-
   describe('scripted fields', () => {
+
+    before(async function () {
+      await remote.setWindowSize(1200,800);
+      // delete .kibana index and then wait for Kibana to re-create it
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.createIndexPattern();
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
+    });
 
     describe('creating and using Lucence expression scripted fields', function describeIndexTests() {
 
