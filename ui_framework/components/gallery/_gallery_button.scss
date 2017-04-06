@@ -1,7 +1,3 @@
-$galleryButtonSize: 140px;
-$galleryButtonRhythm: 20px;
-$galleryButtonIconSize: 50px;
-
 .kuiGalleryButton {
   display: flex;
   flex-direction: column;
@@ -12,10 +8,10 @@ $galleryButtonIconSize: 50px;
   height: $galleryButtonSize;
   margin: 0 $galleryButtonRhythm $galleryButtonRhythm 0;
   padding: 25px 10px 10px;
-  line-height: $lineHeight;
+  line-height: $globalLineHeight;
   background-color: #F6F6F6;
   border: 1px solid #CED5DA;
-  border-radius: $buttonBorderRadius;
+  border-radius: $globalBorderRadius;
   text-decoration: none;
 
   &:hover {
@@ -37,8 +33,8 @@ $galleryButtonIconSize: 50px;
    * 1. Truncate overflowing text.
    */
   .kuiGalleryButton__label {
-    font-size: $fontSize;
-    color: $fontColor;
+    font-size: $globalFontSize;
+    color: $globalFontColor;
     text-align: center;
     max-width: 100%; /* 1 */
     white-space: nowrap; /* 1 */
@@ -50,5 +46,5 @@ $galleryButtonIconSize: 50px;
     position: absolute;
     top: 5px;
     right: 5px;
-    color: $subduedFontColor;
+    color: $globalSubduedTextColor;
   }
