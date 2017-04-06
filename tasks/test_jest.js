@@ -1,18 +1,16 @@
-const platform = require('os').platform();
-const config = require('./utils/ui_framework_test_config');
+const { resolve } = require('path');
 
 module.exports = function (grunt) {
-  grunt.registerTask('uiFramework:test', function () {
+  grunt.registerTask('test:jest', function () {
     const done = this.async();
-    Promise.all([uiFrameworkTest()]).then(done);
+    runJest().then(done);
   });
 
-  function uiFrameworkTest() {
+  function runJest() {
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\jest.cmd' : './node_modules/.bin/jest',
+      cmd: 'node',
       args: [
-        '--env=jsdom',
-        `--config=${JSON.stringify(config)}`,
+        resolve(__dirname, '../scripts/jest.js')
       ],
       opts: { stdio: 'inherit' }
     };
