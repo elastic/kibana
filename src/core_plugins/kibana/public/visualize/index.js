@@ -16,6 +16,7 @@ import 'ui/draggable/draggable_item';
 import 'ui/draggable/draggable_handle';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
+import 'ui/directives/scroll_bottom';
 import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
