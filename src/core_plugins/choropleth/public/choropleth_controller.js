@@ -5,9 +5,10 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import KibanaMap from 'ui/vis_maps/kibana_map';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import ChoroplethLayer from './choropleth_layer';
-import colorramps from 'ui/vislib/components/color/colormaps';
+import truncatedColorMaps from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
+
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
@@ -88,7 +89,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
       updateChoroplethLayer(visParams.selectedLayer.url);
       choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      choroplethLayer.setColorRamp(colorramps[visParams.colorSchema]);
+      choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
 
       kibanaMap.setShowTooltip(visParams.addTooltip);
       kibanaMap.setLegendPosition(visParams.legendPosition);
