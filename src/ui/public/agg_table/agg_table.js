@@ -98,23 +98,30 @@ uiModules
             formattedColumn.class = 'visualize-table-right';
           }
 
-          let fieldType = 'string';
+          let isFieldNumeric = false;
+          let isFieldDate = false;
           const aggType = agg.type;
           if (aggType && aggType.type === 'metrics') {
             if (aggType.name === 'top_hits') {
-              if (agg._opts.params.aggregate === 'concat') {
-                fieldType = 'string';
-              } else {
-                fieldType = 'number';
+              if (agg._opts.params.aggregate !== 'concat') {
+                // all other aggregate types for top_hits output numbers
+                // so treat this field as numeric
+                isFieldNumeric = true;
               }
+            } else if (field) {
+              // if the metric has a field, check if it is either number or date
+              isFieldNumeric = field.type === 'number';
+              isFieldDate = field.type === 'date';
             } else {
-              fieldType = 'number';
+              // if there is no field, then it is count or similar so just say number
+              isFieldNumeric = true;
             }
           } else if (field) {
-            fieldType = field.type;
+            isFieldNumeric = field.type === 'number';
+            isFieldDate = field.type === 'date';
           }
 
-          if (fieldType === 'number' || fieldType === 'date') {
+          if (isFieldNumeric || isFieldDate || $scope.totalFunc === 'count') {
             function sum(tableRows) {
               return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
             }
@@ -122,12 +129,12 @@ uiModules
 
             switch ($scope.totalFunc) {
               case 'sum':
-                if (fieldType !== 'date') {
+                if (!isFieldDate) {
                   formattedColumn.total = formatter(sum(table.rows));
                 }
                 break;
               case 'avg':
-                if (fieldType !== 'date') {
+                if (!isFieldDate) {
                   formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
                 }
                 break;
