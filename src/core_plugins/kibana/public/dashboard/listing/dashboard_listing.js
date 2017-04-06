@@ -27,8 +27,8 @@ export function DashboardListingController($injector, $scope) {
       getValue: item => item.title,
       isAscending: true,
     }
-  ]);
-  sortProperties.setSortedPropertyByName('title');
+  ],
+  'title');
 
   const calculateItemsOnPage = () => {
     this.items = sortProperties.sortItems(this.items);
@@ -70,7 +70,7 @@ export function DashboardListingController($injector, $scope) {
   this.getSortProperty = () => sortProperties.getSortProperty();
 
   this.sortOn = function sortOn(propertyName) {
-    sortProperties.setSortedPropertyByName(propertyName);
+    sortProperties.sortOn(propertyName);
     deselectAll();
     calculateItemsOnPage();
   };
