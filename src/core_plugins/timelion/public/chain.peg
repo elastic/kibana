@@ -21,7 +21,7 @@
 }
 
 start
- = tree:series+ {
+ = tree:series {
   return {
     tree: tree.filter(function (o) {return o != null}),
     functions: functions,
@@ -31,12 +31,9 @@ start
  }
 
 arg_list
- = first:argument rest:more_args* {
+ = first:argument rest:(space? ',' space? arg:argument {return arg})* space? ','? {
   return [first].concat(rest);
  }
-
-more_args
- = space? ','? space? arg:argument {return arg;}
 
 argument
  = name:function_name space? '=' space? value:arg_type {
@@ -82,10 +79,12 @@ series_type
  / reference
 
 series
- = series:series_type space? ',' space? { return series }
+ = first:series_type rest:(space? ',' space? series:series_type {return series})* ','? {
+  return [first].concat(rest)
+ }
 
 function_name
- = (first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
+ = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
 
 function "function"
  = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' {
