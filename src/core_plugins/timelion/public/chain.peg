@@ -82,7 +82,7 @@ series_type
  / reference
 
 series
- = series:series_type space? ','? ';'? space? { return series }
+ = series:series_type space? ',' space? { return series }
 
 function_name
  = (first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
@@ -132,7 +132,7 @@ reference
 
 
 chain
- = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
+ = func:function space? rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
 
 group
  = '(' space? grouped:series+ space? ')' functions:function* {
@@ -162,7 +162,7 @@ literal "literal"
   }
 
 space
- = [\ \t]+
+ = [\ \t\r\n]+
 
 dq_char
   = "\\" sequence:('"' / "\\") { return sequence; }
