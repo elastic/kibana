@@ -238,13 +238,17 @@ export default class Common {
   createErrorHandler(testObj) {
     const testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
     return error => {
-      const now = Date.now();
-      const fileName = `failure_${now}_${testName}`;
+      return this.remote.getCurrentUrl()
+        .then(url => {
+          PageObjects.common.debug(`Failure at URL ${url}`);
+          const now = Date.now();
+          const fileName = `failure_${now}_${testName}`;
 
-      return this.saveScreenshot(fileName, true)
-      .then(function () {
-        throw error;
-      });
+          return this.saveScreenshot(fileName, true)
+            .then(function () {
+              throw error;
+            });
+        });
     };
   }
 
