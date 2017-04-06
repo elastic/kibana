@@ -264,14 +264,24 @@ describe('timepicker directive', function () {
     it('does not round the preview down to the unit when rounding is disable', function (done) {
       // Disable rounding
       $scope.relative.from.round = false;
-      $scope.relative.from.count = 0;
+      $scope.relative.from.count = 1;
 
       _.each($scope.units, function (longUnit, shortUnit) {
         $scope.relative.from.unit = shortUnit;
         $scope.formatRelative('from');
 
+        const matches = shortUnit.match(/([smhdwMy])(\+)?/);
+        let unit;
+        let opp = '-';
+        if (matches) {
+          unit = matches[1];
+          opp = matches[2];
+        }
+
+        const fn = opp === '+' ? 'add' : 'subtract';
+
         // The preview should match the start of the unit eg, the start of the minute
-        expect($scope.relative.from.preview).to.be(moment().format($scope.format));
+        expect($scope.relative.from.preview).to.be(moment()[fn](1, unit).format($scope.format));
       });
 
       done();
