@@ -95,8 +95,9 @@ export default function LineChartFactory(Private) {
           const width = self.baseChart.chartConfig.width;
           const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
+          const baseMagicNumber = 2;
 
-          const base = circleRadius ? Math.sqrt(circleRadius + 2) + lineWidth : lineWidth;
+          const base = circleRadius ? Math.sqrt(circleRadius + baseMagicNumber) + lineWidth : lineWidth;
           return _.min([base, width, height]) + (modifier || 0);
         };
       }
