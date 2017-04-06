@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -44,7 +45,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await retry.try(() => getRemote().findByCssSelector('a[href="#/dashboard"]').click());
+      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`).click());
     }
 
     async gotoDashboardLandingPage() {

@@ -223,7 +223,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     toggleSidebarCollapse() {
       return getRemote().findDisplayedByCssSelector('.sidebar-collapser .chevron-cont')
-        .click();
+      .click();
     }
 
     getAllFieldNames() {
@@ -236,14 +236,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     getSidebarWidth() {
       return getRemote()
-        .findByClassName('sidebar-list')
-        .getProperty('clientWidth');
+      .findByClassName('sidebar-list')
+      .getProperty('clientWidth');
     }
 
     hasNoResults() {
       return testSubjects.find('discoverNoResults')
-        .then(() => true)
-        .catch(() => false);
+      .then(() => true)
+      .catch(() => false);
     }
 
     getNoResultsTimepicker() {
@@ -252,9 +252,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     hasNoResultsTimepicker() {
       return this
-        .getNoResultsTimepicker()
-        .then(() => true)
-        .catch(() => false);
+      .getNoResultsTimepicker()
+      .then(() => true)
+      .catch(() => false);
     }
 
     clickFieldListItem(field) {
