@@ -32,6 +32,12 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
     });
 
+    after(async function afterAll() {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.removeIndexPattern();
+    });
+
     describe('creating and using Lucence expression scripted fields', function describeIndexTests() {
 
       const scriptedExpressionFieldName = 'ram_expr1';

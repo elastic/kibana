@@ -23,6 +23,11 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    after(async function afterAll() {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.removeIndexPattern();
+    });
 
     it('should allow setting advanced settings', function () {
       return PageObjects.settings.clickKibanaSettings()
@@ -48,7 +53,5 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.setAdvancedSettings('dateFormat:tz', 'UTC');
       });
     });
-
-
   });
 }
