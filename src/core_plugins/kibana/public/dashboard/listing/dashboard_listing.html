@@ -121,11 +121,11 @@
           >
         </th>
 
-        <th class="kuiTableHeaderCell" ng-click="listingController.toggleSort()">
+        <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('title')">
           Name
           <span
             class="fa"
-            ng-class="listingController.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+            ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'">
           </span>
         </th>
       </tr>
