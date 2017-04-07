@@ -30,6 +30,10 @@
   font-weight: 400;
   line-height: $globalLineHeight;
   color: $globalFontColor;
+
+  @include darkTheme {
+    color: $globalInputTextColor--darkTheme;
+  }
 }
 
 @mixin formControl {
@@ -57,6 +61,15 @@
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+
+  @include darkTheme {
+    background-color: $globalInputBackgroundColor--darkTheme;
+    border-color: $globalInputBorderColor--darkTheme;
+
+    &:focus {
+      @include formControlFocus;
+    }
   }
 }
 
