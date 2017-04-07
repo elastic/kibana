@@ -15,7 +15,7 @@ First we'll need to define an index, timefield and metric in our first expressio
 image::images/timelion-create01.png[]
 
 
-Now we want to add a another series with an offset of the previous hour. To do so, add the below expression to the Timelion querybar
+Now we want to add a another series with an offset of the previous hour. To do so, add the below expression to the Timelion query bar:
 
 [source,text]
 ----------------------------------
