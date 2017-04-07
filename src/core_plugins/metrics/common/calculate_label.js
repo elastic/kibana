@@ -11,7 +11,8 @@ const paths = [
   'std_deviation_bucket',
   'variance_bucket',
   'sum_of_squares_bucket',
-  'serial_diff'
+  'serial_diff',
+  'positive_only'
 ];
 export default function calculateLabel(metric, metrics) {
   if (!metric) return 'Unknown';
