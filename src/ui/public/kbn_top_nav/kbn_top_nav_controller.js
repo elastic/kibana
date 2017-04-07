@@ -58,6 +58,8 @@ export default function ($compile) {
     open(key) { this.setCurrent(key); }
     close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
     toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
+    click(key) { this.handleClick(this.getItem(key)); }
+    getItem(key) { return this.menuItems.find(i => i.key === key); }
     handleClick(menuItem) {
       if (menuItem.disableButton()) {
         return false;
