@@ -296,6 +296,7 @@ export default class DiscoverPage {
     await PageObjects.common.clickTestSubject('showFilterActions');
     await PageObjects.common.clickTestSubject('removeAllFilters');
     await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.waitUntilUrlFound('filters:!()');
   }
 
 
