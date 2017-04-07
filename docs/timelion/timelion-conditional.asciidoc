@@ -1,9 +1,9 @@
 [[timelion-conditional]]
 == Using conditional logic and tracking trends
 
-In this tutorial we will show you how to modify a series with conditional logic and create a trend line. This is helpful to easily distinguish outliers in your data and detect trends over time.
+In this tutorial we will show you how to modify a series with conditional logic and trend with a moving average. This is helpful to easily distinguish outliers in your data and detect trends over time.
 
-For the purposes of this tutorial, we will continue to use our Metricbeat data to add another visualization that monitors our memory consumption. To start, use the following expression to chart the max *system.memory.actual.used.bytes*.
+For the purposes of this tutorial, we will continue to use our https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to add another visualization that monitors memory consumption. To start, use the following expression to chart the max *system.memory.actual.used.bytes*.
 
 [source,text]
 ----------------------------------
@@ -12,7 +12,8 @@ For the purposes of this tutorial, we will continue to use our Metricbeat data t
 
 image::images/timelion-conditional01.png[]
 
-Let’s create two thresholds to keep an eye on the amount of memory our machine is using. Our warning threshold will be 12.5GB and our severe threshold will be 15GB. If the maximum amount of memory being utilized exceeds either of these thresholds, we can adjust the series appropriately. In order to do so, we will be using the *if()* function.
+
+Let’s create two thresholds to keep an eye on the amount of memory our machine is using. For the purposes of this tutorial, our warning threshold will be 12.5GB and our severe threshold will be 15GB. If the maximum amount of memory being utilized exceeds either of these thresholds, we can adjust the series appropriately. In configure these conditional elements, we will be using the *if()* function. We'll be styling each threshold appropriately based on severity. The warning threshold will be colored yellow (*.color('#FFCC11')*) and the severe threshold will be colored red (*.color('red')*). Use the following expression to apply the conditional logic and styling:
 
 [source,text]
 ----------------------------------
@@ -21,7 +22,8 @@ Let’s create two thresholds to keep an eye on the amount of memory our machine
 
 image::images/timelion-conditional02.png[]
 
-Now that we have thresholds for our outliers set, let’s smooth out the data to see what the trend really is. We can use the *mvavg()* function to define a number of points to average over and create a moving average series. Use the following expression to create a moving average of the maximum memory consumption:
+
+Now that we have thresholds for our outliers set, let’s create a new series to determine what the trend really is. We can use the *mvavg()* function to define a number of points to average over and create a moving average series. Use the following expression to create a moving average of the maximum memory consumption:
 
 [source,text]
 ----------------------------------
@@ -30,7 +32,8 @@ Now that we have thresholds for our outliers set, let’s smooth out the data to
 
 image::images/timelion-conditional03.png[]
 
-Know what time it is? Time to clean up the visualization. With all the styling and formatting knowledge you gained from our {kib-ref}timelion-customize.html[our previous tutorial], use the following expression to update your the visualization:
+
+Know what time it is? Time to clean up our visualization. With all the styling and formatting knowledge you gained from our https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[our previous tutorial], use the following expression to update the color, line widths, title and legend of your the visualization:
 
 [source,text]
 ----------------------------------
@@ -38,5 +41,6 @@ Know what time it is? Time to clean up the visualization. With all the styling a
 ----------------------------------
 
 image::images/timelion-conditional04.png[]
+
 
 Save your Timelion sheet and continue on to the next tutorial to add to your dashboard.

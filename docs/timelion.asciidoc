@@ -17,14 +17,14 @@ For example, Timelion enables you to easily get the answers to questions like:
 * What's the cumulative sum of all search requests received in the last 2 years?
 
 
-Ready to experience all that is Timelion? This tutorial shows you how to:
+Ready to experience all that is Timelion? The following tutorial shows you how to:
 
-* {kib-ref}timelion-create.html[Create a time series chart with multiple expressions]
-* {kib-ref}timelion-customize.html[Customize the visualization type and formatting options]
-* {kib-ref}timelion-math.html[Use mathematical functions to manipulate your data]
-* {kib-ref}timelion-conditional.html[Track trends and use conditional logic to format outliers]
-* {kib-ref}timelion-save.html[Add Timelion visualizations to a dashboard]
-* {kib-ref}timelion-inline-help.html[Reference inline help]
+* https://www.elastic.co/guide/en/kibana/current/timelion-create.html[Create a time series chart with multiple expressions]
+* https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[Customize the visualization type and formatting options]
+* https://www.elastic.co/guide/en/kibana/current/timelion-math.html[Use mathematical functions to manipulate your data]
+* https://www.elastic.co/guide/en/kibana/current/timelion-conditional.html[Track trends and use conditional logic to format outliers]
+* https://www.elastic.co/guide/en/kibana/current/timelion-save.html[Add Timelion visualizations to a dashboard]
+* https://www.elastic.co/guide/en/kibana/current/timelion-inline-help.html[Reference inline help]
 --
 include::timelion/timelion-create.asciidoc[]
 

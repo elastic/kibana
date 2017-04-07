@@ -1,11 +1,11 @@
 [[timelion-create]]
 == Creating time series visualizations
 
-We will use https://www.elastic.co/downloads/beats/metricbeat[Metricbeat] to walk you through a number of functions timelion offers. If you do not want to index this data locally, feel free to test out these same queries in our *[demo environment]*.
+We will be using time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat] to walk you through a number of functions that Timelion offers. To get started, download Metricbeat and follow the https://www.elastic.co/downloads/beats/metricbeat[instructions here] to start ingesting the data locally.
 
-Let’s compare the average percentage of CPU time spent in user space to the previous hour. In order to do so, we’ll need to create two expressions. One with the current average of *system.cpu.user.pct* and another with the average from the previous hour.
+To get started, we will create a visualization that compares the average percentage of CPU time spent in user space to the previous hour. In order to do so, we’ll need to create two expressions. One with the current average of *system.cpu.user.pct* and another with the average from the previous hour.
 
-To start - define a index, timefield and metric in the Timelion querybar
+First we'll need to define an index, timefield and metric in our first expression. Go ahead and enter the below expression into the Timelion query bar.
 
 [source,text]
 ----------------------------------
@@ -14,6 +14,7 @@ To start - define a index, timefield and metric in the Timelion querybar
 
 image::images/timelion-create01.png[]
 
+
 Now we want to add a another series with an offset of the previous hour. To do so, add the below expression to the Timelion querybar
 
 [source,text]
@@ -21,7 +22,7 @@ Now we want to add a another series with an offset of the previous hour. To do s
 .es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
 ----------------------------------
 
-The final expression should look like the following:
+Combine the two and enter the following expression into the Timelion query bar:
 
 [source,text]
 ----------------------------------
@@ -30,7 +31,8 @@ The final expression should look like the following:
 
 image::images/timelion-create02.png[]
 
-It’s hard to differentiate the two, add the following option to label each series accordingly.
+
+It’s a bit hard to differentiate the two series. Let's customize the labels in order to easily distinguish which series is which. Add the following option to label each series accordingly:
 
 [source,text]
 ----------------------------------

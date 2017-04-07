@@ -17,7 +17,6 @@ release-state can be: released | prerelease | unreleased
 :pull:           {repo}pull/
 :commit:         {repo}commit/
 :security:       https://www.elastic.co/community/security/
-:kib-ref:        https://www.elastic.co/guide/en/kibana/current/
 
 include::introduction.asciidoc[]
 
