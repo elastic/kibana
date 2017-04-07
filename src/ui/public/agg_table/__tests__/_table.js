@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
@@ -14,12 +15,14 @@ describe('AggTable Directive', function () {
   let tabifyAggResponse;
   let Vis;
   let indexPattern;
+  let settings;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector, Private, config) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
+    settings = config;
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
@@ -123,6 +126,13 @@ describe('AggTable Directive', function () {
       vis.aggs.forEach(function (agg, i) {
         agg.id = 'agg_' + (i + 1);
       });
+      function setDefaultTimezone() {
+        moment.tz.setDefault(settings.get('dateFormat:tz'));
+      }
+
+      const off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
+      const oldTimezoneSetting = settings.get('dateFormat:tz');
+      settings.set('dateFormat:tz', 'UTC');
 
       $scope.table = tabifyAggResponse(vis,
         fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
@@ -145,6 +155,8 @@ describe('AggTable Directive', function () {
       for (let i = 0; i < 6; i++) {
         expect($($cells[i]).text()).to.be(expected[i]);
       }
+      settings.set('dateFormat:tz', oldTimezoneSetting);
+      off();
     }
     it('as count', function () {
       totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
@@ -152,9 +164,9 @@ describe('AggTable Directive', function () {
     it('as min', function () {
       totalsRowTest('min', [
         '',
-        'September 27th 2014, 18:00:00.000',
+        'September 28th 2014, 00:00:00.000',
         '9,283',
-        'September 27th 2014, 18:00:00.000',
+        'September 28th 2014, 00:00:00.000',
         '1',
         '11'
       ]);
@@ -162,9 +174,9 @@ describe('AggTable Directive', function () {
     it('as max', function () {
       totalsRowTest('max', [
         '',
-        'October 2nd 2014, 18:00:00.000',
+        'October 3rd 2014, 00:00:00.000',
         '220,943',
-        'October 2nd 2014, 18:00:00.000',
+        'October 3rd 2014, 00:00:00.000',
         '239',
         '837'
       ]);
