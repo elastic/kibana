@@ -7,13 +7,13 @@ export function parseRelativeString(part) {
   let results = {};
   const matches = _.isString(part) && part.match(/now(([\-\+])([0-9]+)([smhdwMy])(\/[smhdwMy])?)?/);
 
-  const isNotNow = matches && !matches[1];
+  const isNow = matches && !matches[1];
   const opperator = matches && matches[2];
   const count = matches && matches[3];
   const unit = matches && matches[4];
   const roundBy = matches && matches[5];
 
-  if (isNotNow) {
+  if (isNow) {
     return { count: 0, unit: 's', round: false };
   }
 
