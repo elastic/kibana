@@ -131,6 +131,24 @@
   @include kuiButtonDisabled {
     color: $buttonBasicDisabledTextColor;
   }
+
+  @include darkTheme {
+    color: $buttonBasicTextColor--darkTheme;
+    background-color: $buttonBasicBackgroundColor--darkTheme;
+
+    @include kuiButtonFocus {
+      @include focus($globalFocusColor, $globalBackgroundColor--darkTheme);
+      color: $buttonBasicTextColor--darkTheme;
+    }
+
+    @include kuiButtonHoverAndActive {
+      background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
+    }
+
+    @include kuiButtonDisabled {
+      color: rgba($buttonBasicTextColor--darkTheme, 0.5);
+    }
+  }
 }
 
 /**
