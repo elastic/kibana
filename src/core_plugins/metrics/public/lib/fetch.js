@@ -4,7 +4,7 @@ export default (
   Notifier,
   $http
 ) => {
-  const dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
+  const dashboardContext = Private(require('../../../timelion/public/services/dashboard_context'));
   const notify = new Notifier({ location: 'Metrics' });
   return $scope => () => {
     const panel = $scope.model;
