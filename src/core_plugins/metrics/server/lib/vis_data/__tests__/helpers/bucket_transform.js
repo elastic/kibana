@@ -351,4 +351,30 @@ describe('bucketTransform', () => {
       expect(run).to.throw(Error, 'Metric missing script');
     });
   });
+
+  describe('positive_only', () => {
+    it('returns bucket_script', () => {
+      const metric = {
+        id: '2',
+        type: 'positive_only',
+        field: '1'
+      };
+      const metrics = [{ id: '1', type: 'avg', field: 'cpu.idle.pct' }, metric];
+      const fn = bucketTransform.positive_only;
+      expect(fn(metric, metrics, '10s')).is.eql({
+        bucket_script: {
+          buckets_path: {
+            value: '1'
+          },
+          gap_policy: 'skip',
+          script: {
+            inline: 'params.value > 0 ? params.value : 0',
+            lang: 'painless'
+          }
+        }
+      });
+    });
+  });
+
+
 });
