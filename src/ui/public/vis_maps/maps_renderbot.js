@@ -210,7 +210,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
         return;
       }
-      $(this.el).trigger('renderComplete');
+      this.$el.trigger('renderComplete');
     }
 
   }
