@@ -18,9 +18,13 @@ export async function initLeadfootCommand({ log, tunnelConfig, lifecycle }) {
       const session = await createSession({ log, tunnel });
 
       const command = new Command(session);
+
       lifecycle.on('cleanup', async () => {
         log.verbose('remote: closing leadfoot remote');
         await command.quit();
+
+        log.verbose('remote: closing digdug tunnel');
+        await tunnel.stop();
       });
 
       log.verbose('remote: created leadfoot command');

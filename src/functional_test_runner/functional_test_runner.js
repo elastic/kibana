@@ -19,6 +19,8 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
 
   class FunctionalTestRunner {
     async run() {
+      let runErrorOccurred = false;
+
       try {
         const config = await readConfigFile(log, configFile, configOverrides);
         log.info('Config loaded');
@@ -30,8 +32,23 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
         await lifecycle.trigger('beforeTests');
         log.info('Starting tests');
         return await runTests(lifecycle, log, mocha);
+
+      } catch (runError) {
+        runErrorOccurred = true;
+        throw runError;
+
       } finally {
-        await this.close();
+        try {
+          await this.close();
+
+        } catch (closeError) {
+          if (runErrorOccurred) {
+            log.error('failed to close functional_test_runner');
+            log.error(closeError);
+          } else {
+            throw closeError;
+          }
+        }
       }
     }
 

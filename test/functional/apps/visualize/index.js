@@ -31,7 +31,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_data_table'));
     loadTestFile(require.resolve('./_metric_chart'));
     loadTestFile(require.resolve('./_pie_chart'));
-    loadTestFile(require.resolve('./_tile_map'));
+    //loadTestFile(require.resolve('./_tile_map'));
     loadTestFile(require.resolve('./_vertical_bar_chart'));
     loadTestFile(require.resolve('./_heatmap_chart'));
     loadTestFile(require.resolve('./_point_series_options'));

@@ -2,7 +2,7 @@ import SeleniumTunnel from 'digdug/SeleniumTunnel';
 import uuid from 'node-uuid';
 
 // intern.Runner#loadTunnel
-export async function createTunnel({ log, tunnelConfig, lifecycle }) {
+export async function createTunnel({ log, tunnelConfig }) {
   const tunnel = new SeleniumTunnel({
     // https://git.io/vDnfv
     ...tunnelConfig,
@@ -20,14 +20,9 @@ export async function createTunnel({ log, tunnelConfig, lifecycle }) {
     }
 
     const exitted = new Promise(resolve => proc.on('exit', resolve));
-    tunnel._process.kill('SIGKILL');
+    tunnel._process.kill('SIGTERM');
     await exitted;
   };
-
-  lifecycle.on('cleanup', async () => {
-    log.verbose('remote: closing digdug tunnel');
-    await tunnel.stop();
-  });
 
   await tunnel.start();
   return tunnel;
