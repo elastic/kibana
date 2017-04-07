@@ -131,7 +131,6 @@ module.exports = async function (kbnServer, server, config) {
           redirectUrl: url,
         });
       } catch (err) {
-        console.log(err);
         reply(handleShortUrlError(err));
       }
     }
