@@ -33,17 +33,16 @@
   border: 1px solid #e4e4e4;
   border-radius: 4px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-  padding: 30px 40px 40px;
-  transition: left 0.1s linear;
+  padding: 10px 20px 20px;
+  transition: opacity 0.1s linear;
 
   &.kuiVisualizationNotice-isHidden {
-    left: -480px;
+    opacity: 0;
   }
 }
 
 .vis-editor {
   .flex-parent();
-  border-right: 1px solid #e4e4e4;
 
   @media (min-width: @screen-md-min) {
     position: absolute;
@@ -57,6 +56,7 @@
 
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
+    border-right: 1px solid #e4e4e4;
   }
 
   .visualization-options {
