@@ -124,6 +124,7 @@ module.exports = async function (kbnServer, server, config) {
         const stateStoreInSessionStorage = await uiSettings.get(request, 'state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
           reply().redirect(config.get('server.basePath') + url);
+          return;
         }
 
         const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
