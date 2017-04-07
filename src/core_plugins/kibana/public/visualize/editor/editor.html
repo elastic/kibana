@@ -105,17 +105,56 @@
       class="vis-editor-canvas"
       ng-class="{ embedded: !chrome.getVisible() }"
     >
-      <visualize
-        vis="vis"
-        data-shared-item
-        data-title="{{savedVis.lastSavedTitle}}"
-        data-description="{{savedVis.description}}"
-        render-counter
-        ui-state="uiState"
-        show-spy-panel="chrome.getVisible()"
-        editable-vis="editableVis"
-        search-source="savedVis.searchSource">
-      </visualize>
+      <div class="kuiVisualizationContainer">
+        <div
+          class="kuiVisualizationOverlay"
+        >
+          <div
+            class="kuiVisualizationNotice"
+            ng-class="{ 'kuiVisualizationNotice-isHidden': !$parent.editableVis.dirty }"
+          >
+            <h3 class="kuiSubTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
+              Update visualization with changes?
+            </h3>
+
+            <div class="kuiButtonGroup kuiButtonGroup--fullWidth kuiVerticalRhythm kuiVerticalRhythm--medium">
+              <button
+                class="kuiButton kuiButton--primary kuiButton--iconText"
+                ng-click="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
+              >
+                <span class="kuiButton__inner">
+                  <span
+                   aria-hidden="true"
+                   class="kuiButton__icon kuiIcon fa-play"
+                  ></span>
+                  <span>Update visualization</span>
+                </span>
+              </button>
+
+              <button
+                class="kuiButton kuiButton--hollow"
+                ng-click="resetEditableVis()"
+              >
+                <span class="kuiButton__inner">
+                  <span>Or revert your changes</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <visualize
+          vis="vis"
+          data-shared-item
+          data-title="{{savedVis.lastSavedTitle}}"
+          data-description="{{savedVis.description}}"
+          render-counter
+          ui-state="uiState"
+          show-spy-panel="chrome.getVisible()"
+          editable-vis="editableVis"
+          search-source="savedVis.searchSource">
+        </visualize>
+      </div>
     </div>
   </div>
 </visualize-app>
