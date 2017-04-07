@@ -338,7 +338,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .catch(notify.error);
   };
 
-  $scope.opts.fetch = $scope.fetch = function () {
+  $scope.submit = $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 

@@ -22,7 +22,7 @@ typeahead.directive('kbnTypeahead', function () {
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, $element, $timeout, PersistedLog, config) {
+    controller: function ($scope, $element, PersistedLog, config) {
       const self = this;
       self.form = $element.closest('form');
       self.query = '';
@@ -111,16 +111,8 @@ typeahead.directive('kbnTypeahead', function () {
         $scope.inputModel.$render();
         self.persistEntry();
 
-        if (ev && ev.type === 'click') {
-          $timeout(function () {
-            self.submitForm();
-          });
-        }
-      };
-
-      self.submitForm = function () {
-        if (self.form.length) {
-          self.form.submit();
+        if (ev && ev.type === 'click' && self.form.length) {
+          self.form.scope().submit();
         }
       };
 
