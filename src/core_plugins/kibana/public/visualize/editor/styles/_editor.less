@@ -1,6 +1,3 @@
-
-@vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
-@vis-editor-sidebar-min-width: 350px;
 @vis-editor-nesting-width: 8px;
 @vis-editor-agg-editor-spacing: 5px;
 
@@ -69,22 +66,29 @@
   }
 
   .vis-editor-sidebar {
-    .flex-parent(1, 0, auto);
+    flex: 1 0 auto;
+    flex-direction: colunm;
+
+    > * {
+      flex-shrink: 0;
+    }
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
-      flex-basis: @vis-editor-sidebar-basis;
-      min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
+      width: 350px;
     }
 
     /**
-     * 1. For narrower screens, fix the height of the sideBar and stack it on top.
+     * 1. For narrower screens, stack the sideBar on top.
+     * 2. Also, allow it to grow in height to fix the content.
      */
     @media (max-width: @screen-md-min) {
       width: 100%; /* 1 */
-      height: 400px; /* 1 */
       border-bottom: 1px solid #E4E4E3; /* 1 */
+
+      > * {
+        flex: 1 0 auto; /* 2 */
+      }
     }
 
     .index-pattern,
@@ -289,7 +293,7 @@
     }
 
   .vis-editor-canvas {
-    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
+    flex: 1 0 auto;
     display: flex;
     flex-direction: column;
     overflow: auto;
