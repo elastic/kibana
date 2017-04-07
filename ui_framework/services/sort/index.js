@@ -1,1 +1,1 @@
-export { SortProperties } from './sort_properties';
+export { SortableProperties } from './sort_properties';

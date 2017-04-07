@@ -2,7 +2,7 @@ import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry'
 import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortProperties } from 'ui_framework/services';
+import { SortableProperties } from 'ui_framework/services';
 
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -21,7 +21,7 @@ export function DashboardListingController($injector, $scope) {
   const notify = new Notifier({ location: 'Dashboard' });
 
   let selectedItems = [];
-  const sortProperties = new SortProperties([
+  const sortableProperties = new SortableProperties([
     {
       name: 'title',
       getValue: item => item.title,
@@ -31,7 +31,7 @@ export function DashboardListingController($injector, $scope) {
   'title');
 
   const calculateItemsOnPage = () => {
-    this.items = sortProperties.sortItems(this.items);
+    this.items = sortableProperties.sortItems(this.items);
     this.pager.setTotalItems(this.items.length);
     this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
   };
@@ -66,11 +66,11 @@ export function DashboardListingController($injector, $scope) {
     deselectAll();
     fetchItems();
   });
-  this.isAscending = (name) => sortProperties.isAscendingByName(name);
-  this.getSortProperty = () => sortProperties.getSortProperty();
+  this.isAscending = (name) => sortableProperties.isAscendingByName(name);
+  this.getSortedProperty = () => sortableProperties.getSortedProperty();
 
   this.sortOn = function sortOn(propertyName) {
-    sortProperties.sortOn(propertyName);
+    sortableProperties.sortOn(propertyName);
     deselectAll();
     calculateItemsOnPage();
   };
