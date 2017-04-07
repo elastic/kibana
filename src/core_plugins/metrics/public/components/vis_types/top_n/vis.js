@@ -45,7 +45,7 @@ function TopNVisualization(props) {
 
   if (model.drilldown_url) {
     params.onClick = (item) => {
-      window.location = replaceVars(model.drilldown_url, {}, { key: item.id });
+      window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
     };
   }
   const style = { backgroundColor: panelBackgroundColor };
