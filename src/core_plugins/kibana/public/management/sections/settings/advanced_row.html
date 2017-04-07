@@ -1,7 +1,7 @@
 <tr ng-class="conf.value === undefined ? 'default' : 'custom'">
   <td class="name">
     <b>{{conf.name}}</b>
-    <span class="smaller" ng-show="isValueNonDefault(conf)">
+    <span class="smaller" ng-show="!isDefaultValue(conf)">
       (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
     </span>
     <span class="smaller" ng-show="conf.isCustom">

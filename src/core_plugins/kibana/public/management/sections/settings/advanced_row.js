@@ -65,11 +65,11 @@ uiModules.get('apps/management')
         });
       };
 
-      $scope.isValueNonDefault = (conf) => {
-        return !conf.isCustom
-          && conf.value !== undefined
-          && conf.value !== ''
-          && String(conf.value) !== String(conf.defVal);
+      $scope.isDefaultValue = (conf) => {
+        return conf.isCustom
+          || conf.value === undefined
+          || conf.value === ''
+          || String(conf.value) === String(conf.defVal);
       };
     }
   };
