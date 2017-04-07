@@ -1,22 +1,18 @@
-import {
-  basicRenderTest,
-  basicHtmlAttributesRenderTest,
-  basicRendersChildrenTest
-} from '../../test/common_tests';
+import React from 'react';
+import { render } from 'enzyme';
+import { commonHtmlProps } from '../../test/common_html_props';
 
 import {
   KuiToolBar,
   KuiToolBarFooter,
 } from './tool_bar';
 
-describe('KuiToolBar', () => {
-  test('is rendered', () => basicRenderTest(KuiToolBar));
-  test('HTML attributes are rendered', () => basicHtmlAttributesRenderTest(KuiToolBar));
-  test('renders children', () => basicRendersChildrenTest(KuiToolBar));
+test('renders KuiToolBar', () => {
+  const component = <KuiToolBar { ...commonHtmlProps }>children</KuiToolBar>;
+  expect(render(component)).toMatchSnapshot();
 });
 
-describe('KuiToolBarFooter', () => {
-  test('is rendered', () => basicRenderTest(KuiToolBarFooter));
-  test('HTML attributes are rendered', () => basicHtmlAttributesRenderTest(KuiToolBarFooter));
-  test('renders children', () => basicRendersChildrenTest(KuiToolBarFooter));
+test('renders KuiToolBarFooter', () => {
+  const component = <KuiToolBarFooter { ...commonHtmlProps }>children</KuiToolBarFooter>;
+  expect(render(component)).toMatchSnapshot();
 });

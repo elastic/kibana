@@ -1,11 +1,7 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, mount } from 'enzyme';
 import sinon from 'sinon';
-
-import {
-  basicRenderTest,
-  basicHtmlAttributesRenderTest
-} from '../../test/common_tests';
+import { commonHtmlProps } from '../../test/common_html_props';
 
 import {
   KuiToolBarSearchBox,
@@ -13,12 +9,14 @@ import {
 
 describe('KuiToolBarSearchBox', () => {
   const onFilter = sinon.spy();
-  const props = { onFilter };
-  test('is rendered', () => basicRenderTest(KuiToolBarSearchBox, props));
-  test('HTML attributes are rendered', () => basicHtmlAttributesRenderTest(KuiToolBarSearchBox, props));
+
+  test('renders KuiToolBarSearchBox', () => {
+    const component = <KuiToolBarSearchBox onFilter={onFilter} { ...commonHtmlProps } />;
+    expect(render(component)).toMatchSnapshot();
+  });
 
   describe('onFilter', () => {
-    const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter}/>);
+    const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} { ...commonHtmlProps } />);
     onFilter.reset();
 
     test('is called on change event', () => {

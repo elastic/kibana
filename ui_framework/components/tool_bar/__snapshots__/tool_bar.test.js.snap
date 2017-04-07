@@ -1,45 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KuiToolBar HTML attributes are rendered 1`] = `
+exports[`renders KuiToolBar 1`] = `
 <div
   aria-label="aria-label"
   class="kuiToolBar testClass1 testClass2"
   data-test-subj="test subject string"
-/>
-`;
-
-exports[`KuiToolBar is rendered 1`] = `
-<div
-  class="kuiToolBar"
-/>
-`;
-
-exports[`KuiToolBar renders children 1`] = `
-<div
-  class="kuiToolBar"
 >
-  hello
+  children
 </div>
 `;
 
-exports[`KuiToolBarFooter HTML attributes are rendered 1`] = `
+exports[`renders KuiToolBarFooter 1`] = `
 <div
   aria-label="aria-label"
   class="kuiToolBarFooter testClass1 testClass2"
   data-test-subj="test subject string"
-/>
-`;
-
-exports[`KuiToolBarFooter is rendered 1`] = `
-<div
-  class="kuiToolBarFooter"
-/>
-`;
-
-exports[`KuiToolBarFooter renders children 1`] = `
-<div
-  class="kuiToolBarFooter"
 >
-  hello
+  children
 </div>
 `;
