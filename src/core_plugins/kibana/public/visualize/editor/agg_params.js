@@ -23,19 +23,6 @@ uiModules
       $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
       $scope.advancedToggled = false;
 
-      // this will contain the controls for the schema (rows or columns?), which are unrelated to
-      // controls for the agg, which is why they are first
-      const $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($el);
-
-      if ($scope.agg.schema.editor) {
-        $schemaEditor.append($scope.agg.schema.editor);
-        $compile($schemaEditor)($scope.$new());
-      }
-
-      // allow selection of an aggregation
-      const $aggSelect = $(aggSelectHtml).appendTo($el);
-      $compile($aggSelect)($scope);
-
       // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
       let $aggParamEditors; //  container for agg type param editors
       let $aggParamEditorsScope;
@@ -116,6 +103,19 @@ uiModules
         $aggParamEditors = $(paramEditors).appendTo($el);
         $compile($aggParamEditors)($aggParamEditorsScope);
       });
+
+      // this will contain the controls for the schema (rows or columns?), which are unrelated to
+      // controls for the agg, which is why they are first
+      const $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($el);
+
+      if ($scope.agg.schema.editor) {
+        $schemaEditor.append($scope.agg.schema.editor);
+        $compile($schemaEditor)($scope.$new());
+      }
+
+      // allow selection of an aggregation
+      const $aggSelect = $(aggSelectHtml).appendTo($el);
+      $compile($aggSelect)($scope);
 
       // build HTML editor given an aggParam and index
       function getAggParamHTML(param, idx) {
