@@ -1,0 +1,33 @@
+/**
+ * 1. Override Bootstrap styles.
+ */
+.kuiSideBar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid $sideBarBorderColor !important; /* 1 */
+}
+
+/**
+ * 1. Sometimes your markup may require a wrapper element inside of the SideBar. In this case,
+ *    this class can be used to expand to fill the container.
+ * 2. Set the flex-basis to 0 so that it collapses and becomes scrollable when the window is short.
+ */
+.kuiSideBarInner {
+  display: flex; /* 1 */
+  flex-direction: column; /* 1 */
+  flex: 1 1 0; /* 1, 2 */
+}
+
+.kuiSideBarContent {
+  @include verticalScroll;
+
+  flex: 1 1 auto;
+}
+
+.kuiSideBarControls {
+  flex: 0 0 auto;
+  height: 50px;
+  padding: 10px;
+  border-top: 1px solid $sideBarBorderColor;
+  background-color: rgba(#ffffff, 0.8);
+}

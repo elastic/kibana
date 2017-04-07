@@ -4,6 +4,17 @@
 @vis-editor-nesting-width: 8px;
 @vis-editor-agg-editor-spacing: 5px;
 
+.visualizeEditSideBarConfig {
+  padding-bottom: 10px;
+}
+
+/**
+ * 1. This wraps the sideBar, so it needs to be flex to fill the container's height.
+ */
+.visualizeEditCollapsibleSideBar {
+  display: flex; /* 1 */
+}
+
 .vis-editor {
   .flex-parent();
 
@@ -15,11 +26,6 @@
 
   .btn-xs {
     line-height: 1.3;
-  }
-
-  .collapsible-sidebar {
-    .flex-parent(0, 0, auto);
-    margin-right: 10px;
   }
 
   .visualization-options {
@@ -46,10 +52,7 @@
   vis-editor-agg-group {
     .flex-parent(0, 1, auto);
   }
-
-
 }
-
 
    .indented {
      margin-left: 2em;
@@ -75,6 +78,15 @@
       max-width: @vis-editor-sidebar-min-width;
     }
 
+    /**
+     * 1. For narrower screens, fix the height of the sideBar and stack it on top.
+     */
+    @media (max-width: @screen-md-min) {
+      width: 100%; /* 1 */
+      height: 400px; /* 1 */
+      border-bottom: 1px solid #E4E4E3; /* 1 */
+    }
+
     .index-pattern,
     nav {
       min-height: @app-icon-height;
@@ -91,17 +103,6 @@
 
       form {
         .flex-parent(1, 1, auto);
-
-        > div.vis-editor-config {
-          @media (min-width: @screen-md-min) {
-            .flex-parent(1, 1, 1px);
-            overflow: auto;
-          }
-
-          @media (max-width: @screen-md-min) {
-            .flex-parent(1, 1, auto);
-          }
-        }
 
         > .vis-edit-sidebar-buttons {
           flex: 0 0 auto;
