@@ -40,9 +40,14 @@ export class SortProperties {
    * @returns {Array.<Object>} sorted array of items, based off the sort properties.
    */
   sortItems(items) {
-    return this.isAscending()
-      ? _.sortBy(items, this.getSortProperty().getValue)
-      : _.sortBy(items, this.getSortProperty().getValue).reverse();
+    const sortProperty = this.getSortProperty();
+    if (!sortProperty) {
+      return items;
+    } else {
+      return this.isCurrentSortAscending()
+        ? _.sortBy(items, this.getSortProperty().getValue)
+        : _.sortBy(items, this.getSortProperty().getValue).reverse();
+    }
   }
 
   /**
@@ -63,7 +68,7 @@ export class SortProperties {
     const newSortedProperty = this.getSortPropertyByName(propertyName);
     const sortProperty = this.getSortProperty();
     if (sortProperty && sortProperty.name === newSortedProperty.name) {
-      this.flipAscending();
+      this.flipCurrentSortOrder();
     } else {
       this.currentSortedProperty = newSortedProperty;
     }
@@ -72,14 +77,24 @@ export class SortProperties {
   /**
    * @returns {boolean} True if the current sort property is sorted in ascending order.
    */
-  isAscending() {
-    return this.currentSortedProperty ? this.currentSortedProperty.isAscending : false;
+  isCurrentSortAscending() {
+    const sortProperty = this.getSortProperty();
+    return sortProperty ? this.isAscendingByName(sortProperty.name) : false;
+  }
+
+  /**
+   * @param {string} propertyName
+   * @returns {boolean} True if the given sort property is sorted in ascending order.
+   */
+  isAscendingByName(propertyName) {
+    const sortedProperty = this.getSortPropertyByName(propertyName);
+    return sortedProperty ? sortedProperty.isAscending : false;
   }
 
   /**
    * Flips the current sorted property sort order.
    */
-  flipAscending() {
+  flipCurrentSortOrder() {
     this.currentSortedProperty.isAscending = !this.currentSortedProperty.isAscending;
   }
 }

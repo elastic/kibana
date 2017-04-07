@@ -2,7 +2,7 @@ import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry'
 import 'ui/pager_control';
 import 'ui/pager';
 
-import { SortProperties } from 'ui/sort';
+import { SortProperties } from 'ui_framework/services';
 
 export function VisualizeListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -60,7 +60,7 @@ export function VisualizeListingController($injector, $scope) {
     selectedItems = this.pageOfItems.slice(0);
   };
 
-  this.isAscending = () => sortProperties.isAscending();
+  this.isAscending = (name) => sortProperties.isAscendingByName(name);
   this.getSortProperty = () => sortProperties.getSortProperty();
 
   this.sortOn = function sortOn(propertyName) {
