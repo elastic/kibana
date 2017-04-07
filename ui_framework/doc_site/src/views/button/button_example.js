@@ -69,6 +69,10 @@ export default props => (
       <GuideDemo>
         <Basic />
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <Basic />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection

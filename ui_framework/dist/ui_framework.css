@@ -237,6 +237,44 @@ body {
     color: #9B9B9B; }
   a.kuiButton--basic.kuiButton-isDisabled {
     color: #9B9B9B; }
+  .theme-dark .kuiButton--basic {
+    color: #FFF;
+    background-color: #9c9c9c; }
+    .theme-dark .kuiButton--basic:not(a):enabled:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #6EADC1;
+      /* 3 */
+      color: #FFF; }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):focus {
+      /* 1 */
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #6EADC1;
+      /* 3 */
+      color: #FFF; }
+    .theme-dark .kuiButton--basic:enabled:hover {
+      background-color: dimgray !important;
+      /* 1 */ }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):hover {
+      /* 1 */
+      background-color: dimgray !important;
+      /* 1 */ }
+    .theme-dark .kuiButton--basic:enabled:active {
+      background-color: dimgray !important;
+      /* 1 */ }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):active {
+      /* 1 */
+      background-color: dimgray !important;
+      /* 1 */ }
+    .theme-dark .kuiButton--basic:disabled {
+      color: rgba(255, 255, 255, 0.5); }
+    a.theme-dark .kuiButton--basic.kuiButton-isDisabled {
+      color: rgba(255, 255, 255, 0.5); }
 
 /**
  * 1. Override Bootstrap.
@@ -676,6 +714,8 @@ body {
   /* 1 */
   width: 100%;
   /* 2 */ }
+  .theme-dark .kuiSearchInput__input {
+    color: #cecece; }
   .kuiSearchInput__input:invalid:not(.ng-untouched) {
     /* 1 */
     border-color: #D86051; }
@@ -685,6 +725,12 @@ body {
   .kuiSearchInput__input:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+  .theme-dark .kuiSearchInput__input {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSearchInput__input:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
@@ -717,6 +763,8 @@ body {
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
   /* 2 */ }
+  .theme-dark .kuiSelect {
+    color: #cecece; }
   .kuiSelect:invalid:not(.ng-untouched) {
     /* 1 */
     border-color: #D86051; }
@@ -726,6 +774,15 @@ body {
   .kuiSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+  .theme-dark .kuiSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+  .theme-dark .kuiSelect {
+    background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
+    /* 1 */ }
 
 /**
  * 1. Have the same spatial footprint as the regular input.
@@ -741,6 +798,8 @@ body {
   color: #191E23;
   border: 1px solid transparent;
   /* 1 */ }
+  .theme-dark .kuiStaticInput {
+    color: #cecece; }
 
 .kuiTextArea {
   -webkit-appearance: none;
@@ -761,6 +820,8 @@ body {
    *    We only want invalid inputs to appear invalid after the user has had a chance to interact
    *    with it.
    */ }
+  .theme-dark .kuiTextArea {
+    color: #cecece; }
   .kuiTextArea:invalid:not(.ng-untouched) {
     /* 1 */
     border-color: #D86051; }
@@ -770,6 +831,12 @@ body {
   .kuiTextArea:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+  .theme-dark .kuiTextArea {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiTextArea:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
@@ -793,6 +860,8 @@ body {
    *    We only want invalid inputs to appear invalid after the user has had a chance to interact
    *    with it.
    */ }
+  .theme-dark .kuiTextInput {
+    color: #cecece; }
   .kuiTextInput:invalid:not(.ng-untouched) {
     /* 1 */
     border-color: #D86051; }
@@ -802,6 +871,12 @@ body {
   .kuiTextInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
+  .theme-dark .kuiTextInput {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiTextInput:focus {
+      outline: none;
+      border-color: #6EADC1; }
 
 .kuiFieldGroup {
   display: -webkit-box;
@@ -1119,15 +1194,15 @@ body {
 
 .kuiLocalBreadcrumb__link {
   font-size: 14px;
-  color: #328CAA;
+  color: #328caa;
   text-decoration: none; }
   .kuiLocalBreadcrumb__link:hover {
-    color: #328CAA;
+    color: #328caa;
     text-decoration: underline; }
   .theme-dark .kuiLocalBreadcrumb__link {
     color: #b7e2ea; }
     .theme-dark .kuiLocalBreadcrumb__link:hover {
-      color: #def2f6; }
+      color: #b7e2ea; }
 
 .kuiLocalBreadcrumb__emphasis {
   font-weight: 700; }
