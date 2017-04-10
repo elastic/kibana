@@ -37,7 +37,7 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
       name: 'US States',
       fields: [{
         name: 'STUSPS10',
-        description: '2-letter abbreviation'
+        description: 'Two letter abbreviation'
       }, {
         name: 'NAME10',
         description: 'State name'

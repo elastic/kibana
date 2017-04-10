@@ -45,7 +45,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     });
 
     this._loaded = false;
-    $.ajax({//todo: replace with es6 fetch
+    $.ajax({
       dataType: 'json',
       url: geojsonUrl,
       success: (data) => {
