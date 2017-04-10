@@ -54,36 +54,36 @@ from the saved search.
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
   
-  Metric Aggregations:
-  
-  * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
-  * {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
-  * {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
-  * {es-ref}search-aggregations-metrics-min-aggregation.html[min]
-  * {es-ref}search-aggregations-metrics-max-aggregation.html[max]
-  * {es-ref}search-aggregations-metrics-stats-aggregation.html[standard deviation]
-  * {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
-  * {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
-  * {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
-  * {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
-  * {es-ref}search-aggregations-metrics-top-hits-aggregation.html[top hit]
-  * {es-ref}search-aggregations-metrics-geocentroid-aggregation.html[geo centroid]
-  
-  
-  Parent Pipeline Aggregations:
-  
-  * {es-ref}search-aggregations-pipeline-derivative-aggregation.html[derivative]
-  * {es-ref}search-aggregations-pipeline-cumulative-sum-aggregation.html[cumulative sum]
-  * {es-ref}search-aggregations-pipeline-movavg-aggregation.html[moving average]
-  * {es-ref}search-aggregations-pipeline-serialdiff-aggregation.html[serial diff]
-  
-  
-  Sibling Pipeline Aggregations:
-  
-  * {es-ref}search-aggregations-pipeline-avg-bucket-aggregation.html[average bucket]
-  * {es-ref}search-aggregations-pipeline-sum-bucket-aggregation.html[sum bucket]
-  * {es-ref}search-aggregations-pipeline-min-bucket-aggregation.html[min bucket]
-  * {es-ref}search-aggregations-pipeline-max-bucket-aggregation.html[max bucket]
+* *Metric Aggregations*:
+
+* {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
+* {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
+* {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
+* {es-ref}search-aggregations-metrics-min-aggregation.html[min]
+* {es-ref}search-aggregations-metrics-max-aggregation.html[max]
+* {es-ref}search-aggregations-metrics-stats-aggregation.html[standard deviation]
+* {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
+* {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
+* {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
+* {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
+* {es-ref}search-aggregations-metrics-top-hits-aggregation.html[top hit]
+* {es-ref}search-aggregations-metrics-geocentroid-aggregation.html[geo centroid]
+
+
+* *Parent Pipeline Aggregations*:
+
+* {es-ref}search-aggregations-pipeline-derivative-aggregation.html[derivative]
+* {es-ref}search-aggregations-pipeline-cumulative-sum-aggregation.html[cumulative sum]
+* {es-ref}search-aggregations-pipeline-movavg-aggregation.html[moving average]
+* {es-ref}search-aggregations-pipeline-serialdiff-aggregation.html[serial diff]
+
+
+* *Sibling Pipeline Aggregations*:
+
+* {es-ref}search-aggregations-pipeline-avg-bucket-aggregation.html[average bucket]
+* {es-ref}search-aggregations-pipeline-sum-bucket-aggregation.html[sum bucket]
+* {es-ref}search-aggregations-pipeline-min-bucket-aggregation.html[min bucket]
+* {es-ref}search-aggregations-pipeline-max-bucket-aggregation.html[max bucket]
 
 
 . For the visualizations X axis, select a bucket aggregation:
