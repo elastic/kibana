@@ -1,4 +1,16 @@
 /**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
  * 3. Create an offset box-shadow that follows the contours of the element.
@@ -116,18 +128,6 @@ body {
     margin-left: 10px;
     /* 1 */ }
 
-/**
- * 1. Links can't have a disabled attribute, so they can't support :disabled.
- */
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
@@ -1841,14 +1841,30 @@ body {
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
-  .kuiPanelHeader .kuiButton:focus {
+  .kuiPanelHeader .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
     /* 3 */ }
-  .kuiPanelHeader .kuiButton--danger:focus {
+  a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
     z-index: 1;
     /* 1 */
     outline: none !important;
@@ -1861,9 +1877,16 @@ body {
     .kuiPanelHeader .kuiButton--basic:disabled {
       color: #a7a7a7;
       background-color: #F3F3F3; }
+    a.kuiPanelHeader .kuiButton--basic.kuiButton-isDisabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3; }
   .kuiPanelHeader .kuiSelect {
     border-color: #ffffff; }
-    .kuiPanelHeader .kuiSelect:focus {
+    .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
+      outline: none;
+      border-color: #6EADC1; }
+    a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {
+      /* 1 */
       outline: none;
       border-color: #6EADC1; }
 
@@ -2212,14 +2235,30 @@ body {
   padding: 10px;
   height: 50px;
   background-color: #E4E4E4; }
-  .kuiToolBar .kuiButton:focus {
+  .kuiToolBar .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
     /* 3 */ }
-  .kuiToolBar .kuiButton--danger:focus {
+  a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    /* 3 */ }
+  .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
     z-index: 1;
     /* 1 */
     outline: none !important;
@@ -2232,9 +2271,16 @@ body {
     .kuiToolBar .kuiButton--basic:disabled {
       color: #a7a7a7;
       background-color: #F3F3F3; }
+    a.kuiToolBar .kuiButton--basic.kuiButton-isDisabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3; }
   .kuiToolBar .kuiSelect {
     border-color: #ffffff; }
-    .kuiToolBar .kuiSelect:focus {
+    .kuiToolBar .kuiSelect:not(a):enabled:focus {
+      outline: none;
+      border-color: #6EADC1; }
+    a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {
+      /* 1 */
       outline: none;
       border-color: #6EADC1; }
 

@@ -5,6 +5,63 @@
 }
 
 /**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+@mixin kuiButtonDisabled {
+  &:disabled {
+    @content;
+  }
+
+  @at-root a#{&}.kuiButton-isDisabled {
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonHover {
+  &:enabled:hover {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):hover { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonActive {
+  &:enabled:active {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):active { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonFocus {
+  &:not(a):enabled:focus {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):focus { /* 1 */
+    @content;
+  }
+}
+
+@mixin kuiButtonHoverAndActive {
+  @include kuiButtonHover { @content }
+  @include kuiButtonActive { @content }
+}
+
+/**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
  * 3. Create an offset box-shadow that follows the contours of the element.
@@ -144,13 +201,13 @@
 
 @mixin buttonOnStandoutBackground {
   .kuiButton {
-    &:focus {
+    @include kuiButtonFocus {
       @include focus($globalFocusColor, $globalBorderColor);
     }
   }
 
   .kuiButton--danger {
-    &:focus {
+    @include kuiButtonFocus {
       @include focus($globalFocusDangerColor, $globalBorderColor);
     }
   }
@@ -159,7 +216,7 @@
     color: #5a5a5a;
     background-color: #FFFFFF;
 
-    &:disabled {
+    @include kuiButtonDisabled {
       color: #a7a7a7;
       background-color: #F3F3F3;
     }
@@ -170,7 +227,7 @@
   .kuiSelect {
     border-color: #ffffff;
 
-    &:focus {
+    @include kuiButtonFocus {
       @include formControlFocus;
     }
   }
