@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 const chainRunnerFn = require('../chain_runner');
 const tlConfig = require('../../series_functions/__tests__/fixtures/tlConfig.js')();
 
