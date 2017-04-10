@@ -68,7 +68,7 @@ export default class Common {
     }
   }
 
-  waitUntilUrlFound(path) {
+  waitUntilUrlIncludes(path) {
     return this.tryForTime(defaultFindTimeout, async () => {
       const url = await this.remote.getCurrentUrl();
       if (!url.includes(path)) throw new Error('Url not found');
