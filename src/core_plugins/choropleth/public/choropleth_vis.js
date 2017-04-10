@@ -5,10 +5,12 @@ import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/templat
 import VisSchemasProvider from 'ui/vis/schemas';
 import choroplethTemplate from 'plugins/choropleth/choropleth_controller.html';
 import visTypes from 'ui/registry/vis_types';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import colorramps from 'ui/vislib/components/color/colormaps';
 
 visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
 
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -50,6 +52,7 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
     implementsRenderComplete: true,
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',
+    category: VisType.CATEGORY.MAP,
     icon: 'fa-globe',
     template: choroplethTemplate,
     params: {
