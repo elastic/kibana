@@ -11,11 +11,12 @@ import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
-module.controller('KbnChoroplethController', function ($scope, $element, Private, getAppState, tilemapSettings) {
+module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState, tilemapSettings, config) {
 
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
+  const notify = new Notifier({ location: 'Vectormap' });
 
   const resizeChecker = new ResizeChecker($element);
   const containerNode = $element[0];
@@ -118,6 +119,15 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       const aggs = $scope.vis.aggs.getResponseAggs();
       const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
       clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    });
+    choroplethLayer.on('styleChanged', function (event) {
+      if (event.mismatches.length > 0 && config.get('visualization:vectormap:showWarnings')) {
+        notify.warning(
+          `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
+            + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`
+            + ` Could not join terms: ${event.mismatches.join(',')}`
+        );
+      }
     });
     kibanaMap.addLayer(choroplethLayer);
   }

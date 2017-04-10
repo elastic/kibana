@@ -62,10 +62,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       return;
     }
 
-
-    const styleFunction = makeChoroplethStyleFunction(this._metrics, this._colorRamp, this._joinField);
-    this._leafletLayer.setStyle(styleFunction);
-
+    const styler = makeChoroplethStyler(this._metrics, this._colorRamp, this._joinField);
+    this._leafletLayer.setStyle(styler.getLeafletStyleFunction);
 
     if (this._metrics && this._metrics.length > 0) {
       const { min, max } = getMinMax(this._metrics);
@@ -73,7 +71,9 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
-    this.emit('styleChanged');
+    this.emit('styleChanged', {
+      mismatches: styler.getMismatches()
+    });
   }
 
   getMetrics() {
@@ -181,39 +181,53 @@ function getMinMax(data) {
 }
 
 
-function makeChoroplethStyleFunction(data, colorramp, joinField) {
+function makeChoroplethStyler(data, colorramp, joinField) {
+
 
   if (data.length === 0) {
-    return function () {
-      return emptyStyle();
+    return {
+      getLeafletStyleFunction: function () {
+        return emptyStyle();
+      },
+      getMismatches: function () {
+        return [];
+      }
     };
   }
 
   const { min, max } = getMinMax(data);
+  data = data.slice();
+  return {
+    getLeafletStyleFunction: function (geojsonFeature) {
+      let lastIndex = -1;
+      const match = data.find((bucket, index) => {
+        lastIndex = index;
+        if (typeof bucket.term === 'string' && typeof geojsonFeature.properties[joinField] === 'string') {
+          return normalizeString(bucket.term) === normalizeString(geojsonFeature.properties[joinField]);
+        } else {
+          return bucket.term === geojsonFeature.properties[joinField];
+        }
+      });
 
-
-  return function (geojsonFeature) {
-
-    const match = data.find((bucket) => {
-      if (typeof bucket.term === 'string' && typeof geojsonFeature.properties[joinField] === 'string') {
-        return normalizeString(bucket.term) === normalizeString(geojsonFeature.properties[joinField]);
-      } else {
-        return bucket.term === geojsonFeature.properties[joinField];
+      if (!match) {
+        return emptyStyle();
       }
-    });
 
-    if (!match) {
-      return emptyStyle();
+      data.splice(lastIndex, 1);
+      return {
+        fillColor: getChoroplethColor(match.value, min, max, colorramp),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        fillOpacity: 0.7
+      };
+    },
+    getMismatches: function () {
+      return data.map((bucket) => bucket.term);
     }
-
-    return {
-      fillColor: getChoroplethColor(match.value, min, max, colorramp),
-      weight: 2,
-      opacity: 1,
-      color: 'white',
-      fillOpacity: 0.7
-    };
   };
+
+
 }
 
 
