@@ -3,7 +3,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   const getRemote = () => (
     getService('remote')
@@ -294,6 +294,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('showFilterActions');
       await testSubjects.click('removeAllFilters');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
     }
   }
 

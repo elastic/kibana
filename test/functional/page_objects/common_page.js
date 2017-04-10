@@ -208,6 +208,15 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitUntilUrlIncludes(path) {
+      await retry.try(async () => {
+        const url = await remote.getCurrentUrl();
+        if (!url.includes(path)) {
+          throw new Error('Url not found');
+        }
+      });
+    }
+
     async getSharedItemTitleAndDescription() {
       const element = await remote
         .setFindTimeout(defaultFindTimeout)
