@@ -5,8 +5,8 @@ export default {
   stepForward({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: max.toISOString(),
-      to: moment(max).add(diff).toISOString(),
+      from: moment(max).add(1).toISOString(),
+      to: moment(max).add(diff + 1).toISOString(),
       mode: 'absolute'
     };
   },
@@ -15,8 +15,8 @@ export default {
   stepBackward({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: moment(min).subtract(diff).toISOString(),
-      to: min.toISOString(),
+      from: moment(min).subtract(diff + 1).toISOString(),
+      to: moment(min).subtract(1).toISOString(),
       mode: 'absolute'
     };
   },
