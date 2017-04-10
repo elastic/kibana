@@ -2,8 +2,11 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import encodeUriQuery from 'encode-uri-query';
 import rison from 'rison-node';
+import uiModules from 'ui/modules';
 import { parse as parseUrl, format as formatUrl } from 'url';
 import { stringify as stringifyQuerystring } from 'querystring';
+
+const module = uiModules.get('kibana');
 
 const conservativeStringifyQuerystring = (query) => {
   return stringifyQuerystring(query, null, null, {
@@ -57,21 +60,11 @@ const hashUrl = (states, redirectUrl) => {
   });
 };
 
-import uiRoutes from 'ui/routes';
-uiRoutes.enable();
-uiRoutes
-.when('/', {
-  resolve: {
-    url: function (AppState, globalState, $window) {
-      const redirectUrl = chrome.getInjected('redirectUrl');
+module.run(function (AppState, globalState, $window) {
+  const redirectUrl = chrome.getInjected('redirectUrl');
 
-      const hashedUrl = hashUrl([new AppState(), globalState], redirectUrl);
-      const url = chrome.addBasePath(hashedUrl);
+  const hashedUrl = hashUrl([new AppState(), globalState], redirectUrl);
+  const url = chrome.addBasePath(hashedUrl);
 
-      $window.location = url;
-    }
-  }
+  $window.location = url;
 });
-
-
-
