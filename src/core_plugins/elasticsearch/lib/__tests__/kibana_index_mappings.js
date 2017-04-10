@@ -40,5 +40,17 @@ describe('plugins/elasticsearch', function () {
       kibanaMappings.register({ foo: 'bar' });
       expect(plugin.status.red.called).to.be(true);
     });
+
+    it('includes the plugin id in the mapping conflict message', () => {
+      kibanaMappings.register({ foo: 'bar' });
+      kibanaMappings.register({ foo: 'bar' }, { plugin: 'abc123' });
+      expect(plugin.status.red.called).to.be(true);
+      expect(plugin.status.red.getCall(0).args[0]).to.contain('abc123');
+    });
+
+    afterEach(() => {
+      plugin.status.red.reset();
+    });
   });
+
 });

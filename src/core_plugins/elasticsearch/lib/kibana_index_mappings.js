@@ -23,10 +23,12 @@ class KibanaMappings {
     return this._currentMappings;
   }
 
-  register = (newMappings) => {
+  register = (newMappings, options = {}) => {
     Object.keys(this._currentMappings).forEach(key => {
       if (newMappings.hasOwnProperty(key)) {
-        this._plugin.status.red(`Mappings for ${key} have already been defined`);
+        const pluginPartial = options.plugin ? `registered by plugin ${options.plugin} ` : '';
+        this._plugin.status.red(`Mappings for ${key} ${pluginPartial}have already been defined`);
+        return;
       }
     });
     Object.assign(this._currentMappings, newMappings);
