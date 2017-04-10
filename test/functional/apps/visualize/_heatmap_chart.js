@@ -70,10 +70,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct chart, take screenshot', function () {
-        const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
-          '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
-          '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
-          '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
+        const expectedChartValues = [null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800',
+          null, null, null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', null, null,
+          null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', null, null ];
 
         // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
         // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
