@@ -167,6 +167,13 @@ uiModules.get('apps/management')
           docs = JSON.parse(fileContents);
         } catch (e) {
           notify.error('The file could not be processed.');
+          return;
+        }
+
+        // make sure we have an array, show an error otherwise
+        if (!Array.isArray(docs)) {
+          notify.error('Saved objects file format is invalid and cannot be imported.');
+          return;
         }
 
         function importDocument(doc) {
