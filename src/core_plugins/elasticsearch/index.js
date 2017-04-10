@@ -42,7 +42,7 @@ module.exports = function ({ Plugin }) {
         startupTimeout: number().default(5000),
         logQueries: boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
+        apiVersion: Joi.string().default('5.x'),
         healthCheck: object({
           delay: number().default(2500)
         }).default(),
@@ -59,7 +59,7 @@ module.exports = function ({ Plugin }) {
           startupTimeout: number().default(5000),
           logQueries: boolean().default(false),
           ssl: sslSchema,
-          apiVersion: Joi.string().default('master'),
+          apiVersion: Joi.string().default('5.x'),
         }).default()
       }).default();
     },
