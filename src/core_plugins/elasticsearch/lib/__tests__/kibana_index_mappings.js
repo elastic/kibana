@@ -17,7 +17,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('provides default mappings', function () {
-      expect(kibanaMappings.getCombined()).to.an('object');
+      expect(kibanaMappings.getCombined()).to.be.an('object');
     });
 
     it('registers new mappings', () => {
