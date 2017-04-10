@@ -68,6 +68,13 @@ export default class Common {
     }
   }
 
+  waitUntilUrlIncludes(path) {
+    return this.tryForTime(defaultFindTimeout, async () => {
+      const url = await this.remote.getCurrentUrl();
+      if (!url.includes(path)) throw new Error('Url not found');
+    });
+  }
+
   getHostPort() {
     return getUrl.baseUrl(config.servers.kibana);
   }
