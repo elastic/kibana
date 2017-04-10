@@ -115,7 +115,7 @@
     <button
       ng-if="!conf.editing"
       ng-click="clear(conf)"
-      ng-hide="conf.value === undefined"
+      ng-hide="isDefaultValue(conf)"
       class="btn btn-danger"
       aria-label="Clear"
     >
