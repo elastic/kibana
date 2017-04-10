@@ -34,7 +34,8 @@ export default function ColumnHandler() {
       valueAxis: matchingSeriParams.valueAxis,
       drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
       showCircles: matchingSeriParams.showCircles,
-      radiusRatio: matchingSeriParams.radiusRatio,
+      radiusRatio: cfg.radiusRatio,
+      lineWidth: matchingSeriParams.lineWidth,
       data: seri
     };
   };
