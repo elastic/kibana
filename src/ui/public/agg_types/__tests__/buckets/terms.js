@@ -129,6 +129,35 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('_term');
     });
 
+    it('selects first metric if it is avg', function () {
+      init({
+        responseValueAggs: [
+          {
+            id: 'agg1',
+            type: {
+              name: 'avg',
+              field: 'bytes'
+            }
+          }
+        ]
+      });
+      expect($rootScope.agg.params.orderBy).to.be('agg1');
+    });
+
+    it('selects _term if the first metric is avg_bucket', function () {
+      $rootScope.responseValueAggs = [
+        {
+          id: 'agg1',
+          type: {
+            name: 'avg_bucket',
+            metric: 'custom'
+          }
+        }
+      ];
+      $rootScope.$digest();
+      expect($rootScope.agg.params.orderBy).to.be('_term');
+    });
+
     it('selects _term if the selected metric is removed', function () {
       init({
         responseValueAggs: [

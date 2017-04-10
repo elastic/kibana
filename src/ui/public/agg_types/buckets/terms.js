@@ -117,10 +117,8 @@ export default function TermsAggDefinition(Private) {
           $scope.$watch('agg.params.orderBy', updateOrderAgg);
 
           // Returns true if the agg is not compatible with the terms bucket
-          $scope.rejectAgg = function (agg) {
-            // aggFilter elements all starts with a '!'
-            // so the index of agg.type.name in a filter is 1 if it is included
-            return Boolean(aggFilter.find((filter) => filter.indexOf(agg.type.name) === 1));
+          $scope.rejectAgg = function rejectAgg(agg) {
+            return aggFilter.includes(`!${agg.type.name}`);
           };
 
           function updateOrderAgg() {
