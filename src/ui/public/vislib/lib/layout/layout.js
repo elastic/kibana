@@ -3,10 +3,13 @@ import _ from 'lodash';
 import $ from 'jquery';
 import VislibLibLayoutLayoutTypesProvider from './layout_types';
 import AxisProvider from 'ui/vislib/lib/axis';
+import ChartTitleProvider from 'ui/vislib/lib/chart_title';
+
 export default function LayoutFactory(Private) {
 
   const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
   const Axis = Private(AxisProvider);
+  const ChartTitle = Private(ChartTitleProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -66,20 +69,23 @@ export default function LayoutFactory(Private) {
       const axisConfig = visConfig.get('categoryAxes[0]');
       const axis = new Axis(visConfig, axisConfig);
       const position = axis.axisConfig.get('position');
+      const chartTitle = new ChartTitle(visConfig);
 
       const el = $(this.el).find(`.axis-wrapper-${position}`);
 
       el.css('visibility', 'hidden');
       axis.render();
+      chartTitle.render();
       const width = el.width();
       const height = el.height();
       axis.destroy();
+      el.find('.chart-title svg').remove();
       el.css('visibility', '');
+
 
       if (axis.axisConfig.isHorizontal()) {
         const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
-        el.height(`${height}px`);
-        spacerNodes.height(el.height());
+        spacerNodes.height(`${height}px`);
       } else {
         el.find('.y-axis-div-wrapper').width(`${width}px`);
       }
