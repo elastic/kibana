@@ -1,0 +1,235 @@
+@mixin darkTheme {
+  .theme-dark & {
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+@mixin kuiButtonDisabled {
+  &:disabled {
+    @content;
+  }
+
+  @at-root a#{&}.kuiButton-isDisabled {
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonHover {
+  &:enabled:hover {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):hover { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonActive {
+  &:enabled:active {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):active { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonFocus {
+  &:not(a):enabled:focus {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):focus { /* 1 */
+    @content;
+  }
+}
+
+@mixin kuiButtonHoverAndActive {
+  @include kuiButtonHover { @content }
+  @include kuiButtonActive { @content }
+}
+
+/**
+ * 1. Make sure outline doesn't get hidden beneath adjacent elements.
+ * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
+ */
+@mixin focus($color: $globalFocusColor, $backgroundColor: $globalFocusBackgroundColor) {
+  z-index: 1; /* 1 */
+  outline: none !important; /* 2 */
+  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
+}
+
+@mixin formControlFocus {
+  outline: none;
+  border-color: $globalSelectedBorderColor;
+}
+
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+@mixin formControlBase {
+  appearance: none;
+  padding: 3px 12px 4px;
+  font-size: $globalFontSize;
+  font-weight: 400;
+  line-height: $globalLineHeight;
+  color: $globalFontColor;
+
+  @include darkTheme {
+    color: $globalInputTextColor--darkTheme;
+  }
+}
+
+@mixin formControl {
+  @include formControlBase;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: $globalBorderRadius;
+  transition: border-color $globalInputTransitionTiming;
+
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  &:invalid {
+    &:not(.ng-untouched) { /* 1 */
+      border-color: $globalDangerBorderColor;
+    }
+  }
+
+  &:focus {
+    @include formControlFocus;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @include darkTheme {
+    background-color: $globalInputBackgroundColor--darkTheme;
+    border-color: $globalInputBorderColor--darkTheme;
+
+    &:focus {
+      @include formControlFocus;
+    }
+  }
+}
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+@mixin microButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: $globalSubduedTextColor;
+  background-color: transparent;
+  line-height: 1; /* 2 */
+
+  &:hover {
+    color: $globalFontColor;
+  }
+}
+
+/**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
+@mixin bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px; /* 1 */
+}
+
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one section, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ * 3. Children in the middle should center their content.
+ * 4. Fix an IE bug which causes the last child to overflow the container.
+ * 5. Fixing this bug means we now need to align the children to the right.
+ */
+@mixin barSection {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:not(:first-child):not(:last-child):not(:only-child) {
+    justify-content: center; /* 3 */
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+    flex: 0 1 auto; /* 4 */
+    justify-content: flex-end; /* 5 */
+  }
+
+  &:only-child {
+    margin-left: auto; /* 2 */
+  }
+
+  & > * + * {
+    margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+}
+
+@mixin buttonOnStandoutBackground {
+  .kuiButton {
+    @include kuiButtonFocus {
+      @include focus($globalFocusColor, $globalBorderColor);
+    }
+  }
+
+  .kuiButton--danger {
+    @include kuiButtonFocus {
+      @include focus($globalFocusDangerColor, $globalBorderColor);
+    }
+  }
+
+  .kuiButton--basic {
+    color: #5a5a5a;
+    background-color: #FFFFFF;
+
+    @include kuiButtonDisabled {
+      color: #a7a7a7;
+      background-color: #F3F3F3;
+    }
+  }
+}
+
+@mixin selectOnStandoutBackground {
+  .kuiSelect {
+    border-color: #ffffff;
+
+    @include kuiButtonFocus {
+      @include formControlFocus;
+    }
+  }
+}
+

@@ -1,0 +1,63 @@
+// --------------------------------------------------------------------------------------
+// KUI global variables
+// --------------------------------------------------------------------------------------
+// This file contains all global variables available within kui. Every variable in this
+// document should be prefixed with $global. This lets us know where the variable is
+// coming from when looking inside the individual component files. Any component local
+// variables should be declared at the top of those documents prefixed with $componentName.
+
+
+// Normal colors
+$globalTextColor: #2d2d2d;
+$globalLinkColor: #3CAED2;
+$globalLinkColor-isHover: #105A73;
+$globalInputTextColor: $globalTextColor;
+$globalInputBackgroundColor: #ffffff;
+$globalInputBorderColor: $globalInputBackgroundColor;
+
+// Dark theme colors
+$globalTextColor--darkTheme: #cecece;
+$globalBackgroundColor--darkTheme: #777777;
+$globalLinkColor--darkTheme: #b7e2ea;
+$globalLinkColor-isHover--darkTheme: #def2f6;
+$globalInputTextColor--darkTheme: $globalTextColor--darkTheme;
+$globalInputBackgroundColor--darkTheme: #444444;
+$globalInputBorderColor--darkTheme: $globalInputBackgroundColor--darkTheme;
+
+// Font
+$globalFontFamily: "Open Sans", Helvetica, Arial, sans-serif;
+$globalFontSize: 14px;
+$globalLineHeight: 1.5;
+$globalTitleFontSize: 18px;
+$globalFontWeightRegular: 400;
+$globalFontWeightBold: 700;
+
+// Colors
+$globalInfoColor: #3fa8c7;
+$globalInactiveColor: #c3c3c3;
+$globalSuccessColor: #417505;
+$globalWarningColor: #ec9800;
+$globalDangerColor: #D86051;
+$globalFocusColor: #6EADC1;
+$globalFocusDangerColor: #ff523c;
+$globalFocusBackgroundColor: #ffffff;
+$globalFontColor: #191E23;
+$globalSubduedTextColor: #9fa3a7;
+$globalLinkHoverColor: #006E8A;
+$globalSelectedBorderColor: #6EADC1;
+$globalDangerBorderColor: $globalDangerColor;
+
+// Borders
+$globalBorderColor: #E4E4E4;
+$globalBorderRadius: 4px;
+$globalBorderThick: 2px solid $globalBorderColor;
+$globalBorderThin: 1px solid $globalBorderColor;
+
+// Timing
+$globalInputTransitionTiming: 0.1s linear;
+
+// Bar
+$toolBarHeight: 50px;
+$toolBarPadding: 10px;
+$toolBarSectionSpacing: 50px;
+$toolBarItsemSpacing: 10px;

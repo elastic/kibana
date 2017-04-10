@@ -6,9 +6,9 @@
 }
 
   .kuiPromptForItems__message {
-    font-size: 18px;
-    color: $subduedFontColor;
-    line-height: $lineHeight;
+    font-size: $globalTitleFontSize;
+    color: $globalSubduedTextColor;
+    line-height: $globalLineHeight;
   }
 
   .kuiPromptForItems__actions {

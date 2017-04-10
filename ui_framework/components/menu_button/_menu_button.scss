@@ -9,12 +9,12 @@
   appearance: none;
   cursor: pointer;
   padding: 2px 10px; /* 3 */
-  font-size: 12px;
-  font-weight: 400;
-  line-height: $lineHeight;
+  font-size: $menuButtonFontSize;
+  font-weight: $globalFontWeightRegular;
+  line-height: $globalLineHeight;
   text-decoration: none;
   border: none;
-  border-radius: $buttonBorderRadius;
+  border-radius: $globalBorderRadius;
 
   &:disabled {
     cursor: default;
@@ -47,22 +47,22 @@
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--basic {
-  color: #5a5a5a;
-  background-color: #ffffff;
+  color: $menuButtonBasicTextColor;
+  background-color: $menuButtonBasicBackgroundColor;
 
   // Goes before hover, so that hover can override it.
   &:focus {
-    color: #5a5a5a !important; /* 1 */
+    color: $menuButtonBasicTextColor !important; /* 1 */
   }
 
   &:hover, /* 2 */
   &:active { /* 2 */
-    color: #5a5a5a !important; /* 1 */
-    background-color: #F2F2F2;
+    color: $menuButtonBasicTextColor !important; /* 1 */
+    background-color: $menuButtonBasicHoverBackgroundColor;
   }
 
   &:disabled {
-    color: #9B9B9B;
+    color: $menuButtonBasicDisabledTextColor;
   }
 }
 
@@ -71,20 +71,20 @@
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--danger {
-  color: #D76051;
-  background-color: #ffffff;
+  color: $menuButtonDangerTextColor;
+  background-color: $menuButtonDangerBackgroundColor;
 
   &:hover, /* 2 */
   &:active { /* 2 */
-    color: #FFFFFF !important; /* 1 */
-    background-color: #D76051;
+    color: $menuButtonDangerHoverTextColor !important; /* 1 */
+    background-color: $menuButtonDangerHoverBackgroundColor;
   }
 
   &:disabled {
-    color: #9B9B9B;
+    color: $menuButtonDangerHoverDisabledTextColor;
   }
 
   &:focus {
-    @include focus($focusDangerColor);
+    @include focus($globalFocusDangerColor);
   }
 }

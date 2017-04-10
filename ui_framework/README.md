@@ -10,9 +10,14 @@
 You can view interactive documentation by running `npm run uiFramework:start` and then visiting
 `http://localhost:8020/`.
 
+You can run `npm run uiFramework:dev` to watch for changes and run the tests as you code.
+
+You can run `npm run uiFramework:coverage` to generate a code coverage report to see how
+fully-tested the code is.
+
 ### React components
 
-Here are the components you can import from the Framnework:
+Here are the components you can import from the Framework:
 
 ```javascript
 import {
@@ -73,7 +78,7 @@ content.
 
 1. Create test files with the name pattern of `{component name}.test.js`.
 2. Create your tests.
-3. Run tests with `npm run uiFramework:test`.
+3. Run tests with `npm run uiFramework:coverage`.
 
 You can check how well the components have been covered
 by the tests by viewing the generated report at `ui_framework/jest/report/index.html`.
@@ -81,8 +86,8 @@ by the tests by viewing the generated report at `ui_framework/jest/report/index.
 #### React component development tips
 
 You can run `npm run uiFramework:dev` to watch your files and automatically run the tests when you
-make changes. Under this command, the tests will run faster than under `uiFramework:test` because
-they'll only test the files you've changed -- the code coverage report won't be re-genereated,
+make changes. Under this command, the tests will run faster than under `uiFramework:coverage` because
+they'll only test the files you've changed -- the code coverage report won't be re-generated,
 however.
 
 ## Principles
@@ -91,7 +96,7 @@ however.
 
 If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g.
 Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput,
-TextArea, and CheckBox), then they belong in the same logicaly grouping. In this case, you can create
+TextArea, and CheckBox), then they belong in the same logical grouping. In this case, you can create
 additional SCSS files for these components in the same component directory.
 
 ### Writing CSS

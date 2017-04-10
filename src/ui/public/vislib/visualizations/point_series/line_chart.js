@@ -11,6 +11,7 @@ export default function LineChartFactory(Private) {
     radiusRatio: 9,
     showLines: true,
     interpolate: 'linear',
+    lineWidth: 2,
     color: undefined,
     fillColor: undefined
   };
@@ -40,6 +41,7 @@ export default function LineChartFactory(Private) {
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+      const lineWidth = this.seriesConfig.lineWidth;
 
       const radii =  this.baseChart.radii;
 
@@ -93,8 +95,10 @@ export default function LineChartFactory(Private) {
           const width = self.baseChart.chartConfig.width;
           const height = self.baseChart.chartConfig.height;
           const circleRadius = (d.z - radii.min) / radiusStep;
+          const baseMagicNumber = 2;
 
-          return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
+          const base = circleRadius ? Math.sqrt(circleRadius + baseMagicNumber) + lineWidth : lineWidth;
+          return _.min([base, width, height]) + (modifier || 0);
         };
       }
 
@@ -141,6 +145,7 @@ export default function LineChartFactory(Private) {
       const yScale = this.getValueAxis().getScale();
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
+      const lineWidth = this.seriesConfig.lineWidth;
       const interpolate = this.seriesConfig.interpolate;
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
@@ -179,7 +184,7 @@ export default function LineChartFactory(Private) {
       .attr('stroke', () => {
         return color(data.label);
       })
-      .attr('stroke-width', 2);
+      .attr('stroke-width', lineWidth);
 
       return line;
     }

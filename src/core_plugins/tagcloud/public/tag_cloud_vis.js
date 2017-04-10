@@ -1,23 +1,25 @@
 import 'plugins/tagcloud/tag_cloud.less';
 import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import visTypes from 'ui/registry/vis_types';
+import image from './images/icon-tagcloud.svg';
 
 visTypes.register(function TagCloudProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new TemplateVisType({
     name: 'tagcloud',
-    title: 'Tag cloud',
+    title: 'Tag Cloud',
+    image,
     implementsRenderComplete: true,
-    description: 'A tag cloud visualization is a visual representation of text data, ' +
-    'typically used to visualize individual words. The font size of a word corresponds ' +
-    'with its importance.',
-    icon: 'fa-cloud',
+    description: 'A group of words, sized according to their importance',
+    category: VisType.CATEGORY.OTHER,
     template: tagCloudTemplate,
     params: {
       defaults: {

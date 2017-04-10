@@ -63,9 +63,7 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:dev": "node tasks/utils/ui_framework_test --env=jsdom --watch",
-    "uiFramework:coverage": "node tasks/utils/ui_framework_test --env=jsdom --coverage"
+    "uiFramework:start": "grunt uiFramework:start"
   },
   "repository": {
     "type": "git",
@@ -97,7 +95,7 @@
     "autoprefixer-loader": "2.0.0",
     "babel-cli": "6.18.0",
     "babel-core": "6.21.0",
-    "babel-jest": "18.0.0",
+    "babel-jest": "19.0.0",
     "babel-loader": "6.2.10",
     "babel-plugin-add-module-exports": "0.2.1",
     "babel-polyfill": "6.20.0",
@@ -202,7 +200,7 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.4.0",
+    "@elastic/eslint-config-kibana": "0.5.0",
     "@spalger/babel-presets": "0.3.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",

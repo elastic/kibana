@@ -17,7 +17,8 @@ export function getTopNavConfig(dashboardMode, actions) {
         getSaveConfig(),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(),
-        getOptionsConfig()];
+        getOptionsConfig(),
+        getShareConfig()];
     default:
       return [];
   }

@@ -22,6 +22,7 @@ const pipelineAggs = [
   { label: 'Cumulative Sum', value: 'cumulative_sum' },
   { label: 'Derivative', value: 'derivative' },
   { label: 'Moving Average', value: 'moving_average' },
+  { label: 'Positive Only', value: 'positive_only' },
   { label: 'Serial Difference', value: 'serial_diff' },
   { label: 'Series Agg', value: 'series_agg' }
 ];
