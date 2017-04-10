@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
@@ -14,12 +15,14 @@ describe('AggTable Directive', function () {
   let tabifyAggResponse;
   let Vis;
   let indexPattern;
+  let settings;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector, Private, config) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
+    settings = config;
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
@@ -104,6 +107,99 @@ describe('AggTable Directive', function () {
       // os
       expect(txts[4]).to.match(/^(win|mac|linux)$/);
       validBytes(txts[5]);
+    });
+  });
+
+  describe('renders totals row', function () {
+    function totalsRowTest(totalFunc, expected) {
+      const vis = new Vis(indexPattern, {
+        type: 'table',
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } },
+          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id:'5-orderAgg', type: 'count' } } },
+          { type: 'top_hits', schema: 'metric', params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 } }
+        ]
+      });
+      vis.aggs.forEach(function (agg, i) {
+        agg.id = 'agg_' + (i + 1);
+      });
+      function setDefaultTimezone() {
+        moment.tz.setDefault(settings.get('dateFormat:tz'));
+      }
+
+      const off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
+      const oldTimezoneSetting = settings.get('dateFormat:tz');
+      settings.set('dateFormat:tz', 'UTC');
+
+      $scope.table = tabifyAggResponse(vis,
+        fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
+        { canSplit: false, minimalColumns: true, asAggConfigResults: true }
+      );
+      $scope.showTotal = true;
+      $scope.totalFunc = totalFunc;
+      const $el = $('<kbn-agg-table table="table" show-total="showTotal" total-func="totalFunc"></kbn-agg-table>');
+      $compile($el)($scope);
+      $scope.$digest();
+
+      expect($el.find('tfoot').size()).to.be(1);
+
+      const $rows = $el.find('tfoot tr');
+      expect($rows.size()).to.be(1);
+
+      const $cells = $($rows[0]).find('th');
+      expect($cells.size()).to.be(6);
+
+      for (let i = 0; i < 6; i++) {
+        expect($($cells[i]).text()).to.be(expected[i]);
+      }
+      settings.set('dateFormat:tz', oldTimezoneSetting);
+      off();
+    }
+    it('as count', function () {
+      totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
+    });
+    it('as min', function () {
+      totalsRowTest('min', [
+        '',
+        'September 28th 2014, 00:00:00.000',
+        '9,283',
+        'September 28th 2014, 00:00:00.000',
+        '1',
+        '11'
+      ]);
+    });
+    it('as max', function () {
+      totalsRowTest('max', [
+        '',
+        'October 3rd 2014, 00:00:00.000',
+        '220,943',
+        'October 3rd 2014, 00:00:00.000',
+        '239',
+        '837'
+      ]);
+    });
+    it('as avg', function () {
+      totalsRowTest('avg', [
+        '',
+        '',
+        '87,221.5',
+        '',
+        '64.667',
+        '206.833'
+      ]);
+    });
+    it('as sum', function () {
+      totalsRowTest('sum', [
+        '',
+        '',
+        '1,569,987',
+        '',
+        '1,164',
+        '3,723'
+      ]);
     });
   });
 
