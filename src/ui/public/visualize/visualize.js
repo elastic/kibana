@@ -1,11 +1,9 @@
-import 'ui/visualize/spy';
-import 'ui/visualize/visualize.less';
-import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import 'angular-sanitize';
+import './visualization';
 
 import {
   isTermSizeZeroError,
@@ -28,18 +26,9 @@ uiModules
       uiState: '=?'
     },
     template: visualizeTemplate,
-    link: function ($scope, $el, attr, renderCounter) {
-      const minVisChartHeight = 180;
-
+    link: function ($scope, $el) {
       if (_.isUndefined($scope.showSpyPanel)) {
         $scope.showSpyPanel = true;
-      }
-
-      function getter(selector) {
-        return function () {
-          const $sel = $el.find(selector);
-          if ($sel.size()) return $sel;
-        };
       }
 
       $scope.vis = $scope.savedVis.vis;
@@ -51,85 +40,16 @@ uiModules
       $scope.vis.listeners.click = visualizeApi.events.filter;
       $scope.vis.listeners.brush = visualizeApi.events.brush;
 
-      const getVisEl = getter('[data-visualize-chart]');
-      const getVisContainer = getter('[data-visualize-chart-container]');
-      const getSpyContainer = getter('[data-spy-content-container]');
-
-      // Show no results message when isZeroHits is true and it requires search
-      $scope.showNoResultsMessage = function () {
-        const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-        const isZeroHits = false; //_.get($scope,'esResp.hits.total') === 0;
-        const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
-
-        return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
-      };
-
-      const legendPositionToVisContainerClassMap = {
-        top: 'vis-container--legend-top',
-        bottom: 'vis-container--legend-bottom',
-        left: 'vis-container--legend-left',
-        right: 'vis-container--legend-right',
-      };
-
-      $scope.getVisContainerClasses = function () {
-        return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
-      };
-
-      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
-        renderCounter.disable();
-      }
-
-      $scope.spy = {};
-      $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
-
-      const updateSpy = function () {
-        const $visContainer = getVisContainer();
-        const $spyEl = getSpyContainer();
-        if (!$spyEl) return;
-
-        const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
-
-        $visContainer.toggleClass('spy-only', Boolean(fullSpy));
-        $spyEl.toggleClass('only', Boolean(fullSpy));
-
-        $timeout(function () {
-          if (shouldHaveFullSpy()) {
-            $visContainer.addClass('spy-only');
-            $spyEl.addClass('only');
-          }
-        }, 0);
-      };
-
-      const loadingDelay = config.get('visualization:loadingDelay');
-      $scope.loadingStyle = {
-        '-webkit-transition-delay': loadingDelay,
-        'transition-delay': loadingDelay
-      };
-
-      function shouldHaveFullSpy() {
-        const $visEl = getVisEl();
-        if (!$visEl) return;
-
-        return ($visEl.height() < minVisChartHeight)
-          && _.get($scope.spy, 'mode.fill')
-          && _.get($scope.spy, 'mode.name');
-      }
-
-      // spy watchers
-      $scope.$watch('fullScreenSpy', updateSpy);
-
-      $scope.$watchCollection('spy.mode', function () {
-        $scope.fullScreenSpy = shouldHaveFullSpy();
-        updateSpy();
-      });
-
       const stateMonitor = stateMonitorFactory.create($scope.appState);
-      $scope.renderbot = $scope.vis.type.createRenderbot($scope.vis, getVisEl(), $scope.uiState);
 
       if (_.get($scope, 'savedVis.vis.type.requiresSearch')) {
+        // todo: searchSource ... how it works ? can it be used for other than the courier ?
+        // todo: in case not ... we should abstract this away in requestHandler
         $scope.savedVis.searchSource.onResults().then(function onResults(resp) {
+          // todo: we should use responseHandler here to convert the results
+          // todo: then we should update the observer ? to propagate this data to visualizations
           $scope.esResp = resp;
-          $scope.renderbot.render(resp);
+
           return searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
         $scope.savedVis.searchSource.onError(e => {
@@ -149,6 +69,7 @@ uiModules
           searchSource.set('filter', visualizeApi.queryFilter.getFilters());
           if (!$scope.appState.linked) searchSource.set('query', $scope.appState.query);
 
+          // todo: this should use vis_type.requestHandler, which should receive the searchSource to use
           courier.fetch();
         };
 
@@ -157,9 +78,8 @@ uiModules
           if (keys[0] === 'query') $scope.fetch();
           if (keys[0] === 'vis') {
             const isAggregationsChanged = JSON.stringify($scope.appState.vis.aggs) !== currentAggJson;
-            if (isAggregationsChanged) $scope.fetch();
-            else {
-              $scope.renderbot.render($scope.esResp);
+            if (isAggregationsChanged) {
+              $scope.fetch();
             }
             currentAggJson = JSON.stringify($scope.appState.vis.aggs);
           }
@@ -169,13 +89,6 @@ uiModules
 
         $scope.fetch();
       }
-
-      $scope.$on('$destroy', function () {
-        if ($scope.renderbot) {
-          $el.off('renderComplete');
-          $scope.renderbot.destroy();
-        }
-      });
     }
   };
 });
