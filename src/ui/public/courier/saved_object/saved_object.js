@@ -17,7 +17,7 @@ import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
-import SearchSourceProvider from '../data_source/search_source';
+import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
 
 /**
@@ -40,7 +40,7 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
   const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);

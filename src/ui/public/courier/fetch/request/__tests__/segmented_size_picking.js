@@ -5,7 +5,7 @@ import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
-import SegmentedRequestProvider from '../segmented';
+import { SegmentedRequestProvider } from '../segmented';
 
 describe('Segmented Request Size Picking', function () {
   let SegmentedReq;

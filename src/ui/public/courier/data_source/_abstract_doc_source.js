@@ -15,12 +15,12 @@ import 'ui/storage';
 
 import { DocSendToEsProvider } from './_doc_send_to_es';
 import { AbstractDataSourceProvider } from './_abstract';
-import DocRequestProvider from '../fetch/request/_abstract_doc';
+import { AbstractDocRequestProvider } from '../fetch/request/_abstract_doc';
 
 export function AbstractDocSourceProvider(Private, Promise, es, sessionStorage) {
   const sendToEs = Private(DocSendToEsProvider);
   const SourceAbstract = Private(AbstractDataSourceProvider);
-  const DocRequest = Private(DocRequestProvider);
+  const DocRequest = Private(AbstractDocRequestProvider);
 
   _.class(AbstractDocSource).inherits(SourceAbstract);
   function AbstractDocSource(initialState, strategy) {

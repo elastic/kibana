@@ -55,11 +55,11 @@ import _ from 'lodash';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
 import { AbstractDataSourceProvider } from './_abstract';
-import SearchRequestProvider from '../fetch/request/search';
-import SegmentedRequestProvider from '../fetch/request/segmented';
-import SearchStrategyProvider from '../fetch/strategy/search';
+import { SearchRequestProvider } from '../fetch/request/search';
+import { SegmentedRequestProvider } from '../fetch/request/segmented';
+import { SearchStrategyProvider } from '../fetch/strategy/search';
 
-export default function SearchSourceFactory(Promise, Private, config) {
+export function SearchSourceProvider(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);

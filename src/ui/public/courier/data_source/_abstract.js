@@ -5,7 +5,7 @@ import 'ui/promises';
 
 import { RequestQueueProvider } from '../_request_queue';
 import { ErrorHandlersProvider } from '../_error_handlers';
-import FetchProvider from '../fetch';
+import { FetchProvider } from '../fetch';
 import { DecorateQueryProvider } from './_decorate_query';
 import FieldWildcardProvider from '../../field_wildcard';
 import { getHighlightRequestProvider } from '../../highlight';

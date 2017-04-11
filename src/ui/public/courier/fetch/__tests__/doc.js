@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import { DocSourceProvider } from '../../data_source/doc_source';
-import DocRequestProvider from '../request/doc_data';
+import { DocDataRequestProvider } from '../request/doc_data';
 
 describe('Courier DocFetchRequest class', function () {
   let storage;
@@ -16,7 +16,7 @@ describe('Courier DocFetchRequest class', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, Promise, $injector) {
     const DocSource = Private(DocSourceProvider);
-    const DocFetchRequest = Private(DocRequestProvider);
+    const DocFetchRequest = Private(DocDataRequestProvider);
 
     storage =
     $injector.get('localStorage').store =

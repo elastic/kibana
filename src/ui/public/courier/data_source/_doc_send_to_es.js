@@ -9,7 +9,7 @@ import _ from 'lodash';
 
 import { VersionConflict, RequestFailure } from 'ui/errors';
 import { RequestQueueProvider } from 'ui/courier/_request_queue';
-import FetchProvider from 'ui/courier/fetch/fetch';
+import { FetchProvider } from 'ui/courier/fetch/fetch';
 
 export function DocSendToEsProvider(Promise, Private, es, esAdmin, kbnIndex) {
   const requestQueue = Private(RequestQueueProvider);

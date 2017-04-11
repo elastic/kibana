@@ -2,7 +2,7 @@ import Notifier from 'ui/notify/notifier';
 
 import { ErrorHandlersProvider } from '../../_error_handlers';
 
-export default function RequestErrorHandlerFactory(Private) {
+export function ErrorHandlerRequestProvider(Private) {
   const errHandlers = Private(ErrorHandlersProvider);
 
   const notify = new Notifier({

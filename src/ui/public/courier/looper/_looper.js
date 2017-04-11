@@ -3,7 +3,7 @@ import _ from 'lodash';
 import 'ui/promises';
 import Notifier from 'ui/notify/notifier';
 
-export default function LooperFactory($timeout, Promise) {
+export function LooperProvider($timeout, Promise) {
   const notify = new Notifier();
 
   function Looper(ms, fn) {
