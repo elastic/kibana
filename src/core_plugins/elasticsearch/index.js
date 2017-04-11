@@ -3,7 +3,6 @@ import { unset } from '../../utils';
 import { methodNotAllowed } from 'boom';
 
 import healthCheck from './lib/health_check';
-import { KibanaMappings } from './lib/kibana_index_mappings';
 import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
@@ -114,7 +113,6 @@ module.exports = function ({ Plugin }) {
 
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
-      server.expose('mappings', new KibanaMappings(this));
 
       createDataCluster(server);
       createAdminCluster(server);

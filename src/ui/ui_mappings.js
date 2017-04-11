@@ -1,8 +1,7 @@
 import _ from 'lodash';
 
-class KibanaMappings {
-  constructor(plugin) {
-    this._plugin = plugin;
+class MappingsCollection {
+  constructor() {
     this._defaultMappings = {
       '_default_': {
         'dynamic': 'strict'
@@ -27,7 +26,7 @@ class KibanaMappings {
     Object.keys(this._currentMappings).forEach(key => {
       if (newMappings.hasOwnProperty(key)) {
         const pluginPartial = options.plugin ? `registered by plugin ${options.plugin} ` : '';
-        this._plugin.status.red(`Mappings for ${key} ${pluginPartial}have already been defined`);
+        throw new Error(`Mappings for ${key} ${pluginPartial}have already been defined`);
         return;
       }
     });
@@ -35,4 +34,4 @@ class KibanaMappings {
   }
 }
 
-export { KibanaMappings };
+export { MappingsCollection };

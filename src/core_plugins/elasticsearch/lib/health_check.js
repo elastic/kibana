@@ -70,7 +70,7 @@ module.exports = function (plugin, server) {
     .then(function (health) {
       if (health === NO_INDEX) {
         plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server);
+        return createKibanaIndex(server, plugin.kbnServer.mappings.getCombined());
       }
 
       if (health === INITIALIZING) {
@@ -98,7 +98,7 @@ module.exports = function (plugin, server) {
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(_.partial(migrateConfig, server))
+      .then(_.partial(migrateConfig, server, plugin.kbnServer))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {

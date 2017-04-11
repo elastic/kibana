@@ -44,7 +44,6 @@ module.exports = function (kibana) {
           'devTools',
           'docViews'
         ],
-
         injectVars: function (server) {
           const serverConfig = server.config();
 
@@ -123,7 +122,8 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ]
+      ],
+      mappings
     },
 
     preInit: async function (server) {
@@ -149,8 +149,6 @@ module.exports = function (kibana) {
 
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
-
-      server.plugins.elasticsearch.mappings.register(mappings, { plugin: this.id });
     }
   });
 };

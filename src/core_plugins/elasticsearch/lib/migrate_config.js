@@ -1,9 +1,9 @@
 import upgrade from './upgrade_config';
 
-module.exports = function (server) {
+module.exports = function (server, kbnServer) {
   const config = server.config();
+  const { getCombined } = kbnServer.mappings;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const { getCombined } = server.plugins.elasticsearch.mappings;
   const options =  {
     index: config.get('kibana.index'),
     type: 'config',
