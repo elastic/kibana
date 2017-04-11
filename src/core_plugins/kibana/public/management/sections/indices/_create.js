@@ -64,10 +64,7 @@ uiModules.get('apps/management')
         }
       }
 
-      if (index.expandable && $scope.canExpandIndices()) {
-        indexPattern.notExpandable = false;
-      }
-      else if ($scope.canExpandIndices()) {
+      if (!index.expandable && $scope.canExpandIndices()) {
         indexPattern.notExpandable = true;
       }
 
