@@ -142,21 +142,20 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   }
 
+
+  function getValue(metricsAgg, bucket) {
+    let size = metricsAgg.getValue(bucket);
+    if (typeof size !== 'number' || isNaN(size)) {
+      try {
+        size = bucket[1].values[0].value;//lift out first value (e.g. median aggregations return as array)
+      } catch (e) {
+        size = 1;//punt
+      }
+    }
+    return size;
+  }
+
+
 });
 
-
-
-
-
-function getValue(metricsAgg, bucket) {
-  let size = metricsAgg.getValue(bucket);
-  if (typeof size !== 'number' || isNaN(size)) {
-    try {
-      size = bucket[1].values[0].value;//lift out first value (e.g. median aggregations return as array)
-    } catch (e) {
-      size = 1;//punt
-    }
-  }
-  return size;
-}
 
