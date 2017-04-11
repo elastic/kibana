@@ -29,14 +29,14 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/Aut
 
 We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
 
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See [style_guides/js_style_guide.md]({blob}style_guides/js_style_guide.md).
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
 [float]
 ===== Definitions
 
 **Provider:**
 
-Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to *provide*. Provider functions will always be called with a single argument: a provider API (see Provider API section).
+Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to _provide_. Provider functions will always be called with a single argument: a provider API (see the <<functional_test_runner_provider_api,Provider API Section>>).
 
 A config provder:
 
@@ -50,20 +50,16 @@ export default function (/* { providerAPI } */) {
 }
 -----------
 
-**Services:**
+**Services**:::
+Services are named singleton values produced by a Service Provider. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services.\
 
-Services are named singleton values produced by a Service Provider. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services.
-
-**Page objects:**
-
+**Page objects**:::
 Page objects are a special type of service that encapsulate behaviors common to a particular page or plugin. When you write your own plugin, you’ll likely want to add a page object (or several) that describes the common interactions your tests need to execute.
 
-**Test Files:**
-
+**Test Files**:::
 The `FunctionalTestRunner`'s primary purpose is to execute test files. These files export a Test Provider that is called with a Provider API but is not expected to return a value. Instead Test Providers define a suite using https://mochajs.org/#bdd[mocha's BDD interface].
 
-**Test Suite:**
-
+**Test Suite**:::
 A test suite is a collection of tests defined by calling `describe()`, and then populated with tests and setup/teardown hooks by calling `it()`, `before()`, `beforeEach()`, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
 
 [float]
@@ -126,25 +122,27 @@ export default function ({ getService, getPageObject }) {
 ----
 
 [float]
+[[functional_test_runner_provider_api]]
 ==== Provider API
 
 The first and only argument to all providers is a Provider API Object. This object can be used to load service/page objects and config/test files.
 
 Within config files the API has the following properties
 
-* `log` - An instance of the {blob}src/utils/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
-
-* `readConfigFile(path)` - Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
+[horizontal]
+`log`::: An instance of the {blob}src/utils/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
 
-* `getService(name)` - Load and return the singleton instance of a service by name
-
-* `getPageObjects(names)` - Load the singleton instances of `PageObject`s and collect them on an object where each name is the key to the singleton instance of that PageObject
+[horizontal]
+`getService(name)`::: Load and return the singleton instance of a service by name
+`getPageObjects(names)`::: Load the singleton instances of `PageObject`s and collect them on an object where each name is the key to the singleton instance of that PageObject
 
 Within a test Provider the API is exactly the same as the service providers API but with an additional method:
 
-* `loadTestFile(path)` - Load the test file at path in place. Use this method to nest suites from other files into a higher-level suite
+[horizontal]
+`loadTestFile(path)`::: Load the test file at path in place. Use this method to nest suites from other files into a higher-level suite
 
 [float]
 ==== Service Index
@@ -154,22 +152,17 @@ Within a test Provider the API is exactly the same as the service providers API 
 
 The `FunctionalTestRunner` comes with three built-in services:
 
-**config:**
-
+**config:**:::
 * Source: {blob}src/functional_test_runner/lib/config/config.js[src/functional_test_runner/lib/config/config.js]
-
 * Schema: {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
-
 * Use `config.get(path)` to read any value from the config file
 
-**log:**
-
+**log:**:::
 * Source: {blob}src/utils/tooling_log/tooling_log.js[src/utils/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
-**lifecycle:**
-
+**lifecycle:**:::
 * Source: {blob}src/functional_test_runner/lib/lifecycle.js[src/functional_test_runner/lib/lifecycle.js]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
@@ -180,89 +173,80 @@ The `FunctionalTestRunner` comes with three built-in services:
 
 The Kibana functional tests define the vast majority of the actual functionality used by tests.
 
-**retry:**
-
+**retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
 * Helpers for retrying operations
 * Popular methods:
-    * `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
-    * `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+** `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
+** `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
 
-**testSubjects:**
-
+**testSubjects:**:::
 * Source: {blob}test/functional/services/test_subjects.js[test/functional/services/test_subjects.js]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
-    * Tag your test subject with a `data-test-subj` attribute:
-
+** Tag your test subject with a `data-test-subj` attribute:
++
 ["source","html"]
 -----------
 <div id="container”>
   <button id="clickMe” data-test-subj=”containerButton” />
 </div>
 -----------
-
-* Click this button using the `testSubjects` helper:
-
++
+** Click this button using the `testSubjects` helper:
++
 ["source","js"]
 -----------
 await testSubjects.click(‘containerButton’);
 -----------
-
++
 * Popular methods:
-    * `testSubjects.find(testSubjectSelector)` - Find a test subject in the page; throw if it can't be found after some time
-    * `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
+** `testSubjects.find(testSubjectSelector)` - Find a test subject in the page; throw if it can't be found after some time
+** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
-**find:**
-
+**find:**:::
 * Source: {blob}test/functional/services/find.js[test/functional/services/find.js]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
-    * `find.byCssSelector()`
-    * `find.allByCssSelector()`
+** `find.byCssSelector()`
+** `find.allByCssSelector()`
 
-**kibanaServer:**
-
+**kibanaServer:**:::
 * Source: {blob}test/functional/services/kibana_server/kibana_server.js[test/functional/services/kibana_server/kibana_server.js]
 * Helpers for interacting with Kibana's server
 * Commonly used methods:
-    * `kibanaServer.uiSettings.update()`
-    * `kibanaServer.version.get()`
-    * `kibanaServer.status.getOverallState()`
+** `kibanaServer.uiSettings.update()`
+** `kibanaServer.version.get()`
+** `kibanaServer.status.getOverallState()`
 
-**esArchiver:**
-
+**esArchiver:**:::
 * Source: {blob}test/functional/services/es_archiver.js[test/functional/services/es_archiver.js]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
-    * `esArchiver.load(name)`
-    * `esArchiver.loadIfNeeded(name)`
-    * `esArchiver.unload(name)`
+** `esArchiver.load(name)`
+** `esArchiver.loadIfNeeded(name)`
+** `esArchiver.unload(name)`
 
-**docTable:**
-
+**docTable:**:::
 * Source: {blob}test/functional/services/doc_table.js[test/functional/services/doc_table.js]
 * Helpers for interacting with doc tables
 
-**pointSeriesVis:**
-
+**pointSeriesVis:**:::
 * Source: {blob}test/functional/services/point_series_vis.js[test/functional/services/point_series_vis.js]
 * Helpers for interacting with point series visualizations
 
-**Low-level utilities:**
-
+**Low-level utilities:**:::
 * es
-    * Source: {blob}test/functional/services/es.js[test/functional/services/es.js]
-    * Elasticsearch client
-    * Higher level options: `kibanaServer.uiSettings` or `esArchiver`
-
+** Source: {blob}test/functional/services/es.js[test/functional/services/es.js]
+** Elasticsearch client
+** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
-    * Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
-    * Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
-    * Responsible for all communication with the browser
-    * Higher level options: `testSubjects`, `find`, and `PageObjects.common`
-    * See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
+** Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
+** Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
+** Responsible for all communication with the browser
+** Higher level options: `testSubjects`, `find`, and `PageObjects.common`
+** See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
 
 [float]
 ===== Custom Services
@@ -272,7 +256,7 @@ Services are intentionally generic. They can be literally anything (even nothing
 To create a custom service `somethingUseful`:
 
 * Create a `test/functional/services/something_useful.js` file that looks like this:
-
++
 ["source","js"]
 -----------
 // Services are defined by Provider functions that receive the ServiceProviderAPI
@@ -286,11 +270,10 @@ export function SomethingUsefulProvider({ getService }) {
   return new SomethingUseful();
 }
 -----------
-
++
 * Re-export your provider from `services/index.js`
-
 * Import it into `src/functional/config.js` and add it to the services config:
-
++
 ["source","js"]
 -----------
 import { SomethingUsefulProvider } from './services';
@@ -380,4 +363,3 @@ const log = getService(‘log’);
 // log.debug only writes when using the `--debug` or `--verbose` flag.
 log.debug(‘done clicking menu’);
 -----------
-
