@@ -84,7 +84,7 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
       {
         group: 'metrics',
         name: 'metric',
-        title: '',
+        title: 'Value',
         min: 1,
         max: 1,
         aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
