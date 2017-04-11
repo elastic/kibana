@@ -101,7 +101,8 @@ class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+        publicPath: './bundles/'
       },
 
       recordsPath: resolve(this.env.workingDir, 'webpack.records'),
