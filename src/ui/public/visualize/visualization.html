@@ -1,0 +1,17 @@
+<div ng-if="showNoResultsMessage()" class="text-center visualize-error visualize-chart">
+  <div class="item top"></div>
+  <div class="item">
+    <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+    <h4>No results found</h4>
+  </div>
+  <div class="item bottom"></div>
+</div>
+<div div ng-hide="showNoResultsMessage()" class="vis-container {{getVisContainerClasses()}}">
+  <div
+    ng-style="loadingStyle"
+    ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
+    class="visualize-chart"></div>
+  <visualize-legend></visualize-legend>
+</div>
+<!-- <pre>{{chartData | json}}</pre> -->
+<visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>
