@@ -2,7 +2,6 @@ import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import GetIdsProvider from '../_get_ids';
-import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
 import uiRoutes from 'ui/routes';
 const notify = new Notifier({
   location: 'Index Patterns'
@@ -14,9 +13,8 @@ module.exports = function (opts) {
   let defaultRequiredToasts = null;
 
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, indexPatterns) {
+  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
     const getIds = Private(GetIdsProvider);
-    const rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
     const route = _.get($route, 'current.$$route');
 
     return getIds()
@@ -39,13 +37,6 @@ module.exports = function (opts) {
           throw new NoDefaultIndexPattern();
         }
       }
-
-      return notify.event('loading default index pattern', function () {
-        return indexPatterns.get(defaultId).then(function (pattern) {
-          rootSearchSource.getGlobalSource().set('index', pattern);
-          notify.log('index pattern set to', defaultId);
-        });
-      });
     });
   })
   .afterWork(
