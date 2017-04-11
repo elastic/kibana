@@ -2,6 +2,8 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
+import RequestHandlersProvider from 'ui/registry/request_handlers';
+import ResponseHandlersProvider from 'ui/registry/response_handlers';
 import 'angular-sanitize';
 import './visualization';
 
@@ -11,10 +13,18 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout, courier) {
+.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
   const notify = new Notifier({
     location: 'Visualize'
   });
+  const requestHandlers = Private(RequestHandlersProvider);
+  const responseHandlers = Private(ResponseHandlersProvider);
+
+  function getHandler(from, name) {
+    if (typeof name === 'function') return name;
+    return from.find(handler => handler.name === name).handler;
+  }
+
 
   return {
     restrict: 'E',
@@ -36,43 +46,40 @@ uiModules
       const visualizeApi = $scope.savedVis.vis.api;
       const searchSource = $scope.savedVis.searchSource;
 
+      // get request handler from registry (this should actually happen only once not on every fetch)
+      const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
+      const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
+
       // BWC
       $scope.vis.listeners.click = visualizeApi.events.filter;
       $scope.vis.listeners.brush = visualizeApi.events.brush;
 
+      $scope.fetch = function () {
+        searchSource.set('filter', visualizeApi.queryFilter.getFilters());
+        if (!$scope.appState.linked) searchSource.set('query', $scope.appState.query);
+
+        requestHandler(searchSource)
+          .then(resp => responseHandler($scope.vis, resp), e => {
+            $el.trigger('renderComplete');
+            if (isTermSizeZeroError(e)) {
+              return notify.error(
+                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+                `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
+                `the error.`
+              );
+            }
+
+            notify.error(e);
+          })
+          .then(resp => {
+            $scope.esResp = resp;
+            return resp;
+          });
+      };
+
       const stateMonitor = stateMonitorFactory.create($scope.appState);
 
       if (_.get($scope, 'savedVis.vis.type.requiresSearch')) {
-        // todo: searchSource ... how it works ? can it be used for other than the courier ?
-        // todo: in case not ... we should abstract this away in requestHandler
-        $scope.savedVis.searchSource.onResults().then(function onResults(resp) {
-          // todo: we should use responseHandler here to convert the results
-          // todo: then we should update the observer ? to propagate this data to visualizations
-          $scope.esResp = resp;
-
-          return searchSource.onResults().then(onResults);
-        }).catch(notify.fatal);
-        $scope.savedVis.searchSource.onError(e => {
-          $el.trigger('renderComplete');
-          if (isTermSizeZeroError(e)) {
-            return notify.error(
-              `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-              `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-              `the error.`
-            );
-          }
-
-          notify.error(e);
-        }).catch(notify.fatal);
-
-        $scope.fetch = function () {
-          searchSource.set('filter', visualizeApi.queryFilter.getFilters());
-          if (!$scope.appState.linked) searchSource.set('query', $scope.appState.query);
-
-          // todo: this should use vis_type.requestHandler, which should receive the searchSource to use
-          courier.fetch();
-        };
-
         let currentAggJson = JSON.stringify($scope.appState.vis.aggs);
         stateMonitor.onChange((status, type, keys) => {
           if (keys[0] === 'query') $scope.fetch();

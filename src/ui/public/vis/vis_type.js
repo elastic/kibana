@@ -25,6 +25,8 @@ export function VisVisTypeProvider(Private) {
       this.requiresTimePicker = !!opts.requiresTimePicker;
       this.fullEditor = opts.fullEditor == null ? false : opts.fullEditor;
       this.implementsRenderComplete = opts.implementsRenderComplete || false;
+      this.requestHandler = opts.requestHandler || 'courier';
+      this.responseHandler = opts.responseHandler || 'none';
 
       this.listeners = opts.listeners || {};
 
