@@ -24,7 +24,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         let location = null;
         layer.on({
           mouseover: () => {
-
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
               const leafletGeojon = L.geoJson(feature);

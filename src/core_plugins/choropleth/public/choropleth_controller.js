@@ -52,6 +52,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
       const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
+
       let results;
       if (!response || !response.aggregations) {
         results = [];
@@ -70,12 +71,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
       updateChoroplethLayer($scope.vis.params.selectedLayer.url);
       choroplethLayer.setMetrics(results, metricsAgg);
-      if ($scope.vis.aggs.bySchemaName.segment && $scope.vis.aggs.bySchemaName.segment[0]) {
-        const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
-        choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
-      } else {
-        choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
-      }
+      setTooltipFormatter();
 
       kibanaMap.useUiStateFromVisualization($scope.vis);
       kibanaMap.resize();
@@ -92,6 +88,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       updateChoroplethLayer(visParams.selectedLayer.url);
       choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
+      setTooltipFormatter();
 
       kibanaMap.setShowTooltip(visParams.addTooltip);
       kibanaMap.setLegendPosition(visParams.legendPosition);
@@ -100,6 +97,17 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       $element.trigger('renderComplete');
     });
   });
+
+
+  function setTooltipFormatter() {
+    const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
+    if ($scope.vis.aggs.bySchemaName.segment && $scope.vis.aggs.bySchemaName.segment[0]) {
+      const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
+      choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
+    } else {
+      choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
+    }
+  }
 
   function updateChoroplethLayer(url) {
 
@@ -131,6 +139,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
     });
     kibanaMap.addLayer(choroplethLayer);
+
   }
 
 });
