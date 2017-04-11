@@ -102,7 +102,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
   function setTooltipFormatter() {
     const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
     if ($scope.vis.aggs.bySchemaName.segment && $scope.vis.aggs.bySchemaName.segment[0]) {
-      const fieldName = $scope.vis.aggs.bySchemaName.segment[0].params.field.name;
+      const fieldName = $scope.vis.aggs.bySchemaName.segment[0].makeLabel();
       choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
     } else {
       choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);

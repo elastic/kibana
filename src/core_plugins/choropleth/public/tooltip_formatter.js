@@ -8,7 +8,6 @@ export default function TileMapTooltipFormatter($compile, $rootScope) {
   return function tooltipFormatter(metricAgg, metric, fieldName) {
 
     if (!metric) {
-      console.log('no metric');
       return '';
     }
 
