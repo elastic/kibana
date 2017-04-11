@@ -18,7 +18,7 @@ export function analyzeArchive(archive) {
   return new Promise ((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
-        return reject(`unable to read ${archive}`);
+        return reject(err);
       }
 
       zipfile.readEntry();
@@ -30,7 +30,7 @@ export function analyzeArchive(archive) {
             const chunks = [];
 
             if (err) {
-              return reject(`unable to read ${entry.fileName} within zip`);
+              return reject(err);
             }
 
             readable.on('data', chunk => chunks.push(chunk));
@@ -69,7 +69,7 @@ export function extractArchive(archive, targetDir, extractPath) {
   return new Promise((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
-        return reject(`unable to read ${archive}`);
+        return reject(err);
       }
 
       zipfile.readEntry();
@@ -89,7 +89,7 @@ export function extractArchive(archive, targetDir, extractPath) {
           // directory file names end with '/'
           mkdirp(entry.fileName, function (err) {
             if (err) {
-              return reject(`unable to create directory: ${entry.fileName}`);
+              return reject(err);
             }
 
             zipfile.readEntry();
@@ -98,13 +98,13 @@ export function extractArchive(archive, targetDir, extractPath) {
           // file entry
           zipfile.openReadStream(entry, function (err, readStream) {
             if (err) {
-              return reject(`unable to read ${entry.fileName} within zip`);
+              return reject(err);
             }
 
             // ensure parent directory exists
             mkdirp(path.dirname(fileName), function (err) {
               if (err) {
-                return reject(`unable to create directory: ${path.dirname(fileName)}`);
+                return reject(err);
               }
 
               readStream.pipe(createWriteStream(fileName));

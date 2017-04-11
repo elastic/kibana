@@ -27,7 +27,7 @@ export async function getPackData(settings, logger) {
   try {
     packages = await analyzeArchive(settings.tempArchiveFile);
   } catch (err) {
-    logger.error(err);
+    logger.error(err.stack);
     throw new Error('Error retrieving metadata from plugin archive');
   }
 
@@ -52,10 +52,9 @@ export async function extract(settings, logger) {
 
     logger.log('Extracting plugin archive');
     await extractArchive(settings.tempArchiveFile, settings.workingPath, plugin.archivePath);
-
     logger.log('Extraction complete');
   } catch (err) {
-    logger.error(err);
+    logger.error(err.stack);
     throw new Error('Error extracting plugin archive');
   }
 }
