@@ -1,8 +1,5 @@
 import { readFileSync } from 'fs';
 import { map } from 'lodash';
-import httpolyglot from '@elastic/httpolyglot';
-import { format as formatUrl } from 'url';
-
 import secureOptions from './secure_options';
 
 export default function (kbnServer, server, config) {
@@ -39,45 +36,18 @@ export default function (kbnServer, server, config) {
     return;
   }
 
-  const tlsOptions = {
-    key: readFileSync(config.get('server.ssl.key')),
-    cert: readFileSync(config.get('server.ssl.certificate')),
-    ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
-    passphrase: config.get('server.ssl.keyPassphrase'),
+  server.connection({
+    ...connectionOptions,
+    tls: {
+      key: readFileSync(config.get('server.ssl.key')),
+      cert: readFileSync(config.get('server.ssl.certificate')),
+      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      passphrase: config.get('server.ssl.keyPassphrase'),
 
-    ciphers: config.get('server.ssl.cipherSuites').join(':'),
-    // We use the server's cipher order rather than the client's to prevent the BEAST attack
-    honorCipherOrder: true,
-    secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
-  };
-
-  const devMode = config.get('env.dev');
-  if (devMode) {
-    Object.assign(connectionOptions, {
-      tls: true,
-      listener: httpolyglot.createServer(tlsOptions)
-    });
-  } else {
-    Object.assign(connectionOptions, { tls: tlsOptions });
-  }
-
-  server.connection(connectionOptions);
-
-  if (devMode) {
-    server.ext('onRequest', function (req, reply) {
-      // A request sent through a HapiJS .inject() doesn't have a socket associated with the request
-      // which causes a failure.
-      if (!req.raw.req.socket || req.raw.req.socket.encrypted) {
-        reply.continue();
-      } else {
-        reply.redirect(formatUrl({
-          port,
-          protocol: 'https',
-          hostname: host,
-          pathname: req.url.pathname,
-          search: req.url.search,
-        }));
-      }
-    });
-  }
+      ciphers: config.get('server.ssl.cipherSuites').join(':'),
+      // We use the server's cipher order rather than the client's to prevent the BEAST attack
+      honorCipherOrder: true,
+      secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
+    }
+  });
 }
