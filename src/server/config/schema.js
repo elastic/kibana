@@ -27,6 +27,21 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
+  cpu: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
+
+  cpuacct: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
 
   server: Joi.object({
     uuid: Joi.string().guid().default(),
