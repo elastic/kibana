@@ -24,9 +24,7 @@ export function createGenerateDocRecordsStream(client, stats) {
           } else {
             resp = await client.scroll({
               scroll: SCROLL_TIMEOUT,
-              body: {
-                scroll_id: resp._scroll_id,
-              },
+              scrollId: resp._scroll_id,
             });
           }
 

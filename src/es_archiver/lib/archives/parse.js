@@ -12,6 +12,6 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
   return [
     gzip ? createGunzip() : new PassThrough(),
     createSplitStream(RECORD_SEPARATOR),
-    createJsonParseStream()
+    createJsonParseStream(),
   ];
 }
