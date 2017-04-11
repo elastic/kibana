@@ -3,7 +3,6 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import KibanaMap from 'ui/vis_maps/kibana_map';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import ChoroplethLayer from './choropleth_layer';
 import truncatedColorMaps from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
@@ -13,7 +12,6 @@ import { ResizeCheckerProvider } from 'ui/resize_checker';
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState, tilemapSettings, config) {
 
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Vectormap' });
@@ -123,11 +121,9 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
     }
     choroplethLayer.on('select', function (event) {
-      const appState = getAppState();
-      const clickHandler = filterBarClickHandler(appState);
       const aggs = $scope.vis.aggs.getResponseAggs();
       const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-      clickHandler({ point: { aggConfigResult: aggConfigResult } });
+      $scope.vis.listeners.click({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
       if (event.mismatches.length > 0 && config.get('visualization:vectormap:showWarnings')) {
