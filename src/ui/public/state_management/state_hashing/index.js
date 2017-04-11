@@ -3,6 +3,10 @@ export {
 } from './get_unhashable_states_provider';
 
 export {
+  default as hashUrl,
+} from './hash_url';
+
+export {
   default as unhashQueryString,
 } from './unhash_query_string';
 
