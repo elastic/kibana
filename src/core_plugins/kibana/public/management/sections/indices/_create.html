@@ -61,18 +61,9 @@
 
           <div class="form-group" ng-if="canExpandIndices()">
             <label>
-              <input ng-model="index.notExpandable" type="checkbox">
-                <span translate="KIBANA-NOT_EXPAND_INDEX_PATTERN"></span>
-                <small translate="KIBANA-NOT_RECOMMENDED"></small>
+              <input ng-model="index.expandable" type="checkbox">
+                <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
             </label>
-
-            <div ng-if="index.notExpandable" class="alert alert-info">
-              <span translate="KIBANA-NOT_EXPANDABLE"></span>
-
-              <span translate="KIBANA-ES_QUERY"></span>
-              <em translate="KIBANA-INDEX_NAME_VAR" translate-values="{ indexName: '{{index.name}}' }"></em>
-              <span translate="KIBANA-SEARCH_ALL_DATA"></span>
-            </div>
 
             <p class="help-block" translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"></p>
 
@@ -83,6 +74,8 @@
               <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
               <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
             </p>
+
+            <p class="help-block" translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"></p>
           </div>
 
           <div class="form-group time-and-pattern">

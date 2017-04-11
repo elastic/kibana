@@ -61,7 +61,7 @@ field's searchability or whether or not it's _tokenized_, or broken up into sepa
 Use the following command in a terminal (eg `bash`) to set up a mapping for the Shakespeare data set:
 
 [source,shell]
-curl -XPUT http://localhost:9200/shakespeare -d '
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
 {
  "mappings" : {
   "_default_" : {
@@ -89,7 +89,7 @@ applying the `geo_point` type to those fields.
 Use the following commands to establish `geo_point` mapping for the logs:
 
 [source,shell]
-curl -XPUT http://localhost:9200/logstash-2015.05.18 -d '
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.18 -d '
 {
   "mappings": {
     "log": {
@@ -108,7 +108,7 @@ curl -XPUT http://localhost:9200/logstash-2015.05.18 -d '
 ';
 
 [source,shell]
-curl -XPUT http://localhost:9200/logstash-2015.05.19 -d '
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.19 -d '
 {
   "mappings": {
     "log": {
@@ -127,7 +127,7 @@ curl -XPUT http://localhost:9200/logstash-2015.05.19 -d '
 ';
 
 [source,shell]
-curl -XPUT http://localhost:9200/logstash-2015.05.20 -d '
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.20 -d '
 {
   "mappings": {
     "log": {
@@ -149,9 +149,9 @@ The accounts data set doesn't require any mappings, so at this point we're ready
 {es-ref}docs-bulk.html[`bulk`] API to load the data sets with the following commands:
 
 [source,shell]
-curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
-curl -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
-curl -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 These commands may take some time to execute, depending on the computing resources available.
 

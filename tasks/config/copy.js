@@ -14,6 +14,8 @@ module.exports = function () {
         '!src/ui_framework/doc_site/**',
         '!src/es_archiver/**',
         'bin/**',
+        'ui_framework/components/**',
+        'ui_framework/services/**',
         'ui_framework/dist/**',
         'webpackShims/**',
         'config/kibana.yml',
