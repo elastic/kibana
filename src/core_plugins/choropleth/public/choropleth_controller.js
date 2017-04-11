@@ -37,6 +37,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
     const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
     kibanaMap = new KibanaMap(containerNode, minMaxZoom);
+    kibanaMap.setZoomLevel(2);
     const url = tilemapSettings.getUrl();
     const options = tilemapSettings.getTMSOptions();
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
