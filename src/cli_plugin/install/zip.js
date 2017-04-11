@@ -25,37 +25,37 @@ export function analyzeArchive(archive) {
       zipfile.on('entry', function (entry) {
         const match = entry.fileName.match(regExp);
 
-        if (match) {
-          zipfile.openReadStream(entry, function (err, readable) {
-            const chunks = [];
-
-            if (err) {
-              return reject(err);
-            }
-
-            readable.on('data', chunk => chunks.push(chunk));
-
-            readable.on('end', function () {
-              const contents = Buffer.concat(chunks).toString();
-              const pkg = JSON.parse(contents);
-
-              plugins.push(Object.assign(pkg, {
-                archivePath: match[1],
-                archive: archive,
-
-                // Plugins must specify their version, and by default that version should match
-                // the version of kibana down to the patch level. If these two versions need
-                // to diverge, they can specify a kibana.version to indicate the version of
-                // kibana the plugin is intended to work with.
-                kibanaVersion: get(pkg, 'kibana.version', pkg.version)
-              }));
-
-              zipfile.readEntry();
-            });
-          });
-        } else {
-          zipfile.readEntry();
+        if (!match) {
+          return zipfile.readEntry();
         }
+
+        zipfile.openReadStream(entry, function (err, readable) {
+          const chunks = [];
+
+          if (err) {
+            return reject(err);
+          }
+
+          readable.on('data', chunk => chunks.push(chunk));
+
+          readable.on('end', function () {
+            const contents = Buffer.concat(chunks).toString();
+            const pkg = JSON.parse(contents);
+
+            plugins.push(Object.assign(pkg, {
+              archivePath: match[1],
+              archive: archive,
+
+              // Plugins must specify their version, and by default that version should match
+              // the version of kibana down to the patch level. If these two versions need
+              // to diverge, they can specify a kibana.version to indicate the version of
+              // kibana the plugin is intended to work with.
+              kibanaVersion: get(pkg, 'kibana.version', pkg.version)
+            }));
+
+            zipfile.readEntry();
+          });
+        });
       });
 
       zipfile.on('close', () => {
@@ -80,7 +80,7 @@ export function extractArchive(archive, targetDir, extractPath) {
         if (extractPath && fileName.startsWith(extractPath)) {
           fileName = fileName.substring(extractPath.length);
         } else {
-          zipfile.readEntry();
+          return zipfile.readEntry();
         }
 
         if (targetDir) {
