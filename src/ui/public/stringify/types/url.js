@@ -32,8 +32,8 @@ export default function UrlFormatProvider(Private) {
   Url.editor = {
     template: urlTemplate,
     controllerAs: 'url',
-    controller: function ($scope) {
-      const iconPattern = '/bundles/src/ui/public/stringify/icons/{{value}}.png';
+    controller: function ($scope, chrome) {
+      const iconPattern = `${chrome.getBasePath()}/bundles/src/ui/public/stringify/icons/{{value}}.png`;
 
       this.samples = {
         a: [ 'john', '/some/pathname/asset.png', 1234 ],
