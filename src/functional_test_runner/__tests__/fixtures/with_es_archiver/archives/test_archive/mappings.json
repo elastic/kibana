@@ -1,0 +1,212 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "server": {
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          }
+        }
+      },
+      "search": {
+        "properties": {
+          "columns": {
+            "type": "text"
+          },
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "sort": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "config": {
+        "properties": {
+          "buildNum": {
+            "type": "keyword"
+          },
+          "dateFormat:tz": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "defaultIndex": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "dashboard": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "optionsJSON": {
+            "type": "text"
+          },
+          "panelsJSON": {
+            "type": "text"
+          },
+          "timeFrom": {
+            "type": "text"
+          },
+          "timeRestore": {
+            "type": "boolean"
+          },
+          "timeTo": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "uiStateJSON": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "visualization": {
+        "properties": {
+          "description": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "title": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "uiStateJSON": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "version": {
+            "type": "integer"
+          },
+          "visState": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "index-pattern": {
+        "properties": {
+          "fields": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "sourceFilters": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "timeFieldName": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "title": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

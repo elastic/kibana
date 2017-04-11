@@ -17,3 +17,6 @@ export {
   createReduceStream,
   createSplitStream,
 } from './streams';
+
+export { modifyUrl } from './modify_url';
+export { createToolingLog } from './tooling_log';

@@ -1,0 +1,383 @@
+[[development-functional-tests]]
+=== Functional Testing
+
+We use functional tests to make sure the Kibana UI works as expected. It replaces hours of manual testing by automating user interaction. To have better control over our functional test environment, and to make it more accessible to plugin authors, Kibana uses a tool called the `FunctionalTestRunner`.
+
+[float]
+==== Running functional tests
+
+The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
+
+Execute the `FunctionalTestRunner`'s script with node.js to run the tests with Kibana's default configuration:
+
+["source","shell"]
+-----------
+node scripts/functional_test_runner
+-----------
+
+When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. The logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
+
+Use the `--help` flag for more options.
+
+[float]
+==== Writing functional tests
+
+[float]
+===== Environment
+
+The tests are written in https://mochajs.org[mocha] using https://github.com/Automattic/expect.js[expect] for assertions.
+
+We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
+
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See [style_guides/js_style_guide.md]({blob}style_guides/js_style_guide.md).
+
+[float]
+===== Definitions
+
+**Provider:**
+
+Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to *provide*. Provider functions will always be called with a single argument: a provider API (see Provider API section).
+
+A config provder:
+
+["source","js"]
+-----------
+// config and test files use `export default`
+export default function (/* { providerAPI } */) {
+  return {
+    // ...
+  }
+}
+-----------
+
+**Services:**
+
+Services are named singleton values produced by a Service Provider. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services.
+
+**Page objects:**
+
+Page objects are a special type of service that encapsulate behaviors common to a particular page or plugin. When you write your own plugin, you’ll likely want to add a page object (or several) that describes the common interactions your tests need to execute.
+
+**Test Files:**
+
+The `FunctionalTestRunner`'s primary purpose is to execute test files. These files export a Test Provider that is called with a Provider API but is not expected to return a value. Instead Test Providers define a suite using https://mochajs.org/#bdd[mocha's BDD interface].
+
+**Test Suite:**
+
+A test suite is a collection of tests defined by calling `describe()`, and then populated with tests and setup/teardown hooks by calling `it()`, `before()`, `beforeEach()`, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
+
+[float]
+===== Anatomy of a test file
+
+The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/Automattic/expect.js[`expect.js`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+
+["source","js"]
+----
+import expect from 'expect.js';
+// test files must `export default` a function that defines a test suite
+export default function ({ getService, getPageObject }) {
+
+  // most test files will start off by loading some services
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+
+  // for historical reasons, PageObjects are loaded in a single API call
+  // and returned on an object with a key/value for each requested PageObject
+  const PageObjects = getPageObjects(['common', 'visualize']);
+
+  // every file must define a top-level suite before defining hooks/tests
+  describe('My Test Suite', () => {
+
+    // most suites start with a before hook that navigates to a specific
+    // app/page and restores some archives into elasticsearch with esArchiver
+    before(async () => {
+  await Promise.all([
+        // start with an empty .kibana index
+        esArchiver.load('empty_kibana'),
+        // load some basic log data only if the index doesn't exist
+        esArchiver.loadIfNeeded('makelogs')
+      ]);
+      // go to the page described by `apps.visualize` in the config
+      await PageObjects.common.navigateTo('visualize');
+    });
+
+    // right after the before() hook definition, add the teardown steps
+    // that will tidy up elasticsearch for other test suites
+    after(async () => {
+      // we unload the empty_kibana archive but not the makelogs
+      // archive because we don't make any changes to it, and subsequent
+      // suites could use it if they call `.loadIfNeeded()`.
+      await esArchiver.unload('empty_kibana');
+    });
+
+    // This series of tests illustrate how tests generally verify
+    // one step of a larger process and then move on to the next in
+    // a new test, each step building on top of the previous
+    it('Vis Listing Page is empty');
+    it('Create a new vis');
+    it('Shows new vis in listing page');
+    it('Opens the saved vis');
+    it('Respects time filter changes');
+    it(...
+  });
+
+}
+----
+
+[float]
+==== Provider API
+
+The first and only argument to all providers is a Provider API Object. This object can be used to load service/page objects and config/test files.
+
+Within config files the API has the following properties
+
+* `log` - An instance of the {blob}src/utils/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+
+* `readConfigFile(path)` - Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
+
+Within service and PageObject Providers the API is:
+
+* `getService(name)` - Load and return the singleton instance of a service by name
+
+* `getPageObjects(names)` - Load the singleton instances of `PageObject`s and collect them on an object where each name is the key to the singleton instance of that PageObject
+
+Within a test Provider the API is exactly the same as the service providers API but with an additional method:
+
+* `loadTestFile(path)` - Load the test file at path in place. Use this method to nest suites from other files into a higher-level suite
+
+[float]
+==== Service Index
+
+[float]
+===== Built-in Services
+
+The `FunctionalTestRunner` comes with three built-in services:
+
+**config:**
+
+* Source: {blob}src/functional_test_runner/lib/config/config.js[src/functional_test_runner/lib/config/config.js]
+
+* Schema: {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
+
+* Use `config.get(path)` to read any value from the config file
+
+**log:**
+
+* Source: {blob}src/utils/tooling_log/tooling_log.js[src/utils/tooling_log/tooling_log.js]
+* `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
+* `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
+
+**lifecycle:**
+
+* Source: {blob}src/functional_test_runner/lib/lifecycle.js[src/functional_test_runner/lib/lifecycle.js]
+* Designed primary for use in services
+* Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
+* Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
+
+[float]
+===== Kibana Services
+
+The Kibana functional tests define the vast majority of the actual functionality used by tests.
+
+**retry:**
+
+* Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
+* Helpers for retrying operations
+* Popular methods:
+    * `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
+    * `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+
+**testSubjects:**
+
+* Source: {blob}test/functional/services/test_subjects.js[test/functional/services/test_subjects.js]
+* Test subjects are elements that are tagged specifically for selecting from tests
+* Use `testSubjects` over CSS selectors when possible
+* Usage:
+    * Tag your test subject with a `data-test-subj` attribute:
+
+["source","html"]
+-----------
+<div id="container”>
+  <button id="clickMe” data-test-subj=”containerButton” />
+</div>
+-----------
+
+* Click this button using the `testSubjects` helper:
+
+["source","js"]
+-----------
+await testSubjects.click(‘containerButton’);
+-----------
+
+* Popular methods:
+    * `testSubjects.find(testSubjectSelector)` - Find a test subject in the page; throw if it can't be found after some time
+    * `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
+
+**find:**
+
+* Source: {blob}test/functional/services/find.js[test/functional/services/find.js]
+* Helpers for `remote.findBy*` methods that log and manage timeouts
+* Popular methods:
+    * `find.byCssSelector()`
+    * `find.allByCssSelector()`
+
+**kibanaServer:**
+
+* Source: {blob}test/functional/services/kibana_server/kibana_server.js[test/functional/services/kibana_server/kibana_server.js]
+* Helpers for interacting with Kibana's server
+* Commonly used methods:
+    * `kibanaServer.uiSettings.update()`
+    * `kibanaServer.version.get()`
+    * `kibanaServer.status.getOverallState()`
+
+**esArchiver:**
+
+* Source: {blob}test/functional/services/es_archiver.js[test/functional/services/es_archiver.js]
+* Load/unload archives created with the `esArchiver`
+* Popular methods:
+    * `esArchiver.load(name)`
+    * `esArchiver.loadIfNeeded(name)`
+    * `esArchiver.unload(name)`
+
+**docTable:**
+
+* Source: {blob}test/functional/services/doc_table.js[test/functional/services/doc_table.js]
+* Helpers for interacting with doc tables
+
+**pointSeriesVis:**
+
+* Source: {blob}test/functional/services/point_series_vis.js[test/functional/services/point_series_vis.js]
+* Helpers for interacting with point series visualizations
+
+**Low-level utilities:**
+
+* es
+    * Source: {blob}test/functional/services/es.js[test/functional/services/es.js]
+    * Elasticsearch client
+    * Higher level options: `kibanaServer.uiSettings` or `esArchiver`
+
+* remote
+    * Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
+    * Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
+    * Responsible for all communication with the browser
+    * Higher level options: `testSubjects`, `find`, and `PageObjects.common`
+    * See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
+
+[float]
+===== Custom Services
+
+Services are intentionally generic. They can be literally anything (even nothing). Some services have helpers for interacting with a specific types of UI elements, like `pointSeriesVis`, and others are more foundational, like `log` or `config`. Whenever you want to provide some functionality in a reusable package, consider making a custom service.
+
+To create a custom service `somethingUseful`:
+
+* Create a `test/functional/services/something_useful.js` file that looks like this:
+
+["source","js"]
+-----------
+// Services are defined by Provider functions that receive the ServiceProviderAPI
+export function SomethingUsefulProvider({ getService }) {
+  const log = getService('log');
+
+  class SomethingUseful {
+    doSomething() {
+    }
+  }
+  return new SomethingUseful();
+}
+-----------
+
+* Re-export your provider from `services/index.js`
+
+* Import it into `src/functional/config.js` and add it to the services config:
+
+["source","js"]
+-----------
+import { SomethingUsefulProvider } from './services';
+
+export default function () {
+  return {
+    // … truncated ...
+    services: {
+      somethingUseful: SomethingUsefulProvider
+    }
+  }
+}
+-----------
+
+[float]
+==== PageObjects
+
+The purpose for each PageObject is pretty self-explanatory. The visualize PageObject provides helpers for interacting with the visualize app, dashboard is the same for the dashboard app, and so on.
+
+One exception is the "common" PageObject. A holdover from the intern implementation, the common PageObject is a collection of helpers useful across pages. Now that we have shareable services, and those services can be shared with other `FunctionalTestRunner` configurations, we will continue to move functionality out of the common PageObject and into services.
+
+Please add new methods to existing or new services rather than further expanding the CommonPage class.
+
+[float]
+==== Gotchas
+
+Remember that you can’t run an individual test in the file (`it` block) because the whole `describe` needs to be run in order. There should only be one top level `describe` in a file.
+
+[float]
+===== Functional Test Timing
+
+Another important gotcha is writing stable tests by being mindful of timing. All methods on `remote` run asynchronously. It’s better to write interactions that wait for changes on the UI to appear before moving onto the next step.
+
+For example, rather than writing an interaction that simply clicks a button, write an interaction with the a higher-level purpose in mind:
+
+Bad example: `PageObjects.app.clickButton()`
+
+["source","js"]
+-----------
+class AppPage {
+  // what can people who call this method expect from the
+  // UI after the promise resolves? Since the reaction to most
+  // clicks is asynchronous the behavior is dependant on timing
+  // and likely to cause test that fail unexpectedly
+  async clickButton () {
+    await testSubjects.click(‘menuButton’);
+  }
+}
+-----------
+
+Good example: `PageObjects.app.openMenu()`
+
+["source","js"]
+-----------
+class AppPage {
+  // unlike `clickButton()`, callers of `openMenu()` know
+  // the state that the UI will be in before they move on to
+  // the next step
+  async openMenu () {
+    await testSubjects.click(‘menuButton’);
+    await testSubjects.exists(‘menu’);
+  }
+}
+-----------
+
+Writing in this way will ensure your test timings are not flaky or based on assumptions about UI updates after interactions.
+
+[float]
+==== Debugging
+
+From the command line run:
+
+["source","shell"]
+-----------
+node --debug-brk --inspect scripts/functional_test_runner
+-----------
+
+This prints out a URL that you can visit in Chrome and debug your functional tests in the browser.
+
+You can also see additional logs in the terminal by running the `FunctionalTestRunner` with the `--debug` or `--verbose` flag. Add more logs with statements in your tests like
+
+["source","js"]
+-----------
+// load the log service
+const log = getService(‘log’);
+
+// log.debug only writes when using the `--debug` or `--verbose` flag.
+log.debug(‘done clicking menu’);
+-----------
+

@@ -1,32 +1,32 @@
-import {
-  bdd,
-  defaultTimeout,
-  esArchiver,
-} from '../../../support';
+export default function ({ getService, loadTestFile }) {
+  const config = getService('config');
+  const esArchiver = getService('esArchiver');
 
-bdd.describe('settings app', function () {
-  this.timeout = defaultTimeout;
+  describe('management', function () {
+    this.timeout(config.get('timeouts.test'));
 
-  // on setup, we create an settingsPage instance
-  // that we will use for all the tests
-  bdd.before(async function () {
-    await esArchiver.unload('logstash_functional');
-    await esArchiver.load('empty_kibana');
-    await esArchiver.loadIfNeeded('makelogs');
+    // on setup, we create an settingsPage instance
+    // that we will use for all the tests
+    before(async function () {
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.load('empty_kibana');
+      await esArchiver.loadIfNeeded('makelogs');
+    });
+
+    after(async function () {
+      await esArchiver.unload('makelogs');
+      await esArchiver.unload('empty_kibana');
+    });
+
+    loadTestFile(require.resolve('./_initial_state'));
+    loadTestFile(require.resolve('./_creation_form_changes'));
+    loadTestFile(require.resolve('./_index_pattern_create_delete'));
+    loadTestFile(require.resolve('./_index_pattern_results_sort'));
+    loadTestFile(require.resolve('./_index_pattern_popularity'));
+    loadTestFile(require.resolve('./_kibana_settings'));
+    loadTestFile(require.resolve('./_scripted_fields'));
+    loadTestFile(require.resolve('./_index_pattern_filter'));
+    loadTestFile(require.resolve('./_scripted_fields_filter'));
   });
 
-  bdd.after(async function () {
-    await esArchiver.unload('makelogs');
-    await esArchiver.unload('empty_kibana');
-  });
-
-  require('./_initial_state');
-  require('./_creation_form_changes');
-  require('./_index_pattern_create_delete');
-  require('./_index_pattern_results_sort');
-  require('./_index_pattern_popularity');
-  require('./_kibana_settings');
-  require('./_scripted_fields');
-  require('./_index_pattern_filter');
-  require('./_scripted_fields_filter');
-});
+}
