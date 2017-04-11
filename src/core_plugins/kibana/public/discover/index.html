@@ -44,9 +44,7 @@
             >
               <span class="fa fa-search" aria-hidden="true"></span>
             </button>
-            <button class="fa fa-caret-down" ng-click="discoverApp.showFilterHelper = !discoverApp.showFilterHelper" style="position: absolute; top: 2px; right: 45px; background: none; color: gray !important;"></button>
           </div>
-          <filter-helper index-pattern="indexPattern" ng-show="discoverApp.showFilterHelper" on-apply="discoverApp.showFilterHelper = !discoverApp.showFilterHelper"></filter-helper>
           <kbn-typeahead-items></kbn-typeahead-items>
         </div>
       </form>
@@ -55,7 +53,7 @@
 
   <div class="container-fluid" role="main">
     <div class="row">
-      <filter-bar state="state"></filter-bar>
+      <filter-bar state="state" index-pattern="indexPattern"></filter-bar>
     </div>
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar">

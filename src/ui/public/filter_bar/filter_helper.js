@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import template from './filter_helper.html';
+import './filter_helper.less';
 import uiModules from 'ui/modules';
 import QueryFilterProvider from './query_filter';
 import buildPhraseFilter from '../filter_manager/lib/phrase';

@@ -1,7 +1,16 @@
-<div style="position: absolute; top: 32px; right: 0; width: 50%; z-index: 10; background: white; padding: 10px; border: 1px solid lightgray; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-top: none;"
->
-  <div class="kuiSubTitle kuiVerticalRhythm">
-    Filters
+<div class="filter-helper">
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <div class="kuiSubTitle">
+        Search filters
+      </div>
+    </div>
+    <div class="kuiBarSection">
+      <button class="kuiButton kuiButton--basic kuiButton--iconText" ng-click="filterHelper.addHelper()">
+        <span class="kuiButton__icon kuiIcon fa-plus"></span>
+        Add new
+      </button>
+    </div>
   </div>
 
   <table class="kuiTable kuiVerticalRhythm">
@@ -126,12 +135,6 @@
 
       <tr>
         <td class="kuiTableRowCell" colspan="3">
-          <div class="kuiTableRowCell__liner">
-            <button class="kuiButton kuiButton--basic kuiButton--iconText" ng-click="filterHelper.addHelper()">
-              <span class="kuiButton__icon kuiIcon fa-plus"></span>
-              Add a filter
-            </button>
-          </div>
         </td>
         <td class="kuiTableRowCell text-right">
           <div class="kuiTableRowCell__liner">
