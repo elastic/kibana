@@ -6,7 +6,7 @@ import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import searchResp from 'fixtures/search_response';
 
 import FetchProvider from '../fetch';
-import DocSourceProvider from '../../data_source/doc_source';
+import { DocSourceProvider } from '../../data_source/doc_source';
 import SearchSourceProvider from '../../data_source/search_source';
 
 describe('Fetch service', function () {

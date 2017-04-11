@@ -1,6 +1,6 @@
 import FetchProvider from '../fetch';
 import SearchStrategyProvider from '../fetch/strategy/search';
-import RequestQueueProvider from '../_request_queue';
+import { RequestQueueProvider } from '../_request_queue';
 import LooperProvider from './_looper';
 
 export default function SearchLooperService(Private, Promise, Notifier, $rootScope) {

@@ -2,7 +2,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
-import RequestQueueProv from '../../_request_queue';
+import { RequestQueueProvider } from '../../_request_queue';
 import SearchSourceProv from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
@@ -16,7 +16,7 @@ describe('SearchSource', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    requestQueue = Private(RequestQueueProv);
+    requestQueue = Private(RequestQueueProvider);
     SearchSource = Private(SearchSourceProv);
 
     const IndexPattern = Private(StubIndexPatternProv);

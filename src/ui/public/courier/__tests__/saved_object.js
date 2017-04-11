@@ -5,7 +5,7 @@ import BluebirdPromise from 'bluebird';
 
 import SavedObjectFactory from '../saved_object/saved_object';
 import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
-import DocSourceProvider from '../data_source/admin_doc_source';
+import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 
 import { stubMapper } from 'test_utils/stub_mapper';
 
@@ -101,7 +101,7 @@ describe('Saved Object', function () {
     IndexPattern = Private(IndexPatternFactory);
     esAdminStub = esAdmin;
     esDataStub = es;
-    DocSource = Private(DocSourceProvider);
+    DocSource = Private(AdminDocSourceProvider);
     window = $window;
 
     mockEsService();

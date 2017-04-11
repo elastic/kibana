@@ -16,7 +16,7 @@ import { SavedObjectNotFound } from 'ui/errors';
 import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
-import DocSourceProvider from '../data_source/admin_doc_source';
+import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
 
@@ -42,7 +42,7 @@ function isErrorNonFatal(error) {
 
 export default function SavedObjectFactory(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
 
-  const DocSource = Private(DocSourceProvider);
+  const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
 

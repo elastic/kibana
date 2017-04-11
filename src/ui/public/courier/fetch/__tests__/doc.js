@@ -2,7 +2,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import DocSourceProvider from '../../data_source/doc_source';
+import { DocSourceProvider } from '../../data_source/doc_source';
 import DocRequestProvider from '../request/doc_data';
 
 describe('Courier DocFetchRequest class', function () {

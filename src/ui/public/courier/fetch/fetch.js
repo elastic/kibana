@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import RequestQueueProvider from '../_request_queue';
+import { RequestQueueProvider } from '../_request_queue';
 import FetchTheseProvider from './fetch_these';
 import CallResponseHandlersProvider from './call_response_handlers';
 import ReqStatusProvider from './req_status';
