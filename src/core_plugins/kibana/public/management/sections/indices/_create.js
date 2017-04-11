@@ -24,7 +24,7 @@ uiModules.get('apps/management')
     name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
-    notExpandable: false,
+    expandable: false,
     sampleCount: 5,
     nameIntervalOptions: intervals,
 
@@ -64,7 +64,7 @@ uiModules.get('apps/management')
         }
       }
 
-      if (index.notExpandable && $scope.canExpandIndices()) {
+      if (!index.expandable && $scope.canExpandIndices()) {
         indexPattern.notExpandable = true;
       }
 
