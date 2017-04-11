@@ -37,7 +37,9 @@ describe('kibana cli', function () {
 
     describe('extractArchive', () => {
       it('extracts files using the extractPath filter', async () => {
-        await extractArchive(archivePath, tempPath, 'kibana/test-plugin');
+        const archive = path.resolve(repliesPath, 'test_plugin_many.zip');
+
+        await extractArchive(archive, tempPath, 'kibana/test-plugin');
         const files = await glob.sync('**/*', { cwd: tempPath });
 
         const expected = [

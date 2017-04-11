@@ -79,6 +79,8 @@ export function extractArchive(archive, targetDir, extractPath) {
 
         if (extractPath && fileName.startsWith(extractPath)) {
           fileName = fileName.substring(extractPath.length);
+        } else {
+          zipfile.readEntry();
         }
 
         if (targetDir) {
