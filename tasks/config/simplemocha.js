@@ -1,5 +1,3 @@
-require('../../test/mocha_setup');
-
 module.exports = {
   options: {
     timeout: 10000,
@@ -10,6 +8,7 @@ module.exports = {
   },
   all: {
     src: [
+      'test/mocha_setup.js',
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
@@ -19,6 +18,7 @@ module.exports = {
   },
   api: {
     src: [
+      'test/mocha_setup.js',
       'test/unit/**/*.js'
     ]
   }
