@@ -1,6 +1,7 @@
 import { isAbsolute } from 'path';
 
 import { loadTracer } from './load_tracer';
+import { createDescribeNestingValidator } from './describe_nesting_validator';
 
 /**
  *  Load an array of test files into a mocha instance
@@ -35,9 +36,9 @@ export const loadTestFiles = (mocha, log, providers, paths) => {
     }
 
     loadTracer(provider, `testProvider[${path}]`, () => {
-      // mocha.suite hocus-pocus comes from:
-      // https://github.com/mochajs/mocha/blob/1d52fd38c7acc4de2c0b8b5df864134bb6b2d991/lib/mocha.js#L221-L223
-      mocha.suite.emit('pre-require', global, path, mocha);
+      // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
+
+      mocha.suite.emit('pre-require', createDescribeNestingValidator(global), path, mocha);
 
       const returnVal = provider({
         loadTestFile: innerLoadTestFile,
