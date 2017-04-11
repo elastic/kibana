@@ -41,6 +41,9 @@ window.__KBN__ = {
         }        
       },
       manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest'
+    },
+    vectormapsConfig: {
+      layers: []
     }
   },
   uiSettings: {
