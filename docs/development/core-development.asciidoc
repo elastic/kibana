@@ -5,6 +5,7 @@
 * <<development-dependencies>>
 * <<development-modules>>
 * <<development-elasticsearch>>
+* <<development-functional-tests>>
 
 include::core/development-basepath.asciidoc[]
 
@@ -13,3 +14,5 @@ include::core/development-dependencies.asciidoc[]
 include::core/development-modules.asciidoc[]
 
 include::plugin/development-elasticsearch.asciidoc[]
+
+include::core/development-functional-tests.asciidoc[]

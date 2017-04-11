@@ -16,6 +16,7 @@ release-state can be: released | prerelease | unreleased
 :issue:          {repo}issues/
 :pull:           {repo}pull/
 :commit:         {repo}commit/
+:blob:           {repo}blob/{branch}/
 :security:       https://www.elastic.co/community/security/
 
 
