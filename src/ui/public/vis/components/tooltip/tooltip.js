@@ -177,6 +177,7 @@ Tooltip.prototype.render = function () {
 };
 
 Tooltip.prototype.destroy = function () {
+  this.hide();
   this.binder.destroy();
 };
 
