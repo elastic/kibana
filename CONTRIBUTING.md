@@ -308,7 +308,7 @@ npm run test:ui:runner
 
 ##### Browser Automation Notes
 
-- TODO
+[Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
 ### Building OS packages
 
