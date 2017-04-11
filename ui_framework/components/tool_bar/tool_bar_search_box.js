@@ -15,7 +15,8 @@ export function KuiToolBarSearchBox({ filter, onFilter, className, ...rest }) {
         placeholder="Search..."
         aria-label="Filter"
         defaultValue={ filter }
-        onChange={ onChange }/>
+        onChange={ onChange }
+      />
     </div>
   </div>;
 }

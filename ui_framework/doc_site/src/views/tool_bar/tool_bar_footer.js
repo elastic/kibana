@@ -24,13 +24,11 @@ export const ToolBarFooter = () => (
         <KuiButton
           type="basic"
           icon={<KuiButtonIcon type="previous" />}
-        >
-        </KuiButton>
+        ></KuiButton>
         <KuiButton
           type="basic"
           icon={<KuiButtonIcon type="next" />}
-        >
-        </KuiButton>
+        ></KuiButton>
       </KuiButtonGroup>
     </div>
   </KuiToolBarFooter>

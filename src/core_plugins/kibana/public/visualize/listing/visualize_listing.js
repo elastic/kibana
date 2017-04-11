@@ -81,7 +81,7 @@ export function VisualizeListingController($injector) {
     deselectAll();
     fetchItems();
   };
-  this.onFilter();
+  fetchItems();
 
   this.toggleAll = function toggleAll() {
     if (this.areAllItemsChecked()) {

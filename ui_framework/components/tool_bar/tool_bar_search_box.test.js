@@ -7,34 +7,27 @@ import {
   KuiToolBarSearchBox,
 } from './tool_bar_search_box';
 
-describe('KuiToolBarSearchBox', () => {
-  const onFilter = sinon.spy();
+const onFilter = sinon.spy();
 
-  test('renders KuiToolBarSearchBox', () => {
-    const component = <KuiToolBarSearchBox onFilter={onFilter} { ...commonHtmlProps } />;
-    expect(render(component)).toMatchSnapshot();
-  });
+test('renders KuiToolBarSearchBox', () => {
+  const component = <KuiToolBarSearchBox onFilter={onFilter} { ...commonHtmlProps } />;
+  expect(render(component)).toMatchSnapshot();
+});
 
-  describe('onFilter', () => {
+describe('onFilter', () => {
+  test('is called on change event, with the value entered', () => {
     const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} { ...commonHtmlProps } />);
     onFilter.reset();
-
-    test('is called on change event', () => {
-      const event = { target: { value: 'a' } };
-      searchBox.find('input').simulate('change', event);
-      sinon.assert.calledOnce(onFilter);
-    });
-
-    test('is called with the value entered', () => {
-      sinon.assert.calledWith(onFilter, 'a');
-    });
+    const event = { target: { value: 'a' } };
+    searchBox.find('input').simulate('change', event);
+    sinon.assert.calledWith(onFilter, 'a');
   });
+});
 
-  describe('filter prop', () => {
-    test('initializes search box value', () => {
-      const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} filter="My Query"/>);
-      expect(searchBox.find('input').props().defaultValue).toBe('My Query');
-    });
+describe('filter', () => {
+  test('initializes search box value', () => {
+    const component = <KuiToolBarSearchBox onFilter={onFilter} filter="My Query" />;
+    expect(render(component)).toMatchSnapshot();
   });
 });
 

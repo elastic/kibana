@@ -3,11 +3,10 @@ import { render } from 'enzyme';
 import { commonHtmlProps } from '../../test/common_html_props';
 
 import {
-  KuiToolBar,
-} from './tool_bar';
+  KuiToolBarFooter,
+} from './tool_bar_footer';
 
-test('renders KuiToolBar', () => {
-  const component = <KuiToolBar { ...commonHtmlProps }>children</KuiToolBar>;
+test('renders KuiToolBarFooter', () => {
+  const component = <KuiToolBarFooter { ...commonHtmlProps }>children</KuiToolBarFooter>;
   expect(render(component)).toMatchSnapshot();
 });
-

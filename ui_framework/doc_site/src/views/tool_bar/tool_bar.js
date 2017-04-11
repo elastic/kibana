@@ -10,7 +10,7 @@ import {
 
 export const ToolBar = () => (
   <KuiToolBar>
-    <KuiToolBarSearchBox onFilter={() => {}}/>
+    <KuiToolBarSearchBox onFilter={() => {}} />
 
     <div>
       <select className="kuiSelect">
