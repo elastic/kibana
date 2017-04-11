@@ -1,7 +1,7 @@
 <tr ng-class="conf.value === undefined ? 'default' : 'custom'">
   <td class="name">
     <b>{{conf.name}}</b>
-    <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
+    <span class="smaller" ng-show="!isDefaultValue(conf)">
       (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
     </span>
     <span class="smaller" ng-show="conf.isCustom">
@@ -115,7 +115,7 @@
     <button
       ng-if="!conf.editing"
       ng-click="clear(conf)"
-      ng-hide="conf.value === undefined"
+      ng-hide="isDefaultValue(conf)"
       class="btn btn-danger"
       aria-label="Clear"
     >
