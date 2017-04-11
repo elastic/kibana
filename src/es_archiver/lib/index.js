@@ -19,12 +19,11 @@ export {
 
 export {
   isGzip,
-  getArchiveFiles,
   prioritizeMappings,
   createParseArchiveStreams,
   createFormatArchiveStreams,
 } from './archives';
 
 export {
-  createLog
-} from './log';
+  readDirectory
+} from './directory';
