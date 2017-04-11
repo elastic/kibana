@@ -13,6 +13,6 @@ include::core/development-dependencies.asciidoc[]
 
 include::core/development-modules.asciidoc[]
 
-include::plugin/development-elasticsearch.asciidoc[]
+include::core/development-elasticsearch.asciidoc[]
 
 include::core/development-functional-tests.asciidoc[]

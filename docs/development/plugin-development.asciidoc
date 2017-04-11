@@ -15,4 +15,4 @@ include::plugin/development-plugin-resources.asciidoc[]
 
 include::plugin/development-uiexports.asciidoc[]
 
-include::core/development-plugin-functional-tests.asciidoc[]
+include::plugin/development-plugin-functional-tests.asciidoc[]
