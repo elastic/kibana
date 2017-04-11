@@ -90,7 +90,7 @@ describe('esArchiver: Stats', () => {
       stats.createdIndex('index-name');
       expect(await drain(log)).to.contain('Created');
     });
-    context('with metadata', () => {
+    describe('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
         const log = createToolingLog('debug');
         const stats = createStats('name', log);
@@ -102,7 +102,7 @@ describe('esArchiver: Stats', () => {
         expect(output).to.contain('foo "bar"');
       });
     });
-    context('without metadata', () => {
+    describe('without metadata', () => {
       it('no debug logging', async () => {
         const log = createToolingLog('debug');
         const stats = createStats('name', log);
@@ -126,7 +126,7 @@ describe('esArchiver: Stats', () => {
       stats.archivedIndex('index-name');
       expect(await drain(log)).to.contain('Archived');
     });
-    context('with metadata', () => {
+    describe('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
         const log = createToolingLog('debug');
         const stats = createStats('name', log);
@@ -138,7 +138,7 @@ describe('esArchiver: Stats', () => {
         expect(output).to.contain('foo "bar"');
       });
     });
-    context('without metadata', () => {
+    describe('without metadata', () => {
       it('no debug logging', async () => {
         const log = createToolingLog('debug');
         const stats = createStats('name', log);

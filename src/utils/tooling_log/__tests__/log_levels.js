@@ -5,7 +5,7 @@ import { createLogLevelFlags } from '../log_levels';
 const chance = new Chance();
 
 describe('createLogLevelFlags()', () => {
-  context('logLevel=silent', () => {
+  describe('logLevel=silent', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('silent')).to.eql({
         silent: true,
@@ -18,7 +18,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('logLevel=error', () => {
+  describe('logLevel=error', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('error')).to.eql({
         silent: true,
@@ -44,7 +44,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('logLevel=info', () => {
+  describe('logLevel=info', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('info')).to.eql({
         silent: true,
@@ -57,7 +57,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('logLevel=debug', () => {
+  describe('logLevel=debug', () => {
     it('produces correct map', () => {
       expect(createLogLevelFlags('debug')).to.eql({
         silent: true,
@@ -83,7 +83,7 @@ describe('createLogLevelFlags()', () => {
     });
   });
 
-  context('invalid logLevel', () => {
+  describe('invalid logLevel', () => {
     it('throws error', () => {
       // avoid the impossiblity that a valid level is generated
       // by specifying a long length
