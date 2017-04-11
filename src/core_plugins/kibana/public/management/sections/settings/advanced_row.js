@@ -65,6 +65,14 @@ uiModules.get('apps/management')
         });
       };
 
+      $scope.isDefaultValue = (conf) => {
+        // conf.isCustom = custom setting, provided by user, so there is no notion of
+        // having a default or non-default value for it
+        return conf.isCustom
+          || conf.value === undefined
+          || conf.value === ''
+          || String(conf.value) === String(conf.defVal);
+      };
     }
   };
 });
