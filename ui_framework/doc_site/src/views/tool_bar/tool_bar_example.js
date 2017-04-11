@@ -13,10 +13,6 @@ import { ToolBar } from './tool_bar';
 const toolBarSource = require('!!raw!./tool_bar');
 const toolBarHtml = renderToHtml(ToolBar);
 
-import { ToolBarSearchOnly } from './tool_bar_search_only';
-const toolBarSearchOnlySource = require('!!raw!./tool_bar_search_only');
-const toolBarSearchOnlyHtml = renderToHtml(ToolBarSearchOnly);
-
 import { ToolBarFooter } from './tool_bar_footer';
 const toolBarFooterSource = require('!!raw!./tool_bar_footer');
 const toolBarFooterHtml = renderToHtml(ToolBarFooter);
@@ -40,21 +36,6 @@ export default props => (
 
       <GuideDemo>
         <ToolBar />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="ToolBar with Search only"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: toolBarSearchOnlySource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: toolBarSearchOnlyHtml,
-      }]}
-    >
-      <GuideDemo>
-        <ToolBarSearchOnly />
       </GuideDemo>
     </GuideSection>
 
