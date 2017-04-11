@@ -5,8 +5,8 @@ import url from 'url';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
+import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
-import { KibanaMappings } from '../kibana_index_mappings';
 import kibanaVersion from '../kibana_version';
 import serverConfig from '../../../../../test/server_config';
 
@@ -34,6 +34,14 @@ describe('plugins/elasticsearch', () => {
           red: sinon.stub(),
           green: sinon.stub(),
           yellow: sinon.stub()
+        },
+        kbnServer: {
+          mappings: {
+            getCombined() {
+              return mappings;
+            },
+            register: sinon.stub()
+          }
         }
       };
 
@@ -66,8 +74,7 @@ describe('plugins/elasticsearch', () => {
         config: function () { return { get, set }; },
         plugins: {
           elasticsearch: {
-            getCluster: sinon.stub().returns(cluster),
-            mappings: new KibanaMappings()
+            getCluster: sinon.stub().returns(cluster)
           }
         }
       };
