@@ -9,6 +9,13 @@
       }
     },
     "mappings": {
+      "config": {
+        "properties": {
+          "buildNum": {
+            "type": "keyword"
+          }
+        }
+      },
       "visualization": {
         "properties": {
           "description": {
@@ -134,6 +141,13 @@
           }
         }
       },
+      "server": {
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          }
+        }
+      },
       "dashboard": {
         "properties": {
           "description": {
@@ -172,20 +186,6 @@
           },
           "version": {
             "type": "integer"
-          }
-        }
-      },
-      "server": {
-        "properties": {
-          "uuid": {
-            "type": "keyword"
-          }
-        }
-      },
-      "config": {
-        "properties": {
-          "buildNum": {
-            "type": "keyword"
           }
         }
       }

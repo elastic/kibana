@@ -92,7 +92,7 @@
           }
         }
       },
-      "apache": {
+      "nginx": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -242,9 +242,6 @@
                 }
               }
             }
-          },
-          "phpmemory": {
-            "type": "long"
           },
           "referer": {
             "type": "keyword"
@@ -432,7 +429,7 @@
           }
         }
       },
-      "nginx": {
+      "apache": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -582,6 +579,9 @@
                 }
               }
             }
+          },
+          "phpmemory": {
+            "type": "long"
           },
           "referer": {
             "type": "keyword"
@@ -867,7 +867,7 @@
           }
         }
       },
-      "apache": {
+      "nginx": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -1207,7 +1207,7 @@
           }
         }
       },
-      "nginx": {
+      "apache": {
         "dynamic_templates": [
           {
             "string_fields": {
