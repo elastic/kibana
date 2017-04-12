@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function PointSeriesInitYAxis() {
+
+export function PointSeriesInitYAxisProvider() {
 
   return function initYAxis(chart) {
     const y = chart.aspects.y;

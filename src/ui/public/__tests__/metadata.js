@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import metadata from 'ui/metadata';
+import { metadata } from 'ui/metadata';
 describe('ui/metadata', () => {
 
 
