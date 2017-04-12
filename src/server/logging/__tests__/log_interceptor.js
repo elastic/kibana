@@ -2,9 +2,10 @@ import expect from 'expect.js';
 
 import { LogInterceptor } from '../log_interceptor';
 
-function stubClientErrorEvent(errno) {
+function stubClientErrorEvent(errno, message) {
   const error = new Error();
   error.errno = errno;
+  error.message = message;
 
   return {
     event: 'error',
@@ -107,6 +108,35 @@ describe('server logging LogInterceptor', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
       event.tags = ['different', 'tags'];
+      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+    });
+  });
+
+  describe('#downgradeIfHTTPSWhenHTTP', () => {
+    it('transforms https requests when serving http errors', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent(undefined, 'Parse Error');
+      assertDowngraded(interceptor.downgradeIfHTTPSWhenHTTP(event));
+    });
+
+    it('ignores non events', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent(null, 'Not Parse Error');
+      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+    });
+  });
+
+  describe('#downgradeIfHTTPWhenHTTPS', () => {
+    it('transforms http requests when serving https errors', () => {
+      const message = '40735139278848:error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request:../deps/openssl/openssl/ssl/s23_srvr.c:394'; // eslint-disable-line max-len
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent(undefined, message);
+      assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event));
+    });
+
+    it('ignores non events', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent(null, 'Not error');
       expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
     });
   });
