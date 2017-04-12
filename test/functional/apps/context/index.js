@@ -1,22 +1,25 @@
+export default function ({ getService, getPageObjects, loadTestFile }) {
+  const config = getService('config');
+  const remote = getService('remote');
+  const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common']);
 
-import { bdd, defaultTimeout, elasticDump, scenarioManager } from '../../../support';
+  describe('context app', function () {
+    this.timeout(config.get('timeouts.test'));
 
-import PageObjects from '../../../support/page_objects';
+    before(async function () {
+      await remote.setWindowSize(1200,800);
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('visualize');
+      await PageObjects.common.navigateToApp('discover');
+    });
 
-bdd.describe('context app', function () {
-  this.timeout = defaultTimeout;
+    after(function unloadMakelogs() {
+      return esArchiver.unload('logstash_functional');
+    });
 
-  bdd.before(async function () {
-    await PageObjects.remote.setWindowSize(1200,800);
-    await scenarioManager.loadIfEmpty('logstashFunctional');
-    await elasticDump.elasticLoad('visualize','.kibana');
-    await PageObjects.common.navigateToApp('discover');
+    loadTestFile(require.resolve('./_discover_navigation'));
+    loadTestFile(require.resolve('./_size'));
   });
 
-  bdd.after(function unloadMakelogs() {
-    return scenarioManager.unload('logstashFunctional');
-  });
-
-  require('./_discover_navigation');
-  require('./_size');
-});
+}

@@ -1,0 +1,1552 @@
+{
+  "type": "index",
+  "value": {
+    "index": "logstash-2015.09.17",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "type": "standard",
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email"
+            }
+          }
+        },
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "_default_": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "referer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "nginx": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@message": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@tags": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "bytes": {
+            "type": "long"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "extension": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "headings": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "host": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "index": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "links": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "machine": {
+            "properties": {
+              "os": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ram": {
+                "type": "long"
+              }
+            }
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "referer": {
+            "type": "keyword"
+          },
+          "relatedContent": {
+            "properties": {
+              "article:modified_time": {
+                "type": "date"
+              },
+              "article:published_time": {
+                "type": "date"
+              },
+              "article:section": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "article:tag": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:height": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:width": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:site_name": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:type": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:card": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:site": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "request": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "spaces": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "utc_time": {
+            "type": "date"
+          },
+          "xss": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "apache": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@message": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@tags": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "bytes": {
+            "type": "long"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "extension": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "headings": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "host": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "index": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "links": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "machine": {
+            "properties": {
+              "os": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ram": {
+                "type": "long"
+              }
+            }
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "phpmemory": {
+            "type": "long"
+          },
+          "referer": {
+            "type": "keyword"
+          },
+          "relatedContent": {
+            "properties": {
+              "article:modified_time": {
+                "type": "date"
+              },
+              "article:published_time": {
+                "type": "date"
+              },
+              "article:section": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "article:tag": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:height": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:width": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:site_name": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:type": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:card": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:site": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "request": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "spaces": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "utc_time": {
+            "type": "date"
+          },
+          "xss": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "logstash-2015.09.18",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "type": "standard",
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email"
+            }
+          }
+        },
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "_default_": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "referer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "nginx": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@message": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@tags": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "bytes": {
+            "type": "long"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "extension": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "headings": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "host": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "index": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "links": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "machine": {
+            "properties": {
+              "os": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ram": {
+                "type": "long"
+              }
+            }
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "phpmemory": {
+            "type": "long"
+          },
+          "referer": {
+            "type": "keyword"
+          },
+          "relatedContent": {
+            "properties": {
+              "article:modified_time": {
+                "type": "date"
+              },
+              "article:published_time": {
+                "type": "date"
+              },
+              "article:section": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "article:tag": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:height": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:width": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:site_name": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:type": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:card": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:site": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "request": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "spaces": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "utc_time": {
+            "type": "date"
+          },
+          "xss": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "apache": {
+        "dynamic_templates": [
+          {
+            "string_fields": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@message": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@tags": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "bytes": {
+            "type": "long"
+          },
+          "clientip": {
+            "type": "ip"
+          },
+          "extension": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "geo": {
+            "properties": {
+              "coordinates": {
+                "type": "geo_point"
+              },
+              "dest": {
+                "type": "keyword"
+              },
+              "src": {
+                "type": "keyword"
+              },
+              "srcdest": {
+                "type": "keyword"
+              }
+            }
+          },
+          "headings": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "host": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "index": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ip": {
+            "type": "ip"
+          },
+          "links": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "machine": {
+            "properties": {
+              "os": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ram": {
+                "type": "long"
+              }
+            }
+          },
+          "memory": {
+            "type": "double"
+          },
+          "meta": {
+            "properties": {
+              "char": {
+                "type": "keyword"
+              },
+              "related": {
+                "type": "text"
+              },
+              "user": {
+                "properties": {
+                  "firstname": {
+                    "type": "text"
+                  },
+                  "lastname": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "phpmemory": {
+            "type": "long"
+          },
+          "referer": {
+            "type": "keyword"
+          },
+          "relatedContent": {
+            "properties": {
+              "article:modified_time": {
+                "type": "date"
+              },
+              "article:published_time": {
+                "type": "date"
+              },
+              "article:section": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "article:tag": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:height": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:image:width": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:site_name": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:type": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "og:url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:card": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:description": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:image": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:site": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "twitter:title": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "request": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "spaces": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "utc_time": {
+            "type": "date"
+          },
+          "xss": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
