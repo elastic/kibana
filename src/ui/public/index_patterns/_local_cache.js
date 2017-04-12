@@ -1,6 +1,6 @@
 import angular from 'angular';
 
-export default function LocalCacheFactory() {
+export function IndexPatternsLocalCacheProvider() {
   function LocalCache(opts) {
     opts = opts || {};
     const _id = opts.id || function (o) { return '' + o; };

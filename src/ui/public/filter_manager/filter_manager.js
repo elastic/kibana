@@ -85,3 +85,6 @@ export function FilterManagerProvider(Private) {
   return filterManager;
 }
 
+// Used in x-pack. TODO: switch references to named and remove.
+export default FilterManagerProvider;
+
