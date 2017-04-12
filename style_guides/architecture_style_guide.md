@@ -35,9 +35,9 @@ plugin_root:
   <dd><strong>NOTE</strong>: If you'd like to avoid adding <code>../common</code> to your public code, you could use <em>webpackShims</em> to resolve the path without traversing backwards.</dd>
 </dl>
 
-### Subdirectories
+## Subdirectories
 
-As a plugin gets more complex, it becomes important to organize your code into subdirectories. Each subdirectory should contain an `index.js` file that exposes the contents of that directory.
+As code gets more complex, it becomes important to organize it into subdirectories. Each subdirectory should contain an `index.js` file that exposes the contents of that directory.
 
 ```
 plugin_root:
