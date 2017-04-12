@@ -52,7 +52,7 @@ export const createStubClient = (existingIndices = []) => ({
     }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
-        throw createEsClientError('resource_already_exists_exception');
+        throw createEsClientError('index_already_exists_exception');
       } else {
         existingIndices.push(index);
         return { ok: true };
