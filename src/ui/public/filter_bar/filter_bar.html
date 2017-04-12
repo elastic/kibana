@@ -12,9 +12,9 @@
 <div class="filter-bar kuiBar">
   <div class="kuiSection" ng-if="filters.length">
     Currently filtering your searches against
-    <span ng-repeat="filter in filters track by $index">
-      <span ng-if="filters.length > 1 && $last">and</span>
-      <strong>{{filter.meta.key}}</strong><span ng-if="filters.length > 2 && !$last">,</span>
+    <span ng-repeat="key in getUniqueKeys()">
+      <span ng-if="getUniqueKeys().length > 1 && $last">and</span>
+      <strong>{{key}}</strong><span ng-if="getUniqueKeys().length > 2 && !$last">,</span>
     </span>
   </div>
 <!-- <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters track by $index">

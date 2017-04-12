@@ -89,6 +89,12 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         $scope.changeTimeFilter = null;
       };
 
+      $scope.getUniqueKeys = () => {
+        return _($scope.filters)
+        .map(filter => filter.meta.key)
+        .uniq().value();
+      };
+
       // update the scope filter list on filter changes
       $scope.$listen(queryFilter, 'update', function () {
         $scope.stopEditingFilter();
