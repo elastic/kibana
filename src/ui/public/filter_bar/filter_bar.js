@@ -6,9 +6,9 @@ import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_
 import FilterBarLibMapFlattenAndWrapFiltersProvider from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
 import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_time_filter';
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
-import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import compareFilters from './lib/compare_filters';
+import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { compareFilters } from './lib/compare_filters';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 

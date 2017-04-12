@@ -2,7 +2,8 @@
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
+import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
+
 describe('Filter Bar Directive', function () {
   describe('changeTimeFilter()', function () {
 
