@@ -199,11 +199,14 @@ export default function ColumnHandler() {
         },
         labels: {
           filter: false,
-          axisFormatter: data.data.yAxisFormatter
+          axisFormatter: data.get('zAxisFormatter') || function () { return ''; }
         },
         style: {
           rangePadding: 0,
           rangeOuterPadding: 0
+        },
+        title: {
+          text: data.get('zAxisLabel') || ''
         }
       });
       return defaults;
