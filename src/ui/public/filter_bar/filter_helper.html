@@ -59,20 +59,24 @@
               class="kuiSelect"
               ng-model="helper.type"
               ng-options="type.label for type in filterHelper.filterTypesByField(filterHelper.types, helper.field)"
+              ng-change="filterHelper.updateHelper(helper)"
             ></select>
           </div>
         </td>
 
         <td class="kuiTableRowCell" ng-if="helper.type.id === 'query.match'">
           <div class="kuiTableRowCell__liner">
-            <ui-select ng-model="helper.params.query">
+            <ui-select
+              ng-model="helper.params.query"
+              on-select="filterHelper.updateHelper(helper)"
+            >
               <ui-select-match>
                 {{$select.selected}}
               </ui-select-match>
               <ui-select-choices
                 repeat="value in filterHelper.suggestions[helper.field] | orderBy:'valueOf()'"
                 refresh="filterHelper.refreshSuggestions(helper.field, $select.search)"
-                refresh-delay="0"
+                refresh-delay="10"
               >
                 <div ng-bind-html="value"></div>
               </ui-select-choices>
@@ -82,7 +86,11 @@
 
         <td class="kuiTableRowCell" ng-if="helper.type.id === 'query.terms'">
           <div class="kuiTableRowCell__liner">
-            <ui-select ng-model="helper.params.terms" multiple>
+            <ui-select
+              ng-model="helper.params.terms"
+              on-select="filterHelper.updateHelper(helper)"
+              multiple
+            >
               <ui-select-match>
                 {{$item}}
               </ui-select-match>
@@ -104,6 +112,7 @@
                   ng-model="helper.params.gte"
                   type="number"
                   class="kuiTextInput fullWidth"
+                  ng-blur="filterHelper.updateHelper(helper)"
                 />
               </div><div class="kuiColumn kuiColumn--2">
                 and
@@ -112,6 +121,7 @@
                   ng-model="helper.params.lt"
                   type="number"
                   class="kuiTextInput fullWidth"
+                  ng-blur="filterHelper.updateHelper(helper)"
                 />
               </div>
           </div>
@@ -133,7 +143,15 @@
         </td>
       </tr>
 
-      <tr>
+      <tr ng-show="!filterHelper.helpers.length">
+        <td class="kuiTableRowCell" colspan="4">
+          <div class="kuiTableRowCell__liner">
+            You currently have no filters.
+          </div>
+        </td>
+      </tr>
+
+      <!-- <tr>
         <td class="kuiTableRowCell" colspan="3">
         </td>
         <td class="kuiTableRowCell text-right">
@@ -144,7 +162,7 @@
             </button>
           </div>
         </td>
-      </tr>
+      </tr> -->
     </tbody>
   </table>
 </div>

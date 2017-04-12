@@ -78,19 +78,31 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
 
       this.removeHelper = (helper) => {
         this.helpers = _.without(this.helpers, helper);
-        this.removedHelpers = [...this.removedHelpers, helper];
+        if (helper.filter) queryFilter.removeFilter(helper.filter);
+        // this.removedHelpers = [...this.removedHelpers, helper];
       };
 
-      this.applyHelpers = () => {
-        [...this.removedHelpers, ...this.helpers].forEach(helper => {
-          if (helper.filter) queryFilter.removeFilter(helper.filter);
-        });
-
-        const filters = this.helpers.map(helper => getFilterFromHelper(helper, $scope.indexPattern));
-        queryFilter.addFilters(filters);
-
-        $scope.onApply();
+      this.updateHelper = (helper) => {
+        if (helper.filter) queryFilter.removeFilter(helper.filter);
+        try {
+          const filter = getFilterFromHelper(helper, $scope.indexPattern);
+          helper.filter = filter;
+          queryFilter.addFilters([filter]);
+        } catch (e) {
+          // Do nothing
+        }
       };
+
+      // this.applyHelpers = () => {
+      //   [...this.removedHelpers, ...this.helpers].forEach(helper => {
+      //     if (helper.filter) queryFilter.removeFilter(helper.filter);
+      //   });
+      //
+      //   const filters = this.helpers.map(helper => getFilterFromHelper(helper, $scope.indexPattern));
+      //   queryFilter.addFilters(filters);
+      //
+      //   $scope.onApply();
+      // };
 
       this.refreshSuggestions = (field, value) => {
         const include = this.indexPattern.fields.byName[field].type === 'string' && value ? `.*${value}.*` : undefined;
