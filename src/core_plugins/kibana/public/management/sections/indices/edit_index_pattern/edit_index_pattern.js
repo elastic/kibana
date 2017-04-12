@@ -4,7 +4,7 @@ import './indexed_fields_table';
 import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
-import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
+import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
