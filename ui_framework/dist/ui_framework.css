@@ -128,6 +128,10 @@ body {
     margin-left: 10px;
     /* 1 */ }
 
+.kuiBar--title {
+  border-bottom: 2px solid #E4E4E4;
+  padding-bottom: 4px; }
+
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
@@ -2025,9 +2029,15 @@ body {
  */
 .kuiTable {
   width: 100%;
-  border: 2px solid #E4E4E4;
   border-collapse: collapse;
   background-color: #FFF; }
+
+.kuiTable--contained {
+  border: 1px solid #E4E4E4; }
+  .kuiTable--contained .kuiTableHeaderCell,
+  .kuiTable--contained .kuiTableRowCell__liner {
+    padding-left: 8px;
+    padding-right: 8px; }
 
 /**
  * 1. Allow contents of cells to determine table's width.
@@ -2046,7 +2056,7 @@ body {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 7px 8px 8px;
+  padding: 7px 0 8px;
   line-height: 1.5;
   color: #a7a7a7; }
 
@@ -2104,7 +2114,7 @@ body {
   /* 2 */
   text-overflow: ellipsis;
   /* 2 */
-  padding: 7px 8px 8px;
+  padding: 7px 0 8px;
   /* 2 */
   line-height: 1.5;
   /* 1 */ }
@@ -2240,7 +2250,6 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  padding: 10px;
   height: 50px; }
 
 .kuiToolBarSection {

@@ -5,3 +5,8 @@
 .kuiBarSection {
   @include barSection;
 }
+
+.kuiBar--title {
+  border-bottom: $globalBorderThick;
+  padding-bottom: 4px;
+}
