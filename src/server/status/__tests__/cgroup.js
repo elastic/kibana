@@ -67,7 +67,6 @@ describe('Control Group', function () {
         '/sys/fs/cgroup/cpu/docker/cpu.stat': fsStub.cpuStatContents,
       });
 
-      console.log('fsStub.cpuAcctDir', fsStub.cpuAcctDir);
       const stats = await getAllStats({ cpuPath: '/docker' });
 
       expect(stats).to.eql({
@@ -86,6 +85,20 @@ describe('Control Group', function () {
           }
         }
       });
+    });
+
+    it('handles an undefined control group', async () => {
+      mockFs({
+        '/proc/self/cgroup': '',
+        [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
+        [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents,
+        [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
+        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000'
+      });
+
+      const stats = await getAllStats();
+
+      expect(stats).to.be(null);
     });
 
     it('can override the cpuacct group path', async () => {
