@@ -93,6 +93,7 @@ export function setupTopLevelDescribeFilter(test) {
 
   // to allow describe.only calls. we dont need interceptor as it will call describe internally
   describeInterceptor.only = originalDescribe.only;
+  describeInterceptor.skip = originalDescribe.skip;
 
   // ensure that window.describe isn't messed with by other code
   Object.defineProperty(window, 'describe', {
