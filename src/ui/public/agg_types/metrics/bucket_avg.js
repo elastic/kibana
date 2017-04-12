@@ -1,6 +1,6 @@
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
-import SiblingPipelineAggHelperProvider from './lib/sibling_pipeline_agg_helper';
+import { SiblingPipelineAggHelperProvider } from './lib/sibling_pipeline_agg_helper';
 
 export function AggTypesMetricsBucketAvgProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);

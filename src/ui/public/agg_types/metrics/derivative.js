@@ -1,5 +1,5 @@
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import ParentPipelineAggHelperProvider from './lib/parent_pipeline_agg_helper';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { ParentPipelineAggHelperProvider } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 
 export function AggTypesMetricsDerivativeProvider(Private) {
