@@ -134,7 +134,7 @@ chain
  = func:function space? rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
 
 group
- = '(' space? grouped:series+ space? ')' functions:function* {
+ = '(' space? grouped:series space? ')' functions:function* {
   var first = {
     type: 'chainList',
     list: grouped
