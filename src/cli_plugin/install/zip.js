@@ -87,9 +87,9 @@ export function extractArchive(archive, targetDir, extractPath) {
           fileName = path.join(targetDir, fileName);
         }
 
-        if (/\/$/.test(entry.fileName)) {
+        if (/\/$/.test(fileName)) {
           // directory file names end with '/'
-          mkdirp(entry.fileName, function (err) {
+          mkdirp(fileName, function (err) {
             if (err) {
               return reject(err);
             }
