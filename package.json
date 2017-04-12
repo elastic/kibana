@@ -63,7 +63,8 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "grunt uiFramework:start"
+    "uiFramework:start": "grunt uiFramework:start",
+    "flow": "flow"
   },
   "repository": {
     "type": "git",
@@ -127,6 +128,7 @@
     "extract-text-webpack-plugin": "0.8.2",
     "file-loader": "0.8.4",
     "flot-charts": "0.8.3",
+    "flow-bin": "0.43.0",
     "font-awesome": "4.4.0",
     "glob": "5.0.13",
     "glob-all": "3.0.1",
