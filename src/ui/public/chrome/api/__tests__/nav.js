@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import initChromeNavApi from 'ui/chrome/api/nav';
+import { initChromeNavApi } from 'ui/chrome/api/nav';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 
 const basePath = '/someBasePath';

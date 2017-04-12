@@ -10,7 +10,7 @@ import {
 } from 'ui/state_management/state_hashing';
 import Notifier from 'ui/notify';
 
-export default function (chrome, internals) {
+export function kbnChromeProvider(chrome, internals) {
 
   UiModules
   .get('kibana')
