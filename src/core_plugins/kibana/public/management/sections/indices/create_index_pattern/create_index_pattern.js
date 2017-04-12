@@ -6,6 +6,8 @@ import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import template from './create_index_pattern.html';
+import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
+import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -159,23 +161,6 @@ uiModules.get('apps/management')
       });
   }
 
-  function getPatternDefault(interval) {
-    switch (interval) {
-      case 'hours':
-        return '[logstash-]YYYY.MM.DD.HH';
-      case 'days':
-        return '[logstash-]YYYY.MM.DD';
-      case 'weeks':
-        return '[logstash-]GGGG.WW';
-      case 'months':
-        return '[logstash-]YYYY.MM';
-      case 'years':
-        return '[logstash-]YYYY';
-      default:
-        return 'logstash-*';
-    }
-  }
-
   $scope.canExpandIndices = function () {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
@@ -194,44 +179,36 @@ uiModules.get('apps/management')
   };
 
   $scope.createIndexPattern = function () {
-    // get an empty indexPattern to start
-    indexPatterns.get()
-    .then(function (indexPattern) {
-      // set both the id and title to the index index
-      indexPattern.id = indexPattern.title = index.name;
-      if (index.isTimeBased) {
-        indexPattern.timeFieldName = index.timeField.name;
-        if (index.nameIsPattern) {
-          indexPattern.intervalName = index.nameInterval.name;
-        }
+    const id = index.name;
+    const timeFieldName = index.isTimeBased ? index.timeField.name : undefined;
+    // Only event-time-based index patterns set an intervalName.
+    const intervalName = index.isTimeBased  && index.nameIsPattern ? index.nameInterval.name : undefined;
+    const notExpandable = !index.expandable && $scope.canExpandIndices() ? true : undefined;
+
+    sendCreateIndexPatternRequest(indexPatterns, {
+      id,
+      timeFieldName,
+      intervalName,
+      notExpandable,
+    }).then(createdId => {
+      if (!createdId) {
+        return;
       }
 
-      if (!index.expandable && $scope.canExpandIndices()) {
-        indexPattern.notExpandable = true;
-      }
-
-      // fetch the fields
-      return indexPattern.create()
-      .then(function (id) {
-        if (id) {
-          refreshKibanaIndex().then(function () {
-            if (!config.get('defaultIndex')) {
-              config.set('defaultIndex', indexPattern.id);
-            }
-            indexPatterns.cache.clear(indexPattern.id);
-            kbnUrl.change('/management/kibana/indices/' + indexPattern.id);
-          });
+      refreshKibanaIndex().then(function () {
+        if (!config.get('defaultIndex')) {
+          config.set('defaultIndex', id);
         }
+
+        indexPatterns.cache.clear(id);
+        kbnUrl.change(`/management/kibana/indices/${id}`);
       });
-
-      // refreshFields calls save() after a successfull fetch, no need to save again
-      // .then(function () { indexPattern.save(); })
-    })
-    .catch(function (err) {
+    }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
       }
-      else notify.fatal(err);
+
+      notify.fatal(err);
     });
   };
 
@@ -242,8 +219,8 @@ uiModules.get('apps/management')
   ], function (newVal, oldVal) {
     const isTimeBased = newVal[0];
     const nameIsPattern = newVal[1];
-    const newDefault = getPatternDefault(newVal[2]);
-    const oldDefault = getPatternDefault(oldVal[2]);
+    const newDefault = getDefaultPatternForInterval(newVal[2]);
+    const oldDefault = getDefaultPatternForInterval(oldVal[2]);
 
     if (index.name === oldDefault) {
       index.name = newDefault;
@@ -258,7 +235,7 @@ uiModules.get('apps/management')
       delete index.timeField;
     } else {
       index.nameInterval = index.nameInterval || intervals.byName.days;
-      index.name = index.name || getPatternDefault(index.nameInterval);
+      index.name = index.name || getDefaultPatternForInterval(index.nameInterval);
     }
   });
 
