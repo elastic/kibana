@@ -21,21 +21,29 @@ uiModules.get('apps/management')
   const intervals = indexPatterns.intervals;
   let samplePromise;
 
-  // this and child scopes will write pattern vars here
+  // Configure the new index pattern we're going to create.
   const index = $scope.index = {
     name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
     expandable: false,
-    sampleCount: 5,
-    nameIntervalOptions: intervals,
     nameInterval: _.find(intervals, { name: 'daily' }),
     timeField: null,
+  };
+
+  // UI state.
+  $scope.ctrl = {
+    dateFields: null,
+    sampleCount: 5,
+    samples: null,
+    existing: null,
+    nameIntervalOptions: intervals,
+    patternErrors: [],
     fetchFieldsError: $translate.instant('KIBANA-LOADING'),
   };
 
   function fetchFieldList() {
-    index.dateFields = index.timeField = index.listUsed = null;
+    $scope.ctrl.dateFields = index.timeField = null;
     const useIndexList = index.isTimeBased && index.nameIsPattern;
     let fetchFieldsError;
     let dateFields;
@@ -77,8 +85,8 @@ uiModules.get('apps/management')
       }
 
       return {
-        fetchFieldsError: fetchFieldsError,
-        dateFields: dateFields
+        fetchFieldsError,
+        dateFields,
       };
     }, notify.fatal);
   }
@@ -100,15 +108,15 @@ uiModules.get('apps/management')
   }
 
   function updateFieldList(results) {
-    index.fetchFieldsError = results.fetchFieldsError;
-    index.dateFields = results.dateFields;
+    $scope.ctrl.fetchFieldsError = results.fetchFieldsError;
+    $scope.ctrl.dateFields = results.dateFields;
   }
 
   function resetIndex() {
-    index.patternErrors = [];
-    index.samples = null;
-    index.existing = null;
-    index.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+    $scope.ctrl.patternErrors = [];
+    $scope.ctrl.samples = null;
+    $scope.ctrl.existing = null;
+    $scope.ctrl.fetchFieldsError = $translate.instant('KIBANA-LOADING');
   }
 
   function mockIndexPattern(index) {
@@ -136,25 +144,25 @@ uiModules.get('apps/management')
       .then(function (existing) {
         const all = _.get(existing, 'all', []);
         const matches = _.get(existing, 'matches', []);
+
         if (all.length) {
-          index.existing = {
+          return $scope.ctrl.existing = {
             class: 'success',
             all,
             matches,
             matchPercent: Math.round((matches.length / all.length) * 100) + '%',
             failures: _.difference(all, matches)
           };
-          return;
         }
 
         patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
-        const radius = Math.round(index.sampleCount / 2);
+        const radius = Math.round($scope.ctrl.sampleCount / 2);
         const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
 
         if (_.uniq(samples).length !== samples.length) {
           patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
         } else {
-          index.samples = samples;
+          $scope.ctrl.samples = samples;
         }
 
         throw patternErrors;
@@ -240,7 +248,7 @@ uiModules.get('apps/management')
   });
 
   $scope.moreSamples = function (andUpdate) {
-    index.sampleCount += 5;
+    $scope.ctrl.sampleCount += 5;
     if (andUpdate) updateSamples();
   };
 
@@ -262,14 +270,14 @@ uiModules.get('apps/management')
     samplePromise = lastPromise = updateSamples()
     .then(function () {
       promiseMatch(lastPromise, function () {
-        index.samples = null;
-        index.patternErrors = [];
+        $scope.ctrl.samples = null;
+        $scope.ctrl.patternErrors = [];
       });
     })
     .catch(function (errors) {
       promiseMatch(lastPromise, function () {
-        index.existing = null;
-        index.patternErrors = errors;
+        $scope.ctrl.existing = null;
+        $scope.ctrl.patternErrors = errors;
       });
     })
     .finally(function () {
@@ -287,6 +295,6 @@ uiModules.get('apps/management')
 
   $scope.$watchMulti([
     'index.isTimeBased',
-    'index.sampleCount'
+    'ctrl.sampleCount'
   ], $scope.refreshFieldList);
 });

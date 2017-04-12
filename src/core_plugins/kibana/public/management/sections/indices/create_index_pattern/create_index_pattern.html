@@ -59,11 +59,11 @@
               </small>
             </label>
             <select
-              ng-disabled="index.fetchFieldsError"
-              ng-required="!index.fetchFieldsError"
-              ng-options="field.name for field in index.dateFields"
+              ng-disabled="ctrl.fetchFieldsError"
+              ng-required="!ctrl.fetchFieldsError"
+              ng-options="field.name for field in ctrl.dateFields"
               ng-model="index.timeField"
-              auto-select-if-only-one="index.dateFields"
+              auto-select-if-only-one="ctrl.dateFields"
               class="form-control">
             </select>
           </div>
@@ -111,34 +111,34 @@
             </label>
             <select
               required
-              ng-options="opt.display for opt in index.nameIntervalOptions"
+              ng-options="opt.display for opt in ctrl.nameIntervalOptions"
               ng-model="index.nameInterval"
               class="form-control">
             </select>
           </div>
 
           <section>
-            <div class="alert alert-danger" ng-repeat="err in index.patternErrors">
+            <div class="alert alert-danger" ng-repeat="err in ctrl.patternErrors">
               {{err}}
             </div>
 
-            <div class="alert alert-info" ng-if="index.samples">
+            <div class="alert alert-info" ng-if="ctrl.samples">
               <span translate="KIBANA-SAMPLE_ALERT"></span>
               <ul>
-                <li ng-repeat="sample in index.samples">{{sample}}</li>
+                <li ng-repeat="sample in ctrl.samples">{{sample}}</li>
               </ul>
               <button type="button" ng-click="moreSamples(true)" class="btn btn-default">
                 <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
 
-            <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              <span translate="KIBANA-EXISTING_MATCH_PERCENT" translate-values="{ indexExistingMatchPercent: '{{index.existing.matchPercent}}' }"></span>
+            <div class="alert alert-{{ctrl.existing.class}}" ng-if="ctrl.existing">
+              <span translate="KIBANA-EXISTING_MATCH_PERCENT" translate-values="{ indexExistingMatchPercent: '{{ctrl.existing.matchPercent}}' }"></span>
               <ul>
-                <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
+                <li ng-repeat="match in ctrl.existing.matches | orderBy:'toString()'| limitTo: ctrl.sampleCount">{{match}}</li>
               </ul>
               <button
-                ng-if="index.sampleCount < index.existing.matches.length"
+                ng-if="ctrl.sampleCount < ctrl.existing.matches.length"
                 ng-click="moreSamples()"
                 type="button"
                 class="btn btn-default">
@@ -146,13 +146,13 @@
               </button>
             </div>
 
-            <div class="alert alert-info" ng-if="index.existing.failures.length">
+            <div class="alert alert-info" ng-if="ctrl.existing.failures.length">
               <span translate="KIBANA-NON_MATCHING_INDICES_AND_ALIASES"></span>
               <ul>
-                <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
+                <li ng-repeat="match in ctrl.existing.failures | limitTo: ctrl.sampleCount">{{match}}</li>
               </ul>
               <a
-                ng-if="index.sampleCount < index.existing.matches.length"
+                ng-if="ctrl.sampleCount < ctrl.existing.matches.length"
                 ng-click="moreSamples()"
                 class="alert-link">
                 <span translate="KIBANA-MORE"></span>
@@ -162,12 +162,13 @@
 
           <button
             data-test-subj="submitCreateIndexPatternFromExistingForm"
-            ng-disabled="form.$invalid || index.fetchFieldsError"
-            ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
+            ng-disabled="form.$invalid || ctrl.fetchFieldsError"
+            ng-class="ctrl.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
-            class="btn">
-            <span ng-hide="form.name.$error.indexNameInput" ng-if="index.fetchFieldsError">{{index.fetchFieldsError}}</span>
-            <span ng-hide="form.name.$error.indexNameInput" ng-if="!index.fetchFieldsError" translate="KIBANA-CREATE"></span>
+            class="btn"
+          >
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="ctrl.fetchFieldsError">{{ctrl.fetchFieldsError}}</span>
+            <span ng-hide="form.name.$error.indexNameInput" ng-if="!ctrl.fetchFieldsError" translate="KIBANA-CREATE"></span>
             <span ng-show="form.name.$error.indexNameInput" translate="KIBANA-INVALID_INDEX_PATTERN"></span>
           </button>
         </form>
