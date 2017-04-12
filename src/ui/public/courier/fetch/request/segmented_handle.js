@@ -1,4 +1,4 @@
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 
 export default function CourierSegmentedReqHandle(Private) {
   const Events = Private(EventsProvider);

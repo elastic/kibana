@@ -4,7 +4,7 @@ import onlyStateChanged from 'ui/filter_bar/lib/only_state_changed';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 import compareFilters from 'ui/filter_bar/lib/compare_filters';
 import angular from 'angular';
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
 
 export default function (Private, $rootScope, getAppState, globalState, config) {

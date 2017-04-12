@@ -1,6 +1,6 @@
 import _ from 'lodash';
-export default function AggResponseBucketsProvider() {
 
+export function AggResponseBucketsProvider() {
   function Buckets(aggResp) {
     aggResp = aggResp || false;
     this.buckets = aggResp.buckets || [];

@@ -1,11 +1,11 @@
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import uiModules from 'ui/modules';
 // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
 // didn't already
 const module = uiModules.get('kibana/metric_vis', ['kibana']);
 
 module.controller('KbnMetricVisController', function ($scope, $element, Private) {
-  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+  const tabifyAggResponse = Private(AggResponseTabifyProvider);
 
   const metrics = $scope.metrics = [];
 

@@ -16,22 +16,21 @@ import AggTypesMetricsDerivativeProvider from 'ui/agg_types/metrics/derivative';
 import AggTypesMetricsCumulativeSumProvider from 'ui/agg_types/metrics/cumulative_sum';
 import AggTypesMetricsMovingAvgProvider from 'ui/agg_types/metrics/moving_avg';
 import AggTypesMetricsSerialDiffProvider from 'ui/agg_types/metrics/serial_diff';
-import AggTypesBucketsDateHistogramProvider from 'ui/agg_types/buckets/date_histogram';
-import AggTypesBucketsHistogramProvider from 'ui/agg_types/buckets/histogram';
-import AggTypesBucketsRangeProvider from 'ui/agg_types/buckets/range';
-import AggTypesBucketsDateRangeProvider from 'ui/agg_types/buckets/date_range';
-import AggTypesBucketsIpRangeProvider from 'ui/agg_types/buckets/ip_range';
-import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
-import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
-import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
-import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
+import { AggTypesBucketsDateHistogramProvider } from 'ui/agg_types/buckets/date_histogram';
+import { AggTypesBucketsHistogramProvider } from 'ui/agg_types/buckets/histogram';
+import { AggTypesBucketsRangeProvider } from 'ui/agg_types/buckets/range';
+import { AggTypesBucketsDateRangeProvider } from 'ui/agg_types/buckets/date_range';
+import { AggTypesBucketsIpRangeProvider } from 'ui/agg_types/buckets/ip_range';
+import { AggTypesBucketsTermsProvider } from 'ui/agg_types/buckets/terms';
+import { AggTypesBucketsFiltersProvider } from 'ui/agg_types/buckets/filters';
+import { AggTypesBucketsSignificantTermsProvider } from 'ui/agg_types/buckets/significant_terms';
+import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
 import AggTypesMetricsBucketSumProvider from 'ui/agg_types/metrics/bucket_sum';
 import AggTypesMetricsBucketAvgProvider from 'ui/agg_types/metrics/bucket_avg';
 import AggTypesMetricsBucketMinProvider from 'ui/agg_types/metrics/bucket_min';
 import AggTypesMetricsBucketMaxProvider from 'ui/agg_types/metrics/bucket_max';
 
-
-export default function AggTypeService(Private) {
+export function AggTypesIndexProvider(Private) {
 
   const aggs = {
     metrics: [
@@ -99,5 +98,8 @@ export default function AggTypeService(Private) {
     initialSet: aggs.metrics.concat(aggs.buckets)
   });
 }
+
+// Used by xpack/ml. Keep around until we clean that up. TODO: Clean up.
+export default AggTypesIndexProvider;
 
 // preload

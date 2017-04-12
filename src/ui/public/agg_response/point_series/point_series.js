@@ -1,17 +1,18 @@
-import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_series/_get_series';
-import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_series/_get_aspects';
-import AggResponsePointSeriesInitYAxisProvider from 'ui/agg_response/point_series/_init_y_axis';
-import AggResponsePointSeriesInitXAxisProvider from 'ui/agg_response/point_series/_init_x_axis';
-import AggResponsePointSeriesOrderedDateAxisProvider from 'ui/agg_response/point_series/_ordered_date_axis';
-import AggResponsePointSeriesTooltipFormatterProvider from 'ui/agg_response/point_series/_tooltip_formatter';
-export default function PointSeriesProvider(Private) {
+import { PointSeriesGetSeriesProvider } from 'ui/agg_response/point_series/_get_series';
+import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
+import { PointSeriesInitYAxisProvider } from 'ui/agg_response/point_series/_init_y_axis';
+import { PointSeriesInitXAxisProvider } from 'ui/agg_response/point_series/_init_x_axis';
+import { PointSeriesOrderedDateAxisProvider } from 'ui/agg_response/point_series/_ordered_date_axis';
+import { PointSeriesTooltipFormatter } from 'ui/agg_response/point_series/_tooltip_formatter';
 
-  const getSeries = Private(AggResponsePointSeriesGetSeriesProvider);
-  const getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
-  const initYAxis = Private(AggResponsePointSeriesInitYAxisProvider);
-  const initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
-  const setupOrderedDateXAxis = Private(AggResponsePointSeriesOrderedDateAxisProvider);
-  const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
+export function AggResponsePointSeriesProvider(Private) {
+
+  const getSeries = Private(PointSeriesGetSeriesProvider);
+  const getAspects = Private(PointSeriesGetAspectsProvider);
+  const initYAxis = Private(PointSeriesInitYAxisProvider);
+  const initXAxis = Private(PointSeriesInitXAxisProvider);
+  const setupOrderedDateXAxis = Private(PointSeriesOrderedDateAxisProvider);
+  const tooltipFormatter = Private(PointSeriesTooltipFormatter);
 
   return function pointSeriesChartDataFromTable(vis, table) {
     const chart = {};
