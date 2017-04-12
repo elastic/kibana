@@ -7,6 +7,6 @@ export class KibanaServerVersion {
 
   get = once(async () => {
     const status = await this.kibanaStatus.get();
-    return status.version.number;
+    return status.version;
   })
 }
