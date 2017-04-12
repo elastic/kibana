@@ -18,7 +18,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-    require: ['elasticsearch'],
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),

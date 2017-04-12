@@ -15,6 +15,7 @@ const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
 module.exports = function ({ Plugin }) {
   return new Plugin({
+    require: ['kibana'],
     config(Joi) {
       const { array, boolean, number, object, string, ref } = Joi;
 
