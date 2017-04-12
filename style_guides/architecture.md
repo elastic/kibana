@@ -34,3 +34,36 @@ plugin_root:
   <dd>This folder is where code that is useful on both the client and the server belongs. A consistent example of this is constants, but this could apply to helper modules as well.</dd>
   <dd><strong>NOTE</strong>: If you'd like to avoid adding <code>../common</code> to your public code, you could use <em>webpackShims</em> to resolve the path without traversing backwards.</dd>
 </dl>
+
+### Subdirectories
+
+As a plugin gets more complex, it becomes important to organize your code into subdirectories. Each subdirectory should contain an `index.js` file that exposes the contents of that directory.
+
+```
+plugin_root:
+
+.
+├── common/
+├── public/
+├───── component_one/
+├──────── component_one.js
+├──────── component_one.html
+├──────── index.js
+├───── index.js
+├── server/
+└── index.js
+```
+
+```
+public/component_one/index.js:
+
+import './component_one';
+```
+
+```
+public/index.js (consumer of component_one):
+
+import './component_one';
+```
+
+NOTE: There is currently a Webpack plugin that allows import statements to resolve in multiple ways. The statement `import './component_one'` in the `public/index.js` file above would successfully resolve to both `/public/component_one/component_one.js` and `/public/component_one/index.js`. This functionality may be removed in the future, and when that happens, webpack will only resolve to the `index.js` file.
