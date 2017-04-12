@@ -1,23 +1,5 @@
 {
   "name": "eslint-plugin-kibana-custom",
   "version": "1.0.0",
-  "description": "Custom kibana rules",
-  "keywords": [
-    "eslint",
-    "eslintplugin",
-    "eslint-plugin"
-  ],
-  "author": "Stacey",
-  "main": "index.js",
-  "dependencies": {
-    "requireindex": "~1.1.0"
-  },
-  "devDependencies": {
-    "eslint": "~3.9.1",
-    "mocha": "^3.1.2"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "license": "ISC"
+  "description": "Custom ESLint rules for Kibana"
 }
