@@ -14,7 +14,7 @@ import {
 } from 'ui/state_management/state_storage';
 import HashedItemStore from 'ui/state_management/state_storage/hashed_item_store';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 
 describe('State Management', function () {
   const notifier = new Notifier();

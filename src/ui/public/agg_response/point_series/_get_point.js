@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function PointSeriesGetPoint() {
+
+export function PointSeriesGetPointProvider() {
   function unwrap(aggConfigResult, def) {
     return aggConfigResult ? aggConfigResult.value : def;
   }
