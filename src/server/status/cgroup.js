@@ -105,6 +105,11 @@ export function getAllStats(options = {}) {
       const cpuPath = options.cpuPath || groups[GROUP_CPU];
       const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
 
+      // prevents undefined cgroup paths
+      if (!cpuPath || !cpuAcctPath) {
+        return resolve(null);
+      }
+
       return Promise.all([
         readCPUAcctUsage(cpuAcctPath),
         readCPUFsPeriod(cpuPath),
