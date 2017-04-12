@@ -45,7 +45,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._loaded = false;
     this._error = false;
-    console.log('start loading', $, $.ajax, geojsonUrl);
     $.ajax({
       dataType: 'json',
       url: geojsonUrl,
