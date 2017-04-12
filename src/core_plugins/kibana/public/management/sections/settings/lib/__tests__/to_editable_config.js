@@ -1,5 +1,5 @@
 
-import toEditableConfig from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
+import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
 import expect from 'expect.js';
 
 describe('Settings', function () {
