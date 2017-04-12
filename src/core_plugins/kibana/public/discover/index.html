@@ -30,12 +30,13 @@
               input-focus
               kbn-typeahead-input
               ng-model="state.query"
-              placeholder="Search..."
+              placeholder="Search... ex. status:200 AND extension:PHP"
               aria-label="Search input"
               type="text"
               class="kuiLocalSearchInput"
               ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
             >
+            <a class="kuiLink kuiLocalSearchHelp" ng-href="{{queryDocLinks.luceneQuerySyntax}}" target="_blank">Uses lucene query syntax</a>
             <button
               type="submit"
               aria-label="Search"
