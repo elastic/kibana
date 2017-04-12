@@ -1,11 +1,20 @@
 <kbn-management-app section="kibana">
   <kbn-management-indices>
-    <div ng-controller="managementIndicesCreate" class="kbn-management-indices-create">
-      <div class="page-header">
-        <h1 translate="KIBANA-CONFIGURE_INDEX_PATTERN"></h1>
-        <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"></p>
-      </div>
-      <div>
+    <div
+      ng-controller="managementIndicesCreate"
+      class="kuiViewContent"
+    >
+      <h1
+        class="kuiTitle kuiVerticalRhythm"
+        translate="KIBANA-CONFIGURE_INDEX_PATTERN"
+      ></h1>
+
+      <p
+        class="kuiText kuiVerticalRhythm"
+        translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"
+      ></p>
+
+      <div class="kuiVerticalRhythm">
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
           <div class="form-group">
             <label translate="KIBANA-INDEX_NAME_OR_PATTERN"></label>
