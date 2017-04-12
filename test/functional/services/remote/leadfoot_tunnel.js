@@ -10,6 +10,9 @@ export async function createTunnel({ log, tunnelConfig }) {
     tunnelId: uuid.v4()
   });
 
+  tunnel.on('stdout', chunk => log.verbose('Tunnel [stdout]:', chunk.toString('utf8').trim()));
+  tunnel.on('stderr', chunk => log.verbose('Tunnel [stderr]:', chunk.toString('utf8').trim()));
+
   // override https://git.io/vDnfe so shutdown is fast
   tunnel._stop = async () => {
     const proc = tunnel._process;

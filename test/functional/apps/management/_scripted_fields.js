@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
-  describe('scripted fields', () => {
+  describe.only('scripted fields', () => {
 
     before(async function () {
       await remote.setWindowSize(1200,800);
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.removeIndexPattern();
     });
 
-    describe('creating and using Lucence expression scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Lucence expression scripted fields', function describeIndexTests() {
 
       const scriptedExpressionFieldName = 'ram_expr1';
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless numeric scripted fields', function describeIndexTests() {
 
       const scriptedPainlessFieldName = 'ram_Pain1';
 
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('creating and using Painless string scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless string scripted fields', function describeIndexTests() {
 
       const scriptedPainlessFieldName2 = 'painString';
 
@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless boolean scripted fields', function describeIndexTests() {
 
       const scriptedPainlessFieldName2 = 'painBool';
 
