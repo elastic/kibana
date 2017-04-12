@@ -48,6 +48,7 @@ plugin_root:
 ├───── component_one/
 ├──────── component_one.js
 ├──────── component_one.html
+├──────── component_one_helper.js
 ├──────── index.js
 ├───── index.js
 ├── server/
