@@ -8,7 +8,7 @@ case, a typical index name contains the date in YYYY.MM.DD format, and an index 
 like `logstash-2015.05*`.
 
 For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and
-navigate to `localhost:5601`. Click the *Settings* tab, then the *Indices* tab. Click *Add New* to define a new index
+navigate to `localhost:5601`. Click on "Management/Kibana/Index Patterns" and click *Add New* to define a new index
 pattern. Two of the sample data sets, the Shakespeare plays and the financial accounts, don't contain time-series data.
 Make sure the *Index contains time-based events* box is unchecked when you create index patterns for these data sets.
 Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the index pattern, then
