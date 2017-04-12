@@ -16,7 +16,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import VisProvider from 'ui/vis';
-import DocTitleProvider from 'ui/doc_title';
+import { DocTitleProvider } from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';

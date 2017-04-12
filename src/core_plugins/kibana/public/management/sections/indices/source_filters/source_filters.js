@@ -2,7 +2,7 @@ import { find, each, escape, invoke, size, without } from 'lodash';
 
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
-import FieldWildcardProvider from 'ui/field_wildcard';
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 
 import controlsHtml from 'plugins/kibana/management/sections/indices/source_filters/controls.html';
 import filterHtml from 'plugins/kibana/management/sections/indices/source_filters/filter.html';

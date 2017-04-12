@@ -4,7 +4,7 @@ import nameHtml from 'plugins/kibana/management/sections/indices/_field_name.htm
 import typeHtml from 'plugins/kibana/management/sections/indices/_field_type.html';
 import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
 import uiModules from 'ui/modules';
-import FieldWildcardProvider from 'ui/field_wildcard';
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 import indexedFieldsTemplate from 'plugins/kibana/management/sections/indices/_indexed_fields.html';
 
 uiModules.get('apps/management')

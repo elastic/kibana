@@ -7,7 +7,7 @@ import RequestQueueProvider from '../_request_queue';
 import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
-import FieldWildcardProvider from '../../field_wildcard';
+import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequestProvider } from '../../highlight';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
