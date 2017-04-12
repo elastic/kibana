@@ -1,7 +1,7 @@
 import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
-export default function () {
+export function getComputedFields() {
   const self = this;
   const scriptFields = {};
   let docvalueFields = [];

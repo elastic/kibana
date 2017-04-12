@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
+import { IndexPatternsCastMappingTypeProvider } from 'ui/index_patterns/_cast_mapping_type';
+
 describe('type normalizer (castMappingType)', function () {
   let fn;
   beforeEach(ngMock.module('kibana'));

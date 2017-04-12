@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
+import { IndexPatternsMapFieldProvider } from 'ui/index_patterns/_map_field';
 describe('field mapping normalizer (mapField)', function () {
 
   let fn;

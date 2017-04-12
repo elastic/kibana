@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import highlightTags from './highlight_tags';
+import { highlightTags } from './highlight_tags';
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
@@ -26,7 +26,7 @@ function getHighlightQuery(query) {
   return clone;
 }
 
-export default function getHighlightRequestProvider(config) {
+export function getHighlightRequestProvider(config) {
   return function getHighlightRequest(query) {
     if (!config.get('doc_table:highlight')) return;
 

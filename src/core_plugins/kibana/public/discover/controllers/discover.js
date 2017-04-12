@@ -20,7 +20,7 @@ import { DocTitleProvider } from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import FilterManagerProvider from 'ui/filter_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
 import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
