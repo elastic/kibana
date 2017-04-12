@@ -9,13 +9,14 @@ export const config = {
   ],
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: ['html'],
-  moduleFileExtensions: ['jsx', 'js', 'json'],
+  moduleFileExtensions: ['js', 'json'],
+  testMatch: ['**/*.test.js'],
   testPathIgnorePatterns: [
     '<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]'
   ],
   transform: {
-    '^.+\\.(js|jsx)$': resolve(__dirname, './babelTransform.js')
+    '^.+\\.js$': resolve(__dirname, './babelTransform.js')
   },
-  transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$'],
+  transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.js$'],
   snapshotSerializers: ['<rootDir>/node_modules/enzyme-to-json/serializer']
 };
