@@ -1,4 +1,5 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 define(function (require) {
   const module = require('ui/modules').get('app/sheet');
@@ -8,7 +9,7 @@ define(function (require) {
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
-  require('plugins/kibana/management/saved_object_registry').register({
+  savedObjectManagementRegistry.register({
     service: 'savedSheets',
     title: 'sheets'
   });

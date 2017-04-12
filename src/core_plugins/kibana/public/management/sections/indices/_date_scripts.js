@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function (indexPattern) {
+export function dateScripts(indexPattern) {
   const dateScripts = {};
   const scripts = {
     __dayOfMonth:   'dayOfMonth',

@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function GetFieldTypes() {
+
+export function IndicesEditSectionsProvider() {
 
   return function (indexPattern) {
     const fieldCount = _.countBy(indexPattern.fields, function (field) {

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import registry from 'plugins/kibana/management/saved_object_registry';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import uiRoutes from 'ui/routes';
@@ -19,7 +19,7 @@ uiModules.get('apps/management')
     controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
       const notify = new Notifier({ location: 'SavedObject view' });
       const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
-      const serviceObj = registry.get($routeParams.service);
+      const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
       /**
