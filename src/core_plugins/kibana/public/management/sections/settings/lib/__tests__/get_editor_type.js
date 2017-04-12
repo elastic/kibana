@@ -1,5 +1,5 @@
 
-import getEditorType from 'plugins/kibana/management/sections/settings/lib/get_editor_type';
+import { getEditorType } from 'plugins/kibana/management/sections/settings/lib/get_editor_type';
 import expect from 'expect.js';
 
 describe('Settings', function () {

@@ -6,6 +6,7 @@ import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -15,7 +16,7 @@ uiModules
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
   const filterManager = Private(FilterManagerProvider);
 
-  const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
+  const services = savedObjectManagementRegistry.all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
     return {
       type: service.type,
