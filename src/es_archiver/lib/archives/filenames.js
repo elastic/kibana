@@ -1,18 +1,7 @@
-import { fromNode } from 'bluebird';
-import { readdir } from 'fs';
 import { basename, extname } from 'path';
 
 export function isGzip(path) {
   return extname(path) === '.gz';
-}
-
-/**
- *  Gead the list of files in an archive.
- *
- *  @return {Promise} [description]
- */
-export async function getArchiveFiles(archiveDir) {
-  return await fromNode(cb => readdir(archiveDir, cb));
 }
 
 /**

@@ -1,5 +1,6 @@
 @import "../../dist/ui_framework.css";
-@import "./views/app";
+@import "./variables";
+@import "./views/home/home_view";
 @import "./components/guide_components";
 
 * {
@@ -16,7 +17,38 @@ body {
  *    on styles inherited from body.
  */
 body {
-  background: #ffffff;
+  background-color: $guideBaseBackgroundColor;
   line-height: 40px; /* 1 */
   margin: 0;
+}
+
+.guide {
+  display: flex;
+  height: 100%;
+}
+
+.guideContent {
+  flex: 1 1 auto;
+  padding-top: $guideNavHeight;
+  transition: padding-right $guideCodeViewerTransition;
+
+  &.is-code-viewer-open {
+    padding-right: $guideCodeViewerWidth;
+
+    @include whenNarrowerThan($normalBreakpoint) {
+      padding-right: $guideCodeViewerSmallWidth;
+    }
+  }
+}
+
+.guideWarning {
+  border-left: 5px solid #e8488b;
+  margin-top: 19px;
+  padding: 0 14px;
+  line-height: 21px;
+  color: #e8488b;
+}
+
+.guideBreak {
+  border: none;
 }

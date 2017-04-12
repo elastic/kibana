@@ -2,7 +2,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import Binder from 'ui/binder';
 import { KbnError } from 'ui/errors';
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import './styles/main.less';
 import VisConifgProvider from './lib/vis_config';

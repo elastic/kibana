@@ -1,9 +1,10 @@
-import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesBucketsCreateFilterRangeProvider from 'ui/agg_types/buckets/create_filter/range';
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsCreateFilterRangeProvider } from 'ui/agg_types/buckets/create_filter/range';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
-import RangeKeyProvider from './range_key';
+import { RangeKeyProvider } from './range_key';
 import rangesTemplate from 'ui/agg_types/controls/ranges.html';
-export default function RangeAggDefinition(Private) {
+
+export function AggTypesBucketsRangeProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
   const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);

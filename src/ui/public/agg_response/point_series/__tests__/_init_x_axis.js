@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggResponsePointSeriesInitXAxisProvider from 'ui/agg_response/point_series/_init_x_axis';
+import { PointSeriesInitXAxisProvider } from 'ui/agg_response/point_series/_init_x_axis';
+
 describe('initXAxis', function () {
 
   let initXAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
+    initXAxis = Private(PointSeriesInitXAxisProvider);
   }));
 
   const baseChart = {
