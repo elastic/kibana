@@ -3,7 +3,7 @@ import sinon from 'auto-release-sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterManagerProvider from 'ui/filter_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { buildInlineScriptForPhraseFilter } from '../lib/phrase';
 let queryFilter;

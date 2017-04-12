@@ -6,7 +6,7 @@ const compareOptions = { disabled: true, negate: true };
  * Checks to see if only disabled filters have been changed
  * @returns {bool} Only disabled filters
  */
-export default function (newFilters, oldFilters) {
+export function onlyStateChanged(newFilters, oldFilters) {
   return _.every(newFilters, function (newFilter) {
     const match = _.find(oldFilters, function (oldFilter) {
       return compareFilters(newFilter, oldFilter, compareOptions);

@@ -3,7 +3,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { buildInlineScriptForPhraseFilter } from './lib/phrase';
 
 // Adds a filter to a passed state
-export default function (Private) {
+export function FilterManagerProvider(Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = {};
 

@@ -1,4 +1,4 @@
-import propFilter from 'ui/filters/_prop_filter';
+import { propFilter } from 'ui/filters/_prop_filter';
 import uiModules from 'ui/modules';
 
 uiModules

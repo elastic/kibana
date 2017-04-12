@@ -1,4 +1,4 @@
-export default function mapQueryStringProvider(Promise) {
+export function FilterBarLibMapQueryStringProvider(Promise) {
   return function (filter) {
     let key;
     let value;

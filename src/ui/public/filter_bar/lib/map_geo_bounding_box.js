@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function mapGeoBoundBoxProvider(Promise, courier) {
+
+export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
   return function (filter) {
     let key;
     let value;
