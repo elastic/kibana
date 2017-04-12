@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#maxSize returns error when more items 1`] = `"Invalid setting. array size is [2], but cannot be greater than [1]"`;
+
+exports[`#minSize returns error when fewer items 1`] = `"Invalid setting. array size is [1], but cannot be smaller than [2]"`;
+
+exports[`fails if mixed types of content in array 1`] = `"Invalid [2] setting. expected value of type [string] but got boolean"`;
+
+exports[`fails if wrong input type 1`] = `"Invalid setting. expected value of type [array] but got string"`;
+
+exports[`fails if wrong type of content in array 1`] = `"Invalid [0] setting. expected value of type [string] but got number"`;
+
+exports[`object within array with required 1`] = `"Invalid [0.foo] setting. expected value of type [string] but got undefined"`;

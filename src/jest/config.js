@@ -1,7 +1,10 @@
 import { resolve } from 'path';
 
 export const config = {
-  roots: ['<rootDir>/ui_framework/'],
+  roots: [
+    '<rootDir>/ui_framework/',
+    '<rootDir>/platform/'
+  ],
   collectCoverageFrom: [
     'ui_framework/services/**/*.js',
     '!ui_framework/services/index.js',

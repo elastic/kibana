@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#max returns error when larger number 1`] = `"Invalid setting. Value is [3] but it must be equal to or lower than [2]."`;
+
+exports[`#min returns error when smaller number 1`] = `"Invalid setting. Value is [3] but it must be equal to or greater than [4]."`;
+
+exports[`fails if number is \`NaN\` 1`] = `"Invalid setting. expected value of type [number] but got [number]"`;
+
+exports[`is required by default 1`] = `"Invalid setting. expected value of type [number] but got [undefined]"`;
+
+exports[`returns error when not number 1`] = `"Invalid setting. expected value of type [number] but got [string]"`;
+
+exports[`returns error when not number 2`] = `"Invalid setting. expected value of type [number] but got [Array]"`;
+
+exports[`returns error when not number 3`] = `"Invalid setting. expected value of type [number] but got [RegExp]"`;

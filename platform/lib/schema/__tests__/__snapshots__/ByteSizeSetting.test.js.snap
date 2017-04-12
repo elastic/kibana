@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#defaultValue can be a ByteSizeValue 1`] = `
+ByteSizeValue {
+  "valueInBytes": 1024,
+}
+`;
+
+exports[`#defaultValue can be a string 1`] = `
+ByteSizeValue {
+  "valueInBytes": 1024,
+}
+`;
+
+exports[`#max returns error when larger 1`] = `"Invalid setting. Value is [1mb] ([1048576b]) but it must be equal to or less than [1kb]"`;
+
+exports[`#max returns value when smaller 1`] = `
+ByteSizeValue {
+  "valueInBytes": 1,
+}
+`;
+
+exports[`#min returns error when smaller 1`] = `"(0 , _.byteSize)(...).min is not a function"`;
+
+exports[`#min returns value when larger 1`] = `
+ByteSizeValue {
+  "valueInBytes": 1024,
+}
+`;
+
+exports[`is required by default 1`] = `"Invalid setting. expected value of type [ByteSize] but got undefined"`;
+
+exports[`returns error when not string 1`] = `"Invalid setting. expected value of type [ByteSize] but got number"`;
+
+exports[`returns error when not string 2`] = `"Invalid setting. expected value of type [ByteSize] but got Array"`;
+
+exports[`returns error when not string 3`] = `"Invalid setting. expected value of type [ByteSize] but got RegExp"`;
+
+exports[`returns value by default 1`] = `
+ByteSizeValue {
+  "valueInBytes": 123,
+}
+`;
