@@ -17,14 +17,14 @@ export default function (grunt) {
     functionalTestRunner.run()
       .then(failureCount => {
         if (failureCount) {
-          grunt.fail.error(`${failureCount} test failures`);
+          grunt.fail.warn(`${failureCount} test failures`);
           return;
         }
 
         callback();
       })
       .catch(err => {
-        grunt.log.error(err.stack);
+        grunt.fail.warn(err.stack);
         callback(err);
       });
   });
