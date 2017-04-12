@@ -1,1 +1,1 @@
-export default from './index_header';
+import './index_header';

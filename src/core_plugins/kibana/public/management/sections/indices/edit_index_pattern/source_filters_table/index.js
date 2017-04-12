@@ -1,1 +1,1 @@
-export default from './source_filters_table';
+import './source_filters_table';

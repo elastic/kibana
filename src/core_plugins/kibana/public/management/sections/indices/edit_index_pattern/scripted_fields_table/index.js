@@ -1,1 +1,1 @@
-export default from './scripted_fields_table';
+import './scripted_fields_table';

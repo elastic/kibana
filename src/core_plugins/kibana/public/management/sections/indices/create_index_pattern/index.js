@@ -1,1 +1,1 @@
-export default from './create_index_pattern';
+import './create_index_pattern';
