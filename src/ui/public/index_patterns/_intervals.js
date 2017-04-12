@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 
 export function IndexPatternsIntervalsProvider(timefilter) {
 

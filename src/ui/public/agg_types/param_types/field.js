@@ -3,7 +3,7 @@ import _ from 'lodash';
 import editorHtml from 'ui/agg_types/controls/field.html';
 import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
 import 'ui/filters/field_type';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import Notifier from 'ui/notify/notifier';
 
 export function AggTypesParamTypesFieldProvider(Private, $filter) {

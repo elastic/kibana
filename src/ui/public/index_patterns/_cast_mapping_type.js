@@ -1,4 +1,4 @@
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 
 export function IndexPatternsCastMappingTypeProvider() {
 

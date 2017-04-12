@@ -1,4 +1,4 @@
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import 'ui/agg_types/agg_params';
 import { AggTypesMetricsCountProvider } from 'ui/agg_types/metrics/count';
 import { AggTypesMetricsAvgProvider } from 'ui/agg_types/metrics/avg';

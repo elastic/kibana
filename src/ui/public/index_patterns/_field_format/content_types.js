@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import { getHighlightHtml } from 'ui/highlight';
-export default function contentTypesProvider() {
+
+export function IndexPatternsFieldFormatContentTypesProvider() {
 
   const types = {
     html: function (format, convert) {

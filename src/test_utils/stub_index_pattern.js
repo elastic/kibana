@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';

@@ -14,7 +14,7 @@ function endsWith(str, test) {
   return str.substr(str.length - test.length).toLowerCase() === test.toLowerCase();
 }
 
-function inflector(prefix, postfix) {
+export function inflector(prefix, postfix) {
   return function inflect(key) {
     let inflected;
 
@@ -40,5 +40,3 @@ function inflector(prefix, postfix) {
     return inflected;
   };
 }
-
-export default inflector;

@@ -1,6 +1,6 @@
 import 'ui/filters/label';
 import _ from 'lodash';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
 import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
 import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';

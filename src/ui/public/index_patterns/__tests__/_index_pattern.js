@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import { DuplicateField } from 'ui/errors';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
