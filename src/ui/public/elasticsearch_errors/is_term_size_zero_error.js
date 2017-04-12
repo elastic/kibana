@@ -1,5 +1,5 @@
-import { hasRootCause } from './elasticsearch_error';
+import { ElasticsearchError } from './elasticsearch_error';
 
 export function isTermSizeZeroError(error) {
-  return hasRootCause(error, 'size must be positive, got 0');
+  return ElasticsearchError.hasRootCause(error, 'size must be positive, got 0');
 }

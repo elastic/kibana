@@ -1,5 +1,6 @@
-import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
+import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 import expect from 'expect.js';
+
 describe('Filter Bar Directive', function () {
   describe('uniqFilter', function () {
 

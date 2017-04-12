@@ -24,5 +24,3 @@ function shortDotsFilterProvider(config) {
     return filter(str);
   }
 }
-
-export default shortDotsFilterProvider;
