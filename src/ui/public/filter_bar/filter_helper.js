@@ -76,6 +76,14 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
         }];
       };
 
+      this.pinHelper = (helper) => {
+        if (helper.filter) queryFilter.pinFilter(helper.filter);
+      };
+
+      this.toggleHelper = (helper) => {
+        if (helper.filter) queryFilter.toggleFilter(helper.filter);
+      };
+
       this.removeHelper = (helper) => {
         this.helpers = _.without(this.helpers, helper);
         if (helper.filter) queryFilter.removeFilter(helper.filter);
@@ -130,8 +138,7 @@ uiModules.get('kibana').directive('filterHelper', function (Private, es) {
 });
 
 function getHelpersFromFilters(filters, types) {
-  return filters.filter(filter => !filter.meta.disabled)
-  .map(filter => getHelperFromFilter(filter, types))
+  return filters.map(filter => getHelperFromFilter(filter, types))
   .filter(helper => helper !== null);
 }
 

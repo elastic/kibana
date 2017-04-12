@@ -42,6 +42,7 @@
             <ui-select
               ng-model="helper.field"
               on-select="filterHelper.refreshSuggestions(helper.field)"
+              ng-disabled="helper.filter.meta.disabled"
             >
               <ui-select-match>
                 {{$select.selected.name}}
@@ -60,6 +61,7 @@
               ng-model="helper.type"
               ng-options="type.label for type in filterHelper.filterTypesByField(filterHelper.types, helper.field)"
               ng-change="filterHelper.updateHelper(helper)"
+              ng-disabled="helper.filter.meta.disabled"
             ></select>
           </div>
         </td>
@@ -69,6 +71,7 @@
             <ui-select
               ng-model="helper.params.query"
               on-select="filterHelper.updateHelper(helper)"
+              ng-disabled="helper.filter.meta.disabled"
             >
               <ui-select-match>
                 {{$select.selected}}
@@ -89,6 +92,7 @@
             <ui-select
               ng-model="helper.params.terms"
               on-select="filterHelper.updateHelper(helper)"
+              ng-disabled="helper.filter.meta.disabled"
               multiple
             >
               <ui-select-match>
@@ -113,6 +117,7 @@
                   type="number"
                   class="kuiTextInput fullWidth"
                   ng-blur="filterHelper.updateHelper(helper)"
+                  ng-disabled="helper.filter.meta.disabled"
                 />
               </div><div class="kuiColumn kuiColumn--2">
                 and
@@ -122,6 +127,7 @@
                   type="number"
                   class="kuiTextInput fullWidth"
                   ng-blur="filterHelper.updateHelper(helper)"
+                  ng-disabled="helper.filter.meta.disabled"
                 />
               </div>
           </div>
@@ -133,6 +139,23 @@
 
         <td class="kuiTableRowCell kuiTableRowCell--alignRight">
           <div class="kuiTableRowCell__liner">
+            <button
+              class="kuiMenuButton kuiMenuButton--danger"
+              ng-click="filterHelper.pinHelper(helper)"
+              ng-show="helper.filter"
+            >
+              <span ng-show="helper.filter.$state.store == 'globalState'">Unpin</span>
+              <span ng-hide="helper.filter.$state.store == 'globalState'">Pin</span>
+            </button>
+            <button
+              class="kuiMenuButton kuiMenuButton--danger"
+              ng-click="filterHelper.toggleHelper(helper)"
+              ng-show="helper.filter"
+            >
+              Toggle
+              <span ng-show="helper.filter.meta.disabled">On</span>
+              <span ng-hide="helper.filter.meta.disabled">Off</span>
+            </button>
             <button
               class="kuiMenuButton kuiMenuButton--danger"
               ng-click="filterHelper.removeHelper(helper)"
