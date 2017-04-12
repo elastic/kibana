@@ -4,7 +4,7 @@ import { uiModules } from 'ui/modules';
 // didn't already
 const module = uiModules.get('kibana/metric_vis', ['kibana']);
 
-module.controller('KbnMetricVisController', function ($scope, $element, Private, $sce) {
+module.controller('KbnMetricVisController', function ($scope, $element, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyProvider);
 
   const metrics = $scope.metrics = [];
@@ -16,7 +16,7 @@ module.controller('KbnMetricVisController', function ($scope, $element, Private,
 
         metrics.push({
           label: column.title,
-          value: $sce.trustAsHtml(value.toString('html'))
+          value: value.toString('html')
         });
       });
     });
