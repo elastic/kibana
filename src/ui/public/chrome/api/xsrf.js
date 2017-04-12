@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { set } from 'lodash';
 
-export default function (chrome, internals) {
+export function initChromeXsrfApi(chrome, internals) {
 
   chrome.getXsrfToken = function () {
     return internals.version;

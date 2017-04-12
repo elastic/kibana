@@ -2,7 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import { NoResults } from 'ui/errors';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import VislibLibLayoutLayoutProvider from './layout/layout';
 import VislibLibChartTitleProvider from './chart_title';
 import VislibLibAlertsProvider from './alerts';
