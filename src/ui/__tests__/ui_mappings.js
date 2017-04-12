@@ -30,11 +30,10 @@ describe('UiExports', function () {
     });
 
     it('throws and includes the plugin id in the mapping conflict message', () => {
-      const register = () => mappingsCollection.register({ foo: 'bar' }, { plugin: 'abc123' });
-      register();
-      expect(register).to.throwException(e => {
-        expect(e.message).to.contain('abc123');
-      });
+      const mappings = { foo: 'bar' };
+      const plugin = { plugin: 'abc123' };
+      mappingsCollection.register(mappings, plugin);
+      expect(mappingsCollection.register).withArgs(mappings, plugin).to.throwException(/abc123/);
     });
   });
 
