@@ -67,4 +67,4 @@ public/index.js (consumer of component_one):
 import './component_one';
 ```
 
-NOTE: There is currently a Webpack plugin that allows import statements to resolve in multiple ways. The statement `import './component_one'` in the `public/index.js` file above would successfully resolve to both `/public/component_one/component_one.js` and `/public/component_one/index.js`. This functionality may be removed in the future, and when that happens, webpack will only resolve to the `index.js` file.
+NOTE: There is currently a Webpack plugin that allows import statements to resolve in multiple ways. The statement `import './component_one'` in the `public/index.js` file above would successfully resolve to both `/public/component_one/component_one.js` and `/public/component_one/index.js`. If there is both a named file and an `index.js` file, Webpack will resolve to the `index.js` file. This functionality may be removed in the future, and when that happens, webpack will only resolve to the `index.js` file.
