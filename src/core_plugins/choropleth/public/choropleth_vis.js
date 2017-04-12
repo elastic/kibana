@@ -14,7 +14,6 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-
   const defaultLayers = [
     {
       type: 'default',

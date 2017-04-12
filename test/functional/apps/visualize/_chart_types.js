@@ -12,23 +12,25 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.common.navigateToUrl('visualize', 'new');
     });
 
-    describe('chart types', function indexPatternCreation() {
-      it('should show the correct chart types', function () {
-        const expectedChartTypes = [
-          'Area',
-          'Heat Map',
-          'Horizontal Bar',
-          'Line',
-          'Pie',
-          'Vertical Bar',
-          'Data Table',
-          'Metric',
-          'Tile Map',
-          'Timelion',
-          'Visual Builder',
-          'Markdown',
-          'Tag Cloud',
-        ];
+
+  describe('chart types', function indexPatternCreation() {
+    bdd.it('should show the correct chart types', function () {
+      const expectedChartTypes = [
+        'Area',
+        'Heat Map',
+        'Horizontal Bar',
+        'Line',
+        'Pie',
+        'Vertical Bar',
+        'Data Table',
+        'Metric',
+        'Tile Map',
+        'Vector Map',
+        'Timelion',
+        'Visual Builder',
+        'Markdown',
+        'Tag Cloud',
+      ];
 
         // find all the chart types and make sure there all there
         return PageObjects.visualize.getChartTypes()

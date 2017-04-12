@@ -44,6 +44,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     });
 
     this._loaded = false;
+    this._error = false;
+    console.log('start loading', $, $.ajax, geojsonUrl);
     $.ajax({
       dataType: 'json',
       url: geojsonUrl,
@@ -51,13 +53,16 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         this._leafletLayer.addData(data);
         this._loaded = true;
         this._setStyle();
+      },
+      error: () => {
+        this._loaded = true;
+        this._error = true;
       }
-    }).error(function () {
     });
   }
 
   _setStyle() {
-    if (!this._loaded || !this._metrics || !this._joinField) {
+    if (this._error || (!this._loaded || !this._metrics || !this._joinField)) {
       return;
     }
 
