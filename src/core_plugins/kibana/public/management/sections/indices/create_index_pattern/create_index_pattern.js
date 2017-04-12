@@ -5,11 +5,11 @@ import 'ui/directives/auto_select_if_only_one';
 import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
+import template from './create_index_pattern.html';
 
 uiRoutes
 .when('/management/kibana/index', {
-  template: createTemplate
+  template,
 });
 
 uiModules.get('apps/management')
