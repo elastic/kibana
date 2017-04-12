@@ -18,12 +18,12 @@
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
           <div class="form-group">
             <label translate="KIBANA-INDEX_NAME_OR_PATTERN"></label>
-            <p class="help-block" ng-if="!index.nameIsPattern" translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"></p>
-            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
+            <p class="help-block" ng-if="!newIndexPattern.nameIsPattern" translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"></p>
+            <p class="help-block" ng-if="newIndexPattern.isTimeBased && newIndexPattern.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
               <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate="KIBANA-DATE_FORMAT_DOCS"></a></small></p>
             <input
-              ng-model="index.name"
-              ng-attr-placeholder="{{index.defaultName}}"
+              ng-model="newIndexPattern.name"
+              ng-attr-placeholder="{{newIndexPattern.defaultName}}"
               ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
               validate-index-name
               allow-wildcard
@@ -31,7 +31,7 @@
               required
               type="text"
               class="form-control">
-              <small ng-show="index.nameInterval.name == 'weeks'">
+              <small ng-show="newIndexPattern.nameInterval.name == 'weeks'">
                 <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
                 <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
                 <span translate="KIBANA-SEE"></span>
@@ -42,13 +42,13 @@
           <div class="form-group time-and-pattern">
             <label>
               <input
-                ng-model="index.isTimeBased"
+                ng-model="newIndexPattern.isTimeBased"
                 type="checkbox">
               <span translate="KIBANA-CONTAINS_TIME_BASED_EVENTS"></span>
             </label>
           </div>
 
-          <div class="form-group" ng-if="index.isTimeBased">
+          <div class="form-group" ng-if="newIndexPattern.isTimeBased">
             <label>
               <span translate="KIBANA-TIME_FIELD_NAME"></span>
               &nbsp;
@@ -62,7 +62,7 @@
               ng-disabled="ctrl.fetchFieldsError"
               ng-required="!ctrl.fetchFieldsError"
               ng-options="field.name for field in ctrl.dateFields"
-              ng-model="index.timeField"
+              ng-model="newIndexPattern.timeField"
               auto-select-if-only-one="ctrl.dateFields"
               class="form-control">
             </select>
@@ -70,7 +70,7 @@
 
           <div class="form-group" ng-if="canExpandIndices()">
             <label>
-              <input ng-model="index.expandable" type="checkbox">
+              <input ng-model="newIndexPattern.expandable" type="checkbox">
                 <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
             </label>
 
@@ -88,14 +88,14 @@
           </div>
 
           <div class="form-group time-and-pattern">
-            <label ng-if="index.isTimeBased">
-              <input ng-model="index.nameIsPattern" type="checkbox">
+            <label ng-if="newIndexPattern.isTimeBased">
+              <input ng-model="newIndexPattern.nameIsPattern" type="checkbox">
               <span translate="KIBANA-INDEX_NAME_CREATED_BY_EVENT_TIMES"></span>
               <small translate="KIBANA-DEPRECATED"></small>
             </label>
           </div>
 
-          <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
+          <div class="form-group" ng-if="newIndexPattern.isTimeBased && newIndexPattern.nameIsPattern">
             <div class="alert alert-warning">
               </p>
               <h4 translate="KIBANA-ALERT_INDEX_PATTERN_DEPRECATED"></h4>
@@ -112,7 +112,7 @@
             <select
               required
               ng-options="opt.display for opt in ctrl.nameIntervalOptions"
-              ng-model="index.nameInterval"
+              ng-model="newIndexPattern.nameInterval"
               class="form-control">
             </select>
           </div>

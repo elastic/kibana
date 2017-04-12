@@ -22,7 +22,7 @@ uiModules.get('apps/management')
   let samplePromise;
 
   // Configure the new index pattern we're going to create.
-  const index = $scope.index = {
+  $scope.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
@@ -43,25 +43,25 @@ uiModules.get('apps/management')
   };
 
   function fetchFieldList() {
-    $scope.ctrl.dateFields = index.timeField = null;
-    const useIndexList = index.isTimeBased && index.nameIsPattern;
+    $scope.ctrl.dateFields = $scope.newIndexPattern.timeField = null;
+    const useIndexList = $scope.newIndexPattern.isTimeBased && $scope.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
     let dateFields;
 
     // we don't have enough info to continue
-    if (!index.name) {
+    if (!$scope.newIndexPattern.name) {
       fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
       return;
     }
 
-    if (useIndexList && !index.nameInterval) {
+    if (useIndexList && !$scope.newIndexPattern.nameInterval) {
       fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
       return;
     }
 
-    return indexPatterns.mapper.clearCache(index.name)
+    return indexPatterns.mapper.clearCache($scope.newIndexPattern.name)
     .then(function () {
-      const pattern = mockIndexPattern(index);
+      const pattern = mockIndexPattern($scope.newIndexPattern);
 
       return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
         skipIndexPatternCache: true,
@@ -104,7 +104,7 @@ uiModules.get('apps/management')
     //assign the field from the results-list
     //angular recreates a new timefield instance, each time the list is refreshed.
     //This ensures the selected field matches one of the instances in the list.
-    index.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
+    $scope.newIndexPattern.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
   }
 
   function updateFieldList(results) {
@@ -130,11 +130,11 @@ uiModules.get('apps/management')
   function updateSamples() {
     const patternErrors = [];
 
-    if (!index.nameInterval || !index.name) {
+    if (!$scope.newIndexPattern.nameInterval || !$scope.newIndexPattern.name) {
       return Promise.resolve();
     }
 
-    const pattern = mockIndexPattern(index);
+    const pattern = mockIndexPattern($scope.newIndexPattern);
 
     return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(function (err) {
@@ -157,7 +157,7 @@ uiModules.get('apps/management')
 
         patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
         const radius = Math.round($scope.ctrl.sampleCount / 2);
-        const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
+        const samples = intervals.toIndexList($scope.newIndexPattern.name, $scope.newIndexPattern.nameInterval, -radius, radius);
 
         if (_.uniq(samples).length !== samples.length) {
           patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
@@ -172,11 +172,11 @@ uiModules.get('apps/management')
   $scope.canExpandIndices = function () {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
-    return index.isTimeBased && !index.nameIsPattern && _.includes(index.name, '*');
+    return $scope.newIndexPattern.isTimeBased && !$scope.newIndexPattern.nameIsPattern && _.includes($scope.newIndexPattern.name, '*');
   };
 
   $scope.refreshFieldList = function () {
-    const timeField = index.timeField;
+    const timeField = $scope.newIndexPattern.timeField;
     fetchFieldList().then(function (results) {
       if (timeField) {
         updateFieldListAndSetTimeField(results, timeField.name);
@@ -187,11 +187,22 @@ uiModules.get('apps/management')
   };
 
   $scope.createIndexPattern = function () {
-    const id = index.name;
-    const timeFieldName = index.isTimeBased ? index.timeField.name : undefined;
+    const id = $scope.newIndexPattern.name;
+    const timeFieldName =
+      $scope.newIndexPattern.isTimeBased
+      ? $scope.newIndexPattern.timeField.name
+      : undefined;
+
     // Only event-time-based index patterns set an intervalName.
-    const intervalName = index.isTimeBased  && index.nameIsPattern ? index.nameInterval.name : undefined;
-    const notExpandable = !index.expandable && $scope.canExpandIndices() ? true : undefined;
+    const intervalName =
+      $scope.newIndexPattern.isTimeBased  && $scope.newIndexPattern.nameIsPattern
+      ? $scope.newIndexPattern.nameInterval.name
+      : undefined;
+
+    const notExpandable =
+      !$scope.newIndexPattern.expandable && $scope.canExpandIndices()
+      ? true
+      : undefined;
 
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
@@ -221,29 +232,29 @@ uiModules.get('apps/management')
   };
 
   $scope.$watchMulti([
-    'index.isTimeBased',
-    'index.nameIsPattern',
-    'index.nameInterval.name'
+    'newIndexPattern.isTimeBased',
+    'newIndexPattern.nameIsPattern',
+    'newIndexPattern.nameInterval.name'
   ], function (newVal, oldVal) {
     const isTimeBased = newVal[0];
     const nameIsPattern = newVal[1];
     const newDefault = getDefaultPatternForInterval(newVal[2]);
     const oldDefault = getDefaultPatternForInterval(oldVal[2]);
 
-    if (index.name === oldDefault) {
-      index.name = newDefault;
+    if ($scope.newIndexPattern.name === oldDefault) {
+      $scope.newIndexPattern.name = newDefault;
     }
 
     if (!isTimeBased) {
-      index.nameIsPattern = false;
+      $scope.newIndexPattern.nameIsPattern = false;
     }
 
     if (!nameIsPattern) {
-      delete index.nameInterval;
-      delete index.timeField;
+      delete $scope.newIndexPattern.nameInterval;
+      delete $scope.newIndexPattern.timeField;
     } else {
-      index.nameInterval = index.nameInterval || intervals.byName.days;
-      index.name = index.name || getDefaultPatternForInterval(index.nameInterval);
+      $scope.newIndexPattern.nameInterval = $scope.newIndexPattern.nameInterval || intervals.byName.days;
+      $scope.newIndexPattern.name = $scope.newIndexPattern.name || getDefaultPatternForInterval($scope.newIndexPattern.nameInterval);
     }
   });
 
@@ -253,8 +264,8 @@ uiModules.get('apps/management')
   };
 
   $scope.$watchMulti([
-    'index.name',
-    'index.nameInterval'
+    'newIndexPattern.name',
+    'newIndexPattern.nameInterval'
   ], function (newVal, oldVal) {
     function promiseMatch(lastPromise, cb) {
       if (lastPromise === samplePromise) {
@@ -294,7 +305,7 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchMulti([
-    'index.isTimeBased',
+    'newIndexPattern.isTimeBased',
     'ctrl.sampleCount'
   ], $scope.refreshFieldList);
 });
