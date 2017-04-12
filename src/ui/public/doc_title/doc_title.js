@@ -39,6 +39,9 @@ uiModules.get('kibana')
 });
 
 // return a "private module" so that it can be used both ways
-export default function DoctitleProvider(docTitle) {
+export function DocTitleProvider(docTitle) {
   return docTitle;
 }
+
+// Default export used in x-pack. TODO: cleanup.
+export default DocTitleProvider;

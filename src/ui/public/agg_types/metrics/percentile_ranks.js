@@ -5,7 +5,7 @@ import { AggTypesMetricsGetResponseAggConfigClassProvider } from 'ui/agg_types/m
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import { getPercentileValue } from './percentiles_get_value';
 
-export function AggTypeMetricsPercentileRanksProvider(Private) {
+export function AggTypesMetricsPercentileRanksProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);

@@ -9,10 +9,10 @@ import chrome from 'ui/chrome';
 import angular from 'angular';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import DocTitleProvider from 'ui/doc_title';
+import { DocTitleProvider } from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
@@ -70,7 +70,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
