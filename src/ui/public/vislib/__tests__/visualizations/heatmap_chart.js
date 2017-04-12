@@ -148,6 +148,10 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         expect(labels[2]).to.be('400 - 500');
         expect(labels[3]).to.be('500 - Infinity');
       });
+
+      it('should show correcy Y axis title', function () {
+        expect(vis.handler.valueAxes[1].axisConfig.get('title.text')).to.equal('');
+      });
     });
   });
 });
