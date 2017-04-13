@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import VisVisTypeProvider from 'ui/vis/vis_type';
-import TemplateVisTypeTemplateRenderbotProvider from 'ui/template_vis_type/template_renderbot';
-export default function TemplateVisTypeFactory(Private) {
+import { TemplateRenderbotProvider } from 'ui/template_vis_type/template_renderbot';
+
+export function TemplateVisTypeProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
+  const TemplateRenderbot = Private(TemplateRenderbotProvider);
 
   _.class(TemplateVisType).inherits(VisType);
   function TemplateVisType(opts = {}) {
@@ -21,3 +22,6 @@ export default function TemplateVisTypeFactory(Private) {
 
   return TemplateVisType;
 }
+
+// Used by x-pack. TODO: switched to named and remove.
+export default TemplateVisTypeProvider;
