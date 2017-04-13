@@ -1,8 +1,8 @@
+import { get } from 'lodash';
 import upgrade from './upgrade_config';
 
-module.exports = function (server, kbnServer) {
+module.exports = function (server, { mappings }) {
   const config = server.config();
-  const { getCombined } = kbnServer.mappings;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const options =  {
     index: config.get('kibana.index'),
@@ -13,7 +13,7 @@ module.exports = function (server, kbnServer) {
         {
           buildNum: {
             order: 'desc',
-            unmapped_type: getCombined().config.properties.buildNum.type
+            unmapped_type: get(mappings, 'config.properties.buildNum.type') || 'keyword'
           }
         }
       ]

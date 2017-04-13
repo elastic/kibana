@@ -9,7 +9,6 @@ import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import { UiI18n } from './ui_i18n';
-import { MappingsCollection } from './ui_mappings';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -18,11 +17,6 @@ export default async (kbnServer, server, config) => {
 
   const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.defaultLocale'));
   uiI18n.addUiExportConsumer(uiExports);
-
-  kbnServer.mappings = new MappingsCollection();
-  uiExports.addConsumerForType('mappings', (plugin, mappings) => {
-    kbnServer.mappings.register(mappings, { plugin: plugin.id });
-  });
 
   const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));

@@ -34,14 +34,6 @@ describe('plugins/elasticsearch', () => {
           red: sinon.stub(),
           green: sinon.stub(),
           yellow: sinon.stub()
-        },
-        kbnServer: {
-          mappings: {
-            getCombined() {
-              return mappings;
-            },
-            register: sinon.stub()
-          }
         }
       };
 
@@ -79,7 +71,7 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      health = healthCheck(plugin, server);
+      health = healthCheck(plugin, server, { mappings });
     });
 
     afterEach(() => {
