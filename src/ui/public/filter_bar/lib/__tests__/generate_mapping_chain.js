@@ -1,7 +1,7 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterBarLibGenerateMappingChainProvider from 'ui/filter_bar/lib/generate_mapping_chain';
+import { GenerateMappingChainProvider } from 'ui/filter_bar/lib/generate_mapping_chain';
 
 describe('Filter Bar Directive', function () {
   describe('generateMappingChain()', function () {
@@ -14,7 +14,7 @@ describe('Filter Bar Directive', function () {
     beforeEach(ngMock.inject(function (Private, _$rootScope_, _Promise_) {
       $rootScope = _$rootScope_;
       Promise    = _Promise_;
-      generateMappingChain = Private(FilterBarLibGenerateMappingChainProvider);
+      generateMappingChain = Private(GenerateMappingChainProvider);
     }));
 
 

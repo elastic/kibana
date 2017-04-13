@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterBarLibMapRangeProvider from 'ui/filter_bar/lib/map_range';
+import { FilterBarLibMapRangeProvider } from 'ui/filter_bar/lib/map_range';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {

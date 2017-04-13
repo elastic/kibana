@@ -4,7 +4,7 @@ import sinon from 'auto-release-sinon';
 import BluebirdPromise from 'bluebird';
 
 import SavedObjectFactory from '../saved_object/saved_object';
-import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import DocSourceProvider from '../data_source/admin_doc_source';
 
 import { stubMapper } from 'test_utils/stub_mapper';
@@ -98,7 +98,7 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
     SavedObject = Private(SavedObjectFactory);
-    IndexPattern = Private(IndexPatternFactory);
+    IndexPattern = Private(IndexPatternProvider);
     esAdminStub = esAdmin;
     esDataStub = es;
     DocSource = Private(DocSourceProvider);

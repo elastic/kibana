@@ -3,7 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import MockState from 'fixtures/mock_state';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
 describe('toggle filters', function () {
   let filters;
   let queryFilter;

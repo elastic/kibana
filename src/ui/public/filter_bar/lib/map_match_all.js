@@ -1,4 +1,4 @@
-export default function mapMatchAllProvider(Promise) {
+export function FilterBarLibMapMatchAllProvider(Promise) {
   return function (filter) {
     if (filter.match_all) {
       const key = filter.meta.field;

@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function mapTermsProvider(Promise, courier) {
+
+export function FilterBarLibMapTermsProvider(Promise, courier) {
   return function (filter) {
     let key;
     let value;
