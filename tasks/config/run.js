@@ -6,6 +6,7 @@ module.exports = function (grunt) {
   const root = p => resolve(__dirname, '../../', p);
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  const snapshotBinScript = './build/kibana-6.0.0-alpha1-SNAPSHOT-linux-x86_64/bin/kibana';
   const uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [
@@ -69,6 +70,22 @@ module.exports = function (grunt) {
         failOnError: false
       },
       cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIBuildServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: snapshotBinScript,
       args: [
         ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
