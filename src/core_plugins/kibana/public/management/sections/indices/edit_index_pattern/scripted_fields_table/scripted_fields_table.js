@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
-import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
-import { dateScripts } from 'plugins/kibana/management/sections/indices/_date_scripts';
+import fieldControlsHtml from '../field_controls.html';
+import { dateScripts } from './date_scripts';
 import uiModules from 'ui/modules';
-import scriptedFieldsTemplate from 'plugins/kibana/management/sections/indices/_scripted_fields.html';
+import template from './scripted_fields_table.html';
 
 uiModules.get('apps/management')
-.directive('scriptedFields', function (kbnUrl, Notifier, $filter, confirmModal) {
+.directive('scriptedFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
 
@@ -14,7 +14,7 @@ uiModules.get('apps/management')
 
   return {
     restrict: 'E',
-    template: scriptedFieldsTemplate,
+    template,
     scope: true,
     link: function ($scope) {
 
@@ -58,7 +58,7 @@ uiModules.get('apps/management')
             _.escape(field.script),
             _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
             {
-              markup: controlsHtml,
+              markup: fieldControlsHtml,
               scope: rowScope
             }
           ];

@@ -1,11 +1,11 @@
 import uiModules from 'ui/modules';
-import indexHeaderTemplate from 'plugins/kibana/management/sections/indices/_index_header.html';
+import template from './index_header.html';
 uiModules
 .get('apps/management')
 .directive('kbnManagementIndexHeader', function (config) {
   return {
     restrict: 'E',
-    template: indexHeaderTemplate,
+    template,
     replace: true,
     scope: {
       indexPattern: '=',
