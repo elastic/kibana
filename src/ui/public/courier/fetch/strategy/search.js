@@ -16,7 +16,7 @@ export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, s
      */
     reqsFetchParamsToBody: function (reqsFetchParams) {
       const indexToListMapping = {};
-      const timeBounds = timefilter.enabled ? timefilter.getBounds() : null;
+      const timeBounds = timefilter.getActiveBounds();
 
       return Promise.map(reqsFetchParams, function (fetchParams) {
         return Promise.resolve(fetchParams.index)
