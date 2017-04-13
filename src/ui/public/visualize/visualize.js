@@ -6,6 +6,7 @@ import RequestHandlersProvider from 'ui/registry/request_handlers';
 import ResponseHandlersProvider from 'ui/registry/response_handlers';
 import 'angular-sanitize';
 import './visualization';
+import './visualization_editor';
 
 import {
   isTermSizeZeroError,
@@ -31,6 +32,7 @@ uiModules
     require: '?renderCounter',
     scope : {
       showSpyPanel: '=?',
+      editorMode: '=?',
       savedVis: '=',
       appState: '=',
       uiState: '=?'

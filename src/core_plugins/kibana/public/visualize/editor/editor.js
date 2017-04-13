@@ -89,21 +89,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
 
-  // Clone the _vis instance.
-  const editableVis = vis.createEditableVis();
-
-  // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
-  // vis should call it on both.
-  vis.requesting = function () {
-    const requesting = editableVis.requesting;
-    // Invoking requesting() calls onRequest on each agg's type param. When a vis is marked as being
-    // requested, the bounds of that vis are updated and new data is fetched using the new bounds.
-    requesting.call(vis);
-
-    // We need to keep editableVis in sync with vis.
-    requesting.call(editableVis);
-  };
-
   // SearchSource is a promise-based stream of search results that can inherit from other search
   // sources.
   const searchSource = savedVis.searchSource;
@@ -150,8 +135,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     // appState then they won't be equal.
     if (!angular.equals(appState.vis, savedVisState)) {
       Promise.try(function () {
-        editableVis.setState(appState.vis);
-        vis.setState(editableVis.getEnabledState());
+        vis.setState(appState.vis);
       })
       .catch(courier.redirectWhenMissing({
         'index-pattern-field': '/visualize'
@@ -167,7 +151,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.searchSource = searchSource;
     $scope.vis = vis;
     $scope.indexPattern = vis.indexPattern;
-    $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.queryDocLinks = documentationLinks.query;
 
@@ -201,26 +184,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
-
-    // track state of editable vis vs. "actual" vis
-    $scope.stageEditableVis = transferVisState(editableVis, vis, true);
-    $scope.resetEditableVis = transferVisState(vis, editableVis);
-    $scope.$watch(function () {
-      return editableVis.getEnabledState();
-    }, function (newState) {
-      editableVis.dirty = !angular.equals(newState, vis.getEnabledState());
-
-      $scope.responseValueAggs = null;
-      try {
-        $scope.responseValueAggs = editableVis.aggs.getResponseAggs().filter(function (agg) {
-          return _.get(agg, 'schema.group') === 'metrics';
-        });
-      }
-      // this can fail when the agg.type is changed but the
-      // params have not been set yet. watcher will trigger again
-      // when the params update
-      catch (e) {} // eslint-disable-line no-empty
-    }, true);
 
     $state.replace();
 
@@ -310,21 +273,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
   };
-
-  function transferVisState(fromVis, toVis, stage) {
-    return function () {
-      const view = fromVis.getEnabledState();
-      const viewTo = toVis.getEnabledState();
-      view.listeners = viewTo.listeners;
-      const full = fromVis.getState();
-      toVis.setState(view);
-      editableVis.dirty = false;
-      $state.vis = full;
-      if (stage) {
-        $state.save();
-      }
-    };
-  }
 
   init();
 }
