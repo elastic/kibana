@@ -3,4 +3,10 @@
 set -e
 source "$(dirname $0)/_jenkins_setup.sh"
 
-xvfb-run "$(npm bin)/grunt" jenkins:selenium;
+"$(npm bin)/grunt" build;
+
+gem list | grep pleaserun
+which pleaserun
+#cd build
+
+#xvfb-run "$(npm bin)/grunt" jenkins:selenium;
