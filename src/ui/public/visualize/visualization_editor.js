@@ -4,13 +4,13 @@ import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import angular from 'angular';
 import uiModules from 'ui/modules';
-import visualizationEditorTemplate from 'ui/visualize/visualization_editor.html';
 import 'angular-sanitize';
-
+import RegistryEditorTypesProvider from 'ui/registry/editor_types';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualizationEditor', function () {
+.directive('visualizationEditor', function (Private, $compile) {
+  const editorTypes = Private(RegistryEditorTypesProvider);
 
   return {
     restrict: 'E',
@@ -21,11 +21,13 @@ uiModules
       uiState: '=?',
       appState: '='
     },
-    template: visualizationEditorTemplate,
-    link: function ($scope) {
+    link: function ($scope, element) {
       // Clone the _vis instance.
       const vis = $scope.vis;
       const editableVis = $scope.editableVis = vis.createEditableVis();
+      const editor = typeof vis.type.editor === 'function' ? vis.type.editor :
+        editorTypes.find(editor => editor.name === vis.type.editor).render;
+      element.html($compile(editor())($scope));
 
       // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
       // vis should call it on both.
@@ -39,8 +41,7 @@ uiModules
         requesting.call(editableVis);
       };
 
-
-// track state of editable vis vs. "actual" vis
+      // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
       $scope.resetEditableVis = transferVisState(vis, editableVis);
       $scope.$watch(function () {
@@ -59,8 +60,6 @@ uiModules
           // when the params update
         catch (e) {} // eslint-disable-line no-empty
       }, true);
-
-
 
       function transferVisState(fromVis, toVis, stage) {
         return function () {
