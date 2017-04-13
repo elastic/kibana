@@ -1,9 +1,9 @@
-import DocStrategyProvider from '../strategy/doc_admin';
-import AbstractDocRequestProvider from './_abstract_doc';
+import { DocAdminStrategyProvider } from '../strategy/doc_admin';
+import { AbstractDocRequestProvider } from './_abstract_doc';
 
-export default function DocRequestProvider(Private) {
+export function AdminDocRequestProvider(Private) {
 
-  const docStrategy = Private(DocStrategyProvider);
+  const docStrategy = Private(DocAdminStrategyProvider);
   const AbstractDocRequest = Private(AbstractDocRequestProvider);
 
   class AdminDocRequest extends AbstractDocRequest {

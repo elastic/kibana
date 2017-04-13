@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
   let config;
