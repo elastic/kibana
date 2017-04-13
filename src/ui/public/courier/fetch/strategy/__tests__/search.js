@@ -2,10 +2,10 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import SearchStrategyProvider from '../search';
+import { SearchStrategyProvider } from '../search';
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
 
-describe('ui/courier/fetch/strategy/search', () => {
+describe('SearchStrategyProvider', () => {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let search;

@@ -7,7 +7,7 @@ import { DuplicateField } from 'ui/errors';
 import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
-import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
+import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
@@ -33,7 +33,7 @@ describe('index pattern', function () {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    DocSource = Private(DocSourceProvider);
+    DocSource = Private(AdminDocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
     mapper = stubMapper(Private, mockLogstashFields);

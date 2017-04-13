@@ -3,10 +3,10 @@ import { isNumber } from 'lodash';
 
 import Notifier from 'ui/notify/notifier';
 
-import SearchRequestProvider from './search';
-import SegmentedHandleProvider from './segmented_handle';
+import { SearchRequestProvider } from './search';
+import { SegmentedHandleProvider } from './segmented_handle';
 
-export default function SegmentedReqProvider(es, Private, Promise, timefilter, config) {
+export function SegmentedRequestProvider(es, Private, Promise, timefilter, config) {
   const SearchReq = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
 

@@ -3,7 +3,7 @@ import angular from 'angular';
 
 import { toJson } from 'ui/utils/aggressive_parse';
 
-export default function FetchStrategyForSearch(Private, Promise, timefilter, kbnIndex, sessionId) {
+export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, sessionId) {
 
   return {
     clientMethod: 'msearch',

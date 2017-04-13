@@ -1,11 +1,11 @@
-import AbstractDocSourceProvider from './_abstract_doc_source';
-import DocStrategyProvider from '../fetch/strategy/doc_data';
-import DocRequestProvider from '../fetch/request/doc_data';
+import { AbstractDocSourceProvider } from './_abstract_doc_source';
+import { DocDataStrategyProvider } from '../fetch/strategy/doc_data';
+import { DocDataRequestProvider } from '../fetch/request/doc_data';
 
-export default function DocSourceFactory(Private) {
+export function DocSourceProvider(Private) {
   const AbstractDocSource = Private(AbstractDocSourceProvider);
-  const docStrategy = Private(DocStrategyProvider);
-  const DocRequest = Private(DocRequestProvider);
+  const docStrategy = Private(DocDataStrategyProvider);
+  const DocRequest = Private(DocDataRequestProvider);
 
   class DocSource extends AbstractDocSource {
     constructor(initialState) {
