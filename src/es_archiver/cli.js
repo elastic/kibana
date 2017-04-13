@@ -17,12 +17,15 @@ import { readConfigFile } from '../functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');
 
+const resolveConfigPath = v => resolve(process.cwd(), v);
+const defaultConfigPath = resolveConfigPath('test/functional/config.js');
+
 cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
   .option('--es-url [url]', 'url for elasticsearch')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
-  .option('--config [path]', 'path to a functional test config file to use for default values')
+  .option('--config [path]', 'path to a functional test config file to use for default values', resolveConfigPath, defaultConfigPath)
   .on('--help', () => {
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
