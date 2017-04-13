@@ -2,10 +2,10 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import SegmentedRequestProvider from '../segmented';
-import SearchRequestProvider from '../search';
+import { SegmentedRequestProvider } from '../segmented';
+import { SearchRequestProvider } from '../search';
 
-describe('ui/courier/fetch/request/segmented', () => {
+describe('SegmentedRequestProvider', () => {
   let Promise;
   let SegmentedReq;
   let segmentedReq;

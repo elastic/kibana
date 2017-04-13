@@ -7,7 +7,7 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
 import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
+import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
@@ -19,7 +19,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(DocSourceProvider);
+  const DocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
