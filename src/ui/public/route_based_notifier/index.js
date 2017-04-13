@@ -5,7 +5,7 @@ import { Notifier } from 'ui/notify/notifier';
  * Caches notification attempts so each one is only actually sent to the
  * notifier service once per route.
  */
-export default function routeBasedNotifierProvider($rootScope) {
+export function RouteBasedNotifierProvider($rootScope) {
   const notifier = new Notifier();
 
   let notifications = {
