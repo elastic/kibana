@@ -1,5 +1,6 @@
 import dateMath from '@elastic/datemath';
-export default function () {
+
+export function TimeBucketsCalcEsIntervalProvider() {
 
   const unitsDesc = dateMath.unitsDesc;
   const largeMax = unitsDesc.indexOf('M');
@@ -45,3 +46,6 @@ export default function () {
 
   return esDuration;
 }
+
+// used by x-pack. TODO: switch to named and remove.
+export default TimeBucketsCalcEsIntervalProvider;
