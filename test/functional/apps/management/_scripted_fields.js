@@ -329,7 +329,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
           { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
-          'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
+          'doc[\'utc_time\'].value + (1000) * 60 * 60');
         await retry.try(async function() {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
