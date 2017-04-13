@@ -1,6 +1,6 @@
-import StringifyTypesNumeralProvider from 'ui/stringify/types/_numeral';
+import { StringifyTypesNumeralProvider } from 'ui/stringify/types/_numeral';
 
-export default function NumberFormatProvider(Private) {
+export function stringifyNumber(Private) {
   const Numeral = Private(StringifyTypesNumeralProvider);
   return Numeral.factory({
     id: 'number',
