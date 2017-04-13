@@ -1,7 +1,7 @@
 import { saveAs } from '@spalger/filesaver';
 import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
-import registry from 'plugins/kibana/management/saved_object_registry';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
@@ -38,7 +38,7 @@ uiModules.get('apps/management')
       };
 
       const getData = function (filter) {
-        const services = registry.all().map(function (obj) {
+        const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
           return service.find(filter).then(function (data) {
             return {

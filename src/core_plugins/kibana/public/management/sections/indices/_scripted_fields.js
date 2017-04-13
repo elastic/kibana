@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
 import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
-import dateScripts from 'plugins/kibana/management/sections/indices/_date_scripts';
+import { dateScripts } from 'plugins/kibana/management/sections/indices/_date_scripts';
 import uiModules from 'ui/modules';
 import scriptedFieldsTemplate from 'plugins/kibana/management/sections/indices/_scripted_fields.html';
 import { getSupportedScriptingLangs } from 'ui/scripting_langs';

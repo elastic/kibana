@@ -2,13 +2,13 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 const app = uiModules.get('app/visualize');
 
-
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
-require('plugins/kibana/management/saved_object_registry').register({
+savedObjectManagementRegistry.register({
   service: 'savedVisualizations',
   title: 'visualizations'
 });

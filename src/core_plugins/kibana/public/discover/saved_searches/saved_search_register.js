@@ -1,3 +1,3 @@
-export default function savedSearchObjectFn(savedSearches) {
+export function savedSearchProvider(savedSearches) {
   return savedSearches;
 }
