@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import $ from 'jquery';
 import { metadata } from 'ui/metadata';
-import formatMsg from 'ui/notify/lib/_format_msg';
+import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 import 'ui/render_directive';
 /* eslint no-console: 0 */

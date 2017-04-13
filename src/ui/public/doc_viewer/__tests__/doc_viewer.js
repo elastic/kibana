@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import 'ui/private';
 
 import docViewsRegistry from 'ui/registry/doc_views';
-import Registry from 'ui/registry/_registry';
+import { uiRegistry } from 'ui/registry/_registry';
 import 'ui/doc_viewer';
 
 describe('docViewer', function () {
@@ -15,7 +15,7 @@ describe('docViewer', function () {
 
   beforeEach(function () {
     ngMock.module('kibana', function (PrivateProvider) {
-      stubRegistry = new Registry({
+      stubRegistry = uiRegistry({
         index: ['name'],
         order: ['order'],
         constructor() {

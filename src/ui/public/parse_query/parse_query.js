@@ -1,5 +1,6 @@
-import toUser from 'ui/parse_query/lib/to_user';
-import ParseQueryLibFromUserProvider from 'ui/parse_query/lib/from_user';
+import { toUser } from 'ui/parse_query/lib/to_user';
+import { ParseQueryLibFromUserProvider } from 'ui/parse_query/lib/from_user';
+
 import uiModules from 'ui/modules';
 uiModules
   .get('kibana')
