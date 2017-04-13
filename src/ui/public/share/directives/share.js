@@ -9,7 +9,7 @@ import {
 } from 'ui/state_management/state_hashing';
 import { Notifier } from 'ui/notify/notifier';
 
-import urlShortenerProvider from '../lib/url_shortener';
+import { UrlShortenerProvider } from '../lib/url_shortener';
 
 import uiModules from 'ui/modules';
 import shareTemplate from 'ui/share/views/share.html';
@@ -17,7 +17,7 @@ const app = uiModules.get('kibana');
 
 app.directive('share', function (Private) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const urlShortener = Private(urlShortenerProvider);
+  const urlShortener = Private(UrlShortenerProvider);
 
   return {
     restrict: 'E',

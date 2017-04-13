@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import qs from 'ui/utils/query_string';
-import StateManagementStateProvider from 'ui/state_management/state';
+import { StateProvider } from 'ui/state_management/state';
 import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana/global_state');
 
-function GlobalStateProvider(Private) {
-  const State = Private(StateManagementStateProvider);
+export function GlobalStateProvider(Private) {
+  const State = Private(StateProvider);
 
   _.class(GlobalState).inherits(State);
   function GlobalState(defaults) {
@@ -26,4 +26,3 @@ function GlobalStateProvider(Private) {
 module.service('globalState', function (Private) {
   return Private(GlobalStateProvider);
 });
-export default GlobalStateProvider;

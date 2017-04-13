@@ -5,7 +5,7 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 

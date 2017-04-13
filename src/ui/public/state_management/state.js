@@ -19,7 +19,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
