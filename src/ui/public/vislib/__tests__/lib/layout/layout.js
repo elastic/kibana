@@ -58,13 +58,13 @@ dateHistogramArray.forEach(function (data, i) {
         expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(2);
         expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col').length).to.be(2);
-        expect($(vis.el).find('.y-axis-title').length).to.be(2);
+        expect($(vis.el).find('.y-axis-title').length).to.be.above(0);
         expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(2);
         expect($(vis.el).find('.y-axis-spacer-block').length).to.be(4);
         expect($(vis.el).find('.chart-wrapper').length).to.be(numberOfCharts);
         expect($(vis.el).find('.x-axis-wrapper').length).to.be(2);
         expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(2);
-        expect($(vis.el).find('.x-axis-title').length).to.be(2);
+        expect($(vis.el).find('.x-axis-title').length).to.be.above(0);
       });
     });
 

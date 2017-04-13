@@ -52,10 +52,6 @@ export default function ColumnLayoutFactory(Private) {
                 children: [
                   {
                     type: 'div',
-                    class: 'y-axis-title axis-title'
-                  },
-                  {
-                    type: 'div',
                     class: 'y-axis-chart-title',
                     splits: chartTitleSplit
                   },
@@ -80,10 +76,6 @@ export default function ColumnLayoutFactory(Private) {
                 type: 'div',
                 class: 'x-axis-wrapper axis-wrapper-top',
                 children: [
-                  {
-                    type: 'div',
-                    class: 'x-axis-title axis-title'
-                  },
                   {
                     type: 'div',
                     class: 'x-axis-div-wrapper',
@@ -113,10 +105,6 @@ export default function ColumnLayoutFactory(Private) {
                     type: 'div',
                     class: 'x-axis-chart-title',
                     splits: chartTitleSplit
-                  },
-                  {
-                    type: 'div',
-                    class: 'x-axis-title axis-title'
                   }
                 ]
               }
@@ -138,10 +126,6 @@ export default function ColumnLayoutFactory(Private) {
                     type: 'div',
                     class: 'y-axis-div-wrapper',
                     splits: yAxisSplit
-                  },
-                  {
-                    type: 'div',
-                    class: 'y-axis-title axis-title'
                   }
                 ]
               },
