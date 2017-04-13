@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 
 export function EventsProvider(Private, Promise) {

@@ -1,5 +1,5 @@
 import { includes, mapValues } from 'lodash';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 /*
  * Caches notification attempts so each one is only actually sent to the

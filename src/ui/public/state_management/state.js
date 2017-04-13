@@ -11,7 +11,7 @@ import angular from 'angular';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 import {
   createStateHash,

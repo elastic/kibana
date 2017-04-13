@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import modules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';

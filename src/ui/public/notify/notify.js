@@ -1,5 +1,5 @@
 import modules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';
 const module = modules.get('kibana/notify');

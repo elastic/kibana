@@ -212,7 +212,7 @@ function formatStack(err) {
 /**
  * Functionality to check that
  */
-function Notifier(opts) {
+export function Notifier(opts) {
   const self = this;
   opts = opts || {};
 
@@ -662,4 +662,5 @@ function createGroupLogger(type, opts) {
   };
 }
 
+// Used in x-pack. TODO: convert to named and remove.
 export default Notifier;

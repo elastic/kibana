@@ -1,7 +1,7 @@
 import { find } from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import Notifier from '../../notify/notifier';
+import { Notifier } from '../../notify/notifier';
 import routeBasedNotifierProvider from '../index';
 
 describe('ui/route_based_notifier', function () {
