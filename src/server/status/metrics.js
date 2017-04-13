@@ -30,7 +30,7 @@ export async function getMetrics(event, config, server) {
         load_average: {
           '1m': get(event, 'osload.0'),
           '5m': get(event, 'osload.1'),
-          '15m': get(event, 'osload.1')
+          '15m': get(event, 'osload.2')
         }
       }
     },
