@@ -28,6 +28,9 @@ export async function initLeadfootCommand({ log, tunnelConfig, lifecycle }) {
       });
 
       log.verbose('remote: created leadfoot command');
+      tunnel.on('stdout', chunk => log.verbose('Tunnel [stdout]:', chunk.toString('utf8').trim()));
+      tunnel.on('stderr', chunk => log.verbose('Tunnel [stderr]:', chunk.toString('utf8').trim()));
+
       // command looks like a promise beacuse it has a then function
       // so we wrap it in an object to prevent our promise from trying to unwrap/resolve
       // the remote
