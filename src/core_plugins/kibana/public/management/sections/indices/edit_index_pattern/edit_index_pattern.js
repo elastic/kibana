@@ -1,18 +1,19 @@
 import _ from 'lodash';
-import 'plugins/kibana/management/sections/indices/_indexed_fields';
-import 'plugins/kibana/management/sections/indices/_scripted_fields';
-import 'plugins/kibana/management/sections/indices/source_filters/source_filters';
-import 'plugins/kibana/management/sections/indices/_index_header';
-import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
+import './index_header';
+import './indexed_fields_table';
+import './scripted_fields_table';
+import './scripted_field_editor';
+import './source_filters_table';
+import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import UrlProvider from 'ui/url';
-import { IndicesEditSectionsProvider } from 'plugins/kibana/management/sections/indices/_edit_sections';
+import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
+import template from './edit_index_pattern.html';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId', {
-  template: editTemplate,
+  template,
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns

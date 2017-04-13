@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
-import nameHtml from 'plugins/kibana/management/sections/indices/_field_name.html';
-import typeHtml from 'plugins/kibana/management/sections/indices/_field_type.html';
-import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
+import fieldNameHtml from './field_name.html';
+import fieldTypeHtml from './field_type.html';
+import fieldControlsHtml from '../field_controls.html';
 import uiModules from 'ui/modules';
 import FieldWildcardProvider from 'ui/field_wildcard';
-import indexedFieldsTemplate from 'plugins/kibana/management/sections/indices/_indexed_fields.html';
+import template from './indexed_fields_table.html';
 
 uiModules.get('apps/management')
-.directive('indexedFields', function (Private, $filter) {
+.directive('indexedFieldsTable', function (Private, $filter) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');
@@ -16,7 +16,7 @@ uiModules.get('apps/management')
 
   return {
     restrict: 'E',
-    template: indexedFieldsTemplate,
+    template,
     scope: true,
     link: function ($scope) {
       const rowScopes = []; // track row scopes, so they can be destroyed as needed
@@ -53,7 +53,7 @@ uiModules.get('apps/management')
 
           return [
             {
-              markup: nameHtml,
+              markup: fieldNameHtml,
               scope: childScope,
               value: field.displayName,
               attr: {
@@ -61,7 +61,7 @@ uiModules.get('apps/management')
               }
             },
             {
-              markup: typeHtml,
+              markup: fieldTypeHtml,
               scope: childScope,
               value: field.type,
               attr: {
@@ -86,7 +86,7 @@ uiModules.get('apps/management')
               value: excluded
             },
             {
-              markup: controlsHtml,
+              markup: fieldControlsHtml,
               scope: childScope
             }
           ];
