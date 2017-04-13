@@ -37,7 +37,11 @@ function calculateIndices(req, indexPattern = '*', timeField = '@timestamp', off
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const params = getParams(req, indexPattern, timeField, offsetBy);
   return callWithRequest(req, 'fieldStats', params)
-    .then(handleResponse);
+    .then(handleResponse)
+    .then(indices => {
+      if (!indices.length) return [indexPattern];
+      return indices;
+    });
 }
 
 
