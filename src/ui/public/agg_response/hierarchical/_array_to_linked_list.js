@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default function (buckets) {
+export function arrayToLinkedList(buckets) {
   let previous;
   _.each(buckets, function (bucket) {
     if (previous) {

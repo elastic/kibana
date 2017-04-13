@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/numeral/numeral';
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
-import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
+import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
+
 export default function AbstractNumeralFormatProvider(Private) {
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const BoundToConfigObj = Private(BoundToConfigObjProvider);

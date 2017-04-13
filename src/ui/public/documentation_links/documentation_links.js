@@ -1,5 +1,5 @@
 import semver from 'semver';
-import metadata from '../metadata';
+import { metadata } from '../metadata';
 
 const major = semver.major(metadata.version);
 const minor = semver.minor(metadata.version);

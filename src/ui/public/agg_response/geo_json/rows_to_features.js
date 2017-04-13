@@ -10,7 +10,7 @@ function unwrap(val) {
   return getAcr(val) ? val.value : val;
 }
 
-function convertRowsToFeatures(table, geoI, metricI, centroidI) {
+export function convertRowsToFeatures(table, geoI, metricI, centroidI) {
 
   return _.transform(table.rows, function (features, row) {
     const geohash = unwrap(row[geoI]);
@@ -60,5 +60,3 @@ function convertRowsToFeatures(table, geoI, metricI, centroidI) {
     });
   }, []);
 }
-
-export default convertRowsToFeatures;
