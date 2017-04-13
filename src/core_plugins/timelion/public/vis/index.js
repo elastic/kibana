@@ -1,5 +1,6 @@
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import image from '../images/icon-timelion.svg';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 define(function (require) {
   // we also need to load the controller and used by the template
@@ -10,7 +11,7 @@ define(function (require) {
   require('plugins/timelion/vis/timelion_vis.less');
 
   // register the provider with the visTypes registry so that other know it exists
-  require('ui/registry/vis_types').register(TimelionVisProvider);
+  VisTypesRegistryProvider.register(TimelionVisProvider);
 
   function TimelionVisProvider(Private) {
     const VisType = Private(VisVisTypeProvider);

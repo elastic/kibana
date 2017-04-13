@@ -5,14 +5,14 @@ import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/templat
 import VisSchemasProvider from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
-import visTypesRegistry from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
 
 // register the provider with the visTypes registry
-visTypesRegistry.register(MetricVisProvider);
+VisTypesRegistryProvider.register(MetricVisProvider);
 
 function MetricVisProvider(Private) {
   const VisType = Private(VisVisTypeProvider);

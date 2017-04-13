@@ -5,7 +5,7 @@ import { IndexedArray } from 'ui/indexed_array';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 

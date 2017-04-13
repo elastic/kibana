@@ -6,7 +6,8 @@
  */
 
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
 export default function AggConfigFactory(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 

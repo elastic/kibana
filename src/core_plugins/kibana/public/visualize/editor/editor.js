@@ -8,7 +8,7 @@ import 'ui/share';
 import chrome from 'ui/chrome';
 import angular from 'angular';
 import { Notifier } from 'ui/notify/notifier';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -25,7 +25,7 @@ uiRoutes
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
-      const visTypes = Private(RegistryVisTypesProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
       const visType = _.find(visTypes, { name: $route.current.params.type });
       if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');

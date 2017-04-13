@@ -5,7 +5,7 @@ import VisProvider from 'ui/vis';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 describe('AggConfig', function () {
 

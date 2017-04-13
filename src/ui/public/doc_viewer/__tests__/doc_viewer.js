@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/private';
 
-import docViewsRegistry from 'ui/registry/doc_views';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import { uiRegistry } from 'ui/registry/_registry';
 import 'ui/doc_viewer';
 
@@ -26,7 +26,7 @@ describe('docViewer', function () {
         }
       });
 
-      PrivateProvider.swap(docViewsRegistry, stubRegistry);
+      PrivateProvider.swap(DocViewsRegistryProvider, stubRegistry);
     });
 
     // Create the scope

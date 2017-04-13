@@ -1,7 +1,9 @@
 import { uiRegistry } from 'ui/registry/_registry';
 
-export default uiRegistry({
+export const DevToolsRegistryProvider = uiRegistry({
   name: 'devTools',
   index: ['name'],
   order: ['order']
 });
+
+export default DevToolsRegistryProvider;

@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import docViewsRegistry from 'ui/registry/doc_views';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import tableHtml from './table.html';
 
-docViewsRegistry.register(function () {
+DocViewsRegistryProvider.register(function () {
   return {
     title: 'Table',
     order: 10,

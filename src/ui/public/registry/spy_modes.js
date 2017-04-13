@@ -1,6 +1,6 @@
 import { uiRegistry } from 'ui/registry/_registry';
 
-export default uiRegistry({
+export const SpyModesRegistryProvider = uiRegistry({
   name: 'spyModes',
   index: ['name'],
   order: ['order']

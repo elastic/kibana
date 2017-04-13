@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import resp from 'fixtures/agg_resp/range';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 describe('Range Agg', function () {
   const buckets = values(resp.aggregations[1].buckets);
 
