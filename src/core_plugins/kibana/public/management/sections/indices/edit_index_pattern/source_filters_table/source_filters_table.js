@@ -4,15 +4,15 @@ import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import FieldWildcardProvider from 'ui/field_wildcard';
 
-import controlsHtml from 'plugins/kibana/management/sections/indices/source_filters/controls.html';
-import filterHtml from 'plugins/kibana/management/sections/indices/source_filters/filter.html';
-import template from './source_filters.html';
-import './source_filters.less';
+import controlsHtml from './controls.html';
+import filterHtml from './filter.html';
+import template from './source_filters_table.html';
+import './source_filters_table.less';
 
 const notify = new Notifier();
 
 uiModules.get('kibana')
-.directive('sourceFilters', function (Private, $filter, confirmModal) {
+.directive('sourceFiltersTable', function (Private, $filter, confirmModal) {
   const angularFilter = $filter('filter');
   const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
