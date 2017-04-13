@@ -27,6 +27,7 @@ export function VisVisTypeProvider(Private) {
       this.implementsRenderComplete = opts.implementsRenderComplete || false;
       this.requestHandler = opts.requestHandler || 'courier';
       this.responseHandler = opts.responseHandler || 'none';
+      this.editor = opts.editorController || 'default';
 
       this.listeners = opts.listeners || {};
 
