@@ -1,1 +1,11 @@
-<visualization vis="vis" vis-data="esResp" ui-state="uiState" />
+
+<visualization-editor
+  ng-if="editorMode==true"
+  vis="vis"
+  vis-data="esResp"
+  ui-state="uiState"
+  app-state="appState"
+  class="vis-editor-content"
+/>
+<visualization ng-if="editorMode==false" vis="vis" vis-data="esResp" ui-state="uiState" />
+

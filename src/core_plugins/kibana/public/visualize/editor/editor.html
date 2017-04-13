@@ -82,31 +82,16 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div class="vis-editor-content">
+  <visualize
+    saved-vis="savedVis"
+    ui-state="uiState"
+    app-state="state"
+    editor-mode="true"
+    render-counter
+    data-shared-item
+    data-title="{{savedVis.lastSavedTitle}}"
+    data-description="{{savedVis.description}}"
+    show-spy-panel="chrome.getVisible()">
+  </visualize>
 
-    <vis-editor-vis-options ng-if="vis.type.fullEditor"
-                            vis="vis"
-                            saved-vis="savedVis"
-                            editor="vis.type.params.editor"
-                            ui-state="uiState"
-                            stage-editable-vis="stageEditableVis"
-                            class="vis-editor-full-options"></vis-editor-vis-options>
-
-    <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
-      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
-    </div>
-
-    <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
-      <visualize
-        saved-vis="savedVis"
-        ui-state="uiState"
-        app-state="state"
-        data-shared-item
-        data-title="{{savedVis.lastSavedTitle}}"
-        data-description="{{savedVis.description}}"
-        render-counter
-        show-spy-panel="chrome.getVisible()">
-      </visualize>
-    </div>
-  </div>
 </visualize-app>
