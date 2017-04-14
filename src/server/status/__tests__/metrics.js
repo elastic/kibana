@@ -150,10 +150,10 @@ describe('Metrics', function () {
       mockFs();
       sinon.spy(metrics, 'captureCGroups');
 
-      expect(metrics.cGroupsAvailable).to.be(true);
+      expect(metrics.checkCGroupStats).to.be(true);
 
       await metrics.captureCGroupsIfAvailable();
-      expect(metrics.cGroupsAvailable).to.be(false);
+      expect(metrics.checkCGroupStats).to.be(false);
 
       await metrics.captureCGroupsIfAvailable();
       sinon.assert.calledOnce(metrics.captureCGroups);
@@ -164,10 +164,10 @@ describe('Metrics', function () {
       mockFs(fsStub.files);
       sinon.spy(metrics, 'captureCGroups');
 
-      expect(metrics.cGroupsAvailable).to.be(true);
+      expect(metrics.checkCGroupStats).to.be(true);
 
       await metrics.captureCGroupsIfAvailable();
-      expect(metrics.cGroupsAvailable).to.be(true);
+      expect(metrics.checkCGroupStats).to.be(true);
 
       await metrics.captureCGroupsIfAvailable();
       sinon.assert.calledTwice(metrics.captureCGroups);

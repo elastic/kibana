@@ -6,7 +6,7 @@ export class Metrics {
   constructor(config, server) {
     this.config = config;
     this.server = server;
-    this.cGroupsAvailable = true;
+    this.checkCGroupStats = true;
   }
 
   async capture(hapiEvent) {
@@ -71,14 +71,14 @@ export class Metrics {
   }
 
   async captureCGroupsIfAvailable() {
-    if (this.cGroupsAvailable) {
+    if (this.checkCGroupStats === true) {
       const cgroup = await this.captureCGroups();
 
       if (isObject(cgroup)) {
         return cgroup;
       }
 
-      this.cGroupsAvailable = false;
+      this.checkCGroupStats = false;
     }
   }
 }
