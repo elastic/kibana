@@ -6,6 +6,7 @@ import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
 import uuid from 'node-uuid';
 import IconSelect from './icon_select';
+import YesNo from './yes_no';
 
 function newAnnotation() {
   return {
@@ -13,7 +14,8 @@ function newAnnotation() {
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',
-    icon: 'fa-tag'
+    icon: 'fa-tag',
+    include_filters: 0
   };
 }
 
@@ -81,6 +83,22 @@ class AnnotationsEditor extends Component {
                 type="text"
                 onChange={this.handleChange(model, 'query_string')}
                 value={model.query_string} />
+            </div>
+            <div className="vis_editor__row-item-small">
+              <div className="vis_editor__label">Include Global Filters</div>
+              <YesNo
+                value={model.include_global_filters}
+                name="include_global_filters"
+                onChange={handleChange}/>
+
+            </div>
+            <div className="vis_editor__row-item-small">
+              <div className="vis_editor__label">Include Panel Filters</div>
+              <YesNo
+                value={model.include_panel_filters}
+                name="include_panel_filters"
+                onChange={handleChange}/>
+
             </div>
           </div>
           <div className="vis_editor__row">
