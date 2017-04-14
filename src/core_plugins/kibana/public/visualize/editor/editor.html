@@ -113,11 +113,7 @@
             class="kuiVisualizationNotice"
             ng-class="{ 'kuiVisualizationNotice-isHidden': !$parent.editableVis.dirty }"
           >
-            <h3 class="kuiSubTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
-              Update visualization with changes?
-            </h3>
-
-            <div class="kuiButtonGroup kuiButtonGroup--fullWidth kuiVerticalRhythm kuiVerticalRhythm--medium">
+            <div class="kuiButtonGroup kuiButtonGroup--fullWidth">
               <button
                 class="kuiButton kuiButton--primary kuiButton--iconText"
                 ng-click="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
@@ -125,17 +121,21 @@
                 <span class="kuiButton__inner">
                   <span
                    aria-hidden="true"
-                   class="kuiButton__icon kuiIcon fa-play"
+                   class="kuiButton__icon kuiIcon fa-refresh"
                   ></span>
                   <span>Update visualization</span>
                 </span>
               </button>
 
               <button
-                class="kuiButton kuiButton--hollow"
+                class="kuiButton kuiButton--hollow kuiButton--iconText"
                 ng-click="resetEditableVis()"
               >
                 <span class="kuiButton__inner">
+                  <span
+                   aria-hidden="true"
+                   class="kuiButton__icon kuiIcon fa-undo"
+                  ></span>
                   <span>Or revert your changes</span>
                 </span>
               </button>
