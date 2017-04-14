@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import Visualization from './visualization';
 
 class VisEditorVisualization extends Component {
@@ -40,6 +41,11 @@ class VisEditorVisualization extends Component {
     window.removeEventListener('mouseup', this.handleMouseUp);
   }
 
+  componentDidMount() {
+    const el = findDOMNode(this.visDiv);
+    el.setAttribute('render-counter', 'disabled');
+  }
+
   render() {
     const style = { height: this.state.height };
     if (this.state.dragging) {
@@ -48,7 +54,11 @@ class VisEditorVisualization extends Component {
     const visBackgroundColor = '#FFF';
     return (
       <div>
-        <div style={style} className="vis_editor__visualization">
+        <div
+          style={style}
+          data-shared-item={true}
+          ref={(el) => this.visDiv = el}
+          className="vis_editor__visualization">
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
