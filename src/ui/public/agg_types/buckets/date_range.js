@@ -1,4 +1,4 @@
-import dateRange from 'ui/utils/date_range';
+import { dateRange } from 'ui/utils/date_range';
 import 'ui/directives/validate_date_math';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterDateRangeProvider } from 'ui/agg_types/buckets/create_filter/date_range';

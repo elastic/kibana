@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import noWhiteSpace from 'ui/utils/no_white_space';
+import { noWhiteSpace } from 'ui/utils/no_white_space';
 import angular from 'angular';
 import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 

@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import zoomToPrecision from 'ui/utils/zoom_to_precision';
+import { zoomToPrecision } from 'ui/utils/zoom_to_precision';
 
 const FitControl = L.Control.extend({
   options: {

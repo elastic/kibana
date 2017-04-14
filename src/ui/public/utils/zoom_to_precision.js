@@ -32,7 +32,7 @@ function calculateZoomToPrecisionMap(maxZoom) {
 }
 
 
-export default function zoomToPrecision(mapZoom, maxPrecision, maxZoom) {
+export function zoomToPrecision(mapZoom, maxPrecision, maxZoom) {
   calculateZoomToPrecisionMap(typeof maxZoom === 'number' ? maxZoom : 21);
   return Math.min(zoomPrecisionMap[mapZoom], maxPrecision);
 }

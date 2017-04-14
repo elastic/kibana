@@ -1,4 +1,4 @@
-import ObjDefine from 'ui/utils/obj_define';
+import { ObjDefine } from 'ui/utils/obj_define';
 import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import { IndexPatternsFieldTypesProvider } from 'ui/index_patterns/_field_types';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';

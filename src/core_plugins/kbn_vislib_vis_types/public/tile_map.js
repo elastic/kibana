@@ -1,4 +1,4 @@
-import supports from 'ui/utils/supports';
+import { supports } from 'ui/utils/supports';
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';

@@ -10,7 +10,7 @@ import angular from 'angular';
 import { Notifier } from 'ui/notify/notifier';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import qs from 'ui/utils/query_string';
+import { QueryString } from 'ui/utils/query_string';
 import { StateProvider } from 'ui/state_management/state';
 import uiModules from 'ui/modules';
 
@@ -17,7 +17,7 @@ export function GlobalStateProvider(Private) {
   GlobalState.prototype._persistAcrossApps = true;
 
   GlobalState.prototype.removeFromUrl = function (url) {
-    return qs.replaceParamInUrl(url, this._urlParam, null);
+    return QueryString.replaceParamInUrl(url, this._urlParam, null);
   };
 
   return new GlobalState();

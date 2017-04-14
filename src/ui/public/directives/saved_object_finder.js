@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import rison from 'rison-node';
-import keymap from 'ui/utils/key_map';
+import { keyMap } from 'ui/utils/key_map';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
@@ -127,7 +127,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       //key handler for the filter text box
       self.filterKeyDown = function ($event) {
-        switch (keymap[$event.keyCode]) {
+        switch (keyMap[$event.keyCode]) {
           case 'tab':
             if (self.hitCount === 0) return;
 
@@ -152,7 +152,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       //key handler for the list items
       self.hitKeyDown = function ($event, page, paginate) {
-        switch (keymap[$event.keyCode]) {
+        switch (keyMap[$event.keyCode]) {
           case 'tab':
             if (!self.selector.enabled) break;
 

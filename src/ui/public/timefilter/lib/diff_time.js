@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
+import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
 
 export function TimefilterLibDiffTimeProvider(Private) {
   const diff = Private(UtilsDiffTimePickerValsProvider);
