@@ -2397,15 +2397,19 @@ body {
           flex: 1 1 0;
   /* 1, 2 */ }
 
+/**
+ * 1. Shrink to the size of the SideBar content.
+ */
 .kuiSideBarContent {
   overflow-x: hidden;
   /* 1 */
   overflow-y: auto;
   /* 1 */
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+  /* 1 */ }
   .kuiSideBarContent::-webkit-scrollbar {
     /* 2 */
     width: 16px;
@@ -2419,13 +2423,18 @@ body {
     /* 2 */
     background-color: transparent; }
 
+/**
+ * 1. When the SideBar content is short, the controls will expand to be near them. When the content
+ *    is tall, the controls will anchor at the bottom of the screen.
+ */
 .kuiSideBarControls {
-  -webkit-box-flex: 0;
-  -webkit-flex: 0 0 auto;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
-  height: 50px;
-  padding: 10px;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+  /* 1 */
+  height: 70px;
+  padding: 20px 10px;
   border-top: 1px solid #E4E4E4;
   background-color: rgba(255, 255, 255, 0.8); }
 

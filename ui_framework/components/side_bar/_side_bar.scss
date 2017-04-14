@@ -18,16 +18,23 @@
   flex: 1 1 0; /* 1, 2 */
 }
 
+/**
+ * 1. Shrink to the size of the SideBar content.
+ */
 .kuiSideBarContent {
   @include verticalScroll;
 
-  flex: 1 1 auto;
+  flex: 0 1 auto; /* 1 */
 }
 
+/**
+ * 1. When the SideBar content is short, the controls will expand to be near them. When the content
+ *    is tall, the controls will anchor at the bottom of the screen.
+ */
 .kuiSideBarControls {
-  flex: 0 0 auto;
-  height: 50px;
-  padding: 10px;
+  flex: 1 0 auto; /* 1 */
+  height: 70px;
+  padding: 20px 10px;
   border-top: 1px solid $sideBarBorderColor;
   background-color: rgba(#ffffff, 0.8);
 }
