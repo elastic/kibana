@@ -1,14 +1,14 @@
 [[timelion-math]]
 == Using mathematical functions
 
-You’ve learned how to create and style a Timelion visualization in the previous two tutorials. Next, we will explore the mathematical functions Timelion offers. In this tutorial we will continue to use our https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to create a new Timelion visualizations for inbound and outbound network traffic. To start, let’s add a new Timelion visualization to the sheet.
+You’ve learned how to create and style a Timelion visualization in the previous two tutorials. Next, we will explore the mathematical functions Timelion offers. In this tutorial we will continue to use our https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to create a new Timelion visualization for inbound and outbound network traffic. To start, let’s add a new Timelion visualization to the sheet.
 
-In the top menu, click *Add* to add a second visualization. When added to the sheet, you’ll notice that the query bar has been replaced with the default *.es(\*)*. This is because the query points to whatever visualization on the Timelion sheet you have selected. 
+In the top menu, click `Add` to add a second visualization. When added to the sheet, you’ll notice that the query bar has been replaced with the default `.es(*)` expression. This is because the query is associated with the visualization on the Timelion sheet you have selected. 
 
 image::images/timelion-math01.png[]
 
 
-To track the inbound / outbound traffic, we’ll build our query to calculate the maximum value of *system.network.in.bytes*. Use the expression below for your new sheet.
+To start tracking the inbound / outbound network traffic, we’ll build our first expression to calculate the maximum value of `system.network.in.bytes`. Enter the expression below into your Timelion query bar:
 
 [source,text]
 ----------------------------------
@@ -18,7 +18,7 @@ To track the inbound / outbound traffic, we’ll build our query to calculate th
 image::images/timelion-math02.png[]
 
 
-Now that we have the maximum value for this metric, let’s calculate the derivative to chart the change over time. This can be easily done by appending the *.derivative()* function to the end of the expression. Use the following expression to update your visualization:
+Now that we have the maximum value for the inbound traffic, let’s calculate the derivative to chart the change over time. The `derivative()` function is used to plot the change in values over time. This can be easily done by appending the `.derivative()` to the end of an expression. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------
@@ -28,7 +28,7 @@ Now that we have the maximum value for this metric, let’s calculate the deriva
 image::images/timelion-math03.png[]
 
 
-Now for the outbound traffic. Let’s add a similar calculation for *system.network.out.bytes*. Since outbound traffic is leaving your machine, it makes sense to represent it as a negative number. We can use the *multiply()* function to convert this number to a negative value. Use the following expression to update your visualization:
+Now for the outbound traffic. Let’s add a similar calculation for `system.network.out.bytes`. Since outbound traffic is leaving your machine, it makes sense to represent it as a negative number. The `.multiply()` function will multiply the series by number, the result of a series or list of series. For this example, we will use `.multiply(-1)` to convert the outbound network traffic to a negative value. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------
@@ -38,7 +38,7 @@ Now for the outbound traffic. Let’s add a similar calculation for *system.netw
 image::images/timelion-math04.png[]
 
 
-We should probably convert bytes to megabytes so the metrics are a bit easier to consume. Luckily, Timelion provides us with a  *divide()* function we can use. Use the following expression to update your visualization:
+To make this visualization a bit easier to consume, we should probably convert our series from bytes to megabytes. Luckily, Timelion provides us with a `.divide()` function we can use. `divide()` accepts the same input as `.multiply()` and will divide the series by the divisor given. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------
@@ -48,7 +48,7 @@ We should probably convert bytes to megabytes so the metrics are a bit easier to
 image::images/timelion-math05.png[]
 
 
-Utilizing the formatting functions learned in https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[the last tutorial], let’s clean up the visualization a bit. Use the following expression to update the title, labels, colors and chart types of your visualization:
+Utilizing the formatting functions `title()`, `label()`, `color()`, `lines()` and `legend()` learned in https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[the last tutorial], let’s clean up the visualization a bit. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------
