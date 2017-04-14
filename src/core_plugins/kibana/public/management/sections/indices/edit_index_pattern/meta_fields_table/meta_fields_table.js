@@ -1,24 +1,21 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
-import nameHtml from 'plugins/kibana/management/sections/indices/_field_name.html';
-import typeHtml from 'plugins/kibana/management/sections/indices/_field_type.html';
-import popularityHtml from 'plugins/kibana/management/sections/indices/_field_popularity.html';
-import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
+import fieldNameHtml from '../indexed_fields_table/field_name.html';
+import fieldTypeHtml from '../indexed_fields_table/field_type.html';
+import fieldControlsHtml from '../field_controls.html';
 import uiModules from 'ui/modules';
-import metaFieldsTemplate from 'plugins/kibana/management/sections/indices/_meta_fields.html';
+import template from './meta_fields_table.html';
 
 uiModules.get('apps/management')
-.directive('metaFields', function (kbnUrl, Notifier, $filter, confirmModal) {
+.directive('metaFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
 
-  const notify = new Notifier();
-
   return {
     restrict: 'E',
-    template: metaFieldsTemplate,
+    template,
     scope: true,
     link: function ($scope) {
 
@@ -49,7 +46,7 @@ uiModules.get('apps/management')
 
           return [
             {
-              markup: nameHtml,
+              markup: fieldNameHtml,
               scope: childScope,
               value: field.displayName,
               attr: {
@@ -57,7 +54,7 @@ uiModules.get('apps/management')
               }
             },
             {
-              markup: typeHtml,
+              markup: fieldTypeHtml,
               scope: childScope,
               value: field.type
             },
@@ -71,7 +68,7 @@ uiModules.get('apps/management')
               value: field.aggregatable
             },
             {
-              markup: controlsHtml,
+              markup: fieldControlsHtml,
               scope: childScope
             }
           ];
