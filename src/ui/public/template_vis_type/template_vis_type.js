@@ -10,8 +10,8 @@ export function TemplateVisTypeProvider(Private) {
   function TemplateVisType(opts = {}) {
     TemplateVisType.Super.call(this, opts);
 
-    this.template = opts.template;
-    if (!this.template) {
+    this.visConfig.template = opts.visConfig ? opts.visConfig.template : opts.template;
+    if (!this.visConfig.template) {
       throw new Error('Missing template for TemplateVisType');
     }
   }

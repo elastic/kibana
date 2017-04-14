@@ -24,7 +24,7 @@
               Data
             </a>
           </li>
-          <li ng-repeat="tab in vis.type.params.optionTabs" ng-class="{active: sidebar.section == tab.name}">
+          <li ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-class="{active: sidebar.section == tab.name}">
             <a
               class="vis-editor-subnav-link"
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
@@ -88,7 +88,7 @@
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
     </div>
 
-    <div class="vis-editor-config" ng-repeat="tab in vis.type.params.optionTabs" ng-show="sidebar.section == tab.name">
+    <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
       <vis-editor-vis-options vis="vis" saved-vis="savedVis" ui-state="uiState" editor="tab.editor"></vis-editor-vis-options>
     </div>
 

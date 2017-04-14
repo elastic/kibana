@@ -12,7 +12,7 @@ export function TemplateRenderbotProvider(Private, $compile, $rootScope) {
     this.$scope.vis = vis;
     this.$scope.uiState = uiState;
 
-    $el.html($compile(this.vis.type.template)(this.$scope));
+    $el.html($compile(this.vis.type.visConfig.template)(this.$scope));
   }
 
   TemplateRenderbot.prototype.render = function (esResponse) {

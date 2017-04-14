@@ -25,8 +25,8 @@ uiModules
       // Clone the _vis instance.
       const vis = $scope.vis;
       const editableVis = $scope.editableVis = vis.createEditableVis();
-      const editor = typeof vis.type.editor === 'function' ? vis.type.editor :
-        editorTypes.find(editor => editor.name === vis.type.editor).render;
+      const editor = typeof vis.type.editorController === 'function' ? vis.type.editorController :
+        editorTypes.find(editor => editor.name === vis.type.editorController).render;
       element.html($compile(editor())($scope));
 
       // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
