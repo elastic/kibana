@@ -1,4 +1,4 @@
-export default function PendingRequestList() {
+export function RequestQueueProvider() {
 
   /**
    * Queue of pending requests, requests are removed as
