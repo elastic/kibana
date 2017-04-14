@@ -4,7 +4,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { seedColors } from 'ui/vis/components/color/seed_colors';
 import VislibComponentsColorColorProvider from 'ui/vis/components/color/color';
-import VislibComponentsColorMappedColorsProvider from 'ui/vis/components/color/mapped_colors';
+import { VisColorMappedColorsProvider } from 'ui/vis/components/color/mapped_colors';
 import { createColorPalette } from 'ui/vis/components/color/color_palette';
 
 describe('Vislib Color Module Test Suite', function () {
@@ -29,7 +29,7 @@ describe('Vislib Color Module Test Suite', function () {
       previousConfig = config.get('visualization:colorMapping');
       config.set('visualization:colorMapping', {});
       getColors = Private(VislibComponentsColorColorProvider);
-      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
+      mappedColors = Private(VisColorMappedColorsProvider);
       color = getColors(arr, {});
     }));
 
@@ -129,7 +129,7 @@ describe('Vislib Color Module Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
-      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
+      mappedColors = Private(VisColorMappedColorsProvider);
       mappedColors.mapping = {};
     }));
 
