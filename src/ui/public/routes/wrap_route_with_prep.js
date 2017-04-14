@@ -19,12 +19,12 @@ function wrapRouteWithPrep(route, setup) {
   // send each user resolve to the userWork queue, which will prevent it from running before the
   // prep is complete
   _.forOwn(route.resolve || {}, function (expr, name) {
-    resolve[name] = function ($injector, Promise) {
+    resolve[name] = function ($injector, Promise, kbnUrl) {
       const defer = Promise.defer();
       userWork.push(defer);
-      return defer.promise.then(function () {
-        return $injector[angular.isString(expr) ? 'get' : 'invoke'](expr);
-      });
+      return defer.promise
+        .then(() => $injector[angular.isString(expr) ? 'get' : 'invoke'](expr))
+        .finally(() => kbnUrl.awaitPendingUrlChanges());
     };
   });
 
