@@ -152,6 +152,11 @@ class FlotChart extends Component {
 
   handleResize() {
     const resize = findDOMNode(this.resize);
+    if (!this.rendered) {
+      this.renderChart();
+      return;
+    }
+
     if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
       this.plot.resize();
@@ -165,6 +170,7 @@ class FlotChart extends Component {
     const resize = findDOMNode(this.resize);
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
+      this.rendered = true;
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
 
