@@ -1,39 +1,52 @@
 import { VisSchemasProvider } from './schemas';
-AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
+import _ from 'lodash';
 
 
 export function VisVisTypeProvider(Private) {
   const VisTypeSchemas = Private(VisSchemasProvider);
-  const pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
 
   class VisType {
     constructor(opts) {
       opts = opts || {};
 
-      this.name = opts.name;
-      this.title = opts.title;
-      this.responseConverter = opts.responseConverter || pointSeries;;
-      this.hierarchicalData = opts.hierarchicalData || false;
-      this.icon = opts.icon;
-      this.image = opts.image;
-      this.description = opts.description;
-      this.category = opts.category || VisType.CATEGORY.OTHER;
-      this.isExperimental = opts.isExperimental;
-      this.schemas = opts.schemas || new VisTypeSchemas();
-      this.params = opts.params || {};
-      this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
-      this.requiresTimePicker = !!opts.requiresTimePicker;
-      this.fullEditor = opts.fullEditor == null ? false : opts.fullEditor;
-      this.implementsRenderComplete = opts.implementsRenderComplete || false;
-      this.requestHandler = opts.requestHandler || 'courier';
-      this.responseHandler = opts.responseHandler || 'none';
-      this.editor = opts.editorController || 'default';
+      const _defaults = {
+        // name, title, description, icon, image
+        category: VisType.CATEGORY.OTHER,
+        visController: null,       // must be a function (or object with render/resize/update?)
+        visConfig: {
+          defaults: {},            // default configuration
+          template: '',           // angular vis type requires template html
+        },
+        requestHandler: 'courier',    // select one from registry or pass a function
+        responseHandler: 'none',      // ...
+        editorController: 'default',  // ...
+        editorConfig: {
+          //optionTabs: {},          // default editor needs a list of option tabs
+          optionsTemplate: '',      // default editor needs an optionsTemplate if optionsTab is not provided
+          collections: {},         // collections used for configuration (list of positions, ...)
+        },
+        options: {                // controls the visualize editor
+          showTimePicker: undefined,
+          showQueryBar: undefined,
+          showFilterBar: undefined,
+          hierarchicalData: false  // we should get rid of this i guess ?
+        },
+        schemas: new VisTypeSchemas(),            // default editor needs a list of schemas ... not moved for refact. reasons
+        requiresSearch: true,   // BWC
+        implementsRenderComplete: false,
+        isExperimental: false
+      };
 
-      this.listeners = opts.listeners || {};
+      _.defaultsDeep(this, opts, _defaults);
 
-      if (!this.params.optionTabs) {
-        this.params.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.params.editor }
+      if (!this.name) throw('vis_type must define its name');
+      if (!this.title) throw('vis_type must define its title');
+      if (!this.description) throw('vis_type must define its description');
+      if (!this.icon) throw('vis_type must define its icon');
+
+      if (!this.editorConfig.optionTabs) {
+        this.editorConfig.optionTabs = [
+          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
         ];
       }
     }

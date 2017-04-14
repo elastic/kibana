@@ -21,16 +21,22 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
     description: 'A group of words, sized according to their importance',
     category: VisType.CATEGORY.OTHER,
     template: tagCloudTemplate,
-    params: {
+    visConfig: {
       defaults: {
         scale: 'linear',
         orientation: 'single',
         minFontSize: 18,
         maxFontSize: 72
       },
-      scales: ['linear', 'log', 'square root'],
-      orientations: ['single', 'right angled', 'multiple'],
-      editor: '<tagcloud-vis-params></tagcloud-vis-params>'
+      template: tagCloudTemplate,
+    },
+    editorConfig: {
+      collections: {
+        scales: ['linear', 'log', 'square root'],
+        orientations: ['single', 'right angled', 'multiple'],
+      },
+      optionsTemplate: '<tagcloud-vis-params></tagcloud-vis-params>',
+
     },
     schemas: new Schemas([
       {

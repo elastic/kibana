@@ -92,10 +92,10 @@ export function VisProvider(Notifier, Private) {
         this.type = type;
       }
 
-      this.listeners = _.assign({}, state.listeners, this.type.listeners);
+      this.listeners = _.assign({}, state.listeners);
       this.params = _.defaults({},
         _.cloneDeep(state.params || {}),
-        _.cloneDeep(this.type.params.defaults || {})
+        _.cloneDeep(this.type.visConfig.defaults || {})
       );
 
       this.aggs = new AggConfigs(this, state.aggs);
