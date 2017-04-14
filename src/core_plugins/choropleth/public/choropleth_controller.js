@@ -59,7 +59,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
         results = buckets.map((bucket) => {
           return {
             term: bucket.key,
-            value: getValue(metricsAgg, bucket)
+            value: metricsAgg.getValue(bucket)
           };
         });
       }
@@ -135,20 +135,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
     });
     kibanaMap.addLayer(choroplethLayer);
-
-  }
-
-
-  function getValue(metricsAgg, bucket) {
-    let size = metricsAgg.getValue(bucket);
-    if (typeof size !== 'number' || isNaN(size)) {
-      try {
-        size = bucket[1].values[0].value;//lift out first value (e.g. median aggregations return as array)
-      } catch (e) {
-        size = 1;//punt
-      }
-    }
-    return size;
   }
 
 
