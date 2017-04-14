@@ -1993,8 +1993,16 @@ body {
 .kuiStatusText--error {
   color: #D86051; }
 
+/**
+ * 1. Set the image to be the same size as a font icon at 14px.
+ * 2. We need to cap the height too, in case the icon was designed thin and tall.
+ */
 .kuiStatusText__icon {
-  margin-right: 6px; }
+  margin-right: 6px;
+  width: 1.15em;
+  /* 1 */
+  max-height: 1.15em;
+  /* 2 */ }
 
 /**
  * 1. Make seamless transition from ToolBar to Table header.
