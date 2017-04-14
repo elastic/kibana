@@ -7,6 +7,7 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
+const html = require('./status_text.html');
 const infoHtml = require('./status_text_info.html');
 const successHtml = require('./status_text_success.html');
 const warningHtml = require('./status_text_warning.html');
@@ -14,6 +15,18 @@ const errorHtml = require('./status_text_error.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
+    <GuideSection
+      title="StatusText"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: html,
+      }]}
+    >
+      <GuideDemo
+        html={html}
+      />
+    </GuideSection>
+
     <GuideSection
       title="Info"
       source={[{
