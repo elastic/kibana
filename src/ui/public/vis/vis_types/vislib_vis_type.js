@@ -6,11 +6,11 @@ import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
+import VislibProvider from 'ui/vislib';
 
 export function VislibVisTypeVislibVisTypeProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
+  const vislib = Private(VislibProvider);
 
   const updateParams = function (params) {
     if (!params.seriesParams || !params.seriesParams.length) return;
@@ -51,15 +51,35 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
     updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
   };
 
-  _.class(VislibVisType).inherits(VisType);
-  function VislibVisType(opts = {}) {
-    VislibVisType.Super.call(this, opts);
+  class VislibVisType extends VisType {
+    constructor(opts) {
+      super(opts);
+    }
+
+    render(vis, $el, uiState, esResponse) {
+      updateParams(vis.params);
+      if (!this.vislibVis) {
+        this.vislibVis = new vislib.Vis($el[0], vis.params);
+
+        _.each(vis.listeners, (listener, event) => {
+          this.vislibVis.on(event, listener);
+        });
+      }
+
+      this.vislibVis.render(esResponse, uiState);
+      this.refreshLegend++;
+    }
+
+    destroy() {
+      _.forOwn(self.vis.listeners, (listener, event) => {
+        this.vislibVis.off(event, listener);
+      });
+
+      this.vislibVis.destroy();
+    }
   }
 
-  VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-    updateParams(vis.params);
-    return new VislibRenderbot(vis, $el, uiState);
-  };
+
 
   return VislibVisType;
 }

@@ -106,15 +106,11 @@ uiModules
 
 
       const renderFunction = _.debounce(() => {
-        $scope.renderbot.render($scope.visData);
+        $scope.vis.type.render($scope.vis, getVisEl(), $scope.uiState, $scope.visData);
       }, 500);
 
       $scope.$watchGroup(['visData', 'vis.params'], () => {
         if (!$scope.visData || !$scope.vis) return;
-
-        if (!$scope.renderbot) {
-          $scope.renderbot = $scope.vis.type.createRenderbot($scope.vis, getVisEl(), $scope.uiState);
-        }
 
         renderFunction();
       });
