@@ -179,14 +179,6 @@ class TimeseriesChart extends Component {
       );
     }
 
-    const container = {
-      display: 'flex',
-      rowDirection: 'column',
-      flex: '1 0 auto',
-      position: 'relative'
-    };
-
-
     const params = {
       crosshair: this.props.crosshair,
       onPlotCreate: this.handlePlotCreate,
@@ -207,7 +199,7 @@ class TimeseriesChart extends Component {
     const annotations = this.state.annotations.map(this.renderAnnotations);
 
     return (
-      <div ref={(el) => this.container = el} style={container}>
+      <div ref={(el) => this.container = el} className="rhythm_chart__timeseries-container">
         { tooltip }
         { annotations }
         <FlotChart {...params}/>
