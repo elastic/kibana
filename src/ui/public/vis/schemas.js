@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 
-export default function VisTypeSchemasFactory(Private) {
+export function VisSchemasProvider(Private) {
   const AggParams = Private(AggTypesAggParamsProvider);
 
   function Schemas(schemas) {
@@ -61,3 +61,6 @@ export default function VisTypeSchemasFactory(Private) {
 
   return Schemas;
 }
+
+// used in x-pack. TODO: switch to named and remove.
+export default VisSchemasProvider;

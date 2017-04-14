@@ -4,7 +4,7 @@ import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_su
 import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
 import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
 import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

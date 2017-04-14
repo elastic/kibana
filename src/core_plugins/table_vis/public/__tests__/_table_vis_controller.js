@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 

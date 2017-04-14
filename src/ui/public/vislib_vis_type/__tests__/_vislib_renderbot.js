@@ -5,7 +5,7 @@ import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import VislibProvider from 'ui/vislib';
 import VislibVisProvider from 'ui/vislib/vis';
-import VisRenderbotProvider from 'ui/vis/renderbot';
+import { VisRenderbotProvider } from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 import 'ui/persisted_state';
 import noDigestPromises from 'test_utils/no_digest_promises';

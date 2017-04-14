@@ -1,4 +1,4 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type';

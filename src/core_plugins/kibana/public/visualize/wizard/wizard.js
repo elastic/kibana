@@ -5,7 +5,7 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
 import _ from 'lodash';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';

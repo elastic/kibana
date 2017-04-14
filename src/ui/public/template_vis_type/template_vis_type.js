@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { TemplateRenderbotProvider } from 'ui/template_vis_type/template_renderbot';
 
 export function TemplateVisTypeProvider(Private) {

@@ -1,6 +1,6 @@
 import 'plugins/markdown_vis/markdown_vis.less';
 import 'plugins/markdown_vis/markdown_vis_controller';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import markdownVisTemplate from 'plugins/markdown_vis/markdown_vis.html';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import MapsVisTypeMapsRenderbotProvider from 'ui/vis_maps/maps_renderbot';
 export default function MapsVisTypeFactory(Private) {
   const VisType = Private(VisVisTypeProvider);

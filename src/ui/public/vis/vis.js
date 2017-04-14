@@ -11,10 +11,10 @@
 import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';
 
-export default function VisFactory(Notifier, Private) {
+export function VisProvider(Notifier, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);

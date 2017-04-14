@@ -2,12 +2,11 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import RealAggConfigPM from 'ui/vis/agg_config';
-import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { VisProvider } from 'ui/vis';
+import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import { IndexedArray } from 'ui/indexed_array';
 
 describe('AggConfigs', function () {
@@ -22,14 +21,14 @@ describe('AggConfigs', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy
-    AggConfig = Private(RealAggConfigPM);
+    AggConfig = Private(VisAggConfigProvider);
     const spy = sinon.spy(AggConfig);
     Object.defineProperty(spy, 'aggTypes', {
       get: function () { return AggConfig.aggTypes; },
       set: function (val) { AggConfig.aggTypes = val; }
     });
 
-    Private.stub(RealAggConfigPM, spy);
+    Private.stub(VisAggConfigProvider, spy);
 
     // load main deps
     Vis = Private(VisProvider);

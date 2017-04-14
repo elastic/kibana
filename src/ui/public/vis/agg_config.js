@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-export default function AggConfigFactory(Private) {
+export function VisAggConfigProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {

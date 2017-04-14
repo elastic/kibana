@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import 'ui/private';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
