@@ -172,7 +172,19 @@
           <td class="kuiTableRowCell">
             <div class="kuiTableRowCell__liner">
               <span class="kuiStatusText">
-                <span class="kuiStatusText__icon kuiIcon {{ item.icon }}"></span>
+                <img
+                  class="kuiStatusText__icon kuiIcon"
+                  ng-if="item.type.image"
+                  aria-hidden="true"
+                  ng-src="{{ item.type.image }}"
+                />
+
+                <!-- If there's no image, default to an icon, for BWC. -->
+                <span
+                  class="kuiStatusText__icon kuiIcon {{ item.icon }}"
+                  ng-if="!item.type.image"
+                ></span>
+
                 {{ item.type.title }}
               </span>
             </div>
