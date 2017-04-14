@@ -33,7 +33,7 @@ class TopN extends Component {
             cursor: 'pointer'
           }
         }
-      })(this.props);
+      }, this.props);
       return (
         <tr key={key}
           onClick={this.handleClick({ lastValue, ...item })}

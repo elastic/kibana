@@ -115,7 +115,7 @@ class Timeseries extends Component {
           flexDirection: 'column'
         }
       }
-    })({ bottomLegend: this.props.legendPosition === 'bottom' });
+    }, { bottomLegend: this.props.legendPosition === 'bottom' });
     return (
       <div className={className}>
         <div style={styles.content} className="rhythm_chart__content">

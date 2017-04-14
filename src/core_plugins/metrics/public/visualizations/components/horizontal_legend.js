@@ -10,7 +10,7 @@ function HorizontalLegend(props) {
         display: 'none'
       }
     }
-  })({ hideLegned: !props.showLegend });
+  }, { hideLegned: !props.showLegend });
   let legendControlClass = 'fa fa-chevron-down';
   if (!props.showLegend) {
     legendControlClass = 'fa fa-chevron-up';

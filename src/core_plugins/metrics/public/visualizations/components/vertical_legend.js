@@ -19,7 +19,7 @@ function VerticalLegend(props) {
       legend: { width: 12 },
       series: { display: 'none' },
     }
-  })({ hideLegend, leftLegend });
+  }, { hideLegend, leftLegend });
 
   const openClass = leftLegend ? 'fa-chevron-right' : 'fa-chevron-left';
   const closeClass = leftLegend ? 'fa-chevron-left' : 'fa-chevron-right';
