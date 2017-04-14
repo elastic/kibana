@@ -44,6 +44,15 @@ export class KibanaServerUiSettings {
     return defaultIndex;
   }
 
+  async disableToastAutohide() {
+    await this.update({
+      'notifications:lifetime:banner': 360000,
+      'notifications:lifetime:error': 360000,
+      'notifications:lifetime:warning': 360000,
+      'notifications:lifetime:info': 360000,
+    });
+  }
+
   async replace(doc) {
     const { log, es } = this;
     log.debug('updating kibana config doc: %j', doc);
