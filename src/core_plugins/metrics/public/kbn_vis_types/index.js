@@ -4,7 +4,7 @@ import '../visualizations/less/main.less';
 import 'react-select/dist/react-select.css';
 import '../less/main.less';
 import image from '../images/icon-visualbuilder.svg';
-import { TemplateVisTypeProvider } from 'ui/template_vis_type';
+import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
 
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 // register the provider with the visTypes registry so that other know it exists

@@ -4,7 +4,7 @@ import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';

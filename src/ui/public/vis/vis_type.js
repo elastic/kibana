@@ -51,8 +51,12 @@ export function VisVisTypeProvider(Private) {
       }
     }
 
-    createRenderbot() {
-      throw new Error('not implemented');
+    render() {
+      throw new Error('vis_type render function not implemented');
+    }
+
+    destroy() {
+
     }
   }
 

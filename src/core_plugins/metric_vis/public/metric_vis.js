@@ -1,7 +1,7 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
