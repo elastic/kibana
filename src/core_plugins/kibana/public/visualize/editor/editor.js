@@ -77,10 +77,13 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   });
 
   let stateMonitor;
-  const $appStatus = this.appStatus = {};
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
+
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
 
   // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
@@ -186,7 +189,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
-      $appStatus.dirty = status.dirty;
+      $appStatus.dirty = status.dirty || !savedVis.id;
     });
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
