@@ -1,4 +1,4 @@
-export function GenerateMappingChainProvider(Promise) {
+export function FilterBarLibGenerateMappingChainProvider(Promise) {
 
   const noop = function () {
     return Promise.reject(new Error('No mappings have been found for filter.'));

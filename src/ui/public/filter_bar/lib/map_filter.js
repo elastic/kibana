@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { GenerateMappingChainProvider } from './generate_mapping_chain';
+import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
 import { FilterBarLibMapTermsProvider } from './map_terms';
 import { FilterBarLibMapRangeProvider } from './map_range';
@@ -12,7 +12,7 @@ import { FilterBarLibMapDefaultProvider } from './map_default';
 
 export function FilterBarLibMapFilterProvider(Promise, Private) {
 
-  const generateMappingChain = Private(GenerateMappingChainProvider);
+  const generateMappingChain = Private(FilterBarLibGenerateMappingChainProvider);
 
   /** Mappers **/
 
