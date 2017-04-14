@@ -2,7 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import dataLabel from 'ui/vislib/lib/_data_label';
 import VislibLibDispatchProvider from '../lib/dispatch';
-import TooltipProvider from 'ui/vis/components/tooltip';
+import { TooltipProvider } from 'ui/vis/components/tooltip';
 export default function ChartBaseClass(Private) {
 
   const Dispatch = Private(VislibLibDispatchProvider);
