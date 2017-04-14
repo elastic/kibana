@@ -440,8 +440,7 @@ class KibanaMap extends EventEmitter {
 
     let bounds = null;
     this._layers.forEach(layer => {
-      const leafletLayer = layer.getLeafletLayer();
-      const b = leafletLayer.getBounds();
+      const b = layer.getBounds();
       if (bounds) {
         bounds.extend(b);
       } else {

@@ -1,4 +1,5 @@
 import KibanaMapLayer from './kibana_map_layer';
+import L from 'leaflet';
 import _ from 'lodash';
 import Heatmap from './markers/heatmap';
 import ScaledCircles from './markers/scaled_circles';
@@ -15,7 +16,8 @@ export default class GeohashLayer extends KibanaMapLayer {
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
-
+    const geojson = L.geoJson(this._geohashGeoJson);
+    this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
   }
 
@@ -60,6 +62,10 @@ export default class GeohashLayer extends KibanaMapLayer {
 
   movePointer(...args) {
     this._geohashMarkers.movePointer(...args);
+  }
+
+  getBounds() {
+    return this._bounds;
   }
 
   updateExtent() {
