@@ -1,32 +1,36 @@
 import React, { PropTypes } from 'react';
 import createLegendSeries from '../lib/create_legend_series';
+import reactcss from 'reactcss';
 
 function VerticalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
-  const seriesStyle = {};
-  const legendStyle = {};
-  const controlStyle = {};
-  let openClass = 'fa-chevron-left';
-  let closeClass = 'fa-chevron-right';
-  if (props.legendPosition === 'left') {
-    openClass = 'fa-chevron-right';
-    closeClass = 'fa-chevron-left';
-    legendStyle.order = '-1';
-    controlStyle.order = '2';
-  }
-  let legendControlClass = `fa ${closeClass}`;
-  legendStyle.width = 200;
-  if (!props.showLegend) {
-    legendStyle.width = 12;
-    seriesStyle.display = 'none';
-    legendControlClass = `fa ${openClass}`;
-  }
+  const hideLegend = !props.showLegend;
+  const leftLegend = props.legendPosition === 'left';
+
+  const styles = reactcss({
+    default: {
+      legend: { width: 200 }
+    },
+    leftLegend: {
+      legend: { order: '-1' },
+      control: { order: '2' }
+    },
+    hideLegend: {
+      legend: { width: 12 },
+      series: { display: 'none' },
+    }
+  }, { hideLegend, leftLegend });
+
+  const openClass = leftLegend ? 'fa-chevron-right' : 'fa-chevron-left';
+  const closeClass = leftLegend ? 'fa-chevron-left' : 'fa-chevron-right';
+  const legendControlClass = hideLegend ? `fa ${openClass}` : `fa ${closeClass}`;
+
   return (
-    <div className="rhythm_chart__legend" style={legendStyle}>
-      <div className="rhythm_chart__legend-control" style={controlStyle}>
+    <div className="rhythm_chart__legend" style={styles.legend}>
+      <div className="rhythm_chart__legend-control" style={styles.control}>
         <i className={legendControlClass} onClick={props.onClick}/>
       </div>
-      <div className="rhythm_chart__legend-series" style={seriesStyle}>
+      <div className="rhythm_chart__legend-series" style={styles.series}>
         { rows }
       </div>
     </div>
