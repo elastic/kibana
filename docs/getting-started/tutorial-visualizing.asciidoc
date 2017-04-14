@@ -1,19 +1,26 @@
 [[tutorial-visualizing]]
 == Visualizing Your Data
 
-To start visualizing your data, click *Visualize* in the side navigation:
-
-image::images/tutorial-visualize.png[]
+To start visualizing your data, click *Visualize* in the side navigation.
 
 The *Visualize* tools enable you to view your data in several ways. For example,
 let's use that venerable visualization, the pie chart, to get some insight
-into the account balances in the sample bank account data.
+into the account balances in the sample bank account data. To get started, click the big blue
+**Create a visualization** button in the center of the screen.
 
-To get started, click *Pie chart* in the list of visualizations. You can build
-visualizations from saved searches, or enter new search criteria. To enter
+image::images/tutorial-visualize-landing.png[]
+
+There are a number of visualization types to choose from. Let's click the one
+called *Pie*.
+
+image::images/tutorial-visualize-wizard-step-1.png[]
+
+You can build visualizations from saved searches, or enter new search criteria. To enter
 new search criteria, you first need to select an index pattern to specify
 what indices to search. We want to search the account data, so select the `ba*`
 index pattern.
+
+image::images/tutorial-visualize-wizard-step-2.png[]
 
 The default search matches all documents. Initially, a single "slice"
 encompasses the entire pie:
