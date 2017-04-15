@@ -222,8 +222,11 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
 
-    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-      timefilter.enabled = !!timeField;
+    $scope.$watchMulti([
+      'searchSource.get("index").timeFieldName',
+      'vis.type.requiresTimePicker',
+    ], function ([timeField, requiresTimePicker]) {
+      timefilter.enabled = Boolean(timeField || requiresTimePicker);
     });
 
     // update the searchSource when filters update
