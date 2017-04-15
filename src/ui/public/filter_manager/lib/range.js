@@ -1,8 +1,8 @@
 import _ from 'lodash';
 const OPERANDS_IN_RANGE = 2;
 
-export default function buildRangeFilter(field, params, indexPattern, formattedValue) {
-  const filter = { meta: { index: indexPattern.id } };
+export default function buildRangeFilter(field, params, indexPattern, formattedValue, negate = false) {
+  const filter = { meta: { negate, index: indexPattern.id } };
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
   params = _.clone(params);

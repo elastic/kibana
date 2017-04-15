@@ -25,7 +25,9 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   return {
     restrict: 'E',
     template: template,
-    scope: {},
+    scope: {
+      indexPattern: '='
+    },
     link: function ($scope) {
       // bind query filter actions to the scope
       [
@@ -85,6 +87,12 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       $scope.clearFilterBar = function () {
         $scope.newFilters = [];
         $scope.changeTimeFilter = null;
+      };
+
+      $scope.getUniqueKeys = () => {
+        return _($scope.filters)
+        .map(filter => filter.meta.key)
+        .uniq().value();
       };
 
       // update the scope filter list on filter changes

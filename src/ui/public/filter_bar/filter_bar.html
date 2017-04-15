@@ -9,8 +9,15 @@
   </form>
 </div>
 
-<div class="filter-bar" ng-show="filters.length">
-  <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters track by $index">
+<div class="filter-bar kuiBar">
+  <div class="kuiSection" ng-if="filters.length">
+    Currently filtering your searches against
+    <span ng-repeat="key in getUniqueKeys()">
+      <span ng-if="getUniqueKeys().length > 1 && $last">and</span>
+      <strong>{{key}}</strong><span ng-if="getUniqueKeys().length > 2 && !$last">,</span>
+    </span>
+  </div>
+<!-- <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters track by $index">
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>
@@ -106,4 +113,16 @@
       <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters">Remove</a></div>
     </div>
   </div>
+</div> -->
+
+  <div class="filter-link kuiBarSection">
+    <div class="filter-description small">
+      <a ng-click="showFilterActions = !showFilterActions">
+        Apply search filters
+        <i class="fa" ng-class="{'fa-caret-down': !showFilterActions, 'fa-caret-up': showFilterActions}"></i>
+      </a>
+    </div>
+  </div>
 </div>
+
+<filter-helper index-pattern="indexPattern" ng-show="showFilterActions" on-apply="showFilterActions = !showFilterActions"></filter-helper>

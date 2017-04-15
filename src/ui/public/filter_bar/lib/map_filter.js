@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import GenerateMappingChainProvider from './generate_mapping_chain';
 import MapMatchAllProvider from './map_match_all';
+import MapMatchProvider from './map_match';
 import MapTermsProvider from './map_terms';
 import MapRangeProvider from './map_range';
 import MapExistsProvider from './map_exists';
@@ -31,6 +32,7 @@ export default function mapFilterProvider(Promise, Private) {
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
     Private(MapMatchAllProvider),
+    Private(MapMatchProvider),
     Private(MapTermsProvider),
     Private(MapRangeProvider),
     Private(MapExistsProvider),
