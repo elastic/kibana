@@ -1,0 +1,37 @@
+[[timelion-create]]
+=== Creating time series visualizations
+
+This tutorial will be using the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat] to walk you through a number of functions that Timelion offers. To get started, download Metricbeat and follow the https://www.elastic.co/downloads/beats/metricbeat[instructions here] to start ingesting the data locally.
+
+The first visualization you will create compares the average percentage of CPU time spent in user space to the previous hours. In order to create this visualization, we’ll need to create two Timelion expressions. One with the current average of `system.cpu.user.pct` and another with the average from the previous hour.
+
+To start, you will need to define an `index`, `timefield` and `metric` in the first expression. Go ahead and enter the below expression into the Timelion query bar.
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
+----------------------------------
+
+image::images/timelion-create01.png[]
+{nbsp}
+
+Now you need to add a another series with data from the previous hour for comparison. To do so, you'll have to add an `offset` arguement to the `.es()` function. `offset` will offset the series retrieval by a date expression. For this example, you'll want to look at the previous hour and will be using the date expression `-1h`. Using a comma to separate our two series, enter the following expression into the Timelion query bar:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct'), .es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
+----------------------------------
+
+image::images/timelion-create02.png[]
+{nbsp}
+
+It’s a bit hard to differentiate the two series. Customize the labels in order to easily distinguish the two series. You can always append the `.label()` function to any expression to add a custom label. Enter the below expression into the Timelion query bar to customize your labels:
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour')
+----------------------------------
+
+image::images/timelion-create03.png[]
+{nbsp}
+
+Save the entire Timelion sheet as _Metricbeat Example_. As a best practice, you should be saving any significant changes made to this sheet as you progress through the tutorial.
