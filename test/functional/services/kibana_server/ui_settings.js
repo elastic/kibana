@@ -44,6 +44,14 @@ export class KibanaServerUiSettings {
     return defaultIndex;
   }
 
+  /**
+   *  Sets the auto-hide timeout to 1 hour so that auto-hide is
+   *  effectively disabled. This gives the tests more time to
+   *  interact with the notifications without having to worry about
+   *  them disappearing if the tests are too slow.
+   *
+   *  @return {Promise<undefined>}
+   */
   async disableToastAutohide() {
     await this.update({
       'notifications:lifetime:banner': 360000,
