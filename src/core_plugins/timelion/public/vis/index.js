@@ -29,6 +29,7 @@ define(function (require) {
         editor: require('plugins/timelion/vis/timelion_vis_params.html')
       },
       requiresSearch: false,
+      requiresTimePicker: true,
       implementsRenderComplete: true,
     });
   }

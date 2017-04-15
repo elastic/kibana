@@ -29,6 +29,7 @@ export default function MetricsVisProvider(Private) {
       editor: require('./editor.html')
     },
     requiresSearch: false,
+    requiresTimePicker: true,
     implementsRenderComplete: true,
   });
 }
