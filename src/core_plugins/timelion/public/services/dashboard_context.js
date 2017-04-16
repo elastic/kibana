@@ -1,10 +1,11 @@
 import _ from 'lodash';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 require('ui/state_management/app_state');
 
 
 module.exports = function dashboardContext(Private, getAppState) {
   return function () {
-    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };
     const filterBarFilters = queryFilter.getFilters();
     const queryBarFilter = getAppState().query;

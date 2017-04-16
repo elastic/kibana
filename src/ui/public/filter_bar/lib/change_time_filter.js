@@ -1,6 +1,7 @@
 import moment from 'moment';
 import _ from 'lodash';
-export default function changeTimeFilterProvider(timefilter) {
+
+export function FilterBarLibChangeTimeFilterProvider(timefilter) {
   return function (filter) {
     const key = _.keys(filter.range)[0];
     const values = filter.range[key];

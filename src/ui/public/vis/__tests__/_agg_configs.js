@@ -8,10 +8,11 @@ import VisAggConfigProvider from 'ui/vis/agg_config';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import VisSchemasProvider from 'ui/vis/schemas';
+import { IndexedArray } from 'ui/indexed_array';
+
 describe('AggConfigs', function () {
 
   let Vis;
-  let IndexedArray;
   let AggConfig;
   let AggConfigs;
   let SpiedAggConfig;
@@ -34,7 +35,6 @@ describe('AggConfigs', function () {
     Vis = Private(VisProvider);
     SpiedAggConfig = Private(VisAggConfigProvider);
     AggConfigs = Private(VisAggConfigsProvider);
-    IndexedArray = require('ui/indexed_array');
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Schemas = Private(VisSchemasProvider);
   }));

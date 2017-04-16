@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import getHighlightRequestProvider from '../highlight_request';
+import { getHighlightRequestProvider } from '../highlight_request';
 
 describe('getHighlightRequest', () => {
   const queryStringQuery = { query_string: { query: 'foo' } };

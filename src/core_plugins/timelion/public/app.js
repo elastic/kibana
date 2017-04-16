@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
+import { DocTitleProvider } from 'ui/doc_title';
+
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
 require('plugins/timelion/directives/interval/interval');
@@ -57,7 +59,7 @@ app.controller('timelion', function (
   });
 
   const timezone = Private(require('plugins/timelion/services/timezone'))();
-  const docTitle = Private(require('ui/doc_title'));
+  const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;

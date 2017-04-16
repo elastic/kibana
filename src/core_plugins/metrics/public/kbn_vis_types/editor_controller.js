@@ -4,6 +4,8 @@ import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
 import _ from 'lodash';
 import angular from 'angular';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
 const app = modules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
   $location,
@@ -15,7 +17,7 @@ app.controller('MetricsEditorController', (
 ) => {
 
   $scope.embedded = $location.search().embed === 'true';
-  const queryFilter = Private(require('ui/filter_bar/query_filter'));
+  const queryFilter = Private(FilterBarQueryFilterProvider);
   const createFetch = Private(require('../lib/fetch'));
   const fetch = () => {
     const fn = createFetch($scope);

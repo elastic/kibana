@@ -4,7 +4,7 @@ import fieldNameHtml from './field_name.html';
 import fieldTypeHtml from './field_type.html';
 import fieldControlsHtml from '../field_controls.html';
 import uiModules from 'ui/modules';
-import FieldWildcardProvider from 'ui/field_wildcard';
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 import template from './indexed_fields_table.html';
 
 uiModules.get('apps/management')

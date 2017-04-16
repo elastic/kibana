@@ -1,4 +1,4 @@
-import management from 'ui/management';
+import { management } from 'ui/management';
 import './create_index_pattern';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';

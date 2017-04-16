@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import TopHitProvider from 'ui/agg_types/metrics/top_hit';
+import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
 import VisProvider from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -15,7 +15,7 @@ describe('Top hit metric', function () {
     ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
       const indexPattern = Private(StubbedIndexPattern);
-      topHitMetric = Private(TopHitProvider);
+      topHitMetric = Private(AggTypesMetricsTopHitProvider);
 
       const params = {};
       if (field) {

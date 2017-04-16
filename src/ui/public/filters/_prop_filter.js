@@ -7,7 +7,7 @@ import _ from 'lodash';
  *
  * @returns {function} - the filter function which can be registered with angular
  */
-function propFilter(prop) {
+export function propFilter(prop) {
   /**
    * List filtering function which accepts an array or list of values that a property
    * must contain
@@ -55,5 +55,3 @@ function propFilter(prop) {
     });
   };
 }
-
-export default propFilter;

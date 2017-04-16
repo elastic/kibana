@@ -2,7 +2,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import $ from 'jquery';
 
 describe('Binder class', function () {

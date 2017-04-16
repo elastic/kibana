@@ -39,7 +39,7 @@ import 'ui/watch_multi';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
 import template from './kbn_top_nav.html';
-import KbnTopNavControllerProvider from './kbn_top_nav_controller';
+import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
 import './bread_crumbs/bread_crumbs';
 

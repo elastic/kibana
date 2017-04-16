@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterBarLibMapGeoBoundingBoxProvider from 'ui/filter_bar/lib/map_geo_bounding_box';
+import { FilterBarLibMapGeoBoundingBoxProvider } from 'ui/filter_bar/lib/map_geo_bounding_box';
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoBoundingBox()', function () {

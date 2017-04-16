@@ -5,11 +5,11 @@ import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
-import directivesProvider from '../directives';
+import { directivesProvider } from '../directives';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-export default function (chrome, internals) {
+export function initAngularApi(chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
 
