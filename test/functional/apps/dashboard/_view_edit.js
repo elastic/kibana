@@ -2,12 +2,16 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const remote = getService('remote');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
   const dashboardName = 'Dashboard View Edit Test';
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await kibanaServer.uiSettings.disableToastAutohide();
+      await remote.refresh();
     });
 
     after(async function () {
