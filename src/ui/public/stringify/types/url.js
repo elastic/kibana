@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import urlTemplate from 'ui/stringify/editors/url.html';
 import { getHighlightHtml } from 'ui/highlight';
 

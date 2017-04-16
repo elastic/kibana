@@ -1,5 +1,6 @@
-import dedupFilters from 'ui/filter_bar/lib/dedup_filters';
+import { dedupFilters } from 'ui/filter_bar/lib/dedup_filters';
 import expect from 'expect.js';
+
 describe('Filter Bar Directive', function () {
   describe('dedupFilters(existing, filters)', function () {
 

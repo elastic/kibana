@@ -1,7 +1,7 @@
 import chrome from 'ui/chrome';
 import _ from 'lodash';
 
-export default function ($http) {
+export function EnhanceFieldsWithCapabilitiesProvider($http) {
 
   return function (fields, indices) {
     return $http.get(chrome.addBasePath(`/api/kibana/${indices}/field_capabilities`))

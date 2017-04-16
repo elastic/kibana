@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import angular from 'angular';
-import highlightTags from './highlight_tags';
-import htmlTags from './html_tags';
+import { highlightTags } from './highlight_tags';
+import { htmlTags } from './html_tags';
 
-export default function getHighlightHtml(fieldValue, highlights) {
+export function getHighlightHtml(fieldValue, highlights) {
   let highlightHtml = (typeof fieldValue === 'object')
     ? angular.toJson(fieldValue)
     : fieldValue;

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';
 import './styles/main.less';

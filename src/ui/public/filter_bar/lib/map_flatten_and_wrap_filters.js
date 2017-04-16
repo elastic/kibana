@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
-export default function mapFlattenAndWrapFilters(Private) {
+import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+
+export function FilterBarLibMapFlattenAndWrapFiltersProvider(Private) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   return function (filters) {
     return mapAndFlattenFilters(filters).then(function (filters) {
