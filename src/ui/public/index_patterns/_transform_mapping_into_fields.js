@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
+import { IndexPatternsMapFieldProvider } from 'ui/index_patterns/_map_field';
 import { ConflictTracker } from 'ui/index_patterns/_conflict_tracker';
 
-export default function transformMappingIntoFields(Private, kbnIndex, config) {
+export function IndexPatternsTransformMappingIntoFieldsProvider(Private, kbnIndex, config) {
   const mapField = Private(IndexPatternsMapFieldProvider);
 
   /**

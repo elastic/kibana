@@ -2,8 +2,8 @@ import expect from 'expect.js';
 import { reject } from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-import AggTypesParamTypesFieldProvider from 'ui/agg_types/param_types/field';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
 
 describe('Field', function () {
 

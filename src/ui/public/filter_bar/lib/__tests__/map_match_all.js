@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterBarLibMapMatchAllProvider from 'ui/filter_bar/lib/map_match_all';
+import { FilterBarLibMapMatchAllProvider } from 'ui/filter_bar/lib/map_match_all';
 
 describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {

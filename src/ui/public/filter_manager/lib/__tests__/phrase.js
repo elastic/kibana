@@ -1,5 +1,5 @@
 
-import { buildInlineScriptForPhraseFilter, default as fn } from 'ui/filter_manager/lib/phrase';
+import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
@@ -17,7 +17,7 @@ describe('Filter Manager', function () {
     }));
 
     it('should be a function', function () {
-      expect(fn).to.be.a(Function);
+      expect(buildPhraseFilter).to.be.a(Function);
     });
 
     it('should return a match query filter when passed a standard field', function () {
@@ -29,7 +29,7 @@ describe('Filter Manager', function () {
           }
         }
       };
-      expect(fn(indexPattern.fields.byName.bytes, 5, indexPattern)).to.eql(expected);
+      expect(buildPhraseFilter(indexPattern.fields.byName.bytes, 5, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
@@ -41,7 +41,7 @@ describe('Filter Manager', function () {
           value: 5,
         }
       });
-      expect(fn(indexPattern.fields.byName['script number'], 5, indexPattern)).to.eql(expected);
+      expect(buildPhraseFilter(indexPattern.fields.byName['script number'], 5, indexPattern)).to.eql(expected);
     });
   });
 

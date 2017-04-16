@@ -6,7 +6,7 @@ import { siblingPipelineAggController } from './sibling_pipeline_agg_controller'
 import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
 import metricAggTemplate from 'ui/agg_types/controls/sub_metric.html';
 
-const SiblingPipelineAggHelperProvider = function (Private) {
+export const SiblingPipelineAggHelperProvider = function (Private) {
 
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
@@ -89,4 +89,3 @@ const SiblingPipelineAggHelperProvider = function (Private) {
 
 };
 
-export default SiblingPipelineAggHelperProvider;

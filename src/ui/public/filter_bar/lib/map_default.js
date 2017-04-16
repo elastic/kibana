@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
-export default function mapDefaultProvider(Promise) {
+
+export function FilterBarLibMapDefaultProvider(Promise) {
 
   const metaProperty = /(^\$|meta)/;
 

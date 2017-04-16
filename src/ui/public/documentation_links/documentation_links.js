@@ -6,7 +6,7 @@ const minor = semver.minor(metadata.version);
 const urlVersion = `${major}.${minor}`;
 const baseUrl = 'https://www.elastic.co/';
 
-export default {
+export const documentationLinks = {
   filebeat: {
     installation: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-installation.html`,
     configuration: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-configuration.html`,

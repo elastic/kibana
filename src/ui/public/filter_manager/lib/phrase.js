@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function buildPhraseFilter(field, value, indexPattern) {
+
+export function buildPhraseFilter(field, value, indexPattern) {
   const filter = { meta: { index: indexPattern.id } };
 
   if (field.scripted) {

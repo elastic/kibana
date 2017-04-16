@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import 'ui/field_format_editor/pattern/pattern';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
 import dateTemplate from 'ui/stringify/editors/date.html';
 
