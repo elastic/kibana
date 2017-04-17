@@ -16,7 +16,7 @@ export default (grunt) => {
         '--description', capitalize(name),
         '--user', user,
         '--group', group,
-        '--log-path', `${path.logs}/`,
+        '--log-file-stdout', `${path.logs}/`,
         '-p', service.name,
         '-v', service.version,
         path.kibanaBin,
