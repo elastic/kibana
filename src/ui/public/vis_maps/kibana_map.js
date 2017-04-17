@@ -66,7 +66,7 @@ const LegendControl = L.Control.extend({
  * Collects map functionality required for Kibana.
  * Serves as simple abstraction for leaflet as well.
  */
-class KibanaMap extends EventEmitter {
+export class KibanaMap extends EventEmitter {
 
   constructor(containerNode, options) {
 
@@ -514,12 +514,6 @@ class KibanaMap extends EventEmitter {
       this.setCenter(centerFromUIState[0], centerFromUIState[1]);
     }
   }
-
-
 }
 
-
-
-
-export default KibanaMap;
 

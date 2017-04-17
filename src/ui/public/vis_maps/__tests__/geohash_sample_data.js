@@ -1338,4 +1338,4 @@ const sampleData = `{
   "properties": {"min": 2, "max": 1418, "zoom": 3, "center": [39.57182223734374, -109.51171875]}
 }`;
 
-export default JSON.parse(sampleData);
+export const GeoHashSampleData = JSON.parse(sampleData);
