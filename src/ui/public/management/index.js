@@ -1,23 +1,24 @@
-import ManagementSection from './section';
+import { ManagementSection } from './section';
 
-const sections = new ManagementSection('management', {
+export const management = new ManagementSection('management', {
   display: 'Management'
 });
 
 // TODO: where should this live?
-sections.register('data', {
+management.register('data', {
   display: 'Connect Data',
   order: 0
 });
 
-sections.register('elasticsearch', {
+management.register('elasticsearch', {
   display: 'Elasticsearch',
   order: 10
 });
 
-sections.register('kibana', {
+management.register('kibana', {
   display: 'Kibana',
   order: 20,
 });
 
-export default sections;
+// Default export style used in x-pack. TODO: convert to named and remove.
+export default management;

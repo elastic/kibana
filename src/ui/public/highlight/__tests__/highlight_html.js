@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import highlightTags from '../highlight_tags';
-import htmlTags from '../html_tags';
-import getHighlightHtml from '../highlight_html';
+import { highlightTags } from '../highlight_tags';
+import { htmlTags } from '../html_tags';
+import { getHighlightHtml } from '../highlight_html';
 
 describe('getHighlightHtml', function () {
   const text = '' +

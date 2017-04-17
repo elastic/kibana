@@ -1,4 +1,4 @@
-import KbnTopNavControllerProvider from 'ui/kbn_top_nav/kbn_top_nav_controller';
+import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
 import storage from '../storage';
 
 export function SenseTopNavController(Private) {
@@ -32,8 +32,8 @@ export function SenseTopNavController(Private) {
   ]);
 
   if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    controller.open('welcome')
+    controller.open('welcome');
   }
 
-  return controller
+  return controller;
 }

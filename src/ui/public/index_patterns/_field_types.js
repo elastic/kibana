@@ -1,5 +1,6 @@
-import IndexedArray from 'ui/indexed_array';
-export default function IndexPatternFieldTypes() {
+import { IndexedArray } from 'ui/indexed_array';
+
+export function IndexPatternsFieldTypesProvider() {
 
   return new IndexedArray({
     index: ['name'],

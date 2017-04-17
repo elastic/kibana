@@ -1,5 +1,5 @@
 import 'ui/field_editor';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import UrlProvider from 'ui/url';
 import uiRoutes from 'ui/routes';
 import template from './scripted_field_editor.html';

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import html from 'ui/doc_table/doc_table.html';
-import getSort from 'ui/doc_table/lib/get_sort';
+import { getSort } from 'ui/doc_table/lib/get_sort';
 import 'ui/doc_table/doc_table.less';
 import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';

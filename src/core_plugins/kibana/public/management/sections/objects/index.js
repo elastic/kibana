@@ -1,4 +1,4 @@
-import management from 'ui/management';
+import { management } from 'ui/management';
 import 'plugins/kibana/management/sections/objects/_view';
 import 'plugins/kibana/management/sections/objects/_objects';
 import 'ace';

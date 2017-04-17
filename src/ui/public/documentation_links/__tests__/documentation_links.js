@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import docLinks from '../documentation_links';
+import { documentationLinks } from '../documentation_links';
 import semver from 'semver';
 import { metadata } from '../../metadata';
 
@@ -10,7 +10,7 @@ const urlVersion = `${major}.${minor}`;
 describe('documentation link service', function () {
 
   it('should inject Kibana\'s major.minjor version into doc links', function () {
-    expect(docLinks.filebeat.configuration).to.contain(urlVersion);
+    expect(documentationLinks.filebeat.configuration).to.contain(urlVersion);
   });
 
 });

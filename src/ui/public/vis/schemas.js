@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 
 export default function VisTypeSchemasFactory(Private) {

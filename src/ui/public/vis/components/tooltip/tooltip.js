@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import positionTooltip from './position_tooltip';
 import $ from 'jquery';
 
