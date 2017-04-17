@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should not be enable creation', function () {
-      return PageObjects.settings.getCreateButton().isEnabled()
+      return PageObjects.settings.getCreateIndexPatternButton().isEnabled()
       .then(function (enabled) {
         expect(enabled).to.not.be.ok();
       });

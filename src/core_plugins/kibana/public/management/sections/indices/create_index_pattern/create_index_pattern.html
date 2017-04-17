@@ -22,6 +22,7 @@
             <p class="help-block" ng-if="newIndexPattern.isTimeBased && newIndexPattern.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
               <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate="KIBANA-DATE_FORMAT_DOCS"></a></small></p>
             <input
+              data-test-subj="createIndexPatternNameInput"
               ng-model="newIndexPattern.name"
               ng-attr-placeholder="{{newIndexPattern.defaultName}}"
               ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
@@ -30,18 +31,20 @@
               name="name"
               required
               type="text"
-              class="form-control">
-              <small ng-show="newIndexPattern.nameInterval.name == 'weeks'">
-                <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
-                <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
-                <span translate="KIBANA-SEE"></span>
-                <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
-              </small>
-            </div>
+              class="form-control"
+            >
+            <small ng-show="newIndexPattern.nameInterval.name == 'weeks'">
+              <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
+              <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
+              <span translate="KIBANA-SEE"></span>
+              <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate="KIBANA-WIKI_ISO_WEEK_DATE"></a>
+            </small>
+          </div>
 
           <div class="form-group time-and-pattern">
             <label>
               <input
+                data-test-subj="createIndexPatternIsTimeBasedCheckBox"
                 ng-model="newIndexPattern.isTimeBased"
                 type="checkbox">
               <span translate="KIBANA-CONTAINS_TIME_BASED_EVENTS"></span>
@@ -59,13 +62,14 @@
               </small>
             </label>
             <select
+              data-test-subj="createIndexPatternTimeFieldSelect"
               ng-disabled="ctrl.fetchFieldsError"
               ng-required="!ctrl.fetchFieldsError"
               ng-options="field.name for field in ctrl.dateFields"
               ng-model="newIndexPattern.timeField"
               auto-select-if-only-one="ctrl.dateFields"
-              class="form-control">
-            </select>
+              class="form-control"
+            ></select>
           </div>
 
           <div class="form-group" ng-if="canExpandIndices()">
@@ -89,7 +93,11 @@
 
           <div class="form-group time-and-pattern">
             <label ng-if="newIndexPattern.isTimeBased">
-              <input ng-model="newIndexPattern.nameIsPattern" type="checkbox">
+              <input
+                data-test-subj="createIndexPatternNameIsPatternCheckBox"
+                ng-model="newIndexPattern.nameIsPattern"
+                type="checkbox"
+              >
               <span translate="KIBANA-INDEX_NAME_CREATED_BY_EVENT_TIMES"></span>
               <small translate="KIBANA-DEPRECATED"></small>
             </label>
@@ -161,7 +169,7 @@
           </section>
 
           <button
-            data-test-subj="submitCreateIndexPatternFromExistingForm"
+            data-test-subj="createIndexPatternCreateButton"
             ng-disabled="form.$invalid || ctrl.fetchFieldsError"
             ng-class="ctrl.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"

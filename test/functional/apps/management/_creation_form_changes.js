@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }) {
       })
       // try to find the checkbox (this shouldn fail)
       .then(function () {
-        const waitTime = 10000;
-        return PageObjects.settings.getTimeBasedIndexPatternCheckbox(waitTime);
+        return PageObjects.settings.getTimeBasedIndexPatternCheckbox();
       })
       .then(function () {
         PageObjects.common.saveScreenshot('Settings-indices-hide-time-based-index-pattern');
