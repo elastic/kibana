@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { ContainerTooSmall } from 'ui/errors';
 
-export default function ErrorHandlerFactory() {
+export function VislibLibErrorHandlerProvider() {
 
   /**
    * Common errors shared between constructors

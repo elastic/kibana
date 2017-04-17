@@ -2,13 +2,13 @@
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
 import _ from 'lodash';
-import VisTypesProvider from './types';
-import VislibLibDataProvider from './data';
+import { VislibTypesProvider } from './types';
+import { VislibLibDataProvider } from './data';
 
-export default function VisConfigFactory(Private) {
+export function VislibVisConfigProvider(Private) {
 
   const Data = Private(VislibLibDataProvider);
-  const visTypes = Private(VisTypesProvider);
+  const visTypes = Private(VislibTypesProvider);
   const DEFAULT_VIS_CONFIG = {
     style: {
       margin : { top: 10, right: 3, bottom: 5, left: 3 }

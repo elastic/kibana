@@ -1,9 +1,9 @@
-import VislibVisualizationsColumnChartProvider from './column_chart';
-import VislibVisualizationsLineChartProvider from './line_chart';
-import VislibVisualizationsAreaChartProvider from './area_chart';
-import VislibVisualizationsHeatmapChartProvider from './heatmap_chart';
+import { VislibVisualizationsColumnChartProvider } from './column_chart';
+import { VislibVisualizationsLineChartProvider } from './line_chart';
+import { VislibVisualizationsAreaChartProvider } from './area_chart';
+import { VislibVisualizationsHeatmapChartProvider } from './heatmap_chart';
 
-export default function SeriesTypeFactory(Private) {
+export function VislibVisualizationsSeriesTypesProvider(Private) {
 
   return {
     histogram: Private(VislibVisualizationsColumnChartProvider),

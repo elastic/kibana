@@ -5,13 +5,13 @@ import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import './styles/main.less';
-import VisConifgProvider from './lib/vis_config';
-import VisHandlerProvider from './lib/handler';
+import { VislibVisConfigProvider } from './lib/vis_config';
+import { VisHandlerProvider } from './lib/handler';
 
-export default function VisFactory(Private) {
+export function VislibVisProvider(Private) {
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Events = Private(EventsProvider);
-  const VisConfig = Private(VisConifgProvider);
+  const VisConfig = Private(VislibVisConfigProvider);
   const Handler = Private(VisHandlerProvider);
 
   /**

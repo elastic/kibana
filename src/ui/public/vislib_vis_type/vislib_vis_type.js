@@ -9,7 +9,7 @@ import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 
-export default function VislibVisTypeFactory(Private) {
+export function VislibVisTypeVislibVisTypeProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);

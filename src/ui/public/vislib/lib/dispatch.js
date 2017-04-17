@@ -3,7 +3,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
-export default function DispatchClass(Private, config) {
+export function VislibLibDispatchProvider(Private, config) {
 
   /**
    * Handles event responses
