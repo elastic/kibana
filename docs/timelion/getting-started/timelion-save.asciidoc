@@ -1,7 +1,7 @@
 [[timelion-save]]
 === Add to dashboard
 
-You’ve officially harnessed the power of Timelion to create multiple time series visualizations. The final step of this tutorial is to add your new visualizations to a dashboard. Below, this section will show you how to save a visualization from a Timelion sheet and add it to an existing dashboard.
+You’ve officially harnessed the power of Timelion to create time series visualizations. The final step of this tutorial is to add your new visualizations to a dashboard. Below, this section will show you how to save a visualization from your Timelion sheet and add it to an existing dashboard.
 
 To save a Timelion visualization as a dashboard panel, follow the steps below.
 
@@ -13,9 +13,9 @@ To save a Timelion visualization as a dashboard panel, follow the steps below.
 image::images/timelion-save01.png[]
 {nbsp}
 
-Now you can add this dashboard panel to any dashboard you’d like. This visualization will now be listed in the Visualize app. Go ahead and follow the same process for the rest of the visualizations you created.
+Now you can add this dashboard panel to any dashboard you’d like. This visualization will now be listed in the Visualize list. Go ahead and follow the same process for the rest of the visualizations you created.
 
-Now, create a new or open an existing dashboard to add the Timelion visualizations as you would any other visualization.
+Create a new dashboard or open an existing one to add the Timelion visualizations as you would any other visualization.
 
 image::images/timelion-save02.png[]
 {nbsp}
