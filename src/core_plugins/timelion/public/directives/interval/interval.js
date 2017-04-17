@@ -9,6 +9,7 @@ app.directive('timelionInterval', function ($compile, $timeout) {
     restrict: 'E',
     scope: {
       model: '=', // The interval model
+      inHeader: '=',
     },
     template: html,
     link: function ($scope, $elem) {
