@@ -120,4 +120,6 @@ export function close(moduleName) {
   delete existingModules[moduleName];
 }
 
-export default { link, get, close };
+export const uiModules = { link, get, close };
+// Used prolifically. Keep around until all are converted to the named version. TODO: switch and remove.
+export default uiModules;
