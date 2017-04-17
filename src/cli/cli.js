@@ -6,6 +6,10 @@ import serveCommand from './serve/serve';
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/kibana');
 
+process.on('SIGTERM', function () {
+     process.exit(0);
+});
+
 program
 .version(pkg.version)
 .description(
