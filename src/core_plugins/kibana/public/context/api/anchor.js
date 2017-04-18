@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import SearchSourceProvider from 'ui/courier/data_source/search_source';
 
 
 function fetchAnchorProvider(Private) {
