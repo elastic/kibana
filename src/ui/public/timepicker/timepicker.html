@@ -28,13 +28,13 @@
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
             <li ng-class="{active: mode === 'quick' }">
-              <a ng-click="setMode('quick')">quick</a>
+              <a ng-click="setMode('quick')">快速设置时间</a>
             </li>
             <li ng-class="{active: mode === 'relative' }">
-              <a ng-click="setMode('relative')">relative</a>
+              <a ng-click="setMode('relative')">相对时间</a>
             </li>
             <li ng-class="{active: mode === 'absolute' }">
-              <a ng-click="setMode('absolute')">absolute</a>
+              <a ng-click="setMode('absolute')">用户自定义时间</a>
             </li>
           </ul>
         </div>
@@ -131,7 +131,7 @@
                 <div class="kbn-timepicker-section">
                   <div>
                     <label class="small">To:
-                      <a class="label label-default" ng-click="setToNow()">Set To Now</a>
+                      <a class="label label-default" ng-click="setToNow()">设置为当前时间</a>
                     </label>
                     <span ng-show="!absolute.to"><i>Invalid Date</i></span>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
