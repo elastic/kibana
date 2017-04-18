@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
-import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
+import { seedColors } from 'ui/vis/components/color/seed_colors';
 import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
@@ -386,7 +386,7 @@ function getSizeInPixels(tag) {
   return `${tag.size}px`;
 }
 
-const colorScale = d3.scale.ordinal().range(vislibComponentsSeedColorsProvider());
+const colorScale = d3.scale.ordinal().range(seedColors);
 function getFill(tag) {
   return colorScale(tag.text);
 }
