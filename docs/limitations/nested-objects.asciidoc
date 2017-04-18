@@ -1,5 +1,5 @@
 [[nested-objects]]
-== Limitation with nested objects
+== Aggregations with Nested Objects not Supported
 
 Kibana is not able to perform aggregations across fields containing nested
 documents.
@@ -32,6 +32,6 @@ the parent level.
 
 [IMPORTANT]
 ==============================================
-The `include_in_parent` workaround mentioned above is not a supported
-workaround. Please use it at your own risk.
+Using `include_in_parent` as a workaround is not a supported. Use it at your
+own risk.
 ==============================================

@@ -3,7 +3,7 @@
 
 [partintro]
 --
-This section documents certain limitations of Kibana. These limitations exist by design today but may be removed in the future, as Kibana evolves.
+Kibana currently has the following limitations.
 
 * <<nested-objects>>
 
