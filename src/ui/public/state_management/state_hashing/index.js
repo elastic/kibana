@@ -3,7 +3,7 @@ export {
 } from './get_unhashable_states_provider';
 
 export {
-  default as hashUrl,
+  hashUrl,
 } from './hash_url';
 
 export {

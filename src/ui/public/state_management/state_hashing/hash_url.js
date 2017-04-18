@@ -34,7 +34,7 @@ const hashStatesInQuery = (states, query) => {
   return Object.assign({}, query, hashedQuery);
 };
 
-const hashUrl = (states, redirectUrl) => {
+export const hashUrl = (states, redirectUrl) => {
   // we need states to proceed, throwing an error if we don't have any
   if (states === null || !states.length) {
     throw new Error('states parameter must be an Array with length greater than 0');
@@ -73,5 +73,3 @@ const hashUrl = (states, redirectUrl) => {
     protocol: parsedUrl.protocol,
   });
 };
-
-export default hashUrl;
