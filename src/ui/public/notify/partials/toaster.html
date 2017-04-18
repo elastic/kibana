@@ -29,28 +29,37 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.cancelTimer(); notif.showStack = true"
-          >More Info</button>
+          >
+            More Info
+          </button>
           <button
             type="button"
             ng-if="notif.stack && notif.showStack"
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.showStack = false"
-          >Less Info</button>
+          >
+            Less Info
+          </button>
           <button
+            data-test-subj="notifierDismissButton"
             type="button"
             ng-if="notif.accept"
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.accept()"
-          >OK</button>
+          >
+            OK
+          </button>
           <button
             type="button"
             ng-if="notif.address"
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.address()"
-          >Fix it</button>
+          >
+            Fix it
+          </button>
           <button
             type="button"
             class="kuiButton"
