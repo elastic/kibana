@@ -1,39 +1,123 @@
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-import { fetchAnchor } from 'plugins/kibana/context/api/anchor';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+
+import { fetchAnchorProvider } from '../anchor';
 
 
 describe('context app', function () {
-  describe('function fetchAnchor', function () {
-    it('should use the `search` api to query the given index', function () {
-      const indexPatternStub = createIndexPatternStub('index1');
-      const esStub = createEsStub(['hit1']);
+  let fetchAnchor;
+  let SearchSourceStub;
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+  beforeEach(ngMock.module('kibana'));
+
+  beforeEach(ngMock.inject(function createStubs(Private) {
+    SearchSourceStub = createSearchSourceStubProvider([
+      { _id: 'hit1' },
+    ]);
+    Private.stub(SearchSourceProvider, SearchSourceStub);
+
+    fetchAnchor = Private(fetchAnchorProvider);
+  }));
+
+  describe('function fetchAnchor', function () {
+    it('should use the `fetch` method of the SearchSource', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(() => {
-          expect(esStub.search.calledOnce).to.be(true);
-          expect(esStub.search.firstCall.args[0]).to.have.property('index', 'index1');
+          expect(searchSourceStub.fetch.calledOnce).to.be(true);
         });
     });
 
-    it('should include computed fields in the query', function () {
+    it('should configure the SearchSource to not inherit from the implicit root', function () {
       const indexPatternStub = createIndexPatternStub('index1');
-      const esStub = createEsStub(['hit1']);
+      const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(() => {
-          expect(esStub.search.calledOnce).to.be(true);
-          expect(esStub.search.firstCall.args[0].body).to.have.keys([
-            'script_fields', 'docvalue_fields', 'stored_fields']);
+          const inheritsSpy = searchSourceStub.inherits;
+          expect(inheritsSpy.calledOnce).to.be(true);
+          expect(inheritsSpy.firstCall.args[0]).to.eql(false);
+        });
+    });
+
+    it('should set the SearchSource index pattern', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
+        .then(() => {
+          const setIndexSpy = searchSourceStub.set.withArgs('index');
+          expect(setIndexSpy.calledOnce).to.be(true);
+          expect(setIndexSpy.firstCall.args[1]).to.eql(indexPatternStub);
+        });
+    });
+
+    it('should set the SearchSource version flag to true', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
+        .then(() => {
+          const setVersionSpy = searchSourceStub.set.withArgs('version');
+          expect(setVersionSpy.calledOnce).to.be(true);
+          expect(setVersionSpy.firstCall.args[1]).to.eql(true);
+        });
+    });
+
+    it('should set the SearchSource size to 1', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
+        .then(() => {
+          const setSizeSpy = searchSourceStub.set.withArgs('size');
+          expect(setSizeSpy.calledOnce).to.be(true);
+          expect(setSizeSpy.firstCall.args[1]).to.eql(1);
+        });
+    });
+
+    it('should set the SearchSource query to a _uid terms query', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
+        .then(() => {
+          const setQuerySpy = searchSourceStub.set.withArgs('query');
+          expect(setQuerySpy.calledOnce).to.be(true);
+          expect(setQuerySpy.firstCall.args[1]).to.eql({
+            terms: {
+              _uid: ['UID'],
+            },
+          });
+        });
+    });
+
+    it('should set the SearchSource sort order', function () {
+      const indexPatternStub = createIndexPatternStub('index1');
+      const searchSourceStub = new SearchSourceStub();
+
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
+        .then(() => {
+          const setSortSpy = searchSourceStub.set.withArgs('sort');
+          expect(setSortSpy.calledOnce).to.be(true);
+          expect(setSortSpy.firstCall.args[1]).to.eql([
+            { '@timestamp': 'desc' },
+            { '_uid': 'asc' },
+          ]);
         });
     });
 
     it('should reject with an error when no hits were found', function () {
       const indexPatternStub = createIndexPatternStub('index1');
-      const esStub = createEsStub([]);
+      const searchSourceStub = new SearchSourceStub();
+      searchSourceStub._stubHits = [];
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then(
           () => {
             expect().fail('expected the promise to be rejected');
@@ -46,9 +130,13 @@ describe('context app', function () {
 
     it('should return the first hit after adding an anchor marker', function () {
       const indexPatternStub = createIndexPatternStub('index1');
-      const esStub = createEsStub([{ property1: 'value1' }, {}]);
+      const searchSourceStub = new SearchSourceStub();
+      searchSourceStub._stubHits = [
+        { property1: 'value1' },
+        { property2: 'value2' },
+      ];
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(indexPatternStub, 'UID', { '@timestamp': 'desc' })
         .then((anchorDocument) => {
           expect(anchorDocument).to.have.property('property1', 'value1');
           expect(anchorDocument).to.have.property('$$_isAnchor', true);
@@ -67,14 +155,21 @@ function createIndexPatternStub(indices) {
   };
 }
 
-function createEsStub(hits) {
-  return {
-    search: sinon.stub()
-      .returns({
-        hits: {
-          hits,
-          total: hits.length,
-        },
-      }),
+function createSearchSourceStubProvider(hits) {
+  const searchSourceStub = {
+    _stubHits: hits,
+  };
+
+  searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.set = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
+    hits: {
+      hits: searchSourceStub._stubHits,
+      total: searchSourceStub._stubHits.length,
+    },
+  }));
+
+  return function SearchSourceStubProvider() {
+    return searchSourceStub;
   };
 }

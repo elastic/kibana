@@ -1,12 +1,14 @@
 import _ from 'lodash';
 
-import { fetchAnchor } from '../api/anchor';
-import { fetchPredecessors, fetchSuccessors } from '../api/context';
+import { fetchAnchorProvider } from '../api/anchor';
+import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { LOADING_STATUS } from './constants';
 
 
 export function QueryActionsProvider(es, Notifier, Private, Promise) {
+  const fetchAnchor = Private(fetchAnchorProvider);
+  const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
     increasePredecessorCount,
     increaseSuccessorCount,
@@ -29,7 +31,7 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
     setLoadingStatus(state)('anchor', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchAnchor(es, indexPattern, anchorUid, _.zipObject([sort]))
+      fetchAnchor(indexPattern, anchorUid, _.zipObject([sort]))
     ))
       .then(
         (anchorDocument) => {
@@ -54,7 +56,7 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
     setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchPredecessors(es, indexPattern, anchor, _.zipObject([sort]), predecessorCount)
+      fetchPredecessors(indexPattern, anchor, _.zipObject([sort]), predecessorCount)
     ))
       .then(
         (predecessorDocuments) => {
@@ -79,7 +81,7 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
     setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchSuccessors(es, indexPattern, anchor, _.zipObject([sort]), successorCount)
+      fetchSuccessors(indexPattern, anchor, _.zipObject([sort]), successorCount)
     ))
       .then(
         (successorDocuments) => {

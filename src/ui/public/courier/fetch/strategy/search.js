@@ -16,6 +16,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
      */
     reqsFetchParamsToBody: function (reqsFetchParams) {
       const indexToListMapping = {};
+      const timeBounds = timefilter.getActiveBounds();
 
       return Promise.map(reqsFetchParams, function (fetchParams) {
         return Promise.resolve(fetchParams.index)
@@ -24,10 +25,10 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
             return indexList;
           }
 
-          const timeBounds = timefilter.getBounds();
-
           if (!indexToListMapping[indexList.id]) {
-            indexToListMapping[indexList.id] = indexList.toIndexList(timeBounds.min, timeBounds.max);
+            indexToListMapping[indexList.id] = timeBounds
+              ? indexList.toIndexList(timeBounds.min, timeBounds.max)
+              : indexList.toIndexList();
           }
           return indexToListMapping[indexList.id].then(indexList => {
             // Make sure the index list in the cache can't be subsequently updated.
