@@ -45,7 +45,7 @@ uiModules
 
       const getVisEl = getter('[data-visualize-chart]');
       const getVisContainer = getter('[data-visualize-chart-container]');
-      const getSpyContainer = getter('[data-visualize-spy-container]');
+      const getSpyContainer = getter('[data-spy-content-container]');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {

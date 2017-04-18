@@ -30,7 +30,7 @@
       <button
         type="button"
         ng-click="agg.params.ranges.splice($index, 1)"
-        class="btn btn-danger btn-xs">
+        class="kuiButton kuiButton--danger kuiButton--small">
         <i class="fa fa-times"></i>
       </button>
     </td>
@@ -45,8 +45,9 @@
   </p>
 </div>
 
-<div
+<button
   ng-click="agg.params.ranges.push({})"
-  class="sidebar-item-button primary">
+  class="kuiButton kuiButton--primary kuiButton--fullWidth"
+>
   Add Range
-</div>
+</button>
