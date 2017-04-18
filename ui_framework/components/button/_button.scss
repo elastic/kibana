@@ -42,6 +42,17 @@
     align-items: center; /* 1 */
   }
 
+.kuiButton--small {
+  font-size: 12px;
+  padding: 2px 8px 3px;
+  height: 24px;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
 .kuiButton--iconText {
   .kuiButton__icon {
 
