@@ -1,8 +1,16 @@
 <div class="form-group">
   <div ng-repeat="color in editor.formatParams.colors">
     <div class="editor-color">
-      <button ng-if="editor.formatParams.colors.length > 1" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger editor-color-remove">
-        <i aria-hidden="true" class="fa fa-times"></i>
+      <button
+        ng-if="editor.formatParams.colors.length > 1"
+        aria-label="Remove Color"
+        ng-click="removeColor($index)"
+        tooltip="Remove Color"
+        tooltip-append-to-body="true"
+        type="button"
+        class="kuiButton kuiButton--danger kuiButton--small editor-color-remove"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-times"></span>
       </button>
       <div class="form-group" ng-if="editor.formatParams.fieldType === 'number'">
         <label>Range <small>(min:max)</small></label>
@@ -44,9 +52,19 @@
     </div>
   </div>
 
-  <button aria-label="Add Color" ng-click="addColor()" tooltip="Add Color" tooltip-append-to-body="true" type="button" class="btn btn-primary btn-xs">
-      <span class="sr-only">Add Color</span>
-      <i aria-hidden="true" class="fa fa-plus"></i> Add Color
+  <button
+    aria-label="Add Color"
+    ng-click="addColor()"
+    tooltip="Add Color"
+    tooltip-append-to-body="true"
+    type="button"
+    class="kuiButton kuiButton--primary kuiButton--small kuiButton--iconText"
+  >
+      <span
+        aria-hidden="true"
+        class="kuiButton__icon kuiIcon fa-plus"
+      ></span>
+      <span>Add Color</span>
   </button>
 
 </div>
