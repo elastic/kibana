@@ -70,6 +70,30 @@
  * 1. Override Bootstrap.
  * 2. Safari won't respect :enabled:hover/active on links.
  */
+.kuiMenuButton--primary {
+  color: $menuButtonPrimaryTextColor;
+  background-color: $menuButtonPrimaryBackgroundColor;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: $menuButtonPrimaryTextColor !important; /* 1 */
+  }
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: $menuButtonPrimaryTextColor !important; /* 1 */
+    background-color: $menuButtonPrimaryHoverBackgroundColor;
+  }
+
+  &:disabled {
+    background-color: $menuButtonPrimaryDisabledBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
 .kuiMenuButton--danger {
   color: $menuButtonDangerTextColor;
   background-color: $menuButtonDangerBackgroundColor;

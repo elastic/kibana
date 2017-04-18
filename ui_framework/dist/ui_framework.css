@@ -1634,6 +1634,24 @@ body {
  * 1. Override Bootstrap.
  * 2. Safari won't respect :enabled:hover/active on links.
  */
+.kuiMenuButton--primary {
+  color: #ffffff;
+  background-color: #6EADC1; }
+  .kuiMenuButton--primary:focus {
+    color: #ffffff !important;
+    /* 1 */ }
+  .kuiMenuButton--primary:hover, .kuiMenuButton--primary:active {
+    /* 2 */
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #006E8A; }
+  .kuiMenuButton--primary:disabled {
+    background-color: #B6D6E0; }
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
 .kuiMenuButton--danger {
   color: #D76051;
   background-color: #ffffff; }
@@ -2084,6 +2102,9 @@ body {
   color: #191E23;
   border-top: 1px solid #E4E4E4; }
 
+.kuiTableRowCell--wrap .kuiTableRowCell__liner {
+  white-space: normal; }
+
 /**
  * 1. We don't want to create too strong a disconnect between the original row and the row
  *    that contains its expanded details.
@@ -2503,6 +2524,18 @@ body {
 /**
  * 1. Override p.
  */
+.kuiTextTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 700;
+  /* 1 */
+  color: #191E23;
+  line-height: 1.5;
+  font-size: 14px; }
+
+/**
+ * 1. Override p.
+ */
 .kuiText {
   margin: 0;
   /* 1 */
@@ -2512,11 +2545,23 @@ body {
   line-height: 1.5;
   font-size: 14px; }
 
+.kuiSubText {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  color: #191E23;
+  line-height: 1.5;
+  font-size: 12px; }
+
 .kuiSubduedText {
   color: #9fa3a7 !important; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }
+
+.kuiVerticalRhythmSmall + .kuiVerticalRhythmSmall {
+  margin-top: 5px; }
 
 .kuiView {
   background-color: #FFF;
