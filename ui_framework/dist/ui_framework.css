@@ -201,8 +201,6 @@ body {
           align-items: center;
   /* 1 */ }
 
-<<<<<<< HEAD
-=======
 .kuiButton--small {
   font-size: 12px;
   padding: 2px 8px 3px;
@@ -212,7 +210,6 @@ body {
   width: 100%;
   text-align: center; }
 
->>>>>>> Add kuiButton--fullWidth modifier.
 .kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
   margin-right: 8px; }
 
