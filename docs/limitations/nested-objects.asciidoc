@@ -5,5 +5,5 @@ Kibana cannot perform aggregations across fields that contain nested objects.
 
 [IMPORTANT]
 ==============================================
-Using `include_in_parent` as a workaround is not supported and may stop functioning in future releases.
+Using `include_in_parent` or `copy_to` as a workaround is not supported and may stop functioning in future releases.
 ==============================================
