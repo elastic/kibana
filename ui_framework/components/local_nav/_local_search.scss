@@ -1,16 +1,15 @@
 .kuiLocalSearch {
   display: flex;
   width: 100%;
-  height: $localSearchHeight;
 }
 
 .kuiLocalSearchInput {
   flex: 1 1 100%;
-  padding: 5px 15px;
+  padding: 3px 15px;
   font-size: $globalFontSize;
   color: $localNavTextColor;
   background-color: $localSearchBackgroundColor;
-  border: 2px solid $localSearchBackgroundColor;
+  border: 1px solid $localSearchBackgroundColor;
   border-bottom-left-radius: 4px;
   border-top-left-radius: 4px;
   border-bottom-right-radius: 0;
@@ -18,6 +17,10 @@
 
   &.kuiLocalSearchInput-isInvalid {
     border-color: $localSearchBorderColor-isInvalid;
+  }
+
+  &:focus {
+    @include formControlFocus;
   }
 
   @include darkTheme {
@@ -28,6 +31,24 @@
     &.kuiLocalSearchInput-isInvalid {
       border-color: $localSearchBorderColor-isInvalid--darkTheme;
     }
+
+    &:focus {
+      @include formControlFocus;
+    }
+  }
+}
+
+.kuiLocalSearchInput--secondary {
+  height: $localSearchHeight;
+  flex: 0 0 auto;
+  border-radius: 0;
+  border-left-color: $globalFormControlBorderColor;
+
+  @include darkTheme {
+    border-color: $localNavBackgroundColor--darkTheme;
+    border-top-color: $localSearchBackgroundColor--darkTheme;
+    border-bottom-color: $localSearchBackgroundColor--darkTheme;
+    border-right-color: $localSearchBackgroundColor--darkTheme;
   }
 }
 
@@ -43,8 +64,16 @@
   border-bottom-right-radius: 4px;
   border-top-right-radius: 4px;
 
+  &:focus {
+    @include focus($globalFocusColor, $globalBorderColor);
+  }
+
   @include darkTheme {
     color: $localSearchButtonTextColor--darkTheme;
     background-color: $localSearchButtonBackgroundColor--darkTheme;
+
+    &:focus {
+      @include focus($globalFocusColor, $localNavBackgroundColor--darkTheme);
+    }
   }
 }
