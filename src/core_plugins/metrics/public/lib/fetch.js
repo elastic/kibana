@@ -15,7 +15,7 @@ export default (
         panels: [panel]
       };
 
-      return $http.post('../api/metrics/vis/data', params)
+      return $http.post('./api/metrics/vis/data', params)
         .success(resp => {
           $scope.visData = resp;
         })
