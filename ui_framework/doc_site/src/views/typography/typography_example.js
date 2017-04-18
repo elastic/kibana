@@ -11,7 +11,9 @@ import {
 
 const titleHtml = require('./title.html');
 const subTitleHtml = require('./sub_title.html');
+const textTitleHtml = require('./text_title.html');
 const textHtml = require('./text.html');
+const subTextHtml = require('./sub_text.html');
 const subduedHtml = require('./subdued_type.html');
 
 export default props => (
@@ -49,6 +51,22 @@ export default props => (
     </GuideSection>
 
     <GuideSection
+      title="TextTItle"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: textTitleHtml,
+      }]}
+    >
+      <GuideText>
+        Titles for paragraphs.
+      </GuideText>
+
+      <GuideDemo
+        html={textTitleHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
       title="Text"
       source={[{
         type: GuideSectionTypes.HTML,
@@ -61,6 +79,22 @@ export default props => (
 
       <GuideDemo
         html={textHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="SubText"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: subTextHtml,
+      }]}
+    >
+      <GuideText>
+        For really unimportant information.
+      </GuideText>
+
+      <GuideDemo
+        html={subTextHtml}
       />
     </GuideSection>
 

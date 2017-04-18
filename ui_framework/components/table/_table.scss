@@ -78,6 +78,12 @@
   border-top: $globalBorderThin;
 }
 
+.kuiTableRowCell--wrap {
+  .kuiTableRowCell__liner {
+    white-space: normal;
+  }
+}
+
 /**
  * 1. We don't want to create too strong a disconnect between the original row and the row
  *    that contains its expanded details.
