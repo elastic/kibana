@@ -45,10 +45,11 @@
       <a
         ng-href="{{field.details.visualizeUrl}}"
         ng-show="field.visualizable"
-        class="sidebar-item-button primary"
-        data-test-subj="fieldVisualize-{{::field.name}}">
-          Visualize
-          <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
-          ( {{::warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
-          </span>
+        class="kuiButton kuiButton--primary kuiButton--small kuiButton--fullWidth"
+        data-test-subj="fieldVisualize-{{::field.name}}"
+      >
+        Visualize
+        <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
+        ( {{::warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
+        </span>
       </a>
