@@ -23,9 +23,21 @@
         </div>
 
         <div ng-if="showDetails" class="legend-value-details">
-          <div ng-show="canFilter(legendData)">
-            <button class="btn btn-xs filter-button" ng-click="filter(legendData, false)"><i class="fa fa-search-plus"></i></button>
-            <button class="btn btn-xs filter-button" ng-click="filter(legendData, true)"><i class="fa fa-search-minus"></i></button>
+          <div
+            class="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth"
+            ng-show="canFilter(legendData)"
+          >
+            <button
+              class="kuiButton kuiButton--basic kuiButton--small" ng-click="filter(legendData, false)"
+            >
+              <span class="kuiIcon fa-search-plus"></span>
+            </button>
+
+            <button
+              class="kuiButton kuiButton--basic kuiButton--small" ng-click="filter(legendData, true)"
+            >
+              <span class="kuiIcon fa-search-minus"></span>
+            </button>
           </div>
 
           <div class="legend-value-color-picker">
