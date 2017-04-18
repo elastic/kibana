@@ -45,7 +45,7 @@ At any given time the Kibana team at Elastic is working on dozens of features an
 - **P2**: A broadly applicable, high visibility, issue that enhances the usability of Kibana for a majority users.
 - **P3**: Nice-to-have bug fixes or functionality. Work arounds for P3 items generally exist.
 - **P4**: Niche and special interest issues that may not fit our core goals. We would take a high quality pull for this if implemented in such a way that it does not meaningfully impact other functionality or existing code. Issues may also be labeled P4 if they would be better implemented in Elasticsearch.
-- **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC.
+- **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC ([#kibana on freenode](webchat.com)).
 
 ### Voicing the importance of an issue
 
