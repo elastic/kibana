@@ -21,12 +21,31 @@
 /**
  * 1. Override p.
  */
+.kuiTextTitle {
+  margin: 0; /* 1 */
+  font-weight: $globalFontWeightBold; /* 1 */
+  color: $globalFontColor;
+  line-height: $globalLineHeight;
+  font-size: $globalFontSize;
+}
+
+/**
+ * 1. Override p.
+ */
 .kuiText {
   margin: 0; /* 1 */
   font-weight: $globalFontWeightRegular; /* 1 */
   color: $globalFontColor;
   line-height: $globalLineHeight;
   font-size: $globalFontSize;
+}
+
+.kuiSubText {
+  margin: 0; /* 1 */
+  font-weight: $globalFontWeightRegular; /* 1 */
+  color: $globalFontColor;
+  line-height: $globalLineHeight;
+  font-size: $globalSubTextFontSize;
 }
 
 .kuiSubduedText {

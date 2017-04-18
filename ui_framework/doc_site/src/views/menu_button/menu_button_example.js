@@ -9,6 +9,7 @@ import {
 } from '../../components';
 
 const basicHtml = require('./menu_button_basic.html');
+const primaryHtml = require('./menu_button_primary.html');
 const dangerHtml = require('./menu_button_danger.html');
 const withIconHtml = require('./menu_button_with_icon.html');
 const groupHtml = require('./menu_button_group.html');
@@ -25,6 +26,18 @@ export default props => (
     >
       <GuideDemo
         html={basicHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Primary MenuButton"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: primaryHtml,
+      }]}
+    >
+      <GuideDemo
+        html={primaryHtml}
       />
     </GuideSection>
 
