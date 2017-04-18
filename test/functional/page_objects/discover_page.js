@@ -258,8 +258,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     clickFieldListItem(field) {
-      return getRemote()
-      .findByCssSelector('li[attr-field="' + field + '"]').click();
+      return testSubjects.click(`field-${field}`);
     }
 
     async clickFieldListItemAdd(field) {

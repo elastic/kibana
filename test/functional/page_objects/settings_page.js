@@ -358,9 +358,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickAddScriptedField() {
       log.debug('click Add Scripted Field');
-      await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('a[aria-label="Add Scripted Field"]')
-      .click();
+      await testSubjects.click('addScriptedFieldLink');
     }
 
     async clickSaveScriptedField() {
