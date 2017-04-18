@@ -99,13 +99,10 @@ class KibanaMap extends EventEmitter {
 
     const leafletOptions = {
       minZoom: options.minZoom,
-      maxZoom: options.maxZoom
+      maxZoom: options.maxZoom,
+      center: options.center ? options.center : [0, 0],
+      zoom: options.zoom ? options.zoom : 0
     };
-    const uiState = options.visualization.getUiState();
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
-    leafletOptions.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : options.defaults.mapZoom;
-    leafletOptions.center = centerFromUIState ? centerFromUIState : options.defaults.mapCenter;
 
     this._leafletMap = L.map(containerNode, leafletOptions, leafletOptions);
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
@@ -213,7 +210,6 @@ class KibanaMap extends EventEmitter {
           this._popup.setContent(event.content);
         }
       }
-
 
     };
 

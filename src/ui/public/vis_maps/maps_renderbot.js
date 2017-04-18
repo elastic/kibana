@@ -53,8 +53,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
       const containerElement = $($el)[0];
       const options = _.clone(tilemapSettings.getMinMaxZoom(false));
-      options.visualization = this.vis;
-      options.defaults = this.vis.type.params.defaults;
+      const uiState = this.vis.getUiState();
+      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+      const centerFromUIState = uiState.get('mapCenter');
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.params.defaults.mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : this.vis.type.params.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
       this._kibanaMap.addDrawControl();
