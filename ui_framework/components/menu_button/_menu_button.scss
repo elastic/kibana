@@ -86,7 +86,7 @@
   }
 
   &:disabled {
-    color: $menuButtonPrimaryDisabledTextColor;
+    background-color: $menuButtonPrimaryDisabledBackgroundColor;
   }
 }
 

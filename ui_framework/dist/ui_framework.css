@@ -1646,7 +1646,7 @@ body {
     /* 1 */
     background-color: #006E8A; }
   .kuiMenuButton--primary:disabled {
-    color: #efc0ba; }
+    background-color: #B6D6E0; }
 
 /**
  * 1. Override Bootstrap.
