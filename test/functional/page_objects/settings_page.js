@@ -235,23 +235,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async openControlsRow(row) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
-          (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
-        .click();
-    }
-
     async openControlsByName(name) {
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
-        .click();
+      .findByCssSelector('[data-test-subj="indexPatternFieldEditButton"][href$="/' + name + '"]')
+      .click();
     }
 
     async increasePopularity() {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
-        .click();
+      await testSubjects.click('fieldIncreasePopularityButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -262,16 +253,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async controlChangeCancel() {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
-        .click();
+      await testSubjects.click('fieldCancelButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async controlChangeSave() {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
-        .click();
+      await testSubjects.click('fieldSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

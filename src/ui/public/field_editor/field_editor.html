@@ -97,6 +97,7 @@
 
       <span class="kuiButtonGroup kuiButtonGroup--united">
         <button
+          data-test-subj="fieldIncreasePopularityButton"
           type="button"
           ng-click="editor.field.count = editor.field.count + 1"
           aria-label="Plus"
@@ -228,6 +229,7 @@
     </button>
 
     <button
+      data-test-subj="fieldSaveButton"
       ng-disabled="form.$invalid"
       type="submit"
       aria-label="{{ editor.creating ? 'Create' : 'Update' }} Field"
@@ -237,9 +239,9 @@
     </button>
 
     <button
+      data-test-subj="fieldCancelButton"
       type="button"
       ng-click="editor.cancel()"
-      aria-label="Cancel"
       class="kuiButton kuiButton--hollow"
     >
       Cancel

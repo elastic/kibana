@@ -54,10 +54,12 @@
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
           >
-            <button class="kuiButton kuiButton--primary navbar-btn-link"
+            <button
+              data-test-subj="visualizeEditorRenderButton"
+              class="kuiButton kuiButton--primary navbar-btn-link"
               type="submit"
-              ng-disabled="!vis.dirty">
-
+              ng-disabled="!vis.dirty"
+            >
               <i class="fa fa-play"></i>
             </button>
           </li>
