@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import VislibComponentsColorMappedColorsProvider from './mapped_colors';
+import { VisColorMappedColorsProvider } from './mapped_colors';
+
 export default function ColorUtilService(Private) {
-  const mappedColors = Private(VislibComponentsColorMappedColorsProvider);
+  const mappedColors = Private(VisColorMappedColorsProvider);
 
   /*
    * Accepts an array of strings or numbers that are used to create a
