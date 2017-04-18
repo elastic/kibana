@@ -123,10 +123,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     clickGoButton() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByClassName('kbn-timepicker-go')
-      .click();
+      return testSubjects.click('timepickerGoButton');
     }
 
     collapseChart() {
