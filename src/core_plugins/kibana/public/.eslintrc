@@ -1,6 +1,6 @@
 
 plugins: [
-  'kibana-custom'
+  '@elastic/kibana-custom'
 ]
 rules:
   no-console: 2
