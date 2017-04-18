@@ -1,34 +1,7 @@
 [[nested-objects]]
 == Aggregations with Nested Objects not Supported
 
-Kibana is not able to perform aggregations across fields containing nested
-documents.
-
-[float]
-=== Workaround
-
-For simple aggregations (e.g. a `terms` aggregation), you
-may consider adding the `include_in_parent` setting to your Elasticsearch
-mapping. This creates a flattened version of a field in the nested document at
-the parent level.
-
-[source,js]
-----------------------------------
-{
-  "type1": {
-    "properties": {
-      "users": {
-        "type": "nested",
-        "include_in_parent": true,
-        "properties": {
-          "first": { "type": "keyword" },
-          "last": { "type": "keyword" }
-        }
-      }
-    }
-  }
-}
-----------------------------------
+Kibana cannot perform aggregations across fields that contain nested objects.
 
 [IMPORTANT]
 ==============================================
