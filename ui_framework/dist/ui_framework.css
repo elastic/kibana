@@ -216,6 +216,12 @@ body {
 .kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
   margin-left: 8px; }
 
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 4px; }
+
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 4px; }
+
 /**
  * 1. Override Bootstrap.
  */
