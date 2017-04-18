@@ -123,11 +123,6 @@
       }
     }
 
-    .discover-field-toggle {
-      color: @discover-field-toggle-color;
-      font-size: 9px;
-    }
-
     .discover-table-row--highlight td {
       background-color: #E2F1F6;
     }
@@ -144,18 +139,38 @@
   }
 }
 
-.sidebar-item button.discover-field-toggle {
-  display: none;
-  font-size: 9px;
-  position: absolute;
-  right: 0;
-  top: 0;
-  margin: 5px 10px;
+/**
+ * 1. Override sidebar-item-title styles.
+ */
+.discover-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0 !important; /* 1 */
+  padding-bottom: 0 !important; /* 1 */
+  height: 32px;
+
+  &:hover {
+    .discover-sidebar-item-actions {
+      opacity: 1;
+    }
+  }
 }
 
-.sidebar-item:hover:hover button.discover-field-toggle {
-  display: block;
-}
+  /**
+   * 1. Truncate long text so it doesn't push the actions outside of the container.
+   */
+  .discover-sidebar-item-label {
+    overflow: hidden; /* 1 */
+    text-overflow: ellipsis; /* 1 */
+  }
+
+  /**
+   * 1. Only visually hide the actions, so that they're still accessible to screen readers.
+   */
+  .discover-sidebar-item-actions {
+    opacity: 0; /* 1 */
+  }
 
 .discover-field-details {
   border-top: 1px solid;
@@ -232,7 +247,7 @@ field-name,
 disc-field-chooser {
   ul.discover-selected-fields {
     /* If only _source is presend in the selected fields list, hide its toggle button */
-    li:first-child:nth-last-child(1)[attr-field=_source] button.discover-field-toggle {
+    li:first-child:nth-last-child(1)[attr-field=_source] .discover-field-toggle {
       display: none;
     }
   }
