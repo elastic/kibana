@@ -96,11 +96,18 @@ class KibanaMap extends EventEmitter {
     this._listeners = [];
     this._showTooltip = false;
 
-    this._leafletMap = L.map(containerNode, {
+
+    const leafletOptions = {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom
-    });
-    this._leafletMap.fitWorld();
+    };
+    const uiState = options.visualization.getUiState();
+    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+    const centerFromUIState = uiState.get('mapCenter');
+    leafletOptions.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : options.defaults.mapZoom;
+    leafletOptions.center = centerFromUIState ? centerFromUIState : options.defaults.mapCenter;
+
+    this._leafletMap = L.map(containerNode, leafletOptions, leafletOptions);
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
@@ -112,7 +119,7 @@ class KibanaMap extends EventEmitter {
       }
     });
     this._leafletMap.on('zoomend', () => this.emit('zoomend'));
-    this._leafletMap.on('moveend', () => this.emit('moveend'));
+    this._leafletMap.on('dragend', () => this.emit('dragend'));
     this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.updateExtent('dragend', e)));
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
@@ -169,6 +176,7 @@ class KibanaMap extends EventEmitter {
     });
 
     this.resize();
+
 
   }
 
@@ -508,7 +516,7 @@ class KibanaMap extends EventEmitter {
   }
 
   persistUiStateForVisualization(visualization) {
-    this.on('moveend', () => {
+    function persistMapStateInUiState() {
       const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
@@ -519,7 +527,10 @@ class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-    });
+    }
+
+    this.on('dragend', persistMapStateInUiState);
+    this.on('zoomend', persistMapStateInUiState);
   }
 
   useUiStateFromVisualization(visualization) {

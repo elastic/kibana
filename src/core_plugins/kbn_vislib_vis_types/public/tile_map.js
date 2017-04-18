@@ -29,8 +29,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatBlur: 15,
         heatNormalizeData: true,
         legendPosition: 'bottomright',
-        mapZoom: 2,
-        mapCenter: [15, 5],
+        mapZoom: 0,
+        mapCenter: [0, 0],
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
       legendPositions: [{

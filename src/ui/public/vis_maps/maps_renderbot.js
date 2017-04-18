@@ -52,14 +52,15 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       }
 
       const containerElement = $($el)[0];
-      const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
-      this._kibanaMap = new KibanaMap(containerElement, minMaxZoom);
+      const options = _.clone(tilemapSettings.getMinMaxZoom(false));
+      options.visualization = this.vis;
+      options.defaults = this.vis.type.params.defaults;
+
+      this._kibanaMap = new KibanaMap(containerElement, options);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
-
       this._kibanaMap.persistUiStateForVisualization(this.vis);
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
