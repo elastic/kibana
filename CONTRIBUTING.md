@@ -138,7 +138,7 @@ Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can b
 ```sh
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.28
+gem install pleaserun -v 0.0.24
 npm run build -- --skip-archives
 ```
 
