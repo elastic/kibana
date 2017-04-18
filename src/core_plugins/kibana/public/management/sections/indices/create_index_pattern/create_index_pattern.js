@@ -6,6 +6,8 @@ import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import template from './create_index_pattern.html';
+import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
+import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -19,217 +21,50 @@ uiModules.get('apps/management')
   const intervals = indexPatterns.intervals;
   let samplePromise;
 
-  // this and child scopes will write pattern vars here
-  const index = $scope.index = {
+  // Configure the new index pattern we're going to create.
+  this.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
     expandable: false,
-    sampleCount: 5,
-    nameIntervalOptions: intervals,
-
-    fetchFieldsError: $translate.instant('KIBANA-LOADING')
+    nameInterval: _.find(intervals, { name: 'daily' }),
+    timeField: null,
   };
 
-  index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
-  index.timeField = null;
+  // UI state.
+  this.dateFields = null;
+  this.sampleCount = 5;
+  this.samples = null;
+  this.existing = null;
+  this.nameIntervalOptions = intervals;
+  this.patternErrors = [];
+  this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
 
-  $scope.canExpandIndices = function () {
-    // to maximize performance in the digest cycle, move from the least
-    // expensive operation to most
-    return index.isTimeBased && !index.nameIsPattern && _.includes(index.name, '*');
-  };
-
-  $scope.refreshFieldList = function () {
-    const timeField = index.timeField;
-    fetchFieldList().then(function (results) {
-      if (timeField) {
-        updateFieldListAndSetTimeField(results, timeField.name);
-      } else {
-        updateFieldList(results);
-      }
-    });
-  };
-
-  $scope.createIndexPattern = function () {
-    // get an empty indexPattern to start
-    indexPatterns.get()
-    .then(function (indexPattern) {
-      // set both the id and title to the index index
-      indexPattern.id = indexPattern.title = index.name;
-      if (index.isTimeBased) {
-        indexPattern.timeFieldName = index.timeField.name;
-        if (index.nameIsPattern) {
-          indexPattern.intervalName = index.nameInterval.name;
-        }
-      }
-
-      if (!index.expandable && $scope.canExpandIndices()) {
-        indexPattern.notExpandable = true;
-      }
-
-      // fetch the fields
-      return indexPattern.create()
-      .then(function (id) {
-        if (id) {
-          refreshKibanaIndex().then(function () {
-            if (!config.get('defaultIndex')) {
-              config.set('defaultIndex', indexPattern.id);
-            }
-            indexPatterns.cache.clear(indexPattern.id);
-            kbnUrl.change('/management/kibana/indices/' + indexPattern.id);
-          });
-        }
-      });
-
-      // refreshFields calls save() after a successfull fetch, no need to save again
-      // .then(function () { indexPattern.save(); })
-    })
-    .catch(function (err) {
-      if (err instanceof IndexPatternMissingIndices) {
-        notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
-      }
-      else notify.fatal(err);
-    });
-  };
-
-
-  $scope.$watchMulti([
-    'index.isTimeBased',
-    'index.nameIsPattern',
-    'index.nameInterval.name'
-  ], function (newVal, oldVal) {
-    const isTimeBased = newVal[0];
-    const nameIsPattern = newVal[1];
-    const newDefault = getPatternDefault(newVal[2]);
-    const oldDefault = getPatternDefault(oldVal[2]);
-
-    if (index.name === oldDefault) {
-      index.name = newDefault;
-    }
-
-    if (!isTimeBased) {
-      index.nameIsPattern = false;
-    }
-
-    if (!nameIsPattern) {
-      delete index.nameInterval;
-      delete index.timeField;
-    } else {
-      index.nameInterval = index.nameInterval || intervals.byName.days;
-      index.name = index.name || getPatternDefault(index.nameInterval);
-    }
-  });
-
-  $scope.moreSamples = function (andUpdate) {
-    index.sampleCount += 5;
-    if (andUpdate) updateSamples();
-  };
-
-  $scope.$watchMulti([
-    'index.name',
-    'index.nameInterval'
-  ], function (newVal, oldVal) {
-    let lastPromise;
-    resetIndex();
-    samplePromise = lastPromise = updateSamples()
-    .then(function () {
-      promiseMatch(lastPromise, function () {
-        index.samples = null;
-        index.patternErrors = [];
-      });
-    })
-    .catch(function (errors) {
-      promiseMatch(lastPromise, function () {
-        index.existing = null;
-        index.patternErrors = errors;
-      });
-    })
-    .finally(function () {
-      // prevent running when no change happened (ie, first watcher call)
-      if (!_.isEqual(newVal, oldVal)) {
-        fetchFieldList().then(function (results) {
-          if (lastPromise === samplePromise) {
-            updateFieldList(results);
-            samplePromise = null;
-          }
-        });
-      }
-    });
-  });
-
-  $scope.$watchMulti([
-    'index.isTimeBased',
-    'index.sampleCount'
-  ], $scope.refreshFieldList);
-
-  function updateSamples() {
-    const patternErrors = [];
-
-    if (!index.nameInterval || !index.name) {
-      return Promise.resolve();
-    }
-
-    const pattern = mockIndexPattern(index);
-
-    return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
-    .catch(function (err) {
-      if (err instanceof IndexPatternMissingIndices) return;
-      notify.error(err);
-    })
-    .then(function (existing) {
-      const all = _.get(existing, 'all', []);
-      const matches = _.get(existing, 'matches', []);
-      if (all.length) {
-        index.existing = {
-          class: 'success',
-          all: all,
-          matches: matches,
-          matchPercent: Math.round((matches.length / all.length) * 100) + '%',
-          failures: _.difference(all, matches)
-        };
-        return;
-      }
-
-      patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
-      const radius = Math.round(index.sampleCount / 2);
-      const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
-
-      if (_.uniq(samples).length !== samples.length) {
-        patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
-      } else {
-        index.samples = samples;
-      }
-
-      throw patternErrors;
-    });
-  }
-
-  function fetchFieldList() {
-    index.dateFields = index.timeField = index.listUsed = null;
-    const useIndexList = index.isTimeBased && index.nameIsPattern;
+  const fetchFieldList = () => {
+    this.dateFields = this.newIndexPattern.timeField = null;
+    const useIndexList = this.newIndexPattern.isTimeBased && this.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
     let dateFields;
 
     // we don't have enough info to continue
-    if (!index.name) {
+    if (!this.newIndexPattern.name) {
       fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
       return;
     }
 
-    if (useIndexList && !index.nameInterval) {
+    if (useIndexList && !this.newIndexPattern.nameInterval) {
       fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
       return;
     }
 
-    return indexPatterns.mapper.clearCache(index.name)
-    .then(function () {
-      const pattern = mockIndexPattern(index);
+    return indexPatterns.mapper.clearCache(this.newIndexPattern.name)
+    .then(() => {
+      const pattern = mockIndexPattern(this.newIndexPattern);
 
       return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
         skipIndexPatternCache: true,
       })
-      .catch(function (err) {
+      .catch((err) => {
         // TODO: we should probably display a message of some kind
         if (err instanceof IndexPatternMissingIndices) {
           fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
@@ -239,22 +74,25 @@ uiModules.get('apps/management')
         throw err;
       });
     })
-    .then(function (fields) {
+    .then(fields => {
       if (fields.length > 0) {
         fetchFieldsError = null;
-        dateFields = fields.filter(function (field) {
-          return field.type === 'date';
-        });
+        dateFields = fields.filter(field => field.type === 'date');
       }
 
       return {
-        fetchFieldsError: fetchFieldsError,
-        dateFields: dateFields
+        fetchFieldsError,
+        dateFields,
       };
     }, notify.fatal);
-  }
+  };
 
-  function updateFieldListAndSetTimeField(results, timeFieldName) {
+  const updateFieldList = results => {
+    this.fetchFieldsError = results.fetchFieldsError;
+    this.dateFields = results.dateFields;
+  };
+
+  const updateFieldListAndSetTimeField = (results, timeFieldName) => {
     updateFieldList(results);
 
     if (!results.dateFields.length) {
@@ -267,46 +105,15 @@ uiModules.get('apps/management')
     //assign the field from the results-list
     //angular recreates a new timefield instance, each time the list is refreshed.
     //This ensures the selected field matches one of the instances in the list.
-    index.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
-  }
+    this.newIndexPattern.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
+  };
 
-  function updateFieldList(results) {
-    index.fetchFieldsError = results.fetchFieldsError;
-    index.dateFields = results.dateFields;
-  }
-
-  function promiseMatch(lastPromise, cb) {
-    if (lastPromise === samplePromise) {
-      cb();
-    } else if (samplePromise != null) {
-      // haven't hit the last promise yet, reset index params
-      resetIndex();
-    }
-  }
-
-  function resetIndex() {
-    index.patternErrors = [];
-    index.samples = null;
-    index.existing = null;
-    index.fetchFieldsError = $translate.instant('KIBANA-LOADING');
-  }
-
-  function getPatternDefault(interval) {
-    switch (interval) {
-      case 'hours':
-        return '[logstash-]YYYY.MM.DD.HH';
-      case 'days':
-        return '[logstash-]YYYY.MM.DD';
-      case 'weeks':
-        return '[logstash-]GGGG.WW';
-      case 'months':
-        return '[logstash-]YYYY.MM';
-      case 'years':
-        return '[logstash-]YYYY';
-      default:
-        return 'logstash-*';
-    }
-  }
+  const resetIndex = () => {
+    this.patternErrors = [];
+    this.samples = null;
+    this.existing = null;
+    this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+  };
 
   function mockIndexPattern(index) {
     // trick the mapper into thinking this is an indexPattern
@@ -315,4 +122,188 @@ uiModules.get('apps/management')
       intervalName: index.nameInterval
     };
   }
+
+  const updateSamples = () => {
+    const patternErrors = [];
+
+    if (!this.newIndexPattern.nameInterval || !this.newIndexPattern.name) {
+      return Promise.resolve();
+    }
+
+    const pattern = mockIndexPattern(this.newIndexPattern);
+
+    return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
+      .catch(err => {
+        if (err instanceof IndexPatternMissingIndices) return;
+        notify.error(err);
+      })
+      .then(existing => {
+        const all = _.get(existing, 'all', []);
+        const matches = _.get(existing, 'matches', []);
+
+        if (all.length) {
+          return this.existing = {
+            class: 'success',
+            all,
+            matches,
+            matchPercent: Math.round((matches.length / all.length) * 100) + '%',
+            failures: _.difference(all, matches)
+          };
+        }
+
+        patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
+        const radius = Math.round(this.sampleCount / 2);
+        const samples = intervals.toIndexList(this.newIndexPattern.name, this.newIndexPattern.nameInterval, -radius, radius);
+
+        if (_.uniq(samples).length !== samples.length) {
+          patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
+        } else {
+          this.samples = samples;
+        }
+
+        throw patternErrors;
+      });
+  };
+
+  this.canExpandIndices = () => {
+    // to maximize performance in the digest cycle, move from the least
+    // expensive operation to most
+    return this.newIndexPattern.isTimeBased && !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
+  };
+
+  this.refreshFieldList = () => {
+    const timeField = this.newIndexPattern.timeField;
+    fetchFieldList().then(results => {
+      if (timeField) {
+        updateFieldListAndSetTimeField(results, timeField.name);
+      } else {
+        updateFieldList(results);
+      }
+    });
+  };
+
+  this.createIndexPattern = () => {
+    const id = this.newIndexPattern.name;
+    const timeFieldName =
+      this.newIndexPattern.isTimeBased
+      ? this.newIndexPattern.timeField.name
+      : undefined;
+
+    // Only event-time-based index patterns set an intervalName.
+    const intervalName =
+      this.newIndexPattern.isTimeBased  && this.newIndexPattern.nameIsPattern
+      ? this.newIndexPattern.nameInterval.name
+      : undefined;
+
+    const notExpandable =
+      !this.newIndexPattern.expandable && this.canExpandIndices()
+      ? true
+      : undefined;
+
+    sendCreateIndexPatternRequest(indexPatterns, {
+      id,
+      timeFieldName,
+      intervalName,
+      notExpandable,
+    }).then(createdId => {
+      if (!createdId) {
+        return;
+      }
+
+      refreshKibanaIndex().then(() => {
+        if (!config.get('defaultIndex')) {
+          config.set('defaultIndex', id);
+        }
+
+        indexPatterns.cache.clear(id);
+        kbnUrl.change(`/management/kibana/indices/${id}`);
+      });
+    }).catch(err => {
+      if (err instanceof IndexPatternMissingIndices) {
+        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+      }
+
+      notify.fatal(err);
+    });
+  };
+
+  $scope.$watchMulti([
+    'controller.newIndexPattern.isTimeBased',
+    'controller.newIndexPattern.nameIsPattern',
+    'controller.newIndexPattern.nameInterval.name'
+  ], (newVal, oldVal) => {
+    const isTimeBased = newVal[0];
+    const nameIsPattern = newVal[1];
+    const newDefault = getDefaultPatternForInterval(newVal[2]);
+    const oldDefault = getDefaultPatternForInterval(oldVal[2]);
+
+    if (this.newIndexPattern.name === oldDefault) {
+      this.newIndexPattern.name = newDefault;
+    }
+
+    if (!isTimeBased) {
+      this.newIndexPattern.nameIsPattern = false;
+    }
+
+    if (!nameIsPattern) {
+      delete this.newIndexPattern.nameInterval;
+      delete this.newIndexPattern.timeField;
+    } else {
+      this.newIndexPattern.nameInterval = this.newIndexPattern.nameInterval || intervals.byName.days;
+      this.newIndexPattern.name = this.newIndexPattern.name || getDefaultPatternForInterval(this.newIndexPattern.nameInterval);
+    }
+  });
+
+  this.moreSamples = andUpdate => {
+    this.sampleCount += 5;
+    if (andUpdate) updateSamples();
+  };
+
+  $scope.$watchMulti([
+    'controller.newIndexPattern.name',
+    'controller.newIndexPattern.nameInterval'
+  ], (newVal, oldVal) => {
+    function promiseMatch(lastPromise, cb) {
+      if (lastPromise === samplePromise) {
+        cb();
+      } else if (samplePromise != null) {
+        // haven't hit the last promise yet, reset index params
+        resetIndex();
+      }
+    }
+
+    let lastPromise;
+    resetIndex();
+    samplePromise = lastPromise = updateSamples()
+    .then(() => {
+      promiseMatch(lastPromise, () => {
+        this.samples = null;
+        this.patternErrors = [];
+      });
+    })
+    .catch(errors => {
+      promiseMatch(lastPromise, () => {
+        this.existing = null;
+        this.patternErrors = errors;
+      });
+    })
+    .finally(() => {
+      // prevent running when no change happened (ie, first watcher call)
+      if (!_.isEqual(newVal, oldVal)) {
+        fetchFieldList().then(results => {
+          if (lastPromise === samplePromise) {
+            updateFieldList(results);
+            samplePromise = null;
+          }
+        });
+      }
+    });
+  });
+
+  $scope.$watchMulti([
+    'controller.newIndexPattern.isTimeBased',
+    'controller.sampleCount'
+  ], () => {
+    this.refreshFieldList();
+  });
 });
