@@ -41,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       })
       .then(() => {
         log.debug('--find save button');
-        return testSubjects.click('discover-save-search-btn');
+        return testSubjects.click('discoverSaveSearchButton');
       });
     }
 
