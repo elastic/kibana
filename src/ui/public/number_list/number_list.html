@@ -1,18 +1,21 @@
 <div
   ng-repeat="value in numberListCntr.getList() track by $index"
-  class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+  class="form-group vis-editor-agg-form-row vis-editor-agg-form-row"
+>
 
   <input
     ng-model="numberListCntr.getList()[$index]"
     kbn-number-list-input
     input-focus
-    class="form-control">
+    class="form-control"
+  >
 
   <button
     ng-click="numberListCntr.remove($index, 1)"
-    class="btn btn-danger btn-xs"
-    type="button">
-    <i class="fa fa-times"></i>
+    class="kuiButton kuiButton--danger"
+    type="button"
+  >
+    <span class="kuiIcon fa-times"></span>
   </button>
 
 </div>
