@@ -32,18 +32,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     getAdvancedSettings(propertyName) {
       log.debug('in setAdvancedSettings');
-      return testSubjects.find('advancedSetting-' + propertyName + '-currentValue')
+      return testSubjects.find(`advancedSetting-${propertyName}-currentValue`)
       .getVisibleText();
     }
 
     async setAdvancedSettings(propertyName, propertyValue) {
-      await testSubjects.click('advancedSetting-' + propertyName + '-editButton');
+      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('option[label="' + propertyValue + '"]').click();
+        .findByCssSelector(`option[label="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('advancedSetting-' + propertyName + '-saveButton');
+      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -52,25 +52,20 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     getTimeBasedEventsCheckbox() {
-      return remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model="index.isTimeBased"]');
+      return testSubjects.find('createIndexPatternIsTimeBasedCheckBox');
     }
 
-    getTimeBasedIndexPatternCheckbox(timeout) {
-      timeout = timeout || defaultFindTimeout;
+    getTimeBasedIndexPatternCheckbox() {
       // fail faster since we're sometimes checking that it doesn't exist
-      return remote.setFindTimeout(timeout)
-      .findByCssSelector('input[ng-model="index.nameIsPattern"]');
+      return testSubjects.find('createIndexPatternNameIsPatternCheckBox');
     }
 
     getIndexPatternField() {
-      return remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[ng-model="index.name"]');
+      return testSubjects.find('createIndexPatternNameInput');
     }
 
     getTimeFieldNameField() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('select[ng-model="index.timeField"]');
+      return testSubjects.find('createIndexPatternTimeFieldSelect');
     }
 
     async selectTimeFieldOption(selection) {
@@ -89,6 +84,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     getTimeFieldOption(selection) {
       return remote.setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector('option[label="' + selection + '"]');
+    }
+
+    getCreateIndexPatternButton() {
+      return testSubjects.find('createIndexPatternCreateButton');
     }
 
     getCreateButton() {
@@ -111,12 +110,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     getConfigureHeader() {
       return remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('h1');
+        .findByCssSelector('h1');
     }
 
     getTableHeader() {
       return remote.setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('table.table.table-condensed thead tr th');
+        .findAllByCssSelector('table.table.table-condensed thead tr th');
     }
 
     sortBy(columnName) {
@@ -142,11 +141,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     getTableRow(rowNumber, colNumber) {
       return remote.setFindTimeout(defaultFindTimeout)
-      // passing in zero-based index, but adding 1 for css 1-based indexes
-      .findByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr:nth-child(' +
-        (rowNumber + 1) + ') td.ng-scope:nth-child(' +
-        (colNumber + 1) + ') span.ng-binding'
-      );
+        // passing in zero-based index, but adding 1 for css 1-based indexes
+        .findByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr:nth-child(' +
+          (rowNumber + 1) + ') td.ng-scope:nth-child(' +
+          (colNumber + 1) + ') span.ng-binding'
+        );
     }
 
     getFieldsTabCount() {
@@ -172,27 +171,27 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     getPageSize() {
       let selectedItemLabel = '';
       return remote.setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
-      .then(function (chartTypes) {
-        function getChartType(chart) {
-          const thisChart = chart;
-          return chart.isSelected()
-          .then(function (isSelected) {
-            if (isSelected === true) {
-              return thisChart.getProperty('label')
-              .then(function (theLabel) {
-                selectedItemLabel = theLabel;
-              });
-            }
-          });
-        }
+        .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
+        .then(function (chartTypes) {
+          function getChartType(chart) {
+            const thisChart = chart;
+            return chart.isSelected()
+            .then(function (isSelected) {
+              if (isSelected === true) {
+                return thisChart.getProperty('label')
+                .then(function (theLabel) {
+                  selectedItemLabel = theLabel;
+                });
+              }
+            });
+          }
 
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(() => {
-        return selectedItemLabel;
-      });
+          const getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then(() => {
+          return selectedItemLabel;
+        });
     }
 
     async getFieldNames() {
@@ -218,68 +217,68 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setFieldTypeFilter(type) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]')
-      .click();
+        .findByCssSelector('select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]')
+        .click();
     }
 
     async setScriptedFieldLanguageFilter(language) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' + language + '"]')
-      .click();
+        .findByCssSelector('select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' + language + '"]')
+        .click();
     }
 
     async goToPage(pageNum) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
-        (pageNum + 1) + ') a.ng-binding')
-      .click();
+        .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
+          (pageNum + 1) + ') a.ng-binding')
+        .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async openControlsRow(row) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
-        (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
-      .click();
+        .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
+          (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
+        .click();
     }
 
     async openControlsByName(name) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
-      .click();
+        .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
+        .click();
     }
 
     async increasePopularity() {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
-      .click();
+        .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
+        .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     getPopularity() {
       return remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[ng-model="editor.field.count"]')
-      .getProperty('value');
+        .findByCssSelector('input[ng-model="editor.field.count"]')
+        .getProperty('value');
     }
 
     async controlChangeCancel() {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
-      .click();
+        .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
+        .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async controlChangeSave() {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
-      .click();
+        .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
+        .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setPageSize(size) {
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-      .click();
+        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+        .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
