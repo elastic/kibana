@@ -96,9 +96,10 @@ export function SearchSourceProvider(Promise, Private, config) {
     'highlightAll',
     'aggs',
     'from',
+    'searchAfter',
     'size',
     'source',
-    'version'
+    'version',
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -255,6 +256,10 @@ export function SearchSourceProvider(Promise, Private, config) {
           state[key] = val;
         }
         return;
+      case 'searchAfter':
+        key = 'search_after';
+        addToBody();
+        break;
       case 'source':
         key = '_source';
         addToBody();
