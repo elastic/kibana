@@ -3,7 +3,7 @@ import rimraf from 'rimraf';
 import path from 'path';
 import os from 'os';
 import glob from 'glob';
-import { analyzeArchive, extractArchive } from '../zip';
+import { analyzeArchive, extractArchive, _isDirectory } from '../zip';
 
 describe('kibana cli', function () {
 
@@ -61,6 +61,22 @@ describe('kibana cli', function () {
       } catch(e) {
         done();
       }
+    });
+  });
+
+  describe('_isDirectory', () => {
+    it('should check for a forward slash', () => {
+      expect(_isDirectory('/foo/bar/')).to.be(true);
+    });
+
+    it('should check for a backslash', () => {
+      expect(_isDirectory('\\foo\\bar\\')).to.be(true);
+    });
+
+    it('should return false for files', () => {
+      expect(_isDirectory('foo.txt')).to.be(false);
+      expect(_isDirectory('\\path\\to\\foo.txt')).to.be(false);
+      expect(_isDirectory('/path/to/foo.txt')).to.be(false);
     });
   });
 
