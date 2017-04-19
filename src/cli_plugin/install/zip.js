@@ -65,6 +65,11 @@ export function analyzeArchive(archive) {
   });
 }
 
+const isDirectoryRegex = /(\/|\\)$/;
+export function _isDirectory(filename) {
+  return isDirectoryRegex.test(filename);
+}
+
 export function extractArchive(archive, targetDir, extractPath) {
   return new Promise((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
@@ -87,8 +92,7 @@ export function extractArchive(archive, targetDir, extractPath) {
           fileName = path.join(targetDir, fileName);
         }
 
-        if (/\/$/.test(fileName)) {
-          // directory file names end with '/'
+        if (_isDirectory(fileName)) {
           mkdirp(fileName, function (err) {
             if (err) {
               return reject(err);
