@@ -18,13 +18,13 @@ typeahead.directive('kbnTypeahead', function () {
   return {
     restrict: 'A',
     scope: {
-      historyKey: '@kbnTypeahead'
+      historyKey: '@kbnTypeahead',
+      onSelect: '&'
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, $element, PersistedLog, config) {
+    controller: function ($scope, PersistedLog, config) {
       const self = this;
-      self.form = $element.closest('form');
       self.query = '';
       self.hidden = true;
       self.focused = false;
@@ -111,8 +111,8 @@ typeahead.directive('kbnTypeahead', function () {
         $scope.inputModel.$render();
         self.persistEntry();
 
-        if (ev && ev.type === 'click' && self.form.length) {
-          self.form.scope().submit();
+        if (ev && ev.type === 'click') {
+          $scope.onSelect();
         }
       };
 
@@ -218,7 +218,10 @@ typeahead.directive('kbnTypeahead', function () {
       });
     },
 
-    link: function ($scope, $el) {
+    link: function ($scope, $el, attrs) {
+      if (!_.has(attrs, 'onSelect')) {
+        throw new Error('on-select must be defined');
+      }
       // should be defined via setInput() method
       if (!$scope.inputModel) {
         throw new Error('kbn-typeahead-input must be defined');

@@ -150,7 +150,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
       };
 
-      $scope.submit = $scope.filterResults = function () {
+      $scope.filterResults = function () {
         dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
         $scope.refresh();
       };

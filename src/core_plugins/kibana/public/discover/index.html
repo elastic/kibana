@@ -23,7 +23,7 @@
         name="discoverSearch"
         ng-submit="fetch()"
       >
-        <div class="typeahead" kbn-typeahead="discover">
+        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
           <div class="kuiLocalSearch">
             <input
               parse-query

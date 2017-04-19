@@ -284,7 +284,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     });
   }
 
-  $scope.submit = $scope.fetch = function () {
+  $scope.fetch = function () {
     // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
     $rootScope.$broadcast('fetch');
     $state.save();
