@@ -3,11 +3,11 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
-import visTypesRegistry from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
 // we need to load the css ourselves
 
@@ -18,12 +18,12 @@ import image from './images/icon-table.svg';
 // require the directives that we use as well
 
 // register the provider with the visTypes registry
-visTypesRegistry.register(TableVisTypeProvider);
+VisTypesRegistryProvider.register(TableVisTypeProvider);
 
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template

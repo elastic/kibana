@@ -9,9 +9,9 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import applyDiff from 'ui/utils/diff_object';
+import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 import {
   createStateHash,
@@ -19,7 +19,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);

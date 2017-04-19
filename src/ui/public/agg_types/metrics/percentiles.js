@@ -1,4 +1,4 @@
-import ordinalSuffix from 'ui/utils/ordinal_suffix';
+import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';
 import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';

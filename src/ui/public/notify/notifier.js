@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import $ from 'jquery';
 import { metadata } from 'ui/metadata';
-import formatMsg from 'ui/notify/lib/_format_msg';
+import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 import 'ui/render_directive';
 /* eslint no-console: 0 */
@@ -212,7 +212,7 @@ function formatStack(err) {
 /**
  * Functionality to check that
  */
-function Notifier(opts) {
+export function Notifier(opts) {
   const self = this;
   opts = opts || {};
 
@@ -662,4 +662,5 @@ function createGroupLogger(type, opts) {
   };
 }
 
+// Used in x-pack. TODO: convert to named and remove.
 export default Notifier;

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import addOrdinalSuffix from 'ui/utils/ordinal_suffix';
+import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 import expect from 'expect.js';
 
 describe('ordinal suffix util', function () {
@@ -41,11 +41,11 @@ describe('ordinal suffix util', function () {
     const float = int + Math.random();
 
     it('knowns ' + int, function () {
-      expect(addOrdinalSuffix(num)).to.be(num + '' + expected);
+      expect(ordinalSuffix(num)).to.be(num + '' + expected);
     });
 
     it('knows ' + float, function () {
-      expect(addOrdinalSuffix(num)).to.be(num + '' + expected);
+      expect(ordinalSuffix(num)).to.be(num + '' + expected);
     });
   });
 });

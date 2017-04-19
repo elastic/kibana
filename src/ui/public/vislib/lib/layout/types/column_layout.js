@@ -2,7 +2,8 @@ import VislibLibLayoutSplitsColumnChartChartSplitProvider from '../splits/column
 import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from '../splits/column_chart/y_axis_split';
 import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from '../splits/column_chart/x_axis_split';
 import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from '../splits/column_chart/chart_title_split';
-export default function ColumnLayoutFactory(Private) {
+
+export function VislibLibLayoutTypesColumnLayoutProvider(Private) {
 
   const chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
   const yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);

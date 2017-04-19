@@ -5,11 +5,11 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
 import _ from 'lodash';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
@@ -47,7 +47,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
-  const visTypes = Private(RegistryVisTypesProvider);
+  const visTypes = Private(VisTypesRegistryProvider);
 
   const categoryToVisTypesMap = {};
 

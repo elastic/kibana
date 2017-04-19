@@ -1,4 +1,4 @@
-import formatESMsg from 'ui/notify/lib/_format_es_msg';
+import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
 import expect from 'expect.js';
 describe('formatESMsg', function () {
 

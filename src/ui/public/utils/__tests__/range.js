@@ -1,27 +1,28 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import parse from 'ui/utils/range';
+import { parseRange } from 'ui/utils/range';
+
 describe('Range parsing utility', function () {
 
   it('throws an error for inputs that are not formatted properly', function () {
     expect(function () {
-      parse('');
+      parseRange('');
     }).to.throwException(TypeError);
 
     expect(function () {
-      parse('p10202');
+      parseRange('p10202');
     }).to.throwException(TypeError);
 
     expect(function () {
-      parse('{0,100}');
+      parseRange('{0,100}');
     }).to.throwException(TypeError);
 
     expect(function () {
-      parse('[0,100');
+      parseRange('[0,100');
     }).to.throwException(TypeError);
 
     expect(function () {
-      parse(')0,100(');
+      parseRange(')0,100(');
     }).to.throwException(TypeError);
   });
 
@@ -92,7 +93,7 @@ describe('Range parsing utility', function () {
   _.forOwn(tests, function (spec, str) {
 
     describe(str, function () {
-      const range = parse(str);
+      const range = parseRange(str);
 
       it('creation', function () {
         expect(range).to.eql(spec.props);
