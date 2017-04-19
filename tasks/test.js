@@ -64,14 +64,14 @@ module.exports = function (grunt) {
     'stop:testUIServer'
   ]);
 
-  grunt.registerTask('test:uiBuild', [
+  grunt.registerTask('test:uiRelease', [
     'checkPlugins',
     'esvm:ui',
-    'run:testUIBuildServer',
+    'run:testUIReleaseServer',
     'clean:screenshots',
     'functionalTestRunner',
     'esvm_shutdown:ui',
-    'stop:testUIBuildServer'
+    'stop:testUIReleaseServer'
   ]);
 
   grunt.registerTask('test:ui:server', [

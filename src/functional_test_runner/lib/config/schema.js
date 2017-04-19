@@ -36,7 +36,7 @@ export const schema = Joi.object().keys({
     try: Joi.number().default(40000),
     test: Joi.number().default(INSPECTING ? Infinity : 120000),
     esRequestTimeout: Joi.number().default(30000),
-    kibanaStabilize: Joi.number().default(30000),
+    kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
   }).default(),
 

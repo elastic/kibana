@@ -7,7 +7,7 @@ module.exports = function (grunt) {
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   const pkgVersion = grunt.config.get('pkg.version');
-  const snapshotBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
+  const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
   const uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [
@@ -79,14 +79,14 @@ module.exports = function (grunt) {
       ]
     },
 
-    testUIBuildServer: {
+    testUIReleaseServer: {
       options: {
         wait: false,
         ready: /Server running/,
         quiet: false,
         failOnError: false
       },
-      cmd: snapshotBinScript,
+      cmd: releaseBinScript,
       args: [
         ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
