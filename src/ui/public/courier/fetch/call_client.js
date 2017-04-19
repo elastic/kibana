@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
+import { promiseMapSettled } from 'ui/promises/index';
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {
 
@@ -29,14 +30,19 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
     // for each respond with either the response or ABORTED
     const respond = function (responses) {
       responses = responses || [];
-      return Promise.map(requests, function (req, i) {
+      return Promise.map(requests, function (request, i) {
         switch (statuses[i]) {
           case ABORTED:
             return ABORTED;
           case DUPLICATE:
-            return req._uniq.resp;
+            return request._uniq.resp;
           default:
-            return responses[_.findIndex(executable, req)];
+            const index = _.findIndex(executable, request);
+            if (index < 0) {
+              // This means the request failed.
+              return ABORTED;
+            }
+            return responses[index];
         }
       })
       .then(
@@ -76,17 +82,30 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
       });
     });
 
-
     // Now that all of THAT^^^ is out of the way, lets actually
     // call out to elasticsearch
-    Promise.map(executable, function (req) {
-      return Promise.try(req.getFetchParams, void 0, req)
-      .then(function (fetchParams) {
-        return (req.fetchParams = fetchParams);
+    promiseMapSettled(
+      executable,
+      function (request) {
+        return Promise.try(request.getFetchParams, void 0, request)
+        .then(function (fetchParams) {
+          return (request.fetchParams = fetchParams);
+        });
+      },
+      Promise)
+    .then(function (results) {
+      const requestsWithFetchParams = results.map((result, index) => {
+        if (result.resolved) {
+          return result.resolved;
+        } else {
+          const request = executable[index];
+          request.handleFailure(result.rejected);
+          executable[index] = undefined;
+        }
       });
-    })
-    .then(function (reqsFetchParams) {
-      return strategy.reqsFetchParamsToBody(reqsFetchParams);
+      _.remove(executable, request => request === undefined);
+      _.remove(requestsWithFetchParams, request => request === undefined);
+      return strategy.reqsFetchParamsToBody(requestsWithFetchParams);
     })
     .then(function (body) {
       // while the strategy was converting, our request was aborted
