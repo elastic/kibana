@@ -2,15 +2,15 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import expect from 'expect.js';
 
-import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
-import Registry from 'ui/registry/_registry';
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { uiRegistry } from 'ui/registry/_registry';
 
 describe('chrome nav controls', function () {
   let compile;
   let stubRegistry;
 
   beforeEach(ngMock.module('kibana', function (PrivateProvider) {
-    stubRegistry = new Registry({
+    stubRegistry = uiRegistry({
       order: ['order']
     });
 

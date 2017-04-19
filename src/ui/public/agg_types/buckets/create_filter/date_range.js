@@ -1,4 +1,4 @@
-import dateRange from 'ui/utils/date_range';
+import { dateRange } from 'ui/utils/date_range';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
 export function AggTypesBucketsCreateFilterDateRangeProvider(config) {

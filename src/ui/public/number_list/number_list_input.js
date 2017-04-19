@@ -1,4 +1,4 @@
-import keyMap from 'ui/utils/key_map';
+import { keyMap } from 'ui/utils/key_map';
 import uiModules from 'ui/modules';
 
 const INVALID = {}; // invalid flag

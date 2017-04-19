@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 
 describe('brushEvent', function () {
   let brushEventFn;

@@ -10,13 +10,13 @@
 
 import _ from 'lodash';
 import modules from 'ui/modules';
-import StateManagementStateProvider from 'ui/state_management/state';
+import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
 
 const urlParam = '_a';
 
-function AppStateProvider(Private, $rootScope, $location, $injector) {
-  const State = Private(StateManagementStateProvider);
+export function AppStateProvider(Private, $rootScope, $location, $injector) {
+  const State = Private(StateProvider);
   const PersistedState = $injector.get('PersistedState');
   let persistedStates;
   let eventUnsubscribers;
@@ -115,4 +115,3 @@ modules.get('kibana/global_state')
   return Private(AppStateProvider).getAppState;
 });
 
-export default AppStateProvider;

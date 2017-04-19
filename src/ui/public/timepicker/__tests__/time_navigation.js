@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import moment from 'moment';
-import timeNavigation from '../time_navigation';
+import { timeNavigation } from '../time_navigation';
 
 describe('timeNavigation', () => {
   let bounds;

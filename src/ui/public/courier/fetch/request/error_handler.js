@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 import { ErrorHandlersProvider } from '../../_error_handlers';
 

@@ -2,7 +2,7 @@
 import chrome from 'ui/chrome';
 
 import sinon from 'sinon';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import { setupAutoRelease } from 'auto-release-sinon';
 
 import './test_harness.less';

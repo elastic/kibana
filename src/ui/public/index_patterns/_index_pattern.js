@@ -3,7 +3,7 @@ import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
 import angular from 'angular';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { formatHit } from 'ui/index_patterns/_format_hit';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';

@@ -1,7 +1,7 @@
-import VislibVisualizationsPointSeriesProvider from './point_series';
-import VislibVisualizationsPieChartProvider from './pie_chart';
+import { VislibVisualizationsPointSeriesProvider } from './point_series';
+import { VislibVisualizationsPieChartProvider } from './pie_chart';
 
-export default function VisTypeFactory(Private) {
+export function VislibVisualizationsVisTypesProvider(Private) {
 
   /**
    * Provides the visualizations for the vislib

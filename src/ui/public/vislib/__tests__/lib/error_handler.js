@@ -1,7 +1,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import { VislibLibErrorHandlerProvider } from 'ui/vislib/lib/_error_handler';
 
 describe('Vislib ErrorHandler Test Suite', function () {
   let ErrorHandler;

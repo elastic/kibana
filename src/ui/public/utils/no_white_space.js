@@ -13,6 +13,6 @@ const TAGS_WITH_WS = />\s+</g;
  * @param  {string} html - the html to modify
  * @return {string} - modified html
  */
-export default function noWhiteSpace(html) {
+export function noWhiteSpace(html) {
   return html.replace(TAGS_WITH_WS, '><');
 }

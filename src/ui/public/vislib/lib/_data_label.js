@@ -6,8 +6,7 @@ import d3 from 'd3';
  * @param d {Object} object to wrap in d3.select
  * @returns {string} label value
  */
-function dataLabel(selection, label) {
+export function dataLabel(selection, label) {
   d3.select(selection).attr('data-label', label);
 }
 
-export default dataLabel;

@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ObjDefine from 'ui/utils/obj_define';
+import { ObjDefine } from 'ui/utils/obj_define';
 
 describe('ObjDefine Utility', function () {
 
