@@ -29,7 +29,8 @@ require('./vis');
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
-const unsafeNotifications = require('ui/notify').default._notifs;
+import { notify } from 'ui/notify';
+const unsafeNotifications = notify._notifs;
 
 require('ui/routes').enable();
 

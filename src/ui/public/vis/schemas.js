@@ -62,4 +62,3 @@ export function VisSchemasProvider(Private) {
   return Schemas;
 }
 
-export default VisSchemasProvider;

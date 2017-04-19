@@ -5,5 +5,3 @@ export const SavedObjectRegistryProvider = uiRegistry({
   index: ['loaderProperties.name'],
   order: ['loaderProperties.name']
 });
-
-export default SavedObjectRegistryProvider;

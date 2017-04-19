@@ -5,5 +5,3 @@ export const chromeNavControlsRegistry = uiRegistry({
   order: ['order']
 });
 
-// Used in x-pack. TODO: use named version and remove.
-export default chromeNavControlsRegistry;

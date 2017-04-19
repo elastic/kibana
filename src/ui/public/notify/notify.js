@@ -60,5 +60,3 @@ if (window.addEventListener) {
   });
 }
 
-// Used in x-pack. TODO: convert to named and remove.
-export default notify;

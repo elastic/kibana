@@ -53,4 +53,3 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));
 
-export default IndexPatternsProvider;

@@ -8,7 +8,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import Notifier from 'ui/notify';
+import { notify } from 'ui/notify';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -56,7 +56,7 @@ export function kbnChromeProvider(chrome, internals) {
 
         // and some local values
         chrome.httpActive = $http.pendingRequests;
-        $scope.notifList = Notifier._notifs;
+        $scope.notifList = notify._notifs;
 
         return chrome;
       }

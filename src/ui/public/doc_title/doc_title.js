@@ -43,5 +43,3 @@ export function DocTitleProvider(docTitle) {
   return docTitle;
 }
 
-// Default export used in x-pack. TODO: cleanup.
-export default DocTitleProvider;
