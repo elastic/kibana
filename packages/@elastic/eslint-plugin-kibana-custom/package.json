@@ -1,5 +1,9 @@
 {
   "name": "@elastic/eslint-plugin-kibana-custom",
   "version": "1.0.1",
-  "description": "Custom ESLint rules for Kibana"
+  "description": "Custom ESLint rules for Kibana",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/kibana/tree/master/packages/@elastic/eslint-plugin-kibana-custom"
+  }
 }
