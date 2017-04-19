@@ -33,5 +33,4 @@ export function parseInterval(interval) {
   }
 }
 
-// Used in xpack. TODO: switch to named and remove.
 export default parseInterval;

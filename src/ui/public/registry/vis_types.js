@@ -6,5 +6,4 @@ export const VisTypesRegistryProvider = uiRegistry({
   order: ['title']
 });
 
-// Used in x-pack. TODO: switch to named and remove.
 export default VisTypesRegistryProvider;

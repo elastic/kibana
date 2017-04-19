@@ -73,5 +73,4 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
   });
 };
 
-// Used by x-pack. TODO: switch to named and remove.
 export default Scanner;

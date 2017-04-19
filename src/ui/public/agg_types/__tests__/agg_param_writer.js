@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { VisProvider } from 'ui/vis';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 module.exports = function AggParamWriterHelper(Private) {

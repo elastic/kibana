@@ -23,5 +23,4 @@ export function TemplateVisTypeProvider(Private) {
   return TemplateVisType;
 }
 
-// Used by x-pack. TODO: switched to named and remove.
 export default TemplateVisTypeProvider;

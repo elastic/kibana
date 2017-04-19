@@ -6,5 +6,4 @@ export const SavedObjectRegistryProvider = uiRegistry({
   order: ['loaderProperties.name']
 });
 
-// Used by x-pack. TODO: convert to named and remove.
 export default SavedObjectRegistryProvider;

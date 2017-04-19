@@ -62,5 +62,4 @@ export function VisSchemasProvider(Private) {
   return Schemas;
 }
 
-// used in x-pack. TODO: switch to named and remove.
 export default VisSchemasProvider;

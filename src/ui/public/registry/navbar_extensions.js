@@ -7,5 +7,4 @@ export const NavBarExtensionsRegistryProvider = uiRegistry({
   order: ['order']
 });
 
-// Used in x-pack. TODO: switch to named and remove;
 export default NavBarExtensionsRegistryProvider;

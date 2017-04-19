@@ -53,5 +53,4 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));
 
-// Used by x-pack. TODO: cleanup and remove.
 export default IndexPatternsProvider;

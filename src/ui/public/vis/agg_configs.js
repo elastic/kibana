@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 
 export function VisAggConfigsProvider(Private) {
   const AggConfig = Private(VisAggConfigProvider);

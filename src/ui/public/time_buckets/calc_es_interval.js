@@ -47,5 +47,4 @@ export function TimeBucketsCalcEsIntervalProvider() {
   return esDuration;
 }
 
-// used by x-pack. TODO: switch to named and remove.
 export default TimeBucketsCalcEsIntervalProvider;

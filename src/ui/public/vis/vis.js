@@ -9,7 +9,7 @@
  */
 
 import _ from 'lodash';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';

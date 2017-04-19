@@ -368,5 +368,4 @@ export function TimeBucketsProvider(Private, timefilter, config) {
   return TimeBuckets;
 }
 
-// Used by x-pack. TODO: Switch to named and remove.
 export default TimeBucketsProvider;
