@@ -2,6 +2,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -25,7 +26,7 @@ require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
 require('plugins/kibana/discover/saved_searches/saved_searches');
 require('./vis');
 
-require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
+SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
 const unsafeNotifications = require('ui/notify').default._notifs;

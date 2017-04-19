@@ -1,4 +1,4 @@
-import VisAggConfigProvider from 'ui/vis/agg_config';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import uiModules from 'ui/modules';
 import aggAddTemplate from 'plugins/kibana/visualize/editor/agg_add.html';
 

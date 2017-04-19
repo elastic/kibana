@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-export default function (target, source) {
+export function applyDiff(target, source) {
 
   const diff = {};
 

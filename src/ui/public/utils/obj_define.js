@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-function ObjDefine(defaults, prototype) {
+export function ObjDefine(defaults, prototype) {
   this.obj; // created by this.create()
 
   this.descs = {};
@@ -134,4 +134,3 @@ ObjDefine.prototype._describe = function (name, val, exported, changeable) {
   };
 };
 
-export default ObjDefine;

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import KibanaMap from 'ui/vis_maps/kibana_map';
-import GeohashLayer from 'ui/vis_maps/geohash_layer';
-import sampleData from './geohash_sample_data';
+import { KibanaMap } from 'ui/vis_maps/kibana_map';
+import { GeohashLayer } from 'ui/vis_maps/geohash_layer';
+import { GeoHashSampleData } from './geohash_sample_data';
 
 describe('kibana_map tests', function () {
 
@@ -451,7 +451,7 @@ describe('kibana_map tests', function () {
       it(test.options.mapType, function () {
 
         const geohashGridOptions = test.options;
-        const geohashLayer = new GeohashLayer(sampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+        const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
         const markersNodeList = domNode.querySelectorAll('path.leaflet-clickable');
         const markerArray = [];

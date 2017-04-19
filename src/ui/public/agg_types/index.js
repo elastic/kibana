@@ -99,7 +99,6 @@ export function AggTypesIndexProvider(Private) {
   });
 }
 
-// Used by xpack/ml. Keep around until we clean that up. TODO: Clean up.
 export default AggTypesIndexProvider;
 
 // preload

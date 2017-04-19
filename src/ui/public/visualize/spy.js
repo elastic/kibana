@@ -1,13 +1,14 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import RegistrySpyModesProvider from 'ui/registry/spy_modes';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import uiModules from 'ui/modules';
 import spyTemplate from 'ui/visualize/spy.html';
+
 uiModules
   .get('app/visualize')
   .directive('visualizeSpy', function (Private, $compile) {
 
-    const spyModes = Private(RegistrySpyModesProvider);
+    const spyModes = Private(SpyModesRegistryProvider);
     const defaultMode = spyModes.inOrder[0].name;
 
     return {

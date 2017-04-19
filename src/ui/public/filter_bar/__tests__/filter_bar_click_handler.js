@@ -2,10 +2,10 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import MockState from 'fixtures/mock_state';
-import notify from 'ui/notify';
+import { notify } from 'ui/notify';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 

@@ -5,7 +5,7 @@ import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_forma
 import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
 import dateTemplate from 'ui/stringify/editors/date.html';
 
-export default function DateTimeFormatProvider(Private) {
+export function stringifyDate(Private) {
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const BoundToConfigObj = Private(BoundToConfigObjProvider);
 

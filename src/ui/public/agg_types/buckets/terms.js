@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
-import routeBasedNotifierProvider from 'ui/route_based_notifier';
+import { RouteBasedNotifierProvider } from 'ui/route_based_notifier';
 
 export function AggTypesBucketsTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const AggConfig = Private(VisAggConfigProvider);
   const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
-  const routeBasedNotifier = Private(routeBasedNotifierProvider);
+  const routeBasedNotifier = Private(RouteBasedNotifierProvider);
 
   const aggFilter = [
     '!top_hits', '!percentiles', '!median', '!std_dev',

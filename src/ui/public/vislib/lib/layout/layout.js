@@ -1,15 +1,15 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibLibLayoutLayoutTypesProvider from './layout_types';
-import AxisProvider from 'ui/vislib/lib/axis';
-import ChartTitleProvider from 'ui/vislib/lib/chart_title';
+import { VislibLibLayoutLayoutTypesProvider } from './layout_types';
+import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
+import { VislibLibChartTitleProvider } from 'ui/vislib/lib/chart_title';
 
-export default function LayoutFactory(Private) {
+export function VislibLibLayoutLayoutProvider(Private) {
 
   const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-  const Axis = Private(AxisProvider);
-  const ChartTitle = Private(ChartTitleProvider);
+  const Axis = Private(VislibLibAxisProvider);
+  const ChartTitle = Private(VislibLibChartTitleProvider);
   /**
    * Builds the visualization DOM layout
    *

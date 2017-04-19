@@ -1,4 +1,4 @@
-import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import UiModules from 'ui/modules';
 
 export function kbnAppendChromeNavControls() {

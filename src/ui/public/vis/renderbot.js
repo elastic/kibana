@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function RenderbotFactory() {
+export function VisRenderbotProvider() {
 
   /**
    * "Abstract" renderbot class which just defines the expected API

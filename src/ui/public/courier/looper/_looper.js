@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import 'ui/promises';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 export function LooperProvider($timeout, Promise) {
   const notify = new Notifier();

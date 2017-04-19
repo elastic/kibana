@@ -2,8 +2,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import { PieContainsAllZeros, ContainerTooSmall } from 'ui/errors';
-import VislibVisualizationsChartProvider from './_chart';
-export default function PieChartFactory(Private) {
+import { VislibVisualizationsChartProvider } from './_chart';
+
+export function VislibVisualizationsPieChartProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
 

@@ -1,5 +1,7 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import image from '../images/icon-timelion.svg';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type';
 
 define(function (require) {
   // we also need to load the controller and used by the template
@@ -10,11 +12,11 @@ define(function (require) {
   require('plugins/timelion/vis/timelion_vis.less');
 
   // register the provider with the visTypes registry so that other know it exists
-  require('ui/registry/vis_types').register(TimelionVisProvider);
+  VisTypesRegistryProvider.register(TimelionVisProvider);
 
   function TimelionVisProvider(Private) {
     const VisType = Private(VisVisTypeProvider);
-    const TemplateVisType = Private(require('ui/template_vis_type'));
+    const TemplateVisType = Private(TemplateVisTypeProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

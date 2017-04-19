@@ -10,7 +10,7 @@ import { EventEmitter } from 'events';
  * @param geoJson {geoJson Object}
  * @param params {Object}
  */
-export default class Heatmap extends EventEmitter {
+export class HeatmapMarkers extends EventEmitter {
 
   constructor(featureCollection, options, zoom) {
 

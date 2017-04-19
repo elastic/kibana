@@ -1,4 +1,4 @@
-import parseInterval from 'ui/utils/parse_interval';
+import { parseInterval } from 'ui/utils/parse_interval';
 import uiModules from 'ui/modules';
 
 uiModules

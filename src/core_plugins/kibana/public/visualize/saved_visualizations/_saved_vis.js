@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import uiModules from 'ui/modules';
 
 uiModules

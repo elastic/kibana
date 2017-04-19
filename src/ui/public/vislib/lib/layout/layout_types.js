@@ -1,7 +1,7 @@
-import VislibLibLayoutTypesColumnLayoutProvider from './types/column_layout';
-import VislibLibLayoutTypesPieLayoutProvider from './types/pie_layout';
+import { VislibLibLayoutTypesColumnLayoutProvider } from './types/column_layout';
+import { VislibLibLayoutTypesPieLayoutProvider } from './types/pie_layout';
 
-export default function LayoutTypeFactory(Private) {
+export function VislibLibLayoutLayoutTypesProvider(Private) {
 
   /**
    * Provides the HTML layouts for each visualization class

@@ -1,8 +1,9 @@
 import _ from 'lodash';
-import VislibComponentsLabelsDataArrayProvider from './data_array';
-import VislibComponentsLabelsUniqLabelsProvider from './uniq_labels';
-import VislibComponentsLabelsPiePieLabelsProvider from './pie/pie_labels';
-export default function LabelUtilService(Private) {
+import { VislibComponentsLabelsDataArrayProvider } from './data_array';
+import { VislibComponentsLabelsUniqLabelsProvider } from './uniq_labels';
+import { VislibComponentsLabelsPiePieLabelsProvider } from './pie/pie_labels';
+
+export function VislibComponentsLabelsLabelsProvider(Private) {
 
   const createArr = Private(VislibComponentsLabelsDataArrayProvider);
   const getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibVisProvider from 'ui/vislib/vis';
+import { VislibVisProvider } from 'ui/vislib/vis';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')

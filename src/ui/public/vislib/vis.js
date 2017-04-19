@@ -4,14 +4,15 @@ import { Binder } from 'ui/binder';
 import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';
 import './styles/main.less';
-import VislibLibResizeCheckerProvider from './lib/resize_checker';
-import VisConifgProvider from './lib/vis_config';
-import VisHandlerProvider from './lib/handler';
 
-export default function VisFactory(Private) {
-  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+import { ResizeCheckerProvider } from './lib/resize_checker';
+import { VislibVisConfigProvider } from './lib/vis_config';
+import { VisHandlerProvider } from './lib/handler';
+
+export function VislibVisProvider(Private) {
+  const ResizeChecker = Private(ResizeCheckerProvider);
   const Events = Private(EventsProvider);
-  const VisConfig = Private(VisConifgProvider);
+  const VisConfig = Private(VislibVisConfigProvider);
   const Handler = Private(VisHandlerProvider);
 
   /**
