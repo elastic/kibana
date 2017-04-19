@@ -4,9 +4,9 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/visualize/editor/agg_params';
-import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisProvider } from 'ui/vis';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 

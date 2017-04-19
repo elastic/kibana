@@ -1,6 +1,7 @@
 import d3 from 'd3';
 import dateMath from '@elastic/datemath';
-export default function TimeMarkerFactory() {
+
+export function VislibVisualizationsTimeMarkerProvider() {
 
   class TimeMarker {
     constructor(times, xScale, height) {

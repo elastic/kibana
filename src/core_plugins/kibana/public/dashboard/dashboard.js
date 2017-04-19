@@ -18,10 +18,10 @@ import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
-import notify from 'ui/notify';
+import { notify } from 'ui/notify';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

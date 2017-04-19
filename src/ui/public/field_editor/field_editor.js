@@ -2,7 +2,7 @@ import 'ui/field_format_editor';
 import 'angular-bootstrap-colorpicker';
 import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import uiModules from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';

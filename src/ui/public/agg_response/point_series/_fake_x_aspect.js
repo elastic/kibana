@@ -1,4 +1,4 @@
-import VisAggConfigProvider from 'ui/vis/agg_config';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 
 export function PointSeriesFakeXAxisProvider(Private) {

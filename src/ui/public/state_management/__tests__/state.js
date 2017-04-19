@@ -3,8 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
 import 'ui/private';
-import Notifier from 'ui/notify/notifier';
-import StateManagementStateProvider from 'ui/state_management/state';
+import { Notifier } from 'ui/notify/notifier';
+import { StateProvider } from 'ui/state_management/state';
 import {
   unhashQueryString,
 } from 'ui/state_management/state_hashing';
@@ -12,7 +12,7 @@ import {
   createStateHash,
   isStateHash,
 } from 'ui/state_management/state_storage';
-import HashedItemStore from 'ui/state_management/state_storage/hashed_item_store';
+import { HashedItemStore } from 'ui/state_management/state_storage/hashed_item_store';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import { EventsProvider } from 'ui/events';
 
@@ -28,7 +28,7 @@ describe('State Management', function () {
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
     $location = _$location_;
     $rootScope = _$rootScope_;
-    State = Private(StateManagementStateProvider);
+    State = Private(StateProvider);
     Events = Private(EventsProvider);
     Notifier.prototype._notifs.splice(0);
 

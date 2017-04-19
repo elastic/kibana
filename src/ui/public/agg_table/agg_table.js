@@ -4,7 +4,7 @@ import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 uiModules
 .get('kibana')

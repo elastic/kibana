@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import SCALE_MODES from './scale_modes';
+import { SCALE_MODES } from './scale_modes';
 
-export default function AxisConfigFactory() {
+export function VislibLibAxisConfigProvider() {
 
   const defaults = {
     show: true,

@@ -384,5 +384,4 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
   }
 }
 
-// used by x-pack. TODO: remove and clean up.
 export default FilterBarQueryFilterProvider;

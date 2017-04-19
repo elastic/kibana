@@ -4,7 +4,7 @@ import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivati
 import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumulative_sum';
 import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
 import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

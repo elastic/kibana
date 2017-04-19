@@ -1,4 +1,4 @@
-import Scanner from 'ui/utils/scanner';
+import { Scanner } from 'ui/utils/scanner';
 import expect from 'expect.js';
 import Bluebird from 'bluebird';
 import 'elasticsearch-browser';

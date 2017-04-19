@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { PersistedStateError } from 'ui/errors';
-import SimpleEmitter from 'ui/utils/simple_emitter';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
 function prepSetParams(key, value, path) {
   // key must be the value, set the entire state using it

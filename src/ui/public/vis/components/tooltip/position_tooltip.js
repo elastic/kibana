@@ -10,7 +10,7 @@ const propDirs = {
   left: 'west'
 };
 
-function positionTooltip(opts, html) {
+export function positionTooltip(opts, html) {
   if (!opts) return;
   const $chart = $(opts.$chart);
   const $el = $(opts.$el);
@@ -143,4 +143,3 @@ positionTooltip.removeClone = function () {
   $clone = null;
 };
 
-module.exports = positionTooltip;

@@ -1,4 +1,4 @@
-import decodeGeoHash from 'ui/utils/decode_geo_hash';
+import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import _ from 'lodash';
 

@@ -4,7 +4,7 @@ import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
 
-export default class ScaledCircles extends EventEmitter {
+export class ScaledCirclesMarkers extends EventEmitter {
 
   constructor(featureCollection, options, targetZoom, kibanaMap) {
     super();

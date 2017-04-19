@@ -53,7 +53,7 @@
 
 import { pull, sortBy } from 'lodash';
 
-export default class HashedItemStore {
+export class HashedItemStore {
 
   /**
    * HashedItemStore uses objects called indexed items to refer to items that have been persisted

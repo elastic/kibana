@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
-import VislibVisualizationsPointSeriesProvider from './_point_series';
-import getColor from 'ui/vislib/components/color/heatmap_color';
+import { VislibVisualizationsPointSeriesProvider } from './_point_series';
+import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 
-export default function HeatmapChartFactory(Private) {
+export function VislibVisualizationsHeatmapChartProvider(Private) {
 
   const PointSeries = Private(VislibVisualizationsPointSeriesProvider);
 
@@ -90,7 +90,7 @@ export default function HeatmapChartFactory(Private) {
       for (const i in labels) {
         if (labels[i]) {
           const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
-          colors[labels[i]] = getColor(val, colorSchema);
+          colors[labels[i]] = getHeatmapColors(val, colorSchema);
         }
       }
       return colors;

@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import VislibComponentsLabelsPieRemoveZeroSlicesProvider from './remove_zero_slices';
-import VislibComponentsLabelsPieGetPieNamesProvider from './get_pie_names';
+import { VislibComponentsLabelsPieRemoveZeroSlicesProvider } from './remove_zero_slices';
+import { VislibComponentsLabelsPieGetPieNamesProvider } from './get_pie_names';
 
-export default function PieLabels(Private) {
+export function VislibComponentsLabelsPiePieLabelsProvider(Private) {
   const removeZeroSlices = Private(VislibComponentsLabelsPieRemoveZeroSlicesProvider);
   const getNames = Private(VislibComponentsLabelsPieGetPieNamesProvider);
 

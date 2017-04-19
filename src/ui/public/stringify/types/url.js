@@ -5,7 +5,7 @@ import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_forma
 import urlTemplate from 'ui/stringify/editors/url.html';
 import { getHighlightHtml } from 'ui/highlight';
 
-export default function UrlFormatProvider(Private) {
+export function stringifyUrl(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
