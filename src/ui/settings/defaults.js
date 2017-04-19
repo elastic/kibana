@@ -80,6 +80,11 @@ export default function defaultSettingsProvider() {
       description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
         'Set to false if you are using a "default_field" in your index.',
     },
+    'doc_table:truncationLimit': {
+      value: 20,
+      description: 'The approximate number of characters in a cell beyond which truncation may occur. Adjust this to improve wrapping ' +
+        'and truncation behavior in the document table.',
+    },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +

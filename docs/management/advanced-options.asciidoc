@@ -37,6 +37,7 @@ document.
 working on big documents. Set this property to `false` to disable highlighting.
 `doc_table:highlight:all_fields`:: Improves highlighting by using a separate `highlight_query` that uses `all_fields` mode on
 `query_string` queries. Set to `false` if you are using a `default_field` in your index.
+`doc_table:truncationLimit`:: The approximate number of characters in a cell beyond which truncation may occur. Adjust this to improve wrapping and truncation behavior in the document table.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
 the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
 increase request processing time.
