@@ -3,8 +3,13 @@
   width: 100%;
 }
 
+/**
+ * 1. em used for right padding so documentation link and query string
+ *    won't overlap if the user increases their default browser font size
+ */
 .kuiLocalSearchInput {
   @include formControl;
+  padding-right: 13em; /* 1 */
   flex: 1 1 100%;
   border-color: $localSearchBackgroundColor;
   border-top-color: $localSearchBackgroundColor;
