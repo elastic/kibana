@@ -1,7 +1,9 @@
 [[nested-objects]]
-== Aggregations with Nested Objects not Supported
+== Nested Objects
 
-Kibana cannot perform aggregations across fields that contain nested objects.
+Kibana cannot perform aggregations across fields that contain nested objects. 
+It also cannot search on nested objects when Lucene Query Syntax is used in
+the query bar.
 
 [IMPORTANT]
 ==============================================
