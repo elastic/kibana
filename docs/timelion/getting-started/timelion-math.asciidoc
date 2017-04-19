@@ -18,7 +18,7 @@ To start tracking the inbound / outbound network traffic, your first expression 
 image::images/timelion-math02.png[]
 {nbsp}
 
-Now that you have the maximum value for the inbound traffic, let’s calculate the derivative to chart the change over time. The `derivative()` function is used to plot the change in values over time. This can be easily done by appending the `.derivative()` to the end of an expression. Use the following expression to update your visualization:
+Monitoring network traffic is much more valuable when plotting the rate of change. The `derivative()` function is used do just that - plot the change in values over time. This can be easily done by appending the `.derivative()` to the end of an expression. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------

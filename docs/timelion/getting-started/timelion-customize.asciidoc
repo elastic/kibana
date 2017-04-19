@@ -30,7 +30,7 @@ To differentiate the last hour series a bit more, you are going to change the ch
 image::images/timelion-customize02.png[]
 {nbsp}
 
-Let’s color these series so that the current hour pops a bit more than the last hour. The `color()` function can be used to change the color of any series and accepts standard color names, hexadecimal value or a color schema for grouped series. For this example you will use `.color(gray)` for the last hour and `.color(#1E90FF)` for the current hour. Enter the following expression into the Timelion query bar to make the adjustments:
+Let’s color these series so that the current hour series pops a bit more than the last hour series. The `color()` function can be used to change the color of any series and accepts standard color names, hexadecimal values or a color schema for grouped series. For this example you will use `.color(gray)` for the last hour and `.color(#1E90FF)` for the current hour. Enter the following expression into the Timelion query bar to make the adjustments:
 
 [source,text]
 ----------------------------------

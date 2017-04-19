@@ -1,7 +1,7 @@
 [[timelion-conditional]]
 === Using conditional logic and tracking trends
 
-In this section you will learn how to modify a series with conditional logic and trend your data with a moving average. This is helpful to easily distinguish outliers and detect trends over time.
+In this section you will learn how to modify time series data with conditional logic and create a trend with a moving average. This is helpful to easily detect outliers and patterns over time.
 
 For the purposes of this tutorial, you will continue to use https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to add another visualization that monitors memory consumption. To start, use the following expression to chart the maximum value of  `system.memory.actual.used.bytes`.
 
@@ -13,11 +13,11 @@ For the purposes of this tutorial, you will continue to use https://www.elastic.
 image::images/timelion-conditional01.png[]
 {nbsp}
 
-Let’s create two thresholds to keep an eye on the amount of memory your machine is using. For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of memory being utilized exceeds either of these thresholds, the series will be re-styled accordingly.
+Let’s create two thresholds to keep an eye on the amount of used memory. For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of used memory exceeds either of these thresholds, the series will be colored accordingly.
 
 NOTE: If the threshold values are too high or low for your machine, please adjust accordingly.
 
-To configure these two threshold values, you can utilize Timelions conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the comparison is `true` and use the default styling if the comparison is `false`. Timelion offers six operator values for comparison.
+To configure these two threshold values, you can utilize Timelion's conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following six operator values for comparison.
 
 [horizontal]
 `eq`:: equal
@@ -39,7 +39,7 @@ image::images/timelion-conditional02.png[]
 
 For additional information on Timelions conditional capabilities, check out the blog post https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
 
-Now that you have thresholds defined to easily identify outliers, let’s create a new series to determine what the trend really is. Timelions `mvavg()` function allows you to calculate the moving average over a given window. This is especially helpful for noisey time series. For this tutorial, you will use `.mvavg(10)` to create a moving average with a window of 10 data points. Use the following expression to create a moving average of the maximum memory consumption:
+Now that you have thresholds defined to easily identify outliers, let’s create a new series to determine what the trend really is. Timelion's `mvavg()` function allows you to calculate the moving average over a given window. This is especially helpful for noisey time series. For this tutorial, you will use `.mvavg(10)` to create a moving average with a window of 10 data points. Use the following expression to create a moving average of the maximum memory usage:
 
 [source,text]
 ----------------------------------
