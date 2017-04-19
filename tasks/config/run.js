@@ -102,9 +102,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      // TODO: this is temporary
-      // cmd: binScript,
-      cmd: snapshotBinScript,
+      cmd: binScript,
       args: [
         ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
