@@ -1,0 +1,44 @@
+export const FILTER_OPERATORS = [
+  {
+    name: 'is',
+    type: 'match',
+    negate: false,
+  },
+  {
+    name: 'is not',
+    type: 'match',
+    negate: true,
+  },
+  {
+    name: 'is one of',
+    type: 'terms',
+    negate: false,
+  },
+  {
+    name: 'is not one of',
+    type: 'terms',
+    negate: true,
+  },
+  {
+    name: 'is between',
+    type: 'range',
+    negate: false,
+    fieldTypes: ['number', 'date', 'ip'],
+  },
+  {
+    name: 'is not between',
+    type: 'range',
+    negate: true,
+    fieldTypes: ['number', 'date', 'ip'],
+  },
+  {
+    name: 'exists',
+    type: 'exists',
+    negate: false,
+  },
+  {
+    name: 'does not exist',
+    type: 'exists',
+    negate: true,
+  },
+];

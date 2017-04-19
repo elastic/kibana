@@ -64,6 +64,7 @@ export default function mapFilterProvider(Promise, Private) {
     // Apply the mapping function
     return mapFn(filter).then(function (result) {
       filter.meta = filter.meta || {};
+      filter.meta.type = result.type;
       filter.meta.key = result.key;
       filter.meta.value = result.value;
       filter.meta.disabled = !!(filter.meta.disabled);

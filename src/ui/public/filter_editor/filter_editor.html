@@ -1,0 +1,125 @@
+<div class="filterEditor kuiModal" style="width: 500px; position: absolute; z-index: 20;">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title">
+      <span ng-show="filterEditor.filter.meta.newFilter">Add</span>
+      <span ng-hide="filterEditor.filter.meta.newFilter">Edit</span>
+      filter
+    </div>
+
+    <div
+      class="kuiModalHeaderCloseButton kuiIcon fa-times"
+      ng-click="filterEditor.onCancel()"
+    ></div>
+  </div>
+
+  <div class="kuiModalBody">
+    <div class="kuiFieldGroup">
+      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
+        <ui-select
+          ng-model="filterEditor.getSetField"
+          ng-model-options="{ getterSetter: true }"
+        >
+          <ui-select-match placeholder="Fields...">
+            {{$select.selected.name}}
+          </ui-select-match>
+          <ui-select-choices repeat="field in filterEditor.fieldSuggestions | filter:$select.search | orderBy">
+            <div ng-bind-html="field.name | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+
+      <div
+        class="kuiFieldGroupSection kuiColumn kuiColumn--4"
+      >
+        <ui-select
+          ng-model="filterEditor.getSetOperator"
+          ng-model-options="{ getterSetter: true }"
+          ng-if="filterEditor.field"
+        >
+          <ui-select-match placeholder="Operators...">
+            {{$select.selected.name}}
+          </ui-select-match>
+          <ui-select-choices repeat="operator in filterEditor.operatorSuggestions | filter:$select.search">
+            <div ng-bind-html="operator.name | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+
+      <div
+        class="kuiFieldGroupSection kuiColumn kuiColumn--4"
+      >
+        <ui-select
+          ng-if="filterEditor.operator.type === 'match'"
+          ng-model="filterEditor.params.value"
+        >
+          <ui-select-match placeholder="Values...">
+            {{$select.selected}}
+          </ui-select-match>
+          <ui-select-choices
+            repeat="value in filterEditor.valueSuggestions | filter:$select.search"
+            refresh="filterEditor.getValueSuggestions($select.search)"
+            refresh-delay="10"
+          >
+            <div ng-bind-html="value | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+
+        <ui-select
+          ng-if="filterEditor.operator.type === 'terms'"
+          ng-model="filterEditor.params.values"
+          multiple
+        >
+          <ui-select-match placeholder="Values...">
+            {{$item}}
+          </ui-select-match>
+          <ui-select-choices
+            repeat="value in filterEditor.valueSuggestions | filter:$select.search"
+            refresh="filterEditor.getValueSuggestions($select.search)"
+            refresh-delay="10"
+          >
+            <div ng-bind-html="value | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+
+        <div
+          class="kuiFieldGroup"
+          ng-if="filterEditor.operator.type === 'range'"
+        >
+          <div class="kuiFieldGroupSection">
+            <input
+              type="text"
+              class="kuiTextInput"
+              ng-model="filterEditor.params.from"
+              placeholder="From..."
+              style="width: 60px;"
+            />
+          </div>
+          <div class="kuiFieldGroupSection">
+            <input
+              type="text"
+              class="kuiTextInput"
+              ng-model="filterEditor.params.to"
+              placeholder="To..."
+              style="width: 60px;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kuiModalFooter">
+    <button
+      class="kuiButton kuiButton--basic"
+      ng-click="filterEditor.onCancel()"
+    >
+      Cancel
+    </button>
+    <button
+      class="kuiButton kuiButton--primary"
+      ng-click="filterEditor.save()"
+    >
+      Save
+    </button>
+  </div>
+</div>

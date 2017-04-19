@@ -7,6 +7,7 @@ export default function mapRangeProvider(Promise, courier) {
     .indexPatterns
     .get(filter.meta.index)
     .then(function (indexPattern) {
+      const type = 'range';
       const key = Object.keys(filter.range)[0];
       const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
       const range = filter.range[key];
@@ -17,10 +18,9 @@ export default function mapRangeProvider(Promise, courier) {
       let right = has(range, 'lte') ? range.lte : range.lt;
       if (right == null) right = Infinity;
 
-      return {
-        key: key,
-        value: `${convert(left)} to ${convert(right)}`
-      };
+      const value = `${convert(left)} to ${convert(right)}`;
+
+      return { type, key, value };
     });
 
   };
