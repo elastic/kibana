@@ -70,13 +70,20 @@
           ></button>
         </div>
 
+        <!-- Countdown badge -->
         <button
           type="button"
           ng-if="notif.isTimed()"
           class="toaster-countdown"
-          ng-class="notif.getButtonClass()"
           ng-click="notif.cancelTimer()"
-        ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
+        >
+          <span
+            class="badge"
+            hover-text="stop"
+          >
+            {{notif.timeRemaining}}s
+          </span>
+        </button>
       </div>
 
       <div ng-if="notif.stack && notif.showStack" ng-class="notif.getAlertClassStack()">
