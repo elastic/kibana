@@ -5,7 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiRoutes
 .when('/management/kibana/objects', {

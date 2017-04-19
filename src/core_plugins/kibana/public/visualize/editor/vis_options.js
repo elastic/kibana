@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
 
 uiModules

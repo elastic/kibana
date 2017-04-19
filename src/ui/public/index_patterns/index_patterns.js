@@ -7,7 +7,7 @@ import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
 import { IndexPatternsPatternToWildcardProvider } from 'ui/index_patterns/_pattern_to_wildcard';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
 export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {

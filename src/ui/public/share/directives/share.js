@@ -11,7 +11,7 @@ import { Notifier } from 'ui/notify/notifier';
 
 import { UrlShortenerProvider } from '../lib/url_shortener';
 
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import shareTemplate from 'ui/share/views/share.html';
 const app = uiModules.get('kibana');
 

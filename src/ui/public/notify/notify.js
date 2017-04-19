@@ -1,8 +1,9 @@
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';
-const module = modules.get('kibana/notify');
+
+const module = uiModules.get('kibana/notify');
 export const notify = new Notifier();
 
 module.factory('createNotifier', function () {

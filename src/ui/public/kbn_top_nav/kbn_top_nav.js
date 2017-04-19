@@ -37,7 +37,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import 'ui/watch_multi';
 import 'ui/directives/input_focus';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './kbn_top_nav.html';
 import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';

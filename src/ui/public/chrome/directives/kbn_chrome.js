@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { remove } from 'lodash';
 
 import './kbn_chrome.less';
-import UiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import {
   getUnhashableStatesProvider,
@@ -12,7 +12,7 @@ import Notifier from 'ui/notify';
 
 export function kbnChromeProvider(chrome, internals) {
 
-  UiModules
+  uiModules
   .get('kibana')
   .directive('kbnChrome', () => {
     return {
