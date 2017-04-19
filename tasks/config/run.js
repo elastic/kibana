@@ -7,7 +7,7 @@ module.exports = function (grunt) {
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   const pkgVersion = grunt.config.get('pkg.version');
-  const snapshotBinScript = `./build/kibana-${pkgVersion}-SNAPSHOT-linux-x86_64/bin/kibana`;
+  const snapshotBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
   const uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [

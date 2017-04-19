@@ -18,16 +18,6 @@ export class KibanaServerUiSettings {
 
   async existInEs() {
     const { es } = this;
-    const docParams = await this._docParams();
-    console.log('===========================');
-    console.log('===========================');
-    console.log('===========================');
-    console.log('===========================');
-    console.log('docParams', docParams);
-    console.log('===========================');
-    console.log('===========================');
-    console.log('===========================');
-    console.log('===========================');
     return await es.exists(await this._docParams());
   }
 
