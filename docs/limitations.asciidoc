@@ -1,0 +1,12 @@
+[[limitations]]
+= Limitations
+
+[partintro]
+--
+Kibana currently has the following limitations.
+
+* <<nested-objects>>
+
+--
+
+include::limitations/nested-objects.asciidoc[]
