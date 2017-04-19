@@ -104,7 +104,7 @@ class KibanaMap extends EventEmitter {
       zoom: options.zoom ? options.zoom : 0
     };
 
-    this._leafletMap = L.map(containerNode, leafletOptions, leafletOptions);
+    this._leafletMap = L.map(containerNode, leafletOptions);
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
