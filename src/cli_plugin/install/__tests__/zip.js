@@ -75,6 +75,8 @@ describe('kibana cli', function () {
 
     it('should return false for files', () => {
       expect(_isDirectory('foo.txt')).to.be(false);
+      expect(_isDirectory('\\path\\to\\foo.txt')).to.be(false);
+      expect(_isDirectory('/path/to/foo.txt')).to.be(false);
     });
   });
 
