@@ -630,6 +630,26 @@ body {
   color: #9fa3a7; }
 
 /**
+ * 1. Set inline-block so this wrapper shrinks to fit the input.
+ */
+.kuiAssistedInput {
+  display: inline-block;
+  /* 1 */
+  position: relative; }
+
+/**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+.kuiAssistedInput__assistance {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  /* 1 */
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  /* 1 */ }
+
+/**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
  *    ugly default appearance which we can't customize, so our best option is to give Firefox
  *    control over the checkbox's appearance.
