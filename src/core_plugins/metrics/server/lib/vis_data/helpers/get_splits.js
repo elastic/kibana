@@ -3,6 +3,7 @@ import calculateLabel from '../../../../common/calculate_label';
 import _ from 'lodash';
 import getLastMetric from './get_last_metric';
 import getSplitColors from './get_split_colors';
+import { formatKey } from './format_key';
 export default function getSplits(resp, series) {
   const metric = getLastMetric(series);
   if (_.has(resp, `aggregations.${series.id}.buckets`)) {
@@ -12,7 +13,7 @@ export default function getSplits(resp, series) {
       const colors = getSplitColors(series.color, size, series.split_color_mode);
       return buckets.map(bucket => {
         bucket.id = `${series.id}:${bucket.key}`;
-        bucket.label = bucket.key;
+        bucket.label = formatKey(bucket.key, series);
         bucket.color = colors.shift();
         return bucket;
       });
