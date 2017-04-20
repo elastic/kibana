@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import uiModules from 'ui/modules';
 import template from './filter_editor.html';
 import { FILTER_OPERATORS } from './lib/filter_operators';
@@ -15,16 +16,19 @@ module.directive('filterEditor', function (indexPatterns, es) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: function () {
-      const { index, key } = this.filter.meta;
-      this.indexPattern = indexPatterns.get(index)
-      .then((indexPattern) => {
-        this.setIndexPattern(indexPattern);
-        if (!key) return;
-        this.setField(indexPattern.fields.byName[key]);
-        this.setOperator(getOperatorFromFilter(this.filter));
-        this.params = getParamsFromFilter(this.filter);
-      });
+    controller: function ($scope) {
+      this.init = (filter) => {
+        const { index, key } = filter.meta;
+        this.indexPattern = indexPatterns.get(index)
+        .then((indexPattern) => {
+          this.setIndexPattern(indexPattern);
+          this.setField(indexPattern.fields.byName[key]);
+          this.setOperator(getOperatorFromFilter(filter));
+          this.params = getParamsFromFilter(filter);
+        });
+      };
+
+      $scope.$watch(() => this.filter, this.init);
 
       this.setIndexPattern = (indexPattern) => {
         this.indexPattern = indexPattern;
@@ -50,17 +54,20 @@ module.directive('filterEditor', function (indexPatterns, es) {
 
       this.setOperator = (operator) => {
         this.operator = operator;
-        if (operator.type === 'match' || operator.type === 'terms') {
-          // TODO: Cache this and build up the array
-          this.getValueSuggestions = (query) => {
-            return getValueSuggestions(this.indexPattern, this.field, query)
-            .then(suggestions => this.valueSuggestions = suggestions);
-          };
-        } // ...
+        const type = _.get(operator, 'type');
+        if (type === 'match' || type === 'terms') {
+          this.refreshValueSuggestions();
+        }
+      };
+
+      this.refreshValueSuggestions = (query) => {
+        return getValueSuggestions(this.indexPattern, this.field, query)
+        .then(suggestions => this.valueSuggestions = suggestions);
       };
 
       this.save = () => {
         const { indexPattern, field, operator, params } = this;
+
         let filter;
         if (operator.type === 'match') {
           filter = buildPhraseFilter(field, params.value, indexPattern);
@@ -70,7 +77,8 @@ module.directive('filterEditor', function (indexPatterns, es) {
           filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, indexPattern);
         } else if (operator.type === 'exists') {
           filter = buildExistsFilter(field, indexPattern);
-        } // ...
+        }
+
         filter.meta.negate = operator.negate;
         return this.onSave({ filter });
       };
@@ -94,16 +102,18 @@ module.directive('filterEditor', function (indexPatterns, es) {
             from: params.gte || params.gt,
             to: params.lte || params.lt
           };
-        } // ...
+        }
       }
 
       function getOperatorSuggestions(indexPattern, field) {
+        const type = _.get(field, 'type');
         return FILTER_OPERATORS.filter((operator) => {
-          return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
-        }); // ...
+          return !operator.fieldTypes || operator.fieldTypes.includes(type);
+        });
       }
 
       function getValueSuggestions(indexPattern, field, query) {
+        if (!_.get(field, 'aggregatable')) return Promise.resolve([]);
         const include = query && field.type === 'string' ? `.*${query}.*` : undefined;
         return es.search({
           index: indexPattern.id,
@@ -118,7 +128,9 @@ module.directive('filterEditor', function (indexPatterns, es) {
             }
           }
         })
-        .then(response => response.aggregations.suggestions.buckets.map(bucket => bucket.key));
+        .then((response) => {
+          return response.aggregations.suggestions.buckets.map(bucket => bucket.key);
+        });
       }
     }
   };

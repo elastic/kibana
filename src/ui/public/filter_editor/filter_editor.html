@@ -57,8 +57,8 @@
           </ui-select-match>
           <ui-select-choices
             repeat="value in filterEditor.valueSuggestions | filter:$select.search"
-            refresh="filterEditor.getValueSuggestions($select.search)"
-            refresh-delay="10"
+            refresh="filterEditor.refreshValueSuggestions($select.search)"
+            refresh-delay="100"
           >
             <div ng-bind-html="value | highlight: $select.search"></div>
           </ui-select-choices>
@@ -74,8 +74,8 @@
           </ui-select-match>
           <ui-select-choices
             repeat="value in filterEditor.valueSuggestions | filter:$select.search"
-            refresh="filterEditor.getValueSuggestions($select.search)"
-            refresh-delay="10"
+            refresh="filterEditor.refreshValueSuggestions($select.search)"
+            refresh-delay="100"
           >
             <div ng-bind-html="value | highlight: $select.search"></div>
           </ui-select-choices>
