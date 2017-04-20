@@ -1,0 +1,14 @@
+Backport PR #8229
+---------
+
+**Commit 1:**
+Update elasticsearch plugin to require ES to have the same version as Kibana.
+- Remove engineVersion from elasticsearch plugin config.
+- Use Kibana package.json version instead.
+- Use new rules, documented in README.
+- Log warning if ES is newer than Kibana.
+- Add isEsCompatibleWithKibana and  kibanaVersion.
+- Remove versionSatisfies.
+
+* Original sha: 330e57d6d8590a8a0de068efdb6ac8f12d18478f
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-09-09T22:36:09Z
