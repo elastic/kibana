@@ -41,16 +41,16 @@ describe('calculateIndices', () => {
           'metricbeat-2017.01.03': {}
         }
       };
-      expect(handleResponse(resp)).to.eql([
+      expect(handleResponse('metricbeat-*')(resp)).to.eql([
         'metricbeat-2017.01.01',
         'metricbeat-2017.01.02',
         'metricbeat-2017.01.03',
       ]);
     });
 
-    it('returns an empty array if none found', () => {
+    it('returns an array with the index pattern if none found', () => {
       const resp = { indices: { } };
-      expect(handleResponse(resp)).to.have.length(0);
+      expect(handleResponse('metricbeat-*')(resp)).to.eql(['metricbeat-*']);
     });
   });
 });
