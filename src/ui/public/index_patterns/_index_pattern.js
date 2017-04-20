@@ -114,11 +114,20 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
     } else if (!indexPattern.metaFieldsVersion) {
-      config.get('metaFields').forEach(function (meta) {
-        if (meta !== '_source') {
-          indexPattern.addMetaField(meta);
+      const metaFields = config.get('metaFields');
+      const nonSourceMetaFields = _.remove(metaFields, function (field) {
+        if (field !== '_source') {
+          return field;
         }
       });
+      _.forEach(nonSourceMetaFields, function (meta) {
+        indexPattern.removeNonMetaScriptedField(meta);
+      });
+
+      _.forEach(nonSourceMetaFields, function (meta) {
+        indexPattern.addMetaField(meta);
+      });
+
       indexPattern.metaFieldsVersion = 1;
       indexPattern.save();
     }
@@ -253,7 +262,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       const names = _.pluck(metaFields, 'name');
 
       if (_.contains(names, name)) {
-        throw new errors.DuplicateField(name);
+        throw new DuplicateField(name);
       }
 
       this.fields.push({
@@ -269,6 +278,16 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       const fieldIndex = _.findIndex(this.fields, {
         name: name,
         meta: true
+      });
+      this.fields.splice(fieldIndex, 1);
+      this.save();
+    }
+
+    removeNonMetaScriptedField(name) {
+      const fieldIndex = _.findIndex(this.fields, {
+        name: name,
+        meta: false,
+        scripted: false
       });
       this.fields.splice(fieldIndex, 1);
       this.save();
