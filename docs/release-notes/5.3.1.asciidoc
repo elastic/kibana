@@ -1,0 +1,16 @@
+[[release-notes-5.3.1]]
+== 5.3.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.3.1]]
+=== Bug fixes
+Dashboard::
+* Dashboards no longer trigger an error when top hits aggregations are present with no matching data {issue}10905[#10905]
+* Fixed regression where certain unsaved dashboard links, including links to a dashboard in edit mode, no longer worked {pull}11062[#11062]
+Management::
+* Saved object import will no longer occasionally fail due to visualizations being imported before searches {pull}10740[#10740]
+* Improved error messages when no indices match the default index pattern {pull}10788[#10788]
+Timepicker::
+* Time ranges no longer overlap when using the time based navigation controls  {pull}11131[#11131]
