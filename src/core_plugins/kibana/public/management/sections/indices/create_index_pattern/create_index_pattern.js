@@ -4,7 +4,7 @@ import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';

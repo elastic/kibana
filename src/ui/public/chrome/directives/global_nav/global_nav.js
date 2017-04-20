@@ -4,7 +4,7 @@ import './global_nav_link';
 
 import globalNavTemplate from './global_nav.html';
 import './global_nav.less';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 

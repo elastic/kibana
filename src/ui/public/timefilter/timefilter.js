@@ -7,7 +7,7 @@ import { EventsProvider } from 'ui/events';
 import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
 import { TimefilterLibDiffIntervalProvider } from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiRoutes
 .addSetupWork(function (timefilter) {

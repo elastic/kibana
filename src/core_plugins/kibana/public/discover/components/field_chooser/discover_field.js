@@ -4,7 +4,7 @@ import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
 

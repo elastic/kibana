@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
 uiModules
 .get('kibana')

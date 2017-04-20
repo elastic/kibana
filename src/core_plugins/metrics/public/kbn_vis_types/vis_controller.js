@@ -1,9 +1,9 @@
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import 'ui/state_management/app_state';
 import '../directives/visualization';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
-const app = modules.get('kibana/metrics_vis');
+const app = uiModules.get('kibana/metrics_vis');
 
 app.controller('MetricsVisController', (
   $scope,

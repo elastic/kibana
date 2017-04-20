@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import tagCloudVisParamsTemplate from 'plugins/tagcloud/tag_cloud_vis_params.html';
 import noUiSlider from 'no-ui-slider';
 import 'no-ui-slider/css/nouislider.css';

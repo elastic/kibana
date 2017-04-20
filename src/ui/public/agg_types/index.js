@@ -99,6 +99,3 @@ export function AggTypesIndexProvider(Private) {
   });
 }
 
-export default AggTypesIndexProvider;
-
-// preload

@@ -5,11 +5,19 @@
  * var _ = require('lodash');
  */
 
-var _ = require('node_modules/lodash/index.js').runInContext();
-require('ui/utils/lodash-mixins/string')(_);
-require('ui/utils/lodash-mixins/lang')(_);
-require('ui/utils/lodash-mixins/object')(_);
-require('ui/utils/lodash-mixins/collection')(_);
-require('ui/utils/lodash-mixins/function')(_);
-require('ui/utils/lodash-mixins/oop')(_);
+const _ = require('node_modules/lodash/index.js').runInContext();
+const { lodashStringMixin } = require('ui/utils/lodash-mixins/string');
+const { lodashLangMixin } = require('ui/utils/lodash-mixins/lang');
+const { lodashObjectMixin } = require('ui/utils/lodash-mixins/object');
+const { lodashCollectionMixin } = require('ui/utils/lodash-mixins/collection');
+const { lodashFunctionMixin } = require('ui/utils/lodash-mixins/function');
+const { lodashOopMixin } = require('ui/utils/lodash-mixins/oop');
+
+lodashStringMixin(_);
+lodashLangMixin(_);
+lodashObjectMixin(_);
+lodashCollectionMixin(_);
+lodashFunctionMixin(_);
+lodashOopMixin(_);
+
 module.exports = _;

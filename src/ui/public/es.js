@@ -7,7 +7,7 @@
 
 import 'elasticsearch-browser';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 const plugins = [function (Client, config) {
   // esFactory automatically injects the AngularConnector to the config

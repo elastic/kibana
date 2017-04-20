@@ -1,4 +1,4 @@
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import '../services/executor';
 import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
@@ -6,7 +6,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
-const app = modules.get('kibana/metrics_vis', ['kibana']);
+const app = uiModules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
   $location,
   $element,
