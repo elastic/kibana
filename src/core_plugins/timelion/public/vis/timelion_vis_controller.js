@@ -20,7 +20,7 @@ define(function (require) {
       const expression = $scope.vis.params.expression;
       if (!expression) return;
 
-      $http.post('../api/timelion/run', {
+      $http.post('./api/timelion/run', {
         sheet: [expression],
         extended: {
           es: {

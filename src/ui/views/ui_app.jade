@@ -96,6 +96,7 @@ block content
         | #{i18n('UI-WELCOME_MESSAGE')}
 
   script.
+    window.__webpack_public_path__ = './bundles/';
     window.onload = function () {
       var buildNum = #{kibanaPayload.buildNum};
       var cacheParam = buildNum ? '?v=' + buildNum : '';

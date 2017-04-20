@@ -6,7 +6,7 @@ export default (
   return $scope => (indexPatterns = ['*']) => {
     if (!Array.isArray(indexPatterns)) indexPatterns = [indexPatterns];
     return Promise.all(indexPatterns.map(pattern => {
-      return $http.get(`../api/metrics/fields?index=${pattern}`)
+      return $http.get(`./api/metrics/fields?index=${pattern}`)
         .success(resp => {
           if (!$scope.fields) $scope.fields = {};
           if (resp.length && pattern) {
