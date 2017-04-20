@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import sequencer from 'ui/utils/sequencer';
+import { sequencer } from 'ui/utils/sequencer';
 import expect from 'expect.js';
 describe('sequencer util', function () {
 

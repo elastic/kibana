@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import sequencer from 'ui/utils/sequencer';
+import { sequencer } from 'ui/utils/sequencer';
 import { EventsProvider } from 'ui/events';
-import ReflowWatcherProvider from 'ui/reflow_watcher';
+import { ReflowWatcherProvider } from 'ui/reflow_watcher';
 
 export function ResizeCheckerProvider(Private, Notifier) {
 
