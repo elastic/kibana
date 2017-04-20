@@ -23,13 +23,15 @@ function getParams(req, indexPattern, timeField, offsetBy) {
 
 }
 
-function handleResponse(resp) {
-  const indices = _.map(resp.indices, (_info, index) => index);
-  if (indices.length === 0) {
-    // there are no relevant indices for the given timeframe in the data
-    return [];
-  }
-  return indices;
+function handleResponse(indexPattern) {
+  return resp => {
+    const indices = _.map(resp.indices, (_info, index) => index);
+    if (indices.length === 0) {
+      // there are no relevant indices for the given timeframe in the data
+      return [indexPattern];
+    }
+    return indices;
+  };
 }
 
 function calculateIndices(req, indexPattern = '*', timeField = '@timestamp', offsetBy) {
@@ -37,7 +39,7 @@ function calculateIndices(req, indexPattern = '*', timeField = '@timestamp', off
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const params = getParams(req, indexPattern, timeField, offsetBy);
   return callWithRequest(req, 'fieldStats', params)
-    .then(handleResponse);
+    .then(handleResponse(indexPattern));
 }
 
 
