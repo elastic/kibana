@@ -21,6 +21,6 @@ $searchInputTextColor: #ACACAC;
    */
   .kuiSearchInput__input {
     @include formControl;
-    padding-left: 28px; /* 1 */
+    padding-left: $searchBoxIconPadding; /* 1 */
     width: 100%; /* 2 */
   }

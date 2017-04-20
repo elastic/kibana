@@ -39,10 +39,13 @@
   }
 
   /**
-   * 1. Fix inherited styles (possibly from Bootstrap).
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
    */
   .kuiToolBarSearchBox__input {
-    width: 100%;
+    @include formControl;
+    padding-left: $searchBoxIconPadding; /* 1 */
+    width: 100%; /* 2 */
     min-width: 200px;
     padding: 4px 12px 5px 28px;
     font-family: $globalFontFamily; /* 1 */

@@ -14,9 +14,18 @@
  */
 .kuiTable {
   width: 100%;
-  border: $globalBorderThick;
   border-collapse: collapse;
   background-color: $tableBackgroundColor;
+}
+
+.kuiTable--contained {
+  border: $globalBorderThin;
+
+  .kuiTableHeaderCell,
+  .kuiTableRowCell__liner {
+    padding-left: $tableCellSidePadding;
+    padding-right: $tableCellSidePadding;
+  }
 }
 
 /**
