@@ -5,7 +5,7 @@ import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import { ResizeCheckerProvider } from 'ui/vislib/lib/resize_checker';
 import { EventsProvider } from 'ui/events';
-import ReflowWatcherProvider from 'ui/reflow_watcher';
+import { ReflowWatcherProvider } from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
 

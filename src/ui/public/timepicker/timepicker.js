@@ -12,7 +12,7 @@ import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('ui/timepicker');
 const notify = new Notifier({
   location: 'timepicker',

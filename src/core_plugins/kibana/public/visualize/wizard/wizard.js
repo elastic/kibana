@@ -10,7 +10,7 @@ import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
 

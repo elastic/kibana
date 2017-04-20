@@ -25,7 +25,7 @@ function create(min, max, length, mod) {
   return seq;
 }
 
-export default {
+export const sequencer = {
   /**
    * Create an exponential sequence of numbers.
    *

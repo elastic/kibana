@@ -15,7 +15,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';

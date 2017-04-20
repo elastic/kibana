@@ -10,7 +10,7 @@ import './table_row.less';
 import { noWhiteSpace } from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 

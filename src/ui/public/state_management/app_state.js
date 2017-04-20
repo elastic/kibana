@@ -9,7 +9,7 @@
  */
 
 import _ from 'lodash';
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
 
@@ -107,7 +107,7 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
   return AppState;
 }
 
-modules.get('kibana/global_state')
+uiModules.get('kibana/global_state')
 .factory('AppState', function (Private) {
   return Private(AppStateProvider);
 })

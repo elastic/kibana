@@ -2,7 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import tableCellFilterHtml from './partials/table_cell_filter.html';
 const module = uiModules.get('kibana');
 

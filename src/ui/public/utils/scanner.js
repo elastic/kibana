@@ -73,4 +73,3 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
   });
 };
 
-export default Scanner;

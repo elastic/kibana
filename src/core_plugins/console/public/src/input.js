@@ -7,7 +7,7 @@ let settings = require('./settings');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 let input;
 export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {

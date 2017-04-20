@@ -1,5 +1,5 @@
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { assign } from 'lodash';
 
 // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it

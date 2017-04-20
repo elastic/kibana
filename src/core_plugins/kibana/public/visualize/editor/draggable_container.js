@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import dragula from 'dragula';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('app/visualize')

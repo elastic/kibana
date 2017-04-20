@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import 'ui/modals';
 
 const module = uiModules.get('kibana');
