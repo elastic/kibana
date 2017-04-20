@@ -1,5 +1,5 @@
 import html from 'ui/partials/info.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
   .get('kibana')

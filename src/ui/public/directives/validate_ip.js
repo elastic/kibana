@@ -1,5 +1,5 @@
 import Ipv4Address from 'ui/utils/ipv4_address';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
   .get('kibana')

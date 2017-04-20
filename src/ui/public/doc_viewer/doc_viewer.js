@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import 'ui/render_directive';

@@ -7,4 +7,3 @@ export const NavBarExtensionsRegistryProvider = uiRegistry({
   order: ['order']
 });
 
-export default NavBarExtensionsRegistryProvider;

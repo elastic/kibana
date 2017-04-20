@@ -2,9 +2,9 @@ import _ from 'lodash';
 import 'ui/paginated_table';
 import fieldControlsHtml from '../field_controls.html';
 import { dateScripts } from './date_scripts';
-import uiModules from 'ui/modules';
 import { getSupportedScriptingLangs } from 'ui/scripting_langs';
 import { scriptedFields as docLinks } from 'ui/documentation_links/documentation_links';
+import { uiModules } from 'ui/modules';
 import template from './scripted_fields_table.html';
 
 uiModules.get('apps/management')

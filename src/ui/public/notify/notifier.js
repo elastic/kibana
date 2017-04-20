@@ -662,5 +662,3 @@ function createGroupLogger(type, opts) {
   };
 }
 
-// Used in x-pack. TODO: convert to named and remove.
-export default Notifier;

@@ -46,5 +46,3 @@ export function TimeBucketsCalcEsIntervalProvider() {
 
   return esDuration;
 }
-
-export default TimeBucketsCalcEsIntervalProvider;

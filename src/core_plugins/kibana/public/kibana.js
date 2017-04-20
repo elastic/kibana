@@ -4,7 +4,7 @@
 import moment from 'moment-timezone';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
 import 'plugins/kibana/discover/index';
@@ -48,4 +48,4 @@ chrome
   }
 });
 
-modules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(Notifier.pullMessageFromUrl);

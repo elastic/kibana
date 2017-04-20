@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
 import { modifyUrl } from 'ui/url';

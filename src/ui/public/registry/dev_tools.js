@@ -6,4 +6,3 @@ export const DevToolsRegistryProvider = uiRegistry({
   order: ['order']
 });
 
-export default DevToolsRegistryProvider;

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 // See https://github.com/elastic/elasticsearch/issues/6736
 
 uiModules
