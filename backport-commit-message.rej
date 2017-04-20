@@ -1,0 +1,12 @@
+Backport PR #8316
+---------
+
+**Commit 1:**
+Explicitly ignores plugin directories
+
+The previous pattern ignored all files and directories with the name of "plugins". This included "src/server/plugins" which should not be ignored.
+
+Signe-off-by: Tyler Smalley <tyler.smalley@elastic.co>
+
+* Original sha: e643ca00ca9349f89827c36bfee44d58a50f1654
+* Authored by Tyler Smalley <tyler.smalley@elastic.co> on 2016-09-16T20:28:23Z
