@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
 import { FilterBarLibMapTermsProvider } from './map_terms';
-import { FilterBarLibMapRangeProvider } from './map_range';
 import { FilterBarLibMapExistsProvider } from './map_exists';
 import { FilterBarLibMapMissingProvider } from './map_missing';
 import { FilterBarLibMapQueryStringProvider } from './map_query_string';
@@ -33,7 +32,6 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
   const mappers = [
     Private(FilterBarLibMapMatchAllProvider),
     Private(FilterBarLibMapTermsProvider),
-    Private(FilterBarLibMapRangeProvider),
     Private(FilterBarLibMapExistsProvider),
     Private(FilterBarLibMapMissingProvider),
     Private(FilterBarLibMapQueryStringProvider),
@@ -60,6 +58,8 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
    * @returns {Promise}
    */
   return function (filter) {
+    if (_.has(filter, 'meta.type')) return Promise.resolve(filter);
+
     // Apply the mapping function
     return mapFn(filter).then(function (result) {
       filter.meta = filter.meta || {};

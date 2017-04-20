@@ -112,7 +112,13 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
    * @return {[type]} [description]
    */
   SourceAbstract.prototype.toJSON = function () {
-    return _.clone(this._state);
+    const retVal = _.clone(this._state);
+
+    if (retVal.filter) {
+      retVal.filter = retVal.filter.map(filter => filter.needsGoodName ? filter.needsGoodName() : filter);
+    }
+
+    return retVal;
   };
 
   /**

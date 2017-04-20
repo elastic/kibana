@@ -1,11 +1,14 @@
+import { has } from 'lodash';
 import { migrateRangeFilter } from './migrate_range';
 
 export function migrateFilters(filters, indexPatterns) {
 
   const migrationsPromises = filters.map((filter) => {
-    if (!filter.meta || !filter.meta.index) return filter;
+    if (!has(filter, 'meta.index') && !has(filter, 'index')) return filter;
 
-    return Promise.resolve(indexPatterns.get(filter.meta.index))
+    const index = filter.index || filter.meta.index;
+
+    return Promise.resolve(indexPatterns.get(index))
     .then((indexPattern) => {
       // Migration functions will return undefined if they do not apply
       // so we can simply try them in order with ||

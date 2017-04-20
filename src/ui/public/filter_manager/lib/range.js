@@ -21,7 +21,22 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     throw new Error('indexPattern is a required argument');
   }
 
-  const filter = { meta: { index: indexPattern.id } };
+  const filterDelegate = {
+    needsGoodName: function () {
+      return {
+        index: this.meta.index,
+        field: this.meta.field,
+        type: this.meta.type,
+        params: this.meta.params,
+        disabled: this.meta.disabled,
+        negate: this.meta.negate,
+        alias: this.meta.alias
+      };
+    }
+  };
+
+  const filter = Object.assign(Object.create(filterDelegate), { meta: { index: indexPattern.id } });
+
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
   params = _.clone(params);
@@ -89,6 +104,19 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     filter.meta.field = field.name;
     filter.meta.type = 'range';
     filter.meta.params = params;
+    filter.meta.key = filter.meta.field;
+    filter.meta.disabled = false;
+    filter.meta.negate = false;
+    filter.meta.alias = null;
+
+    const convert = indexPattern.fields.byName[field.name].format.getConverterFor('text');
+    let left = _.has(params, 'gte') ? params.gte : params.gt;
+    if (left == null) left = -Infinity;
+
+    let right = _.has(params, 'lte') ? params.lte : params.lt;
+    if (right == null) right = Infinity;
+    filter.meta.value = `${convert(left)} to ${convert(right)}`;
+
   }
 
   return filter;
