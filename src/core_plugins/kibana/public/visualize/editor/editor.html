@@ -38,7 +38,7 @@
           ng-submit="fetch()"
           class="fullWidth"
         >
-          <div class="typeahead" kbn-typeahead="visualize">
+          <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()">
             <div class="kuiLocalSearch">
               <input
                 ng-model="state.query"
