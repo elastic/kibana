@@ -9,8 +9,8 @@ export function validateInterval(timefilter, panel, maxBuckets) {
     throw new Error(`Invalid interval: ${interval} is not a valid interval`);
   }
   const span = max.valueOf() - min.valueOf();
-  const buckets = span / duration.asMilliseconds();
+  const buckets = Math.floor(span / duration.asMilliseconds());
   if (buckets > maxBuckets) {
-    throw new Error(`Max buckets exceeded: ${buckets} is greater than ${maxBuckets}, try a larger interval or use auto.`);
+    throw new Error(`Max buckets exceeded: ${buckets} is greater than ${maxBuckets}, try a larger time interval in the panel options.`);
   }
 }
