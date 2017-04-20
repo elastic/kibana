@@ -9,6 +9,7 @@ import {
 } from '../../components';
 
 const textInputHtml = require('./text_input.html');
+const textInputSmallHtml = require('./text_input_small.html');
 const searchInputHtml = require('./search_input.html');
 const staticInputHtml = require('./static_input.html');
 const textAreaHtml = require('./text_area.html');
@@ -32,6 +33,18 @@ export default props => (
       <GuideDemo
         html={textInputHtml}
         isDarkTheme={true}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="TextInput, small"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: textInputSmallHtml,
+      }]}
+    >
+      <GuideDemo
+        html={textInputSmallHtml}
       />
     </GuideSection>
 
