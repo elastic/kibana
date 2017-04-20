@@ -1,16 +1,16 @@
 import 'plugins/tagcloud/tag_cloud.less';
 import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
-import visTypes from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
 
-visTypes.register(function TagCloudProvider(Private) {
+VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new TemplateVisType({

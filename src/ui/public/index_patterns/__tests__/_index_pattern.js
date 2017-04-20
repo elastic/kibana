@@ -4,15 +4,16 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import { DuplicateField } from 'ui/errors';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { stubMapper } from 'test_utils/stub_mapper';
+import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -51,7 +52,7 @@ describe('index pattern', function () {
         { index: 'bar', max: Infinity, min: -Infinity }
       ]);
     });
-    Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
+    Private.stub(IndexPatternsCalculateIndicesProvider, calculateIndices);
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);
@@ -60,7 +61,7 @@ describe('index pattern', function () {
       { index: 'bar', max: Infinity, min: -Infinity }
     ]);
 
-    IndexPattern = Private(IndexPatternsIndexPatternProvider);
+    IndexPattern = Private(IndexPatternProvider);
   }));
 
   // create an indexPattern instance for each test

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { isNumber } from 'lodash';
 
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 import { SearchRequestProvider } from './search';
 import { SegmentedHandleProvider } from './segmented_handle';

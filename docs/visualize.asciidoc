@@ -22,6 +22,7 @@ or start with a new search query.
 To create a visualization:
 
 . Click on *Visualize* in the side navigation.
+. Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 +
 [horizontal]

@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function mapMatchProvider(Promise, courier) {
+
+export function FilterBarLibMapMatchProvider(Promise, courier) {
   return function (filter) {
     if (filter.query && filter.query.match) {
       return courier

@@ -1,26 +1,24 @@
-define(function () {
-  return function mapScriptProvider(Promise, courier) {
-    return function (filter) {
-      if (filter.script) {
-        return courier
-        .indexPatterns
-        .get(filter.meta.index).then(function (indexPattern) {
-          const type = 'script';
-          const key = filter.meta.field;
-          const field = indexPattern.fields.byName[key];
-          let value;
+export function FilterBarLibMapScriptProvider(Promise, courier) {
+  return function (filter) {
+    if (filter.script) {
+      return courier
+      .indexPatterns
+      .get(filter.meta.index).then(function (indexPattern) {
+        const type = 'scripted';
+        const key = filter.meta.field;
+        const field = indexPattern.fields.byName[key];
 
-          if (filter.meta.formattedValue) {
-            value = filter.meta.formattedValue;
-          } else {
-            value = filter.script.script.params.value;
-            value = field.format.convert(value);
-          }
+        let value;
+        if (filter.meta.formattedValue) {
+          value = filter.meta.formattedValue;
+        } else {
+          value = filter.script.script.params.value;
+          value = field.format.convert(value);
+        }
 
-          return { type, key, value };
-        });
-      }
-      return Promise.reject(filter);
-    };
+        return { type, key, value };
+      });
+    }
+    return Promise.reject(filter);
   };
-});
+}

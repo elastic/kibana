@@ -1,11 +1,13 @@
-import KibanaMapLayer from './kibana_map_layer';
+import L from 'leaflet';
 import _ from 'lodash';
-import Heatmap from './markers/heatmap';
-import ScaledCircles from './markers/scaled_circles';
-import ShadedCircles from './markers/shaded_circles';
-import GeohashGrid from './markers/geohash_grid';
 
-export default class GeohashLayer extends KibanaMapLayer {
+import { KibanaMapLayer } from './kibana_map_layer';
+import { HeatmapMarkers } from './markers/heatmap';
+import { ScaledCirclesMarkers } from './markers/scaled_circles';
+import { ShadedCirclesMarkers } from './markers/shaded_circles';
+import { GeohashGridMarkers } from './markers/geohash_grid';
+
+export class GeohashLayer extends KibanaMapLayer {
 
   constructor(featureCollection, options, zoom, kibanaMap) {
 
@@ -15,7 +17,8 @@ export default class GeohashLayer extends KibanaMapLayer {
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
-
+    const geojson = L.geoJson(this._geohashGeoJson);
+    this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
   }
 
@@ -26,20 +29,20 @@ export default class GeohashLayer extends KibanaMapLayer {
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
-        this._geohashMarkers = new ScaledCircles(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ScaledCirclesMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Circle Markers':
-        this._geohashMarkers = new ShadedCircles(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ShadedCirclesMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Geohash Grid':
-        this._geohashMarkers = new GeohashGrid(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new GeohashGridMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Heatmap':
-        this._geohashMarkers = new Heatmap(this._geohashGeoJson, {
+        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJson, {
           radius: parseFloat(this._geohashOptions.heatmap.heatRadius),
           blur: parseFloat(this._geohashOptions.heatmap.heatBlur),
           maxZoom: parseFloat(this._geohashOptions.heatmap.heatMaxZoom),
-          minOpaxity: parseFloat(this._geohashOptions.heatmap.heatMinOpacity),
+          minOpacity: parseFloat(this._geohashOptions.heatmap.heatMinOpacity),
           heatNormalizeData: parseFloat(this._geohashOptions.heatmap.heatNormalizeData),
           tooltipFormatter: this._geohashOptions.tooltipFormatter
         }, this._zoom, this._kibanaMap);
@@ -60,6 +63,10 @@ export default class GeohashLayer extends KibanaMapLayer {
 
   movePointer(...args) {
     this._geohashMarkers.movePointer(...args);
+  }
+
+  getBounds() {
+    return this._bounds;
   }
 
   updateExtent() {

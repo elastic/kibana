@@ -1,4 +1,4 @@
-export default function mapExistsProvider(Promise) {
+export function FilterBarLibMapExistsProvider(Promise) {
   return function (filter) {
     if (filter.exists) {
       const type = 'exists';

@@ -1,8 +1,8 @@
 import { find, each, escape, invoke, size, without } from 'lodash';
 
 import uiModules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
-import FieldWildcardProvider from 'ui/field_wildcard';
+import { Notifier } from 'ui/notify/notifier';
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 
 import controlsHtml from './controls.html';
 import filterHtml from './filter.html';

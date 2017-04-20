@@ -1,4 +1,4 @@
-import propFilter from 'ui/filters/_prop_filter';
+import { propFilter } from 'ui/filters/_prop_filter';
 import uiModules from 'ui/modules';
 // Gets all fields of a given type.
 // You may also pass "*" to get all types

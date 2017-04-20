@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import Binder from 'ui/binder';
-import positionTooltip from './position_tooltip';
+import { Binder } from 'ui/binder';
+import { positionTooltip } from './position_tooltip';
 import $ from 'jquery';
 
 let allContents = [];
@@ -15,7 +15,7 @@ let allContents = [];
  * @param formatter {Function} Tooltip formatter
  * @param events {Constructor} Allows tooltip to return event response data
  */
-function Tooltip(id, el, formatter, events) {
+export function Tooltip(id, el, formatter, events) {
   if (!(this instanceof Tooltip)) {
     return new Tooltip(id, el, formatter, events);
   }
@@ -181,6 +181,6 @@ Tooltip.prototype.destroy = function () {
   this.binder.destroy();
 };
 
-module.exports = function TooltipFactoryProvider() {
+export function TooltipProvider() {
   return Tooltip;
-};
+}

@@ -5,9 +5,9 @@ import './agg_params';
 import './buckets/_histogram';
 import './buckets/_geo_hash';
 import './buckets/_range';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 
 describe('AggTypesComponent', function () {
 

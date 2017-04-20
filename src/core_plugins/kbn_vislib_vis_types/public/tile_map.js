@@ -1,14 +1,14 @@
-import supports from 'ui/utils/supports';
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import MapsVisTypeVislibVisTypeProvider from 'ui/vis_maps/maps_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { supports } from 'ui/utils/supports';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { MapsVisTypeProvider } from 'ui/vis_maps/maps_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
   const VisType = Private(VisVisTypeProvider);
-  const MapsVisType = Private(MapsVisTypeVislibVisTypeProvider);
+  const MapsVisType = Private(MapsVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
 

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
 
 describe('IndexPattern#flattenHit()', function () {
   let flattenHit;

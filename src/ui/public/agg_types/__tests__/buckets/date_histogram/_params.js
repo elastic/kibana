@@ -4,8 +4,9 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-import VisAggConfigProvider from 'ui/vis/agg_config';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+
 describe('params', function () {
 
   let paramWriter;

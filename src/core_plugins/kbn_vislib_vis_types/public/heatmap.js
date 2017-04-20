@@ -1,8 +1,8 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
-import heatmapColors from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
@@ -58,7 +58,7 @@ export default function HeatmapVisType(Private) {
         text: 'bottom',
       }],
       scales: ['linear', 'log', 'square root'],
-      colorSchemas: Object.keys(heatmapColors),
+      colorSchemas: Object.keys(vislibColorMaps),
       editor: heatmapTemplate
     },
     schemas: new Schemas([

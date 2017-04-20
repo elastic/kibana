@@ -1,7 +1,7 @@
 import 'ui/agg_table';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
-import spyModesRegistry from 'ui/registry/spy_modes';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyProvider);
@@ -35,4 +35,4 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
   };
 }
 
-spyModesRegistry.register(VisSpyTableProvider);
+SpyModesRegistryProvider.register(VisSpyTableProvider);

@@ -2,13 +2,12 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
-import VislibComponentsColorSeedColorsProvider from 'ui/vis/components/color/seed_colors';
-import VislibComponentsColorColorProvider from 'ui/vis/components/color/color';
-import VislibComponentsColorMappedColorsProvider from 'ui/vis/components/color/mapped_colors';
-import VislibComponentsColorColorPaletteProvider from 'ui/vis/components/color/color_palette';
+import { seedColors } from 'ui/vis/components/color/seed_colors';
+import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
+import { VisColorMappedColorsProvider } from 'ui/vis/components/color/mapped_colors';
+import { createColorPalette } from 'ui/vis/components/color/color_palette';
 
 describe('Vislib Color Module Test Suite', function () {
-  let seedColors;
   let mappedColors;
 
   describe('Color (main)', function () {
@@ -29,9 +28,8 @@ describe('Vislib Color Module Test Suite', function () {
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
       config.set('visualization:colorMapping', {});
-      seedColors = Private(VislibComponentsColorSeedColorsProvider);
       getColors = Private(VislibComponentsColorColorProvider);
-      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
+      mappedColors = Private(VisColorMappedColorsProvider);
       color = getColors(arr, {});
     }));
 
@@ -131,8 +129,7 @@ describe('Vislib Color Module Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
-      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
-      seedColors = Private(VislibComponentsColorSeedColorsProvider);
+      mappedColors = Private(VisColorMappedColorsProvider);
       mappedColors.mapping = {};
     }));
 
@@ -250,13 +247,10 @@ describe('Vislib Color Module Test Suite', function () {
     const emptyArr = [];
     const emptyObject = {};
     let notAValue;
-    let createColorPalette;
     let colorPalette;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      seedColors = Private(VislibComponentsColorSeedColorsProvider);
-      createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
+    beforeEach(ngMock.inject(function () {
       colorPalette = createColorPalette(num1);
     }));
 

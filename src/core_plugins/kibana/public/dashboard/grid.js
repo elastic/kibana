@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import chrome from 'ui/chrome';
 import 'gridster';
 import uiModules from 'ui/modules';

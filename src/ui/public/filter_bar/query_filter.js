@@ -1,13 +1,13 @@
 import _ from 'lodash';
-import onlyDisabled from 'ui/filter_bar/lib/only_disabled';
-import onlyStateChanged from 'ui/filter_bar/lib/only_state_changed';
-import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
-import compareFilters from 'ui/filter_bar/lib/compare_filters';
+import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
+import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
+import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
+import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
 import angular from 'angular';
 import { EventsProvider } from 'ui/events';
-import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 
-export default function (Private, $rootScope, getAppState, globalState, config) {
+export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
@@ -383,3 +383,5 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
     }
   }
 }
+
+export default FilterBarQueryFilterProvider;

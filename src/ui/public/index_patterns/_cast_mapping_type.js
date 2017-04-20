@@ -1,5 +1,6 @@
-import IndexedArray from 'ui/indexed_array';
-export default function CastMappingTypeFn() {
+import { IndexedArray } from 'ui/indexed_array';
+
+export function IndexPatternsCastMappingTypeProvider() {
 
   castMappingType.types = new IndexedArray({
     index: ['name'],

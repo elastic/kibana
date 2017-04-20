@@ -1,13 +1,14 @@
 import { EventEmitter } from 'events';
 
 
-export default class KibanaMapLayer extends EventEmitter {
+export class KibanaMapLayer extends EventEmitter {
   constructor() {
     super();
     this._leafletLayer = null;
   }
-  getLeafletLayer() {
-    return this._leafletLayer;
+
+  getBounds() {
+    return this._leafletLayer.getBounds();
   }
 
   addToLeafletMap(leafletMap) {
@@ -25,9 +26,6 @@ export default class KibanaMapLayer extends EventEmitter {
   }
 
   movePointer() {
-  }
-
-  getBounds() {
   }
 }
 

@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import { ContainerTooSmall } from 'ui/errors';
-import VislibVisualizationsPointSeriesProvider from './_point_series';
-export default function ColumnChartFactory(Private) {
+import { VislibVisualizationsPointSeriesProvider } from './_point_series';
+
+export function VislibVisualizationsColumnChartProvider(Private) {
 
   const PointSeries = Private(VislibVisualizationsPointSeriesProvider);
 

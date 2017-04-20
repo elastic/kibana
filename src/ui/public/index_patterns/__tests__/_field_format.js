@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 describe('FieldFormat class', function () {
 
   let FieldFormat;
@@ -9,7 +9,7 @@ describe('FieldFormat class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+    FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
     TestFormat = function (params) {
       TestFormat.Super.call(this, params);

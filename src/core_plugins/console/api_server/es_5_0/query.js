@@ -141,7 +141,7 @@ module.exports = function (api) {
       filter: {
         __scope_link: 'GLOBAL.filter'
       },
-      minimum_number_should_match: 1,
+      minimum_should_match: 1,
       boost: 1.0
     },
     boosting: {

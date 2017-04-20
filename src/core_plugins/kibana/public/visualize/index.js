@@ -20,7 +20,7 @@ import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
-import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { savedVisualizationProvider } from 'plugins/kibana/visualize/saved_visualizations/saved_visualization_register';
 
 uiRoutes
@@ -35,4 +35,4 @@ uiRoutes
 
 // preloading
 
-savedObjectRegistry.register(savedVisualizationProvider);
+SavedObjectRegistryProvider.register(savedVisualizationProvider);

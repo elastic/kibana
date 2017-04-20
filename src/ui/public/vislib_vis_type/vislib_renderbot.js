@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import VislibProvider from 'ui/vislib';
-import VisRenderbotProvider from 'ui/vis/renderbot';
-import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
+import { VisRenderbotProvider } from 'ui/vis/renderbot';
+import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_chart_data';
+
 module.exports = function VislibRenderbotFactory(Private, $injector) {
   const AngularPromise = $injector.get('Promise');
   const vislib = Private(VislibProvider);

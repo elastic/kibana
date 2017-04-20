@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import IndexedArray from 'ui/indexed_array';
-import IndexPattern from 'ui/index_patterns/_index_pattern';
-import formatHit from 'ui/index_patterns/_format_hit';
-import getComputedFields from 'ui/index_patterns/_get_computed_fields';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import { IndexedArray } from 'ui/indexed_array';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { formatHit } from 'ui/index_patterns/_format_hit';
+import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 
 export default function (Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -24,7 +24,7 @@ export default function (Private) {
     this.getSourceFiltering = sinon.spy();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
-    this.routes = IndexPattern.routes;
+    this.routes = IndexPatternProvider.routes;
 
     this.toIndexList = _.constant(Promise.resolve([pattern]));
     this.toDetailedIndexList = _.constant(Promise.resolve([

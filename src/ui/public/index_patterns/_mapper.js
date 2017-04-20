@@ -1,11 +1,12 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
-import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
-import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
-import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
-import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
-export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
+import { EnhanceFieldsWithCapabilitiesProvider } from 'ui/index_patterns/_enhance_fields_with_capabilities';
+import { IndexPatternsTransformMappingIntoFieldsProvider } from 'ui/index_patterns/_transform_mapping_into_fields';
+import { IndexPatternsPatternToWildcardProvider } from 'ui/index_patterns/_pattern_to_wildcard';
+import { IndexPatternsLocalCacheProvider } from 'ui/index_patterns/_local_cache';
+
+export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, config, kbnIndex) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);

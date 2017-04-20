@@ -1,20 +1,20 @@
 import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
 import angular from 'angular';
-import getComputedFields from 'ui/index_patterns/_get_computed_fields';
-import formatHit from 'ui/index_patterns/_format_hit';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+import { formatHit } from 'ui/index_patterns/_format_hit';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
-import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
-import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
-import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
+import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
+import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
+export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);

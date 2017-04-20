@@ -1,6 +1,6 @@
 import { escapeRegExp, memoize } from 'lodash';
 
-export default function fieldWildcard(config) {
+export function FieldWildcardProvider(config) {
   const metaFields = config.get('metaFields');
 
   const makeRegEx = memoize(function makeRegEx(glob) {

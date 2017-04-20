@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import VislibComponentsLabelsFlattenSeriesProvider from './flatten_series';
-export default function GetArrayUtilService(Private) {
+import { VislibComponentsLabelsFlattenSeriesProvider } from './flatten_series';
+
+export function VislibComponentsLabelsDataArrayProvider(Private) {
   const flattenSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
 
   /*
