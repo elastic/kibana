@@ -264,6 +264,10 @@ export default function defaultSettingsProvider() {
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.'
     },
+    'metrics:max_buckets': {
+      value: 2000,
+      description: 'The maximum number of buckets a single datasource can return'
+    },
     // Timelion stuff
     'timelion:showTutorial': {
       value: false,
