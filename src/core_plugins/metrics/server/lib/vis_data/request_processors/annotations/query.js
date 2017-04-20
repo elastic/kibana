@@ -36,11 +36,11 @@ export default function query(req, panel, annotation) {
     }
 
     const globalFilters = req.payload.filters;
-    if (annotation.include_global_filters) {
+    if (!annotation.ignore_global_filters) {
       doc.query.bool.must = doc.query.bool.must.concat(globalFilters);
     }
 
-    if (annotation.include_panel_filters && panel.filter) {
+    if (!annotation.ignore_panel_filters && panel.filter) {
       doc.query.bool.must.push({
         query_string: {
           query: panel.filter,
