@@ -10,6 +10,7 @@ image:images/ExpandButton.jpg[Expand Button] to the left of the document's
 table entry and then click the *View surrounding documents* link.
 
 image::images/Expanded-Document.png[Expanded Document]
+{nbsp}
 
 The context view displays a number of documents before and after the anchor 
 document. The anchor document itself is highlighted in blue. The view is sorted 
@@ -32,12 +33,14 @@ document, click the *Load 5 more* button above the document list or enter the
 desired number into the input box right of the button.
 
 image::images/Discover-ContextView-SizePicker-Newer.png[]
+{nbsp}
 
 To increase the number of displayed documents, that are older than the anchor 
 document, click the *Load 5 more* button below the document list or enter the 
 desired number into the input box right of the button.
 
 image::images/Discover-ContextView-SizePicker-Older.png[]
+{nbsp}
 
 NOTE: The number of documents loaded with each button click can be configured 
 via the `context:step` setting in <<advanced-options, *Management > Advanced 
