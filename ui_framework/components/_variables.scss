@@ -65,5 +65,5 @@ $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
 
 // Form
-$formControlPaddingSides: 12px;
-$formControlPadding: 3px $formControlPaddingSides 4px;
+$globalFormControlHorizontalPadding: 12px;
+$globalFormControlPadding: 3px $globalFormControlHorizontalPadding 4px;
