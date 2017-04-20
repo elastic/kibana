@@ -5,7 +5,7 @@ import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';
 
 const module = uiModules.get('kibana');
-module.directive('filterEditor', function (indexPatterns, es) {
+module.directive('filterEditor', function (indexPatterns, $http) {
   return {
     restrict: 'E',
     template,
@@ -114,23 +114,11 @@ module.directive('filterEditor', function (indexPatterns, es) {
 
       function getValueSuggestions(indexPattern, field, query) {
         if (!_.get(field, 'aggregatable')) return Promise.resolve([]);
-        const include = query && field.type === 'string' ? `.*${query}.*` : undefined;
-        return es.search({
-          index: indexPattern.id,
-          body: {
-            aggs: {
-              suggestions: {
-                terms: {
-                  include,
-                  field: field.name
-                }
-              }
-            }
-          }
+        return $http.post(`../api/kibana/suggestions/values/${indexPattern.id}`, {
+          query,
+          field: field.name
         })
-        .then((response) => {
-          return response.aggregations.suggestions.buckets.map(bucket => bucket.key);
-        });
+        .then(response => response.data);
       }
     }
   };
