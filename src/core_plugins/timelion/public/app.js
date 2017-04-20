@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { notify } from 'ui/notify';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -28,8 +29,6 @@ require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
 
-// TODO: Expose an api for dismissing notifications
-import { notify } from 'ui/notify';
 const unsafeNotifications = notify._notifs;
 
 require('ui/routes').enable();
