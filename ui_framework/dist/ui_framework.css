@@ -1,4 +1,7 @@
 /**
+ * 1. Enforce pointer when there's no href.
+ */
+/**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
 /**
@@ -1142,9 +1145,6 @@ body {
   font-size: 14px;
   line-height: 1.5; }
 
-/**
- * 1. Enforce pointer when there's no href.
- */
 .kuiLink {
   color: #3CAED2;
   text-decoration: none;
@@ -1155,6 +1155,10 @@ body {
   .kuiLink:hover {
     color: #006E8A;
     text-decoration: underline; }
+  .theme-dark .kuiLink {
+    color: #b7e2ea; }
+    .theme-dark .kuiLink:hover {
+      color: #b7e2ea; }
 
 .kuiLoadingItems {
   padding: 30px;
@@ -1192,12 +1196,21 @@ body {
     .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
       color: #a5a5a5; }
 
+/**
+ * 1. Make it a bit darker to contrast with the gray background.
+ */
 .kuiLocalBreadcrumb__link {
-  font-size: 14px;
+  color: #3CAED2;
+  text-decoration: none;
+  cursor: pointer;
+  /* 1 */
   color: #328caa;
-  text-decoration: none; }
+  /* 1 */
+  font-size: 14px; }
+  .kuiLocalBreadcrumb__link:visited, .kuiLocalBreadcrumb__link:active {
+    color: #3CAED2; }
   .kuiLocalBreadcrumb__link:hover {
-    color: #328caa;
+    color: #006E8A;
     text-decoration: underline; }
   .theme-dark .kuiLocalBreadcrumb__link {
     color: #b7e2ea; }
