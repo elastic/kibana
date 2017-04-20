@@ -21,6 +21,11 @@ export default props => (
       <GuideDemo
         html={linkHtml}
       />
+
+      <GuideDemo
+        html={linkHtml}
+        isDarkTheme={true}
+      />
     </GuideSection>
   </GuidePage>
 );
