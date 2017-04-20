@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 

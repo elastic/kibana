@@ -9,7 +9,7 @@ import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/
 import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { compareFilters } from './lib/compare_filters';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana');
 
 

@@ -23,4 +23,3 @@ export function TemplateVisTypeProvider(Private) {
   return TemplateVisType;
 }
 
-export default TemplateVisTypeProvider;

@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './index_header.html';
 uiModules
 .get('apps/management')

@@ -32,5 +32,3 @@ export function parseInterval(interval) {
     return null;
   }
 }
-
-export default parseInterval;

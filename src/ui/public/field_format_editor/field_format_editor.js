@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('app/management')

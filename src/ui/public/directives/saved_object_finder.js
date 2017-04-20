@@ -2,7 +2,7 @@ import _ from 'lodash';
 import rison from 'rison-node';
 import { keyMap } from 'ui/utils/key_map';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
 
 const module = uiModules.get('kibana');

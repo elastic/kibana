@@ -5,5 +5,3 @@ export const VisTypesRegistryProvider = uiRegistry({
   index: ['name'],
   order: ['title']
 });
-
-export default VisTypesRegistryProvider;

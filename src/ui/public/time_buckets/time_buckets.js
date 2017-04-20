@@ -368,4 +368,3 @@ export function TimeBucketsProvider(Private, timefilter, config) {
   return TimeBuckets;
 }
 
-export default TimeBucketsProvider;

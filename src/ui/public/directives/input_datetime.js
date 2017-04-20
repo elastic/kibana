@@ -1,5 +1,5 @@
 import moment from 'moment';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana');
 
 module.directive('inputDatetime', function () {
