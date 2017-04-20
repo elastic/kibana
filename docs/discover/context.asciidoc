@@ -42,6 +42,6 @@ desired number into the input box right of the button.
 image::images/Discover-ContextView-SizePicker-Older.png[]
 {nbsp}
 
-NOTE: The number of documents loaded with each button click can be configured 
-via the `context:step` setting in <<advanced-options, *Management > Advanced 
-Options*>>.
+NOTE: The default number of documents loaded with each button click can be
+configured via the `context:step` setting in <<advanced-options, *Management >
+Advanced Options*>>.
