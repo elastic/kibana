@@ -1,0 +1,16 @@
+Backport PR #8342
+---------
+
+**Commit 1:**
+[console] fix references to getInput function
+
+When splitting the input/output modules into an `initializeInput` and `getInput` pair, it was changed to an esModule. This means that you can no longer require is and execute it's default export directly, as was being done in the console's settings module.
+
+* Original sha: 086a40c4767660413456c9949b66de8508b8a851
+* Authored by spalger <email@spalger.com> on 2016-09-19T20:18:27Z
+
+**Commit 2:**
+[console] add functional tests to ensure that settings work
+
+* Original sha: 752c3339c2cae3fb5cb8d2701ce5b5cb587ae248
+* Authored by spalger <email@spalger.com> on 2016-09-19T20:23:07Z
