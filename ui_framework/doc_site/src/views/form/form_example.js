@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -9,6 +10,7 @@ import {
 } from '../../components';
 
 const textInputHtml = require('./text_input.html');
+const assistedInputHtml = require('./assisted_input.html');
 const searchInputHtml = require('./search_input.html');
 const staticInputHtml = require('./static_input.html');
 const textAreaHtml = require('./text_area.html');
@@ -31,6 +33,30 @@ export default props => (
 
       <GuideDemo
         html={textInputHtml}
+        isDarkTheme={true}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="AssistedInput"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: assistedInputHtml,
+      }]}
+    >
+      <GuideText>
+        <strong>Note:</strong> You have to specify right-side padding using a custom class or
+        inline style to keep the input text from overlapping with the assistance content.
+        Use <GuideCode>em</GuideCode> units for this padding so that it scales appropriately if the
+        user changes their root font-size.
+      </GuideText>
+
+      <GuideDemo
+        html={assistedInputHtml}
+      />
+
+      <GuideDemo
+        html={assistedInputHtml}
         isDarkTheme={true}
       />
     </GuideSection>
