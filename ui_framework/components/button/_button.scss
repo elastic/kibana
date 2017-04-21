@@ -42,6 +42,17 @@
     align-items: center; /* 1 */
   }
 
+.kuiButton--small {
+  font-size: 12px;
+  padding: 2px 8px 3px;
+  height: 22px;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
 .kuiButton--iconText {
   .kuiButton__icon {
 
@@ -51,6 +62,19 @@
 
     &:last-child:not(:only-child) {
       margin-left: $buttonIconSpacing;
+    }
+  }
+
+  &.kuiButton--small {
+    .kuiButton__icon {
+
+      &:first-child:not(:only-child) {
+        margin-right: $buttonIconSmallSpacing;
+      }
+
+      &:last-child:not(:only-child) {
+        margin-left: $buttonIconSmallSpacing;
+      }
     }
   }
 }

@@ -1,22 +1,35 @@
-<div id="fatal-splash-screen-header" class="container">
-  <center>
-    <h1>Oops!</h1>
-    <p>
+<div
+  id="fatal-splash-screen-header"
+  class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem"
+>
+  <div style="text-align: center">
+    <h1 class="kuiTitle kuiVerticalRhythm">
+      Oops!
+    </h1>
+
+    <p class="kuiText kuiVerticalRhythm">
       Looks like something went wrong. Refreshing may do the trick.
     </p>
 
-    <p>
-      <button class="btn btn-success" onclick="window.history.back();">
+    <div
+      class="kuiButtonGroup kuiVerticalRhythm"
+      style="text-align: center; display: inline-block;"
+    >
+      <button
+        class="kuiButton kuiButton--primary"
+        onclick="window.history.back();"
+      >
         Go back
       </button>
-      or
-      <a
+
+      <button
+        class="kuiButton kuiButton--hollow"
         onclick="localStorage.clear(); sessionStorage.clear(); window.location.hash = ''; window.location.reload();"
-        href="#" >
-        clear your session
-      </a>
-    </p>
-  </center>
+      >
+        Clear your session
+      </button>
+    </div>
+  </div>
   <div id="fatal-splash-screen">
   </div>
 </div>

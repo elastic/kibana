@@ -135,7 +135,7 @@
               <ul>
                 <li ng-repeat="sample in controller.samples">{{sample}}</li>
               </ul>
-              <button type="button" ng-click="controller.moreSamples(true)" class="btn btn-default">
+              <button type="button" ng-click="controller.moreSamples(true)" class="kuiButton kuiButton--basic">
                 <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
@@ -149,7 +149,8 @@
                 ng-if="controller.sampleCount < controller.existing.matches.length"
                 ng-click="controller.moreSamples()"
                 type="button"
-                class="btn btn-default">
+                class="kuiButton kuiButton--basic"
+              >
                 <span translate="KIBANA-EXPAND_SEARCH"></span>
               </button>
             </div>
@@ -171,9 +172,8 @@
           <button
             data-test-subj="createIndexPatternCreateButton"
             ng-disabled="form.$invalid || controller.fetchFieldsError"
-            ng-class="controller.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
-            class="btn"
+            class="kuiButton kuiButton--primary"
           >
             <span ng-hide="form.name.$error.indexNameInput" ng-if="controller.fetchFieldsError">{{controller.fetchFieldsError}}</span>
             <span ng-hide="form.name.$error.indexNameInput" ng-if="!controller.fetchFieldsError" translate="KIBANA-CREATE"></span>

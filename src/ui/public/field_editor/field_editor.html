@@ -92,22 +92,33 @@
         ng-model="editor.field.count"
         type="number"
         class="form-control"
-        data-test-subj=editorFieldCount>
+        data-test-subj=editorFieldCount
+      >
 
-      <span class="input-group-btn">
+      <span class="kuiButtonGroup kuiButtonGroup--united">
         <button
+          data-test-subj="fieldIncreasePopularityButton"
           type="button"
           ng-click="editor.field.count = editor.field.count + 1"
           aria-label="Plus"
-          class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-plus" data-test-subj=editorFieldCountPlus></i>
+          class="kuiButton kuiButton--basic"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiIcon fa-plus"
+          ></span>
         </button>
+
         <button
           type="button"
           ng-click="editor.field.count = editor.field.count - 1"
           aria-label="Minus"
-          class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-minus" data-test-subj=editorFieldCountMinus></i>
+          class="kuiButton kuiButton--basic"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiIcon fa-minus"
+          ></span>
         </button>
       </span>
     </div>
@@ -209,25 +220,31 @@
   <div class="form-group">
     <button
       type="button"
-      ng-click="editor.cancel()"
-      aria-label="Cancel"
-      class="btn btn-primary">
-      Cancel
-    </button>
-    <button
-      type="button"
       ng-if="editor.field.scripted && !editor.creating"
       ng-click="editor.delete()"
       aria-label="Delete"
-      class="btn btn-danger">
+      class="kuiButton kuiButton--danger"
+    >
       Delete Field
     </button>
+
     <button
+      data-test-subj="fieldSaveButton"
       ng-disabled="form.$invalid"
       type="submit"
       aria-label="{{ editor.creating ? 'Create' : 'Update' }} Field"
-      class="btn btn-success">
+      class="kuiButton kuiButton--primary"
+    >
       {{ editor.creating ? 'Create' : 'Update' }} Field
+    </button>
+
+    <button
+      data-test-subj="fieldCancelButton"
+      type="button"
+      ng-click="editor.cancel()"
+      class="kuiButton kuiButton--hollow"
+    >
+      Cancel
     </button>
   </div>
 </form>
