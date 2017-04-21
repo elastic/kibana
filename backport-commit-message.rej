@@ -1,0 +1,9 @@
+Use this instead of self in saved_object.js
+
+Backports PR #9380
+
+**Commit 1:**
+Use this instead of self
+
+* Original sha: 75a5681b3f0860b06ff2d158f0f81490b706ca3a
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-05T20:58:19Z
