@@ -928,11 +928,19 @@ body {
       outline: none;
       border-color: #6EADC1; }
 
+/**
+ * 1. We may want to put elements in here which have different heights.
+ */
 .kuiFieldGroup {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  /* 1 */ }
 
 .kuiFieldGroupSection + .kuiFieldGroupSection {
   margin-left: 10px; }
