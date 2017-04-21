@@ -1,7 +1,7 @@
 [[tilemap]]
 == Tile Maps
 
-A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
+A tile map displays a geographic "area overlaid with circles keyed to the data determined by the buckets you specify.
 
 NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
@@ -76,6 +76,10 @@ in a name to display on the visualization.
 based on the geohash coordinates.
 
 NOTE: By default, the *Change precision on map zoom* box is checked. Uncheck the box to disable this behavior.
+
+NOTE: By default, the *place markers off grid (use geocentroid) box is checked. When this box is checked, the markers are
+placed in the center of all the documents in that bucket. When it is not checked, the markers are placed in the center
+of the geohash grid cell. Leaving this box checked generally results in a more accurate visualization.
 
 Enter a string in the *Custom Label* field to change the display label.
 
