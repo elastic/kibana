@@ -42,15 +42,37 @@
     align-items: center; /* 1 */
   }
 
+.kuiButton--small {
+  font-size: $buttonSmallFontSize;
+  padding: $buttonSmallPadding;
+  height: $buttonSmallHeight;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
 .kuiButton--iconText {
   .kuiButton__icon {
-
     &:first-child:not(:only-child) {
       margin-right: $buttonIconSpacing;
     }
 
     &:last-child:not(:only-child) {
       margin-left: $buttonIconSpacing;
+    }
+  }
+
+  &.kuiButton--small {
+    .kuiButton__icon {
+      &:first-child:not(:only-child) {
+        margin-right: $buttonIconSmallSpacing;
+      }
+
+      &:last-child:not(:only-child) {
+        margin-left: $buttonIconSmallSpacing;
+      }
     }
   }
 }
