@@ -26,7 +26,7 @@
         name="queryInput"
         ng-submit="filterResults()"
       >
-        <div class="typeahead" kbn-typeahead="dashboard">
+        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
           <div class="kuiLocalSearch">
             <input
               parse-query
