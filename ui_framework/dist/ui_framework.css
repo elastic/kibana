@@ -928,6 +928,9 @@ body {
       outline: none;
       border-color: #6EADC1; }
 
+.kuiTextInput--small {
+  width: 60px; }
+
 /**
  * 1. We may want to put elements in here which have different heights.
  */
