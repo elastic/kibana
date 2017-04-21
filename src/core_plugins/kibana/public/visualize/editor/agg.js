@@ -1,7 +1,7 @@
 import 'plugins/kibana/visualize/editor/agg_params';
 import 'plugins/kibana/visualize/editor/agg_add';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import aggTemplate from 'plugins/kibana/visualize/editor/agg.html';
 uiModules
 .get('app/visualize')

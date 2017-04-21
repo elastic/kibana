@@ -1,18 +1,3 @@
-/**
- * 1. Enforce pointer when there's no href.
- */
 .kuiLink {
-  color: $globalLinkColor;
-  text-decoration: none;
-  cursor: pointer; /* 1 */
-
-  &:visited,
-  &:active {
-    color: $globalLinkColor;
-  }
-
-  &:hover {
-    color: $globalLinkHoverColor;
-    text-decoration: underline;
-  }
+  @include link;
 }

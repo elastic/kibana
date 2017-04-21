@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series/category_axis.html';
 const module = uiModules.get('kibana');
 

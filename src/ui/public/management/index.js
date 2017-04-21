@@ -20,5 +20,3 @@ management.register('kibana', {
   order: 20,
 });
 
-// Default export style used in x-pack. TODO: convert to named and remove.
-export default management;

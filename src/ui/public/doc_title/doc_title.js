@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')
 .run(function ($rootScope, docTitle) {
@@ -43,5 +43,3 @@ export function DocTitleProvider(docTitle) {
   return docTitle;
 }
 
-// Default export used in x-pack. TODO: cleanup.
-export default DocTitleProvider;

@@ -6,7 +6,7 @@ import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 

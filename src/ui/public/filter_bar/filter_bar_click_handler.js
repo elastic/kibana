@@ -68,5 +68,3 @@ export function FilterBarClickHandlerProvider(Notifier) {
   };
 }
 
-// Used in xpack. TODO: remove and cleanup.
-export default FilterBarClickHandlerProvider;

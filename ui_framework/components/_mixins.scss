@@ -5,6 +5,33 @@
 }
 
 /**
+ * 1. Enforce pointer when there's no href.
+ */
+@mixin link {
+  color: $globalLinkColor;
+  text-decoration: none;
+  cursor: pointer; /* 1 */
+
+  &:visited,
+  &:active {
+    color: $globalLinkColor;
+  }
+
+  &:hover {
+    color: $globalLinkHoverColor;
+    text-decoration: underline;
+  }
+
+  @include darkTheme {
+    color: $globalLinkColor--darkTheme;
+
+    &:hover {
+      color: $globalLinkColor--darkTheme;
+    }
+  }
+}
+
+/**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
 @mixin kuiButtonDisabled {
@@ -82,7 +109,7 @@
  */
 @mixin formControlBase {
   appearance: none;
-  padding: 3px 12px 4px;
+  padding: $globalFormControlPadding;
   font-size: $globalFontSize;
   font-weight: 400;
   line-height: $globalLineHeight;

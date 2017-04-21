@@ -122,4 +122,3 @@ export function close(moduleName) {
 
 export const uiModules = { link, get, close };
 
-export default uiModules;

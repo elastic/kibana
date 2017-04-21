@@ -13,11 +13,12 @@ let $parentScope;
 let $typeaheadScope;
 let $elem;
 let typeaheadCtrl;
+let onSelectStub;
 
-let markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
-  '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
-  '<kbn-typeahead-items></kbn-typeahead-items>' +
-  '</div>';
+let markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}" on-select="selectItem()">
+                <input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>
+                <kbn-typeahead-items></kbn-typeahead-items>
+              </div>`;
 const typeaheadItems = ['abc', 'def', 'ghi'];
 
 const init = function () {
@@ -48,6 +49,7 @@ const init = function () {
     // Give us a scope
     $parentScope = $rootScope;
 
+    $parentScope.selectItem = onSelectStub = sinon.stub();
     $elem = angular.element(markup);
 
     $compile($elem)($parentScope);
@@ -63,9 +65,9 @@ describe('typeahead directive', function () {
       const goodMarkup = markup;
 
       before(function () {
-        markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
-          '<kbn-typeahead-items></kbn-typeahead-items>' +
-          '</div>';
+        markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}" on-select="selectItem()">
+                    <kbn-typeahead-items></kbn-typeahead-items>
+                  </div>`;
       });
 
       after(function () {
@@ -74,6 +76,25 @@ describe('typeahead directive', function () {
 
       it('should throw with message', function () {
         expect(init).to.throwException(/kbn-typeahead-input must be defined/);
+      });
+    });
+
+    describe('missing on-select attribute', function () {
+      const goodMarkup = markup;
+
+      before(function () {
+        markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}">
+                    <input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input />
+                    <kbn-typeahead-items></kbn-typeahead-items>
+                  </div>`;
+      });
+
+      after(function () {
+        markup = goodMarkup;
+      });
+
+      it('should throw with message', function () {
+        expect(init).to.throwException(/on-select must be defined/);
       });
     });
   });
@@ -148,6 +169,20 @@ describe('typeahead directive', function () {
         });
 
         expect($typeaheadScope.filteredItems).not.to.contain('skrillex');
+      });
+
+      it('should call the on-select method on mouse click of an item', function () {
+        // $scope.items is set via history.add, so mock the output
+        typeaheadCtrl.history.add.returns(typeaheadItems);
+
+        // a single call will call history.add, which will respond with the mocked data
+        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
+        typeaheadCtrl.persistEntry();
+
+        $parentScope.$digest();
+
+        $elem.find('.typeahead-item').click();
+        sinon.assert.called(onSelectStub);
       });
     });
 

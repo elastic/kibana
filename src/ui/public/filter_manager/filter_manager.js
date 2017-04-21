@@ -84,5 +84,3 @@ export function FilterManagerProvider(Private) {
 
   return filterManager;
 }
-
-export default FilterManagerProvider;

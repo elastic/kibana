@@ -5,7 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import { IndexPatternsCastMappingTypeProvider } from 'ui/index_patterns/_cast_mapping_type';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiRoutes
 .when('/management/kibana/objects/:service/:id', {

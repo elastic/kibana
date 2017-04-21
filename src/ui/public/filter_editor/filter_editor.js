@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './filter_editor.html';
 import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';

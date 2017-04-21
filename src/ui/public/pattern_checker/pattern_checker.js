@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './pattern_checker.html';
 import './pattern_checker.less';
 import chrome from 'ui/chrome';

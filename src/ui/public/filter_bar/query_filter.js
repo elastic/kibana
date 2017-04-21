@@ -384,4 +384,3 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
   }
 }
 
-export default FilterBarQueryFilterProvider;

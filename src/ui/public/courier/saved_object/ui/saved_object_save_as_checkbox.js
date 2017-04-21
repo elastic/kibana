@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import saveObjectSaveAsCheckboxTemplate from './saved_object_save_as_checkbox.html';
 
 uiModules
