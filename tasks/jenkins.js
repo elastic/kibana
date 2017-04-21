@@ -38,7 +38,7 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
 
-    'test:ui'
+    'test:uiRelease'
   ]);
 
 };
