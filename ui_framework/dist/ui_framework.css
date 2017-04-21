@@ -630,6 +630,26 @@ body {
   color: #9fa3a7; }
 
 /**
+ * 1. Set inline-block so this wrapper shrinks to fit the input.
+ */
+.kuiAssistedInput {
+  display: inline-block;
+  /* 1 */
+  position: relative; }
+
+/**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+.kuiAssistedInput__assistance {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  /* 1 */
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  /* 1 */ }
+
+/**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
  *    ugly default appearance which we can't customize, so our best option is to give Firefox
  *    control over the checkbox's appearance.
@@ -1436,7 +1456,8 @@ body {
   min-height: 70px;
   /* 1 */
   color: #2d2d2d;
-  background-color: #e4e4e4; }
+  background-color: #e4e4e4;
+  line-height: 1.5; }
   .theme-dark .kuiLocalNav {
     color: #cecece;
     background-color: #333333; }
@@ -1485,33 +1506,51 @@ body {
   width: 100%; }
 
 .kuiLocalSearchInput {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
-  padding: 3px 15px;
-  font-size: 14px;
-  color: #2d2d2d;
-  background-color: #ffffff;
-  border: 1px solid #ffffff;
-  border-bottom-left-radius: 4px;
-  border-top-left-radius: 4px;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0; }
-  .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
-    border-color: #e74C3c; }
+  border-color: #ffffff;
+  border-top-color: #ffffff;
+  border-bottom-color: #ffffff;
+  border-radius: 4px 0 0 4px; }
+  .theme-dark .kuiLocalSearchInput {
+    color: #cecece; }
+  .kuiLocalSearchInput:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
   .kuiLocalSearchInput:focus {
     outline: none;
     border-color: #6EADC1; }
+  .kuiLocalSearchInput:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
   .theme-dark .kuiLocalSearchInput {
-    color: #cecece;
-    background-color: #4e4e4e;
-    border-color: #4e4e4e; }
-    .theme-dark .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
-      border-color: #ff6758; }
+    background-color: #444444;
+    border-color: #444444; }
     .theme-dark .kuiLocalSearchInput:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
+    border-color: #e74C3c; }
 
 .kuiLocalSearchInput--secondary {
   height: 30px;
@@ -1522,10 +1561,82 @@ body {
   border-radius: 0;
   border-left-color: #DEDEDE; }
   .theme-dark .kuiLocalSearchInput--secondary {
-    border-color: #333333;
-    border-top-color: #4e4e4e;
-    border-bottom-color: #4e4e4e;
-    border-right-color: #4e4e4e; }
+    border-left-color: #333333;
+    border-right-color: #333333; }
+
+.kuiLocalSearchAssistedInput {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 100%;
+      -ms-flex: 1 1 100%;
+          flex: 1 1 100%;
+  position: relative; }
+
+/**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+.kuiLocalSearchAssistedInput__assistance {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  /* 1 */
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  /* 1 */ }
+
+.kuiLocalSearchSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
+  transition: border-color 0.1s linear;
+  /**
+   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+   *    with it.
+   */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */
+  border-color: #ffffff;
+  border-left-color: #DEDEDE;
+  border-radius: 0; }
+  .theme-dark .kuiLocalSearchSelect {
+    color: #cecece; }
+  .kuiLocalSearchSelect:invalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
+  .kuiLocalSearchSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiLocalSearchSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiLocalSearchSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiLocalSearchSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+  .theme-dark .kuiLocalSearchSelect {
+    background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
+    /* 1 */ }
 
 .kuiLocalSearchButton {
   width: 43px;
@@ -1534,10 +1645,7 @@ body {
   color: #ffffff;
   background-color: #9c9c9c;
   border: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  border-bottom-right-radius: 4px;
-  border-top-right-radius: 4px; }
+  border-radius: 0 4px 4px 0; }
   .kuiLocalSearchButton:focus {
     z-index: 1;
     /* 1 */
