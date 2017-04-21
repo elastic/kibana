@@ -8,7 +8,7 @@ export default function percentile(resp, panel, series) {
     const metric = getLastMetric(series);
     if (metric.type !== 'percentile') return next(results);
 
-    getSplits(resp, series).forEach((split) => {
+    getSplits(resp, panel, series).forEach((split) => {
       metric.percentiles.forEach(percentile => {
         const label = (split.label) + ` (${percentile.value})`;
         const data = split.timeseries.buckets.map(bucket => {
