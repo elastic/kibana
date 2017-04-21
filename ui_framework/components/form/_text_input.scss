@@ -1,3 +1,7 @@
 .kuiTextInput {
   @include formControl;
 }
+
+.kuiTextInput--small {
+  width: 60px;
+}
