@@ -175,10 +175,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
           await PageObjects.dashboard.clickEdit();
           const originalFilters = await retry.try(async () => {
-            return PageObjects.dashboard.getFilters().then(resp => {
-              if (!resp.length) throw new Error('expected filters');
-              return resp;
-            });
+            const filters = await PageObjects.dashboard.getFilters();
+            if (!filters.length) throw new Error('expected filters');
+            return filters;
           });
           // Click to cause hover menu to show up, but it will also actually click the filter, which will turn
           // it off, so we need to click twice to turn it back on.
