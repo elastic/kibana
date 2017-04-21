@@ -11,6 +11,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
     template,
     scope: {
       filter: '=',
+      onDelete: '&',
       onCancel: '&',
       onSave: '&'
     },

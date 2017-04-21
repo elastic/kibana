@@ -63,6 +63,11 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         };
       };
 
+      $scope.deleteFilter = (filter) => {
+        $scope.removeFilter(filter);
+        $scope.cancelEdit();
+      };
+
       $scope.editFilter = (filter) => {
         $scope.editingFilter = filter;
       };

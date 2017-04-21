@@ -108,18 +108,29 @@
     </div>
   </div>
 
-  <div class="kuiModalFooter">
-    <button
-      class="kuiButton kuiButton--basic"
-      ng-click="filterEditor.onCancel()"
-    >
-      Cancel
-    </button>
-    <button
-      class="kuiButton kuiButton--primary"
-      ng-click="filterEditor.save()"
-    >
-      Save
-    </button>
+  <div class="kuiModalFooter kuiBar">
+    <div class="kuiBarSection" ng-hide="filterEditor.filter.meta.newFilter">
+      <button
+        class="kuiButton kuiButton--danger"
+        ng-click="filterEditor.onDelete()"
+      >
+        <span class="fa fa-trash"></span>
+      </button>
+    </div>
+
+    <div class="kuiBarSection">
+      <button
+        class="kuiButton kuiButton--basic"
+        ng-click="filterEditor.onCancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="kuiButton kuiButton--primary"
+        ng-click="filterEditor.save()"
+      >
+        Save
+      </button>
+    </div>
   </div>
 </div>
