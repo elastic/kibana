@@ -50,6 +50,8 @@ import Elements from './button_elements';
 const elementsSource = require('!!raw!./button_elements');
 const elementsHtml = renderToHtml(Elements);
 
+const sizesHtml = require('./button_sizes.html');
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -244,6 +246,18 @@ export default props => (
       <GuideDemo>
         <Elements />
       </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Sizes"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: sizesHtml,
+      }]}
+    >
+      <GuideDemo
+        html={sizesHtml}
+      />
     </GuideSection>
   </GuidePage>
 );

@@ -201,11 +201,26 @@ body {
           align-items: center;
   /* 1 */ }
 
+.kuiButton--small {
+  font-size: 12px;
+  padding: 2px 8px 3px;
+  height: 22px; }
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center; }
+
 .kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
   margin-right: 8px; }
 
 .kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
   margin-left: 8px; }
+
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 4px; }
+
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 4px; }
 
 /**
  * 1. Override Bootstrap.
@@ -425,6 +440,18 @@ body {
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
   margin-left: 2px; }
+
+.kuiButtonGroup--fullWidth {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiButtonGroup--fullWidth > .kuiButton {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    text-align: center; }
 
 .kuiCard {
   display: -webkit-box;
