@@ -22,7 +22,7 @@
           <ui-select-match placeholder="Fields...">
             {{$select.selected.name}}
           </ui-select-match>
-          <ui-select-choices repeat="field in filterEditor.fieldSuggestions | filter:$select.search | orderBy">
+          <ui-select-choices repeat="field in filterEditor.fieldSuggestions | filter:{ name: $select.search } | orderBy:'name' | sortPrefixFirst:$select.search:'name'">
             <div ng-bind-html="field.name | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
@@ -39,7 +39,7 @@
           <ui-select-match placeholder="Operators...">
             {{$select.selected.name}}
           </ui-select-match>
-          <ui-select-choices repeat="operator in filterEditor.operatorSuggestions | filter:$select.search">
+          <ui-select-choices repeat="operator in filterEditor.operatorSuggestions | filter:{ name: $select.search } | sortPrefixFirst:$select.search:'name'">
             <div ng-bind-html="operator.name | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
@@ -56,7 +56,7 @@
             {{$select.selected}}
           </ui-select-match>
           <ui-select-choices
-            repeat="value in filterEditor.valueSuggestions | filter:$select.search"
+            repeat="value in filterEditor.valueSuggestions | filter:$select.search | sortPrefixFirst:$select.search"
             refresh="filterEditor.refreshValueSuggestions($select.search)"
             refresh-delay="100"
           >
@@ -73,7 +73,7 @@
             {{$item}}
           </ui-select-match>
           <ui-select-choices
-            repeat="value in filterEditor.valueSuggestions | filter:$select.search"
+            repeat="value in filterEditor.valueSuggestions | filter:$select.search | sortPrefixFirst:$select.search"
             refresh="filterEditor.refreshValueSuggestions($select.search)"
             refresh-delay="100"
           >

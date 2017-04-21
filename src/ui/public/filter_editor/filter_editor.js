@@ -3,6 +3,7 @@ import { uiModules } from 'ui/modules';
 import template from './filter_editor.html';
 import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';
+import '../filters/sort_prefix_first';
 
 const module = uiModules.get('kibana');
 module.directive('filterEditor', function (indexPatterns, $http) {
