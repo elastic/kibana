@@ -10,7 +10,7 @@ export default function stdSibling(resp, panel, series) {
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
     const decoration = getDefaultDecoration(series);
-    getSplits(resp, series).forEach((split) => {
+    getSplits(resp, panel, series).forEach((split) => {
       const data = split.timeseries.buckets.map(bucket => {
         return [bucket.key, getSiblingAggValue(split, metric)];
       });

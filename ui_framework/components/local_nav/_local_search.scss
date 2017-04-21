@@ -4,37 +4,15 @@
 }
 
 .kuiLocalSearchInput {
+  @include formControl;
   flex: 1 1 100%;
-  padding: 3px 15px;
-  font-size: $globalFontSize;
-  color: $localNavTextColor;
-  background-color: $localSearchBackgroundColor;
-  border: 1px solid $localSearchBackgroundColor;
-  border-bottom-left-radius: 4px;
-  border-top-left-radius: 4px;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
+  border-color: $localSearchBackgroundColor;
+  border-top-color: $localSearchBackgroundColor;
+  border-bottom-color: $localSearchBackgroundColor;
+  border-radius: $globalBorderRadius 0 0 $globalBorderRadius;
 
   &.kuiLocalSearchInput-isInvalid {
     border-color: $localSearchBorderColor-isInvalid;
-  }
-
-  &:focus {
-    @include formControlFocus;
-  }
-
-  @include darkTheme {
-    color: $localNavTextColor--darkTheme;
-    background-color: $localSearchBackgroundColor--darkTheme;
-    border-color: $localSearchBackgroundColor--darkTheme;
-
-    &.kuiLocalSearchInput-isInvalid {
-      border-color: $localSearchBorderColor-isInvalid--darkTheme;
-    }
-
-    &:focus {
-      @include formControlFocus;
-    }
   }
 }
 
@@ -45,11 +23,33 @@
   border-left-color: $globalFormControlBorderColor;
 
   @include darkTheme {
-    border-color: $localNavBackgroundColor--darkTheme;
-    border-top-color: $localSearchBackgroundColor--darkTheme;
-    border-bottom-color: $localSearchBackgroundColor--darkTheme;
-    border-right-color: $localSearchBackgroundColor--darkTheme;
+    border-left-color: $localNavBackgroundColor--darkTheme;
+    border-right-color: $localNavBackgroundColor--darkTheme;
   }
+}
+
+.kuiLocalSearchAssistedInput {
+  display: flex;
+  flex: 1 1 100%;
+  position: relative;
+}
+
+  /**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+  .kuiLocalSearchAssistedInput__assistance {
+    position: absolute;
+    right: $globalFormControlHorizontalPadding;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
+  }
+
+.kuiLocalSearchSelect {
+  @include select;
+
+  border-color: $localSearchBackgroundColor;
+  border-left-color: $globalFormControlBorderColor;
+  border-radius: 0;
 }
 
 .kuiLocalSearchButton {
@@ -59,10 +59,7 @@
   color: $localSearchButtonTextColor;
   background-color: $localSearchButtonBackgroundColor;
   border: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  border-bottom-right-radius: 4px;
-  border-top-right-radius: 4px;
+  border-radius: 0 $globalBorderRadius $globalBorderRadius 0;
 
   &:focus {
     @include focus($globalFocusColor, $globalBorderColor);

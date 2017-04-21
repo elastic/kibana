@@ -38,12 +38,20 @@
 
   <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
     <div class="kuiLocalSearch">
-      <input
-        class="kuiLocalSearchInput"
-        type="text"
-        placeholder="Filter..."
-        autocomplete="off"
-      >
+      <div class="kuiLocalSearchAssistedInput">
+        <input
+          style="padding-right: 5.5em"
+          class="kuiLocalSearchInput"
+          type="text"
+          placeholder="Filter..."
+          autocomplete="off"
+        >
+        <div class="kuiLocalSearchAssistedInput__assistance">
+          <p class="kuiText">
+            <a class="kuiLink" href="#">API docs</a>
+          </p>
+        </div>
+      </div>
 
       <input
         class="kuiLocalSearchInput kuiLocalSearchInput--secondary"

@@ -109,7 +109,7 @@
  */
 @mixin formControlBase {
   appearance: none;
-  padding: 3px 12px 4px;
+  padding: $globalFormControlPadding;
   font-size: $globalFontSize;
   font-weight: 400;
   line-height: $globalLineHeight;
