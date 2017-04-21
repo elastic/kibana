@@ -4,9 +4,15 @@ export {
   KuiButtonIcon,
   KuiLinkButton,
   KuiSubmitButton,
-} from './button';
+} from './button/index';
+
 export {
   KuiToolBarSearchBox,
   KuiToolBar,
   KuiToolBarFooter,
 } from './tool_bar';
+
+export {
+  KuiConfirmModal,
+  KuiModalOverlay
+} from './modal/index';
