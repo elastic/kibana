@@ -1,5 +1,9 @@
 <div class="visualize-show-spy">
-  <div ng-click="toggleDisplay()" class="visualize-show-spy-tab">
+  <div
+    ng-click="toggleDisplay()"
+    data-test-subj="spyToggleButton"
+    class="visualize-show-spy-tab"
+  >
     <span
       class="kuiIcon"
       ng-class="spy.mode.name ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"

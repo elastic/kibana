@@ -130,10 +130,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     collapseChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.visualize-show-spy > div > i')
-      .click();
+      return testSubjects.click('spyToggleButton');
     }
 
     getMetric() {
