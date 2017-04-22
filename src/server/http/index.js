@@ -1,5 +1,7 @@
 import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
+import { format as formatUrl } from 'url';
+import httpolyglot from 'httpolyglot';
 
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
@@ -32,8 +34,9 @@ module.exports = function (kbnServer, server, config) {
   };
 
   // enable tls if ssl key and cert are defined
-  if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
-    connectionOptions.tls = {
+  let usesSsl = config.get('server.ssl.key') && config.get('server.ssl.cert');
+  if (usesSsl) {
+    connectionOptions.listener = httpolyglot.createServer({
       key: fs.readFileSync(config.get('server.ssl.key')),
       cert: fs.readFileSync(config.get('server.ssl.cert')),
       // The default ciphers in node 0.12.x include insecure ciphers, so until
@@ -65,7 +68,8 @@ module.exports = function (kbnServer, server, config) {
       // We use the server's cipher order rather than the client's to prevent
       // the BEAST attack
       honorCipherOrder: true
-    };
+    });
+    connectionOptions.tls = true;
   }
 
   server.connection(connectionOptions);
@@ -134,6 +138,27 @@ module.exports = function (kbnServer, server, config) {
 
     return reply.continue();
   });
+
+  if (usesSsl) {
+    let port = config.get('server.port');
+    let hostname = config.get('server.host');
+
+    server.ext('onRequest', function (req, reply) {
+      // A request sent through a HapiJS .inject() doesn't have a socket associated with the request
+      // which causes a failure.
+      if (!req.raw.req.socket || req.raw.req.socket.encrypted) {
+        reply.continue();
+      } else {
+        reply.redirect(formatUrl({
+          port,
+          protocol: 'https',
+          hostname,
+          pathname: req.url.pathname,
+          search: req.url.search,
+        }));
+      }
+    });
+  }
 
   server.route({
     path: '/',
