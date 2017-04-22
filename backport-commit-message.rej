@@ -1,0 +1,37 @@
+Remove the need to pass state and parentUiState to dashboard_panel directive
+
+Backports PR #9769
+
+**Commit 1:**
+- Remove need for passing state to dashboard_panel directive.
+
+get rid of parentUiState
+
+* Original sha: e97cb33b5b6c9d14005a0094b61bad41c62628ce
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-05T21:05:40Z
+
+**Commit 2:**
+Address code review comments
+
+* Original sha: 4c7f0be3362af7d85b578f34e1ea99b26299bba9
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-13T20:29:45Z
+
+**Commit 3:**
+Only do savedSearch specific init stuff for searches
+
+* Original sha: 76149edae8893f3279000af886c13a0ee8a9cbd0
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-16T15:21:42Z
+
+**Commit 4:**
+Throw Error object, not string
+
+* Original sha: 31713b04365f7f0ae78d2a1997c2ef65927b0a6b
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-17T15:25:47Z
+
+**Commit 5:**
+Remove new patterns from this PR
+
+Removing the new patterns from this PR to preserve consistency.
+
+* Original sha: 65131d0ee7b45829db510c12fb7e836a33627750
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-17T20:15:07Z
