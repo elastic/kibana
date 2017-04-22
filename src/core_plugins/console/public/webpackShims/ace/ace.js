@@ -3847,7 +3847,9 @@ var TextInput = function(parentNode, host) {
         host.onCompositionUpdate(val);
         if (inComposition.lastValue)
             host.undo();
-        inComposition.lastValue = val;
+        if (inComposition.lastValue != null && val != null && inComposition.lastValue < val.length) {
+            inComposition.lastValue = val;
+        }
         if (inComposition.lastValue) {
             var r = host.selection.getRange();
             host.insert(inComposition.lastValue);
