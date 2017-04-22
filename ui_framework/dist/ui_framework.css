@@ -1278,6 +1278,142 @@ body {
 .kuiLocalBreadcrumb__emphasis {
   font-weight: 700; }
 
+.kuiDatePicker {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: 1.5; }
+
+.kuiDatePickerNavigationCell {
+  padding: 0; }
+
+.kuiDatePickerNavigation {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-bottom: 4px; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerNavigationButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  border: none;
+  font-size: 12px;
+  color: #5a5a5a;
+  padding: 3px 6px;
+  border-radius: 4px; }
+  .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
+    cursor: pointer;
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.1); }
+  .kuiDatePickerNavigationButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    /* 3 */
+    color: #5a5a5a;
+    /* 1 */ }
+  .theme-dark .kuiDatePickerNavigationButton {
+    color: #dedede; }
+    .theme-dark .kuiDatePickerNavigationButton:hover, .theme-dark .kuiDatePickerNavigationButton:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
+    .theme-dark .kuiDatePickerNavigationButton:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      /* 3 */
+      color: #dedede;
+      /* 1 */ }
+
+.kuiDatePickerHeaderCell {
+  padding: 0;
+  color: #2d2d2d;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center; }
+  .theme-dark .kuiDatePickerHeaderCell {
+    color: #cecece; }
+
+.kuiDatePickerRowCell {
+  padding: 0;
+  text-align: center; }
+  .kuiDatePickerRowCell.kuiDatePickerRowCell-isPrecluded {
+    background-color: rgba(0, 0, 0, 0.05);
+    pointer-events: none; }
+    .theme-dark .kuiDatePickerRowCell.kuiDatePickerRowCell-isPrecluded {
+      background-color: rgba(0, 0, 0, 0.15); }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerRowCellContent {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  color: #2d2d2d;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  line-height: 1.2; }
+  .kuiDatePickerRowCellContent:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    /* 3 */
+    color: #2d2d2d;
+    /* 1 */ }
+  .kuiDatePickerRowCellContent:disabled {
+    pointer-events: none;
+    opacity: 0.5; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isOtherMonth {
+    visibility: hidden;
+    pointer-events: none; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+    color: #2d2d2d;
+    /* 1 */
+    border: 1px dotted #9fa3a7; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+    background-color: #777777;
+    color: #ffffff; }
+  .kuiDatePickerRowCellContent:hover:not(.kuiDatePickerRowCellContent-isSelected), .kuiDatePickerRowCellContent:active:not(.kuiDatePickerRowCellContent-isSelected) {
+    cursor: pointer;
+    background-color: #3fa8c7;
+    color: #ffffff; }
+  .theme-dark .kuiDatePickerRowCellContent {
+    color: #cecece; }
+    .theme-dark .kuiDatePickerRowCellContent:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      /* 3 */ }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+      color: #ffffff; }
+
 .kuiLocalDropdown {
   position: relative;
   padding: 10px 10px 14px;

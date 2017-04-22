@@ -1,0 +1,145 @@
+.kuiDatePicker {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: $globalLineHeight;
+}
+
+.kuiDatePickerNavigationCell {
+  padding: 0;
+}
+
+.kuiDatePickerNavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerNavigationButton {
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  font-size: $globalSubTextFontSize;
+  color: $localNavButtonTextColor;
+  padding: 3px 6px;
+  border-radius: $globalBorderRadius;
+
+  &:hover,
+  &:active {
+    cursor: pointer;
+    color: $localNavButtonTextColor-isHover;
+    background-color: $localNavButtonBackgroundColor-isHover;
+  }
+
+  &:focus {
+    @include focus($globalFocusColor, $localDropdownBackgroundColor);
+
+    color: $localNavButtonTextColor; /* 1 */
+  }
+
+  @include darkTheme {
+    color: $localNavButtonTextColor--darkTheme;
+
+    &:hover,
+    &:active {
+      color: $localNavButtonTextColor-isHover--darkTheme;
+      background-color: rgba(#000000, 0.4);
+    }
+
+    &:focus {
+      @include focus($globalFocusColor, $localDropdownBackgroundColor--darkTheme);
+
+      color: $localNavButtonTextColor--darkTheme; /* 1 */
+    }
+  }
+}
+
+.kuiDatePickerHeaderCell {
+  padding: 0;
+  color: $localNavTextColor;
+  font-size: $globalSubTextFontSize;
+  font-weight: bold;
+  text-align: center;
+
+  @include darkTheme {
+    color: $globalTextColor--darkTheme;
+  }
+}
+
+.kuiDatePickerRowCell {
+  padding: 0;
+  text-align: center;
+
+  &.kuiDatePickerRowCell-isPrecluded {
+    background-color: rgba(black, 0.05);
+    pointer-events: none;
+
+    @include darkTheme {
+      background-color: rgba(black, 0.15);
+    }
+  }
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerRowCellContent {
+  appearance: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  color: $localNavTextColor;
+  font-size: $globalSubTextFontSize;
+  padding: 8px;
+  border-radius: $globalBorderRadius;
+  line-height: 1.2;
+
+  &:focus {
+    @include focus($globalFocusColor, $localDropdownBackgroundColor);
+
+    color: $localNavTextColor; /* 1 */
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &.kuiDatePickerRowCellContent-isOtherMonth {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &.kuiDatePickerRowCellContent-isCurrent {
+    color: $localNavTextColor; /* 1 */
+    border: 1px dotted $globalSubduedTextColor;
+  }
+
+  &.kuiDatePickerRowCellContent-isSelected {
+    background-color: #777777;
+    color: #ffffff;
+  }
+
+  &:hover:not(.kuiDatePickerRowCellContent-isSelected),
+  &:active:not(.kuiDatePickerRowCellContent-isSelected) {
+    cursor: pointer;
+    background-color: $globalInfoColor;
+    color: #ffffff;
+  }
+
+  @include darkTheme {
+    color: $globalTextColor--darkTheme;
+
+    &:focus {
+      @include focus($globalFocusColor, $localDropdownBackgroundColor--darkTheme);
+    }
+
+    &.kuiDatePickerRowCellContent-isSelected {
+      color: #ffffff;
+    }
+  }
+}
