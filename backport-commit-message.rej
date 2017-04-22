@@ -1,0 +1,48 @@
+Use better confirm button text. rename safe confirm.
+
+Backports PR #9984
+
+**Commit 1:**
+Use better confirm button text. rename safe confirm.
+
+Use confirm_modal_promise only when it’s easier than using
+confirm_modal directly.
+
+change all native confirmations to the new dialog
+
+* Original sha: d3352acdc8b0fa93dd7c55e973704ee249110a60
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-20T19:04:53Z
+
+**Commit 2:**
+address code review comments
+
+* Original sha: bd300174cb0b7ba215420c26707bfa8331e18c8a
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T16:14:01Z
+
+**Commit 3:**
+Be consistent with the confirm button text pattern
+
+Address other code review comments
+
+* Original sha: fa0bf47c94da7ae4fc22c2d1349ee32a28e5c84d
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T19:05:51Z
+
+**Commit 4:**
+remove default option for confirmButtonText
+
+Require onConfirm and confirmButtonText for confirmModal
+
+* Original sha: 5adb95edfc38661514a4b172ba88f3086dc08ffb
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T19:25:05Z
+
+**Commit 5:**
+fix tests for no longer using alertText
+
+* Original sha: 161ab0ae843e94f43482f4a83fa159107357a9fc
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T21:18:32Z
+
+**Commit 6:**
+address code review comments Round 2
+
+* Original sha: d9c29e2019c93beb43374e41935e29d52a7791ee
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-24T15:05:25Z
