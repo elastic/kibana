@@ -27,7 +27,7 @@
             ng-dblclick="unlink()"
             tooltip="Double click to unlink from Saved Search"
           >
-            <span aria-hidden="true" class="fa fa-chain-broken"></span>
+            <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
           </a>
         </div>
 
@@ -56,7 +56,7 @@
                 class="kuiLocalSearchButton"
                 ng-disabled="queryInput.$invalid"
               >
-                <span aria-hidden="true" class="fa fa-search"></span>
+                <span aria-hidden="true" class="kuiIcon fa-search"></span>
               </button>
             </div>
             <kbn-typeahead-items></kbn-typeahead-items>
@@ -69,10 +69,12 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div class="vis-editor-content">
-
+  <!-- Custom, full-screen editing UI. -->
+  <div
+    ng-if="vis.type.fullEditor"
+    class="vis-editor-content"
+  >
     <vis-editor-vis-options
-      ng-if="vis.type.fullEditor"
       vis="vis"
       saved-vis="savedVis"
       editor="vis.type.params.editor"
@@ -80,24 +82,79 @@
       stage-editable-vis="stageEditableVis"
       class="vis-editor-full-options"
     ></vis-editor-vis-options>
+  </div>
 
-    <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
-      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
+  <!-- Traditional sidebar-and-visualization editor. -->
+  <div
+    ng-if="!vis.type.fullEditor"
+    class="vis-editor-content"
+  >
+    <!-- Sidebar -->
+    <div
+      class="collapsible-sidebar"
+      ng-if="chrome.getVisible()"
+    >
+      <vis-editor-sidebar
+        vis="editableVis"
+        class="vis-editor-sidebar"
+      ></vis-editor-sidebar>
     </div>
 
-    <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
-      <visualize
-        vis="vis"
-        data-shared-item
-        data-title="{{savedVis.lastSavedTitle}}"
-        data-description="{{savedVis.description}}"
-        render-counter
-        ui-state="uiState"
-        show-spy-panel="chrome.getVisible()"
-        editable-vis="editableVis"
-        search-source="savedVis.searchSource">
-      </visualize>
-    </div>
+    <!-- Visualization -->
+    <div
+      class="vis-editor-canvas"
+      ng-class="{ embedded: !chrome.getVisible() }"
+    >
+      <div class="kuiVisualizationContainer">
+        <div
+          class="kuiVisualizationOverlay"
+        >
+          <div
+            class="kuiVisualizationNotice"
+            ng-class="{ 'kuiVisualizationNotice-isHidden': !$parent.editableVis.dirty }"
+          >
+            <div class="kuiButtonGroup kuiButtonGroup--fullWidth">
+              <button
+                class="kuiButton kuiButton--primary kuiButton--iconText"
+                ng-click="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
+              >
+                <span class="kuiButton__inner">
+                  <span
+                   aria-hidden="true"
+                   class="kuiButton__icon kuiIcon fa-refresh"
+                  ></span>
+                  <span>Update visualization</span>
+                </span>
+              </button>
 
+              <button
+                class="kuiButton kuiButton--hollow kuiButton--iconText"
+                ng-click="resetEditableVis()"
+              >
+                <span class="kuiButton__inner">
+                  <span
+                   aria-hidden="true"
+                   class="kuiButton__icon kuiIcon fa-undo"
+                  ></span>
+                  <span>Or revert your changes</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <visualize
+          vis="vis"
+          data-shared-item
+          data-title="{{savedVis.lastSavedTitle}}"
+          data-description="{{savedVis.description}}"
+          render-counter
+          ui-state="uiState"
+          show-spy-panel="chrome.getVisible()"
+          editable-vis="editableVis"
+          search-source="savedVis.searchSource">
+        </visualize>
+      </div>
+    </div>
   </div>
 </visualize-app>

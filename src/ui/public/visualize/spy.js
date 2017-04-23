@@ -16,7 +16,7 @@ uiModules
       template: spyTemplate,
       link: function ($scope, $el) {
         let currentSpy;
-        const $container = $el.find('.visualize-spy-container');
+        const $container = $el.find('[data-visualize-spy-container]');
         let fullPageSpy = _.get($scope.spy, 'mode.fill', false);
         $scope.modes = spyModes;
         $scope.spy.params = $scope.spy.params || {};

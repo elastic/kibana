@@ -4,6 +4,43 @@
 @vis-editor-nesting-width: 8px;
 @vis-editor-agg-editor-spacing: 5px;
 
+.kuiVisualizationContainer {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex: 1 1 auto;
+}
+
+/**
+ * 1. Needs to be on top of the legend.
+ */
+.kuiVisualizationOverlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20; /* 1 */
+}
+
+.kuiVisualizationNotice {
+  width: 450px;
+  position: absolute;
+  left: 10px;
+  top: 7px;
+  line-height: 1.5;
+  background-color: #FFF;
+  border: 1px solid #e4e4e4;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  padding: 10px;
+  transition: opacity 0.1s linear;
+
+  &.kuiVisualizationNotice-isHidden {
+    opacity: 0;
+  }
+}
+
 .vis-editor {
   .flex-parent();
 
@@ -19,7 +56,7 @@
 
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
-    margin-right: 10px;
+    border-right: 1px solid #e4e4e4;
   }
 
   .visualization-options {
@@ -292,7 +329,6 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
-    padding-left: @collapser-width;
 
     &.embedded {
       flex-shrink: 1;

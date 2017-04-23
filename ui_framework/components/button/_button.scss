@@ -36,10 +36,12 @@
 
   /**
    * 1. Solves whitespace problems introduced by inline elements.
+   * 2. If the button is full-width, we want the content to be horizontally centered.
    */
   .kuiButton__inner {
     display: flex; /* 1 */
     align-items: center; /* 1 */
+    justify-content: center; /* 2 */
   }
 
 .kuiButton--small {

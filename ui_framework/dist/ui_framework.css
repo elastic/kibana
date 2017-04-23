@@ -188,6 +188,7 @@ body {
 
 /**
    * 1. Solves whitespace problems introduced by inline elements.
+   * 2. If the button is full-width, we want the content to be horizontally centered.
    */
 .kuiButton__inner {
   display: -webkit-box;
@@ -199,7 +200,12 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  /* 1 */ }
+  /* 1 */
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  /* 2 */ }
 
 .kuiButton--small {
   font-size: 12px;
@@ -420,6 +426,17 @@ body {
           align-items: center; }
   .kuiButtonGroup .kuiButton + .kuiButton {
     margin-left: 4px; }
+
+.kuiButtonGroup--fullWidth {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiButtonGroup--fullWidth > .kuiButton {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto; }
 
 .kuiButtonGroup--united > .kuiButton:not(:first-child):not(:last-child) {
   border-radius: 0; }
