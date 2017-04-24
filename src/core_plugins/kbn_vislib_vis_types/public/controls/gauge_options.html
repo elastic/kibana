@@ -210,98 +210,122 @@
             >
           </div>
         </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="showScale">
-            Show Scale
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="vis.params.gauge.scale.show">
+        <div ng-hide="vis.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="showScale">
+              Show Scale
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="vis.params.gauge.scale.show">
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="scaleWidth">
+              Scale Width
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="scaleWidth"
+                class="kuiInput kuiSideBarInput"
+                ng-model="vis.params.gauge.scale.width"
+                type="number"
+                min="0"
+                max="5"
+                step="1"
+              >
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="gaugeStyle">
+              Gauge Style
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <select
+                id="gaugeStyle"
+                class="kuiSelect kuiSideBarSelect"
+                ng-model="vis.params.gauge.gaugeStyle"
+                ng-options="mode for mode in vis.type.params.gaugeStyles"
+              ></select>
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="backStyle">
+              Back Style
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <select
+                id="backStyle"
+                class="kuiSelect kuiSideBarSelect"
+                ng-model="vis.params.gauge.backStyle"
+                ng-options="mode for mode in vis.type.params.gaugeStyles"
+              ></select>
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="gaugePadding">
+              Gauge Width
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="gaugePadding"
+                class="kuiInput kuiSideBarInput"
+                ng-model="vis.params.gauge.style.width"
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+              >
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="backWidth">
+              Back Width
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="backWidth"
+                class="kuiInput kuiSideBarInput"
+                ng-model="vis.params.gauge.style.bgWidth"
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+              >
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="backColor">
+              Back Color
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="backColor"
+                class="kuiInput kuiSideBarInput"
+                ng-model="vis.params.gauge.style.bgFill"
+              >
+            </div>
           </div>
         </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="scaleWidth">
-            Scale Width
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input
-              id="scaleWidth"
-              class="kuiInput kuiSideBarInput"
-              ng-model="vis.params.gauge.scale.width"
-              type="number"
-              min="0"
-              max="5"
-              step="1"
-            >
+        <div ng-show="vis.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="bgColor">
+              Color Background
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="bgColor" type="checkbox" ng-model="vis.params.gauge.style.bgColor">
+            </div>
           </div>
-        </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="gaugeStyle">
-            Gauge Style
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <select
-              id="gaugeStyle"
-              class="kuiSelect kuiSideBarSelect"
-              ng-model="vis.params.gauge.gaugeStyle"
-              ng-options="mode for mode in vis.type.params.gaugeStyles"
-            ></select>
-          </div>
-        </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="backStyle">
-            Back Style
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <select
-              id="backStyle"
-              class="kuiSelect kuiSideBarSelect"
-              ng-model="vis.params.gauge.backStyle"
-              ng-options="mode for mode in vis.type.params.gaugeStyles"
-            ></select>
-          </div>
-        </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="gaugePadding">
-            Gauge Width
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input
-              id="gaugePadding"
-              class="kuiInput kuiSideBarInput"
-              ng-model="vis.params.gauge.style.width"
-              type="number"
-              min="0"
-              max="1"
-              step="0.1"
-            >
-          </div>
-        </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="backWidth">
-            Back Width
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input
-              id="backWidth"
-              class="kuiInput kuiSideBarInput"
-              ng-model="vis.params.gauge.style.bgWidth"
-              type="number"
-              min="0"
-              max="1"
-              step="0.1"
-            >
-          </div>
-        </div>
-        <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="backColor">
-            Back Color
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <input
-              id="backColor"
-              class="kuiInput kuiSideBarInput"
-              ng-model="vis.params.gauge.style.bgFill"
-            >
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="backColor">
+              Back/Text Color
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="backTextColor"
+                class="kuiInput kuiSideBarInput"
+                ng-model="vis.params.gauge.style.bgFill"
+              >
+            </div>
           </div>
         </div>
 

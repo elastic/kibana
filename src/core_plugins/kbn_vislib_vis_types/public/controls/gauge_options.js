@@ -24,6 +24,8 @@ module.directive('gaugeOptions', function () {
             $scope.vis.params.gauge.minAngle = 0;
             $scope.vis.params.gauge.maxAngle = 2 * Math.PI;
             break;
+          case 'Metric':
+            $scope.vis.params.gauge.type = 'simple';
         }
       });
 

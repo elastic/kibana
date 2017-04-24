@@ -52,11 +52,12 @@ export default function GaugeVisType(Private) {
             bgMask: false,
             maskBars: 50,
             bgFill: '#eee',
+            bgColor: true,
             subText: '',
           }
         }
       },
-      gaugeTypes: ['Meter', 'Circle'],
+      gaugeTypes: ['Meter', 'Circle', 'Metric'],
       gaugeStyles: ['Full', 'Bars', 'Lines'],
       scales: ['linear', 'log', 'square root'],
       colorSchemas: Object.keys(vislibColorMaps),
