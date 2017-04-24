@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
           'Tile Map',
           'Timelion',
           'Visual Builder',
+          'Gauge Chart',
           'Markdown',
           'Tag Cloud',
         ];

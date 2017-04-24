@@ -10,7 +10,7 @@ export default function GaugeVisType(Private) {
 
   return new VislibVisType({
     name: 'gauge',
-    title: 'Gauge chart',
+    title: 'Gauge Chart',
     icon: 'fa-tachometer',
     description: 'A gauge chart shows much more than one value. It gives the minimum, the maximum, ' +
     'the current value and how far from the maximum you are ',
