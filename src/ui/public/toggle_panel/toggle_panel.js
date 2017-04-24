@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './toggle_panel.html';
 import 'ui/toggle_button';
 
