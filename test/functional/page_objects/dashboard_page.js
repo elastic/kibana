@@ -225,7 +225,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(() => {
         log.debug('clicking final Save button for named dashboard');
-        return getRemote().findByCssSelector('.btn-primary').click();
+        return testSubjects.click('confirmSaveDashboardButton');
       });
     }
 

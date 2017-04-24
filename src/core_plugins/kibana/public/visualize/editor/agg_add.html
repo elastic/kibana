@@ -19,14 +19,27 @@
   class="vis-editor-agg-wide-btn">
 
   <div ng-if="!add.form">
-    <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate">
+    <button
+      data-test-subj="visualizeEditorAddAggregationButton"
+      class="kuiButton kuiButton--primary kuiButton--small"
+      ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate"
+    >
       Add {{ groupName }}
-    </div>
-    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate">
+    </button>
+
+    <button
+      data-test-subj="visualizeEditorAddAggregationButton"
+      class="kuiButton kuiButton--primary kuiButton--small"
+      ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate"
+    >
       Add sub-{{ groupName }}
-    </div>
+    </button>
   </div>
-  <div class="btn btn-sm btn-primary" ng-if="add.form">
+
+  <button
+    class="kuiButton kuiButton--primary kuiButton--small"
+    ng-if="add.form"
+  >
     Cancel
-  </div>
+  </button>
 </div>

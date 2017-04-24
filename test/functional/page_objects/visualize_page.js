@@ -39,7 +39,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     clickAddMetric() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[group-name="metrics"] .vis-editor-agg-add .vis-editor-agg-wide-btn div.btn')
+      .findByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]')
       .click();
     }
 
@@ -123,10 +123,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     clickGoButton() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByClassName('kbn-timepicker-go')
-      .click();
+      return testSubjects.click('timepickerGoButton');
     }
 
     collapseChart() {
@@ -287,10 +284,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     clickGo() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.btn-success')
-      .click()
+      return testSubjects.click('visualizeEditorRenderButton')
       .then(function () {
         return PageObjects.header.waitUntilLoadingHasFinished();
       });

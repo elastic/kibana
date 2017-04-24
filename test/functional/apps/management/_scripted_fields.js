@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('creating and using Lucence expression scripted fields', function describeIndexTests() {
-
       const scriptedExpressionFieldName = 'ram_expr1';
 
       it('should create scripted field', async function () {
@@ -75,7 +74,6 @@ export default function ({ getService, getPageObjects }) {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
         });
-
       });
 
       it('should filter by scripted field value in Discover', async function () {
@@ -95,7 +93,6 @@ export default function ({ getService, getPageObjects }) {
           '8 16', '15 14', '3 13', '2 12', '9 10', '4 9'
         ];
         await PageObjects.discover.removeAllFilters();
-        await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedExpressionFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -108,11 +105,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.saveScreenshot('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
-
     });
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
-
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function () {
@@ -165,7 +160,6 @@ export default function ({ getService, getPageObjects }) {
           '8 16', '15 14', '3 13', '2 12', '9 10', '4 9'
         ];
         await PageObjects.discover.removeAllFilters();
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -178,11 +172,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.saveScreenshot('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
-
     });
 
     describe('creating and using Painless string scripted fields', function describeIndexTests() {
-
       const scriptedPainlessFieldName2 = 'painString';
 
       it('should create scripted field', async function () {
@@ -233,7 +225,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -245,12 +236,9 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('data.length=' + data.length);
         expect(data.trim().split('\n')).to.eql([ 'good 359', 'bad 27' ]);
       });
-
     });
 
-
     describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
-
       const scriptedPainlessFieldName2 = 'painBool';
 
       it('should create scripted field', async function () {
@@ -301,7 +289,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -313,12 +300,9 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('data.length=' + data.length);
         expect(data.trim().split('\n')).to.eql([ 'true 359', 'false 27' ]);
       });
-
     });
 
-
     describe('creating and using Painless date scripted fields', function describeIndexTests() {
-
       const scriptedPainlessFieldName2 = 'painDate';
 
       it('should create scripted field', async function () {
@@ -369,7 +353,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -402,7 +385,6 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-18 07:00 1',
         ]);
       });
-
     });
   });
 }

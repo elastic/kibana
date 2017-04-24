@@ -124,7 +124,12 @@
                   <label>&nbsp;</label>
                   <br>
                   <div class="form-group">
-                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()">
+                    <button
+                      data-test-subj="timepickerGoButton"
+                      type="submit"
+                      class="kuiButton kuiButton--primary"
+                      ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
+                    >
                       Go
                     </button>
                   </div>
@@ -162,7 +167,12 @@
                 <div class="kbn-timepicker-section kbn-timepicker-alert">
                   <label>&nbsp;</label>
                   <div class="form-group">
-                    <button class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" type="submit">
+                    <button
+                      data-test-subj="timepickerGoButton"
+                      class="kuiButton kuiButton--primary"
+                      ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
+                      type="submit"
+                    >
                       Go
                     </button>
                     <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>

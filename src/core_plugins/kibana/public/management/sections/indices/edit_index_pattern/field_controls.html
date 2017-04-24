@@ -1,14 +1,19 @@
 <div class="actions">
-  <a ng-href="{{ kbnUrl.getRouteHref(field, 'edit') }}" aria-label="Edit" class="btn btn-xs btn-default">
-    <span class="sr-only">Edit</span>
-    <i aria-hidden="true" class="fa fa-pencil"></i>
+  <a
+    data-test-subj="indexPatternFieldEditButton"
+    ng-href="{{ kbnUrl.getRouteHref(field, 'edit') }}"
+    aria-label="Edit"
+    class="kuiButton kuiButton--basic kuiButton--small"
+  >
+    <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
   </a>
 
   <button
     ng-if="field.scripted"
     ng-click="remove(field)"
-    class="btn btn-xs btn-danger"
-    aria-label="Delete">
-    <i aria-hidden="true" class="fa fa-trash"></i>
+    class="kuiButton kuiButton--danger kuiButton--small"
+    aria-label="Delete"
+  >
+    <span aria-hidden="true" class="kuiIcon fa-trash"></span>
   </button>
 </div>
