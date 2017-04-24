@@ -20,4 +20,6 @@ include::discover/field-filter.asciidoc[]
 
 include::discover/document-data.asciidoc[]
 
+include::discover/context.asciidoc[]
+
 include::discover/viewing-field-stats.asciidoc[]
