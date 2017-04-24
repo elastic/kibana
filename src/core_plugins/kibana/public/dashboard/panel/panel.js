@@ -144,6 +144,11 @@ uiModules
         .catch(function (e) {
           $scope.error = e.message;
 
+          // Dashboard listens for this broadcast, once for every visualization (pendingVisCount).
+          // We need to broadcast even in the event of an error or it'll never fetch the data for
+          // other visualizations.
+          $scope.$root.$broadcast('ready:vis');
+
           // If the savedObjectType matches the panel type, this means the object itself has been deleted,
           // so we shouldn't even have an edit link. If they don't match, it means something else is wrong
           // with the object (but the object still exists), so we link to the object editor instead.
