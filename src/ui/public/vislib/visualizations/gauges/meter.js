@@ -1,8 +1,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import getColor from 'ui/vislib/components/color/heatmap_color';
+import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 
-export default function GaugeChartFactory(Private) {
+export function MeterGaugeProvider() {
 
 
   const defaultConfig = {
@@ -77,7 +77,7 @@ export default function GaugeChartFactory(Private) {
       for (const i in labels) {
         if (labels[i]) {
           const val = invertColors ? 1 - i / colorsRange.length : i / colorsRange.length;
-          colors[labels[i]] = getColor(val, colorSchema);
+          colors[labels[i]] = getHeatmapColors(val, colorSchema);
         }
       }
       return colors;
@@ -109,8 +109,8 @@ export default function GaugeChartFactory(Private) {
     }
 
     drawScale(svg, data, radius, angle) {
-      const maxAngle = this.gaugeConfig.maxAngle;
-      const minAngle = this.gaugeConfig.minAngle;
+      //const maxAngle = this.gaugeConfig.maxAngle;
+      //const minAngle = this.gaugeConfig.minAngle;
       const scaleWidth = this.gaugeConfig.scale.width;
       const tickLength = this.gaugeConfig.scale.tickLength;
       const scaleTicks = this.gaugeConfig.scale.ticks;
@@ -182,10 +182,6 @@ export default function GaugeChartFactory(Private) {
           return mask;
         });
       };
-    }
-
-    drawScaleLabels(svg, data) {
-
     }
 
     drawGauge(svg, data, width, height) {

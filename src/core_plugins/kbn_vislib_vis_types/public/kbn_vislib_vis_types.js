@@ -7,7 +7,7 @@ import areaVisTypeProvider from 'plugins/kbn_vislib_vis_types/area';
 import tileMapVisTypeProvider from 'plugins/kbn_vislib_vis_types/tile_map';
 import heatmapVisTypeProvider from 'plugins/kbn_vislib_vis_types/heatmap';
 import horizontalBarVisTypeProvider from 'plugins/kbn_vislib_vis_types/horizontal_bar';
-import gaugeVisTypeProvider from 'plugins/kbn_vislib_vis_types/gauge'
+import gaugeVisTypeProvider from 'plugins/kbn_vislib_vis_types/gauge';
 
 VisTypesRegistryProvider.register(histogramVisTypeProvider);
 VisTypesRegistryProvider.register(lineVisTypeProvider);

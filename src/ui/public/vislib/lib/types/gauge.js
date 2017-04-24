@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function PieConfig(Private) {
+export function vislibGaugeProvider() {
 
   return function (config) {
     if (!config.chart) {

@@ -1,8 +1,8 @@
 import GaugeChartSplitProvider from '../splits/gauge_chart/chart_split';
-import VislibLibLayoutSplitsPieChartChartTitleSplitProvider from '../splits/gauge_chart/chart_title_split';
-export default function ColumnLayoutFactory(Private) {
+//import VislibLibLayoutSplitsPieChartChartTitleSplitProvider from '../splits/gauge_chart/chart_title_split';
+export function GaugeLayoutProvider(Private) {
   const chartSplit = Private(GaugeChartSplitProvider);
-  const chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
+  //const chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
 
   /**
    * Specifies the visualization layout for column charts.

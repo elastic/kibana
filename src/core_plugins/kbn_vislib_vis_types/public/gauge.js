@@ -1,7 +1,8 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+//import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
-import heatmapColors from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
 export default function GaugeVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -58,7 +59,7 @@ export default function GaugeVisType(Private) {
       gaugeTypes: ['Meter', 'Circle'],
       gaugeStyles: ['Full', 'Bars', 'Lines'],
       scales: ['linear', 'log', 'square root'],
-      colorSchemas: Object.keys(heatmapColors),
+      colorSchemas: Object.keys(vislibColorMaps),
       editor: gaugeTemplate
     },
     implementsRenderComplete: true,

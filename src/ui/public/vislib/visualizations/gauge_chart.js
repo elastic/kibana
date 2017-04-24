@@ -1,11 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
-import VislibVisualizationsChartProvider from './_chart';
-import GaugeTypesProvider from './gauges/gauge_types';
+import { VislibVisualizationsChartProvider } from './_chart';
+import { GaugeTypesProvider } from './gauges/gauge_types';
 
-export default function GaugeChartFactory(Private) {
+export function GaugeChartProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
   const gaugeTypes = Private(GaugeTypesProvider);

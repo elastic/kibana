@@ -1,6 +1,6 @@
-import MeterGaugeProvider from './meter';
+import { MeterGaugeProvider } from './meter';
 
-export default function GaugeTypeFactory(Private) {
+export function GaugeTypesProvider(Private) {
 
   return {
     meter: Private(MeterGaugeProvider)
