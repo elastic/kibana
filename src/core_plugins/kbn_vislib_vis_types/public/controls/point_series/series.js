@@ -57,11 +57,20 @@ module.directive('vislibSeries', function () {
         });
       });
 
+      let horizontal = false;
       $scope.$watch(() => {
         return $scope.vis.params.seriesParams.map(series => series.type).join();
       }, () => {
         const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
         $scope.savedVis.type = types.length === 1 ? types[0] : 'histogram';
+        if (horizontal) $scope.savedVis.type = 'horizontal_bar';
+      });
+
+      $scope.$watch(() => {
+        return $scope.vis.params.categoryAxes[0].position;
+      }, newPosition => {
+        horizontal = (newPosition === 'left' || newPosition === 'right');
+        if (horizontal) $scope.savedVis.type = 'horizontal_bar';
       });
 
       $scope.$watch('vis.params.valueAxes.length', () => {
