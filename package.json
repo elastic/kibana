@@ -195,7 +195,7 @@
     "validate-npm-package-name": "2.2.2",
     "vision": "4.1.0",
     "webpack": "github:elastic/webpack#fix/query-params-for-aliased-loaders",
-    "whatwg-fetch": "0.9.0",
+    "whatwg-fetch": "2.0.3",
     "wreck": "6.2.0",
     "yauzl": "2.7.0"
   },

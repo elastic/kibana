@@ -1,40 +1,44 @@
 import _ from 'lodash';
-import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl) {
-    this.type = SavedObjectClass.type;
+  constructor(SavedObjectClass, savedObjectsClient, kbnUrl, options = {}) {
+    const {
+      type = SavedObjectClass.type,
+      loaderProperties = {
+        name: `${ type.toLowerCase() }s`,
+        noun: StringUtils.upperFirst(type),
+        nouns: `${ type.toLowerCase() }s`,
+      },
+      getUrl,
+    } = options;
+
     this.Class = SavedObjectClass;
-    this.lowercaseType = this.type.toLowerCase();
-    this.kbnIndex = kbnIndex;
+    this.savedObjectsClient = savedObjectsClient;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
-      index: kbnIndex,
-      type: this.lowercaseType
-    });
-
-    this.loaderProperties = {
-      name: `${ this.lowercaseType }s`,
-      noun: StringUtils.upperFirst(this.type),
-      nouns: `${ this.lowercaseType }s`,
-    };
+    this.type = type;
+    this.loaderProperties = loaderProperties;
+    if (getUrl) this.urlFor = getUrl;
   }
 
   /**
    * Retrieve a saved object by id. Returns a promise that completes when the object finishes
    * initializing.
-   * @param id
+   * @param {String} id
    * @returns {Promise<SavedObject>}
    */
   get(id) {
     return (new this.Class(id)).init();
   }
 
+  /**
+   *  Get the url for an object with it's id. Override with `options.getUrl`
+   *  @param  {String} id
+   *  @return {String}
+   */
   urlFor(id) {
-    return this.kbnUrl.eval(`#/${ this.lowercaseType }/{{id}}`, { id: id });
+    return this.kbnUrl.eval(`#/${ this.type.toLowerCase() }/{{id}}`, { id: id });
   }
 
   delete(ids) {
@@ -61,11 +65,8 @@ export class SavedObjectLoader {
     return source;
   }
 
-  scanAll(queryString, pageSize = 1000) {
-    return this.scanner.scanAndMap(queryString, {
-      pageSize,
-      docCount: Infinity
-    }, (hit) => this.mapHits(hit));
+  scanAll() {
+    return this.savedObjectsClient.scanAndMap(this.type, hit => this.mapHits(hit));
   }
 
   /**
@@ -77,32 +78,13 @@ export class SavedObjectLoader {
    * @returns {Promise}
    */
   find(searchString, size = 100) {
-    let body;
-    if (searchString) {
-      body = {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
-          }
-        }
-      };
-    } else {
-      body = { query: { match_all: {} } };
-    }
-
-    return this.esAdmin.search({
-      index: this.kbnIndex,
-      type: this.lowercaseType,
-      body,
+    return this.savedObjectsClient.find(this.type, {
+      filter: searchString,
       size
     })
-      .then((resp) => {
-        return {
-          total: resp.hits.total,
-          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
-        };
-      });
+    .then(resp => ({
+      total: resp.hits.total,
+      hits: resp.hits.hits.map((hit) => this.mapHits(hit))
+    }));
   }
 }

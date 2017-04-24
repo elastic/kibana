@@ -1,4 +1,5 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 define(function (require) {
@@ -15,18 +16,16 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
-    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl);
-    savedSheetLoader.urlFor = function (id) {
-      return kbnUrl.eval('#/{{id}}', { id: id });
-    };
-
-    // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
-    savedSheetLoader.loaderProperties = {
-      name: 'timelion-sheet',
-      noun: 'Saved Sheets',
-      nouns: 'saved sheets'
-    };
+  module.service('savedSheets', function (Promise, Private, SavedSheet, kbnUrl) {
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
+    const savedSheetLoader = new SavedObjectLoader(SavedSheet, savedObjectsClient, kbnUrl, {
+      loaderProperties: {
+        name: 'timelion-sheet',
+        noun: 'Saved Sheets',
+        nouns: 'saved sheets'
+      },
+      getUrl: id => kbnUrl.eval('#/{{id}}', { id: id })
+    });
     return savedSheetLoader;
   });
 });

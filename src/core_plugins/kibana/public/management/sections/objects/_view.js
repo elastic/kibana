@@ -4,6 +4,7 @@ import rison from 'rison-node';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import { IndexPatternsCastMappingTypeProvider } from 'ui/index_patterns/_cast_mapping_type';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
@@ -13,12 +14,13 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
+.directive('kbnManagementObjectsView', function (Notifier, confirmModal) {
   return {
     restrict: 'E',
-    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
+    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
       const notify = new Notifier({ location: 'SavedObject view' });
       const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
       const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
@@ -104,11 +106,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
-      esAdmin.get({
-        index: kbnIndex,
-        type: service.type,
-        id: $routeParams.id
-      })
+      savedObjectsClient.get(service.type, $routeParams.id)
       .then(function (obj) {
         $scope.obj = obj;
         $scope.link = service.urlFor(obj._id);
@@ -171,11 +169,7 @@ uiModules.get('apps/management')
        */
       $scope.delete = function () {
         function doDelete() {
-          esAdmin.delete({
-            index: kbnIndex,
-            type: service.type,
-            id: $routeParams.id
-          })
+          savedObjectsClient.delete(service.type, $routeParams.id)
             .then(function () {
               return redirectHandler('deleted');
             })
@@ -208,11 +202,9 @@ uiModules.get('apps/management')
           _.set(source, field.name, value);
         });
 
-        esAdmin.index({
-          index: kbnIndex,
-          type: service.type,
-          id: $routeParams.id,
-          body: source
+        savedObjectsClient.save(service.type, $routeParams.id, source, {
+          allowTitleConflict: true,
+          allowOverwrite: true,
         })
         .then(function () {
           return redirectHandler('updated');
@@ -221,19 +213,13 @@ uiModules.get('apps/management')
       };
 
       function redirectHandler(action) {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        })
-        .then(function () {
-          const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
-
-          $location.path('/management/kibana/objects').search({
-            _a: rison.encode({
-              tab: serviceObj.title
-            })
-          });
-          notify.info(msg);
+        const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+        $location.path('/management/kibana/objects').search({
+          _a: rison.encode({
+            tab: serviceObj.title
+          })
         });
+        notify.info(msg);
       }
     }
   };

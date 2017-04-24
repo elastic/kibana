@@ -2,7 +2,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import { CallClientProvider } from 'ui/courier/fetch/call_client';
+import { SendRequestsProvider } from 'ui/courier/fetch/send_requests';
 import { CallResponseHandlersProvider } from 'ui/courier/fetch/call_response_handlers';
 import { ContinueIncompleteProvider } from 'ui/courier/fetch/continue_incomplete';
 import { FetchTheseProvider } from '../fetch_these';
@@ -26,7 +26,7 @@ describe('FetchTheseProvider', () => {
       return fakeResponses;
     }
 
-    PrivateProvider.swap(CallClientProvider, FakeResponsesProvider);
+    PrivateProvider.swap(SendRequestsProvider, FakeResponsesProvider);
     PrivateProvider.swap(CallResponseHandlersProvider, FakeResponsesProvider);
     PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
   }));

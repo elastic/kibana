@@ -2,6 +2,7 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 const app = uiModules.get('app/visualize');
@@ -13,13 +14,14 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
+app.service('savedVisualizations', function (Promise, SavedVis, Private, Notifier, kbnUrl) {
   const visTypes = Private(VisTypesRegistryProvider);
   const notify = new Notifier({
     location: 'Saved Visualization Service'
   });
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, savedObjectsClient, kbnUrl);
   saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;
     source.id = hit._id;

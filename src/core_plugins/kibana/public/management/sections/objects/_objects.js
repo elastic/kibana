@@ -6,6 +6,7 @@ import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 uiRoutes
 .when('/management/kibana/objects', {
@@ -18,12 +19,13 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function (Notifier, Private, kbnUrl, Promise, confirmModal) {
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function ($scope, $injector, $q, AppState, esAdmin) {
+    controller: function ($scope, $injector, $q, AppState) {
       const notify = new Notifier({ location: 'Saved Objects' });
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
 
       // TODO: Migrate all scope variables to the controller.
       const $state = $scope.state = new AppState();
@@ -52,7 +54,7 @@ uiModules.get('apps/management')
           });
         });
 
-        $q.all(services).then(function (data) {
+        return $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
           if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
@@ -130,26 +132,23 @@ uiModules.get('apps/management')
       // TODO: Migrate all scope methods to the controller.
       $scope.exportAll = () => Promise
         .map($scope.services, service => service.service
-          .scanAll('')
-          .then(result => result.hits.map(hit => extend(hit, { type: service.type })))
+          .scanAll()
+          .then(hits => hits.map(hit => extend(hit, { type: service.type })))
         )
         .then(results => retrieveAndExportDocs(flattenDeep(results)))
         .catch(error => notify.error(error));
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        esAdmin.mget({
-          index: kbnIndex,
-          body: { docs: objs.map(transformToMget) }
-        })
+        return savedObjectsClient.mget(
+          objs.map(obj => ({
+            type: obj.type,
+            id: obj.id
+          }))
+        )
         .then(function (response) {
           saveToFile(response.docs.map(partialRight(pick, '_id', '_type', '_source')));
         });
-      }
-
-      // Takes an object and returns the associated data needed for an mget API request
-      function transformToMget(obj) {
-        return { _id: obj.id, _type: obj.type };
       }
 
       function saveToFile(results) {
@@ -235,17 +234,10 @@ uiModules.get('apps/management')
 
             return Promise.map(docTypes.searches, importDocument)
               .then(() => Promise.map(docTypes.other, importDocument))
-              .then(refreshIndex)
               .then(refreshData)
               .catch(notify.error);
           });
       };
-
-      function refreshIndex() {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        });
-      }
 
       // TODO: Migrate all scope methods to the controller.
       $scope.changeTab = function (tab) {

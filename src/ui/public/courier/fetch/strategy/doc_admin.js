@@ -1,26 +1,19 @@
-export function DocAdminStrategyProvider(Promise) {
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+
+export function DocAdminStrategyProvider(Private) {
+  const savedObjects = Private(SavedObjectsClientProvider);
+
   return {
     id: 'doc_admin',
-    clientMethod: 'mget',
 
-    /**
-     * Flatten a series of requests into as ES request body
-     * @param  {array} requests - an array of flattened requests
-     * @return {Promise} - a promise that is fulfilled by the request body
-     */
-    reqsFetchParamsToBody: function (reqsFetchParams) {
-      return Promise.resolve({
-        docs: reqsFetchParams
-      });
+    fetch(requests) {
+      return savedObjects.mget(
+        requests.map(req => ({
+          type: req.source.get('type'),
+          id: req.source.get('id'),
+        }))
+      )
+      .then(resp => resp.docs);
     },
-
-    /**
-     * Fetch the multiple responses from the ES Response
-     * @param  {object} resp - The response sent from Elasticsearch
-     * @return {array} - the list of responses
-     */
-    getResponses: function (resp) {
-      return resp.docs;
-    }
   };
 }

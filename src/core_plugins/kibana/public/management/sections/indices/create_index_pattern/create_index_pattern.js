@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
@@ -17,7 +16,6 @@ uiRoutes
 uiModules.get('apps/management')
 .controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
   const notify = new Notifier();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
   let samplePromise;
 
@@ -210,14 +208,12 @@ uiModules.get('apps/management')
         return;
       }
 
-      refreshKibanaIndex().then(() => {
-        if (!config.get('defaultIndex')) {
-          config.set('defaultIndex', id);
-        }
+      if (!config.get('defaultIndex')) {
+        config.set('defaultIndex', id);
+      }
 
-        indexPatterns.cache.clear(id);
-        kbnUrl.change(`/management/kibana/indices/${id}`);
-      });
+      indexPatterns.cache.clear(id);
+      kbnUrl.change(`/management/kibana/indices/${id}`);
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));

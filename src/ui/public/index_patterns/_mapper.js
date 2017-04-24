@@ -5,11 +5,14 @@ import { EnhanceFieldsWithCapabilitiesProvider } from 'ui/index_patterns/_enhanc
 import { IndexPatternsTransformMappingIntoFieldsProvider } from 'ui/index_patterns/_transform_mapping_into_fields';
 import { IndexPatternsPatternToWildcardProvider } from 'ui/index_patterns/_pattern_to_wildcard';
 import { IndexPatternsLocalCacheProvider } from 'ui/index_patterns/_local_cache';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, config, kbnIndex) {
+
+export function IndexPatternsMapperProvider(Private, Promise, es, config) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   const LocalCache = Private(IndexPatternsLocalCacheProvider);
 
@@ -28,19 +31,15 @@ export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, confi
      * @returns {Promise}
      * @async
      */
-    self.getFieldsForIndexPattern = function (indexPattern, opts) {
+    self.getFieldsForIndexPattern = function (indexPattern, opts = {}) {
       const id = indexPattern.id;
+      const { skipIndexPatternCache } = opts;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
-      if (!opts.skipIndexPatternCache) {
-        return esAdmin.get({
-          index: kbnIndex,
-          type: 'index-pattern',
-          id: id,
-          _sourceInclude: ['fields']
-        })
+      if (!skipIndexPatternCache) {
+        return savedObjectsClient.get('index-pattern', id)
         .then(function (resp) {
           if (resp.found && resp._source.fields) {
             fieldCache.set(id, JSON.parse(resp._source.fields));

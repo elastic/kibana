@@ -1,8 +1,11 @@
 import angular from 'angular';
 import _ from 'lodash';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+
 define(function () {
-  return function MappingSetupService(kbnIndex, esAdmin) {
+  return function MappingSetupService(kbnIndex, Private) {
     const mappingSetup = this;
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     const json = {
       _serialize: function (val) {
@@ -23,19 +26,7 @@ define(function () {
      * @return {[type]} [description]
      */
     const getKnownKibanaTypes = _.once(function () {
-      return esAdmin.indices.getFieldMapping({
-        // only concerned with types in this kibana index
-        index: kbnIndex,
-        // check all types
-        type: '*',
-        // limit the response to just the _source field for each index
-        fields: '_source'
-      }).then(function (resp) {
-        // kbnIndex is not sufficient here, if the kibana indexed is aliased we need to use
-        // the root index name as key
-        const index = _.keys(resp)[0];
-        return _.keys(resp[index].mappings);
-      });
+      return savedObjectsClient.getDefinedTypes();
     });
 
     mappingSetup.expandShorthand = function (sh) {
@@ -76,23 +67,9 @@ define(function () {
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
-
-        // we need to create the mapping
-        const body = {};
-        body[type] = {
-          properties: mapping
-        };
-
-        return esAdmin.indices.putMapping({
-          index: kbnIndex,
-          type: type,
-          body: body
-        }).then(function () {
-          // add this type to the list of knownTypes
+        return savedObjectsClient.defineType(type, mapping)
+        .then(() => {
           knownTypes.push(type);
-
-          // cast the response to "true", meaning
-          // the mapping exists
           return true;
         });
       })
