@@ -1,0 +1,47 @@
+[[document-context]]
+== Viewing Document Context
+
+For certain applications it can be useful to inspect a window of documents 
+surrounding a specific event. The context view enables you to do just that for
+index patterns that are configured to contain time-based events.
+
+To show the context surrounding an anchor document, click the *Expand* button 
+image:images/ExpandButton.jpg[Expand Button] to the left of the document's 
+table entry and then click the *View surrounding documents* link.
+
+image::images/Expanded-Document.png[Expanded Document]
+{nbsp}
+
+The context view displays a number of documents before and after the anchor 
+document. The anchor document itself is highlighted in blue. The view is sorted 
+by the time field specified in the index pattern configuration and uses the 
+same set of columns as the Discover view the context was opened from.
+
+image::images/Discover-ContextView.png[Context View]
+
+NOTE: The number of documents displayed by default can be configured 
+via the `context:defaultSize` setting in <<advanced-options, *Management > 
+Advanced Options*>>.
+
+=== Changing the Context Size
+
+You can change the number documents displayed before and after the anchor 
+document independently.
+
+To increase the number of displayed documents that are newer than the anchor
+document, click the *Load 5 more* button above the document list or enter the 
+desired number into the input box right of the button.
+
+image::images/Discover-ContextView-SizePicker-Newer.png[]
+{nbsp}
+
+To increase the number of displayed documents that are older than the anchor
+document, click the *Load 5 more* button below the document list or enter the 
+desired number into the input box right of the button.
+
+image::images/Discover-ContextView-SizePicker-Older.png[]
+{nbsp}
+
+NOTE: The default number of documents loaded with each button click can be
+configured via the `context:step` setting in <<advanced-options, *Management >
+Advanced Options*>>.
