@@ -19,18 +19,22 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="opts.dontShowHelp()"
-        class="btn btn-default btn-doc-prev"
-      >
-        Don't show this again
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="opts.dontShowHelp()"
+          class="kuiButton kuiButton--hollow"
+        >
+          Don't show this again
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="page = page+1"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
   <div ng-show="page === 2">
@@ -52,23 +56,27 @@
         </p>
       </div>
       <div class="doc-container-buttons">
-        <button
-          ng-click="page = page-1"
-          class="btn btn-primary btn-doc-prev"
-        >
-          Previous
-        </button>
+        <div class="btn-doc-prev">
+          <button
+            ng-click="page = page-1"
+            class="kuiButton kuiButton--primary"
+          >
+            Previous
+          </button>
+        </div>
         <span ng-show="es.invalidCount > 0 && !es.valid">
           Could not validate Elasticsearch settings:
           <strong>{{es.invalidReason}}.</strong> Check your Advanced Settings
           and try again. ({{es.invalidCount}})
         </span>
-        <button
-          ng-click="recheckElasticsearch()"
-          class="btn btn-success btn-doc-next"
-        >
-          Validate Config
-        </button>
+        <div class="btn-doc-next">
+          <button
+            ng-click="recheckElasticsearch()"
+            class="kuiButton kuiButton--primary"
+          >
+            Validate Config
+          </button>
+        </div>
       </div>
     </div>
     <div ng-show="es.valid">
@@ -123,18 +131,22 @@
         </p>
       </div>
       <div class="doc-container-buttons">
-        <button
-          ng-click="page = page-1"
-          class="btn btn-primary btn-doc-prev"
-        >
-          Previous
-        </button>
-        <button
-          ng-click="page = page+1"
-          class="btn btn-primary btn-doc-next"
-        >
-          Next
-        </button>
+        <div class="btn-doc-prev">
+          <button
+            ng-click="page = page-1"
+            class="kuiButton kuiButton--primary"
+          >
+            Previous
+          </button>
+        </div>
+        <div class="btn-doc-next">
+          <button
+            ng-click="page = page+1"
+            class="kuiButton kuiButton--primary"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -195,18 +207,22 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="page = page-1"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="page = page+1"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
 
@@ -269,18 +285,22 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="page = page-1"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="page = page+1"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
   <div ng-show="page === 5">
@@ -325,19 +345,23 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="page = page-1"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
 
-      <button
-        ng-click="opts.dontShowHelp()"
-        class="btn btn-default btn-doc-next"
-      >
-        Don't show this again
-      </button>
+      <div class="btn-doc-next">
+        <button
+          ng-click="opts.dontShowHelp()"
+          class="kuiButton kuiButton--hollow"
+        >
+          Don't show this again
+        </button>
+      </div>
     </div>
   </div>
 </div>

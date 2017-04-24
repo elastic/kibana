@@ -3,11 +3,12 @@
 
 <header>
   <a
+    data-test-subj="addScriptedFieldLink"
     ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addField') }}"
-    class="btn btn-info"
-    aria-label="Add Scripted Field">
-    <i aria-hidden="true" class="fa fa-plus"></i>
-    Add Scripted Field
+    class="kuiButton kuiButton--primary kuiButton--iconText"
+  >
+    <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+    <span>Add Scripted Field</span>
   </a>
 </header>
 
@@ -29,7 +30,7 @@
   rows="rows"
   per-page="perPage"
   link-to-top="true"
-  show-blank-rows="false">
-</paginated-table>
+  show-blank-rows="false"
+></paginated-table>
 
 <p class="text-center" ng-if="rows.length === 0">No matching scripted fields found.</p>

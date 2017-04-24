@@ -41,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       })
       .then(() => {
         log.debug('--find save button');
-        return testSubjects.click('discover-save-search-btn');
+        return testSubjects.click('discoverSaveSearchButton');
       });
     }
 
@@ -258,8 +258,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     clickFieldListItem(field) {
-      return getRemote()
-      .findByCssSelector('li[attr-field="' + field + '"]').click();
+      return testSubjects.click(`field-${field}`);
     }
 
     async clickFieldListItemAdd(field) {
@@ -270,7 +269,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickFieldListItemVisualize(field) {
       return await retry.try(async () => {
-        await testSubjects.click('fieldVisualize-' + field);
+        await testSubjects.click(`fieldVisualize-${field}`);
       });
     }
 
@@ -278,7 +277,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       return getRemote()
-      .findByCssSelector('i[data-test-subj="plus-' + field + '-' + value + '"]')
+      .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
       .click();
     }
 
@@ -286,7 +285,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
       return getRemote()
-      .findByCssSelector('i[data-test-subj="minus-' + field + '-' + value + '"]')
+      .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
       .click();
     }
 

@@ -16,13 +16,15 @@
         ng-model="sourceFilters.newValue"
         placeholder="{{ sourceFilters.placeHolder }}"
         type="text"
-        class="form-control">
+        class="form-control"
+      >
 
       <div class="input-group-btn" role="group" aria-label="Source Filter Editor Controls">
         <button
           type="submit"
-          class="btn btn-primary"
-          ng-disabled="!sourceFilters.newValue">
+          class="kuiButton kuiButton--primary"
+          ng-disabled="!sourceFilters.newValue"
+        >
           Add
         </button>
       </div>
@@ -34,6 +36,6 @@
     rows="rows"
     link-to-top="true"
     per-page="perPage"
-    show-blank-rows="false">
-  </paginated-table>
+    show-blank-rows="false"
+  ></paginated-table>
 </div>
