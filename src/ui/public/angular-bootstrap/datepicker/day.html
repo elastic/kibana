@@ -29,7 +29,6 @@
             class="kuiDatePickerNavigationButton"
             ng-click="toggleMode()"
             tabindex="-1"
-            style="width:100%;"
           >
             <strong>{{title}}</strong>
           </button>
@@ -61,14 +60,13 @@
       <td
         ng-repeat="dt in row track by dt.date"
         class="kuiDatePickerRowCell"
-        ng-class="{'kuiDatePickerRowCell-isPrecluded': dt.disabled && !dt.secondary}"
+        ng-class="{'kuiDatePickerRowCell-isBlocked': dt.disabled && !dt.secondary}"
         role="gridcell"
         id="{{dt.uid}}"
         aria-disabled="{{!!dt.disabled}}"
       >
         <button
           type="button"
-          style="width:100%;"
           class="kuiDatePickerRowCellContent"
           ng-class="{'kuiDatePickerRowCellContent-isSelected': dt.selected, 'kuiDatePickerRowCellContent-isCurrent': dt.current, 'kuiDatePickerRowCellContent-isOtherMonth': dt.secondary}"
           ng-click="select(dt.date)"
