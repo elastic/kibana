@@ -62,6 +62,9 @@ module.exports = {
       return '' + val;
     }
   },
+  'yAxisFormatter': function (val) {
+    return val;
+  },
   'tooltipFormatter': function (d) {
     return d;
   }
