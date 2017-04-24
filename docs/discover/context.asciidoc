@@ -28,14 +28,14 @@ Advanced Options*>>.
 You can change the number documents displayed before and after the anchor 
 document independently.
 
-To increase the number of displayed documents, that are newer than the anchor 
+To increase the number of displayed documents that are newer than the anchor
 document, click the *Load 5 more* button above the document list or enter the 
 desired number into the input box right of the button.
 
 image::images/Discover-ContextView-SizePicker-Newer.png[]
 {nbsp}
 
-To increase the number of displayed documents, that are older than the anchor 
+To increase the number of displayed documents that are older than the anchor
 document, click the *Load 5 more* button below the document list or enter the 
 desired number into the input box right of the button.
 
