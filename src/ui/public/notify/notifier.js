@@ -86,18 +86,18 @@ function restartNotifTimer(notif, cb) {
 }
 
 const typeToButtonClassMap = {
-  danger: 'btn-danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'btn-warning',
-  info: 'btn-info',
-  banner: 'btn-banner'
+  danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
+  warning: 'kuiButton--danger',
+  info: 'kuiButton--primary',
+  banner: 'kuiButton--basic'
 };
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
     // first action: primary className
-    return 'btn-primary';
+    return 'kuiButton--primary';
   }
   // subsequent actions: secondary/default className
-  return 'btn-default';
+  return 'kuiButton--basic';
 };
 const typeToAlertClassMap = {
   danger: `alert-danger`,

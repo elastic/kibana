@@ -400,12 +400,12 @@ describe('timepicker directive', function () {
       $scope.absolute.from = moment('2012-02-01');
       $scope.absolute.to = moment('2012-02-11');
       $scope.$digest();
-      expect($elem.find('.kbn-timepicker-section button.kbn-timepicker-go').attr('disabled')).to.be(undefined);
+      expect($elem.find('[data-test-subj="timepickerGoButton"]').attr('disabled')).to.be(undefined);
 
       $scope.absolute.from = moment('2012-02-12');
       $scope.absolute.to = moment('2012-02-11');
       $scope.$digest();
-      expect($elem.find('.kbn-timepicker-section button.kbn-timepicker-go').attr('disabled')).to.be('disabled');
+      expect($elem.find('[data-test-subj="timepickerGoButton"]').attr('disabled')).to.be('disabled');
       done();
     });
 
