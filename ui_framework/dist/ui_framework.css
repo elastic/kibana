@@ -1344,11 +1344,12 @@ body {
       /* 1 */ }
 
 .kuiDatePickerHeaderCell {
-  padding: 0;
+  padding: 9px 0;
   color: #2d2d2d;
   font-size: 12px;
   font-weight: bold;
-  text-align: center; }
+  text-align: center;
+  line-height: 1.2; }
   .theme-dark .kuiDatePickerHeaderCell {
     color: #cecece; }
 
@@ -1361,10 +1362,9 @@ body {
    * the "To" calendar (and vice versa, you can't select a "To" day if it is before the "From" day).
    */ }
   .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked {
-    background-color: rgba(0, 0, 0, 0.05);
-    pointer-events: none; }
-    .theme-dark .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked {
-      background-color: rgba(0, 0, 0, 0.15); }
+    cursor: not-allowed; }
+    .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked .kuiDatePickerRowCellContent {
+      pointer-events: none; }
 
 /**
  * 1. Override inherited styles.
@@ -1397,16 +1397,14 @@ body {
     visibility: hidden;
     pointer-events: none; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
-    color: #2d2d2d;
-    /* 1 */
-    border: 1px dotted #9fa3a7; }
+    color: #3CAED2; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
     background-color: #777777;
     color: #ffffff; }
-  .kuiDatePickerRowCellContent:hover:not(.kuiDatePickerRowCellContent-isSelected), .kuiDatePickerRowCellContent:active:not(.kuiDatePickerRowCellContent-isSelected) {
+  .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
-    background-color: #3fa8c7;
-    color: #ffffff; }
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.1); }
   .theme-dark .kuiDatePickerRowCellContent {
     color: #cecece; }
     .theme-dark .kuiDatePickerRowCellContent:focus {
@@ -1416,8 +1414,13 @@ body {
       /* 2 */
       box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
       /* 3 */ }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+      color: #b7e2ea; }
     .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
       color: #ffffff; }
+    .theme-dark .kuiDatePickerRowCellContent:hover, .theme-dark .kuiDatePickerRowCellContent:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
 
 .kuiLocalDropdown {
   position: relative;

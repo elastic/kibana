@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: $localCalendarBottomSpacing;
+  margin-bottom: $localDatePickerBottomSpacing;
 }
 
 /**
@@ -25,14 +25,14 @@
   border: none;
   font-size: $globalSubTextFontSize;
   color: $localNavButtonTextColor;
-  padding: $localCalendarButtonPadding;
+  padding: $localDatePickerButtonPadding;
   border-radius: $globalBorderRadius;
 
   &:hover,
   &:active {
     cursor: pointer;
     color: $localNavButtonTextColor-isHover;
-    background-color: $localCalendarButtonHoverBackgroundColor;;
+    background-color: $localDatePickerButtonHoverBackgroundColor;
   }
 
   &:focus {
@@ -47,7 +47,7 @@
     &:hover,
     &:active {
       color: $localNavButtonTextColor-isHover--darkTheme;
-      background-color: $localCalendarButtonHoverBackgroundColor--darkTheme;
+      background-color: $localDatePickerButtonHoverBackgroundColor--darkTheme;
     }
 
     &:focus {
@@ -59,11 +59,12 @@
 }
 
 .kuiDatePickerHeaderCell {
-  padding: 0;
+  padding: $localDatePickerHeaderCellPadding;
   color: $localNavTextColor;
   font-size: $globalSubTextFontSize;
   font-weight: bold;
   text-align: center;
+  line-height: 1.2;
 
   @include darkTheme {
     color: $globalTextColor--darkTheme;
@@ -80,11 +81,10 @@
    * the "To" calendar (and vice versa, you can't select a "To" day if it is before the "From" day).
    */
   &.kuiDatePickerRowCell-isBlocked {
-    background-color: $localCalendarCellPrecludedBackgroundColor;
-    pointer-events: none;
+    cursor: not-allowed;
 
-    @include darkTheme {
-      background-color: $localCalendarCellPrecludedBackgroundColor--darkTheme;
+    .kuiDatePickerRowCellContent {
+      pointer-events: none;
     }
   }
 }
@@ -99,9 +99,9 @@
   border: 1px solid transparent;
   color: $localNavTextColor;
   font-size: $globalSubTextFontSize;
-  padding: $localCalendarCellPadding;
+  padding: $localDatePickerCellPadding;
   border-radius: $globalBorderRadius;
-  line-height: $localCalendarCellLineHeight;
+  line-height: $localDatePickerCellLineHeight;
 
   &:focus {
     @include focus($globalFocusColor, $localDropdownBackgroundColor);
@@ -120,20 +120,19 @@
   }
 
   &.kuiDatePickerRowCellContent-isCurrent {
-    color: $localNavTextColor; /* 1 */
-    border: 1px dotted $globalSubduedTextColor;
+    color: $globalLinkColor;
   }
 
   &.kuiDatePickerRowCellContent-isSelected {
-    background-color: $localCalendarCellSelectedBackgroundColor;
-    color: $localCalendarCellSelectedTextColor;
+    background-color: $localDatePickerCellSelectedBackgroundColor;
+    color: $localDatePickerCellSelectedTextColor;
   }
 
-  &:hover:not(.kuiDatePickerRowCellContent-isSelected),
-  &:active:not(.kuiDatePickerRowCellContent-isSelected) {
+  &:hover,
+  &:active {
     cursor: pointer;
-    background-color: $localCalendarCellHoverBackgroundColor;
-    color: $localCalendarCellHoverTextColor;
+    color: $localNavButtonTextColor-isHover;
+    background-color: $localDatePickerButtonHoverBackgroundColor;
   }
 
   @include darkTheme {
@@ -143,8 +142,18 @@
       @include focus($globalFocusColor, $localDropdownBackgroundColor--darkTheme);
     }
 
+    &.kuiDatePickerRowCellContent-isCurrent {
+      color: $globalLinkColor--darkTheme;
+    }
+
     &.kuiDatePickerRowCellContent-isSelected {
-      color: $localCalendarCellSelectedTextColor--darkTheme;
+      color: $localDatePickerCellSelectedTextColor--darkTheme;
+    }
+
+    &:hover,
+    &:active {
+      color: $localNavButtonTextColor-isHover--darkTheme;
+      background-color: $localDatePickerButtonHoverBackgroundColor--darkTheme;
     }
   }
 }

@@ -46,14 +46,17 @@
     </tr>
     <tr>
       <th ng-show="showWeeks" class="text-center"></th>
-      <th ng-repeat="label in labels track by $index" class="text-center">
+      <th
+        ng-repeat="label in labels track by $index"
+        class="kuiDatePickerHeaderCell"
+      >
         <small aria-label="{{label.full}}">{{label.abbr}}</small>
       </th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="row in rows track by $index">
-      <td ng-show="showWeeks" class="kuiDatePickerHeaderCell">
+      <td ng-show="showWeeks">
         <em>{{ weekNumbers[$index] }}</em>
       </td>
 
