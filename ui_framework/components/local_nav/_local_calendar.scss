@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: $localCalendarBottomSpacing;
 }
 
 /**
@@ -25,14 +25,14 @@
   border: none;
   font-size: $globalSubTextFontSize;
   color: $localNavButtonTextColor;
-  padding: 3px 6px;
+  padding: $localCalendarButtonPadding;
   border-radius: $globalBorderRadius;
 
   &:hover,
   &:active {
     cursor: pointer;
     color: $localNavButtonTextColor-isHover;
-    background-color: $localNavButtonBackgroundColor-isHover;
+    background-color: $localCalendarButtonHoverBackgroundColor;;
   }
 
   &:focus {
@@ -47,7 +47,7 @@
     &:hover,
     &:active {
       color: $localNavButtonTextColor-isHover--darkTheme;
-      background-color: rgba(#000000, 0.4);
+      background-color: $localCalendarButtonHoverBackgroundColor--darkTheme;
     }
 
     &:focus {
@@ -75,11 +75,11 @@
   text-align: center;
 
   &.kuiDatePickerRowCell-isPrecluded {
-    background-color: rgba(black, 0.05);
+    background-color: $localCalendarCellPrecludedBackgroundColor;
     pointer-events: none;
 
     @include darkTheme {
-      background-color: rgba(black, 0.15);
+      background-color: $localCalendarCellPrecludedBackgroundColor--darkTheme;
     }
   }
 }
@@ -94,9 +94,9 @@
   border: 1px solid transparent;
   color: $localNavTextColor;
   font-size: $globalSubTextFontSize;
-  padding: 8px;
+  padding: $localCalendarCellPadding;
   border-radius: $globalBorderRadius;
-  line-height: 1.2;
+  line-height: $localCalendarCellLineHeight;
 
   &:focus {
     @include focus($globalFocusColor, $localDropdownBackgroundColor);
@@ -120,15 +120,15 @@
   }
 
   &.kuiDatePickerRowCellContent-isSelected {
-    background-color: #777777;
-    color: #ffffff;
+    background-color: $localCalendarCellSelectedBackgroundColor;
+    color: $localCalendarCellSelectedTextColor;
   }
 
   &:hover:not(.kuiDatePickerRowCellContent-isSelected),
   &:active:not(.kuiDatePickerRowCellContent-isSelected) {
     cursor: pointer;
-    background-color: $globalInfoColor;
-    color: #ffffff;
+    background-color: $localCalendarCellHoverBackgroundColor;
+    color: $localCalendarCellHoverTextColor;
   }
 
   @include darkTheme {
@@ -139,7 +139,7 @@
     }
 
     &.kuiDatePickerRowCellContent-isSelected {
-      color: #ffffff;
+      color: $localCalendarCellSelectedTextColor--darkTheme;
     }
   }
 }

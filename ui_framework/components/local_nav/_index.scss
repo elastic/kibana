@@ -17,6 +17,12 @@ $localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
 $localBreadcrumbLinkColor: #328caa;
 $localSearchButtonBackgroundColor: #9c9c9c;
 $localSearchButtonTextColor: #ffffff;
+$localCalendarButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
+$localCalendarCellPrecludedBackgroundColor: rgba(black, 0.05);
+$localCalendarCellSelectedBackgroundColor: #777777;
+$localCalendarCellSelectedTextColor: #ffffff;
+$localCalendarCellHoverBackgroundColor: $globalInfoColor;
+$localCalendarCellHoverTextColor: #ffffff;
 
 // Dark theme colors
 $localNavTextColor--darkTheme: $globalTextColor--darkTheme;
@@ -37,10 +43,17 @@ $localTabTextColor-isHover--darkTheme: $localNavButtonTextColor-isHover--darkThe
 $localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
 $localSearchButtonBackgroundColor--darkTheme: #777777;
 $localSearchButtonTextColor--darkTheme: #ffffff;
+$localCalendarButtonHoverBackgroundColor--darkTheme: rgba(#000000, 0.4);
+$localCalendarCellPrecludedBackgroundColor--darkTheme: rgba(black, 0.15);
+$localCalendarCellSelectedTextColor--darkTheme: #ffffff;
 
 // Spacing
 $localNavSideSpacing: 10px;
 $localSearchHeight: 30px;
+$localCalendarBottomSpacing: 4px;
+$localCalendarButtonPadding: 3px 6px;
+$localCalendarCellPadding: 8px;
+$localCalendarCellLineHeight: 1.2;
 
 // Fonts
 
