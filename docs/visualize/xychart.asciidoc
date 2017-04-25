@@ -1,6 +1,6 @@
 [[xy-chart]]
-== X/Y Charts
-X/Y charts refer to Area, Line and Bar charts which allow you to plot your data on X/Y axis.
+== Line, Area and Bar charts
+Line, Area and Bar charts allow you to plot your data on X/Y axis.
 
 First you need to select your _metrics_ which define Value axis. 
 
