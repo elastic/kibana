@@ -43,8 +43,8 @@ uiModules.get('apps/management')
     NO_DATE_FIELD_SELECTED: {
       name: $translate.instant('KIBANA-NO_DATE_FIELD_SELECTED')
     },
-    NO_DATE_FIELDS_IN_INDEX: {
-      name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDEX')
+    NO_DATE_FIELDS_IN_INDICES: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
     }
   };
 
@@ -106,7 +106,7 @@ uiModules.get('apps/management')
     if (this.doesIndexHaveDateFields) {
       this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
     } else {
-      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX);
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES);
     }
     this.newIndexPattern.timeField = this.dateFields[0];
   };
@@ -206,7 +206,7 @@ uiModules.get('apps/management')
     const id = this.newIndexPattern.name;
     let timeFieldName;
     if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED)
-      && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX)) {
+      && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
       timeFieldName = this.newIndexPattern.timeField.name;
     }
 
