@@ -163,7 +163,6 @@ uiModules.get('apps/management')
 
         if (all.length) {
           return this.existing = {
-            class: 'success',
             all,
             matches,
             matchPercent: Math.round((matches.length / all.length) * 100) + '%',

@@ -726,6 +726,28 @@ body {
     opacity: 0.3;
     cursor: not-allowed; }
 
+.kuiCheckBoxLabel {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-weight: normal !important; }
+
+.kuiCheckBoxLabel__text {
+  margin-left: 8px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiLabel {
+  font-weight: bold;
+  margin-bottom: 0;
+  /* 1 */ }
+
 .kuiSearchInput {
   display: inline-block;
   position: relative;
@@ -830,6 +852,9 @@ body {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
 
+.kuiSelect--large {
+  min-width: 400px; }
+
 /**
  * 1. Have the same spatial footprint as the regular input.
  */
@@ -923,7 +948,12 @@ body {
       border-color: #6EADC1; }
 
 .kuiTextInput--small {
-  width: 60px; }
+  width: 100%;
+  max-width: 60px; }
+
+.kuiTextInput--large {
+  width: 100%;
+  max-width: 400px; }
 
 /**
  * 1. We may want to put elements in here which have different heights.
