@@ -3,7 +3,7 @@ import 'ui/paginated_table';
 import fieldNameHtml from '../indexed_fields_table/field_name.html';
 import fieldTypeHtml from '../indexed_fields_table/field_type.html';
 import fieldControlsHtml from '../field_controls.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './meta_fields_table.html';
 
 uiModules.get('apps/management')

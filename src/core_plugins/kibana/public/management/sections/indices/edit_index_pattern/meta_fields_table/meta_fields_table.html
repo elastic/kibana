@@ -3,18 +3,21 @@
 
 <header>
   <a
+    data-test-subj="addMetaFieldLink"
     ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addMetaField') }}"
-    class="btn btn-info"
-    aria-label="Add Meta Field">
-    <i aria-hidden="true" class="fa fa-plus"></i>
-    Add Meta Field
+    class="kuiButton kuiButton--primary kuiButton--iconText"
+  >
+    <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+    <span>Add Meta Field</span>
   </a>
 </header>
 
 <paginated-table
   columns="columns"
   rows="rows"
-  per-page="perPage">
-</paginated-table>
+  per-page="perPage"
+  link-to-top="true"
+  show-blank-rows="false"
+></paginated-table>
 
 <p class="text-center" ng-if="rows.length === 0">No matching meta fields found.</p>
