@@ -14,13 +14,13 @@ app.directive('togglePanel', function () {
       togglePanelId: '@',
       text: '@',
       isCollapsed: '=',
-      onToggleButtonClick: '='
+      onToggle: '='
     },
     controllerAs: 'togglePanel',
     bindToController: true,
     controller: class TogglePanelController {
       toggle = () => {
-        this.onToggleButtonClick(this.togglePanelId);
+        this.onToggle(this.togglePanelId);
       };
     }
   };
