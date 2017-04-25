@@ -24,9 +24,9 @@ To create a visualization:
 . Click on *Visualize* in the side navigation.
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
-+
+
 [horizontal]
-<<xy-chart,Line, Area and Bar chart>>:: Compare different series in X/Y charts.
+<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
 <<data-table,Data table>>:: Display the raw data of a composed aggregation.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
