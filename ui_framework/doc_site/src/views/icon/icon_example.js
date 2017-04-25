@@ -16,6 +16,8 @@ const successHtml = require('./icon_success.html');
 const warningHtml = require('./icon_warning.html');
 const errorHtml = require('./icon_error.html');
 const inactiveHtml = require('./icon_inactive.html');
+const spinnerHtml = require('./icon_spinner.html');
+const spinnerJs = require('raw!./icon_spinner.js');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -132,6 +134,23 @@ export default props => (
 
       <GuideDemo
         html={inactiveHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Spinner"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: spinnerHtml,
+      }]}
+    >
+      <GuideText>
+        You can use Icons to represent a loading and successfully-loaded state.
+      </GuideText>
+
+      <GuideDemo
+        html={spinnerHtml}
+        js={spinnerJs}
       />
     </GuideSection>
   </GuidePage>
