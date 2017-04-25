@@ -37,16 +37,6 @@ A high level overview of our contributing guidelines.
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
 
-## Effective issue reporting in Kibana
-
-At any given time the Kibana team at Elastic is working on dozens of features and enhancements, both for Kibana itself and for a few other projects at Elastic. When you file an issue, we'll take the time to digest it, consider solutions, and weigh its applicability to both the Kibana user base at large and the long-term vision for the project. Once we've completed that process, we will assign the issue a priority.
-
-- **P1**: A high-priority issue that affects virtually all Kibana users. Bugs that would cause incorrect results, security issues and features that would vastly improve the user experience for everyone. Work arounds for P1s generally don't exist without a code change.
-- **P2**: A broadly applicable, high visibility, issue that enhances the usability of Kibana for a majority users.
-- **P3**: Nice-to-have bug fixes or functionality. Work arounds for P3 items generally exist.
-- **P4**: Niche and special interest issues that may not fit our core goals. We would take a high quality pull for this if implemented in such a way that it does not meaningfully impact other functionality or existing code. Issues may also be labeled P4 if they would be better implemented in Elasticsearch.
-- **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC.
-
 ### Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to you, add a comment with a solid write up of your use case and explain why it's so important. Please avoid posting comments comprised solely of a thumbs up emoji 👍.
